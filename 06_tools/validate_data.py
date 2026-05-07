@@ -23,6 +23,7 @@ try:
         PROMOTIONS,
         QUESTS,
         RECIPES,
+        RELICS,
         SHOP_INVENTORY,
         SKILLS,
     )
@@ -60,6 +61,8 @@ VALID_EQUIPMENT_STATS = {
 VALID_EFFECT_KEYS = {"defense_up", "defense_down", "quickstep", "cinder_mark", "burn"}
 VALID_PROMOTION_STATUSES = {"preview"}
 VALID_PROMOTION_REQUIREMENT_KINDS = {"level", "unlock", "quest", "flag", "item"}
+VALID_RELIC_STATUSES = {"preview"}
+VALID_RELIC_UNLOCK_KINDS = {"level", "unlock", "quest", "flag", "item"}
 
 
 def error(errors: list[str], path: str, message: str) -> None:
@@ -144,6 +147,58 @@ def check_promotions(errors: list[str]) -> None:
                     error(errors, f"{path}.key", f"references unknown flag: {key}")
                 elif kind == "item" and key not in all_item_like_ids():
                     error(errors, f"{path}.key", f"references missing item/material id: {key}")
+
+
+def check_relic_unlock(errors: list[str], path: str, unlock_data: Any) -> None:
+    if not isinstance(unlock_data, dict):
+        error(errors, path, "must be a dict")
+        return
+
+    require_keys(errors, path, unlock_data, {"kind", "label"})
+    kind = unlock_data.get("kind")
+    if kind not in VALID_RELIC_UNLOCK_KINDS:
+        error(errors, f"{path}.kind", f"uses unsupported unlock kind: {kind}")
+        return
+    if not isinstance(unlock_data.get("label"), str) or not unlock_data.get("label").strip():
+        error(errors, f"{path}.label", "must be a non-empty string")
+
+    if kind == "level":
+        if not isinstance(unlock_data.get("value"), int) or unlock_data.get("value") <= 0:
+            error(errors, f"{path}.value", "must be a positive int")
+        return
+
+    if "key" not in unlock_data:
+        error(errors, path, "is missing required field: key")
+        return
+    key = unlock_data.get("key")
+    if kind == "unlock" and key not in all_unlock_producers():
+        error(errors, f"{path}.key", f"has no known unlock producer: {key}")
+    elif kind == "quest" and key not in QUESTS:
+        error(errors, f"{path}.key", f"references missing quest_id: {key}")
+    elif kind == "flag" and key not in KNOWN_FLAG_KEYS:
+        error(errors, f"{path}.key", f"references unknown flag: {key}")
+    elif kind == "item" and key not in all_item_like_ids():
+        error(errors, f"{path}.key", f"references missing item/material id: {key}")
+
+
+def check_relics(errors: list[str]) -> None:
+    relic_ids = list(RELICS)
+    if len(relic_ids) != len(set(relic_ids)):
+        error(errors, "RELICS", "contains duplicate relic ids")
+
+    for relic_id, relic in RELICS.items():
+        require_keys(errors, f"RELICS.{relic_id}", relic, {"name", "summary", "source", "effect_preview", "status"})
+
+        for field in ("name", "summary", "source", "effect_preview"):
+            if not isinstance(relic.get(field), str) or not relic.get(field).strip():
+                error(errors, f"RELICS.{relic_id}.{field}", "must be a non-empty string")
+
+        status = relic.get("status")
+        if status not in VALID_RELIC_STATUSES:
+            error(errors, f"RELICS.{relic_id}.status", f"uses unsupported status: {status}")
+
+        if "unlock" in relic:
+            check_relic_unlock(errors, f"RELICS.{relic_id}.unlock", relic["unlock"])
 
 
 def check_items(errors: list[str]) -> None:
@@ -327,6 +382,7 @@ def validate() -> list[str]:
     errors: list[str] = []
     check_jobs(errors)
     check_promotions(errors)
+    check_relics(errors)
     check_items(errors)
     check_equipment(errors)
     check_skills(errors)

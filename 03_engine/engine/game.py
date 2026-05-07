@@ -20,6 +20,7 @@ from data import (
     PROMOTIONS,
     QUESTS,
     RECIPES,
+    RELICS,
     SHOP_INVENTORY,
     SKILLS,
 )
@@ -524,6 +525,51 @@ def craft_recipe(state: dict, recipe_id: str) -> None:
         add_item(state, item_id, qty)
     print(f"完成：{recipe['name']}。")
 
+def relic_unlock_met(state: dict, unlock_data: dict | None) -> bool:
+    if not unlock_data:
+        return True
+    kind = unlock_data.get("kind")
+    if kind == "level":
+        return state.get("level", 0) >= unlock_data.get("value", 0)
+    if kind == "unlock":
+        return is_unlocked(state, unlock_data.get("key"))
+    if kind == "quest":
+        return unlock_data.get("key") in state.get("completed_quests", [])
+    if kind == "flag":
+        return bool(state.get("flags", {}).get(unlock_data.get("key")))
+    if kind == "item":
+        return state.get("inventory", {}).get(unlock_data.get("key"), 0) > 0
+    return False
+
+def relic_unlock_line(state: dict, unlock_data: dict | None) -> str:
+    if not unlock_data:
+        return "解鎖提示：目前無額外提示。"
+    status = "已達成" if relic_unlock_met(state, unlock_data) else "未達成"
+    return f"解鎖提示：{unlock_data['label']}（{status}）"
+
+def relic_preview_menu(state: dict) -> None:
+    title("聖物調查")
+    previews = [
+        relic
+        for relic in RELICS.values()
+        if relic.get("status") == "preview"
+    ]
+    if not previews:
+        print("目前沒有可預覽的聖物線索。")
+        pause()
+        return
+
+    print("目前僅為預覽，聖物效果尚未開放。")
+    for relic in previews:
+        print(f"\n{relic['name']}")
+        print(relic["summary"])
+        print(f"來源：{relic['source']}")
+        print(relic_unlock_line(state, relic.get("unlock")))
+        print(f"效果預告：{relic['effect_preview']}")
+        print(f"狀態：{relic['status']}")
+    print("\n這裡不會取得、裝備、啟用或強化聖物。")
+    pause()
+
 def town_menu(state: dict) -> None:
     while True:
         title("邊境城鎮艾爾姆")
@@ -535,6 +581,7 @@ def town_menu(state: dict) -> None:
             "米菈合成屋",
             "星燈魔法商店",
             "轉職神殿",
+            "聖物調查",
             "倉庫/背包",
             "旅館休息 30G",
         ]
@@ -564,8 +611,10 @@ def town_menu(state: dict) -> None:
         elif choice == 7:
             temple(state)
         elif choice == 8:
-            backpack_menu(state, allow_storage=True)
+            relic_preview_menu(state)
         elif choice == 9:
+            backpack_menu(state, allow_storage=True)
+        elif choice == 10:
             rest_inn(state)
 
 def iron_workshop(state: dict) -> None:

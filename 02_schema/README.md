@@ -9,6 +9,7 @@
 - `state.schema.md`：`save.json` 與 runtime player state。
 - `job.schema.md`：職業資料 `JOBS`。
 - `promotion.schema.md`：preview-only 轉職預告資料 `PROMOTIONS`。
+- `relic.schema.md`：preview-only 聖物預告資料 `RELICS`。
 - `item.schema.md`：一般道具 `ITEMS`。
 - `equipment.schema.md`：裝備 `EQUIPMENT`。
 - `skill.schema.md`：技能 `SKILLS`。

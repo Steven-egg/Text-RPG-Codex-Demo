@@ -10,6 +10,7 @@ from .dungeons import DUNGEONS, EVENT_WEIGHTS
 from .quests import QUESTS
 from .shops import SHOP_INVENTORY
 from .promotions import PROMOTIONS
+from .relics import RELICS
 from .registry import DATA_REGISTRY
 
 __all__ = [
@@ -26,5 +27,6 @@ __all__ = [
     "QUESTS",
     "SHOP_INVENTORY",
     "PROMOTIONS",
+    "RELICS",
     "DATA_REGISTRY",
 ]

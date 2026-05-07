@@ -35,6 +35,7 @@ registry 是資料總目錄與引用驗證依據，不承擔 gameplay 邏輯。
 | magic book id | `MAGIC_BOOKS` key |
 | recipe id | `RECIPES` key |
 | promotion id | `PROMOTIONS` key |
+| relic id | `RELICS` key |
 | monster id | `MONSTERS` key |
 | dungeon id | `DUNGEONS` key |
 | quest id | `QUESTS` key |
@@ -82,6 +83,12 @@ flag:boss_glen_defeated
 `PROMOTIONS` 是 preview-only 的轉職預告資料表，供轉職神殿顯示未來職業方向與條件狀態。
 
 目前不新增 save 欄位、不修改 `state["job"]`、不把轉職後名稱加入 `JOBS`，也不影響戰鬥能力。Validation 只檢查 `source_job`、顯示欄位、status 與 requirements 的跨表引用。
+
+## Relic preview
+
+`RELICS` 是 preview-only 的聖物預告資料表，供城鎮中的聖物調查入口顯示未來聖物線索、來源、解鎖提示與效果預告。
+
+目前不新增 save 欄位、不代表玩家已取得聖物、不影響角色能力，也不接入 `get_stats()`、戰鬥傷害計算、元素倍率或陷阱傷害公式。Validation 只檢查顯示欄位、status 與 unlock 提示的跨表引用。
 
 ## Validation
 

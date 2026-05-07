@@ -7,6 +7,7 @@ from .jobs import JOBS
 from .materials import MATERIALS
 from .monsters import MONSTERS
 from .promotions import PROMOTIONS
+from .relics import RELICS
 from .quests import QUESTS
 from .shops import SHOP_INVENTORY
 from .skills import MAGIC_BOOKS, SKILLS
@@ -26,6 +27,7 @@ DATA_REGISTRY = {
     "quests": QUESTS,
     "shop_inventory": SHOP_INVENTORY,
     "promotions": PROMOTIONS,
+    "relics": RELICS,
 }
 
 
@@ -98,11 +100,23 @@ def all_promotion_ids() -> set[str]:
     return set(PROMOTIONS)
 
 
+def all_relic_ids() -> set[str]:
+    return set(RELICS)
+
+
 def promotion_previews_for_job(job_id: str) -> list[tuple[str, dict]]:
     return [
         (promotion_id, promotion)
         for promotion_id, promotion in PROMOTIONS.items()
         if promotion.get("source_job") == job_id and promotion.get("status") == "preview"
+    ]
+
+
+def relic_previews() -> list[tuple[str, dict]]:
+    return [
+        (relic_id, relic)
+        for relic_id, relic in RELICS.items()
+        if relic.get("status") == "preview"
     ]
 
 

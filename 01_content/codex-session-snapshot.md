@@ -1,7 +1,7 @@
 # Codex Session 接續快照
 
 用途：給下一個 Codex session 在接手此專案時快速恢復上下文。  
-狀態日期：2026-05-07  
+狀態日期：2026-05-08  
 專案：`C:\Users\user\OneDrive\文字冒險遊戲`
 
 ## 1. 目前版本與目標
@@ -20,7 +20,7 @@
 ```
 
 目前專案已從「可玩原型」進入「第二幕最小施工切片迭代」與核心系統 MVP 拆點階段。  
-Act 2 Slice 1 已完成：灰燼裂谷偵查版已進入 runtime data。Act 2 Entry Balance & Guidance Patch 也已完成，修正葛倫壓力、小魔晶掉落、破甲釘負回饋與灰燼裂谷入口引導。集中藥袋 special 裝備語意 bug 也已修正。近期已完成工會收購 MVP、倉庫 MVP、倉庫入口顯示位置修正與怪物圖鑑 MVP。重點仍不是直接完成第二幕，而是逐步以單一節點 MVP 驗證 engine、save、schema、data、registry、validation 與必要文件同步。
+Act 2 Slice 1 已完成：灰燼裂谷偵查版已進入 runtime data。Act 2 Entry Balance & Guidance Patch 也已完成，修正葛倫壓力、小魔晶掉落、破甲釘負回饋與灰燼裂谷入口引導。集中藥袋 special 裝備語意 bug 也已修正。近期已完成工會收購 MVP、倉庫 MVP、倉庫入口顯示位置修正、怪物圖鑑 MVP、轉職資料結構 MVP 與聖物資料結構 preview MVP。重點仍不是直接完成第二幕，而是逐步以單一節點 MVP 驗證 engine、save、schema、data、registry、validation 與必要文件同步。
 
 ## 2. 已完成項目
 
@@ -32,7 +32,7 @@ Act 2 Slice 1 已完成：灰燼裂谷偵查版已進入 runtime data。Act 2 En
 - 城鎮：工會、鐵刃工坊、堅甲工坊、旅人小鋪、米菈合成屋、星燈魔法商店、轉職神殿。
 - 迷宮：青苔洞窟、焦石礦坑、灰燼裂谷偵查版。
 - Boss：山寨頭目葛倫。灰燼裂谷目前沒有 Boss。
-- 基礎戰鬥、掉落、合成、商店、任務、魔法書、存檔、工會素材收購、LV1 倉庫、怪物圖鑑 MVP。
+- 基礎戰鬥、掉落、合成、商店、任務、魔法書、存檔、工會素材收購、LV1 倉庫、怪物圖鑑 MVP、轉職 preview、聖物 preview。
 - 玩家普通攻擊與傷害技能目前為 100% 命中。
 
 ### Act 2 Slice 1 runtime data
@@ -101,6 +101,23 @@ Act 2 Slice 1 已完成：灰燼裂谷偵查版已進入 runtime data。Act 2 En
   - `monster_locations(monster_id)` 從 `DUNGEONS` 反查出現地點。
   - 掉落物用 `item_name()` 顯示名稱，不直接印 id。
   - 本輪未做 20% 機率登錄、掉落率顯示、擊殺數、遭遇數、`???` 未登錄清單、圖鑑完成率、圖鑑獎勵、成就系統、大型 UI 重構或 engine 大拆分。
+- 轉職資料結構 MVP 已完成：
+  - 新增 `04_data/data/promotions.py`，建立 `PROMOTIONS` preview-only 轉職資料。
+  - 城鎮「轉職神殿」已改為讀取 `PROMOTIONS`，顯示目前職業、未來轉職方向、summary 與條件達成狀態。
+  - 神殿明確顯示正式轉職尚未開放。
+  - 沒有新增 save 欄位、沒有修改 `state["job"]`、沒有修改 `get_stats()` 或戰鬥公式。
+- 聖物資料結構 preview MVP 已完成：
+  - 新增 `04_data/data/relics.py`，建立 `RELICS`。
+  - 第一個 preview-only 聖物是 `relic_ash_charm`，名稱為「灰燼護符」。
+  - `RELICS` 已匯出並納入 registry。
+  - `06_tools/validate_data.py` 已加入 relic validation。
+  - 新增 `02_schema/relic.schema.md`，並更新 schema README 與 registry schema。
+  - 城鎮已新增「聖物調查」入口。
+  - 「聖物調查」目前只顯示 preview，不提供取得、裝備、啟用、升級或強化。
+  - 畫面會明確顯示「目前僅為預覽，聖物效果尚未開放」。
+  - 沒有新增 save 欄位、沒有新增 `state["relics"]`、沒有修改 `state.schema.md`。
+  - 沒有修改 `create_state()`、`ensure_state_defaults()`、`get_stats()`、`calc_enemy_damage()`、`element_multiplier()`、陷阱傷害公式或裝備 stats。
+  - 沒有實作聖物取得、裝備、啟用、效果、升級、掉落、任務鏈、圖鑑或成就。
 
 ### 專案治理與文件
 
@@ -142,6 +159,10 @@ C:\Users\user\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\py
 - 圖鑑顯示內容可接受，沒有過度干擾。
 - 已登錄怪物不重複提示。
 - 主選單、城鎮、背包、倉庫入口沒有混亂。
+最近一次轉職資料結構 MVP 已通過 validation 與 smoke test。
+最近一次聖物資料結構 preview MVP 已通過 validation 與 smoke test：
+- bundled Python 執行 `06_tools\validate_data.py` → `data validation ok`
+- bundled Python 執行 `element_maze.py --smoke-test` → `smoke test ok`
 
 ## 3. 目前檔案結構
 
@@ -165,6 +186,8 @@ C:\Users\user\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\py
 │  ├─ README.md
 │  ├─ state.schema.md
 │  ├─ job.schema.md
+│  ├─ promotion.schema.md
+│  ├─ relic.schema.md
 │  ├─ item.schema.md
 │  ├─ equipment.schema.md
 │  ├─ skill.schema.md
@@ -192,6 +215,8 @@ C:\Users\user\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\py
 │     ├─ dungeons.py
 │     ├─ quests.py
 │     ├─ shops.py
+│     ├─ promotions.py
+│     ├─ relics.py
 │     └─ registry.py
 ├─ 05_assets/
 └─ 06_tools/
@@ -254,6 +279,8 @@ C:\Users\user\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\py
 - `dungeons.py`：迷宮與事件權重。
 - `quests.py`：任務。
 - `shops.py`：商店商品清單。
+- `promotions.py`：preview-only 轉職預告資料。
+- `relics.py`：preview-only 聖物預告資料。
 
 data 檔只放資料表，不放互動流程或 gameplay 邏輯。
 
@@ -296,6 +323,8 @@ data 檔只放資料表，不放互動流程或 gameplay 邏輯。
 - `quest_ash_ravine_scout` 最小偵查任務。
 - 破甲釘即時傷害補丁。
 - 集中藥袋 special 裝備語意修正。
+- 轉職資料結構 MVP。
+- 聖物資料結構 preview MVP。
 
 目前尚未實作：
 
@@ -304,6 +333,8 @@ data 檔只放資料表，不放互動流程或 gameplay 邏輯。
 - 情報屋或鍊金攤。
 - 完整火之印記流程。
 - 轉職試煉入口 runtime 行為。
+- 正式轉職系統。
+- 完整聖物系統、聖物取得狀態與聖物效果。
 
 第二幕第一個最小施工切片「灰燼裂谷偵查版」已完成；後續仍不應直接擴成完整第二幕。
 
@@ -345,19 +376,21 @@ data 檔只放資料表，不放互動流程或 gameplay 邏輯。
 - 不要調整工會收購價格或擴充經濟系統，除非使用者明確要求進入平衡輪。
 - 不要擴充倉庫升級、分類、搜尋、排序或與工會收購聯動，除非使用者明確要求。
 - 不要擴充怪物圖鑑完整系統、圖鑑獎勵、完成率、擊殺數、遭遇數、掉落率百科或成就系統，除非使用者明確要求。
+- 不要擴充聖物取得、裝備、啟用、效果、升級、掉落、任務鏈、圖鑑或成就，除非使用者明確要求。
 
 ## 9. 下一步只允許做什麼
 
 目前下一步只允許以下之一：
 
 1. 做 `01_content/` 文件同步或 drift check，並將本 session 作為恢復點收尾。
-2. 下一個新 session 再規劃下一個單一節點，例如聖物 MVP 或職業特化 MVP；仍需先做單一節點規劃與實作前檢查，不直接實作完整系統。
+2. 下一個新 session 再規劃下一個單一節點，例如職業特化 MVP、聖物取得狀態 MVP 或 engine 拆分前檢查；仍需先做單一節點規劃與實作前檢查，不直接實作完整系統。
 3. 在使用者明確要求下，提出 schema / registry / validation / save schema 的最小修改理由與範圍。
 
 下一個候選節點可評估：
 
-1. 聖物 MVP。
-2. 職業特化 MVP。
+1. 職業特化 MVP。
+2. 聖物取得狀態 MVP。
+3. engine 拆分前檢查。
 
 下一輪仍應先做單一節點規劃與實作前檢查，不要直接實作完整系統。
 
@@ -408,12 +441,12 @@ data 檔只放資料表，不放互動流程或 gameplay 邏輯。
 可回貼舊 session 驗證是否 drift：
 
 ```text
-目前專案是《元素迷宮：邊境冒險者》Python CLI v1 playable vertical slice。README.md 是 project-level SSOT；01_content 是內容與架構規劃；game-design.md 是 v1 設計；game-architecture.md 是擴大架構；full-act-structure.md 是五幕總綱；act-2-content-plan.md 是第二幕灰燼裂谷規劃。02_schema 是資料契約；04_data/data 是 runtime data；registry.py 只做資料索引與 id/unlock helper；validate_data.py 做跨表引用驗證；engine/game.py 是 runtime 流程。v1 第一幕已完成且主線可通關；第二幕 Act 2 Slice 1 已完成，灰燼裂谷偵查版已進 runtime data，完成 quest_boss_glen 後會解鎖 unlock_act_2 與 unlock_ash_ravine，並可接「灰燼裂谷偵查」。入口平衡補丁已完成：葛倫小幅降壓、小魔晶較易取得、破甲釘有即時傷害、灰燼裂谷為 18 步；破甲釘短測已確認可正常觸發擊殺、經驗與金幣結算。集中藥袋已修正為 special 欄裝備時才生效。工會收購 MVP 已完成，採白名單素材收購，不靠非 key item 判斷，不修改 save schema。倉庫 MVP 已完成，新增 storage_unlocked 與 storage，load_game 會透過 ensure_state_defaults 補舊存檔欄位；倉庫入口已修正為城鎮 allow_storage=True 才顯示，主選單背包/裝備不顯示。怪物圖鑑 MVP 已完成，新增 bestiary，擊敗怪物後 100% 登錄，逃跑/戰敗/遭遇不登錄，主選單有「怪物圖鑑」入口，只顯示已登錄怪物並顯示基礎資訊與掉落物名稱。轉職資料結構 MVP 已完成：新增 `04_data/data/promotions.py` 與 `PROMOTIONS` preview-only 轉職資料，城鎮「轉職神殿」已改為資料化顯示目前職業、未來轉職方向、summary 與條件達成狀態，且明確提示正式轉職尚未開放；本輪未新增 save 欄位，未修改 `state["job"]`、`get_stats()`、戰鬥公式、技能效果、裝備限制或等級成長，也未把轉職後職業加入 `JOBS`。validate_data.py、element_maze.py --smoke-test、工會收購、倉庫與圖鑑流程測試皆通過；怪物圖鑑實機短測全部通過；轉職資料結構 MVP 的 validation 與 smoke test 也通過。灰燼裂谷目前沒有 Boss；灰燼守衛、完整火之印記、第二幕完整任務鏈、正式轉職系統仍未實作。本 session 到此收尾；下一個新 session 可評估聖物 MVP 或職業特化 MVP，仍需先做單一節點規劃與實作前檢查，不直接實作完整系統。不得處理 Element Decay，不得新增 act-3-content-plan.md。
+目前專案是《元素迷宮：邊境冒險者》Python CLI v1 playable vertical slice。README.md 是 project-level SSOT；01_content 是內容與架構規劃；game-design.md 是 v1 設計；game-architecture.md 是擴大架構；full-act-structure.md 是五幕總綱；act-2-content-plan.md 是第二幕灰燼裂谷規劃。02_schema 是資料契約；04_data/data 是 runtime data；registry.py 只做資料索引與 id/unlock helper；validate_data.py 做跨表引用驗證；engine/game.py 是 runtime 流程。v1 第一幕已完成且主線可通關；第二幕 Act 2 Slice 1 已完成，灰燼裂谷偵查版已進 runtime data，完成 quest_boss_glen 後會解鎖 unlock_act_2 與 unlock_ash_ravine，並可接「灰燼裂谷偵查」。入口平衡補丁已完成：葛倫小幅降壓、小魔晶較易取得、破甲釘有即時傷害、灰燼裂谷為 18 步；破甲釘短測已確認可正常觸發擊殺、經驗與金幣結算。集中藥袋已修正為 special 欄裝備時才生效。工會收購 MVP 已完成，採白名單素材收購，不靠非 key item 判斷，不修改 save schema。倉庫 MVP 已完成，新增 storage_unlocked 與 storage，load_game 會透過 ensure_state_defaults 補舊存檔欄位；倉庫入口已修正為城鎮 allow_storage=True 才顯示，主選單背包/裝備不顯示。怪物圖鑑 MVP 已完成，新增 bestiary，擊敗怪物後 100% 登錄，逃跑/戰敗/遭遇不登錄，主選單有「怪物圖鑑」入口，只顯示已登錄怪物並顯示基礎資訊與掉落物名稱。轉職資料結構 MVP 已完成：新增 `04_data/data/promotions.py` 與 `PROMOTIONS` preview-only 轉職資料，城鎮「轉職神殿」已改為資料化顯示目前職業、未來轉職方向、summary 與條件達成狀態，且明確提示正式轉職尚未開放；未新增 save 欄位，未修改 `state["job"]`、`get_stats()`、戰鬥公式、技能效果、裝備限制或等級成長，也未把轉職後職業加入 `JOBS`。聖物資料結構 preview MVP 已完成：新增 `04_data/data/relics.py` 與 `RELICS`，第一個 preview-only 聖物為 `relic_ash_charm`「灰燼護符」，已匯出並納入 registry；validate_data.py 已加入 relic validation；新增 `02_schema/relic.schema.md` 並更新 schema README / registry schema；城鎮新增「聖物調查」入口，只顯示 preview，明確提示「目前僅為預覽，聖物效果尚未開放」，不提供取得、裝備、啟用、升級或強化。聖物 MVP 未新增 save 欄位，未新增 `state["relics"]`，未修改 `state.schema.md`、`create_state()`、`ensure_state_defaults()`、`get_stats()`、`calc_enemy_damage()`、`element_multiplier()`、陷阱傷害公式或裝備 stats，也未實作聖物取得、裝備、啟用、效果、升級、掉落、任務鏈、圖鑑或成就。validate_data.py、element_maze.py --smoke-test、工會收購、倉庫與圖鑑流程測試皆通過；怪物圖鑑實機短測全部通過；轉職資料結構 MVP 與聖物資料結構 preview MVP 的 validation 與 smoke test 也通過。灰燼裂谷目前沒有 Boss；灰燼守衛、完整火之印記、第二幕完整任務鏈、正式轉職系統、聖物取得狀態與聖物效果仍未實作。本 session 到此收尾；下一個新 session 可評估職業特化 MVP、聖物取得狀態 MVP 或 engine 拆分前檢查，仍需先做單一節點規劃與實作前檢查，不直接實作完整系統。不得處理 Element Decay，不得新增 act-3-content-plan.md。
 ```
 
 ## 12. 給下一個 Codex 的一句話
 
-目前專案已完成 v1 可玩原型、第二幕內容規劃、五幕總綱、灰燼裂谷偵查版 runtime data、入口平衡引導補丁、集中藥袋 special 裝備語意修正、工會收購 MVP、倉庫 MVP、倉庫入口 UX 修正、怪物圖鑑 MVP 與轉職資料結構 MVP。轉職資料目前只做 `PROMOTIONS` preview-only 骨架與神殿條件顯示，正式轉職尚未開放，也沒有新增 save 欄位或改變 `state["job"]`。本 session 到此收尾；下一個新 session 可評估聖物 MVP 或職業特化 MVP，但仍要先做單一節點規劃與實作前檢查，不直接實作完整系統；不要急著把灰燼守衛、完整火之印記、完整任務鏈、完整轉職、完整聖物、完整圖鑑或後續幕次塞進 runtime。
+目前專案已完成 v1 可玩原型、第二幕內容規劃、五幕總綱、灰燼裂谷偵查版 runtime data、入口平衡引導補丁、集中藥袋 special 裝備語意修正、工會收購 MVP、倉庫 MVP、倉庫入口 UX 修正、怪物圖鑑 MVP、轉職資料結構 MVP 與聖物資料結構 preview MVP。轉職資料目前只做 `PROMOTIONS` preview-only 骨架與神殿條件顯示，正式轉職尚未開放，也沒有新增 save 欄位或改變 `state["job"]`。聖物資料目前只做 `RELICS` preview-only 骨架與城鎮「聖物調查」顯示，聖物效果尚未開放，也沒有新增 `state["relics"]` 或任何 save 欄位。本 session 到此收尾；下一個新 session 可評估職業特化 MVP、聖物取得狀態 MVP 或 engine 拆分前檢查，但仍要先做單一節點規劃與實作前檢查，不直接實作完整系統；不要急著把灰燼守衛、完整火之印記、完整任務鏈、完整轉職、完整聖物、完整圖鑑或後續幕次塞進 runtime。
 
 ## 13. 轉職資料結構 MVP 收尾摘要
 
@@ -450,7 +483,50 @@ data 檔只放資料表，不放互動流程或 gameplay 邏輯。
 
 下一個候選節點可評估：
 
-1. 聖物 MVP。
-2. 職業特化 MVP。
+1. 職業特化 MVP。
+2. 聖物取得狀態 MVP。
+3. engine 拆分前檢查。
+
+下一輪仍應先做單一節點規劃與實作前檢查，不要直接實作完整系統。
+
+## 14. 聖物資料結構 preview MVP 收尾摘要
+
+本輪「聖物資料結構 preview MVP」已完成，範圍是資料骨架與玩家可見 preview，不是完整聖物系統。
+
+完成內容：
+
+- 新增 `04_data/data/relics.py`，建立 `RELICS`。
+- 目前第一個 preview-only 聖物為 `relic_ash_charm`。
+- `relic_ash_charm` 名稱為「灰燼護符」。
+- `RELICS` 已匯出並納入 registry。
+- `06_tools/validate_data.py` 已加入 relic validation。
+- 新增 `02_schema/relic.schema.md`。
+- 已更新 `02_schema/README.md` 與 `02_schema/registry.schema.md`。
+- 城鎮已新增「聖物調查」入口。
+- 「聖物調查」會顯示聖物名稱、summary、來源、解鎖提示、effect_preview 與 status。
+- 「聖物調查」目前只顯示 preview，不提供取得、裝備、啟用、升級或強化。
+- 畫面會明確顯示「目前僅為預覽，聖物效果尚未開放」。
+
+明確未做：
+
+- 沒有新增 save 欄位。
+- 沒有新增 `state["relics"]`。
+- 沒有修改 `state.schema.md`。
+- 沒有修改 `create_state()`。
+- 沒有修改 `ensure_state_defaults()`。
+- 沒有修改 `get_stats()`。
+- 沒有修改 `calc_enemy_damage()`、`element_multiplier()`、陷阱傷害公式或裝備 stats。
+- 沒有實作聖物取得、裝備、啟用、效果、升級、掉落、任務鏈、圖鑑或成就。
+
+驗證結果：
+
+- bundled Python 執行 `06_tools\validate_data.py` → `data validation ok`
+- bundled Python 執行 `element_maze.py --smoke-test` → `smoke test ok`
+
+下一個候選節點可評估：
+
+1. 職業特化 MVP。
+2. 聖物取得狀態 MVP。
+3. engine 拆分前檢查。
 
 下一輪仍應先做單一節點規劃與實作前檢查，不要直接實作完整系統。
