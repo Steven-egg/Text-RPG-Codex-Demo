@@ -2,12 +2,12 @@ from __future__ import annotations
 
 import json
 import math
-import os
 import random
 import sys
 from copy import deepcopy
 from pathlib import Path
 
+from .display import clear_screen, menu, pause, setup_console, title
 from data import (
     DUNGEONS,
     EQUIPMENT,
@@ -44,15 +44,6 @@ GUILD_MATERIAL_BUY_PRICES = {
 STORAGE_UNLOCK_COST = 500
 STORAGE_CAPACITY = 10
 
-def setup_console() -> None:
-    if os.name == "nt":
-        os.system("chcp 65001 > nul")
-    try:
-        sys.stdout.reconfigure(encoding="utf-8")
-        sys.stdin.reconfigure(encoding="utf-8")
-    except Exception:
-        pass
-
 def item_name(item_id: str) -> str:
     if item_id in ITEMS:
         return ITEMS[item_id]["name"]
@@ -64,30 +55,6 @@ def item_name(item_id: str) -> str:
 
 def is_key_item(item_id: str) -> bool:
     return item_id.startswith("key_")
-
-def pause() -> None:
-    input("\n按 Enter 繼續...")
-
-def title(text: str) -> None:
-    print("\n" + "=" * 56)
-    print(text)
-    print("=" * 56)
-
-def menu(prompt: str, options: list[str], allow_back: bool = True) -> int:
-    print()
-    for idx, option in enumerate(options, start=1):
-        print(f"{idx}. {option}")
-    if allow_back:
-        print("0. 返回")
-    while True:
-        raw = input(f"{prompt} > ").strip()
-        if allow_back and raw == "0":
-            return 0
-        if raw.isdigit():
-            choice = int(raw)
-            if 1 <= choice <= len(options):
-                return choice
-        print("請輸入列表中的數字。")
 
 def exp_to_next(level: int) -> int:
     return 70 + (level - 1) * 70
@@ -1534,9 +1501,6 @@ def tick_effects(state: dict, player_buffs: dict, enemy_buffs: dict) -> None:
                 expired.append(key)
         for key in expired:
             del buffs[key]
-
-def clear_screen() -> None:
-    os.system("cls" if os.name == "nt" else "clear")
 
 def main_loop(state: dict) -> None:
     while True:

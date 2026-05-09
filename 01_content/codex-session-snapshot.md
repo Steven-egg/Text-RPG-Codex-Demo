@@ -629,3 +629,47 @@ data 檔只放資料表，不放互動流程或 gameplay 邏輯。
 - 目前不應直接做 engine 拆分、搬移檔案、修改 import、修改 save schema、修改 `state.schema.md` 或大型重構。
 
 下一輪若要延續此方向，建議先做「engine 拆分前規劃表」：列出候選切點、import 影響、驗證清單與 rollback 範圍；仍不要直接實作。
+
+## 17. CLI / display primitives 拆分完成紀錄
+
+本輪完成第一個最小 engine 拆分 MVP：只拆出 CLI / display primitives，未擴大到其他 engine 區域。
+
+本輪新增檔案：
+- `03_engine/engine/display.py`
+
+本輪修改檔案：
+- `03_engine/engine/game.py`
+
+已搬移 helper：
+- `setup_console`
+- `pause`
+- `title`
+- `menu`
+- `clear_screen`
+
+import 方向：
+- `game.py` 單向 import `display.py`
+- `display.py` 不 import `game.py`
+- 目前沒有 circular import
+
+未修改範圍：
+- save/state
+- combat/dungeon
+- data
+- schema
+- registry/validation
+- `run_checks.bat`
+- `element_maze.py`
+- README
+- gameplay 數值與規則
+
+驗證結果：
+- 原始 `python` 指令因 PATH 找不到 python 失敗，不視為 gameplay 錯誤
+- 使用本機 Python 絕對路徑補跑：
+  - `data validation ok`
+  - `smoke test ok`
+
+下一步建議：
+- 使用者本機跑 `run_checks.bat`
+- 通過後 Git commit / push
+- 下一個 engine 拆分節點需另行規劃，不要直接連續拆分
