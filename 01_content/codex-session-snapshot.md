@@ -888,3 +888,43 @@ import 方向：
 驗證提醒：
 - 本輪建議執行本機 `run_checks.bat`
 - 若通過，建議 commit message：`Extract promotion preview query helper`
+
+## 職業特色與刺客副武器 MVP 規劃紀錄
+
+本輪沒有實作，只做 read-only 規劃。
+
+本輪先暫停「餘燼護符」方案，原因是目前已有暖石墜改與抗火斗篷兩件火抗 accessory，再新增同質火抗 accessory 會造成裝備定位重疊。
+
+本輪改為評估「職業特色 / 刺客副武器 / 敏捷戰鬥價值」。
+
+目前 equipment slot 固定為：
+- `weapon`
+- `head`
+- `body`
+- `accessory`
+- `special`
+
+短期不建議新增 `offhand` slot，因為會牽涉 state、schema、validation、UI、save/defaults 與裝備流程。
+
+第一版刺客特色 MVP 建議採用 data-only 方式：沿用既有 `head` slot，新增盜賊限定「副武器」語意裝備。
+
+此 MVP 的限制是 UI 仍可能顯示為「頭部/head」，但可接受為短期語意不完美。
+
+刺客副武器建議使用既有 stats，例如 `attack`、`agility`、`crit`，不新增新 stat。
+
+敏捷目前用於 `quickstep`、陷阱迴避與逃跑機率，但未真正成為核心輸出屬性。
+
+未來可考慮讓 `agility` 影響傷害浮動區間，例如 85%~125%，敏捷相對怪物越高，越容易落在高傷害區間。
+
+敏捷傷害浮動屬於 combat rule MVP，會碰 `calc_player_damage()`，不應與刺客副武器 data-only MVP 同輪實作。
+
+下一輪新 session 建議優先實作 data-only「盜賊 head-slot 副武器 MVP」：
+- 只新增盜賊限定 head-slot 副武器裝備
+- 取得方式優先放既有商店
+- 不新增 `offhand` slot
+- 不修改 engine
+- 不修改 combat
+- 不修改 save/state
+- 不修改 schema/validation
+
+實作後需要本機跑 `run_checks.bat`，通過後再 Git commit / push。
