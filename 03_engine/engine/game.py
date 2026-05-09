@@ -8,6 +8,7 @@ from copy import deepcopy
 from pathlib import Path
 
 from .display import clear_screen, menu, pause, setup_console, title
+from .formatting import equipment_summary, format_items, item_name, monster_drop_names
 from data import (
     DUNGEONS,
     EQUIPMENT,
@@ -16,7 +17,6 @@ from data import (
     JOB_SPECIALIZATIONS,
     JOBS,
     MAGIC_BOOKS,
-    MATERIALS,
     MONSTERS,
     PROMOTIONS,
     QUESTS,
@@ -43,15 +43,6 @@ GUILD_MATERIAL_BUY_PRICES = {
 
 STORAGE_UNLOCK_COST = 500
 STORAGE_CAPACITY = 10
-
-def item_name(item_id: str) -> str:
-    if item_id in ITEMS:
-        return ITEMS[item_id]["name"]
-    if item_id in EQUIPMENT:
-        return EQUIPMENT[item_id]["name"]
-    if item_id in MATERIALS:
-        return MATERIALS[item_id]
-    return item_id
 
 def is_key_item(item_id: str) -> bool:
     return item_id.startswith("key_")
@@ -219,19 +210,6 @@ def add_loot(state: dict, item_id: str, qty: int, run_log: dict | None = None) -
     if run_log is not None:
         run_log["items"][item_id] = run_log["items"].get(item_id, 0) + qty
 
-def format_items(cost: dict) -> str:
-    if not cost:
-        return "無"
-    parts = []
-    for item_id, qty in cost.items():
-        if item_id.startswith("flag:"):
-            flag = item_id.split(":", 1)[1]
-            flag_names = {"boss_glen_defeated": "擊敗山寨頭目葛倫"}
-            parts.append(flag_names.get(flag, flag))
-        else:
-            parts.append(f"{item_name(item_id)} x{qty}")
-    return "、".join(parts)
-
 def can_pay_items(state: dict, cost: dict) -> bool:
     for item_id, qty in cost.items():
         if item_id.startswith("flag:"):
@@ -248,26 +226,6 @@ def pay_items(state: dict, cost: dict) -> None:
         if item_id.startswith("flag:"):
             continue
         remove_item(state, item_id, qty)
-
-def equipment_summary(item_id: str) -> str:
-    eq = EQUIPMENT[item_id]
-    stats = []
-    for key, label in [
-        ("attack", "攻擊"),
-        ("magic_attack", "魔攻"),
-        ("defense", "防禦"),
-        ("agility", "敏捷"),
-        ("accuracy", "命中"),
-        ("crit", "暴擊"),
-        ("fire_resist", "火抗"),
-        ("trap_evasion", "陷阱迴避"),
-        ("rare_drop", "稀有掉落"),
-    ]:
-        if key in eq.get("stats", {}):
-            value = eq["stats"][key]
-            suffix = "%" if key in {"accuracy", "crit", "fire_resist", "trap_evasion", "rare_drop"} else ""
-            stats.append(f"{label} {value:+}{suffix}")
-    return "，".join(stats) if stats else eq.get("desc", "")
 
 def save_game(state: dict) -> None:
     SAVE_PATH.write_text(json.dumps(state, ensure_ascii=False, indent=2), encoding="utf-8")
@@ -791,10 +749,6 @@ def monster_locations(monster_id: str) -> list[str]:
         if monster_id in dungeon.get("monsters", []) or dungeon.get("boss") == monster_id:
             locations.append(dungeon["name"])
     return locations
-
-def monster_drop_names(monster: dict) -> str:
-    drops = [item_name(item_id) for item_id, _chance, _qty in monster["drops"]]
-    return "、".join(drops) if drops else "無"
 
 def bestiary_menu(state: dict) -> None:
     ensure_state_defaults(state)
