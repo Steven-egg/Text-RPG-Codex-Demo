@@ -10,7 +10,7 @@ from pathlib import Path
 from .bestiary import monster_locations
 from .display import clear_screen, menu, pause, setup_console, title
 from .formatting import equipment_summary, format_items, item_name, monster_drop_names
-from .previews import get_preview_relics, show_job_specialization_preview
+from .previews import get_preview_promotions_for_job, get_preview_relics, show_job_specialization_preview
 from data import (
     DUNGEONS,
     EQUIPMENT,
@@ -19,7 +19,6 @@ from data import (
     JOBS,
     MAGIC_BOOKS,
     MONSTERS,
-    PROMOTIONS,
     QUESTS,
     RECIPES,
     SHOP_INVENTORY,
@@ -961,11 +960,7 @@ def temple(state: dict) -> None:
         print("「這還不是完整的印記。但神殿記得它的溫度。等你集齊三枚元素核心，再回來敲這扇門。」")
     print()
     print(f"目前職業：{state['job']}")
-    previews = [
-        promotion
-        for promotion in PROMOTIONS.values()
-        if promotion.get("source_job") == state["job"] and promotion.get("status") == "preview"
-    ]
+    previews = get_preview_promotions_for_job(state["job"])
     if not previews:
         print("目前尚無可預覽轉職方向。")
     else:

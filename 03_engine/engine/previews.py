@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from data import JOB_SPECIALIZATIONS, RELICS
+from data import JOB_SPECIALIZATIONS, PROMOTIONS, RELICS
 
 
 def get_preview_relics() -> list[dict]:
@@ -8,6 +8,14 @@ def get_preview_relics() -> list[dict]:
         relic
         for relic in RELICS.values()
         if relic.get("status") == "preview"
+    ]
+
+
+def get_preview_promotions_for_job(job: str) -> list[dict]:
+    return [
+        promotion
+        for promotion in PROMOTIONS.values()
+        if promotion.get("source_job") == job and promotion.get("status") == "preview"
     ]
 
 
