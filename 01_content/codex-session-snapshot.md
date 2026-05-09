@@ -673,3 +673,51 @@ import 方向：
 - 使用者本機跑 `run_checks.bat`
 - 通過後 Git commit / push
 - 下一個 engine 拆分節點需另行規劃，不要直接連續拆分
+
+## formatting / lookup helpers 拆分完成紀錄
+
+本輪完成第二個最小 engine helper 拆分節點：只拆出 formatting / lookup helpers，未擴大到其他 engine 區域。
+
+本輪新增檔案：
+- `03_engine/engine/formatting.py`
+
+本輪修改檔案：
+- `03_engine/engine/game.py`
+
+已搬移 helper：
+- `item_name`
+- `format_items`
+- `equipment_summary`
+- `monster_drop_names`
+
+import 方向：
+- `game.py -> formatting.py -> data`
+- `formatting.py` 不 import `game.py`
+- 目前沒有 circular import
+
+未修改範圍：
+- save/state
+- combat/dungeon
+- data
+- schema
+- registry/validation
+- `run_checks.bat`
+- `element_maze.py`
+- `display.py`
+- README
+- gameplay 數值與規則
+
+驗證結果：
+- 本機 `run_checks.bat` 通過
+- `smoke test ok`
+- `all checks ok`
+
+GitHub 備份：
+- commit `8582872`
+- message `Extract formatting lookup helpers`
+- 已 push 到 `main`
+
+下一步提醒：
+- 下一個 engine 拆分節點需另行 read-only 檢查
+- 不要直接連續拆 town、storage、guild、combat、dungeon 或 save/state
+- 若繼續拆分，優先考慮低風險 helper 或 preview-only UI，但需先規劃
