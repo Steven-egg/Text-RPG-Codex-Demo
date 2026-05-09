@@ -765,3 +765,46 @@ import 方向：
 下一步提醒：
 - 下一個 engine 拆分節點仍需先做 read-only 檢查
 - 不要直接連續拆 engine
+
+## job specialization preview helper 拆分完成紀錄
+
+本輪完成第四個最小 engine helper 拆分節點：只抽出 job specialization preview helper，未擴大到其他 preview 或 gameplay 區域。
+
+本輪新增檔案：
+- `03_engine/engine/previews.py`
+
+本輪修改檔案：
+- `03_engine/engine/game.py`
+
+已抽出 helper：
+- `show_job_specialization_preview(job: str) -> None`
+
+原本來源：
+- `show_status` 內的職業特化 preview 顯示區塊
+
+import 方向：
+- `game.py -> previews.py -> data`
+- `previews.py` 目前只 import `from data import JOB_SPECIALIZATIONS`
+
+明確未搬移：
+- `show_status` 本體
+
+未修改範圍：
+- relic
+- promotion
+- bestiary
+- save/state
+- combat/dungeon
+- data
+- schema
+- registry/validation
+- gameplay 數值與規則
+
+驗證結果：
+- 本機 `run_checks.bat` 已通過
+- `smoke test ok`
+- `all checks ok`
+
+下一步提醒：
+- 下一個 engine 拆分節點仍需先做 read-only 檢查
+- 不要直接連續拆 engine

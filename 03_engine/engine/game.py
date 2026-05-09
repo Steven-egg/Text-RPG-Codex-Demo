@@ -10,12 +10,12 @@ from pathlib import Path
 from .bestiary import monster_locations
 from .display import clear_screen, menu, pause, setup_console, title
 from .formatting import equipment_summary, format_items, item_name, monster_drop_names
+from .previews import show_job_specialization_preview
 from data import (
     DUNGEONS,
     EQUIPMENT,
     EVENT_WEIGHTS,
     ITEMS,
-    JOB_SPECIALIZATIONS,
     JOBS,
     MAGIC_BOOKS,
     MONSTERS,
@@ -272,18 +272,7 @@ def show_status(state: dict) -> None:
         skill = SKILLS[skill_id]
         print(f"- {skill['name']} / MP {skill['mp']}: {skill['desc']}")
 
-    specializations = [
-        specialization
-        for specialization in JOB_SPECIALIZATIONS.values()
-        if specialization.get("source_job") == state["job"] and specialization.get("status") == "preview"
-    ]
-    if specializations:
-        print("\n職業特化預覽（目前尚未生效）")
-        for specialization in specializations:
-            print(f"- {specialization['name']}")
-            print(f"  {specialization['summary']}")
-            print(f"  定位：{specialization['identity']}")
-            print(f"  效果預告：{specialization['effect_preview']}")
+    show_job_specialization_preview(state["job"])
 
 def show_inventory(state: dict) -> None:
     title("背包與素材")
