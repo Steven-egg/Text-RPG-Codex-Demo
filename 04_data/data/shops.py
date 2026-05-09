@@ -13,6 +13,7 @@ SHOP_INVENTORY = {
     "armor": [
         "armor_cloth_cap",
         "armor_leather_cap",
+        "armor_rogue_sleeve_blade",
         "armor_traveler_cloth",
         "armor_leather_armor",
         "armor_round_shield",

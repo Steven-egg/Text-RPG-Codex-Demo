@@ -928,3 +928,11 @@ import 方向：
 - 不修改 schema/validation
 
 實作後需要本機跑 `run_checks.bat`，通過後再 Git commit / push。
+
+## 盜賊 head-slot 副武器 MVP 完成紀錄
+
+本輪完成 data-only MVP，只新增盜賊限定 head-slot 副武器裝備 `armor_rogue_sleeve_blade`（影袖副刃），並將取得方式放入既有防具商店。
+
+本輪未新增 `offhand` slot，未修改 engine，未修改 combat，未修改 save/state，也未修改 schema/validation。
+
+敏捷傷害浮動仍保留為後續 combat rule MVP；本輪不處理 `calc_player_damage()` 或任何敏捷戰鬥公式。

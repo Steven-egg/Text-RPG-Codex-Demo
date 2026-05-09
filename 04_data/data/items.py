@@ -112,6 +112,15 @@ EQUIPMENT = {
         "stats": {"defense": 4},
         "desc": "初期通用頭部防具。",
     },
+    "armor_rogue_sleeve_blade": {
+        "name": "影袖副刃",
+        "slot": "head",
+        "subtype": "副武器",
+        "price": 240,
+        "jobs": ["盜賊"],
+        "stats": {"attack": 3, "agility": 2, "crit": 3},
+        "desc": "犧牲頭部防護，換取盜賊近身爆發與機動性的暗藏副刃。",
+    },
     "armor_traveler_cloth": {
         "name": "旅人衣",
         "slot": "body",
