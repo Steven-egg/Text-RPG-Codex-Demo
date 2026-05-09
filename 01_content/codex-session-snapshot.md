@@ -615,3 +615,17 @@ data 檔只放資料表，不放互動流程或 gameplay 邏輯。
 4. engine 拆分前檢查。
 
 下一輪仍應先做單一節點規劃與實作前檢查，不要直接實作完整系統。
+
+## 16. engine/data 結構整理前檢查結論
+
+本輪「engine/data 結構整理前檢查」已完成，範圍是 read-only 架構盤點，未修改檔案。
+
+結論：
+
+- 不建議現在整理 `03_engine/engine` 與 `04_data/data` 的巢狀結構。
+- 目前真正風險不是資料夾層級，而是 `03_engine/engine/game.py` 職責集中；`game.py` 同時承擔 state/defaults、inventory/equipment、storage、bestiary、guild/quest、shop/crafting、preview UI、dungeon、combat、save/load 與 smoke test。
+- `save/state`、`combat/dungeon`、`import/package path`、`registry/validation` 屬高風險區；未來重構前需獨立盤點，不應在功能輪順手修改。
+- 若未來拆分 engine，建議先從低風險邊界開始，例如 display / lookup helpers 或 town menu 子功能；不要一開始碰 save/state、combat/dungeon 或大型搬檔。
+- 目前不應直接做 engine 拆分、搬移檔案、修改 import、修改 save schema、修改 `state.schema.md` 或大型重構。
+
+下一輪若要延續此方向，建議先做「engine 拆分前規劃表」：列出候選切點、import 影響、驗證清單與 rollback 範圍；仍不要直接實作。
