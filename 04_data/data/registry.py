@@ -4,6 +4,7 @@ from .crafting import RECIPES
 from .dungeons import DUNGEONS, EVENT_WEIGHTS
 from .items import EQUIPMENT, ITEMS
 from .jobs import JOBS
+from .job_specializations import JOB_SPECIALIZATIONS
 from .materials import MATERIALS
 from .monsters import MONSTERS
 from .promotions import PROMOTIONS
@@ -15,6 +16,7 @@ from .skills import MAGIC_BOOKS, SKILLS
 
 DATA_REGISTRY = {
     "jobs": JOBS,
+    "job_specializations": JOB_SPECIALIZATIONS,
     "materials": MATERIALS,
     "items": ITEMS,
     "equipment": EQUIPMENT,
@@ -76,6 +78,10 @@ def all_job_ids() -> set[str]:
     return set(JOBS)
 
 
+def all_job_specialization_ids() -> set[str]:
+    return set(JOB_SPECIALIZATIONS)
+
+
 def all_monster_ids() -> set[str]:
     return set(MONSTERS)
 
@@ -109,6 +115,14 @@ def promotion_previews_for_job(job_id: str) -> list[tuple[str, dict]]:
         (promotion_id, promotion)
         for promotion_id, promotion in PROMOTIONS.items()
         if promotion.get("source_job") == job_id and promotion.get("status") == "preview"
+    ]
+
+
+def job_specialization_previews_for_job(job_id: str) -> list[tuple[str, dict]]:
+    return [
+        (specialization_id, specialization)
+        for specialization_id, specialization in JOB_SPECIALIZATIONS.items()
+        if specialization.get("source_job") == job_id and specialization.get("status") == "preview"
     ]
 
 

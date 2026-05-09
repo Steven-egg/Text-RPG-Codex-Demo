@@ -57,6 +57,23 @@
 C:\Users\user\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe .\element_maze.py
 ```
 
+### 驗證方式
+
+Windows 本機可在專案根目錄執行標準檢查入口：
+
+```powershell
+.\run_checks.bat
+```
+
+`run_checks.bat` 會依序執行：
+
+```powershell
+python 06_tools\validate_data.py
+python element_maze.py --smoke-test
+```
+
+若 Codex 環境因 runtime 或 sandbox 限制無法執行 Python，請由使用者在本機 PowerShell 執行 `run_checks.bat`，再將結果回貼到 Codex session。
+
 煙霧測試：
 
 ```powershell

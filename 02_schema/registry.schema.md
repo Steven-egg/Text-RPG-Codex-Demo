@@ -28,6 +28,7 @@ registry 是資料總目錄與引用驗證依據，不承擔 gameplay 邏輯。
 | 類型 | 來源 |
 |---|---|
 | job id | `JOBS` key |
+| job specialization id | `JOB_SPECIALIZATIONS` key |
 | material id | `MATERIALS` key |
 | item id | `ITEMS` key |
 | equipment id | `EQUIPMENT` key |
@@ -83,6 +84,12 @@ flag:boss_glen_defeated
 `PROMOTIONS` 是 preview-only 的轉職預告資料表，供轉職神殿顯示未來職業方向與條件狀態。
 
 目前不新增 save 欄位、不修改 `state["job"]`、不把轉職後名稱加入 `JOBS`，也不影響戰鬥能力。Validation 只檢查 `source_job`、顯示欄位、status 與 requirements 的跨表引用。
+
+## Job specialization preview
+
+`JOB_SPECIALIZATIONS` 是 preview-only 的職業特化預告資料表，供角色狀態頁顯示目前基礎職業的特化方向。
+
+目前不新增 save 欄位、不新增特化狀態欄位、不修改 `state["job"]`、不開放玩家選擇，也不影響 `get_stats()`、戰鬥公式、技能、裝備限制或魔法書限制。Validation 只檢查 `source_job`、顯示欄位與 status。
 
 ## Relic preview
 

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from .jobs import JOBS
+from .job_specializations import JOB_SPECIALIZATIONS
 from .materials import MATERIALS
 from .items import ITEMS, EQUIPMENT
 from .skills import SKILLS, MAGIC_BOOKS
@@ -15,6 +16,7 @@ from .registry import DATA_REGISTRY
 
 __all__ = [
     "JOBS",
+    "JOB_SPECIALIZATIONS",
     "MATERIALS",
     "ITEMS",
     "EQUIPMENT",

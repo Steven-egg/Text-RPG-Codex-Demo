@@ -13,6 +13,7 @@ from data import (
     EQUIPMENT,
     EVENT_WEIGHTS,
     ITEMS,
+    JOB_SPECIALIZATIONS,
     JOBS,
     MAGIC_BOOKS,
     MATERIALS,
@@ -344,6 +345,19 @@ def show_status(state: dict) -> None:
     for skill_id in state["learned_skills"]:
         skill = SKILLS[skill_id]
         print(f"- {skill['name']} / MP {skill['mp']}: {skill['desc']}")
+
+    specializations = [
+        specialization
+        for specialization in JOB_SPECIALIZATIONS.values()
+        if specialization.get("source_job") == state["job"] and specialization.get("status") == "preview"
+    ]
+    if specializations:
+        print("\n職業特化預覽（目前尚未生效）")
+        for specialization in specializations:
+            print(f"- {specialization['name']}")
+            print(f"  {specialization['summary']}")
+            print(f"  定位：{specialization['identity']}")
+            print(f"  效果預告：{specialization['effect_preview']}")
 
 def show_inventory(state: dict) -> None:
     title("背包與素材")

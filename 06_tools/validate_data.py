@@ -16,6 +16,7 @@ try:
         EQUIPMENT,
         EVENT_WEIGHTS,
         ITEMS,
+        JOB_SPECIALIZATIONS,
         JOBS,
         MAGIC_BOOKS,
         MATERIALS,
@@ -61,6 +62,7 @@ VALID_EQUIPMENT_STATS = {
 VALID_EFFECT_KEYS = {"defense_up", "defense_down", "quickstep", "cinder_mark", "burn"}
 VALID_PROMOTION_STATUSES = {"preview"}
 VALID_PROMOTION_REQUIREMENT_KINDS = {"level", "unlock", "quest", "flag", "item"}
+VALID_JOB_SPECIALIZATION_STATUSES = {"preview"}
 VALID_RELIC_STATUSES = {"preview"}
 VALID_RELIC_UNLOCK_KINDS = {"level", "unlock", "quest", "flag", "item"}
 
@@ -147,6 +149,32 @@ def check_promotions(errors: list[str]) -> None:
                     error(errors, f"{path}.key", f"references unknown flag: {key}")
                 elif kind == "item" and key not in all_item_like_ids():
                     error(errors, f"{path}.key", f"references missing item/material id: {key}")
+
+
+def check_job_specializations(errors: list[str]) -> None:
+    for specialization_id, specialization in JOB_SPECIALIZATIONS.items():
+        require_keys(
+            errors,
+            f"JOB_SPECIALIZATIONS.{specialization_id}",
+            specialization,
+            {"source_job", "name", "summary", "identity", "effect_preview", "status"},
+        )
+
+        source_job = specialization.get("source_job")
+        if source_job not in JOBS:
+            error(
+                errors,
+                f"JOB_SPECIALIZATIONS.{specialization_id}.source_job",
+                f"references missing job_id: {source_job}",
+            )
+
+        for field in ("name", "summary", "identity", "effect_preview"):
+            if not isinstance(specialization.get(field), str) or not specialization.get(field).strip():
+                error(errors, f"JOB_SPECIALIZATIONS.{specialization_id}.{field}", "must be a non-empty string")
+
+        status = specialization.get("status")
+        if status not in VALID_JOB_SPECIALIZATION_STATUSES:
+            error(errors, f"JOB_SPECIALIZATIONS.{specialization_id}.status", f"uses unsupported status: {status}")
 
 
 def check_relic_unlock(errors: list[str], path: str, unlock_data: Any) -> None:
@@ -381,6 +409,7 @@ def check_shops(errors: list[str]) -> None:
 def validate() -> list[str]:
     errors: list[str] = []
     check_jobs(errors)
+    check_job_specializations(errors)
     check_promotions(errors)
     check_relics(errors)
     check_items(errors)
