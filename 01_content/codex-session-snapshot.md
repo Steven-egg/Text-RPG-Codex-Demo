@@ -808,3 +808,43 @@ import 方向：
 下一步提醒：
 - 下一個 engine 拆分節點仍需先做 read-only 檢查
 - 不要直接連續拆 engine
+
+## relic preview query helper 拆分完成紀錄
+
+本輪完成第五個最小 engine helper 拆分節點：只抽出 relic preview data query helper，未搬移聖物選單本體或解鎖文字 helper。
+
+本輪修改檔案：
+- `03_engine/engine/previews.py`
+- `03_engine/engine/game.py`
+
+已新增 helper：
+- `get_preview_relics() -> list[dict]`
+
+原本來源：
+- `relic_preview_menu` 內的 `RELICS.values()` 與 `status == "preview"` 篩選區塊
+
+import 方向：
+- `game.py -> previews.py -> data`
+- `previews.py` 目前 import `JOB_SPECIALIZATIONS` 與 `RELICS`
+- `previews.py` 不 import `game.py`
+
+明確未搬移：
+- `relic_preview_menu`
+- `relic_unlock_met`
+- `relic_unlock_line`
+- temple
+- promotion requirement helper
+
+未修改範圍：
+- save/state
+- combat/dungeon
+- town/guild/storage/shop/crafting
+- data
+- schema
+- registry/validation
+- README
+- gameplay 數值與規則
+
+驗證提醒：
+- 本輪建議執行本機 `run_checks.bat`
+- 若通過，建議 commit message：`Extract relic preview query helper`

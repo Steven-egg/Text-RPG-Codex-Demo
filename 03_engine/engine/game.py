@@ -10,7 +10,7 @@ from pathlib import Path
 from .bestiary import monster_locations
 from .display import clear_screen, menu, pause, setup_console, title
 from .formatting import equipment_summary, format_items, item_name, monster_drop_names
-from .previews import show_job_specialization_preview
+from .previews import get_preview_relics, show_job_specialization_preview
 from data import (
     DUNGEONS,
     EQUIPMENT,
@@ -22,7 +22,6 @@ from data import (
     PROMOTIONS,
     QUESTS,
     RECIPES,
-    RELICS,
     SHOP_INVENTORY,
     SKILLS,
 )
@@ -478,11 +477,7 @@ def relic_unlock_line(state: dict, unlock_data: dict | None) -> str:
 
 def relic_preview_menu(state: dict) -> None:
     title("聖物調查")
-    previews = [
-        relic
-        for relic in RELICS.values()
-        if relic.get("status") == "preview"
-    ]
+    previews = get_preview_relics()
     if not previews:
         print("目前沒有可預覽的聖物線索。")
         pause()

@@ -1,6 +1,14 @@
 from __future__ import annotations
 
-from data import JOB_SPECIALIZATIONS
+from data import JOB_SPECIALIZATIONS, RELICS
+
+
+def get_preview_relics() -> list[dict]:
+    return [
+        relic
+        for relic in RELICS.values()
+        if relic.get("status") == "preview"
+    ]
 
 
 def show_job_specialization_preview(job: str) -> None:
