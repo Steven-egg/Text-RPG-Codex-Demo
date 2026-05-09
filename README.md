@@ -22,6 +22,10 @@
 - 工會收購 MVP：工會可收購白名單素材，只給金幣；第一版不收消耗品、裝備或關鍵道具
 - 倉庫 MVP：可花費 500G 開啟 LV1 倉庫，存取最多 10 種非 key item 背包物品
 - 怪物圖鑑 MVP：擊敗怪物後 100% 登錄，可從主選單查看已登錄怪物的基礎資訊
+- 轉職 preview-only MVP：轉職神殿顯示 `PROMOTIONS` 預覽方向與條件，正式轉職尚未開放
+- 聖物 preview-only MVP：城鎮「聖物調查」顯示 `RELICS` 預覽，聖物取得與效果尚未開放
+- 職業特化 preview-only MVP：角色狀態頁顯示 `JOB_SPECIALIZATIONS` 預覽，目前尚未生效
+- 盜賊 head-slot 副武器 data-only MVP：新增盜賊限定 `head` slot 副武器語意裝備，未新增 `offhand`
 - Boss：山寨頭目葛倫
 - 存檔：主選單可存檔，會建立 `save.json`
 
@@ -41,7 +45,7 @@
 - 破甲釘現在會造成少量即時傷害，並維持 3 回合降低敵方防禦。
 - 玩家短測確認：破甲釘可造成傷害並正常觸發擊殺、經驗與金幣結算；小藥水、集中滴露、逃脫卷軸未觀察到被破甲釘補丁波及。
 - 集中藥袋已修正為 special 欄實際裝備時才生效；只放在背包中不會在進入迷宮時取得集中滴露。
-- 灰燼裂谷難度暫不調整：目前短測角色 Lv10、火抗 25%、裝備抗火斗篷，已高於灰燼裂谷推薦 Lv7-9；後續需以 Lv7-9、低裝或無抗火斗篷狀態另行測試。
+- 灰燼裂谷難度暫不調整：目前短測角色 Lv10、火抗 25%、裝備抗火斗篷，已高於灰燼裂谷推薦 Lv7-9；後續先整理 Lv6-7、低裝或無抗火斗篷狀態的實測資料。
 
 ## 3. 啟動方式
 
@@ -91,7 +95,7 @@ C:\Users\user\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\py
 - `element_maze.py`：遊戲入口，負責載入 `04_data` 與 `03_engine`，再執行 `engine.game.main()`。
 - `01_content/`：內容設計文件與玩法規劃。
 - `02_schema/`：資料契約文件，定義欄位、型別、引用規則與維護規則。
-- `03_engine/engine/`：遊戲流程與規則，例如城鎮、背包、商店、合成、任務、迷宮、戰鬥、存檔。
+- `03_engine/engine/`：遊戲流程與規則；目前包含主流程 `game.py`，以及低風險 helper modules：`display.py`、`formatting.py`、`bestiary.py`、`previews.py`。
 - `04_data/data/`：runtime 實際讀取的資料表。
 - `05_assets/`：未來素材資源預留。
 - `06_tools/`：開發與驗證工具。
@@ -190,13 +194,15 @@ data validation ok
 - 維持 schema 文件。
 - 修改 data 後固定跑 validation。
 - 重要 gameplay 修改後固定跑 smoke test。
-- 下一輪優先短測 Lv7-9、低裝或無抗火斗篷狀態的灰燼裂谷入口節奏。
-- 若灰燼裂谷入口節奏正常，下一個第二幕施工應維持小切片，優先評估灰燼裂谷素材出口或最小火抗對策配方。
-- 暫不建議直接做灰燼守衛 Boss、轉職、聖物、倉庫升級完整版、完整圖鑑系統或 Act 3。
+- 下一輪優先做 read-only 數值平衡檢查，不直接改公式或數值。
+- 整理灰燼裂谷 Lv6-7 實測資料，特別觀察低裝、無抗火斗篷與升級全回復對入口壓力的影響。
+- 檢查怪物成長是否跟不上角色成長、裝備整備與升級全回復。
+- 暫不把餘燼護符或新火抗 accessory 當主要下一步；目前已有暖石墜改與抗火斗篷，新增同質火抗飾品容易定位重疊。
+- 暫不建議直接做灰燼守衛 Boss、轉職、聖物、倉庫升級完整版、完整圖鑑系統、火抗配方或 Act 3。
 
 中期：
 
-- 逐步拆分 `03_engine/engine/game.py`，一次只拆一個主題。
+- 若未來有明確低風險邊界，再評估 `03_engine/engine/game.py` 拆分；目前不要為拆而拆。
 - 將 item effect、monster behavior、unlock rule 部分資料化。
 - 為 validation 增加更細的欄位型別與平衡範圍檢查。
 

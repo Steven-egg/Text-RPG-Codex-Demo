@@ -1,7 +1,7 @@
 # Codex Session 接續快照
 
 用途：給下一個 Codex session 在接手此專案時快速恢復上下文。  
-狀態日期：2026-05-09
+狀態日期：2026-05-10
 專案：`C:\Users\user\OneDrive\文字冒險遊戲`
 
 ## 1. 目前版本與目標
@@ -20,7 +20,7 @@
 ```
 
 目前專案已從「可玩原型」進入「第二幕最小施工切片迭代」與核心系統 MVP 拆點階段。  
-Act 2 Slice 1 已完成：灰燼裂谷偵查版已進入 runtime data。Act 2 Entry Balance & Guidance Patch 也已完成，修正葛倫壓力、小魔晶掉落、破甲釘負回饋與灰燼裂谷入口引導。集中藥袋 special 裝備語意 bug 也已修正。近期已完成工會收購 MVP、倉庫 MVP、倉庫入口顯示位置修正、怪物圖鑑 MVP、轉職資料結構 MVP、聖物資料結構 preview MVP 與職業特化 MVP preview-only。重點仍不是直接完成第二幕，而是逐步以單一節點 MVP 驗證 engine、save、schema、data、registry、validation 與必要文件同步。
+Act 2 Slice 1 已完成：灰燼裂谷偵查版已進入 runtime data。Act 2 Entry Balance & Guidance Patch 也已完成，修正葛倫壓力、小魔晶掉落、破甲釘負回饋與灰燼裂谷入口引導。集中藥袋 special 裝備語意 bug 也已修正。近期已完成工會收購 MVP、倉庫 MVP、倉庫入口顯示位置修正、怪物圖鑑 MVP、轉職資料結構 MVP、聖物資料結構 preview MVP、職業特化 MVP preview-only 與盜賊 head-slot 副武器 data-only MVP。重點仍不是直接完成第二幕，而是逐步以單一節點 MVP 驗證 engine、save、schema、data、registry、validation 與必要文件同步。
 
 ## 2. 已完成項目
 
@@ -32,7 +32,7 @@ Act 2 Slice 1 已完成：灰燼裂谷偵查版已進入 runtime data。Act 2 En
 - 城鎮：工會、鐵刃工坊、堅甲工坊、旅人小鋪、米菈合成屋、星燈魔法商店、轉職神殿。
 - 迷宮：青苔洞窟、焦石礦坑、灰燼裂谷偵查版。
 - Boss：山寨頭目葛倫。灰燼裂谷目前沒有 Boss。
-- 基礎戰鬥、掉落、合成、商店、任務、魔法書、存檔、工會素材收購、LV1 倉庫、怪物圖鑑 MVP、轉職 preview、聖物 preview、職業特化 preview。
+- 基礎戰鬥、掉落、合成、商店、任務、魔法書、存檔、工會素材收購、LV1 倉庫、怪物圖鑑 MVP、轉職 preview、聖物 preview、職業特化 preview、盜賊 head-slot 副武器 data-only MVP。
 - 玩家普通攻擊與傷害技能目前為 100% 命中。
 
 ### Act 2 Slice 1 runtime data
@@ -66,7 +66,7 @@ Act 2 Slice 1 已完成：灰燼裂谷偵查版已進入 runtime data。Act 2 En
 
 - 玩家目前短測角色 Lv10、火抗 25%、裝備抗火斗篷，已高於灰燼裂谷推薦 Lv7-9。
 - 灰燼裂谷體感偏輕鬆暫不視為怪物數值 bug。
-- 後續若要調整灰燼裂谷難度，需以 Lv7-9、低裝或無抗火斗篷狀態另行測試。
+- 後續若要調整灰燼裂谷難度，需先整理 Lv6-7、低裝或無抗火斗篷狀態的實測資料。
 
 ### 核心系統 MVP 節點
 
@@ -134,6 +134,13 @@ Act 2 Slice 1 已完成：灰燼裂谷偵查版已進入 runtime data。Act 2 En
   - 沒有新增 `state["job_specialization"]` 或其他特化狀態。
   - 沒有修改 `get_stats()`、戰鬥、技能、裝備限制或魔法書限制。
   - 沒有混入轉職神殿；轉職神殿仍只顯示 `PROMOTIONS` preview。
+- 盜賊 head-slot 副武器 data-only MVP 已完成：
+  - 新增 `armor_rogue_sleeve_blade`（影袖副刃）。
+  - 使用既有 `head` slot，`subtype` 為「副武器」。
+  - `jobs` 只允許 `["盜賊"]`。
+  - stats 只使用既有 key：`attack`、`agility`、`crit`。
+  - 已加入既有防具商店。
+  - 沒有新增 `offhand` slot，沒有修改 engine、combat、save/state 或 schema/validation。
 
 ### 專案治理與文件
 
@@ -231,7 +238,11 @@ C:\Users\User\AppData\Local\Programs\Python\Python311\python.exe
 ├─ 03_engine/
 │  └─ engine/
 │     ├─ __init__.py
-│     └─ game.py
+│     ├─ bestiary.py
+│     ├─ display.py
+│     ├─ formatting.py
+│     ├─ game.py
+│     └─ previews.py
 ├─ 04_data/
 │  └─ data/
 │     ├─ __init__.py
@@ -283,16 +294,17 @@ C:\Users\User\AppData\Local\Programs\Python\Python311\python.exe
 
 ### engine
 
-位置：`03_engine/engine/game.py`
+位置：`03_engine/engine/`
 
 負責：
 
-- 主流程、選單與輸入。
-- 城鎮、背包、商店、合成、任務、迷宮、戰鬥。
-- 存檔與讀檔。
-- 傷害、狀態、掉落、任務交付等 runtime 規則。
+- `game.py`：主流程、城鎮、背包、商店、合成、任務、迷宮、戰鬥、存檔與讀檔。
+- `display.py`：CLI / display primitives。
+- `formatting.py`：名稱查詢與格式化 helper。
+- `bestiary.py`：怪物圖鑑查詢 helper。
+- `previews.py`：preview-only 顯示與資料查詢 helper。
 
-目前 `game.py` 仍是較大的單檔 engine，但不要大重構。
+目前 `game.py` 仍是 runtime 核心且職責較集中，但已有低風險 helper modules。不要繼續為拆而拆，也不要在功能輪順手重構 engine。
 
 ### data
 
@@ -392,7 +404,7 @@ data 檔只放資料表，不放互動流程或 gameplay 邏輯。
 除非使用者在新 session 明確改變方向，否則禁止：
 
 - 不要直接完成整個第二幕。
-- 不要修改 `03_engine/engine/game.py`。
+- 不要修改 `03_engine/engine/*.py`。
 - 不要修改 `04_data/data/*.py`。
 - 不要修改 `02_schema/*.schema.md`，除非先提出理由與最小修改範圍且使用者明確要求。
 - 不要修改 `04_data/data/registry.py` 或 `06_tools/validate_data.py`，除非進入明確批准的 registry/validation 準備切片。
@@ -417,15 +429,14 @@ data 檔只放資料表，不放互動流程或 gameplay 邏輯。
 目前下一步只允許以下之一：
 
 1. 做 `01_content/` 文件同步或 drift check，並將本 session 作為恢復點收尾。
-2. 下一個新 session 再規劃下一個單一節點，例如聖物取得狀態 MVP、職業特化正式設計前只讀檢查、README / runtime 說明檢查或 engine 拆分前檢查；仍需先做單一節點規劃與實作前檢查，不直接實作完整系統。
+2. 下一個新 session 再規劃下一個單一節點，例如數值平衡 read-only 檢查、灰燼裂谷 Lv6-7 實測資料整理、或怪物成長與玩家成長差距檢查；仍需先做單一節點規劃與實作前檢查，不直接實作完整系統。
 3. 在使用者明確要求下，提出 schema / registry / validation / save schema 的最小修改理由與範圍。
 
 下一個候選節點可評估：
 
-1. 聖物取得狀態 MVP。
-2. 職業特化正式設計前只讀檢查。
-3. README / runtime 說明檢查。
-4. engine 拆分前檢查。
+1. 數值平衡 read-only 檢查。
+2. 灰燼裂谷 Lv6-7 實測資料整理。
+3. 檢查怪物成長是否跟不上角色成長、裝備整備與升級全回復。
 
 下一輪仍應先做單一節點規劃與實作前檢查，不要直接實作完整系統。
 
@@ -439,7 +450,7 @@ data 檔只放資料表，不放互動流程或 gameplay 邏輯。
 → 使用者確認後，下一輪才實作
 ```
 
-不要在同一輪做灰燼守衛、完整火之印記、第二幕完整任務鏈、轉職試煉、情報屋、鍊金攤、聖物完整系統、轉職完整系統、怪物圖鑑完整系統、第二個元素迷宮、Act 3、倉庫升級完整版或經濟平衡調整。
+不要在同一輪做灰燼守衛、完整火之印記、第二幕完整任務鏈、轉職試煉、情報屋、鍊金攤、聖物完整系統、轉職完整系統、怪物圖鑑完整系統、第二個元素迷宮、Act 3、倉庫升級完整版、經濟平衡調整、火抗配方、`offhand` slot 或 combat formula 調整。
 
 ## 10. 新 session 先檢查哪些檔案
 
@@ -473,15 +484,15 @@ data 檔只放資料表，不放互動流程或 gameplay 邏輯。
 
 ## 11. Drift check 摘要
 
-可回貼舊 session 驗證是否 drift：
+可回貼最新 session 驗證是否 drift：
 
 ```text
-目前專案是《元素迷宮：邊境冒險者》Python CLI v1 playable vertical slice。README.md 是 project-level SSOT；01_content 是內容與架構規劃；game-design.md 是 v1 設計；game-architecture.md 是擴大架構；full-act-structure.md 是五幕總綱；act-2-content-plan.md 是第二幕灰燼裂谷規劃。02_schema 是資料契約；04_data/data 是 runtime data；registry.py 只做資料索引與 id/unlock helper；validate_data.py 做跨表引用驗證；engine/game.py 是 runtime 流程。v1 第一幕已完成且主線可通關；第二幕 Act 2 Slice 1 已完成，灰燼裂谷偵查版已進 runtime data，完成 quest_boss_glen 後會解鎖 unlock_act_2 與 unlock_ash_ravine，並可接「灰燼裂谷偵查」。入口平衡補丁、集中藥袋 special 裝備語意修正、工會收購 MVP、倉庫 MVP、倉庫入口 UX 修正、怪物圖鑑 MVP、轉職資料結構 MVP、聖物資料結構 preview MVP 與職業特化 MVP preview-only 皆已完成。轉職資料目前只做 `PROMOTIONS` preview-only 骨架與神殿條件顯示，正式轉職尚未開放。聖物資料目前只做 `RELICS` preview-only 骨架與城鎮「聖物調查」顯示，聖物效果尚未開放。職業特化目前只做 `JOB_SPECIALIZATIONS` preview-only 骨架與角色狀態頁顯示，四個基礎職業 preview 為劍士「守勢突破」、法師「元素共鳴」、盜賊「影步偵查」、牧師「聖印守護」，UI 明確標註目前尚未生效。職業特化 MVP 未新增 save 欄位，未修改 `state.schema.md`，未新增 `state["job_specialization"]` 或其他特化狀態，未修改 `get_stats()`、戰鬥、技能、裝備限制或魔法書限制，也未混入轉職神殿；轉職神殿仍只顯示 `PROMOTIONS` preview。目前已新增 `run_checks.bat` 作為 Windows 本機標準驗證入口，使用者本機執行已通過 `data validation ok`、`smoke test ok`、`all checks ok`；前一輪 Codex 環境找不到 Python runtime，後續驗證以本機 `run_checks.bat` 結果為準，可另開節點檢查 README / runtime 說明。灰燼裂谷目前沒有 Boss；灰燼守衛、完整火之印記、第二幕完整任務鏈、正式轉職系統、聖物取得狀態與聖物效果、正式職業特化選擇與效果仍未實作。本 session 到此收尾；下一個新 session 可評估聖物取得狀態 MVP、職業特化正式設計前只讀檢查、README / runtime 說明檢查或 engine 拆分前檢查，仍需先做單一節點規劃與實作前檢查，不直接實作完整系統。不得處理 Element Decay，不得新增 act-3-content-plan.md。
+目前專案是《元素迷宮：邊境冒險者》Python CLI v1 playable vertical slice。README.md 是 project-level SSOT；01_content 是內容與架構規劃；game-design.md 是 v1 設計；game-architecture.md 是擴大架構；full-act-structure.md 是五幕總綱；act-2-content-plan.md 是第二幕灰燼裂谷規劃。02_schema 是資料契約；04_data/data 是 runtime data；registry.py 只做資料索引與 id/unlock helper；validate_data.py 做跨表引用驗證；03_engine/engine 目前包含 game.py、display.py、formatting.py、bestiary.py、previews.py。v1 第一幕已完成且主線可通關；第二幕 Act 2 Slice 1 已完成，灰燼裂谷偵查版已進 runtime data，完成 quest_boss_glen 後會解鎖 unlock_act_2 與 unlock_ash_ravine，並可接「灰燼裂谷偵查」。入口平衡補丁、集中藥袋 special 裝備語意修正、工會收購 MVP、倉庫 MVP、倉庫入口 UX 修正、怪物圖鑑 MVP、轉職 preview-only MVP、聖物 preview-only MVP、職業特化 preview-only MVP 與盜賊 head-slot 副武器 data-only MVP 皆已完成。轉職、聖物與職業特化目前皆為 preview-only，未新增正式狀態或效果。盜賊副武器使用既有 head slot，未新增 offhand。灰燼裂谷目前沒有 Boss；灰燼守衛、完整火之印記、第二幕完整任務鏈、正式轉職、正式聖物、正式職業特化仍未實作。目前已有暖石墜改與抗火斗篷，餘燼護符或新火抗 accessory 不再是主要下一步，以免裝備定位重疊。下一個新 session 建議只做 read-only 數值平衡檢查、灰燼裂谷 Lv6-7 實測資料整理，並檢查怪物成長是否跟不上角色成長、裝備整備與升級全回復。不得處理 Element Decay，不得新增 act-3-content-plan.md，不得新增火抗配方或 offhand slot，不得修改 combat formula。
 ```
 
 ## 12. 給下一個 Codex 的一句話
 
-目前專案已完成 v1 可玩原型、第二幕內容規劃、五幕總綱、灰燼裂谷偵查版 runtime data、入口平衡引導補丁、集中藥袋 special 裝備語意修正、工會收購 MVP、倉庫 MVP、倉庫入口 UX 修正、怪物圖鑑 MVP、轉職資料結構 MVP、聖物資料結構 preview MVP 與職業特化 MVP preview-only。轉職資料目前只做 `PROMOTIONS` preview-only 骨架與神殿條件顯示，正式轉職尚未開放，也沒有新增 save 欄位或改變 `state["job"]`。聖物資料目前只做 `RELICS` preview-only 骨架與城鎮「聖物調查」顯示，聖物效果尚未開放，也沒有新增 `state["relics"]` 或任何 save 欄位。職業特化目前只做 `JOB_SPECIALIZATIONS` preview-only 骨架與角色狀態頁顯示，UI 明確標註目前尚未生效，也沒有新增 save 欄位、特化狀態欄位、數值效果或任何戰鬥/技能/裝備/魔法書限制變更。Windows 本機標準驗證入口是專案根目錄的 `run_checks.bat`；Codex 若遇到 Python runtime / sandbox 存取限制，不視為 gameplay 錯誤。本 session 到此收尾；下一個新 session 可評估聖物取得狀態 MVP、職業特化正式設計前只讀檢查、README / runtime 說明檢查或 engine 拆分前檢查，但仍要先做單一節點規劃與實作前檢查，不直接實作完整系統；不要急著把灰燼守衛、完整火之印記、完整任務鏈、完整轉職、完整聖物、完整職業特化、完整圖鑑或後續幕次塞進 runtime。
+目前專案已完成 v1 可玩原型、第二幕內容規劃、五幕總綱、灰燼裂谷偵查版 runtime data、入口平衡引導補丁、集中藥袋 special 裝備語意修正、工會收購 MVP、倉庫 MVP、倉庫入口 UX 修正、怪物圖鑑 MVP、轉職 preview-only MVP、聖物 preview-only MVP、職業特化 preview-only MVP 與盜賊 head-slot 副武器 data-only MVP。轉職、聖物與職業特化目前皆為 preview-only，未新增正式狀態、save 欄位或數值效果。盜賊副武器使用既有 `head` slot，沒有新增 `offhand`。`03_engine/engine` 已拆出 display、formatting、bestiary、previews 等 helper modules，但不要繼續為拆而拆。Windows 本機標準驗證入口是專案根目錄的 `run_checks.bat`；Codex 若遇到 Python runtime / sandbox 存取限制，不視為 gameplay 錯誤。下一個新 session 建議只做 read-only 數值平衡檢查、灰燼裂谷 Lv6-7 實測資料整理，並檢查怪物成長是否跟不上角色成長、裝備整備與升級全回復；不要急著把灰燼守衛、完整火之印記、完整任務鏈、完整轉職、完整聖物、完整職業特化、完整圖鑑或後續幕次塞進 runtime。
 
 ## 13. 轉職資料結構 MVP 收尾摘要
 
@@ -518,10 +529,9 @@ data 檔只放資料表，不放互動流程或 gameplay 邏輯。
 
 下一個候選節點可評估：
 
-1. 聖物取得狀態 MVP。
-2. 職業特化正式設計前只讀檢查。
-3. README / runtime 說明檢查。
-4. engine 拆分前檢查。
+1. 數值平衡 read-only 檢查。
+2. 灰燼裂谷 Lv6-7 實測資料整理。
+3. 檢查怪物成長是否跟不上角色成長、裝備整備與升級全回復。
 
 下一輪仍應先做單一節點規劃與實作前檢查，不要直接實作完整系統。
 
@@ -561,10 +571,9 @@ data 檔只放資料表，不放互動流程或 gameplay 邏輯。
 
 下一個候選節點可評估：
 
-1. 聖物取得狀態 MVP。
-2. 職業特化正式設計前只讀檢查。
-3. README / runtime 說明檢查。
-4. engine 拆分前檢查。
+1. 數值平衡 read-only 檢查。
+2. 灰燼裂谷 Lv6-7 實測資料整理。
+3. 檢查怪物成長是否跟不上角色成長、裝備整備與升級全回復。
 
 下一輪仍應先做單一節點規劃與實作前檢查，不要直接實作完整系統。
 
@@ -609,10 +618,9 @@ data 檔只放資料表，不放互動流程或 gameplay 邏輯。
 
 下一個候選節點可評估：
 
-1. 聖物取得狀態 MVP。
-2. 職業特化正式設計前只讀檢查。
-3. README / runtime 說明檢查。
-4. engine 拆分前檢查。
+1. 數值平衡 read-only 檢查。
+2. 灰燼裂谷 Lv6-7 實測資料整理。
+3. 檢查怪物成長是否跟不上角色成長、裝備整備與升級全回復。
 
 下一輪仍應先做單一節點規劃與實作前檢查，不要直接實作完整系統。
 
@@ -628,7 +636,7 @@ data 檔只放資料表，不放互動流程或 gameplay 邏輯。
 - 若未來拆分 engine，建議先從低風險邊界開始，例如 display / lookup helpers 或 town menu 子功能；不要一開始碰 save/state、combat/dungeon 或大型搬檔。
 - 目前不應直接做 engine 拆分、搬移檔案、修改 import、修改 save schema、修改 `state.schema.md` 或大型重構。
 
-下一輪若要延續此方向，建議先做「engine 拆分前規劃表」：列出候選切點、import 影響、驗證清單與 rollback 範圍；仍不要直接實作。
+此方向目前不作為下一步；若未來明確要延續，仍需先做「engine 拆分前規劃表」並列出候選切點、import 影響、驗證清單與 rollback 範圍，不要直接實作。
 
 ## 17. CLI / display primitives 拆分完成紀錄
 
@@ -918,7 +926,7 @@ import 方向：
 
 敏捷傷害浮動屬於 combat rule MVP，會碰 `calc_player_damage()`，不應與刺客副武器 data-only MVP 同輪實作。
 
-下一輪新 session 建議優先實作 data-only「盜賊 head-slot 副武器 MVP」：
+此候選已於後續完成，完成狀態見下一節。原建議範圍如下：
 - 只新增盜賊限定 head-slot 副武器裝備
 - 取得方式優先放既有商店
 - 不新增 `offhand` slot
@@ -936,3 +944,13 @@ import 方向：
 本輪未新增 `offhand` slot，未修改 engine，未修改 combat，未修改 save/state，也未修改 schema/validation。
 
 敏捷傷害浮動仍保留為後續 combat rule MVP；本輪不處理 `calc_player_damage()` 或任何敏捷戰鬥公式。
+
+## 文件 / handoff drift sync MVP 完成紀錄
+
+本輪只做文件同步，更新 README、短交接與 snapshot，反映目前已完成 v1 playable slice、灰燼裂谷偵查版、工會收購 MVP、倉庫 MVP、怪物圖鑑 MVP、轉職 preview-only MVP、聖物 preview-only MVP、職業特化 preview-only MVP，以及盜賊 head-slot 副武器 data-only MVP。
+
+本輪修正 snapshot 前段檔案樹，補上目前 engine helper modules：`game.py`、`display.py`、`formatting.py`、`bestiary.py`、`previews.py`。
+
+本輪將下一步方向記錄為 read-only 數值平衡檢查、灰燼裂谷 Lv6-7 實測資料整理，以及怪物成長是否跟不上角色成長、裝備整備與升級全回復的檢查。
+
+本輪未修改 gameplay、data、schema、engine、validation、`run_checks.bat` 或 `save.json`；未新增功能、未新增 `offhand` slot、未修改 combat formula、未新增火抗配方。
