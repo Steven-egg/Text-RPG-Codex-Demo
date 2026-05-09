@@ -7,6 +7,7 @@ import sys
 from copy import deepcopy
 from pathlib import Path
 
+from .bestiary import monster_locations
 from .display import clear_screen, menu, pause, setup_console, title
 from .formatting import equipment_summary, format_items, item_name, monster_drop_names
 from data import (
@@ -742,13 +743,6 @@ def try_register_bestiary(state: dict, monster_id: str) -> bool:
     state["bestiary"].append(monster_id)
     print(f"怪物圖鑑新增：{MONSTERS[monster_id]['name']}。")
     return True
-
-def monster_locations(monster_id: str) -> list[str]:
-    locations = []
-    for dungeon in DUNGEONS.values():
-        if monster_id in dungeon.get("monsters", []) or dungeon.get("boss") == monster_id:
-            locations.append(dungeon["name"])
-    return locations
 
 def bestiary_menu(state: dict) -> None:
     ensure_state_defaults(state)

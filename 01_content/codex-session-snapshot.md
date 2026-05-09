@@ -721,3 +721,47 @@ GitHub 備份：
 - 下一個 engine 拆分節點需另行 read-only 檢查
 - 不要直接連續拆 town、storage、guild、combat、dungeon 或 save/state
 - 若繼續拆分，優先考慮低風險 helper 或 preview-only UI，但需先規劃
+
+## bestiary lookup helper 拆分完成紀錄
+
+本輪完成第三個最小 engine helper 拆分節點：只拆出 bestiary lookup helper，未擴大到圖鑑 UI 或登錄流程。
+
+本輪新增檔案：
+- `03_engine/engine/bestiary.py`
+
+本輪修改檔案：
+- `03_engine/engine/game.py`
+
+已搬移 helper：
+- `monster_locations` 已由 `game.py` 搬至 `bestiary.py`
+
+import 方向：
+- `game.py -> bestiary.py -> data`
+- `bestiary.py` 目前只 import `from data import DUNGEONS`
+
+明確未搬移：
+- `bestiary_menu`
+- `try_register_bestiary`
+- `monster_drop_names`
+- `ensure_state_defaults`
+
+未修改範圍：
+- save/state
+- combat/dungeon
+- storage
+- guild/quest
+- shop/crafting
+- data
+- schema
+- registry/validation
+- README
+- gameplay 數值與規則
+
+驗證結果：
+- 本機 `run_checks.bat` 已通過
+- `smoke test ok`
+- `all checks ok`
+
+下一步提醒：
+- 下一個 engine 拆分節點仍需先做 read-only 檢查
+- 不要直接連續拆 engine
