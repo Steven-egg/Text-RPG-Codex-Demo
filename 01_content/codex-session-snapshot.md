@@ -1,5 +1,38 @@
 # Codex Session 接續快照
 
+## 第 3 枚火之印記碎片 read-only 規劃結論
+
+本輪只做 markdown-only 收尾與備份；未實作 gameplay，也不修改 runtime / engine / data / schema / save/state。
+
+最新規劃方向已修正：第 3 枚 `key_fire_mark_shard` 不做成工會任務補發，而是來自新的可玩內容：新火系 dungeon skeleton + 新普通怪 + 新 Boss。工會只負責灰燼守衛後提供新地點線索，以及 Boss 後提示玩家可去教會詢問火之印記。
+
+候選 runtime 內容仍只是規劃，尚未實作：
+- 新 dungeon 暫名：`dungeon_cinder_seal_depths`，名稱「燼印深窟」。
+- 新普通怪候選：`mon_ember_stalker`、`mon_cinder_acolyte`、`mon_molten_shell`。
+- 新 Boss 候選：`boss_cinder_seal_sentinel`，名稱「燼印哨衛」。
+- 擊敗 `boss_cinder_seal_sentinel` 後才取得第 3 枚 `key_fire_mark_shard`。
+- 擊敗 Boss 並回報後，工會提示玩家可去教會詢問碎片或火之印記相關資訊。
+
+後續任務節奏暫定為三個追加任務：
+- 任務 A：開啟新火系 dungeon 的引子。
+- 任務 B：開放進階補給藥水的引子。
+- 任務 C：Boss 討伐任務兼第 3 枚火之印記碎片取得與教會引導。
+
+補給藥水升級任務 MVP 也列為下一階段候選：在正式實作燼印深窟前，先 read-only 評估現有藥水 / 商店 / 任務 unlock 機制，再決定最小方式開放比目前補給藥水高一階的新藥水。目的不是開鍊金或製藥系統，而是讓玩家能更順地度過第二章 demo 的 Boss，同時 Boss 難度不必過度下修。
+
+明確限制：
+- 暫不新增完整火之印記。
+- 暫不新增火印熔爐。
+- 暫不新增火印爐衛。
+- 暫不新增正式轉職。
+- 暫不新增正式聖物。
+- 暫不新增八元素完整系統。
+- 暫不新增 `offhand` slot。
+- 暫不修改 schema / save/state。
+- 暫不修改 combat formula。
+- 暫不做通用 Boss framework。
+- 暫不展開完整第二幕。
+
 用途：給下一個 Codex session 在接手此專案時快速恢復上下文。  
 狀態日期：2026-05-10
 專案：`C:\Users\user\OneDrive\文字冒險遊戲`

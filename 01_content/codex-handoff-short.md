@@ -1,5 +1,33 @@
 # Codex Handoff Short
 
+## 最新 handoff：第 3 枚火之印記碎片與燼印深窟規劃
+
+- 本輪是 markdown-only 收尾與備份；未實作 gameplay，未修改 runtime / engine / data / schema / save/state。
+- 最新方向已從「工會任務補發第 3 枚火之印記碎片」修正為「新火系 dungeon + Boss 掉落」。
+- 新 dungeon 暫名：`dungeon_cinder_seal_depths`，名稱「燼印深窟」。
+- 新普通怪候選：`mon_ember_stalker`、`mon_cinder_acolyte`、`mon_molten_shell`。
+- 新 Boss 候選：`boss_cinder_seal_sentinel`，名稱「燼印哨衛」。
+- 第 3 枚 `key_fire_mark_shard` 不由工會補發，而是由 `boss_cinder_seal_sentinel` 擊敗後掉落。
+- 工會只負責兩段提示：灰燼守衛後提供新地點線索；燼印哨衛後提示玩家可去教會詢問碎片或火之印記。
+- 暫不實作完整火之印記、火印熔爐、火印爐衛。
+
+後續節奏暫定三個追加任務：
+- 任務 A：開啟新火系 dungeon 的引子。
+- 任務 B：開放進階補給藥水的引子。
+- 任務 C：Boss 討伐任務兼第 3 枚火之印記碎片取得與教會引導。
+
+補給藥水升級任務 MVP：
+- 建議在正式實作燼印深窟前，先 read-only 評估現有藥水 / 商店 / 任務 unlock 機制。
+- 目的：讓玩家能更順地度過第二章 demo 的 Boss，同時 Boss 難度不必過度下修。
+- 只做補給任務，不做鍊金系統、不做製藥系統、不新增配方系統、不修改 combat formula。
+
+最新限制：
+- 暫不新增完整火之印記、火印熔爐、火印爐衛。
+- 暫不新增正式轉職、正式聖物、八元素完整系統、`offhand` slot。
+- 暫不修改 schema / save/state / combat formula。
+- 暫不做通用 Boss framework。
+- 暫不展開完整第二幕。
+
 - `README.md` 是 project-level SSOT；專案採分層 SSOT，不是所有細節都塞在 README。
 - 目前版本：Python CLI v1 playable vertical slice，可玩核心循環已完成；第二幕 Act 2 Slice 1 已進 runtime data。
 - 目前專案階段：v1 第一幕完成，第二幕進入最小施工切片迭代；灰燼守衛 Boss MVP 已完成，下一個 runtime 候選節點需先 read-only 規劃。

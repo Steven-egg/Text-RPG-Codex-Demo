@@ -1,5 +1,34 @@
 # 《元素迷宮：邊境冒險者》終端機版
 
+## 最新規劃：第 3 枚火之印記碎片與補給藥水升級
+
+本段為 markdown-only 規劃備份；尚未實作 gameplay，也未修改 runtime / engine / data / schema / save/state。
+
+「第 3 枚火之印記碎片：新火系 dungeon + Boss MVP」規劃結論：
+- 新 dungeon 暫名：`dungeon_cinder_seal_depths`，名稱「燼印深窟」。
+- 新普通怪候選：`mon_ember_stalker`、`mon_cinder_acolyte`、`mon_molten_shell`。
+- 新 Boss 候選：`boss_cinder_seal_sentinel`，名稱「燼印哨衛」。
+- 第 3 枚 `key_fire_mark_shard` 不由工會補發，而是由新 Boss 擊敗後掉落。
+- 工會只負責灰燼守衛後提供新地點線索，以及 Boss 後提示玩家可去教會詢問碎片或火之印記。
+- 暫不實作完整火之印記、火印熔爐、火印爐衛。
+
+「補給藥水升級任務 MVP」列為燼印深窟前的候選節點：
+- 在正式實作燼印深窟前，先 read-only 評估現有藥水 / 商店 / 任務 unlock 機制。
+- 目的是讓玩家能更順地度過第二章 demo 的 Boss，同時 Boss 難度不必過度下修。
+- 這只是補給任務，不做鍊金系統、不做製藥系統、不新增配方系統、不修改 combat formula。
+
+後續任務節奏暫定：
+- 任務 A：開啟新火系 dungeon 的引子。
+- 任務 B：開放進階補給藥水的引子。
+- 任務 C：Boss 討伐任務兼第 3 枚火之印記碎片取得與教會引導。
+
+限制仍維持：
+- 暫不新增完整火之印記、火印熔爐、火印爐衛。
+- 暫不新增正式轉職、正式聖物、八元素完整系統、`offhand` slot。
+- 暫不修改 schema / save/state / combat formula。
+- 暫不做通用 Boss framework。
+- 暫不展開完整第二幕。
+
 ## 1. 專案定位
 
 這是一個 Python CLI 文字冒險 RPG 的 v1 playable vertical slice。核心體驗是「進入迷宮探索 → 戰鬥 → 取得素材與金幣 → 回城整備 → 商店、合成、工會、魔法書強化 → 挑戰更高階迷宮」。
