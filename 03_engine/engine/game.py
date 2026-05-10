@@ -42,6 +42,7 @@ GUILD_MATERIAL_BUY_PRICES = {
 
 STORAGE_UNLOCK_COST = 500
 STORAGE_CAPACITY = 10
+SLEEVE_BLADE_FOLLOWUP_MULTIPLIER = 0.35
 
 def is_key_item(item_id: str) -> bool:
     return item_id.startswith("key_")
@@ -1171,6 +1172,23 @@ def calc_player_damage(state: dict, enemy: dict, skill: dict | None, player_buff
         base *= 1.5
     return max(1, math.ceil(base)), is_crit
 
+def can_sleeve_blade_followup(state: dict, skill: dict | None) -> bool:
+    return (
+        skill is None
+        and state["job"] == "盜賊"
+        and state["equipment"].get("head") == "armor_rogue_sleeve_blade"
+    )
+
+def calc_sleeve_blade_followup_damage(state: dict, enemy: dict, player_buffs: dict, enemy_buffs: dict) -> int:
+    stats = get_stats(state, player_buffs)
+    enemy_defense = enemy["defense"]
+    if enemy_buffs.get("defense_up", 0) > 0:
+        enemy_defense = math.ceil(enemy_defense * 1.15)
+    if enemy_buffs.get("defense_down", 0) > 0:
+        enemy_defense = max(1, math.floor(enemy_defense * 0.8))
+    base = max(1, stats["attack"] * SLEEVE_BLADE_FOLLOWUP_MULTIPLIER - enemy_defense * 0.6)
+    return max(1, math.ceil(base))
+
 def calc_enemy_damage(enemy: dict, state: dict, multiplier: float, element: str, player_buffs: dict, defending: bool) -> int:
     stats = get_stats(state, player_buffs)
     base = max(1, enemy["attack"] * multiplier - stats["defense"] * 0.6)
@@ -1276,6 +1294,10 @@ def player_attack(state: dict, enemy: dict, enemy_hp: int, skill: dict | None, p
     label = skill["name"] if skill else "普通攻擊"
     crit_text = " 暴擊！" if is_crit else ""
     print(f"你使用{label}，造成 {damage} 傷害。{crit_text}")
+    if can_sleeve_blade_followup(state, skill) and enemy_hp - damage > 0:
+        followup_damage = calc_sleeve_blade_followup_damage(state, enemy, player_buffs, enemy_buffs)
+        damage += followup_damage
+        print(f"影袖副刃順勢劃出追擊，造成 {followup_damage} 傷害。")
     return damage
 
 def skill_menu(state: dict, enemy: dict, player_buffs: dict, enemy_buffs: dict):
