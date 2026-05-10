@@ -1,5 +1,22 @@
 # 《元素迷宮：邊境冒險者》終端機版
 
+## 最新完成：補給藥水升級任務 MVP
+
+本輪已完成補給藥水升級任務 MVP：
+- 新增 `item_potion_m`「中藥水」，回復 HP 70。
+- 新增 `quest_supply_upgrade`「補給線升級」，灰燼守衛擊敗後可在工會完成。
+- 任務完成後取得 `item_potion_m x2`，並解鎖旅人小鋪販售中藥水。
+- 本輪暫不實作素材交付需求；素材交付需求待新的 dungeon / materials / monsters 系統完成後再回補。
+- 本輪未修改 schema / save / state / combat formula。
+
+實機驗證結果：
+- 已完整驗證主線 vertical slice：葛倫 Boss 戰、`血跡地圖`、`灰燼裂谷偵查`、`灰燼守衛`、`補給線升級` 與中藥水解鎖。
+- `quest_supply_upgrade` gate 正常：灰燼守衛未擊敗前不出現，擊敗後正常解鎖，完成後不可重複完成。
+- 商店解鎖狀態可正常保存；旅人小鋪在任務完成後販售中藥水。
+- 葛倫、灰燼裂谷怪物與 Boss 系統正常；灼傷、防禦下降、Boss buff/debuff、掉落、圖鑑、等級提升與首次通關獎勵皆正常。
+- 舊道具回歸確認正常：小藥水、集中滴露、解毒草、破甲釘、逃脫卷軸皆可正常使用。
+- 中藥水可於戰鬥中正常使用；HP 不足時回復 70，接近滿血時不會超過 max HP。
+
 ## 最新規劃：第 3 枚火之印記碎片與補給藥水升級
 
 本段為 markdown-only 規劃備份；尚未實作 gameplay，也未修改 runtime / engine / data / schema / save/state。

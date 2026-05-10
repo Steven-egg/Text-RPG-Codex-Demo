@@ -1,5 +1,40 @@
 # Codex Session 接續快照
 
+## 補給藥水升級任務 MVP 完成紀錄
+
+本輪完成補給藥水升級任務 MVP，範圍只包含補給任務、商店解鎖與戰鬥中使用中藥水。
+
+完成內容：
+- 新增 `item_potion_m`「中藥水」，`kind` 為 `consumable`，價格 80G，效果文案為回復 HP 70。
+- `item_potion_m` 已加入旅人小鋪 `SHOP_INVENTORY["travel"]`，未解鎖前不顯示。
+- 新增 `quest_supply_upgrade`「補給線升級」。
+- `quest_supply_upgrade` 在 `ash_guardian_defeated` 為 true 後出現。
+- 任務完成後獎勵 `item_potion_m x2`，並 unlock `item_potion_m`，讓旅人小鋪開始販售中藥水。
+- 戰鬥道具選單已支援 `item_potion_m`，使用後回復最多 70 HP，且不超過 max HP。
+
+本輪刻意暫緩：
+- 不實作素材交付需求。
+- 不綁定 `mat_ravine_ash`、`mat_flame_stone_refined` 或任何新材料。
+- 素材交付需求待新的 dungeon / materials / monsters 系統完成後再回補。
+
+未修改：
+- schema / save / state。
+- combat formula。
+- Boss AI。
+- dungeon / monster data。
+- materials / drops / refinement。
+- 鍊金、製藥、配方、正式轉職、正式聖物、八元素、offhand、完整火印、火印熔爐、火印爐衛。
+
+實機驗證結果：
+- 已完整驗證火系第一章 vertical slice：葛倫 Boss 戰、`血跡地圖`、`灰燼裂谷偵查`、`灰燼守衛`、`補給線升級` 與中藥水解鎖。
+- quest flag 與前置條件正常：灰燼守衛未擊敗前不會出現「補給線升級」，擊敗後任務正常解鎖，任務完成後不會重複完成。
+- 商店解鎖狀態正常保存，任務完成後旅人小鋪會販售中藥水。
+- 葛倫與灰燼裂谷怪物正常運作，Boss 系統未出現回歸問題。
+- 灼傷、防禦下降、Boss buff/debuff 正常。
+- 掉落、圖鑑、等級提升、首次通關獎勵正常。
+- 舊道具回歸功能已確認：小藥水、集中滴露、解毒草、破甲釘、逃脫卷軸均可正常使用，未被中藥水系統破壞。
+- 新中藥水系統已確認：戰鬥中可正常使用，HP 不足時回復 70，接近滿血時不會超過 max HP。
+
 ## 第 3 枚火之印記碎片 read-only 規劃結論
 
 本輪只做 markdown-only 收尾與備份；未實作 gameplay，也不修改 runtime / engine / data / schema / save/state。

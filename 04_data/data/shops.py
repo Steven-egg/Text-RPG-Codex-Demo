@@ -20,6 +20,7 @@ SHOP_INVENTORY = {
     ],
     "travel": [
         "item_potion_s",
+        "item_potion_m",
         "item_herb_antidote",
         "item_focus_drop",
         "item_escape_scroll",

@@ -51,4 +51,12 @@ QUESTS = {
         "unlocks": ["quest_ash_ravine_scout"],
         "desc": "前往新解鎖的灰燼裂谷偵查，帶回裂谷灰 x2、焦黑鐵片 x1。這不是討伐任務，遇到壓力就先撤回城鎮。",
     },
+    "quest_supply_upgrade": {
+        "title": "補給線升級",
+        "giver": "諾亞",
+        "turn_in": {},
+        "reward": {"gold": 0, "items": {"item_potion_m": 2}, "guild": 0},
+        "unlocks": ["item_potion_m", "quest_supply_upgrade"],
+        "desc": "灰燼守衛已倒下，工會開始整理更深入火系迷宮的補給路線。先確認中藥水能穩定供應。",
+    },
 }

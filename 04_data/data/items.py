@@ -9,6 +9,13 @@ ITEMS = {
         "price": 30,
         "desc": "回復 HP 35。",
     },
+    "item_potion_m": {
+        "name": "中藥水",
+        "kind": "consumable",
+        "price": 80,
+        "desc": "回復 HP 70。",
+        "unlock": "item_potion_m",
+    },
     "item_herb_antidote": {
         "name": "解毒草",
         "kind": "consumable",

@@ -1,5 +1,24 @@
 # Codex Handoff Short
 
+## 最新 handoff：補給藥水升級任務 MVP 已完成
+
+- 本輪已完成 `quest_supply_upgrade`「補給線升級」。
+- 新增 `item_potion_m`「中藥水」，可回復 HP 70。
+- 灰燼守衛擊敗後，工會會出現補給升級任務。
+- 任務完成後取得 `item_potion_m x2`，並解鎖旅人小鋪販售中藥水。
+- 本輪暫不實作素材交付需求；不綁定 `mat_ravine_ash`、`mat_flame_stone_refined` 或任何新材料。
+- 素材交付需求待新的 dungeon / materials / monsters 系統完成後再回補。
+- 本輪未修改 schema / save / state / combat formula。
+- 本輪未修改 Boss AI、dungeon / monster data、materials / drops / refinement，也未新增鍊金、製藥或配方系統。
+
+最新實機驗證：
+- 火系第一章 vertical slice 已完整跑通：葛倫 Boss 戰、`血跡地圖`、`灰燼裂谷偵查`、`灰燼守衛`、`補給線升級`、中藥水解鎖。
+- `quest_supply_upgrade` gate 正常：灰燼守衛未擊敗前不出現，擊敗後出現，完成後不可重複完成。
+- 商店解鎖狀態正常保存；任務完成後旅人小鋪販售中藥水。
+- 葛倫、灰燼裂谷怪物、灼傷、防禦下降、Boss buff/debuff、掉落、圖鑑、等級提升、首次通關獎勵正常。
+- 舊道具功能正常，未被中藥水系統破壞：小藥水、集中滴露、解毒草、破甲釘、逃脫卷軸均可正常使用。
+- 中藥水戰鬥中可正常使用；HP 不足時回復 70，接近滿血時不超過 max HP。
+
 ## 最新 handoff：第 3 枚火之印記碎片與燼印深窟規劃
 
 - 本輪是 markdown-only 收尾與備份；未實作 gameplay，未修改 runtime / engine / data / schema / save/state。

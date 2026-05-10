@@ -793,6 +793,8 @@ def quest_unlocked(state: dict, quest_id: str) -> bool:
         return "quest_mine_scout" in state["completed_quests"]
     if quest_id == "quest_ash_ravine_scout":
         return "quest_boss_glen" in state["completed_quests"]
+    if quest_id == "quest_supply_upgrade":
+        return state["flags"].get("ash_guardian_defeated", False)
     return False
 
 def quest_ready(state: dict, quest_id: str) -> bool:
@@ -934,6 +936,8 @@ def show_or_complete_quest(state: dict, quest_id: str) -> None:
         print("下一步很明確：前往「迷宮探索」中的灰燼裂谷，先帶回少量裂谷素材完成偵查。")
     elif quest_id == "quest_ash_ravine_scout":
         print("諾亞收起裂谷灰與焦黑鐵片：這些足夠證明灰燼裂谷值得深入調查，但現在還不是挑戰守衛的時候。")
+    elif quest_id == "quest_supply_upgrade":
+        print("諾亞點頭：旅人小鋪已能販售中藥水。挑戰燼印深窟前，記得把補給準備好。")
 
 def promotion_requirement_met(state: dict, requirement: dict) -> bool:
     kind = requirement.get("kind")
@@ -1368,7 +1372,7 @@ def skill_menu(state: dict, enemy: dict, player_buffs: dict, enemy_buffs: dict):
 def combat_item_menu(state: dict, boss: bool, enemy_buffs: dict, enemy: dict):
     usable_ids = [
         item_id
-        for item_id in ["item_potion_s", "item_focus_drop", "item_herb_antidote", "item_armor_piercer", "item_escape_scroll"]
+        for item_id in ["item_potion_s", "item_potion_m", "item_focus_drop", "item_herb_antidote", "item_armor_piercer", "item_escape_scroll"]
         if state["inventory"].get(item_id, 0) > 0
     ]
     if not usable_ids:
@@ -1385,6 +1389,12 @@ def combat_item_menu(state: dict, boss: bool, enemy_buffs: dict, enemy: dict):
         state["current_hp"] = min(stats["max_hp"], state["current_hp"] + 35)
         remove_item(state, item_id, 1)
         print(f"使用小藥水，回復 {state['current_hp'] - before} HP。")
+    elif item_id == "item_potion_m":
+        stats = get_stats(state)
+        before = state["current_hp"]
+        state["current_hp"] = min(stats["max_hp"], state["current_hp"] + 70)
+        remove_item(state, item_id, 1)
+        print(f"使用中藥水，回復 {state['current_hp'] - before} HP。")
     elif item_id == "item_focus_drop":
         stats = get_stats(state)
         before = state["current_mp"]
