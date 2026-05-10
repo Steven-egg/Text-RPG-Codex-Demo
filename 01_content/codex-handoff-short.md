@@ -14,6 +14,8 @@
 - 集中藥袋 special 裝備語意 bug 已修正：只有 `state["equipment"].get("special") == "special_focus_pouch"` 時，進入迷宮才會取得集中滴露並顯示訊息。
 - 工會收購 MVP、倉庫 MVP、怪物圖鑑 MVP、轉職 preview-only MVP、聖物 preview-only MVP、職業特化 preview-only MVP 皆已完成。
 - 盜賊 head-slot 副武器 data-only MVP 已完成：新增 `armor_rogue_sleeve_blade`（影袖副刃），使用既有 `head` slot 與 `attack`、`agility`、`crit`，未新增 `offhand`。
+- 副武器效果下一步優先做分類設計：魔法類型偏元素持續傷害，物理效果類型偏流血、破甲、標記、中毒；目前不直接做 combat 實作或職業特化。
+- 新增 `01_content/combat-growth-layering-plan.md`：本輪確認「職業玩法定位先行，屬性系統暫緩」，火/冰只作為局部特色，不新增八元素、完整屬性克制或精神屬性。
 - `03_engine/engine/` 目前已包含 `game.py`、`display.py`、`formatting.py`、`bestiary.py`、`previews.py`；不建議繼續為拆而拆。
 - 灰燼裂谷目前沒有 Boss，`boss` 為 `None`。
 - 灰燼守衛、完整火之印記、第二幕完整任務鏈、正式轉職系統、聖物取得狀態與效果、正式職業特化選擇與效果仍未實作。
@@ -35,7 +37,7 @@
 Drift check 可回貼：
 
 ```text
-目前專案是《元素迷宮：邊境冒險者》Python CLI v1 playable vertical slice。README.md 是 project-level SSOT；01_content 是內容與架構規劃；full-act-structure.md 是五幕總綱；act-2-content-plan.md 是第二幕灰燼裂谷規劃；02_schema 是資料契約；04_data/data 是 runtime data；registry.py 是資料索引與 unlock/helper；06_tools/validate_data.py 做跨表引用驗證；03_engine/engine 目前包含 game.py、display.py、formatting.py、bestiary.py、previews.py。v1 第一幕已完成且主線可通關；第二幕 Act 2 Slice 1 已完成，灰燼裂谷偵查版已進 runtime data，完成 quest_boss_glen 後會解鎖 unlock_act_2 與 unlock_ash_ravine，並可接「灰燼裂谷偵查」。入口平衡補丁、灰燼裂谷普通怪 HP 平衡 MVP、集中藥袋 special 裝備語意修正、工會收購 MVP、倉庫 MVP、倉庫入口 UX 修正、怪物圖鑑 MVP、轉職 preview-only MVP、聖物 preview-only MVP、職業特化 preview-only MVP 與盜賊 head-slot 副武器 data-only MVP 皆已完成。灰燼裂谷 Lv7 → Lv8 盜賊實測確認目前難度合理；暫不建議繼續提高 HP，也不建議修改 combat formula、EXP/gold、升級全回復或新增怪物技能。轉職、聖物與職業特化目前皆為 preview-only，未新增正式狀態或效果。盜賊副武器使用既有 head slot，未新增 offhand。灰燼裂谷目前沒有 Boss；灰燼守衛、完整火之印記、第二幕完整任務鏈、正式轉職、正式聖物、正式職業特化仍未實作。下一步若要繼續評估灰燼裂谷，建議改測法師、劍士、牧師或不同裝備狀態，不直接施工。不得處理 Element Decay，不得新增 act-3-content-plan.md，不得新增火抗配方或 offhand slot。
+目前專案是《元素迷宮：邊境冒險者》Python CLI v1 playable vertical slice。README.md 是 project-level SSOT；01_content 是內容與架構規劃；full-act-structure.md 是五幕總綱；act-2-content-plan.md 是第二幕灰燼裂谷規劃；combat-growth-layering-plan.md 記錄「職業玩法定位先行，屬性系統暫緩」。02_schema 是資料契約；04_data/data 是 runtime data；registry.py 是資料索引與 unlock/helper；06_tools/validate_data.py 做跨表引用驗證；03_engine/engine 目前包含 game.py、display.py、formatting.py、bestiary.py、previews.py。v1 第一幕已完成且主線可通關；第二幕 Act 2 Slice 1 已完成，灰燼裂谷偵查版已進 runtime data，完成 quest_boss_glen 後會解鎖 unlock_act_2 與 unlock_ash_ravine，並可接「灰燼裂谷偵查」。入口平衡補丁、灰燼裂谷普通怪 HP 平衡 MVP、集中藥袋 special 裝備語意修正、工會收購 MVP、倉庫 MVP、倉庫入口 UX 修正、怪物圖鑑 MVP、轉職 preview-only MVP、聖物 preview-only MVP、職業特化 preview-only MVP 與盜賊 head-slot 副武器 data-only MVP 皆已完成。灰燼裂谷 Lv7 → Lv8 盜賊實測確認目前難度合理；暫不建議繼續提高 HP，也不建議修改 combat formula、EXP/gold、升級全回復或新增怪物技能。轉職、聖物與職業特化目前皆為 preview-only，未新增正式狀態或效果。火、冰目前只作為局部特色，不新增八元素、完整屬性克制、完整抗性表或精神屬性。盜賊副武器使用既有 head slot，未新增 offhand。副武器效果下一步優先維持分類設計：魔法類型偏元素持續傷害，物理效果類型偏流血、破甲、標記、中毒；目前不直接做 combat 實作或職業特化。灰燼裂谷目前沒有 Boss；灰燼守衛、完整火之印記、第二幕完整任務鏈、正式轉職、正式聖物、正式職業特化仍未實作。下一輪適合回到盜賊影袖副刃普通攻擊追擊最小 MVP，但不得新增 offhand、精神屬性、完整特化、完整轉職、完整聖物或大改 combat formula。
 ```
 
 新 session 建議優先讀：
@@ -45,6 +47,7 @@ Drift check 可回貼：
 3. `01_content/codex-session-snapshot.md`
 4. `01_content/full-act-structure.md`
 5. `01_content/act-2-content-plan.md`
-6. `01_content/game-architecture.md`
-7. `01_content/game-design.md`
-8. 需要施工前評估時，再讀 `02_schema/`、`04_data/data/registry.py`、`06_tools/validate_data.py`
+6. `01_content/combat-growth-layering-plan.md`
+7. `01_content/game-architecture.md`
+8. `01_content/game-design.md`
+9. 需要施工前評估時，再讀 `02_schema/`、`04_data/data/registry.py`、`06_tools/validate_data.py`
