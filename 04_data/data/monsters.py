@@ -105,7 +105,7 @@ MONSTERS = {
     "mon_ash_imp": {
         "name": "灰燼小鬼",
         "level": 7,
-        "hp": 92,
+        "hp": 104,
         "attack": 23,
         "defense": 11,
         "agility": 13,
@@ -119,7 +119,7 @@ MONSTERS = {
     "mon_lava_bat": {
         "name": "熔岩蝙蝠",
         "level": 7,
-        "hp": 84,
+        "hp": 96,
         "attack": 22,
         "defense": 9,
         "agility": 18,
@@ -133,7 +133,7 @@ MONSTERS = {
     "mon_cinder_soldier": {
         "name": "燼火兵",
         "level": 8,
-        "hp": 118,
+        "hp": 132,
         "attack": 26,
         "defense": 15,
         "agility": 8,

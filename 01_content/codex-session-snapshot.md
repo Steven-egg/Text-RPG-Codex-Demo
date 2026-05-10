@@ -954,3 +954,35 @@ import 方向：
 本輪將下一步方向記錄為 read-only 數值平衡檢查、灰燼裂谷 Lv6-7 實測資料整理，以及怪物成長是否跟不上角色成長、裝備整備與升級全回復的檢查。
 
 本輪未修改 gameplay、data、schema、engine、validation、`run_checks.bat` 或 `save.json`；未新增功能、未新增 `offhand` slot、未修改 combat formula、未新增火抗配方。
+
+## 灰燼裂谷 Lv7 → Lv8 盜賊實測紀錄
+
+前一輪完成灰燼裂谷普通怪 HP 平衡 MVP，只調整 `04_data/data/monsters.py` 中三隻灰燼裂谷普通怪 HP：
+- `mon_ash_imp`：HP 92 -> 104
+- `mon_lava_bat`：HP 84 -> 96
+- `mon_cinder_soldier`：HP 118 -> 132
+
+本機 `run_checks.bat` 已通過：
+- `smoke test ok`
+- `all checks ok`
+
+本次實測條件：
+- 職業：盜賊
+- 等級：Lv7 進場，途中升至 Lv8
+- 裝備：獵人短匕、影袖副刃、旅人衣、抗火斗篷、見習徽章
+- 進場 HP / MP：149 / 52
+- 未攜帶藥水
+- 迷宮長度：18 步
+
+實測結果：
+- 共 7 場戰鬥
+- 燼火兵 6 場、灰燼小鬼 1 場
+- 中途升級至 Lv8，HP/MP 全回復
+- 最終通關狀態：HP 43 / MP 12
+- 未死亡，未逃跑，未使用藥水
+
+判斷：
+- 目前灰燼裂谷難度合理
+- 不建議繼續提高 HP
+- 不建議修改 combat formula、EXP/gold、升級全回復或新增怪物技能
+- 若後續仍要評估，應改測法師、劍士、牧師或不同裝備狀態

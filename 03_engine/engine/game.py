@@ -368,7 +368,7 @@ def magic_book_price(state: dict, book_id: str) -> int:
 def magic_shop(state: dict) -> None:
     while True:
         title("星燈魔法商店")
-        print("伊芙輕輕敲了敲書脊：「買下的不是紙，是你以後能做出的選擇。」")
+        print("伊芙輕輕敲了敲書脊：「願星辰指引你的靈魂，冒險者。今天需要一點魔法的幫助嗎？」")
         print(f"持有金幣：{state['gold']}G")
         book_ids = list(MAGIC_BOOKS.keys())
         options = []
@@ -543,7 +543,8 @@ def town_menu(state: dict) -> None:
 def iron_workshop(state: dict) -> None:
     while True:
         title("鐵刃工坊")
-        print("葛雷抬眼看你：「好武器不能替你冒險，但能讓怪物少活幾回合。」")
+        print("伴隨著鐵錘敲擊砧台的節奏，這裡充滿了金屬與汗水的硬派氣息。\n") 
+        print("葛雷抬起頭，抹了一把汗看著你：\n「最好的防禦就是進攻！來挑一把能讓敵人發抖的傢伙吧。」")
         choice = menu("鐵刃工坊", ["購買武器", "強化武器"])
         if choice == 0:
             return
@@ -555,7 +556,8 @@ def iron_workshop(state: dict) -> None:
 def armor_workshop(state: dict) -> None:
     while True:
         title("堅甲工坊")
-        print("布琳把皮甲翻到內側：「能活著回來，才有下一次委託。」")
+        print("布琳的手指滑過一排整齊的甲冑，語氣自信：")
+        print("「這些都是工坊的得意之作，耐用、實惠，品質無可挑剔。隨便挑，每一件都經得起實戰檢驗。」")
         choice = menu("堅甲工坊", ["購買防具", "強化防具"])
         if choice == 0:
             return
@@ -800,7 +802,7 @@ def quest_ready(state: dict, quest_id: str) -> bool:
 def guild_menu(state: dict) -> None:
     while True:
         title("冒險者工會")
-        print("諾亞翻開任務冊：「今天也讓背包比出門時重一點吧。」")
+        print("諾亞從一堆文件中抬頭，對你點了點頭：\n「歡迎回來。想挑戰新目標，還是要交付已完成的委託？」")
         choice = menu("選擇服務", ["查看委託任務", "收購素材"])
         if choice == 0:
             return
@@ -812,7 +814,7 @@ def guild_menu(state: dict) -> None:
 def guild_quest_menu(state: dict) -> None:
     while True:
         title("冒險者工會")
-        print("諾亞翻開任務冊：「今天也讓背包比出門時重一點吧。」")
+        print("諾亞從一堆文件中抬頭，對你點了點頭：\n「歡迎回來。想挑戰新目標，還是要交付已完成的委託？」")
         quest_ids = [qid for qid in QUESTS if quest_unlocked(state, qid)]
         options = []
         for quest_id in quest_ids:
