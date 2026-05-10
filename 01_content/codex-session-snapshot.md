@@ -20,7 +20,7 @@
 ```
 
 目前專案已從「可玩原型」進入「第二幕最小施工切片迭代」與核心系統 MVP 拆點階段。  
-Act 2 Slice 1 已完成：灰燼裂谷偵查版已進入 runtime data。Act 2 Entry Balance & Guidance Patch 也已完成，修正葛倫壓力、小魔晶掉落、破甲釘負回饋與灰燼裂谷入口引導。集中藥袋 special 裝備語意 bug 也已修正。近期已完成工會收購 MVP、倉庫 MVP、倉庫入口顯示位置修正、怪物圖鑑 MVP、轉職資料結構 MVP、聖物資料結構 preview MVP、職業特化 MVP preview-only 與盜賊 head-slot 副武器 data-only MVP。重點仍不是直接完成第二幕，而是逐步以單一節點 MVP 驗證 engine、save、schema、data、registry、validation 與必要文件同步。
+Act 2 Slice 1 已完成：灰燼裂谷偵查版已進入 runtime data。Act 2 Entry Balance & Guidance Patch 也已完成，修正葛倫壓力、小魔晶掉落、破甲釘負回饋與灰燼裂谷入口引導。灰燼守衛 Boss MVP 已完成，讓灰燼裂谷在完成偵查任務後可觸發單次 Boss 戰並取得第 2 枚火之印記碎片。集中藥袋 special 裝備語意 bug 也已修正。近期已完成工會收購 MVP、倉庫 MVP、倉庫入口顯示位置修正、怪物圖鑑 MVP、轉職資料結構 MVP、聖物資料結構 preview MVP、職業特化 MVP preview-only 與盜賊 head-slot 副武器 data-only MVP。重點仍不是直接完成第二幕，而是逐步以單一節點 MVP 驗證 engine、save、schema、data、registry、validation 與必要文件同步。
 
 ## 2. 已完成項目
 
@@ -31,7 +31,7 @@ Act 2 Slice 1 已完成：灰燼裂谷偵查版已進入 runtime data。Act 2 En
 - 四個初始職業：劍士、法師、盜賊、牧師。
 - 城鎮：工會、鐵刃工坊、堅甲工坊、旅人小鋪、米菈合成屋、星燈魔法商店、轉職神殿。
 - 迷宮：青苔洞窟、焦石礦坑、灰燼裂谷偵查版。
-- Boss：山寨頭目葛倫。灰燼裂谷目前沒有 Boss。
+- Boss：山寨頭目葛倫、灰燼守衛。
 - 基礎戰鬥、掉落、合成、商店、任務、魔法書、存檔、工會素材收購、LV1 倉庫、怪物圖鑑 MVP、轉職 preview、聖物 preview、職業特化 preview、盜賊 head-slot 副武器 data-only MVP。
 - 玩家普通攻擊與傷害技能目前為 100% 命中。
 
@@ -41,9 +41,11 @@ Act 2 Slice 1 已完成：灰燼裂谷偵查版已進入 runtime data。Act 2 En
 - `dungeon_ash_ravine` 已新增，定位為灰燼裂谷偵查版。
 - 灰燼裂谷偵查版目前有 3 個普通怪：灰燼小鬼、熔岩蝙蝠、燼火兵。
 - 灰燼裂谷偵查版目前有 3 個素材：裂谷灰、焦黑鐵片、精煉火焰石。
-- 灰燼裂谷目前為 18 步，`boss` 為 `None`。
+- 灰燼裂谷目前為 18 步，`boss` 為 `boss_ash_guardian`。
 - 已新增最小偵查任務 `quest_ash_ravine_scout`，完成「血跡地圖」後可見。
-- 灰燼守衛、完整火之印記、第二幕完整任務鏈、轉職神殿後續仍未實作。
+- 灰燼守衛只在 `quest_ash_ravine_scout` 完成後出現；擊敗後設定 `ash_guardian_defeated` 並取得第 2 枚 `key_fire_mark_shard`。
+- 目前火之印記碎片最多可取得 2 枚。
+- 完整火之印記、火印熔爐、火印爐衛、第二幕完整任務鏈、轉職神殿後續仍未實作。
 
 ### Act 2 Entry Balance & Guidance Patch
 
@@ -364,6 +366,9 @@ data 檔只放資料表，不放互動流程或 gameplay 邏輯。
 - 3 個素材。
 - `unlock_act_2` 與 `unlock_ash_ravine`。
 - `quest_ash_ravine_scout` 最小偵查任務。
+- 灰燼守衛 Boss MVP：`boss_ash_guardian`、`ash_guardian_defeated`、灰燼裂谷 boss 指向灰燼守衛。
+- 灰燼守衛 gate：完成 `quest_ash_ravine_scout` 後才會在灰燼裂谷終點出現。
+- 灰燼守衛擊敗獎勵：第 2 枚 `key_fire_mark_shard`，且防重複領取正常。
 - 破甲釘即時傷害補丁。
 - 集中藥袋 special 裝備語意修正。
 - 轉職資料結構 MVP。
@@ -372,16 +377,17 @@ data 檔只放資料表，不放互動流程或 gameplay 邏輯。
 
 目前尚未實作：
 
-- 灰燼守衛 Boss。
 - 第二幕完整任務鏈。
 - 情報屋或鍊金攤。
 - 完整火之印記流程。
+- 火印熔爐。
+- 火印爐衛。
 - 轉職試煉入口 runtime 行為。
 - 正式轉職系統。
 - 正式職業特化選擇與效果。
 - 完整聖物系統、聖物取得狀態與聖物效果。
 
-第二幕第一個最小施工切片「灰燼裂谷偵查版」已完成；後續仍不應直接擴成完整第二幕。
+第二幕第一個最小施工切片「灰燼裂谷偵查版」與灰燼守衛 Boss MVP 已完成；後續仍不應直接擴成完整第二幕。
 
 ## 7. 五幕總綱目前狀態
 
@@ -429,14 +435,15 @@ data 檔只放資料表，不放互動流程或 gameplay 邏輯。
 目前下一步只允許以下之一：
 
 1. 做 `01_content/` 文件同步或 drift check，並將本 session 作為恢復點收尾。
-2. 下一個新 session 再規劃下一個單一節點，例如數值平衡 read-only 檢查、灰燼裂谷 Lv6-7 實測資料整理、或怪物成長與玩家成長差距檢查；仍需先做單一節點規劃與實作前檢查，不直接實作完整系統。
+2. 下一個新 session 再規劃下一個單一節點，例如火印熔爐 skeleton read-only 規劃、第 3 枚碎片來源 read-only 規劃、完整火之印記 preview/event read-only 規劃、數值平衡 read-only 檢查；仍需先做單一節點規劃與實作前檢查，不直接實作完整系統。
 3. 在使用者明確要求下，提出 schema / registry / validation / save schema 的最小修改理由與範圍。
 
 下一個候選節點可評估：
 
-1. 數值平衡 read-only 檢查。
-2. 灰燼裂谷 Lv6-7 實測資料整理。
-3. 檢查怪物成長是否跟不上角色成長、裝備整備與升級全回復。
+1. 火印熔爐 skeleton read-only 規劃。
+2. 第 3 枚碎片來源 read-only 規劃。
+3. 完整火之印記 preview/event read-only 規劃。
+4. 數值平衡 read-only 檢查。
 
 下一輪仍應先做單一節點規劃與實作前檢查，不要直接實作完整系統。
 
@@ -450,7 +457,7 @@ data 檔只放資料表，不放互動流程或 gameplay 邏輯。
 → 使用者確認後，下一輪才實作
 ```
 
-不要在同一輪做灰燼守衛、完整火之印記、第二幕完整任務鏈、轉職試煉、情報屋、鍊金攤、聖物完整系統、轉職完整系統、怪物圖鑑完整系統、第二個元素迷宮、Act 3、倉庫升級完整版、經濟平衡調整、火抗配方、`offhand` slot 或 combat formula 調整。
+不要在同一輪做火印熔爐、火印爐衛、完整火之印記、第二幕完整任務鏈、轉職試煉、情報屋、鍊金攤、聖物完整系統、轉職完整系統、怪物圖鑑完整系統、第二個元素迷宮、Act 3、倉庫升級完整版、經濟平衡調整、火抗配方、`offhand` slot、通用 Boss framework 或 combat formula 調整。
 
 ## 10. 新 session 先檢查哪些檔案
 
@@ -487,12 +494,12 @@ data 檔只放資料表，不放互動流程或 gameplay 邏輯。
 可回貼最新 session 驗證是否 drift：
 
 ```text
-目前專案是《元素迷宮：邊境冒險者》Python CLI v1 playable vertical slice。README.md 是 project-level SSOT；01_content 是內容與架構規劃；game-design.md 是 v1 設計；game-architecture.md 是擴大架構；full-act-structure.md 是五幕總綱；act-2-content-plan.md 是第二幕灰燼裂谷規劃。02_schema 是資料契約；04_data/data 是 runtime data；registry.py 只做資料索引與 id/unlock helper；validate_data.py 做跨表引用驗證；03_engine/engine 目前包含 game.py、display.py、formatting.py、bestiary.py、previews.py。v1 第一幕已完成且主線可通關；第二幕 Act 2 Slice 1 已完成，灰燼裂谷偵查版已進 runtime data，完成 quest_boss_glen 後會解鎖 unlock_act_2 與 unlock_ash_ravine，並可接「灰燼裂谷偵查」。入口平衡補丁、集中藥袋 special 裝備語意修正、工會收購 MVP、倉庫 MVP、倉庫入口 UX 修正、怪物圖鑑 MVP、轉職 preview-only MVP、聖物 preview-only MVP、職業特化 preview-only MVP 與盜賊 head-slot 副武器 data-only MVP 皆已完成。轉職、聖物與職業特化目前皆為 preview-only，未新增正式狀態或效果。盜賊副武器使用既有 head slot，未新增 offhand。灰燼裂谷目前沒有 Boss；灰燼守衛、完整火之印記、第二幕完整任務鏈、正式轉職、正式聖物、正式職業特化仍未實作。目前已有暖石墜改與抗火斗篷，餘燼護符或新火抗 accessory 不再是主要下一步，以免裝備定位重疊。下一個新 session 建議只做 read-only 數值平衡檢查、灰燼裂谷 Lv6-7 實測資料整理，並檢查怪物成長是否跟不上角色成長、裝備整備與升級全回復。不得處理 Element Decay，不得新增 act-3-content-plan.md，不得新增火抗配方或 offhand slot，不得修改 combat formula。
+目前專案是《元素迷宮：邊境冒險者》Python CLI v1 playable vertical slice。README.md 是 project-level SSOT；01_content 是內容與架構規劃；game-design.md 是 v1 設計；game-architecture.md 是擴大架構；full-act-structure.md 是五幕總綱；act-2-content-plan.md 是第二幕灰燼裂谷規劃。02_schema 是資料契約；04_data/data 是 runtime data；registry.py 只做資料索引與 id/unlock helper；validate_data.py 做跨表引用驗證；03_engine/engine 目前包含 game.py、display.py、formatting.py、bestiary.py、previews.py。v1 第一幕已完成且主線可通關；第二幕 Act 2 Slice 1 已完成，灰燼裂谷偵查版已進 runtime data，完成 quest_boss_glen 後會解鎖 unlock_act_2 與 unlock_ash_ravine，並可接「灰燼裂谷偵查」。入口平衡補丁、灰燼裂谷普通怪 HP 平衡 MVP、灰燼守衛 Boss MVP、集中藥袋 special 裝備語意修正、工會收購 MVP、倉庫 MVP、倉庫入口 UX 修正、怪物圖鑑 MVP、轉職 preview-only MVP、聖物 preview-only MVP、職業特化 preview-only MVP 與盜賊 head-slot 副武器 data-only MVP 皆已完成。灰燼守衛只在 quest_ash_ravine_scout 完成後於灰燼裂谷終點出現；擊敗後設定 ash_guardian_defeated 並取得第 2 枚 key_fire_mark_shard；本機 run_checks.bat 與手動測試皆通過。轉職、聖物與職業特化目前皆為 preview-only，未新增正式狀態或效果。盜賊副武器使用既有 head slot，未新增 offhand。目前火之印記碎片最多可取得 2 枚；完整火之印記、火印熔爐、火印爐衛、第二幕完整任務鏈、正式轉職、正式聖物、正式職業特化仍未實作。目前已有暖石墜改與抗火斗篷，餘燼護符或新火抗 accessory 不再是主要下一步，以免裝備定位重疊。下一個 runtime 候選節點應先 read-only 規劃；候選方向包含火印熔爐 skeleton、第 3 枚碎片來源、完整火之印記 preview/event。不得處理 Element Decay，不得新增 act-3-content-plan.md，不得新增火抗配方、offhand slot、通用 Boss framework 或完整屬性克制，不得修改 combat formula。
 ```
 
 ## 12. 給下一個 Codex 的一句話
 
-目前專案已完成 v1 可玩原型、第二幕內容規劃、五幕總綱、灰燼裂谷偵查版 runtime data、入口平衡引導補丁、集中藥袋 special 裝備語意修正、工會收購 MVP、倉庫 MVP、倉庫入口 UX 修正、怪物圖鑑 MVP、轉職 preview-only MVP、聖物 preview-only MVP、職業特化 preview-only MVP 與盜賊 head-slot 副武器 data-only MVP。轉職、聖物與職業特化目前皆為 preview-only，未新增正式狀態、save 欄位或數值效果。盜賊副武器使用既有 `head` slot，沒有新增 `offhand`。`03_engine/engine` 已拆出 display、formatting、bestiary、previews 等 helper modules，但不要繼續為拆而拆。Windows 本機標準驗證入口是專案根目錄的 `run_checks.bat`；Codex 若遇到 Python runtime / sandbox 存取限制，不視為 gameplay 錯誤。下一個新 session 建議只做 read-only 數值平衡檢查、灰燼裂谷 Lv6-7 實測資料整理，並檢查怪物成長是否跟不上角色成長、裝備整備與升級全回復；不要急著把灰燼守衛、完整火之印記、完整任務鏈、完整轉職、完整聖物、完整職業特化、完整圖鑑或後續幕次塞進 runtime。
+目前專案已完成 v1 可玩原型、第二幕內容規劃、五幕總綱、灰燼裂谷偵查版 runtime data、入口平衡引導補丁、灰燼守衛 Boss MVP、集中藥袋 special 裝備語意修正、工會收購 MVP、倉庫 MVP、倉庫入口 UX 修正、怪物圖鑑 MVP、轉職 preview-only MVP、聖物 preview-only MVP、職業特化 preview-only MVP 與盜賊 head-slot 副武器 data-only MVP。轉職、聖物與職業特化目前皆為 preview-only，未新增正式狀態、save 欄位或數值效果。盜賊副武器使用既有 `head` slot，沒有新增 `offhand`。灰燼守衛已完成但目前火之印記碎片最多仍只可取得 2 枚；完整火之印記、火印熔爐、火印爐衛仍未實作。`03_engine/engine` 已拆出 display、formatting、bestiary、previews 等 helper modules，但不要繼續為拆而拆。Windows 本機標準驗證入口是專案根目錄的 `run_checks.bat`；Codex 若遇到 Python runtime / sandbox 存取限制，不視為 gameplay 錯誤。下一個 runtime 候選節點應先 read-only 規劃，例如火印熔爐 skeleton、第 3 枚碎片來源、完整火之印記 preview/event；不要急著把完整任務鏈、完整轉職、完整聖物、完整職業特化、完整圖鑑、通用 Boss framework 或後續幕次塞進 runtime。
 
 ## 13. 轉職資料結構 MVP 收尾摘要
 
@@ -1068,3 +1075,33 @@ import 方向：
 - 下一輪建議轉向 read-only / markdown-only 規劃「火之印記第一章可玩閉環 demo MVP」。
 - 火之印記閉環方向包含：第三關 Boss、新火系 dungeon skeleton、三個火之印記碎片、火之印記合成 preview/event、2～3 個任務支撐，等級節奏約 Lv8～Lv12。
 - 暫不做八元素、完整屬性克制、精神屬性、正式轉職、正式聖物、多城鎮、大型 UI 框架，或 combat/schema/save 大改。
+
+## 灰燼守衛 Boss MVP 完成紀錄
+
+本輪完成「灰燼守衛 Boss MVP」，範圍只是在既有灰燼裂谷加入第二幕第一個守門 Boss，不是完整火之印記閉環。
+
+完成內容：
+- 新增 `boss_ash_guardian`。
+- `dungeon_ash_ravine["boss"]` 已指向 `boss_ash_guardian`。
+- 新增 `ash_guardian_defeated` flag。
+- 灰燼守衛只在 `quest_ash_ravine_scout` 完成後於灰燼裂谷終點出現。
+- 擊敗灰燼守衛後取得第 2 枚 `key_fire_mark_shard`。
+- 防重複領取正常；再次走完灰燼裂谷不會重複觸發灰燼守衛或取得第 2 枚碎片。
+
+驗證結果：
+- 使用者本機 `run_checks.bat` 已通過。
+- 手動測試確認葛倫流程未回歸。
+- 手動測試確認灰燼裂谷偵查 gate 正常。
+- 手動測試確認灰燼守衛只觸發一次。
+- 手動測試確認第 2 枚火之印記碎片取得正常。
+
+目前邊界：
+- 火之印記碎片目前最多可取得 2 枚。
+- 完整火之印記尚未實作。
+- 火印熔爐與火印爐衛尚未實作。
+- 正式轉職、正式聖物、八元素、`offhand` slot、完整屬性克制與通用 Boss framework 仍未開放。
+
+下一個 runtime 候選節點應先 read-only 規劃，不要直接施工。候選方向：
+- 火印熔爐 skeleton read-only 規劃。
+- 第 3 枚碎片來源 read-only 規劃。
+- 完整火之印記 preview/event read-only 規劃。

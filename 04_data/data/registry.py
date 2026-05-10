@@ -58,6 +58,7 @@ SYSTEM_UNLOCK_KEYS = {
 
 
 KNOWN_FLAG_KEYS = {
+    "ash_guardian_defeated",
     "boss_glen_defeated",
 }
 

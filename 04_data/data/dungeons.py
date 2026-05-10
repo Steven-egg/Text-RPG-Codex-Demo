@@ -37,7 +37,7 @@ DUNGEONS = {
         "monsters": ["mon_ash_imp", "mon_lava_bat", "mon_cinder_soldier"],
         "gold_range": (90, 150),
         "clear_guild": 80,
-        "boss": None,
+        "boss": "boss_ash_guardian",
     },
 }
 

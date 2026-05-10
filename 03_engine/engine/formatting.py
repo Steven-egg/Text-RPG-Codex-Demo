@@ -20,7 +20,10 @@ def format_items(cost: dict) -> str:
     for item_id, qty in cost.items():
         if item_id.startswith("flag:"):
             flag = item_id.split(":", 1)[1]
-            flag_names = {"boss_glen_defeated": "擊敗山寨頭目葛倫"}
+            flag_names = {
+                "ash_guardian_defeated": "擊敗灰燼守衛",
+                "boss_glen_defeated": "擊敗山寨頭目葛倫",
+            }
             parts.append(flag_names.get(flag, flag))
         else:
             parts.append(f"{item_name(item_id)} x{qty}")

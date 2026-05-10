@@ -1005,6 +1005,28 @@ def dungeon_menu(state: dict) -> None:
         return
     explore_dungeon(state, unlocked_dungeons[choice - 1])
 
+def boss_available_at_dungeon_end(state: dict, dungeon_id: str, boss_id: str | None) -> bool:
+    if boss_id == "boss_glen":
+        return not state["flags"].get("boss_glen_defeated")
+    if boss_id == "boss_ash_guardian":
+        return (
+            dungeon_id == "dungeon_ash_ravine"
+            and "quest_ash_ravine_scout" in state["completed_quests"]
+            and not state["flags"].get("ash_guardian_defeated")
+        )
+    return False
+
+def boss_challenge_prompt(boss_id: str) -> str:
+    if boss_id == "boss_ash_guardian":
+        return "裂谷深處的灰燼凝成古老守衛。要挑戰灰燼守衛嗎？(y/n) > "
+    return "礦坑深處傳來粗暴的笑聲。要挑戰 Boss 嗎？(y/n) > "
+
+def clear_dungeon_boss(state: dict, boss_id: str, run_log: dict) -> None:
+    if boss_id == "boss_glen":
+        clear_boss_glen(state, run_log)
+    elif boss_id == "boss_ash_guardian":
+        clear_ash_guardian(state, run_log)
+
 def explore_dungeon(state: dict, dungeon_id: str) -> None:
     dungeon = DUNGEONS[dungeon_id]
     run_log = {"gold": 0, "items": {}}
@@ -1054,15 +1076,15 @@ def explore_dungeon(state: dict, dungeon_id: str) -> None:
         print(f"首次通關探索路線，工會積分 +{dungeon['clear_guild']}。")
 
     boss_id = dungeon.get("boss")
-    if boss_id and not state["flags"].get("boss_glen_defeated"):
-        raw = input("礦坑深處傳來粗暴的笑聲。要挑戰 Boss 嗎？(y/n) > ").strip().lower()
+    if boss_available_at_dungeon_end(state, dungeon_id, boss_id):
+        raw = input(boss_challenge_prompt(boss_id)).strip().lower()
         if raw == "y":
             result = combat(state, boss_id, boss=True, run_log=run_log)
             if result is False:
                 handle_defeat(state, run_log)
                 return
             if result is True:
-                clear_boss_glen(state, run_log)
+                clear_dungeon_boss(state, boss_id, run_log)
     pause()
 
 def dungeon_material_event(state: dict, dungeon: dict, run_log: dict) -> None:
@@ -1136,6 +1158,14 @@ def clear_boss_glen(state: dict, run_log: dict) -> None:
     print("\n葛倫倒下時，懷裡掉出一張染血地圖。")
     print("取得 血跡地圖 x1、火之印記碎片 x1、熔岩碎片 x2。")
 
+def clear_ash_guardian(state: dict, run_log: dict) -> None:
+    if state["flags"].get("ash_guardian_defeated"):
+        return
+    state["flags"]["ash_guardian_defeated"] = True
+    add_loot(state, "key_fire_mark_shard", 1, run_log)
+    print("\n灰燼守衛的爐心逐漸熄滅，一枚赤紅碎片從灰殼中落下。")
+    print("取得 火之印記碎片 x1。")
+
 def element_multiplier(attack_element: str, target_element: str, enemy_buffs: dict | None = None) -> float:
     multiplier = 1.0
     if attack_element == "冰" and target_element == "火":
@@ -1204,7 +1234,7 @@ def combat(state: dict, enemy_id: str, boss: bool = False, run_log: dict | None 
     player_buffs = {}
     enemy_buffs = {}
     turn = 1
-    summoned = False
+    boss_marker = False
     title(f"遭遇 {enemy['name']}")
     while enemy_hp > 0 and state["current_hp"] > 0:
         clamp_vitals(state)
@@ -1254,7 +1284,9 @@ def combat(state: dict, enemy_id: str, boss: bool = False, run_log: dict | None 
             break
 
         if boss and enemy_id == "boss_glen":
-            summoned = boss_glen_action(enemy, enemy_hp, state, player_buffs, enemy_buffs, defending, turn, summoned)
+            boss_marker = boss_glen_action(enemy, enemy_hp, state, player_buffs, enemy_buffs, defending, turn, boss_marker)
+        elif boss and enemy_id == "boss_ash_guardian":
+            boss_marker = boss_ash_guardian_action(enemy, enemy_hp, state, player_buffs, enemy_buffs, defending, turn, boss_marker)
         else:
             monster_action(enemy_id, enemy, state, player_buffs, defending)
 
@@ -1436,6 +1468,41 @@ def boss_glen_action(
     state["current_hp"] -= damage
     print(f"葛倫粗暴斬擊，造成 {damage} 傷害。")
     return summoned
+
+def boss_ash_guardian_action(
+    enemy: dict,
+    enemy_hp: int,
+    state: dict,
+    player_buffs: dict,
+    enemy_buffs: dict,
+    defending: bool,
+    turn: int,
+    charged: bool,
+) -> bool:
+    if charged:
+        damage = calc_enemy_damage(enemy, state, 1.35, "火", player_buffs, defending)
+        state["current_hp"] -= damage
+        print(f"{enemy['name']}釋放爐心蓄熱，熔火爆裂造成 {damage} 火傷害。")
+        if random.random() < 0.2:
+            player_buffs["burn"] = 3
+            print("你陷入灼傷。")
+        return False
+    if enemy_hp <= enemy["hp"] * 0.45 and turn % 3 == 1:
+        print(f"{enemy['name']}胸口的爐心開始發亮，下一擊會很危險。")
+        return True
+    if turn % 4 == 0:
+        enemy_buffs["defense_up"] = 2
+        print(f"{enemy['name']}收攏灰燼甲片，防禦上升。")
+        return charged
+    if turn % 2 == 0:
+        damage = calc_enemy_damage(enemy, state, 1.1, "火", player_buffs, defending)
+        state["current_hp"] -= damage
+        print(f"{enemy['name']}揮出火舌掃擊，造成 {damage} 火傷害。")
+        return charged
+    damage = calc_enemy_damage(enemy, state, 1.0, "物理", player_buffs, defending)
+    state["current_hp"] -= damage
+    print(f"{enemy['name']}以沉重石臂砸下，造成 {damage} 傷害。")
+    return charged
 
 def tick_effects(state: dict, player_buffs: dict, enemy_buffs: dict) -> None:
     if state.pop("_clear_burn", False):
