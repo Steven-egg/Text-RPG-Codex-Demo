@@ -1105,6 +1105,13 @@ def explore_dungeon(state: dict, dungeon_id: str) -> None:
                 return
             if result is True:
                 clear_dungeon_boss(state, boss_id, run_log)
+    elif (
+        dungeon_id == "dungeon_cinder_seal_depths"
+        and boss_id == "boss_cinder_seal_sentinel"
+        and not state["flags"].get("cinder_seal_sentinel_defeated")
+    ):
+        print("\n深窟深處仍殘留著某種守護者的氣息。")
+        print("這裡似乎還有未解開的事情。或許可以回冒險者工會詢問諾亞。")
     pause()
 
 def dungeon_material_event(state: dict, dungeon: dict, run_log: dict) -> None:

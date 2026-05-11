@@ -1,101 +1,41 @@
 # 《元素迷宮：邊境冒險者》終端機版
 
-## 最新完成：燼印深窟 dungeon skeleton MVP
+## 最新完成：未接 Boss 任務時的燼印深窟通關提示 UX MVP
 
-本輪已完成「燼印深窟」最小 runtime skeleton，並由使用者人工測試通過：
-- 新增 `dungeon_cinder_seal_depths`，名稱「燼印深窟」。
-- `boss` 仍為 `None`，本輪沒有實作 Boss。
-- 地城由 `quest_supply_upgrade` 完成後解鎖，`unlock` 直接使用 `dungeon_cinder_seal_depths`。
-- 普通怪只新增 `mon_ember_stalker` 與 `mon_molten_shell`；未新增 `mon_cinder_acolyte`。
-- 素材重用既有素材，未新增 `materials.py` 條目。
-- 未取得第 3 枚 `key_fire_mark_shard`，目前火之印記碎片仍最多可取得 2 枚。
-- 未實作完整火之印記、火印熔爐、火印爐衛、正式轉職、正式聖物、八元素、完整屬性克制、通用 Boss framework、save/schema 或 combat formula 改動。
+本輪完成一個很小的 UX 補點：玩家已能進入並走完 `dungeon_cinder_seal_depths`「燼印深窟」，但尚未完成 `quest_cinder_depths_scout`、因此不會觸發 `boss_cinder_seal_sentinel` 時，通關後會看到暗示文字：
+- 深窟深處仍殘留某種守護者氣息。
+- 這裡似乎還有未解開的事情。
+- 或許可以回冒險者工會詢問諾亞。
 
-## 最新 read-only 規劃：燼印深窟 Boss 與第 3 枚火之印記碎片
+此提示只引導玩家回工會查看任務，不直接開 Boss、不給第 3 枚碎片、不提示去教會，也不新增工會三碎片詢問選項。
 
-本段為 markdown-only 規劃；尚未實作 gameplay，也未修改 runtime / engine / data / schema / save/state。
+## 目前 Act 2 火系 demo 最新狀態
 
-下一輪 Boss MVP 預設方向：
-- 新 Boss id：`boss_cinder_seal_sentinel`。
-- Boss 名稱：「燼印哨衛」。
-- Boss 所屬地城：`dungeon_cinder_seal_depths`。
-- 第 3 枚 `key_fire_mark_shard` 只由擊敗 `boss_cinder_seal_sentinel` 後取得。
-- 工會不補發第 3 枚碎片，只負責提示玩家前往燼印深窟，以及 Boss 後提示玩家可去教會詢問碎片或火之印記。
-- Boss gate 預設使用最小偵查或討伐任務，例如 `quest_cinder_depths_scout`；不新增 registry story key，能用 quest completion 或既有 id 就不用新增 unlock key。
-- Boss reward 預設設定 `cinder_seal_sentinel_defeated` flag、給 `key_fire_mark_shard x1`，並防重複領取。
-- Boss 後只提示「可去教會詢問火之印記」，不開正式火印流程。
+- `dungeon_cinder_seal_depths`「燼印深窟」已進 runtime。
+- 深窟普通怪目前為 `mon_ember_stalker`、`mon_molten_shell`、`mon_cinder_brand_wisp`。
+- `boss_cinder_seal_sentinel` 已進 runtime，現名「燼印鎮衛」。
+- 第 3 枚 `key_fire_mark_shard` 已可由擊敗燼印鎮衛取得，並以 `cinder_seal_sentinel_defeated` 防重複領取。
+- Boss gate 使用 `quest_cinder_depths_scout`；未完成該任務時，深窟通關只顯示回工會詢問諾亞的暗示。
+- `quest_supply_upgrade`「補給線升級」已素材化，需要 `mat_flame_stone_refined x3` 與 `mat_lava_shard x2`。
+- 完成 `quest_supply_upgrade` 後維持既有效果：取得 `item_potion_m x2`，並解鎖旅人小鋪販售中藥水。
+- 測試結果：燼印鎮衛調高一階難度後，Lv10-Lv12 盜賊可通過；中藥水在 Boss 後期連續使用兩次，確認有實戰價值；目前不再調 Boss 數值。
 
-下一輪 runtime 最小範圍預設：
-- `04_data/data/monsters.py`
-- `04_data/data/dungeons.py`
-- `04_data/data/quests.py`
-- 必要時才改 `03_engine/engine/game.py` 加入單一 Boss gate / clear handler。
-
-明確不做：
-- 不新增或實作完整火之印記。
-- 不新增火印熔爐。
-- 不新增火印爐衛。
-- 不新增正式轉職。
-- 不新增正式聖物。
-- 不新增八元素。
-- 不新增完整屬性克制。
-- 不新增通用 Boss framework。
-- 不改 save/schema。
-- 不改 combat formula。
-- 不新增 Act 3 規劃文件。
-
-## 最新完成：補給藥水升級任務 MVP
-
-本輪已完成補給藥水升級任務 MVP：
-- 新增 `item_potion_m`「中藥水」，回復 HP 70。
-- 新增 `quest_supply_upgrade`「補給線升級」，灰燼守衛擊敗後可在工會完成。
-- 任務完成後取得 `item_potion_m x2`，並解鎖旅人小鋪販售中藥水。
-- 本輪暫不實作素材交付需求；素材交付需求待新的 dungeon / materials / monsters 系統完成後再回補。
-- 本輪未修改 schema / save / state / combat formula。
-
-實機驗證結果：
-- 已完整驗證主線 vertical slice：葛倫 Boss 戰、`血跡地圖`、`灰燼裂谷偵查`、`灰燼守衛`、`補給線升級` 與中藥水解鎖。
-- `quest_supply_upgrade` gate 正常：灰燼守衛未擊敗前不出現，擊敗後正常解鎖，完成後不可重複完成。
-- 商店解鎖狀態可正常保存；旅人小鋪在任務完成後販售中藥水。
-- 葛倫、灰燼裂谷怪物與 Boss 系統正常；灼傷、防禦下降、Boss buff/debuff、掉落、圖鑑、等級提升與首次通關獎勵皆正常。
-- 舊道具回歸確認正常：小藥水、集中滴露、解毒草、破甲釘、逃脫卷軸皆可正常使用。
-- 中藥水可於戰鬥中正常使用；HP 不足時回復 70，接近滿血時不會超過 max HP。
-
-## 最新規劃：第 3 枚火之印記碎片與補給藥水升級
-
-本段為 markdown-only 規劃備份；尚未實作 gameplay，也未修改 runtime / engine / data / schema / save/state。
-
-「第 3 枚火之印記碎片：燼印深窟 + Boss MVP」規劃結論：
-- 新 dungeon `dungeon_cinder_seal_depths`「燼印深窟」已完成 skeleton MVP，Boss 仍未實作。
-- 已實作普通怪：`mon_ember_stalker`、`mon_molten_shell`。
-- `mon_cinder_acolyte` 暫不新增，避免引出施法、debuff 或特殊 AI。
-- 新 Boss 候選：`boss_cinder_seal_sentinel`，名稱「燼印哨衛」。
-- 第 3 枚 `key_fire_mark_shard` 不由工會補發，而是由未來新 Boss 擊敗後掉落。
-- 工會只負責灰燼守衛後提供新地點線索，以及 Boss 後提示玩家可去教會詢問碎片或火之印記。
-- 暫不實作完整火之印記、火印熔爐、火印爐衛。
-
-「補給藥水升級任務 MVP」已作為燼印深窟前置節點完成：
-- `quest_supply_upgrade` 完成後會解鎖燼印深窟 skeleton。
-- 目的是讓玩家能更順地度過第二章 demo 的 Boss，同時 Boss 難度不必過度下修。
-- 這只是補給任務，不做鍊金系統、不做製藥系統、不新增配方系統、不修改 combat formula。
-
-後續任務節奏暫定：
-- 任務 A：開啟新火系 dungeon 的引子。
-- 任務 B：開放進階補給藥水的引子。
-- 任務 C：Boss 討伐任務兼第 3 枚火之印記碎片取得與教會引導。
-
-限制仍維持：
-- 暫不新增完整火之印記、火印熔爐、火印爐衛。
-- 暫不新增正式轉職、正式聖物、八元素完整系統、`offhand` slot。
-- 暫不修改 schema / save/state / combat formula。
-- 暫不做通用 Boss framework。
-- 暫不展開完整第二幕。
+明確仍未開放：
+- 完整火之印記。
+- 火印熔爐。
+- 火印爐衛。
+- 教會事件。
+- 工會三碎片詢問選項。
+- 正式轉職與正式聖物。
+- 八元素或完整屬性克制。
+- 通用 Boss framework。
+- save/schema/combat formula 改動。
 
 ## 1. 專案定位
 
 這是一個 Python CLI 文字冒險 RPG 的 v1 playable vertical slice。核心體驗是「進入迷宮探索 → 戰鬥 → 取得素材與金幣 → 回城整備 → 商店、合成、工會、魔法書強化 → 挑戰更高階迷宮」。
 
-目前目標不是大型內容擴張，而是讓既有最小垂直切片具備可維護、可擴張、可驗證的資料與文件基礎。第二幕已開始以最小切片方式進入 runtime data，目前完成「灰燼裂谷偵查版」與「灰燼守衛 Boss MVP」。
+目前目標不是大型內容擴張，而是讓既有最小垂直切片具備可維護、可擴張、可驗證的資料與文件基礎。第二幕已開始以最小切片方式進入 runtime data，目前完成灰燼裂谷、灰燼守衛、補給線升級、燼印深窟、燼印鎮衛 Boss MVP 與深窟未接 Boss 任務時的通關提示 UX。
 
 ## 2. 目前版本狀態
 
@@ -105,11 +45,11 @@
 - 城鎮：工會、鐵刃工坊、堅甲工坊、旅人小鋪、米菈合成屋、星燈魔法商店、轉職神殿
 - 商店：武器、防具、飾品、補給、特殊道具
 - 魔法書：購買後永久學習技能
-- 迷宮：青苔洞窟、焦石礦坑、灰燼裂谷偵查版
+- 迷宮：青苔洞窟、焦石礦坑、灰燼裂谷、燼印深窟
 - 戰鬥：攻擊、防禦、技能、道具、逃跑
 - 掉落：金幣、素材、藥水、關鍵道具
 - 合成：抗火斗篷、鐵劍 +1、皮甲 +1、集中藥袋、暖石墜改、破甲釘組
-- 工會任務：冒險者登記、洞窟採集、魔晶研究、焦石偵查、血跡地圖、灰燼裂谷偵查
+- 工會任務：冒險者登記、洞窟採集、魔晶研究、焦石偵查、血跡地圖、灰燼裂谷偵查、補給線升級、燼印深窟偵查
 - 工會收購 MVP：工會可收購白名單素材，只給金幣；第一版不收消耗品、裝備或關鍵道具
 - 倉庫 MVP：可花費 500G 開啟 LV1 倉庫，存取最多 10 種非 key item 背包物品
 - 怪物圖鑑 MVP：擊敗怪物後 100% 登錄，可從主選單查看已登錄怪物的基礎資訊
@@ -117,10 +57,10 @@
 - 聖物 preview-only MVP：城鎮「聖物調查」顯示 `RELICS` 預覽，聖物取得與效果尚未開放
 - 職業特化 preview-only MVP：角色狀態頁顯示 `JOB_SPECIALIZATIONS` 預覽，目前尚未生效
 - 盜賊 head-slot 副武器 data-only MVP：新增盜賊限定 `head` slot 副武器語意裝備，未新增 `offhand`
-- Boss：山寨頭目葛倫、灰燼守衛
+- Boss：山寨頭目葛倫、灰燼守衛、燼印鎮衛
 - 存檔：主選單可存檔，會建立 `save.json`
 
-第二幕目前已實作的 runtime data 包含 Act 2 Slice 1 與灰燼守衛 Boss MVP：
+第二幕目前已實作的 runtime data 包含灰燼裂谷、灰燼守衛、燼印深窟與燼印鎮衛 Boss MVP：
 
 - 完成 `quest_boss_glen` 後會解鎖 `second_act_preview`、`unlock_act_2`、`unlock_ash_ravine`。
 - `dungeon_ash_ravine` 已存在，定位為灰燼裂谷偵查版，目前為 18 步。
@@ -129,8 +69,14 @@
 - 灰燼裂谷 `boss` 已指向 `boss_ash_guardian`。
 - 灰燼守衛只會在完成 `quest_ash_ravine_scout` 後於灰燼裂谷終點出現。
 - 擊敗灰燼守衛會設定 `ash_guardian_defeated`，並取得第 2 枚 `key_fire_mark_shard`；防重複領取已由手測確認。
-- 目前火之印記碎片最多可取得 2 枚。
-- 完整火之印記、火印熔爐、火印爐衛、第二幕完整任務鏈、轉職神殿後續仍未實作。
+- 灰燼守衛擊敗後會開放燼印深窟探索，並讓 `quest_supply_upgrade` 出現。
+- `quest_supply_upgrade` 已素材化，需要 `mat_flame_stone_refined x3` 與 `mat_lava_shard x2`；完成後取得 `item_potion_m x2` 並解鎖旅人小鋪販售中藥水。
+- 燼印深窟目前有 3 個普通怪：餘燼潛獵者、熔殼岩獸、燼印火靈。
+- 燼印深窟 `boss` 已指向 `boss_cinder_seal_sentinel`（燼印鎮衛）。
+- 燼印鎮衛只會在完成 `quest_cinder_depths_scout` 後於燼印深窟終點出現；未滿足 Boss gate 時，深窟通關會提示玩家回工會詢問諾亞。
+- 擊敗燼印鎮衛會設定 `cinder_seal_sentinel_defeated`，並取得第 3 枚 `key_fire_mark_shard`。
+- 目前火之印記碎片最多可取得 3 枚，但完整火之印記流程尚未開放。
+- 完整火之印記、火印熔爐、火印爐衛、教會事件、工會三碎片詢問選項、第二幕完整任務鏈、轉職神殿後續仍未實作。
 
 最近一次入口平衡修正：
 
@@ -294,8 +240,8 @@ data validation ok
 - 暫不繼續提高灰燼裂谷普通怪 HP，暫不修改 combat formula、EXP/gold、升級全回復或新增怪物技能。
 - 灰燼裂谷目前已具備偵查版與灰燼守衛 Boss MVP；後續測試結論需避免用單次隨機遭遇過度外推。
 - 暫不把餘燼護符或新火抗 accessory 當主要下一步；目前已有暖石墜改與抗火斗篷，新增同質火抗飾品容易定位重疊。
-- 暫不建議直接做火印熔爐、火印爐衛、完整火之印記、正式轉職、正式聖物、倉庫升級完整版、完整圖鑑系統、火抗配方或 Act 3。
-- 下一個 runtime 候選節點應先 read-only 規劃，不直接施工；候選方向包含火印熔爐 skeleton、第 3 枚碎片來源、完整火之印記 preview/event。
+- 暫不建議直接做火印熔爐、火印爐衛、完整火之印記、教會事件、工會三碎片詢問選項、正式轉職、正式聖物、倉庫升級完整版、完整圖鑑系統、火抗配方或 Act 3。
+- 下一個 runtime 候選節點仍應先維持單一小切片規劃，不直接施工完整火印或大型系統；候選方向包含火印熔爐 skeleton 或完整火之印記 preview/event。
 
 中期：
 
@@ -315,4 +261,6 @@ data validation ok
 - 小魔晶不要急著賣掉，它能用來學魔法書或完成任務。
 - 焦石礦坑的火傷害很痛，抗火斗篷、暖石墜、守護符文和補給都很有用。
 - 擊敗山寨頭目葛倫後，把任務「血跡地圖」交回工會，會看到第二幕預告並解鎖灰燼裂谷偵查版；下一步是接「灰燼裂谷偵查」並帶回少量裂谷素材。
-- 完成「灰燼裂谷偵查」後，灰燼裂谷終點會出現灰燼守衛；擊敗後可取得第 2 枚火之印記碎片。目前完整火之印記尚未開放。
+- 完成「灰燼裂谷偵查」後，灰燼裂谷終點會出現灰燼守衛；擊敗後可取得第 2 枚火之印記碎片，並開放燼印深窟探索。
+- 完成「補給線升級」後，中藥水會進入旅人小鋪販售；補給線升級需要從燼印深窟取得精煉火石與熔岩碎片。
+- 完成「燼印深窟偵查」後，燼印深窟終點會出現燼印鎮衛；擊敗後可取得第 3 枚火之印記碎片。目前完整火之印記流程尚未開放。
