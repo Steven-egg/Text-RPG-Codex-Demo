@@ -56,7 +56,7 @@ QUESTS = {
         "giver": "諾亞",
         "turn_in": {},
         "reward": {"gold": 0, "items": {"item_potion_m": 2}, "guild": 0},
-        "unlocks": ["item_potion_m", "quest_supply_upgrade"],
+        "unlocks": ["item_potion_m", "dungeon_cinder_seal_depths", "quest_supply_upgrade"],
         "desc": "灰燼守衛已倒下，工會開始整理更深入火系迷宮的補給路線。先確認中藥水能穩定供應。",
     },
 }

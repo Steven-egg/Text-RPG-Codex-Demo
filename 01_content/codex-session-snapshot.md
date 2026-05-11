@@ -1,5 +1,51 @@
 # Codex Session 接續快照
 
+## 燼印深窟 dungeon skeleton MVP 與 Boss read-only plan
+
+本輪完成文件同步，記錄「燼印深窟」最新狀態與下一輪 Boss MVP 邊界。本輪不修改 runtime / engine / data / schema / save/state。
+
+已完成狀態：
+- `dungeon_cinder_seal_depths`「燼印深窟」skeleton 已進 runtime。
+- 使用者已完成人工測試，確認沒有問題。
+- `dungeon_cinder_seal_depths["boss"]` 仍為 `None`，Boss 尚未實作。
+- 燼印深窟由 `quest_supply_upgrade` 完成後解鎖，`unlock` 直接使用 `dungeon_cinder_seal_depths`。
+- 燼印深窟目前只有兩隻普通怪：`mon_ember_stalker`、`mon_molten_shell`。
+- `mon_cinder_acolyte` 暫不新增，避免引出施法、debuff 或特殊 AI。
+- 本輪未新增新素材、新商店、新配方或新道具。
+- 目前火之印記碎片仍最多可取得 2 枚，因為第 3 枚碎片來源 Boss 尚未實作。
+
+下一輪 Boss MVP 預設：
+- 新 Boss id：`boss_cinder_seal_sentinel`。
+- Boss 名稱：「燼印哨衛」。
+- Boss 所屬地城：`dungeon_cinder_seal_depths`。
+- 第 3 枚 `key_fire_mark_shard` 只由擊敗 `boss_cinder_seal_sentinel` 後取得。
+- 工會不補發第 3 枚碎片，只負責提示玩家前往燼印深窟，以及 Boss 後提示玩家可去教會詢問碎片或火之印記。
+- Boss gate 預設使用最小偵查或討伐任務，例如 `quest_cinder_depths_scout`。
+- 完成該任務後，才讓燼印深窟終點可挑戰 `boss_cinder_seal_sentinel`。
+- 不新增 registry story key；能用 quest completion 或既有 id 就不用新增 unlock key。
+- Boss reward 預設設定 `cinder_seal_sentinel_defeated` flag、給 `key_fire_mark_shard x1`，並防重複領取。
+- Boss 後只提示「可去教會詢問火之印記」，不開正式火印流程。
+- Boss 行為可用單一 hardcoded Boss handler；不做通用 Boss framework。
+
+下一輪 runtime 最小範圍預設：
+- `04_data/data/monsters.py`
+- `04_data/data/dungeons.py`
+- `04_data/data/quests.py`
+- 必要時才改 `03_engine/engine/game.py` 加入單一 Boss gate / clear handler。
+
+明確未做：
+- 未新增或實作完整火之印記。
+- 未新增火印熔爐。
+- 未新增火印爐衛。
+- 未新增正式轉職。
+- 未新增正式聖物。
+- 未新增八元素。
+- 未新增完整屬性克制。
+- 未新增通用 Boss framework。
+- 未改 save/schema。
+- 未改 combat formula。
+- 未新增 Act 3 規劃文件。
+
 ## 補給藥水升級任務 MVP 完成紀錄
 
 本輪完成補給藥水升級任務 MVP，範圍只包含補給任務、商店解鎖與戰鬥中使用中藥水。
@@ -39,12 +85,13 @@
 
 本輪只做 markdown-only 收尾與備份；未實作 gameplay，也不修改 runtime / engine / data / schema / save/state。
 
-最新規劃方向已修正：第 3 枚 `key_fire_mark_shard` 不做成工會任務補發，而是來自新的可玩內容：新火系 dungeon skeleton + 新普通怪 + 新 Boss。工會只負責灰燼守衛後提供新地點線索，以及 Boss 後提示玩家可去教會詢問火之印記。
+最新規劃方向已修正：第 3 枚 `key_fire_mark_shard` 不做成工會任務補發，而是來自燼印深窟後續 Boss。工會只負責灰燼守衛後提供新地點線索，以及 Boss 後提示玩家可去教會詢問火之印記。
 
-候選 runtime 內容仍只是規劃，尚未實作：
-- 新 dungeon 暫名：`dungeon_cinder_seal_depths`，名稱「燼印深窟」。
-- 新普通怪候選：`mon_ember_stalker`、`mon_cinder_acolyte`、`mon_molten_shell`。
-- 新 Boss 候選：`boss_cinder_seal_sentinel`，名稱「燼印哨衛」。
+目前已完成與尚未實作的切分：
+- 新 dungeon `dungeon_cinder_seal_depths`「燼印深窟」已完成 skeleton MVP。
+- 已實作普通怪：`mon_ember_stalker`、`mon_molten_shell`。
+- `mon_cinder_acolyte` 暫不新增，避免引出施法、debuff 或特殊 AI。
+- 新 Boss 候選：`boss_cinder_seal_sentinel`，名稱「燼印哨衛」，尚未實作。
 - 擊敗 `boss_cinder_seal_sentinel` 後才取得第 3 枚 `key_fire_mark_shard`。
 - 擊敗 Boss 並回報後，工會提示玩家可去教會詢問碎片或火之印記相關資訊。
 
@@ -53,7 +100,7 @@
 - 任務 B：開放進階補給藥水的引子。
 - 任務 C：Boss 討伐任務兼第 3 枚火之印記碎片取得與教會引導。
 
-補給藥水升級任務 MVP 也列為下一階段候選：在正式實作燼印深窟前，先 read-only 評估現有藥水 / 商店 / 任務 unlock 機制，再決定最小方式開放比目前補給藥水高一階的新藥水。目的不是開鍊金或製藥系統，而是讓玩家能更順地度過第二章 demo 的 Boss，同時 Boss 難度不必過度下修。
+補給藥水升級任務 MVP 已作為燼印深窟前置節點完成：`quest_supply_upgrade` 完成後會解鎖燼印深窟 skeleton。目的不是開鍊金或製藥系統，而是讓玩家能更順地度過第二章 demo 的 Boss，同時 Boss 難度不必過度下修。
 
 明確限制：
 - 暫不新增完整火之印記。

@@ -39,6 +39,18 @@ DUNGEONS = {
         "clear_guild": 80,
         "boss": "boss_ash_guardian",
     },
+    "dungeon_cinder_seal_depths": {
+        "name": "燼印深窟",
+        "recommended": "Lv9-11",
+        "steps": 18,
+        "element": "火",
+        "unlock": "dungeon_cinder_seal_depths",
+        "materials": ["mat_ravine_ash", "mat_charred_iron", "mat_flame_stone_refined", "mat_lava_shard"],
+        "monsters": ["mon_ember_stalker", "mon_molten_shell"],
+        "gold_range": (110, 175),
+        "clear_guild": 90,
+        "boss": None,
+    },
 }
 
 
