@@ -43,6 +43,9 @@ GUILD_MATERIAL_BUY_PRICES = {
 STORAGE_UNLOCK_COST = 500
 STORAGE_CAPACITY = 10
 SLEEVE_BLADE_FOLLOWUP_MULTIPLIER = 0.35
+FIRE_MARK_GUILD_INQUIRY_FLAG = "fire_mark_guild_inquiry_done"
+FIRE_MARK_CHURCH_BRIDGE_FLAG = "fire_mark_church_bridge_done"
+FIRE_MARK_SHARD_ID = "key_fire_mark_shard"
 
 def is_key_item(item_id: str) -> bool:
     return item_id.startswith("key_")
@@ -804,17 +807,42 @@ def quest_ready(state: dict, quest_id: str) -> bool:
         return False
     return can_pay_items(state, QUESTS[quest_id]["turn_in"])
 
+def can_ask_fire_mark_guild_inquiry(state: dict) -> bool:
+    return (
+        state["inventory"].get(FIRE_MARK_SHARD_ID, 0) >= 3
+        and not state["flags"].get(FIRE_MARK_GUILD_INQUIRY_FLAG)
+    )
+
+def fire_mark_guild_inquiry(state: dict) -> None:
+    title("詢問三枚印記碎片的事情")
+    print("你把三枚火之印記碎片放在諾亞面前。")
+    print("碎片彼此靠近時，裂紋裡浮起微弱的紅光，像在回應同一個呼吸。")
+    print()
+    print("諾亞仔細翻過工會的舊紀錄，最後搖了搖頭：")
+    print("「三枚碎片的反應已經很明顯，但工會沒有足夠資料判讀它真正的用途。」")
+    print("「去教堂問問吧。教會保存的舊文獻，也許能解釋這些印記碎片代表什麼。」")
+    print()
+    print("正式火之印記流程尚未開放；你已記下下一步該詢問教會。")
+    state["flags"][FIRE_MARK_GUILD_INQUIRY_FLAG] = True
+
 def guild_menu(state: dict) -> None:
     while True:
         title("冒險者工會")
         print("諾亞從一堆文件中抬頭，對你點了點頭：\n「歡迎回來。想挑戰新目標，還是要交付已完成的委託？」")
-        choice = menu("選擇服務", ["查看委託任務", "收購素材"])
+        options = ["查看委託任務", "收購素材"]
+        inquiry_option = can_ask_fire_mark_guild_inquiry(state)
+        if inquiry_option:
+            options.append("詢問三枚印記碎片的事情")
+        choice = menu("選擇服務", options)
         if choice == 0:
             return
         if choice == 1:
             guild_quest_menu(state)
         elif choice == 2:
             guild_material_buy_menu(state)
+        elif inquiry_option and choice == 3:
+            fire_mark_guild_inquiry(state)
+            pause()
 
 def guild_quest_menu(state: dict) -> None:
     while True:
@@ -963,9 +991,30 @@ def promotion_requirement_line(state: dict, requirement: dict) -> str:
     return f"- [{status}] {requirement['label']}"
 
 
+def should_show_fire_mark_church_bridge(state: dict) -> bool:
+    return (
+        state["flags"].get(FIRE_MARK_GUILD_INQUIRY_FLAG, False)
+        and state["inventory"].get(FIRE_MARK_SHARD_ID, 0) >= 3
+        and not state["flags"].get(FIRE_MARK_CHURCH_BRIDGE_FLAG)
+    )
+
+
+def fire_mark_church_bridge(state: dict) -> None:
+    print("賽恩聽完諾亞的轉介，視線落在三枚火之印記碎片上。")
+    print("碎片的紅光在神殿石階間一明一滅，像是在尋找尚未打開的門。")
+    print("「工會看不懂它，是因為這不是委託紀錄裡的東西。」賽恩低聲說。")
+    print("「教會的舊文獻或許能回答它的名字，但那需要正式查閱。先把碎片收好，別急著合成。」")
+    print()
+    print("正式教會火印流程尚未開放；你已把教會查閱這條線索記下。")
+    state["flags"][FIRE_MARK_CHURCH_BRIDGE_FLAG] = True
+    print()
+
+
 def temple(state: dict) -> None:
     title("轉職神殿")
     print("賽恩站在門前，像一塊懂得呼吸的石碑。")
+    if should_show_fire_mark_church_bridge(state):
+        fire_mark_church_bridge(state)
     if state["flags"].get("boss_glen_defeated"):
         print("賽恩看著你手中的火之印記碎片：")
         print("「這還不是完整的印記。但神殿記得它的溫度。等你集齊三枚元素核心，再回來敲這扇門。」")
