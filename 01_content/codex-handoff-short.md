@@ -1,5 +1,13 @@
 # Codex Handoff Short
 
+## 最新 handoff：中藥水任務素材化 MVP
+
+- 測試結果已確認：燼印深窟 Boss `boss_cinder_seal_sentinel` 調高一階難度後，Lv10-Lv12 盜賊測試可通過。
+- 中藥水在 Boss 後期連續使用兩次，確認具有實戰價值。
+- 目前不再調 Boss 數值。
+- 本輪只做中藥水任務素材化：新增 1 隻燼印深窟普通怪、調整深窟普通怪掉落、讓 `quest_supply_upgrade` 改為素材交付。
+- 本輪不做完整火之印記、火印熔爐、火印爐衛、工會三碎片詢問選項、教會事件、通用 Boss framework、save/schema/combat formula。
+
 ## 最新 handoff：燼印深窟 Boss / 第 3 碎片 read-only plan
 
 - 本輪只做文件同步；不改 runtime / engine / data / schema / save/state。

@@ -1,5 +1,14 @@
 # Codex Session 接續快照
 
+## 中藥水任務素材化 MVP
+
+本輪記錄使用者測試結果，並將補給線升級改成素材交付型任務。
+
+- 燼印深窟 Boss `boss_cinder_seal_sentinel` 調高一階難度後，Lv10-Lv12 盜賊測試可通過。
+- 中藥水在 Boss 後期連續使用兩次，確認具有實戰價值。
+- 目前不再調 Boss 數值。
+- 本輪不做完整火之印記、火印熔爐、火印爐衛、工會三碎片詢問選項、教會事件、通用 Boss framework、save/schema/combat formula。
+
 ## 燼印深窟 dungeon skeleton MVP 與 Boss read-only plan
 
 本輪完成文件同步，記錄「燼印深窟」最新狀態與下一輪 Boss MVP 邊界。本輪不修改 runtime / engine / data / schema / save/state。

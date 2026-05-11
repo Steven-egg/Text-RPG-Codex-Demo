@@ -795,6 +795,8 @@ def quest_unlocked(state: dict, quest_id: str) -> bool:
         return "quest_boss_glen" in state["completed_quests"]
     if quest_id == "quest_supply_upgrade":
         return state["flags"].get("ash_guardian_defeated", False)
+    if quest_id == "quest_cinder_depths_scout":
+        return "quest_supply_upgrade" in state["completed_quests"]
     return False
 
 def quest_ready(state: dict, quest_id: str) -> bool:
@@ -937,7 +939,9 @@ def show_or_complete_quest(state: dict, quest_id: str) -> None:
     elif quest_id == "quest_ash_ravine_scout":
         print("諾亞收起裂谷灰與焦黑鐵片：這些足夠證明灰燼裂谷值得深入調查，但現在還不是挑戰守衛的時候。")
     elif quest_id == "quest_supply_upgrade":
-        print("諾亞點頭：旅人小鋪已能販售中藥水。挑戰燼印深窟前，記得把補給準備好。")
+        print("諾亞點頭：旅人小鋪已能販售中藥水。接下來的長戰鬥，記得把補給準備好。")
+    elif quest_id == "quest_cinder_depths_scout":
+        print("諾亞攤開偵查圖：深窟最底層有一座燼印鎮衛。若要第三枚火之印記碎片，只能親自擊敗它。")
 
 def promotion_requirement_met(state: dict, requirement: dict) -> bool:
     kind = requirement.get("kind")
@@ -993,6 +997,8 @@ def choose_weighted_event() -> str:
     return "empty"
 
 def dungeon_menu(state: dict) -> None:
+    if state["flags"].get("ash_guardian_defeated") and not is_unlocked(state, "dungeon_cinder_seal_depths"):
+        unlock(state, "dungeon_cinder_seal_depths")
     unlocked_dungeons = [dungeon_id for dungeon_id, d in DUNGEONS.items() if is_unlocked(state, d["unlock"])]
     if not unlocked_dungeons:
         print("目前沒有可探索的迷宮。")
@@ -1018,11 +1024,19 @@ def boss_available_at_dungeon_end(state: dict, dungeon_id: str, boss_id: str | N
             and "quest_ash_ravine_scout" in state["completed_quests"]
             and not state["flags"].get("ash_guardian_defeated")
         )
+    if boss_id == "boss_cinder_seal_sentinel":
+        return (
+            dungeon_id == "dungeon_cinder_seal_depths"
+            and "quest_cinder_depths_scout" in state["completed_quests"]
+            and not state["flags"].get("cinder_seal_sentinel_defeated")
+        )
     return False
 
 def boss_challenge_prompt(boss_id: str) -> str:
     if boss_id == "boss_ash_guardian":
         return "裂谷深處的灰燼凝成古老守衛。要挑戰灰燼守衛嗎？(y/n) > "
+    if boss_id == "boss_cinder_seal_sentinel":
+        return "燼印深窟的最底層浮現赤紅刻印。要挑戰燼印鎮衛嗎？(y/n) > "
     return "礦坑深處傳來粗暴的笑聲。要挑戰 Boss 嗎？(y/n) > "
 
 def clear_dungeon_boss(state: dict, boss_id: str, run_log: dict) -> None:
@@ -1030,6 +1044,8 @@ def clear_dungeon_boss(state: dict, boss_id: str, run_log: dict) -> None:
         clear_boss_glen(state, run_log)
     elif boss_id == "boss_ash_guardian":
         clear_ash_guardian(state, run_log)
+    elif boss_id == "boss_cinder_seal_sentinel":
+        clear_cinder_seal_sentinel(state, run_log)
 
 def explore_dungeon(state: dict, dungeon_id: str) -> None:
     dungeon = DUNGEONS[dungeon_id]
@@ -1166,9 +1182,19 @@ def clear_ash_guardian(state: dict, run_log: dict) -> None:
     if state["flags"].get("ash_guardian_defeated"):
         return
     state["flags"]["ash_guardian_defeated"] = True
+    unlock(state, "dungeon_cinder_seal_depths")
     add_loot(state, "key_fire_mark_shard", 1, run_log)
     print("\n灰燼守衛的爐心逐漸熄滅，一枚赤紅碎片從灰殼中落下。")
     print("取得 火之印記碎片 x1。")
+
+def clear_cinder_seal_sentinel(state: dict, run_log: dict) -> None:
+    if state["flags"].get("cinder_seal_sentinel_defeated"):
+        return
+    state["flags"]["cinder_seal_sentinel_defeated"] = True
+    add_loot(state, "key_fire_mark_shard", 1, run_log)
+    print("\n燼印鎮衛碎裂時，胸口的赤紅刻印凝成第三枚碎片。")
+    print("取得 火之印記碎片 x1。")
+    print("你可以去教會詢問火之印記的意義；正式火印流程尚未開放。")
 
 def element_multiplier(attack_element: str, target_element: str, enemy_buffs: dict | None = None) -> float:
     multiplier = 1.0
@@ -1291,6 +1317,8 @@ def combat(state: dict, enemy_id: str, boss: bool = False, run_log: dict | None 
             boss_marker = boss_glen_action(enemy, enemy_hp, state, player_buffs, enemy_buffs, defending, turn, boss_marker)
         elif boss and enemy_id == "boss_ash_guardian":
             boss_marker = boss_ash_guardian_action(enemy, enemy_hp, state, player_buffs, enemy_buffs, defending, turn, boss_marker)
+        elif boss and enemy_id == "boss_cinder_seal_sentinel":
+            boss_marker = boss_cinder_seal_sentinel_action(enemy, enemy_hp, state, player_buffs, enemy_buffs, defending, turn, boss_marker)
         else:
             monster_action(enemy_id, enemy, state, player_buffs, defending)
 
@@ -1512,6 +1540,42 @@ def boss_ash_guardian_action(
     damage = calc_enemy_damage(enemy, state, 1.0, "物理", player_buffs, defending)
     state["current_hp"] -= damage
     print(f"{enemy['name']}以沉重石臂砸下，造成 {damage} 傷害。")
+    return charged
+
+def boss_cinder_seal_sentinel_action(
+    enemy: dict,
+    enemy_hp: int,
+    state: dict,
+    player_buffs: dict,
+    enemy_buffs: dict,
+    defending: bool,
+    turn: int,
+    charged: bool,
+) -> bool:
+    if charged:
+        damage = calc_enemy_damage(enemy, state, 1.4, "火", player_buffs, defending)
+        state["current_hp"] -= damage
+        print(f"{enemy['name']}將燼印壓入地面，赤焰衝擊造成 {damage} 火傷害。")
+        if random.random() < 0.25:
+            player_buffs["burn"] = 3
+            print("你陷入灼傷。")
+        return False
+    if enemy_hp <= enemy["hp"] * 0.5 and turn % 3 == 1:
+        print(f"{enemy['name']}胸口的燼印亮起，下一擊正在蓄勢。")
+        return True
+    if turn % 4 == 0:
+        enemy_buffs["defense_up"] = 2
+        print(f"{enemy['name']}收束熔殼，防禦上升。")
+        return charged
+    if turn % 2 == 0:
+        damage = calc_enemy_damage(enemy, state, 1.05, "物理", player_buffs, defending)
+        state["current_hp"] -= damage
+        player_buffs["defense_down"] = 2
+        print(f"{enemy['name']}以刻印長槍貫擊，造成 {damage} 傷害，你的防禦下降。")
+        return charged
+    damage = calc_enemy_damage(enemy, state, 1.1, "火", player_buffs, defending)
+    state["current_hp"] -= damage
+    print(f"{enemy['name']}揮出燼火斬，造成 {damage} 火傷害。")
     return charged
 
 def tick_effects(state: dict, player_buffs: dict, enemy_buffs: dict) -> None:

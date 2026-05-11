@@ -54,9 +54,17 @@ QUESTS = {
     "quest_supply_upgrade": {
         "title": "補給線升級",
         "giver": "諾亞",
-        "turn_in": {},
+        "turn_in": {"mat_flame_stone_refined": 3, "mat_lava_shard": 2},
         "reward": {"gold": 0, "items": {"item_potion_m": 2}, "guild": 0},
         "unlocks": ["item_potion_m", "dungeon_cinder_seal_depths", "quest_supply_upgrade"],
-        "desc": "灰燼守衛已倒下，工會開始整理更深入火系迷宮的補給路線。先確認中藥水能穩定供應。",
+        "desc": "灰燼守衛已倒下，工會開始整理更深入火系迷宮的補給路線。交付精煉火石 x3、熔岩碎片 x2，用來穩定中藥水的耐熱瓶封。",
+    },
+    "quest_cinder_depths_scout": {
+        "title": "燼印深窟偵查",
+        "giver": "諾亞",
+        "turn_in": {"mat_flame_stone_refined": 2, "mat_lava_shard": 1},
+        "reward": {"gold": 220, "items": {"item_potion_m": 1}, "guild": 80},
+        "unlocks": ["quest_cinder_depths_scout"],
+        "desc": "補給線穩定後，前往燼印深窟記錄燼印反應。帶回精煉火石 x2、熔岩碎片 x1；工會只需要偵查資料，不會補發火之印記碎片。",
     },
 }

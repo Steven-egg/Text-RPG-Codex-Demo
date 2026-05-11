@@ -46,10 +46,10 @@ DUNGEONS = {
         "element": "火",
         "unlock": "dungeon_cinder_seal_depths",
         "materials": ["mat_ravine_ash", "mat_charred_iron", "mat_flame_stone_refined", "mat_lava_shard"],
-        "monsters": ["mon_ember_stalker", "mon_molten_shell"],
+        "monsters": ["mon_ember_stalker", "mon_molten_shell", "mon_cinder_brand_wisp"],
         "gold_range": (110, 175),
         "clear_guild": 90,
-        "boss": None,
+        "boss": "boss_cinder_seal_sentinel",
     },
 }
 
