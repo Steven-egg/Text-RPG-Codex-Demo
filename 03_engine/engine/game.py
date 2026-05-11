@@ -45,6 +45,7 @@ STORAGE_CAPACITY = 10
 SLEEVE_BLADE_FOLLOWUP_MULTIPLIER = 0.35
 FIRE_MARK_GUILD_INQUIRY_FLAG = "fire_mark_guild_inquiry_done"
 FIRE_MARK_CHURCH_BRIDGE_FLAG = "fire_mark_church_bridge_done"
+FIRE_MARK_CHURCH_LOOKUP_FLAG = "fire_mark_church_lookup_done"
 FIRE_MARK_SHARD_ID = "key_fire_mark_shard"
 
 def is_key_item(item_id: str) -> bool:
@@ -1003,10 +1004,33 @@ def fire_mark_church_bridge(state: dict) -> None:
     print("賽恩聽完諾亞的轉介，視線落在三枚火之印記碎片上。")
     print("碎片的紅光在神殿石階間一明一滅，像是在尋找尚未打開的門。")
     print("「工會看不懂它，是因為這不是委託紀錄裡的東西。」賽恩低聲說。")
-    print("「教會的舊文獻或許能回答它的名字，但那需要正式查閱。先把碎片收好，別急著合成。」")
+    print("「它不普通，但我還不能斷言它是什麼。我要花點時間查閱舊文獻。」")
+    print("「先把碎片收好。等我整理出線索，再回神殿找我。」")
     print()
-    print("正式教會火印流程尚未開放；你已把教會查閱這條線索記下。")
+    print("你記下賽恩的囑咐：先保管碎片，稍後再回神殿詢問查閱結果。")
     state["flags"][FIRE_MARK_CHURCH_BRIDGE_FLAG] = True
+    print()
+
+
+def should_show_fire_mark_church_lookup(state: dict) -> bool:
+    return (
+        state["flags"].get(FIRE_MARK_CHURCH_BRIDGE_FLAG, False)
+        and state["inventory"].get(FIRE_MARK_SHARD_ID, 0) >= 3
+        and not state["flags"].get(FIRE_MARK_CHURCH_LOOKUP_FLAG)
+    )
+
+
+def fire_mark_church_lookup(state: dict) -> None:
+    print("賽恩把翻開的舊文獻推到石桌中央，頁面上畫著三道分裂的火印。")
+    print("「查到了。這三枚碎片不是完整的火之印記，而是它尚未完成的核心。」")
+    print("「它記錄了火的資格，卻還沒有承載力量。現在啟用，只會把印記燒毀。」")
+    print()
+    print("賽恩用封蠟與灰白布帶暫時封住碎片的共鳴，又把它們交還給你。")
+    print("「先保管好。等找到真正的熔印之地，再談合成與承載。」")
+    print()
+    print("已確認：未完成的火之印記核心。")
+    print("正式火之印記合成、啟用與聖物效果尚未開放。")
+    state["flags"][FIRE_MARK_CHURCH_LOOKUP_FLAG] = True
     print()
 
 
@@ -1015,9 +1039,11 @@ def temple(state: dict) -> None:
     print("賽恩站在門前，像一塊懂得呼吸的石碑。")
     if should_show_fire_mark_church_bridge(state):
         fire_mark_church_bridge(state)
+    elif should_show_fire_mark_church_lookup(state):
+        fire_mark_church_lookup(state)
     if state["flags"].get("boss_glen_defeated"):
         print("賽恩看著你手中的火之印記碎片：")
-        print("「這還不是完整的印記。但神殿記得它的溫度。等你集齊三枚元素核心，再回來敲這扇門。」")
+        print("「這還不是完整的印記。但神殿記得它的溫度。若你找到更多線索，再回來找我。」")
     print()
     print(f"目前職業：{state['job']}")
     previews = get_preview_promotions_for_job(state["job"])
@@ -1250,7 +1276,7 @@ def clear_cinder_seal_sentinel(state: dict, run_log: dict) -> None:
     add_loot(state, "key_fire_mark_shard", 1, run_log)
     print("\n燼印鎮衛碎裂時，胸口的赤紅刻印凝成第三枚碎片。")
     print("取得 火之印記碎片 x1。")
-    print("你可以去教會詢問火之印記的意義；正式火印流程尚未開放。")
+    print("三枚碎片短暫共鳴，像有一個尚未說出口的名字在灰燼裡亮起。")
 
 def element_multiplier(attack_element: str, target_element: str, enemy_buffs: dict | None = None) -> float:
     multiplier = 1.0
