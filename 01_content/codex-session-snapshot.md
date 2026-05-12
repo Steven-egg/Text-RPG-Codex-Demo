@@ -1,15 +1,20 @@
 # Codex Session 接續快照
 
-## 最新快照：火之印記三碎片後工會詢問與神殿接橋已進 runtime
+用途：詳細歷史快照。新 session 應先讀 `01_content/codex-handoff-short.md` 與 `README.md`，只有需要追溯歷史決策時再全文查閱本檔。
 
-目前 runtime 已完成三枚 `key_fire_mark_shard` 收集後的兩個最小劇情接橋：
+狀態日期：2026-05-12
+
+## 最新快照：火之印記三碎片後工會、神殿與教會查閱已進 runtime
+
+目前 runtime 已完成三枚 `key_fire_mark_shard` 收集後的三個最小劇情接橋：
 
 完成內容：
 - 玩家持有 `key_fire_mark_shard x3`，且尚未觸發過事件時，冒險者工會會新增「詢問三枚印記碎片的事情」。
 - 工會詢問完成後設定 `fire_mark_guild_inquiry_done`；諾亞會提示三枚碎片反應明顯，但工會無法判讀真正用途，建議前往教堂／教會側詢問。
 - 玩家完成工會詢問、仍持有三枚碎片，且尚未觸發神殿接橋時，第一次進入轉職神殿會觸發賽恩的一次性對話。
 - 神殿接橋完成後設定 `fire_mark_church_bridge_done`。
-- 這兩個事件只做查閱方向與劇情接橋：不合成火之印記、不消耗三枚碎片、不開正式火印流程、不啟用正式聖物或正式轉職。
+- 玩家完成神殿接橋後，可觸發教會查閱結果；教會確認三枚碎片是「未完成的火之印記核心」，完成後設定 `fire_mark_church_lookup_done`。
+- 這些事件只做查閱、確認與交還／封存：不合成火之印記、不消耗三枚碎片、不開正式火印流程、不啟用正式聖物或正式轉職。
 - 本輪文件同步為 markdown-only；不改 runtime / data / schema / save / combat formula。
 
 目前 runtime 最新狀態：
@@ -18,6 +23,7 @@
 - `quest_supply_upgrade` 已素材化，需要 `mat_flame_stone_refined x3` 與 `mat_lava_shard x2`；完成後取得 `item_potion_m x2` 並解鎖旅人小鋪販售中藥水。
 - 三碎片後的工會詢問事件已完成，使用 `fire_mark_guild_inquiry_done` 防重複觸發。
 - 工會 → 教堂／神殿接橋事件已完成，使用 `fire_mark_church_bridge_done` 防重複觸發。
+- 教會查閱結果已完成，使用 `fire_mark_church_lookup_done` 防重複觸發；結論是三枚碎片為「未完成的火之印記核心」。
 - 火之印記目前不是正式聖物，暫定為未來正式聖物的零組件／核心材料與第一章主線成果物。
 - demo 第一章目標是完成「發現火印真相」，不是讓玩家掌握火印力量。
 - 燼印鎮衛調高一階難度後，Lv10-Lv12 盜賊測試可通過；中藥水在 Boss 後期連續使用兩次，確認具有實戰價值；目前不再調 Boss 數值。
@@ -167,7 +173,7 @@
 ```
 
 目前專案已從「可玩原型」進入「第二幕最小施工切片迭代」與核心系統 MVP 拆點階段。  
-Act 2 火系 demo 已包含灰燼裂谷、灰燼守衛、補給線升級、燼印深窟、燼印鎮衛 Boss MVP 與第 3 枚火之印記碎片來源。最新完成的最小 UX 補點是：玩家走完燼印深窟但尚未滿足 Boss gate 時，會提示深處仍有守護者氣息，並引導回冒險者工會詢問諾亞。重點仍不是直接完成第二幕，而是逐步以單一節點 MVP 驗證 engine、save、schema、data、registry、validation 與必要文件同步。
+Act 2 火系 demo 已包含灰燼裂谷、灰燼守衛、補給線升級、燼印深窟、燼印鎮衛 Boss MVP、第 3 枚火之印記碎片來源、三碎片後工會詢問、神殿接橋與教會查閱結果。最新穩定收束是：三枚碎片被確認為「未完成的火之印記核心」。重點仍不是直接完成第二幕，而是逐步以單一節點 MVP 驗證 engine、save、schema、data、registry、validation 與必要文件同步。
 
 ## 2. 已完成項目
 
@@ -196,6 +202,7 @@ Act 2 火系 demo 已包含灰燼裂谷、灰燼守衛、補給線升級、燼�
 - 燼印鎮衛只在 `quest_cinder_depths_scout` 完成後出現；擊敗後設定 `cinder_seal_sentinel_defeated` 並取得第 3 枚 `key_fire_mark_shard`。
 - 目前火之印記碎片最多可取得 3 枚；玩家持有三枚碎片後，可在工會觸發三碎片詢問並設定 `fire_mark_guild_inquiry_done`。
 - 完成工會詢問後，首次進入轉職神殿會觸發工會 → 教堂／神殿接橋並設定 `fire_mark_church_bridge_done`。
+- 完成神殿接橋後，可取得教會查閱結果並設定 `fire_mark_church_lookup_done`；三枚碎片被確認為「未完成的火之印記核心」。
 - 火之印記目前不是正式聖物，暫定為未來正式聖物的零組件／核心材料；demo 第一章目標是「發現火印真相」，不是「掌握火印力量」。
 - 完整火之印記正式合成／啟用、火印熔爐、具名火印守護 Boss、第二幕完整任務鏈、正式轉職與正式聖物仍未實作。
 
@@ -498,7 +505,7 @@ data 檔只放資料表，不放互動流程或 gameplay 邏輯。
 
 `01_content/act-2-content-plan.md` 已存在，且目前已標註 Act 2 Slice 1 的已實作狀態。未標註已實作的段落仍是規劃或候選內容。
 
-第二幕第一輪主軸：
+第二幕第一輪原始主軸曾寫為：
 
 ```text
 血跡地圖解讀
@@ -509,6 +516,8 @@ data 檔只放資料表，不放互動流程或 gameplay 邏輯。
 → 完整火之印記
 → 轉職試煉入口預告
 ```
+
+目前治理修正：runtime 收束不做「完整火之印記」或「轉職試煉入口 runtime 行為」，而是收束為「三枚碎片經工會與神殿確認後，被教會判定為未完成的火之印記核心」。
 
 目前已實作：
 
@@ -524,6 +533,7 @@ data 檔只放資料表，不放互動流程或 gameplay 邏輯。
 - 燼印鎮衛 Boss MVP 與第 3 枚 `key_fire_mark_shard` 來源。
 - 三碎片後工會詢問事件：設定 `fire_mark_guild_inquiry_done`。
 - 工會 → 教堂／神殿接橋事件：設定 `fire_mark_church_bridge_done`。
+- 教會查閱結果事件：設定 `fire_mark_church_lookup_done`，確認三枚碎片為「未完成的火之印記核心」。
 - 破甲釘即時傷害補丁。
 - 集中藥袋 special 裝備語意修正。
 - 轉職資料結構 MVP。
@@ -545,7 +555,7 @@ data 檔只放資料表，不放互動流程或 gameplay 邏輯。
 
 目前火之印記不是正式聖物，暫定為未來正式聖物的零組件／核心材料；demo 第一章收束目標是「發現火印真相」，不是讓玩家掌握完整火印力量。
 
-第二幕第一個最小施工切片「灰燼裂谷偵查版」與灰燼守衛 Boss MVP 已完成；後續仍不應直接擴成完整第二幕。
+第二幕火系 demo 的前置閉環已完成；後續仍不應直接擴成完整第二幕，也不應把火印熔爐、完整火印、正式聖物或正式轉職當作下一個默認施工目標。
 
 ## 7. 五幕總綱目前狀態
 
@@ -593,15 +603,14 @@ data 檔只放資料表，不放互動流程或 gameplay 邏輯。
 目前下一步只允許以下之一：
 
 1. 做 `01_content/` 文件同步或 drift check，並將本 session 作為恢復點收尾。
-2. 下一個新 session 再規劃下一個單一節點，例如火印熔爐 skeleton read-only 規劃、第 3 枚碎片來源 read-only 規劃、完整火之印記 preview/event read-only 規劃、數值平衡 read-only 檢查；仍需先做單一節點規劃與實作前檢查，不直接實作完整系統。
+2. 下一個新 session 若要繼續 gameplay，必須先規劃一個新的單一節點並做 read-only 邊界確認；目前沒有已批准的下一個 runtime 施工目標。
 3. 在使用者明確要求下，提出 schema / registry / validation / save schema 的最小修改理由與範圍。
 
-下一個候選節點可評估：
+已不應再列為下一步的內容：
 
-1. 火印熔爐 skeleton read-only 規劃。
-2. 第 3 枚碎片來源 read-only 規劃。
-3. 完整火之印記 preview/event read-only 規劃。
-4. 數值平衡 read-only 檢查。
+- 教會查閱結果 MVP：已完成。
+- 第 3 枚碎片來源：已完成為燼印鎮衛掉落。
+- 火印熔爐 skeleton、完整火印 preview/event、火印守護 Boss：未來願景，不是當前下一步。
 
 下一輪仍應先做單一節點規劃與實作前檢查，不要直接實作完整系統。
 
@@ -615,7 +624,7 @@ data 檔只放資料表，不放互動流程或 gameplay 邏輯。
 → 使用者確認後，下一輪才實作
 ```
 
-不要在同一輪做火印熔爐、火印爐衛、完整火之印記、第二幕完整任務鏈、轉職試煉、情報屋、鍊金攤、聖物完整系統、轉職完整系統、怪物圖鑑完整系統、第二個元素迷宮、Act 3、倉庫升級完整版、經濟平衡調整、火抗配方、`offhand` slot、通用 Boss framework 或 combat formula 調整。
+不要在同一輪做火印熔爐、火印爐衛、完整火之印記、第二幕完整任務鏈、轉職試煉、情報屋、鍊金攤、聖物完整系統、轉職完整系統、怪物圖鑑完整系統、第二個元素迷宮、Act 3、倉庫升級完整版、經濟平衡調整、火抗配方、`offhand` slot、通用 Boss framework、save/schema 改動或 combat formula 調整。
 
 ## 10. 新 session 先檢查哪些檔案
 
@@ -623,10 +632,10 @@ data 檔只放資料表，不放互動流程或 gameplay 邏輯。
 
 1. `01_content/codex-handoff-short.md`
 2. `README.md`
-3. `01_content/full-act-structure.md`
-4. `01_content/act-2-content-plan.md`
-5. `01_content/game-architecture.md`
-6. `01_content/game-design.md`
+3. 需要詳細歷史時再讀 `01_content/codex-session-snapshot.md`
+4. 需要第二幕規劃脈絡時再讀 `01_content/act-2-content-plan.md`
+5. 需要幕次治理時再讀 `01_content/full-act-structure.md`
+6. 需要架構或玩法背景時再讀 `01_content/game-architecture.md`、`01_content/game-design.md`、`01_content/combat-growth-layering-plan.md`
 
 如果任務進入第二幕施工前評估，再讀：
 
@@ -652,12 +661,12 @@ data 檔只放資料表，不放互動流程或 gameplay 邏輯。
 可回貼最新 session 驗證是否 drift：
 
 ```text
-目前專案是《元素迷宮：邊境冒險者》Python CLI v1 playable vertical slice。README.md 是 project-level SSOT；01_content 是內容與架構規劃；game-design.md 是 v1 設計；game-architecture.md 是擴大架構；full-act-structure.md 是五幕總綱；act-2-content-plan.md 是第二幕規劃。02_schema 是資料契約；04_data/data 是 runtime data；registry.py 只做資料索引與 id/unlock helper；validate_data.py 做跨表引用驗證；03_engine/engine 目前包含 game.py、display.py、formatting.py、bestiary.py、previews.py。v1 第一幕已完成且主線可通關；第二幕火系 demo 已進 runtime，包含灰燼裂谷、灰燼守衛、補給線升級、燼印深窟、燼印鎮衛 Boss MVP 與第 3 枚 key_fire_mark_shard 來源。灰燼守衛只在 quest_ash_ravine_scout 完成後於灰燼裂谷終點出現，擊敗後設定 ash_guardian_defeated 並取得第 2 枚碎片；灰燼守衛後會開放燼印深窟探索。quest_supply_upgrade 已素材化，需要 mat_flame_stone_refined x3 與 mat_lava_shard x2，完成後取得 item_potion_m x2 並解鎖旅人小鋪販售中藥水。燼印深窟目前有 mon_ember_stalker、mon_molten_shell、mon_cinder_brand_wisp；boss_cinder_seal_sentinel 現名「燼印鎮衛」，只在 quest_cinder_depths_scout 完成後於深窟終點出現，擊敗後設定 cinder_seal_sentinel_defeated 並取得第 3 枚碎片。若玩家通關深窟但尚未滿足 Boss gate，會顯示守護者氣息與回工會詢問諾亞的提示。玩家持有三枚碎片後，可在工會觸發三碎片詢問並設定 fire_mark_guild_inquiry_done；完成工會詢問後，首次進入轉職神殿會觸發工會 → 教堂／神殿接橋並設定 fire_mark_church_bridge_done。火之印記目前不是正式聖物，暫定為未來正式聖物的零組件／核心材料；demo 第一章目標是發現火印真相，不是掌握火印力量。轉職、聖物與職業特化目前皆為 preview-only，未新增正式狀態或效果；盜賊副武器使用既有 head slot，未新增 offhand。完整火之印記正式合成／啟用、火印熔爐、具名火印守護 Boss、第二幕完整任務鏈、正式轉職、正式聖物、正式職業特化仍未實作。不得處理 Element Decay，不得新增 act-3-content-plan.md，不得新增火抗配方、offhand slot、通用 Boss framework 或完整屬性克制，不得修改 combat formula。
+目前專案是《元素迷宮：邊境冒險者》Python CLI v1 playable vertical slice。README.md 是 project-level SSOT；01_content 是內容與架構規劃；game-design.md 是 v1 設計；game-architecture.md 是擴大架構；full-act-structure.md 是五幕總綱；act-2-content-plan.md 是第二幕規劃。02_schema 是資料契約；04_data/data 是 runtime data；registry.py 只做資料索引與 id/unlock helper；validate_data.py 做跨表引用驗證；03_engine/engine 目前包含 game.py、display.py、formatting.py、bestiary.py、previews.py。v1 第一幕已完成且主線可通關；第二幕火系 demo 已進 runtime，包含灰燼裂谷、灰燼守衛、補給線升級、燼印深窟、燼印鎮衛 Boss MVP 與第 3 枚 key_fire_mark_shard 來源。灰燼守衛只在 quest_ash_ravine_scout 完成後於灰燼裂谷終點出現，擊敗後設定 ash_guardian_defeated 並取得第 2 枚碎片；灰燼守衛後會開放燼印深窟探索。quest_supply_upgrade 已素材化，需要 mat_flame_stone_refined x3 與 mat_lava_shard x2，完成後取得 item_potion_m x2 並解鎖旅人小鋪販售中藥水。燼印深窟目前有 mon_ember_stalker、mon_molten_shell、mon_cinder_brand_wisp；boss_cinder_seal_sentinel 現名「燼印鎮衛」，只在 quest_cinder_depths_scout 完成後於深窟終點出現，擊敗後設定 cinder_seal_sentinel_defeated 並取得第 3 枚碎片。若玩家通關深窟但尚未滿足 Boss gate，會顯示守護者氣息與回工會詢問諾亞的提示。玩家持有三枚碎片後，可在工會觸發三碎片詢問並設定 fire_mark_guild_inquiry_done；完成工會詢問後，首次進入轉職神殿會觸發工會 → 教堂／神殿接橋並設定 fire_mark_church_bridge_done；完成神殿接橋後，可取得教會查閱結果並設定 fire_mark_church_lookup_done。教會查閱結果確認三枚碎片是「未完成的火之印記核心」。火之印記目前不是正式聖物，暫定為未來正式聖物的零組件／核心材料；demo 第一章目標是發現火印真相，不是掌握火印力量。轉職、聖物與職業特化目前皆為 preview-only，未新增正式狀態或效果；盜賊副武器使用既有 head slot，未新增 offhand。完整火之印記正式合成／啟用、火印熔爐、具名火印守護 Boss、第二幕完整任務鏈、正式轉職、正式聖物、正式職業特化仍未實作。不得處理 Element Decay，不得新增 act-3-content-plan.md，不得新增火抗配方、offhand slot、通用 Boss framework 或完整屬性克制，不得修改 save/schema 或 combat formula。
 ```
 
 ## 12. 給下一個 Codex 的一句話
 
-目前專案已完成 v1 可玩原型、第二幕內容規劃、五幕總綱、灰燼裂谷 runtime data、灰燼守衛 Boss MVP、補給線升級素材化、燼印深窟、燼印鎮衛 Boss MVP、第 3 枚火之印記碎片來源、未接 Boss 任務時的深窟通關提示 UX、三碎片後工會詢問事件，以及工會 → 教堂／神殿接橋事件。轉職、聖物與職業特化目前皆為 preview-only，未新增正式狀態、save 欄位或數值效果。盜賊副武器使用既有 `head` slot，沒有新增 `offhand`。火之印記目前不是正式聖物，暫定為未來正式聖物的零組件／核心材料；完整火之印記正式合成／啟用、火印熔爐、具名火印守護 Boss、正式教會火印流程仍未實作。`03_engine/engine` 已拆出 display、formatting、bestiary、previews 等 helper modules，但不要繼續為拆而拆。Windows 本機標準驗證入口是專案根目錄的 `run_checks.bat`；Codex 若遇到 Python runtime / sandbox 存取限制，不視為 gameplay 錯誤。下一個 runtime 候選節點仍應維持單一小切片，不要急著把完整任務鏈、完整轉職、完整聖物、完整職業特化、完整圖鑑、通用 Boss framework 或後續幕次塞進 runtime。
+目前專案已完成 v1 可玩原型、第二幕內容規劃、五幕總綱、灰燼裂谷 runtime data、灰燼守衛 Boss MVP、補給線升級素材化、燼印深窟、燼印鎮衛 Boss MVP、第 3 枚火之印記碎片來源、未接 Boss 任務時的深窟通關提示 UX、三碎片後工會詢問、工會 → 教堂／神殿接橋，以及教會查閱結果。轉職、聖物與職業特化目前皆為 preview-only，未新增正式狀態、save 欄位或數值效果。盜賊副武器使用既有 `head` slot，沒有新增 `offhand`。火之印記目前不是正式聖物，而是「未完成的火之印記核心」與未來正式聖物的零組件／核心材料；完整火之印記正式合成／啟用、火印熔爐、具名火印守護 Boss、正式教會火印流程仍未實作。`03_engine/engine` 已拆出 display、formatting、bestiary、previews 等 helper modules，但不要繼續為拆而拆。Windows 本機標準驗證入口是專案根目錄的 `run_checks.bat`；Codex 若遇到 Python runtime / sandbox 存取限制，不視為 gameplay 錯誤。目前沒有已批准的下一個 runtime 施工目標；不要急著把完整任務鏈、完整轉職、完整聖物、完整職業特化、完整圖鑑、通用 Boss framework 或後續幕次塞進 runtime。
 
 ## 13. 轉職資料結構 MVP 收尾摘要
 
@@ -1199,8 +1208,8 @@ import 方向：
 施工邊界：
 - 盜賊影袖副刃普通攻擊追擊歸類為裝備/副武器效果層，也可作為職業特化 preview 的玩法實例。
 - 它不是正式職業特化系統，不需要 `offhand`、save/state 或 schema 擴充作為前置。
-- 下一輪適合回到「盜賊影袖副刃普通攻擊追擊最小 MVP」。
-- 下一輪若施工，必須先鎖定低倍率、只限普通攻擊、只限裝備 `armor_rogue_sleeve_blade`，且不得重複擊殺、經驗、金幣或掉落結算。
+- 歷史建議曾是「盜賊影袖副刃普通攻擊追擊最小 MVP」；後續已完成，不再是當前下一步。
+- 若未來延伸副武器效果，仍必須先鎖定低倍率、只限普通攻擊、只限特定裝備，且不得重複擊殺、經驗、金幣或掉落結算。
 
 ## 盜賊影袖副刃普通攻擊低倍率追擊 MVP 完成紀錄
 
@@ -1230,8 +1239,8 @@ import 方向：
 
 下一階段方向：
 - 暫停繼續橫向擴張大型系統。
-- 下一輪建議轉向 read-only / markdown-only 規劃「火之印記第一章可玩閉環 demo MVP」。
-- 火之印記閉環方向包含：第三關 Boss、新火系 dungeon skeleton、三個火之印記碎片、火之印記合成 preview/event、2～3 個任務支撐，等級節奏約 Lv8～Lv12。
+- 歷史建議曾轉向 read-only / markdown-only 規劃「火之印記第一章可玩閉環 demo MVP」。
+- 該方向後續已演進並完成為：燼印深窟、燼印鎮衛、第 3 枚碎片、工會詢問、神殿接橋與教會查閱結果。正式火印合成 / 啟用不施工。
 - 暫不做八元素、完整屬性克制、精神屬性、正式轉職、正式聖物、多城鎮、大型 UI 框架，或 combat/schema/save 大改。
 
 ## 灰燼守衛 Boss MVP 完成紀錄
@@ -1260,6 +1269,6 @@ import 方向：
 - 正式轉職、正式聖物、八元素、`offhand` slot、完整屬性克制與通用 Boss framework 仍未開放。
 
 歷史下一步建議（灰燼守衛 MVP 完成當時）：
-- 火印熔爐 skeleton read-only 規劃。
-- 第 3 枚碎片來源 read-only 規劃（目前已完成為燼印鎮衛掉落）。
-- 完整火之印記 preview/event read-only 規劃。
+- 火印熔爐 skeleton read-only 規劃。（歷史候選；目前不作為下一步）
+- 第 3 枚碎片來源 read-only 規劃。（目前已完成為燼印鎮衛掉落）
+- 完整火之印記 preview/event read-only 規劃。（歷史候選；目前改為未完成核心查閱結果，不作正式火印）
