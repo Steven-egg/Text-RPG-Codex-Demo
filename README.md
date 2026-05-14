@@ -1,6 +1,18 @@
 # 《元素迷宮：邊境冒險者》終端機版
 
-## 最新完成：火之印記三碎片後的工會、神殿與教會查閱 MVP
+## 最新完成：CLI UI MVP 主選單 panel 化與文件同步
+
+最新 UI 變更只做 CLI 顯示層優化：
+
+- 主選單已使用 Rich `Panel` 包裝，顯示角色摘要與主選單行動列表。
+- 只新增薄層 helper `main_menu_panel()`；共用 `menu()` 仍維持原本輸入與 fallback print 行為。
+- Rich 不可用時會退回原本的文字輸出，不影響啟動與 smoke test。
+- 本輪不修改 combat / dungeon / quest gameplay flow，不修改 data / schema / save，也不建立 UI framework。
+- 使用者本機已補裝 `.venv` 並回報 `python element_maze.py --smoke-test` 成功；Codex 端另以 bundled Python 驗證 smoke test、data validation 與 content inventory report。
+
+本輪也補上 `06_tools/content_inventory_report.py` 的 README 說明。它是 read-only 內容盤點工具，不是 gameplay 功能，也不是 validation 的替代品。
+
+## 近期完成：火之印記三碎片後的工會、神殿與教會查閱 MVP
 
 最新 runtime 已完成三個很小的劇情接橋：
 - 玩家持有 `key_fire_mark_shard x3`，且尚未觸發過事件時，冒險者工會會新增「詢問三枚印記碎片的事情」。
@@ -65,6 +77,7 @@
 - 工會收購 MVP：工會可收購白名單素材，只給金幣；第一版不收消耗品、裝備或關鍵道具
 - 倉庫 MVP：可花費 500G 開啟 LV1 倉庫，存取最多 10 種非 key item 背包物品
 - 怪物圖鑑 MVP：擊敗怪物後 100% 登錄，可從主選單查看已登錄怪物的基礎資訊
+- CLI UI MVP：主選單以 Rich `Panel` 包裝；其他選單、戰鬥、迷宮、任務與存檔流程維持原樣
 - 轉職 preview-only MVP：轉職神殿顯示 `PROMOTIONS` 預覽方向與條件，正式轉職尚未開放
 - 聖物 preview-only MVP：城鎮「聖物調查」顯示 `RELICS` 預覽，聖物取得與效果尚未開放
 - 職業特化 preview-only MVP：角色狀態頁顯示 `JOB_SPECIALIZATIONS` 預覽，目前尚未生效
@@ -118,6 +131,15 @@
 C:\Users\user\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe .\element_maze.py
 ```
 
+若使用本機 `.venv`，可先啟用 venv 後用一般 `python` 指令：
+
+```powershell
+.\.venv\Scripts\Activate.ps1
+python .\element_maze.py
+```
+
+`.venv/` 已列入 `.gitignore`，只作為本機執行環境，不是專案資料來源。
+
 ### 驗證方式
 
 Windows 本機可在專案根目錄執行標準檢查入口：
@@ -135,6 +157,12 @@ python element_maze.py --smoke-test
 
 若 Codex 環境因 runtime 或 sandbox 限制無法執行 Python，請由使用者在本機 PowerShell 執行 `run_checks.bat`，再將結果回貼到 Codex session。
 
+若本機已啟用 `.venv` 或 PATH 中有可用 Python，也可直接執行：
+
+```powershell
+python element_maze.py --smoke-test
+```
+
 煙霧測試：
 
 ```powershell
@@ -147,6 +175,15 @@ C:\Users\user\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\py
 C:\Users\user\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe .\06_tools\validate_data.py
 ```
 
+內容盤點工具：
+
+```powershell
+python .\06_tools\content_inventory_report.py
+python .\06_tools\content_inventory_report.py --json
+```
+
+`content_inventory_report.py` 是 read-only 工具，用於盤點資料數量、runtime / preview-only tables、資料分組、迷宮 / Boss / 任務、unlock drift、火印相關 id、命名與治理提醒，以及 engine 中硬寫 id 的參照位置。它不修改資料，也不取代 `validate_data.py`。
+
 ## 4. 專案資料夾職責
 
 - `element_maze.py`：遊戲入口，負責載入 `04_data` 與 `03_engine`，再執行 `engine.game.main()`。
@@ -155,7 +192,7 @@ C:\Users\user\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\py
 - `03_engine/engine/`：遊戲流程與規則；目前包含主流程 `game.py`，以及低風險 helper modules：`display.py`、`formatting.py`、`bestiary.py`、`previews.py`。
 - `04_data/data/`：runtime 實際讀取的資料表。
 - `05_assets/`：未來素材資源預留。
-- `06_tools/`：開發與驗證工具。
+- `06_tools/`：開發、驗證與 read-only 盤點工具；目前包含 `validate_data.py` 與 `content_inventory_report.py`。
 
 ## 5. SSOT 分層規則
 
@@ -165,6 +202,7 @@ C:\Users\user\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\py
 - `04_data/data/*.py`：runtime data SSOT，遊戲實際讀取的資料表。
 - `04_data/data/registry.py`：資料索引與引用總目錄，供 validation 與未來查詢使用。
 - `06_tools/validate_data.py`：資料驗證工具，檢查跨表引用與基本欄位一致性。
+- `06_tools/content_inventory_report.py`：read-only 內容盤點與 drift 檢查輔助工具，不是 SSOT。
 - `save.json`：runtime 存檔，不是 SSOT，不應作為設計資料來源。
 
 ## 6. Data 擴張規則
@@ -235,6 +273,16 @@ C:\Users\user\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\py
 data validation ok
 ```
 
+`06_tools/content_inventory_report.py` 會輸出 read-only 內容盤點：
+
+- runtime 與 preview-only 資料表數量
+- item / equipment / skill 分組
+- dungeon、boss、quest 與 preview content 摘要
+- unlock producer / consumer drift
+- 火印相關 id 清單
+- 命名與治理提醒
+- engine hardcoded id 參照位置
+
 ## 8. 不要做的事
 
 - 不要把 `save.json` 當資料表或設計來源。
@@ -251,6 +299,7 @@ data validation ok
 - 維持 schema 文件。
 - 修改 data 後固定跑 validation。
 - 重要 gameplay 修改後固定跑 smoke test。
+- CLI UI 目前只做顯示層包裝；不要在未批准範圍內擴張成 UI framework、Unity 或 HTML UI。
 - 下一輪若要繼續評估灰燼裂谷，優先改測法師、劍士、牧師或不同裝備狀態，不直接施工。
 - 暫不繼續提高灰燼裂谷普通怪 HP，暫不修改 combat formula、EXP/gold、升級全回復或新增怪物技能。
 - 灰燼裂谷目前已具備偵查版與灰燼守衛 Boss MVP；後續測試結論需避免用單次隨機遭遇過度外推。

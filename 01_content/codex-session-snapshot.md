@@ -2,9 +2,45 @@
 
 用途：詳細歷史快照。新 session 應先讀 `01_content/codex-handoff-short.md` 與 `README.md`，只有需要追溯歷史決策時再全文查閱本檔。
 
-狀態日期：2026-05-12
+狀態日期：2026-05-14
 
-## 最新快照：火之印記三碎片後工會、神殿與教會查閱已進 runtime
+## 最新快照：CLI UI MVP 主選單 panel 化與文件同步
+
+本輪完成 CLI UI MVP 的第一個最小節點：只將主選單 panel 化，不改 gameplay flow。
+
+完成內容：
+- `03_engine/engine/display.py` 新增 `main_menu_panel()`，使用 Rich `Panel` 包裝主選單。
+- 主選單 panel 目前顯示角色摘要與主選單行動列表。
+- Rich 不可用時，`main_menu_panel()` 會 fallback 到原本的 `title()`、`print()` 與 `menu()` 行為。
+- `03_engine/engine/game.py` 的 `main_loop()` 改用 `main_menu_panel()`；其他城鎮、背包、倉庫、圖鑑、戰鬥、迷宮與任務選單仍使用既有 `menu()`。
+- 本輪 UI 只作 thin display layer，不建立 UI framework。
+
+同步文件：
+- `README.md` 補上最新 CLI UI MVP 狀態。
+- `README.md` 補上本機 `.venv` 使用方式；`.venv/` 仍是 ignored local environment，不是專案資料來源。
+- `README.md` 補上 `06_tools/content_inventory_report.py` 說明。該工具是 read-only 內容盤點與 drift 檢查輔助工具，不是 validation 替代品，也不修改資料。
+- `01_content/codex-handoff-short.md` 與本 snapshot 已同步最新邊界與驗證結果。
+
+驗證與環境狀態：
+- 使用者本機已補裝 `.venv`，並回報 `python element_maze.py --smoke-test` 成功。
+- Codex 端直接使用 `.venv` 時遇到 WindowsApps Python stub 路徑限制；這是 Codex 沙盒環境問題，不視為 gameplay 錯誤。
+- Codex 已用 bundled Python 補跑：
+  - `06_tools/validate_data.py` → `data validation ok`
+  - `element_maze.py --smoke-test` → `smoke test ok`
+  - `06_tools/content_inventory_report.py --json` → 成功輸出 report
+
+本輪未修改：
+- combat / dungeon / quest gameplay flow。
+- data / schema / save。
+- `run_checks.bat`。
+- Unity / HTML UI 或任何 UI framework。
+
+後續邊界：
+- UI 目前只允許 CLI 顯示層薄包裝；不要在未批准範圍內擴張成 UI framework、Unity 或 HTML UI。
+- `content_inventory_report.py` 只作 read-only 盤點，不能把 report 輸出當成 SSOT。
+- 目前沒有已批准的下一個 runtime gameplay 施工目標。
+
+## 歷史快照：火之印記三碎片後工會、神殿與教會查閱已進 runtime
 
 目前 runtime 已完成三枚 `key_fire_mark_shard` 收集後的三個最小劇情接橋：
 
@@ -611,6 +647,7 @@ data 檔只放資料表，不放互動流程或 gameplay 邏輯。
 - 教會查閱結果 MVP：已完成。
 - 第 3 枚碎片來源：已完成為燼印鎮衛掉落。
 - 火印熔爐 skeleton、完整火印 preview/event、火印守護 Boss：未來願景，不是當前下一步。
+- CLI UI framework、Unity UI、HTML UI：目前不在範圍內；已完成的只是主選單 Rich panel thin layer。
 
 下一輪仍應先做單一節點規劃與實作前檢查，不要直接實作完整系統。
 
@@ -624,7 +661,7 @@ data 檔只放資料表，不放互動流程或 gameplay 邏輯。
 → 使用者確認後，下一輪才實作
 ```
 
-不要在同一輪做火印熔爐、火印爐衛、完整火之印記、第二幕完整任務鏈、轉職試煉、情報屋、鍊金攤、聖物完整系統、轉職完整系統、怪物圖鑑完整系統、第二個元素迷宮、Act 3、倉庫升級完整版、經濟平衡調整、火抗配方、`offhand` slot、通用 Boss framework、save/schema 改動或 combat formula 調整。
+不要在同一輪做火印熔爐、火印爐衛、完整火之印記、第二幕完整任務鏈、轉職試煉、情報屋、鍊金攤、聖物完整系統、轉職完整系統、怪物圖鑑完整系統、第二個元素迷宮、Act 3、倉庫升級完整版、經濟平衡調整、火抗配方、`offhand` slot、通用 Boss framework、UI framework、Unity / HTML UI、save/schema 改動或 combat formula 調整。
 
 ## 10. 新 session 先檢查哪些檔案
 
@@ -649,24 +686,26 @@ data 檔只放資料表，不放互動流程或 gameplay 邏輯。
 14. `02_schema/equipment.schema.md`
 15. `04_data/data/registry.py`
 16. `06_tools/validate_data.py`
+17. `06_tools/content_inventory_report.py`
 
-只有需要理解 runtime 行為時才讀：
+只有需要理解 runtime / CLI UI 行為時才讀：
 
-17. `03_engine/engine/game.py`
+18. `03_engine/engine/game.py`
+19. `03_engine/engine/display.py`
 
-下一步文件規劃不應修改 engine。
+下一步文件規劃不應修改 engine；`content_inventory_report.py` 只供 read-only 盤點與 drift check。
 
 ## 11. Drift check 摘要
 
 可回貼最新 session 驗證是否 drift：
 
 ```text
-目前專案是《元素迷宮：邊境冒險者》Python CLI v1 playable vertical slice。README.md 是 project-level SSOT；01_content 是內容與架構規劃；game-design.md 是 v1 設計；game-architecture.md 是擴大架構；full-act-structure.md 是五幕總綱；act-2-content-plan.md 是第二幕規劃。02_schema 是資料契約；04_data/data 是 runtime data；registry.py 只做資料索引與 id/unlock helper；validate_data.py 做跨表引用驗證；03_engine/engine 目前包含 game.py、display.py、formatting.py、bestiary.py、previews.py。v1 第一幕已完成且主線可通關；第二幕火系 demo 已進 runtime，包含灰燼裂谷、灰燼守衛、補給線升級、燼印深窟、燼印鎮衛 Boss MVP 與第 3 枚 key_fire_mark_shard 來源。灰燼守衛只在 quest_ash_ravine_scout 完成後於灰燼裂谷終點出現，擊敗後設定 ash_guardian_defeated 並取得第 2 枚碎片；灰燼守衛後會開放燼印深窟探索。quest_supply_upgrade 已素材化，需要 mat_flame_stone_refined x3 與 mat_lava_shard x2，完成後取得 item_potion_m x2 並解鎖旅人小鋪販售中藥水。燼印深窟目前有 mon_ember_stalker、mon_molten_shell、mon_cinder_brand_wisp；boss_cinder_seal_sentinel 現名「燼印鎮衛」，只在 quest_cinder_depths_scout 完成後於深窟終點出現，擊敗後設定 cinder_seal_sentinel_defeated 並取得第 3 枚碎片。若玩家通關深窟但尚未滿足 Boss gate，會顯示守護者氣息與回工會詢問諾亞的提示。玩家持有三枚碎片後，可在工會觸發三碎片詢問並設定 fire_mark_guild_inquiry_done；完成工會詢問後，首次進入轉職神殿會觸發工會 → 教堂／神殿接橋並設定 fire_mark_church_bridge_done；完成神殿接橋後，可取得教會查閱結果並設定 fire_mark_church_lookup_done。教會查閱結果確認三枚碎片是「未完成的火之印記核心」。火之印記目前不是正式聖物，暫定為未來正式聖物的零組件／核心材料；demo 第一章目標是發現火印真相，不是掌握火印力量。轉職、聖物與職業特化目前皆為 preview-only，未新增正式狀態或效果；盜賊副武器使用既有 head slot，未新增 offhand。完整火之印記正式合成／啟用、火印熔爐、具名火印守護 Boss、第二幕完整任務鏈、正式轉職、正式聖物、正式職業特化仍未實作。不得處理 Element Decay，不得新增 act-3-content-plan.md，不得新增火抗配方、offhand slot、通用 Boss framework 或完整屬性克制，不得修改 save/schema 或 combat formula。
+目前專案是《元素迷宮：邊境冒險者》Python CLI v1 playable vertical slice。README.md 是 project-level SSOT；01_content 是內容與架構規劃；game-design.md 是 v1 設計；game-architecture.md 是擴大架構；full-act-structure.md 是五幕總綱；act-2-content-plan.md 是第二幕規劃。02_schema 是資料契約；04_data/data 是 runtime data；registry.py 只做資料索引與 id/unlock helper；validate_data.py 做跨表引用驗證；content_inventory_report.py 是 read-only 內容盤點與 drift check 輔助工具；03_engine/engine 目前包含 game.py、display.py、formatting.py、bestiary.py、previews.py。v1 第一幕已完成且主線可通關；第二幕火系 demo 已進 runtime，包含灰燼裂谷、灰燼守衛、補給線升級、燼印深窟、燼印鎮衛 Boss MVP 與第 3 枚 key_fire_mark_shard 來源。主選單已完成 CLI UI MVP 的 Rich Panel thin layer；其他選單、戰鬥、迷宮、任務、data、schema 與 save 不受影響。灰燼守衛只在 quest_ash_ravine_scout 完成後於灰燼裂谷終點出現，擊敗後設定 ash_guardian_defeated 並取得第 2 枚碎片；灰燼守衛後會開放燼印深窟探索。quest_supply_upgrade 已素材化，需要 mat_flame_stone_refined x3 與 mat_lava_shard x2，完成後取得 item_potion_m x2 並解鎖旅人小鋪販售中藥水。燼印深窟目前有 mon_ember_stalker、mon_molten_shell、mon_cinder_brand_wisp；boss_cinder_seal_sentinel 現名「燼印鎮衛」，只在 quest_cinder_depths_scout 完成後於深窟終點出現，擊敗後設定 cinder_seal_sentinel_defeated 並取得第 3 枚碎片。若玩家通關深窟但尚未滿足 Boss gate，會顯示守護者氣息與回工會詢問諾亞的提示。玩家持有三枚碎片後，可在工會觸發三碎片詢問並設定 fire_mark_guild_inquiry_done；完成工會詢問後，首次進入轉職神殿會觸發工會 → 教堂／神殿接橋並設定 fire_mark_church_bridge_done；完成神殿接橋後，可取得教會查閱結果並設定 fire_mark_church_lookup_done。教會查閱結果確認三枚碎片是「未完成的火之印記核心」。火之印記目前不是正式聖物，暫定為未來正式聖物的零組件／核心材料；demo 第一章目標是發現火印真相，不是掌握火印力量。轉職、聖物與職業特化目前皆為 preview-only，未新增正式狀態或效果；盜賊副武器使用既有 head slot，未新增 offhand。完整火之印記正式合成／啟用、火印熔爐、具名火印守護 Boss、第二幕完整任務鏈、正式轉職、正式聖物、正式職業特化仍未實作。不得處理 Element Decay，不得新增 act-3-content-plan.md，不得新增火抗配方、offhand slot、通用 Boss framework、UI framework、Unity / HTML UI 或完整屬性克制，不得修改 save/schema 或 combat formula。
 ```
 
 ## 12. 給下一個 Codex 的一句話
 
-目前專案已完成 v1 可玩原型、第二幕內容規劃、五幕總綱、灰燼裂谷 runtime data、灰燼守衛 Boss MVP、補給線升級素材化、燼印深窟、燼印鎮衛 Boss MVP、第 3 枚火之印記碎片來源、未接 Boss 任務時的深窟通關提示 UX、三碎片後工會詢問、工會 → 教堂／神殿接橋，以及教會查閱結果。轉職、聖物與職業特化目前皆為 preview-only，未新增正式狀態、save 欄位或數值效果。盜賊副武器使用既有 `head` slot，沒有新增 `offhand`。火之印記目前不是正式聖物，而是「未完成的火之印記核心」與未來正式聖物的零組件／核心材料；完整火之印記正式合成／啟用、火印熔爐、具名火印守護 Boss、正式教會火印流程仍未實作。`03_engine/engine` 已拆出 display、formatting、bestiary、previews 等 helper modules，但不要繼續為拆而拆。Windows 本機標準驗證入口是專案根目錄的 `run_checks.bat`；Codex 若遇到 Python runtime / sandbox 存取限制，不視為 gameplay 錯誤。目前沒有已批准的下一個 runtime 施工目標；不要急著把完整任務鏈、完整轉職、完整聖物、完整職業特化、完整圖鑑、通用 Boss framework 或後續幕次塞進 runtime。
+目前專案已完成 v1 可玩原型、第二幕內容規劃、五幕總綱、灰燼裂谷 runtime data、灰燼守衛 Boss MVP、補給線升級素材化、燼印深窟、燼印鎮衛 Boss MVP、第 3 枚火之印記碎片來源、未接 Boss 任務時的深窟通關提示 UX、三碎片後工會詢問、工會 → 教堂／神殿接橋、教會查閱結果，以及 CLI UI MVP 的主選單 Rich Panel thin layer。轉職、聖物與職業特化目前皆為 preview-only，未新增正式狀態、save 欄位或數值效果。盜賊副武器使用既有 `head` slot，沒有新增 `offhand`。火之印記目前不是正式聖物，而是「未完成的火之印記核心」與未來正式聖物的零組件／核心材料；完整火之印記正式合成／啟用、火印熔爐、具名火印守護 Boss、正式教會火印流程仍未實作。`03_engine/engine` 已拆出 display、formatting、bestiary、previews 等 helper modules；`display.py` 目前也承載主選單 panel helper，但不要繼續為拆而拆。`06_tools/content_inventory_report.py` 是 read-only 盤點工具，不是 SSOT 或 validation 替代品。Windows 本機標準驗證入口是專案根目錄的 `run_checks.bat`；使用者本機已補裝 `.venv` 並回報 smoke test 成功；Codex 若遇到 Python runtime / sandbox 存取限制，不視為 gameplay 錯誤。目前沒有已批准的下一個 runtime 施工目標；不要急著把完整任務鏈、完整轉職、完整聖物、完整職業特化、完整圖鑑、通用 Boss framework、UI framework、Unity / HTML UI 或後續幕次塞進 runtime。
 
 ## 13. 轉職資料結構 MVP 收尾摘要
 

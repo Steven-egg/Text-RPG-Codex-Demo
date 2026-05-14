@@ -8,7 +8,7 @@ from copy import deepcopy
 from pathlib import Path
 
 from .bestiary import monster_locations
-from .display import clear_screen, menu, pause, setup_console, title
+from .display import clear_screen, main_menu_panel, menu, pause, setup_console, title
 from .formatting import equipment_summary, format_items, item_name, monster_drop_names
 from .previews import get_preview_promotions_for_job, get_preview_relics, show_job_specialization_preview
 from data import (
@@ -1681,9 +1681,17 @@ def tick_effects(state: dict, player_buffs: dict, enemy_buffs: dict) -> None:
 def main_loop(state: dict) -> None:
     while True:
         clamp_vitals(state)
-        title("主選單")
-        print(f"{state['name']} / {state['job']} Lv{state['level']} / {state['gold']}G")
-        choice = menu("選擇行動", ["查看狀態", "返回城鎮整備", "進入迷宮探索", "怪物圖鑑", "背包/裝備", "存檔", "離開遊戲"], allow_back=False)
+        main_options = [
+            "查看狀態",
+            "返回城鎮整備",
+            "進入迷宮探索",
+            "怪物圖鑑",
+            "背包/裝備",
+            "存檔",
+            "離開遊戲",
+        ]
+        player_summary = f"{state['name']} / {state['job']} Lv{state['level']} / {state['gold']}G"
+        choice = main_menu_panel("選擇行動", main_options, player_summary, allow_back=False)
         if choice == 1:
             show_status(state)
             pause()

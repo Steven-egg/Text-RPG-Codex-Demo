@@ -9,6 +9,8 @@
 - 灰燼裂谷、灰燼守衛 Boss MVP、補給線升級、燼印深窟、燼印鎮衛 Boss MVP 已完成。
 - `quest_supply_upgrade` 已素材化：需要 `mat_flame_stone_refined x3` 與 `mat_lava_shard x2`，完成後取得 `item_potion_m x2`，並解鎖旅人小鋪販售中藥水。
 - 中藥水已在燼印鎮衛 Boss 戰中確認有實戰價值；目前不再調 Boss 數值。
+- CLI UI MVP 已開始，只完成主選單 Rich `Panel` 包裝；這是 thin display layer，不改 gameplay flow、data、schema 或 save。
+- `06_tools/content_inventory_report.py` 已作為 read-only 內容盤點工具納入 README 說明，不是 validation 替代品。
 
 ## 火印第一章前置閉環
 
@@ -59,14 +61,18 @@
 - 目前沒有已批准的下一個 runtime 施工目標。
 - 教會查閱結果 MVP 已完成，不要再列為待做。
 - 火印熔爐、完整火印、火印守護 Boss、正式聖物、正式轉職、八元素、Act 3 都只能視為未來願景；不是當前下一步。
+- UI 目前只允許 CLI 顯示層薄包裝；不要擴張成 UI framework、Unity 或 HTML UI。
+- `content_inventory_report.py` 只做 read-only 盤點；不要把 report 輸出當成 SSOT 或 gameplay 變更依據。
 - 若未來要繼續 gameplay，仍需先做單一小切片 read-only 邊界確認，再由使用者明確批准施工範圍。
-- 文件同步輪只改 markdown，不改 runtime / data / schema / save / combat formula。
+- 若使用者指定文件同步輪，只改 markdown，不改 runtime / data / schema / save / combat formula。
 
 ## 最新驗證
 
-- `run_checks.bat` 仍可能因 PATH 找不到 `python` 失敗。
-- 已用 bundled Python 補跑：
+- 使用者本機已補裝 `.venv`，並回報 `python element_maze.py --smoke-test` 成功。
+- Codex 端直接使用 `.venv` 時遇到 WindowsApps Python stub 路徑限制；這是 Codex 沙盒環境問題，不視為 gameplay 錯誤。
+- Codex 已用 bundled Python 補跑：
   - `06_tools/validate_data.py`：`data validation ok`
   - `element_maze.py --smoke-test`：`smoke test ok`
+  - `06_tools/content_inventory_report.py --json`：成功輸出 report
 
-建議穩定節點 commit message：`Complete fire mark church inquiry flow`
+建議穩定節點 commit message：`Document CLI UI MVP and content inventory tooling`
