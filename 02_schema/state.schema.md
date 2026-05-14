@@ -59,6 +59,6 @@
 ## 未來注意事項
 
 - 不要手動把 `save.json` 當資料表改。
-- 讀取舊存檔時，runtime 需以 `ensure_state_defaults()` 補上 `storage_unlocked=False`、`storage={}` 與 `bestiary=[]`。
+- 讀取舊存檔時，runtime 需以 `ensure_state_defaults()` 補上 `flags={}`、`storage_unlocked=False`、`storage={}` 與 `bestiary=[]`。
 - 若 data id 改名，需處理舊存檔相容性。
 - 若新增裝備 slot，需同步更新 `equipment.schema.md` 與 `create_state()`。

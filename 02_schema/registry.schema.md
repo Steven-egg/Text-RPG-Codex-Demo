@@ -77,7 +77,12 @@ flag:boss_glen_defeated
 
 目前允許 flag：
 
+- `ash_guardian_defeated`
 - `boss_glen_defeated`
+- `cinder_seal_sentinel_defeated`
+- `fire_mark_church_bridge_done`
+- `fire_mark_church_lookup_done`
+- `fire_mark_guild_inquiry_done`
 
 ## Promotion preview
 

@@ -82,6 +82,8 @@ def create_state(name: str, job: str) -> dict:
     return state
 
 def ensure_state_defaults(state: dict) -> dict:
+    if not isinstance(state.get("flags"), dict):
+        state["flags"] = {}
     state.setdefault("storage_unlocked", False)
     if not isinstance(state.get("storage"), dict):
         state["storage"] = {}
@@ -1711,6 +1713,7 @@ def smoke_test() -> None:
     assert state["bestiary"] == []
     legacy_state = {"inventory": {}}
     ensure_state_defaults(legacy_state)
+    assert legacy_state["flags"] == {}
     assert legacy_state["storage_unlocked"] is False
     assert legacy_state["storage"] == {}
     assert legacy_state["bestiary"] == []

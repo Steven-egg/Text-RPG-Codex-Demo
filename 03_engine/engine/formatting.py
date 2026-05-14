@@ -23,6 +23,10 @@ def format_items(cost: dict) -> str:
             flag_names = {
                 "ash_guardian_defeated": "擊敗灰燼守衛",
                 "boss_glen_defeated": "擊敗山寨頭目葛倫",
+                "cinder_seal_sentinel_defeated": "擊敗燼印鎮衛",
+                "fire_mark_church_bridge_done": "完成火印神殿接橋",
+                "fire_mark_church_lookup_done": "完成火印教會查閱",
+                "fire_mark_guild_inquiry_done": "完成火印工會詢問",
             }
             parts.append(flag_names.get(flag, flag))
         else:
