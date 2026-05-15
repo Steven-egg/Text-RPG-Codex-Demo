@@ -9,7 +9,10 @@
 - 灰燼裂谷、灰燼守衛 Boss MVP、補給線升級、燼印深窟、燼印鎮衛 Boss MVP 已完成。
 - `quest_supply_upgrade` 已素材化：需要 `mat_flame_stone_refined x3` 與 `mat_lava_shard x2`，完成後取得 `item_potion_m x2`，並解鎖旅人小鋪販售中藥水。
 - 中藥水已在燼印鎮衛 Boss 戰中確認有實戰價值；目前不再調 Boss 數值。
-- CLI UI MVP 已開始，只完成主選單 Rich `Panel` 包裝；這是 thin display layer，不改 gameplay flow、data、schema 或 save。
+- CLI UI MVP 已推進到核心循環 Rich `Panel` 薄層：主選單、角色狀態、城鎮整備、迷宮選擇、迷宮探索、戰鬥指令與結算都已整理出狀態 / 提示 / 行動區；不改 gameplay flow、data、schema、save 或 combat formula。
+- 手動測試回饋後已修正迷宮 Boss/gate 提示混雜問題，Boss 狀態現在放在各迷宮選項；背包補上用途提示，旅館改為專屬 panel。
+- 第二輪手動回饋後，城鎮第 9 項已簡化為純倉庫入口；工會、工坊、商店、魔法書、合成與倉庫開始比照旅館走專屬設施 panel。工會內部已補可交付、進行中委託與 Boss 挑戰狀態提示。
+- UI 完成後再處理的 demo 遊玩體驗、平衡、任務引導與內容節奏 polish，已集中記錄在 `01_content/demo-playtest-notes.md`；它不是目前 runtime 施工清單。
 - `06_tools/content_inventory_report.py` 已作為 read-only 內容盤點工具納入 README 說明，不是 validation 替代品。
 
 ## 火印第一章前置閉環
@@ -54,14 +57,15 @@
 3. 需要詳細歷史時再讀 `01_content/codex-session-snapshot.md`
 4. 需要第二幕規劃脈絡時再讀 `01_content/act-2-content-plan.md`
 5. 需要長期幕次脈絡時再讀 `01_content/full-act-structure.md`
-6. 需要架構或玩法背景時再讀 `01_content/game-architecture.md`、`01_content/game-design.md`、`01_content/combat-growth-layering-plan.md`
+6. 需要 UI 完成後的 demo polish backlog 時再讀 `01_content/demo-playtest-notes.md`
+7. 需要架構或玩法背景時再讀 `01_content/game-architecture.md`、`01_content/game-design.md`、`01_content/combat-growth-layering-plan.md`
 
 ## 下一步邊界
 
 - 目前沒有已批准的下一個 runtime 施工目標。
 - 教會查閱結果 MVP 已完成，不要再列為待做。
 - 火印熔爐、完整火印、火印守護 Boss、正式聖物、正式轉職、八元素、Act 3 都只能視為未來願景；不是當前下一步。
-- UI 目前只允許 CLI 顯示層薄包裝；不要擴張成 UI framework、Unity 或 HTML UI。
+- UI 目前只允許 CLI 顯示層薄包裝；可延續 `render_panel()` / `action_menu_panel()` 做小步 panel 化，不要擴張成 UI framework、Unity 或 HTML UI。
 - `content_inventory_report.py` 只做 read-only 盤點；不要把 report 輸出當成 SSOT 或 gameplay 變更依據。
 - 若未來要繼續 gameplay，仍需先做單一小切片 read-only 邊界確認，再由使用者明確批准施工範圍。
 - 若使用者指定文件同步輪，只改 markdown，不改 runtime / data / schema / save / combat formula。
@@ -75,4 +79,4 @@
   - `element_maze.py --smoke-test`：`smoke test ok`
   - `06_tools/content_inventory_report.py --json`：成功輸出 report
 
-建議穩定節點 commit message：`Document CLI UI MVP and content inventory tooling`
+建議穩定節點 commit message：`Panelize core CLI loop screens`

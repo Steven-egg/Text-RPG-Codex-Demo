@@ -1,16 +1,25 @@
 # 《元素迷宮：邊境冒險者》終端機版
 
-## 最新完成：CLI UI MVP 主選單 panel 化與文件同步
+## 最新完成：核心循環 CLI UI panel 化
 
-最新 UI 變更只做 CLI 顯示層優化：
+最新 UI 變更仍只做 CLI 顯示層優化，採用「流程節點藍圖」反推核心循環畫面：
 
-- 主選單已使用 Rich `Panel` 包裝，顯示角色摘要與主選單行動列表。
-- 只新增薄層 helper `main_menu_panel()`；共用 `menu()` 仍維持原本輸入與 fallback print 行為。
+- `display.py` 新增薄層 `render_panel()` 與 `action_menu_panel()`，讓畫面能分成狀態、提示、行動與結算區。
+- 主選單補上 HP/MP 與下一步提示，維持原本主選單行動列表。
+- 城鎮整備、迷宮選擇、迷宮探索、戰鬥指令、探索/失敗結算已接入 Rich `Panel` 顯示。
+- 角色狀態頁拆成角色狀態、裝備、技能 panel。
+- 依手動測試回饋修正迷宮 Boss/gate 提示：Boss 狀態改放在各迷宮選項中，避免不同迷宮提示混在一起；葛倫已擊敗後會正確顯示已擊敗。
+- 背包顯示補上物品描述、任務、配方與工會收購用途；城鎮倉庫入口已簡化為純倉庫功能。
+- 旅館、冒險者工會、工坊、商店、魔法書、合成與倉庫開始改為專屬設施 panel。
+- 工會內部補上可交付、進行中委託與 Boss 挑戰狀態提示，避免重要線索只出現在主選單或迷宮選擇。
+- 數字輸入、返回邏輯、save/schema/data/combat formula 與 gameplay flow 維持原樣。
 - Rich 不可用時會退回原本的文字輸出，不影響啟動與 smoke test。
-- 本輪不修改 combat / dungeon / quest gameplay flow，不修改 data / schema / save，也不建立 UI framework。
+- 本輪不建立 UI framework，不擴張成 Unity / HTML UI。
 - 使用者本機已補裝 `.venv` 並回報 `python element_maze.py --smoke-test` 成功；Codex 端另以 bundled Python 驗證 smoke test、data validation 與 content inventory report。
 
-本輪也補上 `06_tools/content_inventory_report.py` 的 README 說明。它是 read-only 內容盤點工具，不是 gameplay 功能，也不是 validation 的替代品。
+`06_tools/content_inventory_report.py` 是 read-only 內容盤點工具，不是 gameplay 功能，也不是 validation 的替代品。
+
+UI 完成後要回頭處理的 demo 遊玩體驗、平衡、任務引導與內容節奏 polish，統一記錄在 `01_content/demo-playtest-notes.md`；它不是目前 runtime 施工清單。
 
 ## 近期完成：火之印記三碎片後的工會、神殿與教會查閱 MVP
 
@@ -77,7 +86,7 @@
 - 工會收購 MVP：工會可收購白名單素材，只給金幣；第一版不收消耗品、裝備或關鍵道具
 - 倉庫 MVP：可花費 500G 開啟 LV1 倉庫，存取最多 10 種非 key item 背包物品
 - 怪物圖鑑 MVP：擊敗怪物後 100% 登錄，可從主選單查看已登錄怪物的基礎資訊
-- CLI UI MVP：主選單以 Rich `Panel` 包裝；其他選單、戰鬥、迷宮、任務與存檔流程維持原樣
+- CLI UI MVP：核心循環已以 Rich `Panel` 薄層整理，涵蓋主選單、角色狀態、城鎮整備、迷宮選擇、迷宮探索、戰鬥指令與結算；輸入、資料、存檔與戰鬥規則維持原樣
 - 轉職 preview-only MVP：轉職神殿顯示 `PROMOTIONS` 預覽方向與條件，正式轉職尚未開放
 - 聖物 preview-only MVP：城鎮「聖物調查」顯示 `RELICS` 預覽，聖物取得與效果尚未開放
 - 職業特化 preview-only MVP：角色狀態頁顯示 `JOB_SPECIALIZATIONS` 預覽，目前尚未生效

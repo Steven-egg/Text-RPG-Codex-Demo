@@ -8,7 +8,17 @@ from copy import deepcopy
 from pathlib import Path
 
 from .bestiary import monster_locations
-from .display import clear_screen, main_menu_panel, menu, pause, setup_console, title
+from .display import (
+    action_menu_panel,
+    clear_screen,
+    main_menu_panel,
+    menu,
+    pause,
+    render_panel,
+    save_prompt_panel,
+    setup_console,
+    title,
+)
 from .formatting import equipment_summary, format_items, item_name, monster_drop_names
 from .previews import get_preview_promotions_for_job, get_preview_relics, show_job_specialization_preview
 from data import (
@@ -193,6 +203,182 @@ def clamp_vitals(state: dict) -> None:
     state["current_hp"] = max(0, min(state["current_hp"], stats["max_hp"]))
     state["current_mp"] = max(0, min(state["current_mp"], stats["max_mp"]))
 
+def player_summary_line(state: dict) -> str:
+    clamp_vitals(state)
+    stats = get_stats(state)
+    return (
+        f"{state['name']} / {state['job']} Lv{state['level']} / "
+        f"HP {state['current_hp']}/{stats['max_hp']} / "
+        f"MP {state['current_mp']}/{stats['max_mp']} / {state['gold']}G"
+    )
+
+def player_resource_lines(state: dict) -> list[str]:
+    stats = get_stats(state)
+    return [
+        player_summary_line(state),
+        f"工會積分 {state['guild_points']} / 經驗 {state['exp']}/{exp_to_next(state['level'])}",
+        (
+            f"攻擊 {stats['attack']} / 魔攻 {stats['magic_attack']} / 防禦 {stats['defense']} / "
+            f"敏捷 {stats['agility']} / 暴擊 {stats['crit']}% / 火抗 {stats['fire_resist']}%"
+        ),
+    ]
+
+def run_loot_summary(run_log: dict) -> str:
+    item_lines = [f"{item_name(item_id)} x{qty}" for item_id, qty in sorted(run_log.get("items", {}).items())]
+    item_text = "、".join(item_lines) if item_lines else "無"
+    return f"本趟收益：{run_log.get('gold', 0)}G / 物品：{item_text}"
+
+def ready_quest_titles(state: dict) -> list[str]:
+    return [
+        QUESTS[quest_id]["title"]
+        for quest_id in QUESTS
+        if quest_unlocked(state, quest_id) and quest_ready(state, quest_id)
+    ]
+
+def next_step_hint(state: dict) -> str:
+    if can_ask_fire_mark_guild_inquiry(state):
+        return "三枚火之印記碎片正在共鳴，回冒險者工會詢問諾亞。"
+    if should_show_fire_mark_church_lookup(state):
+        return "回轉職神殿詢問賽恩的查閱結果。"
+    if should_show_fire_mark_church_bridge(state):
+        return "帶著三枚火之印記碎片前往轉職神殿。"
+    if "quest_cinder_depths_scout" in state["completed_quests"] and not state["flags"].get("cinder_seal_sentinel_defeated"):
+        return "前往燼印深窟終點，挑戰燼印鎮衛。"
+    if "quest_supply_upgrade" in state["completed_quests"] and "quest_cinder_depths_scout" not in state["completed_quests"]:
+        return "探索燼印深窟並完成工會偵查委託。"
+    if state["flags"].get("ash_guardian_defeated") and "quest_supply_upgrade" not in state["completed_quests"]:
+        return "收集深窟素材，完成補給線升級。"
+    if "quest_ash_ravine_scout" in state["completed_quests"] and not state["flags"].get("ash_guardian_defeated"):
+        return "前往灰燼裂谷終點，挑戰灰燼守衛。"
+    if "quest_boss_glen" in state["completed_quests"] and "quest_ash_ravine_scout" not in state["completed_quests"]:
+        return "前往灰燼裂谷，帶回偵查素材。"
+    ready_titles = ready_quest_titles(state)
+    if ready_titles:
+        return f"工會有可交付委託：{ready_titles[0]}。"
+    return "整備補給與裝備後，選擇下一座迷宮探索。"
+
+def town_hint_lines(state: dict) -> list[str]:
+    hints = []
+    main_hint = next_step_hint(state)
+    if main_hint != "整備補給與裝備後，選擇下一座迷宮探索。":
+        hints.append(main_hint)
+    ready_titles = ready_quest_titles(state)
+    if ready_titles and not main_hint.startswith("工會有可交付委託"):
+        hints.append(f"工會有可交付委託：{'、'.join(ready_titles[:2])}。")
+    stats = get_stats(state)
+    if state["current_hp"] < stats["max_hp"] or state["current_mp"] < stats["max_mp"]:
+        hints.append("旅館可回復 HP/MP，適合在長探索或 Boss 前使用。")
+    if state["inventory"].get("item_potion_s", 0) + state["inventory"].get("item_potion_m", 0) == 0:
+        hints.append("背包沒有藥水，旅人小鋪可補充探索容錯。")
+    if not hints:
+        hints.append("把探索收益轉成任務、裝備、技能或補給後再出發。")
+    return hints
+
+def guild_hint_lines(state: dict) -> list[str]:
+    hints = []
+    ready_titles = ready_quest_titles(state)
+    if ready_titles:
+        hints.append(f"可交付委託：{'、'.join(ready_titles[:2])}。")
+
+    in_progress = []
+    for quest_id, quest in QUESTS.items():
+        if quest_unlocked(state, quest_id) and quest_id not in state["completed_quests"] and not quest_ready(state, quest_id):
+            in_progress.append(f"{quest['title']} 需要 {format_items(quest['turn_in'])}")
+    if in_progress:
+        hints.append(f"進行中：{in_progress[0]}。")
+
+    if "quest_ash_ravine_scout" in state["completed_quests"] and not state["flags"].get("ash_guardian_defeated"):
+        hints.append("灰燼裂谷偵查已完成；灰燼守衛已可在裂谷終點挑戰。")
+    elif state["flags"].get("ash_guardian_defeated") and "quest_supply_upgrade" not in state["completed_quests"]:
+        hints.append("灰燼守衛已擊敗；補給線升級委託已開放。")
+    elif "quest_cinder_depths_scout" in state["completed_quests"] and not state["flags"].get("cinder_seal_sentinel_defeated"):
+        hints.append("燼印深窟偵查已完成；燼印鎮衛已可在深窟終點挑戰。")
+
+    if not hints:
+        hints.append(next_step_hint(state))
+    return hints
+
+def recommended_level_note(recommended: str, level: int) -> str:
+    raw = recommended.replace("Lv", "")
+    parts = raw.split("-")
+    try:
+        low = int(parts[0])
+        high = int(parts[-1])
+    except (ValueError, IndexError):
+        return "等級參考"
+    if level < low:
+        return "等級偏低"
+    if level > high + 2:
+        return "可穩定回收"
+    return "適合探索"
+
+def dungeon_gate_hint(state: dict, dungeon_id: str) -> str:
+    dungeon = DUNGEONS[dungeon_id]
+    boss_id = dungeon.get("boss")
+    if not boss_id:
+        return "終點 Boss：無。"
+    boss_name = MONSTERS[boss_id]["name"]
+    if boss_available_at_dungeon_end(state, dungeon_id, boss_id):
+        return f"終點可能遭遇 {boss_name}，出發前確認 HP、藥水與火抗。"
+    if state["flags"].get("boss_glen_defeated") and boss_id == "boss_glen":
+        return f"{boss_name} 已擊敗。"
+    if state["flags"].get("ash_guardian_defeated") and boss_id == "boss_ash_guardian":
+        return f"{boss_name} 已擊敗。"
+    if state["flags"].get("cinder_seal_sentinel_defeated") and boss_id == "boss_cinder_seal_sentinel":
+        return f"{boss_name} 已擊敗。"
+    return f"{boss_name} 尚未滿足挑戰條件，先處理工會委託線索。"
+
+def dungeon_boss_status(state: dict, dungeon_id: str) -> str:
+    dungeon = DUNGEONS[dungeon_id]
+    boss_id = dungeon.get("boss")
+    if not boss_id:
+        return "Boss 無"
+    boss_name = MONSTERS[boss_id]["name"]
+    if boss_available_at_dungeon_end(state, dungeon_id, boss_id):
+        return f"Boss {boss_name}: 可挑戰"
+    if state["flags"].get("boss_glen_defeated") and boss_id == "boss_glen":
+        return f"Boss {boss_name}: 已擊敗"
+    if state["flags"].get("ash_guardian_defeated") and boss_id == "boss_ash_guardian":
+        return f"Boss {boss_name}: 已擊敗"
+    if state["flags"].get("cinder_seal_sentinel_defeated") and boss_id == "boss_cinder_seal_sentinel":
+        return f"Boss {boss_name}: 已擊敗"
+    return f"Boss {boss_name}: 需任務線索"
+
+def dungeon_option_line(state: dict, dungeon_id: str) -> str:
+    dungeon = DUNGEONS[dungeon_id]
+    clear = "已通關" if dungeon_id in state["cleared_dungeons"] else "未通關"
+    level_note = recommended_level_note(dungeon["recommended"], state["level"])
+    return (
+        f"{dungeon['name']} / 推薦 {dungeon['recommended']} / {dungeon['steps']} 步 / "
+        f"{dungeon['element']} / {clear} / {level_note} / {dungeon_boss_status(state, dungeon_id)}"
+    )
+
+def buff_summary(buffs: dict) -> str:
+    labels = {
+        "burn": "灼傷",
+        "defense_up": "防禦上升",
+        "defense_down": "防禦下降",
+        "quickstep": "迅步",
+        "cinder_mark": "燼印",
+    }
+    active = [f"{labels.get(key, key)} {turns}" for key, turns in buffs.items() if turns > 0]
+    return "、".join(active) if active else "無"
+
+def combat_panel_lines(
+    state: dict,
+    enemy: dict,
+    enemy_hp: int,
+    turn: int,
+    player_buffs: dict,
+    enemy_buffs: dict,
+) -> list[str]:
+    stats = get_stats(state, player_buffs)
+    return [
+        f"回合 {turn}",
+        f"{state['name']} HP {state['current_hp']}/{stats['max_hp']} / MP {state['current_mp']}/{stats['max_mp']} / 狀態 {buff_summary(player_buffs)}",
+        f"{enemy['name']} HP {enemy_hp}/{enemy['hp']} / 屬性 {enemy['element']} / 狀態 {buff_summary(enemy_buffs)}",
+    ]
+
 def gain_exp(state: dict, amount: int) -> None:
     print(f"獲得經驗 {amount}。")
     state["exp"] += amount
@@ -258,34 +444,61 @@ def new_game() -> dict:
 
 def show_status(state: dict) -> None:
     clamp_vitals(state)
-    stats = get_stats(state)
-    title(f"{state['name']} / {state['job']} Lv{state['level']}")
-    print(f"HP {state['current_hp']}/{stats['max_hp']}  MP {state['current_mp']}/{stats['max_mp']}")
-    print(f"金幣 {state['gold']}G  工會積分 {state['guild_points']}")
-    print(
-        f"攻擊 {stats['attack']}  魔攻 {stats['magic_attack']}  防禦 {stats['defense']}  "
-        f"敏捷 {stats['agility']}  命中 100%  暴擊 {stats['crit']}%  火抗 {stats['fire_resist']}%"
-    )
-    print(f"經驗 {state['exp']}/{exp_to_next(state['level'])}")
-    print("\n裝備")
+    render_panel("角色狀態", player_resource_lines(state), border_style="cyan")
+
     slot_names = {"weapon": "武器", "head": "頭部", "body": "身體", "accessory": "飾品", "special": "特殊"}
+    equipment_lines = []
     for slot, label in slot_names.items():
         item_id = state["equipment"].get(slot)
-        print(f"- {label}: {item_name(item_id) if item_id else '無'}")
-    print("\n技能")
+        equipment_lines.append(f"{label}: {item_name(item_id) if item_id else '無'}")
+    render_panel("裝備", equipment_lines, border_style="green")
+
+    skill_lines = []
     for skill_id in state["learned_skills"]:
         skill = SKILLS[skill_id]
-        print(f"- {skill['name']} / MP {skill['mp']}: {skill['desc']}")
+        skill_lines.append(f"{skill['name']} / MP {skill['mp']}: {skill['desc']}")
+    render_panel("技能", skill_lines, border_style="magenta")
 
     show_job_specialization_preview(state["job"])
 
 def show_inventory(state: dict) -> None:
-    title("背包與素材")
     if not state["inventory"]:
-        print("背包目前是空的。")
+        render_panel("背包與素材", ["背包目前是空的。"], border_style="green")
         return
+    lines = []
     for item_id, qty in sorted(state["inventory"].items(), key=lambda pair: item_name(pair[0])):
-        print(f"- {item_name(item_id)} x{qty}")
+        lines.append(f"{item_name(item_id)} x{qty} / {item_usage_summary(item_id)}")
+    render_panel("背包與素材", lines, border_style="green")
+
+def item_usage_summary(item_id: str) -> str:
+    data = ITEMS.get(item_id) or EQUIPMENT.get(item_id)
+    desc = data.get("desc", "") if data else ""
+    usage = []
+    if item_id in EQUIPMENT:
+        usage.append("可裝備")
+    if item_id in {"item_potion_s", "item_potion_m", "item_focus_drop", "item_herb_antidote", "item_armor_piercer", "item_escape_scroll"}:
+        usage.append("戰鬥可用")
+    if is_key_item(item_id):
+        usage.append("關鍵道具")
+    quest_titles = [
+        quest["title"]
+        for quest in QUESTS.values()
+        if item_id in quest.get("turn_in", {})
+    ]
+    if quest_titles:
+        usage.append(f"任務：{'、'.join(quest_titles[:2])}")
+    recipe_names = [
+        recipe["name"]
+        for recipe in RECIPES.values()
+        if item_id in recipe.get("materials", {}) or recipe.get("base_item") == item_id
+    ]
+    if recipe_names:
+        usage.append(f"配方：{'、'.join(recipe_names[:2])}")
+    if item_id in GUILD_MATERIAL_BUY_PRICES:
+        usage.append(f"工會收購 {GUILD_MATERIAL_BUY_PRICES[item_id]}G")
+    if usage:
+        return f"{desc} 用途：{'；'.join(usage)}。"
+    return desc or "目前沒有額外用途提示。"
 
 def equip_item(state: dict, item_id: str, quiet: bool = False) -> bool:
     if item_id not in EQUIPMENT:
@@ -313,15 +526,25 @@ def equip_item(state: dict, item_id: str, quiet: bool = False) -> bool:
 def equipment_menu(state: dict) -> None:
     while True:
         equippables = [item_id for item_id in state["inventory"] if item_id in EQUIPMENT]
-        title("裝備管理")
-        for slot, item_id in state["equipment"].items():
-            print(f"{slot}: {item_name(item_id) if item_id else '無'}")
+        slot_names = {"weapon": "武器", "head": "頭部", "body": "身體", "accessory": "飾品", "special": "特殊"}
+        current_lines = [
+            f"{slot_names.get(slot, slot)}: {item_name(item_id) if item_id else '無'}"
+            for slot, item_id in state["equipment"].items()
+        ]
+        render_panel("目前裝備", current_lines, border_style="green")
         if not equippables:
             print("\n背包裡沒有可裝備物品。")
             pause()
             return
         options = [f"{item_name(item_id)} - {equipment_summary(item_id)}" for item_id in equippables]
-        choice = menu("選擇要裝備的物品", options)
+        choice = action_menu_panel(
+            "選擇要裝備的物品",
+            options,
+            "裝備管理",
+            header_lines=["選擇物品後會替換同欄位目前裝備。"],
+            allow_back=True,
+            border_style="green",
+        )
         if choice == 0:
             return
         equip_item(state, equippables[choice - 1])
@@ -335,7 +558,6 @@ def is_shop_item_available(state: dict, item_id: str) -> bool:
 
 def buy_menu(state: dict, shop_name: str, item_ids: list[str]) -> None:
     while True:
-        title(shop_name)
         available = [item_id for item_id in item_ids if is_shop_item_available(state, item_id)]
         options = []
         for item_id in available:
@@ -346,11 +568,18 @@ def buy_menu(state: dict, shop_name: str, item_ids: list[str]) -> None:
                 detail = data.get("desc", "")
             options.append(f"{item_name(item_id)} / {data['price']}G / {detail}")
         if not options:
-            print("目前沒有可購買商品。")
+            render_panel(shop_name, ["目前沒有可購買商品。"], border_style="green")
             pause()
             return
-        print(f"持有金幣：{state['gold']}G")
-        choice = menu("選擇商品", options)
+        choice = action_menu_panel(
+            "選擇商品",
+            options,
+            shop_name,
+            header_lines=[f"持有金幣：{state['gold']}G"],
+            hint_lines=["購買後會放入背包；裝備仍需到背包/裝備中替換。"],
+            allow_back=True,
+            border_style="green",
+        )
         if choice == 0:
             return
         item_id = available[choice - 1]
@@ -374,9 +603,6 @@ def magic_book_price(state: dict, book_id: str) -> int:
 
 def magic_shop(state: dict) -> None:
     while True:
-        title("星燈魔法商店")
-        print("伊芙輕輕敲了敲書脊：「願星辰指引你的靈魂，冒險者。今天需要一點魔法的幫助嗎？」")
-        print(f"持有金幣：{state['gold']}G")
         book_ids = list(MAGIC_BOOKS.keys())
         options = []
         for book_id in book_ids:
@@ -388,7 +614,18 @@ def magic_shop(state: dict) -> None:
             options.append(
                 f"{book['name']} / {status} / {','.join(book['jobs'])} Lv{book['level']} / {skill['desc']}"
             )
-        choice = menu("選擇要學習的魔法書", options)
+        choice = action_menu_panel(
+            "選擇要學習的魔法書",
+            options,
+            "星燈魔法商店",
+            header_lines=[
+                "伊芙輕輕敲了敲書脊：「願星辰指引你的靈魂，冒險者。」",
+                f"持有金幣：{state['gold']}G",
+            ],
+            hint_lines=["魔法書學會後會永久加入戰鬥技能。"],
+            allow_back=True,
+            border_style="magenta",
+        )
         if choice == 0:
             return
         book_id = book_ids[choice - 1]
@@ -418,13 +655,11 @@ def recipe_available(state: dict, recipe_id: str) -> bool:
 
 def craft_menu(state: dict, title_text: str, recipe_ids: list[str]) -> None:
     while True:
-        title(title_text)
         available = [recipe_id for recipe_id in recipe_ids if recipe_available(state, recipe_id)]
         if not available:
-            print("目前沒有可用配方。")
+            render_panel(title_text, ["目前沒有可用配方。"], border_style="green")
             pause()
             return
-        print(f"持有金幣：{state['gold']}G")
         options = []
         for recipe_id in available:
             recipe = RECIPES[recipe_id]
@@ -432,7 +667,15 @@ def craft_menu(state: dict, title_text: str, recipe_ids: list[str]) -> None:
             options.append(
                 f"{recipe['name']} / {recipe['gold']}G / {format_items(recipe['materials'])}{base} / {recipe['desc']}"
             )
-        choice = menu("選擇配方", options)
+        choice = action_menu_panel(
+            "選擇配方",
+            options,
+            title_text,
+            header_lines=[f"持有金幣：{state['gold']}G"],
+            hint_lines=["製作會消耗素材；若配方需要基底裝備，已裝備物也可被消耗。"],
+            allow_back=True,
+            border_style="green",
+        )
         if choice == 0:
             return
         recipe_id = available[choice - 1]
@@ -502,20 +745,27 @@ def relic_preview_menu(state: dict) -> None:
 
 def town_menu(state: dict) -> None:
     while True:
-        title("邊境城鎮艾爾姆")
         options = [
-            "冒險者工會",
-            "鐵刃工坊",
-            "堅甲工坊",
-            "旅人小鋪",
-            "米菈合成屋",
-            "星燈魔法商店",
-            "轉職神殿",
-            "聖物調查",
-            "倉庫/背包",
-            "旅館休息 30G",
+            "冒險者工會 - 委託、素材收購與火印線索",
+            "鐵刃工坊 - 武器購買與強化",
+            "堅甲工坊 - 防具購買與強化",
+            "旅人小鋪 - 補給與特殊道具",
+            "米菈合成屋 - 把素材轉成裝備與戰術道具",
+            "星燈魔法商店 - 學習永久技能",
+            "轉職神殿 - 轉職、火印與未來方向預覽",
+            "聖物調查 - 預覽未開放聖物線索",
+            "倉庫 - 存放與取出非關鍵物品",
+            "旅館休息 30G - 回復 HP/MP",
         ]
-        choice = menu("你要去哪裡", options)
+        choice = action_menu_panel(
+            "你要去哪裡",
+            options,
+            "邊境城鎮艾爾姆",
+            header_lines=player_resource_lines(state)[:2],
+            hint_lines=town_hint_lines(state),
+            allow_back=True,
+            border_style="green",
+        )
         if choice == 0:
             return
         if choice == 1:
@@ -543,16 +793,24 @@ def town_menu(state: dict) -> None:
         elif choice == 8:
             relic_preview_menu(state)
         elif choice == 9:
-            backpack_menu(state, allow_storage=True)
+            storage_menu(state)
         elif choice == 10:
             rest_inn(state)
 
 def iron_workshop(state: dict) -> None:
     while True:
-        title("鐵刃工坊")
-        print("伴隨著鐵錘敲擊砧台的節奏，這裡充滿了金屬與汗水的硬派氣息。\n") 
-        print("葛雷抬起頭，抹了一把汗看著你：\n「最好的防禦就是進攻！來挑一把能讓敵人發抖的傢伙吧。」")
-        choice = menu("鐵刃工坊", ["購買武器", "強化武器"])
+        choice = action_menu_panel(
+            "鐵刃工坊",
+            ["購買武器", "強化武器"],
+            "鐵刃工坊",
+            header_lines=[
+                "伴隨著鐵錘敲擊砧台的節奏，這裡充滿了金屬與汗水的硬派氣息。",
+                "葛雷抹了一把汗：「最好的防禦就是進攻。」",
+            ],
+            hint_lines=["武器升級能縮短戰鬥回合；購買後仍需到裝備管理替換。"],
+            allow_back=True,
+            border_style="yellow",
+        )
         if choice == 0:
             return
         if choice == 1:
@@ -562,10 +820,18 @@ def iron_workshop(state: dict) -> None:
 
 def armor_workshop(state: dict) -> None:
     while True:
-        title("堅甲工坊")
-        print("布琳的手指滑過一排整齊的甲冑，語氣自信：")
-        print("「這些都是工坊的得意之作，耐用、實惠，品質無可挑剔。隨便挑，每一件都經得起實戰檢驗。」")
-        choice = menu("堅甲工坊", ["購買防具", "強化防具"])
+        choice = action_menu_panel(
+            "堅甲工坊",
+            ["購買防具", "強化防具"],
+            "堅甲工坊",
+            header_lines=[
+                "布琳的手指滑過一排整齊的甲冑。",
+                "「耐用、實惠，品質無可挑剔。每一件都經得起實戰檢驗。」",
+            ],
+            hint_lines=["防具與抗性裝能提高長探索容錯；購買後仍需到裝備管理替換。"],
+            allow_back=True,
+            border_style="green",
+        )
         if choice == 0:
             return
         if choice == 1:
@@ -575,8 +841,22 @@ def armor_workshop(state: dict) -> None:
 
 def rest_inn(state: dict) -> None:
     stats = get_stats(state)
+    render_panel(
+        "微光旅店",
+        [
+            "旅店老闆擦亮櫃台上的銅鈴：「睡一晚，明天的路會比較像路。」",
+            f"費用：30G / 目前金幣：{state['gold']}G",
+            f"目前 HP {state['current_hp']}/{stats['max_hp']} / MP {state['current_mp']}/{stats['max_mp']}",
+        ],
+        border_style="green",
+    )
     if state["gold"] < 30:
         print("旅館老闆搖搖頭：「先去工會看看有沒有簡單委託吧。」")
+        pause()
+        return
+    raw = input("要休息一晚嗎？(y/n) > ").strip().lower()
+    if raw != "y":
+        print("暫不休息。")
     else:
         state["gold"] -= 30
         state["current_hp"] = stats["max_hp"]
@@ -613,8 +893,15 @@ def prompt_quantity(action: str, item_id: str, available: int) -> int | None:
 def storage_menu(state: dict) -> None:
     ensure_state_defaults(state)
     if not state["storage_unlocked"]:
-        title("倉庫")
-        print(f"工會旁的小倉庫還沒整理好。開啟 LV1 倉庫需要 {STORAGE_UNLOCK_COST}G。")
+        render_panel(
+            "工會倉庫",
+            [
+                "工會旁的小倉庫還沒整理好，木箱上還掛著新的銅鎖。",
+                f"開啟 LV1 倉庫需要 {STORAGE_UNLOCK_COST}G。",
+                f"目前金幣：{state['gold']}G / 容量：{STORAGE_CAPACITY} 種非關鍵物品。",
+            ],
+            border_style="green",
+        )
         if state["gold"] < STORAGE_UNLOCK_COST:
             print("金幣不足，暫時無法開啟倉庫。")
             pause()
@@ -630,9 +917,17 @@ def storage_menu(state: dict) -> None:
         return
 
     while True:
-        title("倉庫 LV1")
-        print(f"容量：{storage_kind_count(state)}/{STORAGE_CAPACITY} 種物品。")
-        choice = menu("選擇動作", ["查看倉庫", "存入物品", "取出物品"])
+        choice = action_menu_panel(
+            "選擇動作",
+            ["查看倉庫", "存入物品", "取出物品"],
+            "倉庫 LV1",
+            header_lines=[
+                f"容量：{storage_kind_count(state)}/{STORAGE_CAPACITY} 種物品。",
+                "關鍵道具不會存入倉庫。",
+            ],
+            allow_back=True,
+            border_style="green",
+        )
         if choice == 0:
             return
         if choice == 1:
@@ -645,12 +940,11 @@ def storage_menu(state: dict) -> None:
 
 def show_storage(state: dict) -> None:
     ensure_state_defaults(state)
-    title("倉庫內容")
     if not state["storage"]:
-        print("倉庫目前是空的。")
+        render_panel("倉庫內容", ["倉庫目前是空的。"], border_style="green")
         return
-    for item_id, qty in state["storage"].items():
-        print(f"- {item_name(item_id)} x{qty}")
+    lines = [f"{item_name(item_id)} x{qty}" for item_id, qty in state["storage"].items()]
+    render_panel("倉庫內容", lines, border_style="green")
 
 def storage_deposit_menu(state: dict) -> None:
     ensure_state_defaults(state)
@@ -676,7 +970,14 @@ def storage_deposit_menu(state: dict) -> None:
             room_note = " / 倉庫已滿，無法新增種類"
         options.append(f"{item_name(item_id)} x{state['inventory'][item_id]}{room_note}")
 
-    choice = menu("選擇要存入的物品", options)
+    choice = action_menu_panel(
+        "選擇要存入的物品",
+        options,
+        "倉庫存入",
+        header_lines=[f"容量：{storage_kind_count(state)}/{STORAGE_CAPACITY} 種物品。"],
+        allow_back=True,
+        border_style="green",
+    )
     if choice == 0:
         return
 
@@ -711,7 +1012,14 @@ def storage_withdraw_menu(state: dict) -> None:
 
     item_ids = list(state["storage"].keys())
     options = [f"{item_name(item_id)} x{state['storage'][item_id]}" for item_id in item_ids]
-    choice = menu("選擇要取出的物品", options)
+    choice = action_menu_panel(
+        "選擇要取出的物品",
+        options,
+        "倉庫取出",
+        header_lines=[f"容量：{storage_kind_count(state)}/{STORAGE_CAPACITY} 種物品。"],
+        allow_back=True,
+        border_style="green",
+    )
     if choice == 0:
         return
 
@@ -769,12 +1077,18 @@ def bestiary_menu(state: dict) -> None:
 
 def backpack_menu(state: dict, allow_storage: bool = False) -> None:
     while True:
-        title("倉庫/背包")
-        options = ["查看背包", "裝備管理"]
+        options = ["查看背包與素材用途", "裝備管理"]
         if allow_storage:
             options.append("倉庫")
-        options.append("查看狀態")
-        choice = menu("選擇動作", options)
+        choice = action_menu_panel(
+            "選擇動作",
+            options,
+            "背包 / 裝備",
+            header_lines=player_resource_lines(state)[:2],
+            hint_lines=["背包會顯示描述、任務、配方與收購用途；裝備管理用來實際替換裝備。"],
+            allow_back=True,
+            border_style="green",
+        )
         if choice == 0:
             return
         if choice == 1:
@@ -784,9 +1098,6 @@ def backpack_menu(state: dict, allow_storage: bool = False) -> None:
             equipment_menu(state)
         elif allow_storage and choice == 3:
             storage_menu(state)
-        elif choice == len(options):
-            show_status(state)
-            pause()
 
 def quest_unlocked(state: dict, quest_id: str) -> bool:
     if quest_id == "quest_register":
@@ -830,13 +1141,22 @@ def fire_mark_guild_inquiry(state: dict) -> None:
 
 def guild_menu(state: dict) -> None:
     while True:
-        title("冒險者工會")
-        print("諾亞從一堆文件中抬頭，對你點了點頭：\n「歡迎回來。想挑戰新目標，還是要交付已完成的委託？」")
         options = ["查看委託任務", "收購素材"]
         inquiry_option = can_ask_fire_mark_guild_inquiry(state)
         if inquiry_option:
             options.append("詢問三枚印記碎片的事情")
-        choice = menu("選擇服務", options)
+        choice = action_menu_panel(
+            "選擇服務",
+            options,
+            "冒險者工會",
+            header_lines=[
+                "諾亞從一堆文件中抬頭，對你點了點頭。",
+                "「歡迎回來。想挑戰新目標，還是要交付已完成的委託？」",
+            ],
+            hint_lines=guild_hint_lines(state),
+            allow_back=True,
+            border_style="cyan",
+        )
         if choice == 0:
             return
         if choice == 1:
@@ -849,8 +1169,6 @@ def guild_menu(state: dict) -> None:
 
 def guild_quest_menu(state: dict) -> None:
     while True:
-        title("冒險者工會")
-        print("諾亞從一堆文件中抬頭，對你點了點頭：\n「歡迎回來。想挑戰新目標，還是要交付已完成的委託？」")
         quest_ids = [qid for qid in QUESTS if quest_unlocked(state, qid)]
         options = []
         for quest_id in quest_ids:
@@ -862,7 +1180,15 @@ def guild_quest_menu(state: dict) -> None:
             else:
                 status = f"進行中，需求 {format_items(quest['turn_in'])}"
             options.append(f"{quest['title']} / {status}")
-        choice = menu("選擇任務", options)
+        choice = action_menu_panel(
+            "選擇任務",
+            options,
+            "工會委託",
+            header_lines=["委託清單會保留已完成任務，方便確認目前進度。"],
+            hint_lines=guild_hint_lines(state),
+            allow_back=True,
+            border_style="cyan",
+        )
         if choice == 0:
             return
         quest_id = quest_ids[choice - 1]
@@ -871,15 +1197,20 @@ def guild_quest_menu(state: dict) -> None:
 
 def guild_material_buy_menu(state: dict) -> None:
     while True:
-        title("工會收購素材")
-        print("諾亞推來一只木箱：「只收登記過的可重複素材，劇情物品我可不敢碰。」")
         buyable_ids = [
             item_id
             for item_id in GUILD_MATERIAL_BUY_PRICES
             if state["inventory"].get(item_id, 0) > 0
         ]
         if not buyable_ids:
-            print("背包裡沒有工會目前收購的素材。")
+            render_panel(
+                "工會收購素材",
+                [
+                    "諾亞推來一只木箱：「只收登記過的可重複素材，劇情物品我可不敢碰。」",
+                    "背包裡沒有工會目前收購的素材。",
+                ],
+                border_style="cyan",
+            )
             pause()
             return
 
@@ -889,7 +1220,14 @@ def guild_material_buy_menu(state: dict) -> None:
             price = GUILD_MATERIAL_BUY_PRICES[item_id]
             options.append(f"{item_name(item_id)} x{qty} / 單價 {price}G")
 
-        choice = menu("選擇要出售的素材", options)
+        choice = action_menu_panel(
+            "選擇要出售的素材",
+            options,
+            "工會收購素材",
+            header_lines=["諾亞推來一只木箱：「只收登記過的可重複素材，劇情物品我可不敢碰。」"],
+            allow_back=True,
+            border_style="cyan",
+        )
         if choice == 0:
             return
 
@@ -1081,13 +1419,19 @@ def dungeon_menu(state: dict) -> None:
         print("目前沒有可探索的迷宮。")
         pause()
         return
-    title("迷宮探索")
-    options = []
-    for dungeon_id in unlocked_dungeons:
-        dungeon = DUNGEONS[dungeon_id]
-        clear = "已通關" if dungeon_id in state["cleared_dungeons"] else "未通關"
-        options.append(f"{dungeon['name']} / 推薦 {dungeon['recommended']} / {dungeon['steps']} 步 / {clear}")
-    choice = menu("選擇迷宮", options)
+    options = [dungeon_option_line(state, dungeon_id) for dungeon_id in unlocked_dungeons]
+    hint_lines = [next_step_hint(state)]
+    if any(DUNGEONS[dungeon_id]["element"] == "火" for dungeon_id in unlocked_dungeons):
+        hint_lines.append(f"目前火抗 {get_stats(state)['fire_resist']}%，火系迷宮前建議檢查補給。")
+    choice = action_menu_panel(
+        "選擇迷宮",
+        options,
+        "迷宮探索",
+        header_lines=[player_summary_line(state)],
+        hint_lines=hint_lines,
+        allow_back=True,
+        border_style="yellow",
+    )
     if choice == 0:
         return
     explore_dungeon(state, unlocked_dungeons[choice - 1])
@@ -1127,8 +1471,16 @@ def clear_dungeon_boss(state: dict, boss_id: str, run_log: dict) -> None:
 def explore_dungeon(state: dict, dungeon_id: str) -> None:
     dungeon = DUNGEONS[dungeon_id]
     run_log = {"gold": 0, "items": {}}
-    title(dungeon["name"])
-    print(f"推薦等級：{dungeon['recommended']}  主要屬性：{dungeon['element']}")
+    render_panel(
+        dungeon["name"],
+        [
+            f"推薦等級：{dungeon['recommended']} / 目前 {state['job']} Lv{state['level']} ({recommended_level_note(dungeon['recommended'], state['level'])})",
+            f"主要屬性：{dungeon['element']} / 路線長度：{dungeon['steps']} 步",
+            dungeon_gate_hint(state, dungeon_id),
+            "按 Enter 前進；輸入 r 可帶著本趟收穫撤退。",
+        ],
+        border_style="yellow",
+    )
     if state["equipment"].get("special") == "special_focus_pouch":
         add_loot(state, "item_focus_drop", 1, run_log)
         print("集中藥袋發出微光，你在出發前多整理出一瓶集中滴露。")
@@ -1138,10 +1490,19 @@ def explore_dungeon(state: dict, dungeon_id: str) -> None:
         if state["current_hp"] <= 0:
             handle_defeat(state, run_log)
             return
-        print(f"\n第 {step}/{dungeon['steps']} 步  HP {state['current_hp']}/{stats['max_hp']}  MP {state['current_mp']}/{stats['max_mp']}")
+        render_panel(
+            "探索狀態",
+            [
+                f"{dungeon['name']} / 第 {step}/{dungeon['steps']} 步",
+                f"HP {state['current_hp']}/{stats['max_hp']} / MP {state['current_mp']}/{stats['max_mp']}",
+                run_loot_summary(run_log),
+            ],
+            border_style="green",
+        )
         raw = input("按 Enter 前進，輸入 r 撤退 > ").strip().lower()
         if raw == "r":
             print("你帶著本趟收穫返回城鎮。")
+            render_panel("探索結算", ["撤退成功。", run_loot_summary(run_log)], border_style="green")
             pause()
             return
         event = choose_weighted_event()
@@ -1189,6 +1550,15 @@ def explore_dungeon(state: dict, dungeon_id: str) -> None:
     ):
         print("\n深窟深處仍殘留著某種守護者的氣息。")
         print("這裡似乎還有未解開的事情。或許可以回冒險者工會詢問諾亞。")
+    render_panel(
+        "探索結算",
+        [
+            f"完成路線：{dungeon['name']}",
+            run_loot_summary(run_log),
+            next_step_hint(state),
+        ],
+        border_style="green",
+    )
     pause()
 
 def dungeon_material_event(state: dict, dungeon: dict, run_log: dict) -> None:
@@ -1233,7 +1603,6 @@ def dungeon_special_event(state: dict, dungeon_id: str, run_log: dict) -> None:
             print("路標後方還卡著熔岩碎片 x1。")
 
 def handle_defeat(state: dict, run_log: dict) -> None:
-    title("戰鬥失敗")
     lost_gold = math.floor(run_log.get("gold", 0) * 0.3)
     state["gold"] = max(0, state["gold"] - lost_gold)
     lost_items = []
@@ -1246,12 +1615,14 @@ def handle_defeat(state: dict, run_log: dict) -> None:
     stats = get_stats(state)
     state["current_hp"] = max(1, stats["max_hp"] // 2)
     state["current_mp"] = max(0, stats["max_mp"] // 2)
-    print("工會救援隊把你帶回艾爾姆。")
-    print(f"失去本趟金幣 {lost_gold}G。")
-    if lost_items:
-        print("散落素材：" + "、".join(lost_items))
-    else:
-        print("素材大致都保住了。")
+    result_lines = [
+        "工會救援隊把你帶回艾爾姆。",
+        f"失去本趟金幣 {lost_gold}G。",
+        "散落素材：" + "、".join(lost_items) if lost_items else "素材大致都保住了。",
+        f"回城後 HP {state['current_hp']}/{stats['max_hp']} / MP {state['current_mp']}/{stats['max_mp']}",
+        next_step_hint(state),
+    ]
+    render_panel("戰鬥失敗 / 回城結算", result_lines, border_style="red")
     pause()
 
 def clear_boss_glen(state: dict, run_log: dict) -> None:
@@ -1349,18 +1720,29 @@ def combat(state: dict, enemy_id: str, boss: bool = False, run_log: dict | None 
     enemy_buffs = {}
     turn = 1
     boss_marker = False
-    title(f"遭遇 {enemy['name']}")
+    render_panel(
+        f"遭遇 {enemy['name']}",
+        [
+            f"敵人屬性：{enemy['element']} / HP {enemy_hp}/{enemy['hp']}",
+            "觀察敵我狀態後選擇攻擊、防禦、技能或道具。",
+        ],
+        border_style="red" if boss else "yellow",
+    )
     while enemy_hp > 0 and state["current_hp"] > 0:
         clamp_vitals(state)
-        stats = get_stats(state, player_buffs)
-        print(f"\n回合 {turn}")
-        print(f"{state['name']} HP {state['current_hp']}/{stats['max_hp']} MP {state['current_mp']}/{stats['max_mp']}")
-        print(f"{enemy['name']} HP {enemy_hp}/{enemy['hp']}")
 
         options = ["攻擊", "防禦", "技能", "道具"]
         if not boss:
             options.append("逃跑")
-        choice = menu("戰鬥指令", options, allow_back=False)
+        choice = action_menu_panel(
+            "戰鬥指令",
+            options,
+            "戰鬥狀態",
+            header_lines=combat_panel_lines(state, enemy, enemy_hp, turn, player_buffs, enemy_buffs),
+            hint_lines=["Boss 戰不可逃跑。" if boss else "逃跑失敗時敵人仍會行動。"],
+            allow_back=False,
+            border_style="red" if boss else "yellow",
+        )
         defending = False
         escaped = False
 
@@ -1371,6 +1753,7 @@ def combat(state: dict, enemy_id: str, boss: bool = False, run_log: dict | None 
         elif choice == 2:
             defending = True
             if player_buffs.get("defense_up", 0) > 0:
+                stats = get_stats(state, player_buffs)
                 state["current_mp"] = min(stats["max_mp"], state["current_mp"] + 2)
                 print("你穩住姿勢，符文讓你回復 MP 2。")
             print("你採取防禦姿態。")
@@ -1430,6 +1813,11 @@ def combat(state: dict, enemy_id: str, boss: bool = False, run_log: dict | None 
         print("你摸清了斥候的護甲結構，旅人小鋪開始販售破甲釘，米菈也能製作破甲釘組。")
     if enemy_id == "mon_lava_imp":
         unlock(state, "recipe_heat_charm")
+    result_lines = [f"擊敗 {enemy['name']}。", f"目前 {player_summary_line(state)}"]
+    if run_log is not None:
+        result_lines.append(run_loot_summary(run_log))
+    result_lines.append("Boss 結果將在迷宮結算中處理。" if boss else next_step_hint(state))
+    render_panel("戰鬥結算", result_lines, border_style="red" if boss else "green")
     return True
 
 def player_attack(state: dict, enemy: dict, enemy_hp: int, skill: dict | None, player_buffs: dict, enemy_buffs: dict):
@@ -1690,8 +2078,13 @@ def main_loop(state: dict) -> None:
             "存檔",
             "離開遊戲",
         ]
-        player_summary = f"{state['name']} / {state['job']} Lv{state['level']} / {state['gold']}G"
-        choice = main_menu_panel("選擇行動", main_options, player_summary, allow_back=False)
+        choice = main_menu_panel(
+            "選擇行動",
+            main_options,
+            player_summary_line(state),
+            allow_back=False,
+            hint_lines=[next_step_hint(state)],
+        )
         if choice == 1:
             show_status(state)
             pause()
@@ -1772,8 +2165,7 @@ def main() -> None:
 
     state = None
     if SAVE_PATH.exists():
-        title("找到存檔")
-        choice = menu("要讀取舊存檔嗎", ["讀取存檔", "重新開始"], allow_back=False)
+        choice = save_prompt_panel()
         if choice == 1:
             state = load_game()
     if state is None:
