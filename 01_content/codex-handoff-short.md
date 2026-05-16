@@ -10,6 +10,11 @@
 - `quest_supply_upgrade` 已素材化：需要 `mat_flame_stone_refined x3` 與 `mat_lava_shard x2`，完成後取得 `item_potion_m x2`，並解鎖旅人小鋪販售中藥水。
 - 中藥水已在燼印鎮衛 Boss 戰中確認有實戰價值；目前不再調 Boss 數值。
 - CLI UI MVP 已推進到核心循環 Rich `Panel` 薄層：主選單、角色狀態、城鎮整備、迷宮選擇、迷宮探索、戰鬥指令與結算都已整理出狀態 / 提示 / 行動區；不改 gameplay flow、data、schema、save 或 combat formula。
+- Combat UI Log Separation MVP 已完成：戰鬥動作改為產出事件文字，由 `combat()` 統一渲染 1-3 行回合摘要與戰後 `Battle Log`，主畫面只保留當前決策所需狀態與上一動短摘要。
+- Start Screen MVP 已完成：啟動時顯示標題與最小進入選項；有存檔時提供「重新開始 / 載入進度」，無存檔時提供「開始新冒險」；只取 UI 範本架構，不做背景圖或新 UI framework。
+- Travel Shop Catalog MVP 已完成：旅人小鋪改為專屬分類商店流程，顯示分類、持有數、價格、商品詳情與購買確認；其他商店仍維持原流程。
+- Workshop Catalog MVP 已完成：鐵刃工坊與堅甲工坊改為專屬 catalog 流程，分成購買、強化與我的裝備；顯示職業可用性、裝備狀態、強化基底與素材狀態；其他商店不變。
+- Magic Shop Catalog MVP 已完成：星燈魔法商店改為專屬 catalog 流程，依魔法功能分類，顯示學習狀態、職業 / 等級 / 素材條件、MP、價格與技能效果；其他商店不變。
 - 手動測試回饋後已修正迷宮 Boss/gate 提示混雜問題，Boss 狀態現在放在各迷宮選項；背包補上用途提示，旅館改為專屬 panel。
 - 第二輪手動回饋後，城鎮第 9 項已簡化為純倉庫入口；工會、工坊、商店、魔法書、合成與倉庫開始比照旅館走專屬設施 panel。工會內部已補可交付、進行中委託與 Boss 挑戰狀態提示。
 - UI 完成後再處理的 demo 遊玩體驗、平衡、任務引導與內容節奏 polish，已集中記錄在 `01_content/demo-playtest-notes.md`；它不是目前 runtime 施工清單。
@@ -65,7 +70,7 @@
 - 目前沒有已批准的下一個 runtime 施工目標。
 - 教會查閱結果 MVP 已完成，不要再列為待做。
 - 火印熔爐、完整火印、火印守護 Boss、正式聖物、正式轉職、八元素、Act 3 都只能視為未來願景；不是當前下一步。
-- UI 目前只允許 CLI 顯示層薄包裝；可延續 `render_panel()` / `action_menu_panel()` 做小步 panel 化，不要擴張成 UI framework、Unity 或 HTML UI。
+- UI 目前只允許 CLI 顯示層薄包裝；開始畫面、工坊 catalog、旅人小鋪分類商店、星燈魔法商店 catalog 與戰鬥主畫面 / Battle Log 分流已落地，可延續 `render_panel()` / `action_menu_panel()` 做小步改善，不要擴張成 UI framework、Unity 或 HTML UI。
 - `content_inventory_report.py` 只做 read-only 盤點；不要把 report 輸出當成 SSOT 或 gameplay 變更依據。
 - 若未來要繼續 gameplay，仍需先做單一小切片 read-only 邊界確認，再由使用者明確批准施工範圍。
 - 若使用者指定文件同步輪，只改 markdown，不改 runtime / data / schema / save / combat formula。
@@ -79,4 +84,39 @@
   - `element_maze.py --smoke-test`：`smoke test ok`
   - `06_tools/content_inventory_report.py --json`：成功輸出 report
 
-建議穩定節點 commit message：`Panelize core CLI loop screens`
+本輪 Magic Shop Catalog MVP 已確認：
+- Python 語法編譯
+- `06_tools/validate_data.py`
+- `element_maze.py --smoke-test`
+- `git diff --check`
+- 額外魔法商店探針：分類、詳情、學習魔法書、金幣 / 素材 / 已學技能更新正常
+
+本輪 Workshop Catalog MVP 已確認：
+- Python 語法編譯
+- `06_tools/validate_data.py`
+- `element_maze.py --smoke-test`
+- `git diff --check`
+- 額外工坊探針：購買武器、強化武器、購買防具、強化防具的金幣 / 背包更新正常
+
+本輪 Travel Shop Catalog MVP 已確認：
+- Python 語法編譯
+- `06_tools/validate_data.py`
+- `element_maze.py --smoke-test`
+- `git diff --check`
+- 額外旅人小鋪探針：分類、詳情、購買 1 個與金幣 / 持有數更新正常
+
+本輪 Start Screen MVP 已確認：
+- Python 語法編譯
+- `06_tools/validate_data.py`
+- `element_maze.py --smoke-test`
+- `git diff --check`
+- 額外入口探針：無存檔時可選「開始新冒險」，有存檔時可選「載入進度」
+
+前一輪 Combat UI Log Separation MVP 已確認：
+- Python 語法編譯
+- `06_tools/validate_data.py`
+- `element_maze.py --smoke-test`
+- `git diff --check`
+- 額外非互動戰鬥探針：普通攻擊戰可跑完，回合摘要與 Battle Log 正常輸出
+
+建議穩定節點 commit message：`Add magic shop catalog UI`

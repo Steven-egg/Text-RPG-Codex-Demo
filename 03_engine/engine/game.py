@@ -5,6 +5,7 @@ import math
 import random
 import sys
 from copy import deepcopy
+from dataclasses import dataclass, field
 from pathlib import Path
 
 from .bestiary import monster_locations
@@ -15,8 +16,8 @@ from .display import (
     menu,
     pause,
     render_panel,
-    save_prompt_panel,
     setup_console,
+    start_screen_panel,
     title,
 )
 from .formatting import equipment_summary, format_items, item_name, monster_drop_names
@@ -53,10 +54,20 @@ GUILD_MATERIAL_BUY_PRICES = {
 STORAGE_UNLOCK_COST = 500
 STORAGE_CAPACITY = 10
 SLEEVE_BLADE_FOLLOWUP_MULTIPLIER = 0.35
+MAX_COMBAT_SUMMARY_LINES = 3
+TRAVEL_SHOP_CATEGORIES = ["全部", "補給品", "戰術道具", "飾品"]
+MAGIC_SHOP_CATEGORIES = ["全部", "攻擊魔法", "恢復魔法", "輔助魔法", "特殊魔法"]
 FIRE_MARK_GUILD_INQUIRY_FLAG = "fire_mark_guild_inquiry_done"
 FIRE_MARK_CHURCH_BRIDGE_FLAG = "fire_mark_church_bridge_done"
 FIRE_MARK_CHURCH_LOOKUP_FLAG = "fire_mark_church_lookup_done"
 FIRE_MARK_SHARD_ID = "key_fire_mark_shard"
+
+@dataclass
+class CombatActionResult:
+    damage: int = 0
+    events: list[str] = field(default_factory=list)
+    summary: list[str] = field(default_factory=list)
+    outcome: str | None = None
 
 def is_key_item(item_id: str) -> bool:
     return item_id.startswith("key_")
@@ -371,13 +382,45 @@ def combat_panel_lines(
     turn: int,
     player_buffs: dict,
     enemy_buffs: dict,
+    last_action_summary: str,
 ) -> list[str]:
     stats = get_stats(state, player_buffs)
     return [
         f"回合 {turn}",
         f"{state['name']} HP {state['current_hp']}/{stats['max_hp']} / MP {state['current_mp']}/{stats['max_mp']} / 狀態 {buff_summary(player_buffs)}",
         f"{enemy['name']} HP {enemy_hp}/{enemy['hp']} / 屬性 {enemy['element']} / 狀態 {buff_summary(enemy_buffs)}",
+        f"上一動：{last_action_summary}",
     ]
+
+def record_battle_events(battle_log: list[str], turn: int, events: list[str]) -> None:
+    for event in events:
+        battle_log.append(f"回合 {turn}: {event}")
+
+def combat_summary_lines(*groups: list[str]) -> list[str]:
+    lines: list[str] = []
+    for group in groups:
+        for line in group:
+            if line:
+                lines.append(line)
+            if len(lines) >= MAX_COMBAT_SUMMARY_LINES:
+                return lines
+    return lines
+
+def render_combat_summary(lines: list[str], boss: bool) -> None:
+    if not lines:
+        return
+    render_panel(
+        "戰鬥結果摘要",
+        lines[:MAX_COMBAT_SUMMARY_LINES],
+        border_style="red" if boss else "yellow",
+    )
+
+def render_battle_log(battle_log: list[str], boss: bool) -> None:
+    render_panel(
+        "Battle Log",
+        battle_log if battle_log else ["本場戰鬥沒有紀錄。"],
+        border_style="red" if boss else "cyan",
+    )
 
 def gain_exp(state: dict, amount: int) -> None:
     print(f"獲得經驗 {amount}。")
@@ -595,58 +638,540 @@ def buy_menu(state: dict, shop_name: str, item_ids: list[str]) -> None:
             print(f"購買了 {item_name(item_id)}。")
         pause()
 
+def travel_shop_category(item_id: str) -> str:
+    if item_id in EQUIPMENT:
+        return "飾品"
+    kind = ITEMS.get(item_id, {}).get("kind")
+    if kind == "consumable":
+        return "補給品"
+    if kind in {"battle", "special"}:
+        return "戰術道具"
+    return "其他"
+
+def travel_shop_owned_count(state: dict, item_id: str) -> int:
+    owned = state["inventory"].get(item_id, 0)
+    if item_id in EQUIPMENT and item_id in state["equipment"].values():
+        owned += 1
+    return owned
+
+def travel_shop_available_items(state: dict, category: str = "全部") -> list[str]:
+    available = [item_id for item_id in SHOP_INVENTORY["travel"] if is_shop_item_available(state, item_id)]
+    if category == "全部":
+        return available
+    return [item_id for item_id in available if travel_shop_category(item_id) == category]
+
+def travel_shop_item_detail(item_id: str) -> str:
+    data = ITEMS.get(item_id) or EQUIPMENT[item_id]
+    if item_id in EQUIPMENT:
+        return equipment_summary(item_id)
+    return data.get("desc", "")
+
+def travel_shop_item_line(state: dict, item_id: str) -> str:
+    data = ITEMS.get(item_id) or EQUIPMENT[item_id]
+    return (
+        f"{item_name(item_id)} / {travel_shop_category(item_id)} / "
+        f"持有 x{travel_shop_owned_count(state, item_id)} / {data['price']}G / "
+        f"{travel_shop_item_detail(item_id)}"
+    )
+
+def travel_shop_detail_lines(state: dict, item_id: str) -> list[str]:
+    data = ITEMS.get(item_id) or EQUIPMENT[item_id]
+    lines = [
+        f"商品：{item_name(item_id)}",
+        f"分類：{travel_shop_category(item_id)}",
+        f"持有：x{travel_shop_owned_count(state, item_id)}",
+        f"價格：{data['price']}G",
+        f"效果：{travel_shop_item_detail(item_id)}",
+        f"目前金幣：{state['gold']}G",
+    ]
+    if item_id in EQUIPMENT:
+        lines.append(f"可用職業：{','.join(EQUIPMENT[item_id]['jobs'])}")
+        lines.append("購買後會放入背包；仍需到背包/裝備中替換。")
+    return lines
+
+def buy_travel_shop_item(state: dict, item_id: str) -> str:
+    data = ITEMS.get(item_id) or EQUIPMENT[item_id]
+    price = data["price"]
+    if state["gold"] < price:
+        return "金幣不足。"
+    if item_id in EQUIPMENT and state["job"] not in EQUIPMENT[item_id]["jobs"]:
+        return f"{state['job']}無法使用這件裝備，先別買比較好。"
+    state["gold"] -= price
+    add_item(state, item_id, 1)
+    return f"購買了 {item_name(item_id)}。"
+
+def travel_shop_item_menu(state: dict, category: str) -> None:
+    while True:
+        item_ids = travel_shop_available_items(state, category)
+        if not item_ids:
+            render_panel(
+                "旅人小鋪 - 商品清單",
+                [f"分類：{category}", "目前此分類沒有可購買商品。"],
+                border_style="green",
+            )
+            pause()
+            return
+        choice = action_menu_panel(
+            "選擇商品",
+            [travel_shop_item_line(state, item_id) for item_id in item_ids],
+            "旅人小鋪 - 商品清單",
+            header_lines=[
+                f"持有金幣：{state['gold']}G",
+                f"分類：{category} / 可購買商品 {len(item_ids)} 種",
+            ],
+            hint_lines=["選擇商品可查看效果、持有數與購買確認。"],
+            allow_back=True,
+            border_style="green",
+        )
+        if choice == 0:
+            return
+        item_id = item_ids[choice - 1]
+        action = action_menu_panel(
+            "商品操作",
+            ["購買 1 個"],
+            "旅人小鋪 - 商品詳情",
+            header_lines=travel_shop_detail_lines(state, item_id),
+            allow_back=True,
+            border_style="green",
+        )
+        if action == 0:
+            continue
+        result = buy_travel_shop_item(state, item_id)
+        render_panel(
+            "旅人小鋪 - 購買結果",
+            [result, f"目前金幣：{state['gold']}G", f"{item_name(item_id)} 持有：x{travel_shop_owned_count(state, item_id)}"],
+            border_style="green",
+        )
+        pause()
+
+def travel_shop(state: dict) -> None:
+    while True:
+        available = travel_shop_available_items(state)
+        category_options = []
+        for category in TRAVEL_SHOP_CATEGORIES:
+            count = len(travel_shop_available_items(state, category))
+            category_options.append(f"{category} / {count} 種商品")
+        choice = action_menu_panel(
+            "選擇分類",
+            category_options,
+            "旅人小鋪 - 拉比",
+            header_lines=[
+                f"持有金幣：{state['gold']}G",
+                f"可購買商品：{len(available)} 種",
+            ],
+            hint_lines=["補給品提高探索容錯；戰術道具能處理長戰鬥；飾品需購買後手動裝備。"],
+            allow_back=True,
+            border_style="green",
+        )
+        if choice == 0:
+            return
+        travel_shop_item_menu(state, TRAVEL_SHOP_CATEGORIES[choice - 1])
+
+def equipment_owned_count(state: dict, item_id: str) -> int:
+    owned = state["inventory"].get(item_id, 0)
+    if item_id in state["equipment"].values():
+        owned += 1
+    return owned
+
+def equipment_status_line(state: dict, item_id: str) -> str:
+    if item_id in state["equipment"].values():
+        return "已裝備"
+    if state["inventory"].get(item_id, 0) > 0:
+        return f"背包 x{state['inventory'][item_id]}"
+    return "未持有"
+
+def equipment_job_status(state: dict, item_id: str) -> str:
+    return "可用" if state["job"] in EQUIPMENT[item_id]["jobs"] else "目前職業不可用"
+
+def workshop_item_line(state: dict, item_id: str) -> str:
+    eq = EQUIPMENT[item_id]
+    return (
+        f"{eq['name']} / {equipment_job_status(state, item_id)} / "
+        f"{equipment_status_line(state, item_id)} / {eq['price']}G / {equipment_summary(item_id)}"
+    )
+
+def workshop_item_detail_lines(state: dict, item_id: str) -> list[str]:
+    eq = EQUIPMENT[item_id]
+    slot_names = {"weapon": "武器", "head": "頭部", "body": "身體", "accessory": "飾品", "special": "特殊"}
+    lines = [
+        f"裝備：{eq['name']}",
+        f"欄位：{slot_names.get(eq['slot'], eq['slot'])} / {eq['subtype']}",
+        f"狀態：{equipment_status_line(state, item_id)}",
+        f"可用職業：{','.join(eq['jobs'])}",
+        f"目前職業：{state['job']}（{equipment_job_status(state, item_id)}）",
+        f"價格：{eq['price']}G / 目前金幣：{state['gold']}G",
+        f"能力：{equipment_summary(item_id)}",
+        f"說明：{eq['desc']}",
+        "購買後會放入背包；仍需到背包/裝備中替換。",
+    ]
+    return lines
+
+def buy_workshop_item(state: dict, item_id: str) -> str:
+    eq = EQUIPMENT[item_id]
+    if state["gold"] < eq["price"]:
+        return "金幣不足。"
+    if state["job"] not in eq["jobs"]:
+        return f"{state['job']}無法使用這件裝備，先別買比較好。"
+    state["gold"] -= eq["price"]
+    add_item(state, item_id, 1)
+    return f"購買了 {eq['name']}。"
+
+def workshop_buy_menu(state: dict, title_text: str, item_ids: list[str], border_style: str) -> None:
+    while True:
+        available = [item_id for item_id in item_ids if is_shop_item_available(state, item_id)]
+        if not available:
+            render_panel(title_text, ["目前沒有可購買裝備。"], border_style=border_style)
+            pause()
+            return
+        choice = action_menu_panel(
+            "選擇裝備",
+            [workshop_item_line(state, item_id) for item_id in available],
+            title_text,
+            header_lines=[
+                f"持有金幣：{state['gold']}G",
+                f"目前職業：{state['job']} / 商品 {len(available)} 種",
+            ],
+            hint_lines=["選擇裝備可查看完整能力、可用職業與購買確認。"],
+            allow_back=True,
+            border_style=border_style,
+        )
+        if choice == 0:
+            return
+        item_id = available[choice - 1]
+        action = action_menu_panel(
+            "裝備操作",
+            ["購買 1 件"],
+            f"{title_text} - 裝備詳情",
+            header_lines=workshop_item_detail_lines(state, item_id),
+            allow_back=True,
+            border_style=border_style,
+        )
+        if action == 0:
+            continue
+        result = buy_workshop_item(state, item_id)
+        render_panel(
+            f"{title_text} - 購買結果",
+            [
+                result,
+                f"目前金幣：{state['gold']}G",
+                f"{item_name(item_id)} 狀態：{equipment_status_line(state, item_id)}",
+            ],
+            border_style=border_style,
+        )
+        pause()
+
+def recipe_base_status(state: dict, recipe: dict) -> str:
+    base_item = recipe.get("base_item")
+    if not base_item:
+        return "無"
+    status = "足夠" if owns_item_or_equipped(state, base_item) else "不足"
+    return f"{item_name(base_item)}（{status}）"
+
+def recipe_material_status(state: dict, materials: dict) -> str:
+    parts = []
+    for item_id, qty in materials.items():
+        owned = state["inventory"].get(item_id, 0)
+        status = "足夠" if owned >= qty else "不足"
+        parts.append(f"{item_name(item_id)} {owned}/{qty} {status}")
+    return "、".join(parts) if parts else "無"
+
+def recipe_output_summary(recipe: dict) -> str:
+    return format_items(recipe["output"])
+
+def workshop_recipe_line(state: dict, recipe_id: str) -> str:
+    recipe = RECIPES[recipe_id]
+    return (
+        f"{recipe['name']} / {recipe['gold']}G / "
+        f"基底：{recipe_base_status(state, recipe)} / "
+        f"素材：{format_items(recipe['materials'])} / {recipe['desc']}"
+    )
+
+def workshop_recipe_detail_lines(state: dict, recipe_id: str) -> list[str]:
+    recipe = RECIPES[recipe_id]
+    return [
+        f"強化：{recipe['name']}",
+        f"完成品：{recipe_output_summary(recipe)}",
+        f"基底裝備：{recipe_base_status(state, recipe)}",
+        f"素材需求：{recipe_material_status(state, recipe['materials'])}",
+        f"費用：{recipe['gold']}G / 目前金幣：{state['gold']}G",
+        f"效果：{recipe['desc']}",
+        "強化會消耗素材；若需要基底裝備，已裝備物也可被消耗。",
+    ]
+
+def craft_recipe_message(state: dict, recipe_id: str) -> str:
+    recipe = RECIPES[recipe_id]
+    if state["gold"] < recipe["gold"]:
+        return "金幣不足。"
+    if not can_pay_items(state, recipe["materials"]):
+        return "素材不足。"
+    base_item = recipe.get("base_item")
+    if base_item and not owns_item_or_equipped(state, base_item):
+        return f"需要 {item_name(base_item)}。"
+    state["gold"] -= recipe["gold"]
+    pay_items(state, recipe["materials"])
+    if base_item:
+        consume_item_or_equipped(state, base_item)
+    for item_id, qty in recipe["output"].items():
+        add_item(state, item_id, qty)
+    return f"完成：{recipe['name']}。"
+
+def workshop_upgrade_menu(state: dict, title_text: str, recipe_ids: list[str], border_style: str) -> None:
+    while True:
+        available = [recipe_id for recipe_id in recipe_ids if recipe_available(state, recipe_id)]
+        if not available:
+            render_panel(title_text, ["目前沒有可用強化配方。"], border_style=border_style)
+            pause()
+            return
+        choice = action_menu_panel(
+            "選擇強化",
+            [workshop_recipe_line(state, recipe_id) for recipe_id in available],
+            title_text,
+            header_lines=[f"持有金幣：{state['gold']}G"],
+            hint_lines=["選擇強化可查看基底裝備、素材狀態與完成品。"],
+            allow_back=True,
+            border_style=border_style,
+        )
+        if choice == 0:
+            return
+        recipe_id = available[choice - 1]
+        action = action_menu_panel(
+            "強化操作",
+            ["進行強化"],
+            f"{title_text} - 強化詳情",
+            header_lines=workshop_recipe_detail_lines(state, recipe_id),
+            allow_back=True,
+            border_style=border_style,
+        )
+        if action == 0:
+            continue
+        result = craft_recipe_message(state, recipe_id)
+        render_panel(
+            f"{title_text} - 強化結果",
+            [result, f"目前金幣：{state['gold']}G"],
+            border_style=border_style,
+        )
+        pause()
+
+def workshop_equipment_lines(state: dict, item_ids: list[str]) -> list[str]:
+    slot_names = {"weapon": "武器", "head": "頭部", "body": "身體", "accessory": "飾品", "special": "特殊"}
+    relevant_slots = []
+    for item_id in item_ids:
+        slot = EQUIPMENT[item_id]["slot"]
+        if slot not in relevant_slots:
+            relevant_slots.append(slot)
+    lines = ["目前裝備："]
+    for slot in relevant_slots:
+        equipped = state["equipment"].get(slot)
+        lines.append(f"{slot_names.get(slot, slot)}：{item_name(equipped) if equipped else '無'}")
+    owned = [
+        f"{item_name(item_id)} x{state['inventory'][item_id]} / {equipment_summary(item_id)}"
+        for item_id in item_ids
+        if state["inventory"].get(item_id, 0) > 0
+    ]
+    lines.append("")
+    lines.append("背包中的本店裝備：")
+    lines.extend(owned if owned else ["目前沒有本店裝備在背包中。"])
+    return lines
+
+def workshop_catalog(
+    state: dict,
+    title_text: str,
+    option_buy: str,
+    option_upgrade: str,
+    item_ids: list[str],
+    recipe_ids: list[str],
+    intro_lines: list[str],
+    hint_lines: list[str],
+    border_style: str,
+) -> None:
+    while True:
+        choice = action_menu_panel(
+            title_text,
+            [option_buy, option_upgrade, "我的裝備"],
+            title_text,
+            header_lines=[*intro_lines, f"持有金幣：{state['gold']}G"],
+            hint_lines=hint_lines,
+            allow_back=True,
+            border_style=border_style,
+        )
+        if choice == 0:
+            return
+        if choice == 1:
+            workshop_buy_menu(state, f"{title_text} - {option_buy}", item_ids, border_style)
+        elif choice == 2:
+            workshop_upgrade_menu(state, f"{title_text} - {option_upgrade}", recipe_ids, border_style)
+        elif choice == 3:
+            render_panel(f"{title_text} - 我的裝備", workshop_equipment_lines(state, item_ids), border_style=border_style)
+            pause()
+
 def magic_book_price(state: dict, book_id: str) -> int:
     price = MAGIC_BOOKS[book_id]["price"]
     if book_id == "book_spark" and "quest_magic_crystal" in state["completed_quests"]:
         price = max(0, price - 50)
     return price
 
+def magic_shop_category(book_id: str) -> str:
+    skill = SKILLS[MAGIC_BOOKS[book_id]["skill"]]
+    kind = skill["kind"]
+    if kind == "damage":
+        return "攻擊魔法"
+    if kind == "heal":
+        return "恢復魔法"
+    if kind == "buff":
+        return "輔助魔法"
+    if kind == "debuff":
+        return "特殊魔法"
+    return "特殊魔法"
+
+def magic_book_status(state: dict, book_id: str) -> str:
+    book = MAGIC_BOOKS[book_id]
+    skill_id = book["skill"]
+    price = magic_book_price(state, book_id)
+    if skill_id in state["learned_skills"]:
+        return "已學會"
+    if state["job"] not in book["jobs"]:
+        return "職業不符"
+    if state["level"] < book["level"]:
+        return f"等級不足 Lv{book['level']}"
+    if state["gold"] < price:
+        return "金幣不足"
+    if not can_pay_items(state, book["materials"]):
+        return "素材不足"
+    return "可學習"
+
+def magic_shop_book_ids(category: str = "全部") -> list[str]:
+    book_ids = list(MAGIC_BOOKS.keys())
+    if category == "全部":
+        return book_ids
+    return [book_id for book_id in book_ids if magic_shop_category(book_id) == category]
+
+def magic_material_status(state: dict, materials: dict) -> str:
+    if not materials:
+        return "無"
+    parts = []
+    for item_id, qty in materials.items():
+        owned = state["inventory"].get(item_id, 0)
+        status = "足夠" if owned >= qty else "不足"
+        parts.append(f"{item_name(item_id)} {owned}/{qty} {status}")
+    return "、".join(parts)
+
+def magic_book_line(state: dict, book_id: str) -> str:
+    book = MAGIC_BOOKS[book_id]
+    skill = SKILLS[book["skill"]]
+    price = magic_book_price(state, book_id)
+    return (
+        f"{book['name']} / {magic_shop_category(book_id)} / {magic_book_status(state, book_id)} / "
+        f"{','.join(book['jobs'])} Lv{book['level']} / MP {skill['mp']} / {price}G / {skill['desc']}"
+    )
+
+def magic_book_detail_lines(state: dict, book_id: str) -> list[str]:
+    book = MAGIC_BOOKS[book_id]
+    skill = SKILLS[book["skill"]]
+    price = magic_book_price(state, book_id)
+    lines = [
+        f"魔法書：{book['name']}",
+        f"分類：{magic_shop_category(book_id)}",
+        f"狀態：{magic_book_status(state, book_id)}",
+        f"學會技能：{skill['name']} / MP {skill['mp']}",
+        f"技能效果：{skill['desc']}",
+        f"可用職業：{','.join(book['jobs'])}",
+        f"目前職業：{state['job']}（{'可學' if state['job'] in book['jobs'] else '不可學'}）",
+        f"等級需求：Lv{book['level']} / 目前 Lv{state['level']}",
+        f"費用：{price}G / 目前金幣：{state['gold']}G",
+        f"需求素材：{magic_material_status(state, book['materials'])}",
+        "魔法書學會後會永久加入戰鬥技能。",
+    ]
+    if book_id == "book_spark" and "quest_magic_crystal" in state["completed_quests"]:
+        lines.append("魔晶研究已完成，火花術書價格已折扣。")
+    return lines
+
+def learn_magic_book_message(state: dict, book_id: str) -> str:
+    book = MAGIC_BOOKS[book_id]
+    skill_id = book["skill"]
+    price = magic_book_price(state, book_id)
+    if skill_id in state["learned_skills"]:
+        return "你已經學會這本書的技能。"
+    if state["job"] not in book["jobs"]:
+        return f"{state['job']}無法理解這本魔法書的核心術式。"
+    if state["level"] < book["level"]:
+        return f"等級不足，需要 Lv{book['level']}。"
+    if state["gold"] < price:
+        return "金幣不足。"
+    if not can_pay_items(state, book["materials"]):
+        return "素材不足。"
+    state["gold"] -= price
+    pay_items(state, book["materials"])
+    state["learned_skills"].append(skill_id)
+    return f"你學會了 {SKILLS[skill_id]['name']}。"
+
 def magic_shop(state: dict) -> None:
     while True:
-        book_ids = list(MAGIC_BOOKS.keys())
-        options = []
-        for book_id in book_ids:
-            book = MAGIC_BOOKS[book_id]
-            skill = SKILLS[book["skill"]]
-            learned = book["skill"] in state["learned_skills"]
-            price = magic_book_price(state, book_id)
-            status = "已學會" if learned else f"{price}G，需求 {format_items(book['materials'])}"
-            options.append(
-                f"{book['name']} / {status} / {','.join(book['jobs'])} Lv{book['level']} / {skill['desc']}"
-            )
+        category_options = []
+        for category in MAGIC_SHOP_CATEGORIES:
+            count = len(magic_shop_book_ids(category))
+            category_options.append(f"{category} / {count} 本魔法書")
         choice = action_menu_panel(
-            "選擇要學習的魔法書",
-            options,
+            "選擇分類",
+            category_options,
             "星燈魔法商店",
             header_lines=[
                 "伊芙輕輕敲了敲書脊：「願星辰指引你的靈魂，冒險者。」",
                 f"持有金幣：{state['gold']}G",
             ],
-            hint_lines=["魔法書學會後會永久加入戰鬥技能。"],
+            hint_lines=["依魔法功能分類瀏覽；選中魔法書後可查看職業、等級、素材與技能效果。"],
+            allow_back=True,
+            border_style="magenta",
+        )
+        if choice == 0:
+            return
+        magic_shop_book_menu(state, MAGIC_SHOP_CATEGORIES[choice - 1])
+
+def magic_shop_book_menu(state: dict, category: str) -> None:
+    while True:
+        book_ids = magic_shop_book_ids(category)
+        if not book_ids:
+            render_panel(
+                "星燈魔法商店 - 魔法書列表",
+                [f"分類：{category}", "目前此分類沒有魔法書。"],
+                border_style="magenta",
+            )
+            pause()
+            return
+        choice = action_menu_panel(
+            "選擇魔法書",
+            [magic_book_line(state, book_id) for book_id in book_ids],
+            "星燈魔法商店 - 魔法書列表",
+            header_lines=[
+                f"持有金幣：{state['gold']}G",
+                f"分類：{category} / 魔法書 {len(book_ids)} 本",
+            ],
+            hint_lines=["選擇魔法書可查看技能、條件、素材狀態與學習確認。"],
             allow_back=True,
             border_style="magenta",
         )
         if choice == 0:
             return
         book_id = book_ids[choice - 1]
-        book = MAGIC_BOOKS[book_id]
-        skill_id = book["skill"]
-        price = magic_book_price(state, book_id)
-        if skill_id in state["learned_skills"]:
-            print("你已經學會這本書的技能。")
-        elif state["job"] not in book["jobs"]:
-            print(f"{state['job']}無法理解這本魔法書的核心術式。")
-        elif state["level"] < book["level"]:
-            print(f"等級不足，需要 Lv{book['level']}。")
-        elif state["gold"] < price:
-            print("金幣不足。")
-        elif not can_pay_items(state, book["materials"]):
-            print("素材不足。")
-        else:
-            state["gold"] -= price
-            pay_items(state, book["materials"])
-            state["learned_skills"].append(skill_id)
-            print(f"你學會了 {SKILLS[skill_id]['name']}。")
+        action = action_menu_panel(
+            "魔法書操作",
+            ["學習魔法"],
+            "星燈魔法商店 - 魔法書詳情",
+            header_lines=magic_book_detail_lines(state, book_id),
+            allow_back=True,
+            border_style="magenta",
+        )
+        if action == 0:
+            continue
+        result = learn_magic_book_message(state, book_id)
+        render_panel(
+            "星燈魔法商店 - 學習結果",
+            [
+                result,
+                f"目前金幣：{state['gold']}G",
+                f"狀態：{magic_book_status(state, book_id)}",
+            ],
+            border_style="magenta",
+        )
         pause()
 
 def recipe_available(state: dict, recipe_id: str) -> bool:
@@ -683,24 +1208,7 @@ def craft_menu(state: dict, title_text: str, recipe_ids: list[str]) -> None:
         pause()
 
 def craft_recipe(state: dict, recipe_id: str) -> None:
-    recipe = RECIPES[recipe_id]
-    if state["gold"] < recipe["gold"]:
-        print("金幣不足。")
-        return
-    if not can_pay_items(state, recipe["materials"]):
-        print("素材不足。")
-        return
-    base_item = recipe.get("base_item")
-    if base_item and not owns_item_or_equipped(state, base_item):
-        print(f"需要 {item_name(base_item)}。")
-        return
-    state["gold"] -= recipe["gold"]
-    pay_items(state, recipe["materials"])
-    if base_item:
-        consume_item_or_equipped(state, base_item)
-    for item_id, qty in recipe["output"].items():
-        add_item(state, item_id, qty)
-    print(f"完成：{recipe['name']}。")
+    print(craft_recipe_message(state, recipe_id))
 
 def relic_unlock_met(state: dict, unlock_data: dict | None) -> bool:
     if not unlock_data:
@@ -775,7 +1283,7 @@ def town_menu(state: dict) -> None:
         elif choice == 3:
             armor_workshop(state)
         elif choice == 4:
-            buy_menu(state, "旅人小鋪 - 拉比", SHOP_INVENTORY["travel"])
+            travel_shop(state)
         elif choice == 5:
             if not is_unlocked(state, "shop_synthesis_01"):
                 print("米菈的店門半掩著。先完成工會任務「洞窟採集」吧。")
@@ -798,46 +1306,36 @@ def town_menu(state: dict) -> None:
             rest_inn(state)
 
 def iron_workshop(state: dict) -> None:
-    while True:
-        choice = action_menu_panel(
-            "鐵刃工坊",
-            ["購買武器", "強化武器"],
-            "鐵刃工坊",
-            header_lines=[
-                "伴隨著鐵錘敲擊砧台的節奏，這裡充滿了金屬與汗水的硬派氣息。",
-                "葛雷抹了一把汗：「最好的防禦就是進攻。」",
-            ],
-            hint_lines=["武器升級能縮短戰鬥回合；購買後仍需到裝備管理替換。"],
-            allow_back=True,
-            border_style="yellow",
-        )
-        if choice == 0:
-            return
-        if choice == 1:
-            buy_menu(state, "鐵刃工坊 - 武器", SHOP_INVENTORY["weapon"])
-        elif choice == 2:
-            craft_menu(state, "鐵刃工坊 - 強化", ["recipe_iron_sword_plus_1"])
+    workshop_catalog(
+        state,
+        "鐵刃工坊",
+        "購買武器",
+        "強化武器",
+        SHOP_INVENTORY["weapon"],
+        ["recipe_iron_sword_plus_1"],
+        [
+            "伴隨著鐵錘敲擊砧台的節奏，這裡充滿了金屬與汗水的硬派氣息。",
+            "葛雷抹了一把汗：「最好的防禦就是進攻。」",
+        ],
+        ["武器升級能縮短戰鬥回合；購買後仍需到背包/裝備中替換。"],
+        "yellow",
+    )
 
 def armor_workshop(state: dict) -> None:
-    while True:
-        choice = action_menu_panel(
-            "堅甲工坊",
-            ["購買防具", "強化防具"],
-            "堅甲工坊",
-            header_lines=[
-                "布琳的手指滑過一排整齊的甲冑。",
-                "「耐用、實惠，品質無可挑剔。每一件都經得起實戰檢驗。」",
-            ],
-            hint_lines=["防具與抗性裝能提高長探索容錯；購買後仍需到裝備管理替換。"],
-            allow_back=True,
-            border_style="green",
-        )
-        if choice == 0:
-            return
-        if choice == 1:
-            buy_menu(state, "堅甲工坊 - 防具", SHOP_INVENTORY["armor"])
-        elif choice == 2:
-            craft_menu(state, "堅甲工坊 - 強化", ["recipe_leather_armor_plus_1"])
+    workshop_catalog(
+        state,
+        "堅甲工坊",
+        "購買防具",
+        "強化防具",
+        SHOP_INVENTORY["armor"],
+        ["recipe_leather_armor_plus_1"],
+        [
+            "布琳的手指滑過一排整齊的甲冑。",
+            "「耐用、實惠，品質無可挑剔。每一件都經得起實戰檢驗。」",
+        ],
+        ["防具與抗性裝能提高長探索容錯；購買後仍需到背包/裝備中替換。"],
+        "green",
+    )
 
 def rest_inn(state: dict) -> None:
     stats = get_stats(state)
@@ -1720,6 +2218,8 @@ def combat(state: dict, enemy_id: str, boss: bool = False, run_log: dict | None 
     enemy_buffs = {}
     turn = 1
     boss_marker = False
+    last_action_summary = "尚未行動。"
+    battle_log = [f"遭遇 {enemy['name']}。敵人屬性：{enemy['element']} / HP {enemy_hp}/{enemy['hp']}。"]
     render_panel(
         f"遭遇 {enemy['name']}",
         [
@@ -1738,61 +2238,96 @@ def combat(state: dict, enemy_id: str, boss: bool = False, run_log: dict | None 
             "戰鬥指令",
             options,
             "戰鬥狀態",
-            header_lines=combat_panel_lines(state, enemy, enemy_hp, turn, player_buffs, enemy_buffs),
+            header_lines=combat_panel_lines(state, enemy, enemy_hp, turn, player_buffs, enemy_buffs, last_action_summary),
             hint_lines=["Boss 戰不可逃跑。" if boss else "逃跑失敗時敵人仍會行動。"],
             allow_back=False,
             border_style="red" if boss else "yellow",
         )
         defending = False
-        escaped = False
+        action_result = CombatActionResult()
 
         if choice == 1:
-            escaped = player_attack(state, enemy, enemy_hp, None, player_buffs, enemy_buffs)
-            if isinstance(escaped, int):
-                enemy_hp -= escaped
+            action_result = player_attack(state, enemy, enemy_hp, None, player_buffs, enemy_buffs)
+            enemy_hp -= action_result.damage
         elif choice == 2:
             defending = True
+            events = []
             if player_buffs.get("defense_up", 0) > 0:
                 stats = get_stats(state, player_buffs)
                 state["current_mp"] = min(stats["max_mp"], state["current_mp"] + 2)
-                print("你穩住姿勢，符文讓你回復 MP 2。")
-            print("你採取防禦姿態。")
+                events.append("你穩住姿勢，符文讓你回復 MP 2。")
+            events.append("你採取防禦姿態。")
+            action_result = CombatActionResult(events=events, summary=["你採取防禦姿態。"])
         elif choice == 3:
             result = skill_menu(state, enemy, player_buffs, enemy_buffs)
-            if result == "cancel":
+            if result.outcome == "cancel":
+                render_combat_summary(result.summary, boss)
+                if result.summary:
+                    last_action_summary = result.summary[0]
                 continue
-            if isinstance(result, int):
-                enemy_hp -= result
+            action_result = result
+            enemy_hp -= action_result.damage
         elif choice == 4:
             result = combat_item_menu(state, boss, enemy_buffs, enemy)
-            if result == "cancel":
+            if result.outcome == "cancel":
+                render_combat_summary(result.summary, boss)
+                if result.summary:
+                    last_action_summary = result.summary[0]
                 continue
-            if result == "escaped":
+            action_result = result
+            if action_result.outcome == "escaped":
+                record_battle_events(battle_log, turn, action_result.events)
+                summary = combat_summary_lines(action_result.summary)
+                render_combat_summary(summary, boss)
+                render_battle_log(battle_log, boss)
                 return "fled"
-            if isinstance(result, int):
-                enemy_hp -= result
+            enemy_hp -= action_result.damage
         elif not boss and choice == 5:
             if try_escape(state, enemy):
-                print("你成功脫離戰鬥。")
+                action_result = CombatActionResult(
+                    events=["你成功脫離戰鬥。"],
+                    summary=["你成功脫離戰鬥。"],
+                    outcome="fled",
+                )
+                record_battle_events(battle_log, turn, action_result.events)
+                render_combat_summary(action_result.summary, boss)
+                render_battle_log(battle_log, boss)
                 return "fled"
-            print("逃跑失敗。")
+            action_result = CombatActionResult(events=["逃跑失敗。"], summary=["逃跑失敗。"])
 
+        turn_events = list(action_result.events)
         if enemy_hp <= 0:
+            turn_events.append(f"{enemy['name']}倒下。")
+            record_battle_events(battle_log, turn, turn_events)
+            summary = combat_summary_lines(action_result.summary, [f"{enemy['name']}倒下。"])
+            render_combat_summary(summary, boss)
+            if summary:
+                last_action_summary = summary[0]
             break
 
         if boss and enemy_id == "boss_glen":
-            boss_marker = boss_glen_action(enemy, enemy_hp, state, player_buffs, enemy_buffs, defending, turn, boss_marker)
+            boss_marker, enemy_events = boss_glen_action(enemy, enemy_hp, state, player_buffs, enemy_buffs, defending, turn, boss_marker)
         elif boss and enemy_id == "boss_ash_guardian":
-            boss_marker = boss_ash_guardian_action(enemy, enemy_hp, state, player_buffs, enemy_buffs, defending, turn, boss_marker)
+            boss_marker, enemy_events = boss_ash_guardian_action(enemy, enemy_hp, state, player_buffs, enemy_buffs, defending, turn, boss_marker)
         elif boss and enemy_id == "boss_cinder_seal_sentinel":
-            boss_marker = boss_cinder_seal_sentinel_action(enemy, enemy_hp, state, player_buffs, enemy_buffs, defending, turn, boss_marker)
+            boss_marker, enemy_events = boss_cinder_seal_sentinel_action(enemy, enemy_hp, state, player_buffs, enemy_buffs, defending, turn, boss_marker)
         else:
-            monster_action(enemy_id, enemy, state, player_buffs, defending)
+            enemy_events = monster_action(enemy_id, enemy, state, player_buffs, defending)
 
-        tick_effects(state, player_buffs, enemy_buffs)
+        effect_events = tick_effects(state, player_buffs, enemy_buffs)
+        turn_events.extend(enemy_events)
+        turn_events.extend(effect_events)
+        record_battle_events(battle_log, turn, turn_events)
+        summary = combat_summary_lines(action_result.summary, enemy_events, effect_events)
+        render_combat_summary(summary, boss)
+        if summary:
+            last_action_summary = " / ".join(summary[:2])
         turn += 1
 
     if state["current_hp"] <= 0:
+        battle_log.append("戰鬥結束：你倒下了。")
+        render_combat_summary(["你倒下了。"], boss)
+        render_battle_log(battle_log, boss)
         return False
 
     print(f"\n擊敗 {enemy['name']}！")
@@ -1818,23 +2353,25 @@ def combat(state: dict, enemy_id: str, boss: bool = False, run_log: dict | None 
         result_lines.append(run_loot_summary(run_log))
     result_lines.append("Boss 結果將在迷宮結算中處理。" if boss else next_step_hint(state))
     render_panel("戰鬥結算", result_lines, border_style="red" if boss else "green")
+    render_battle_log(battle_log, boss)
     return True
 
 def player_attack(state: dict, enemy: dict, enemy_hp: int, skill: dict | None, player_buffs: dict, enemy_buffs: dict):
     stats = get_stats(state, player_buffs)
     skill_bonus = skill.get("accuracy", 0) if skill else 0
     if not hit_roll(stats["accuracy"], enemy["agility"], skill_bonus):
-        print("攻擊落空。")
-        return 0
+        return CombatActionResult(events=["攻擊落空。"], summary=["攻擊落空。"])
     damage, is_crit = calc_player_damage(state, enemy, skill, player_buffs, enemy_buffs)
     label = skill["name"] if skill else "普通攻擊"
     crit_text = " 暴擊！" if is_crit else ""
-    print(f"你使用{label}，造成 {damage} 傷害。{crit_text}")
+    events = [f"你使用{label}，造成 {damage} 傷害。{crit_text}"]
+    summary = [f"你使用{label}，造成 {damage} 傷害。{crit_text}"]
     if can_sleeve_blade_followup(state, skill) and enemy_hp - damage > 0:
         followup_damage = calc_sleeve_blade_followup_damage(state, enemy, player_buffs, enemy_buffs)
         damage += followup_damage
-        print(f"影袖副刃順勢劃出追擊，造成 {followup_damage} 傷害。")
-    return damage
+        events.append(f"影袖副刃順勢劃出追擊，造成 {followup_damage} 傷害。")
+        summary.append(f"影袖副刃追擊 {followup_damage} 傷害。")
+    return CombatActionResult(damage=damage, events=events, summary=summary)
 
 def skill_menu(state: dict, enemy: dict, player_buffs: dict, enemy_buffs: dict):
     skills = state["learned_skills"]
@@ -1842,32 +2379,42 @@ def skill_menu(state: dict, enemy: dict, player_buffs: dict, enemy_buffs: dict):
     for skill_id in skills:
         skill = SKILLS[skill_id]
         options.append(f"{skill['name']} / MP {skill['mp']} / {skill['desc']}")
-    choice = menu("選擇技能", options)
+    stats = get_stats(state, player_buffs)
+    choice = action_menu_panel(
+        "選擇技能",
+        options,
+        "技能選擇",
+        header_lines=[
+            f"目前 MP {state['current_mp']}/{stats['max_mp']}",
+            f"目標：{enemy['name']} / 屬性 {enemy['element']} / 狀態 {buff_summary(enemy_buffs)}",
+        ],
+        hint_lines=["返回不消耗本回合。"],
+        border_style="magenta",
+    )
     if choice == 0:
-        return "cancel"
+        return CombatActionResult(outcome="cancel")
     skill_id = skills[choice - 1]
     skill = SKILLS[skill_id]
     if state["current_mp"] < skill["mp"]:
-        print("MP 不足。")
-        return "cancel"
+        return CombatActionResult(events=["MP 不足。"], summary=["MP 不足。"], outcome="cancel")
     state["current_mp"] -= skill["mp"]
     if skill["kind"] == "damage":
         return player_attack(state, enemy, enemy["hp"], skill, player_buffs, enemy_buffs)
     if skill["kind"] == "heal":
-        stats = get_stats(state, player_buffs)
         before = state["current_hp"]
         state["current_hp"] = min(stats["max_hp"], state["current_hp"] + skill["amount"])
-        print(f"你使用{skill['name']}，回復 {state['current_hp'] - before} HP。")
-        return None
+        healed = state["current_hp"] - before
+        line = f"你使用{skill['name']}，回復 {healed} HP。"
+        return CombatActionResult(events=[line], summary=[line])
     if skill["kind"] == "buff":
         player_buffs[skill["buff"]] = skill["duration"]
-        print(f"你使用{skill['name']}。{skill['desc']}")
-        return None
+        line = f"你使用{skill['name']}。{skill['desc']}"
+        return CombatActionResult(events=[line], summary=[line])
     if skill["kind"] == "debuff":
         enemy_buffs[skill["debuff"]] = skill["duration"]
-        print(f"你使用{skill['name']}。{skill['desc']}")
-        return None
-    return None
+        line = f"你使用{skill['name']}。{skill['desc']}"
+        return CombatActionResult(events=[line], summary=[line])
+    return CombatActionResult()
 
 def combat_item_menu(state: dict, boss: bool, enemy_buffs: dict, enemy: dict):
     usable_ids = [
@@ -1876,49 +2423,57 @@ def combat_item_menu(state: dict, boss: bool, enemy_buffs: dict, enemy: dict):
         if state["inventory"].get(item_id, 0) > 0
     ]
     if not usable_ids:
-        print("沒有可用道具。")
-        return "cancel"
+        return CombatActionResult(events=["沒有可用道具。"], summary=["沒有可用道具。"], outcome="cancel")
     options = [f"{item_name(item_id)} x{state['inventory'][item_id]} / {ITEMS[item_id]['desc']}" for item_id in usable_ids]
-    choice = menu("選擇道具", options)
+    choice = action_menu_panel(
+        "選擇道具",
+        options,
+        "道具選擇",
+        header_lines=[f"目標：{enemy['name']} / 狀態 {buff_summary(enemy_buffs)}"],
+        hint_lines=["返回不消耗本回合。"],
+        border_style="green",
+    )
     if choice == 0:
-        return "cancel"
+        return CombatActionResult(outcome="cancel")
     item_id = usable_ids[choice - 1]
     if item_id == "item_potion_s":
         stats = get_stats(state)
         before = state["current_hp"]
         state["current_hp"] = min(stats["max_hp"], state["current_hp"] + 35)
         remove_item(state, item_id, 1)
-        print(f"使用小藥水，回復 {state['current_hp'] - before} HP。")
+        line = f"使用小藥水，回復 {state['current_hp'] - before} HP。"
+        return CombatActionResult(events=[line], summary=[line])
     elif item_id == "item_potion_m":
         stats = get_stats(state)
         before = state["current_hp"]
         state["current_hp"] = min(stats["max_hp"], state["current_hp"] + 70)
         remove_item(state, item_id, 1)
-        print(f"使用中藥水，回復 {state['current_hp'] - before} HP。")
+        line = f"使用中藥水，回復 {state['current_hp'] - before} HP。"
+        return CombatActionResult(events=[line], summary=[line])
     elif item_id == "item_focus_drop":
         stats = get_stats(state)
         before = state["current_mp"]
         state["current_mp"] = min(stats["max_mp"], state["current_mp"] + 12)
         remove_item(state, item_id, 1)
-        print(f"使用集中滴露，回復 {state['current_mp'] - before} MP。")
+        line = f"使用集中滴露，回復 {state['current_mp'] - before} MP。"
+        return CombatActionResult(events=[line], summary=[line])
     elif item_id == "item_herb_antidote":
         remove_item(state, item_id, 1)
         state.setdefault("_clear_burn", True)
-        print("你嚼下解毒草，灼熱感稍微退去。")
+        line = "你嚼下解毒草，灼熱感稍微退去。"
+        return CombatActionResult(events=[line], summary=[line])
     elif item_id == "item_armor_piercer":
         remove_item(state, item_id, 1)
         enemy_buffs["defense_down"] = max(enemy_buffs.get("defense_down", 0), 3)
         damage = max(8, math.ceil(enemy["hp"] * 0.08))
-        print(f"破甲釘命中敵人的護具縫隙，造成 {damage} 傷害，敵方防禦下降。")
-        return damage
+        line = f"破甲釘命中敵人的護具縫隙，造成 {damage} 傷害，敵方防禦下降。"
+        return CombatActionResult(damage=damage, events=[line], summary=[line])
     elif item_id == "item_escape_scroll":
         if boss:
-            print("Boss 戰中無法使用逃脫卷軸。")
-            return "cancel"
+            return CombatActionResult(events=["Boss 戰中無法使用逃脫卷軸。"], summary=["Boss 戰中無法使用逃脫卷軸。"], outcome="cancel")
         remove_item(state, item_id, 1)
-        print("卷軸化成白光，你撤回迷宮入口。")
-        return "escaped"
-    return None
+        return CombatActionResult(events=["卷軸化成白光，你撤回迷宮入口。"], summary=["卷軸化成白光，你撤回迷宮入口。"], outcome="escaped")
+    return CombatActionResult()
 
 def try_escape(state: dict, enemy: dict) -> bool:
     stats = get_stats(state)
@@ -1926,25 +2481,24 @@ def try_escape(state: dict, enemy: dict) -> bool:
     chance = max(25, min(85, chance))
     return random.randint(1, 100) <= chance
 
-def monster_action(enemy_id: str, enemy: dict, state: dict, player_buffs: dict, defending: bool) -> None:
+def monster_action(enemy_id: str, enemy: dict, state: dict, player_buffs: dict, defending: bool) -> list[str]:
     if enemy_id == "mon_lava_imp" and random.random() < 0.35:
         damage = calc_enemy_damage(enemy, state, 1.1, "火", player_buffs, defending)
         state["current_hp"] -= damage
-        print(f"{enemy['name']}丟出小火球，造成 {damage} 火傷害。")
+        events = [f"{enemy['name']}丟出小火球，造成 {damage} 火傷害。"]
         if random.random() < 0.2:
             player_buffs["burn"] = 3
-            print("你陷入灼傷。")
-        return
+            events.append("你陷入灼傷。")
+        return events
     if enemy_id == "mon_scorched_guard" and random.random() < 0.3:
         damage = calc_enemy_damage(enemy, state, 1.0, "物理", player_buffs, defending)
         state["current_hp"] -= damage
         player_buffs["defense_down"] = 2
-        print(f"{enemy['name']}使用破甲斬，造成 {damage} 傷害，你的防禦下降。")
-        return
+        return [f"{enemy['name']}使用破甲斬，造成 {damage} 傷害，你的防禦下降。"]
     element = "火" if enemy_id == "mon_cinder_bat" else "物理"
     damage = calc_enemy_damage(enemy, state, 1.0, element, player_buffs, defending)
     state["current_hp"] -= damage
-    print(f"{enemy['name']}攻擊，造成 {damage} 傷害。")
+    return [f"{enemy['name']}攻擊，造成 {damage} 傷害。"]
 
 def boss_glen_action(
     enemy: dict,
@@ -1955,29 +2509,26 @@ def boss_glen_action(
     defending: bool,
     turn: int,
     summoned: bool,
-) -> bool:
+) -> tuple[bool, list[str]]:
     if not summoned and enemy_hp <= enemy["hp"] * 0.6:
         enemy_buffs["defense_up"] = 3
-        print("葛倫吹響口哨，山寨手下在遠處吶喊。他的防禦上升。")
-        return True
+        return True, ["葛倫吹響口哨，山寨手下在遠處吶喊。他的防禦上升。"]
     if enemy_hp <= enemy["hp"] * 0.35:
         damage = calc_enemy_damage(enemy, state, 1.35, "物理", player_buffs, defending)
         state["current_hp"] -= damage
         player_buffs["defense_down"] = 2
-        print(f"葛倫使出破甲重擊，造成 {damage} 傷害，你的防禦下降。")
-        return summoned
+        return summoned, [f"葛倫使出破甲重擊，造成 {damage} 傷害，你的防禦下降。"]
     if turn % 3 == 0:
         damage = calc_enemy_damage(enemy, state, 1.15, "火", player_buffs, defending)
         state["current_hp"] -= damage
-        print(f"葛倫砸出火油瓶，造成 {damage} 火傷害。")
+        events = [f"葛倫砸出火油瓶，造成 {damage} 火傷害。"]
         if random.random() < 0.25:
             player_buffs["burn"] = 3
-            print("你陷入灼傷。")
-        return summoned
+            events.append("你陷入灼傷。")
+        return summoned, events
     damage = calc_enemy_damage(enemy, state, 1.0, "物理", player_buffs, defending)
     state["current_hp"] -= damage
-    print(f"葛倫粗暴斬擊，造成 {damage} 傷害。")
-    return summoned
+    return summoned, [f"葛倫粗暴斬擊，造成 {damage} 傷害。"]
 
 def boss_ash_guardian_action(
     enemy: dict,
@@ -1988,31 +2539,27 @@ def boss_ash_guardian_action(
     defending: bool,
     turn: int,
     charged: bool,
-) -> bool:
+) -> tuple[bool, list[str]]:
     if charged:
         damage = calc_enemy_damage(enemy, state, 1.35, "火", player_buffs, defending)
         state["current_hp"] -= damage
-        print(f"{enemy['name']}釋放爐心蓄熱，熔火爆裂造成 {damage} 火傷害。")
+        events = [f"{enemy['name']}釋放爐心蓄熱，熔火爆裂造成 {damage} 火傷害。"]
         if random.random() < 0.2:
             player_buffs["burn"] = 3
-            print("你陷入灼傷。")
-        return False
+            events.append("你陷入灼傷。")
+        return False, events
     if enemy_hp <= enemy["hp"] * 0.45 and turn % 3 == 1:
-        print(f"{enemy['name']}胸口的爐心開始發亮，下一擊會很危險。")
-        return True
+        return True, [f"{enemy['name']}胸口的爐心開始發亮，下一擊會很危險。"]
     if turn % 4 == 0:
         enemy_buffs["defense_up"] = 2
-        print(f"{enemy['name']}收攏灰燼甲片，防禦上升。")
-        return charged
+        return charged, [f"{enemy['name']}收攏灰燼甲片，防禦上升。"]
     if turn % 2 == 0:
         damage = calc_enemy_damage(enemy, state, 1.1, "火", player_buffs, defending)
         state["current_hp"] -= damage
-        print(f"{enemy['name']}揮出火舌掃擊，造成 {damage} 火傷害。")
-        return charged
+        return charged, [f"{enemy['name']}揮出火舌掃擊，造成 {damage} 火傷害。"]
     damage = calc_enemy_damage(enemy, state, 1.0, "物理", player_buffs, defending)
     state["current_hp"] -= damage
-    print(f"{enemy['name']}以沉重石臂砸下，造成 {damage} 傷害。")
-    return charged
+    return charged, [f"{enemy['name']}以沉重石臂砸下，造成 {damage} 傷害。"]
 
 def boss_cinder_seal_sentinel_action(
     enemy: dict,
@@ -2023,40 +2570,37 @@ def boss_cinder_seal_sentinel_action(
     defending: bool,
     turn: int,
     charged: bool,
-) -> bool:
+) -> tuple[bool, list[str]]:
     if charged:
         damage = calc_enemy_damage(enemy, state, 1.4, "火", player_buffs, defending)
         state["current_hp"] -= damage
-        print(f"{enemy['name']}將燼印壓入地面，赤焰衝擊造成 {damage} 火傷害。")
+        events = [f"{enemy['name']}將燼印壓入地面，赤焰衝擊造成 {damage} 火傷害。"]
         if random.random() < 0.25:
             player_buffs["burn"] = 3
-            print("你陷入灼傷。")
-        return False
+            events.append("你陷入灼傷。")
+        return False, events
     if enemy_hp <= enemy["hp"] * 0.5 and turn % 3 == 1:
-        print(f"{enemy['name']}胸口的燼印亮起，下一擊正在蓄勢。")
-        return True
+        return True, [f"{enemy['name']}胸口的燼印亮起，下一擊正在蓄勢。"]
     if turn % 4 == 0:
         enemy_buffs["defense_up"] = 2
-        print(f"{enemy['name']}收束熔殼，防禦上升。")
-        return charged
+        return charged, [f"{enemy['name']}收束熔殼，防禦上升。"]
     if turn % 2 == 0:
         damage = calc_enemy_damage(enemy, state, 1.05, "物理", player_buffs, defending)
         state["current_hp"] -= damage
         player_buffs["defense_down"] = 2
-        print(f"{enemy['name']}以刻印長槍貫擊，造成 {damage} 傷害，你的防禦下降。")
-        return charged
+        return charged, [f"{enemy['name']}以刻印長槍貫擊，造成 {damage} 傷害，你的防禦下降。"]
     damage = calc_enemy_damage(enemy, state, 1.1, "火", player_buffs, defending)
     state["current_hp"] -= damage
-    print(f"{enemy['name']}揮出燼火斬，造成 {damage} 火傷害。")
-    return charged
+    return charged, [f"{enemy['name']}揮出燼火斬，造成 {damage} 火傷害。"]
 
-def tick_effects(state: dict, player_buffs: dict, enemy_buffs: dict) -> None:
+def tick_effects(state: dict, player_buffs: dict, enemy_buffs: dict) -> list[str]:
+    events = []
     if state.pop("_clear_burn", False):
         player_buffs.pop("burn", None)
     if player_buffs.get("burn", 0) > 0:
         damage = max(1, math.ceil(get_stats(state)["max_hp"] * 0.05))
         state["current_hp"] -= damage
-        print(f"灼傷造成 {damage} 傷害。")
+        events.append(f"灼傷造成 {damage} 傷害。")
     for buffs in (player_buffs, enemy_buffs):
         expired = []
         for key in list(buffs.keys()):
@@ -2065,6 +2609,7 @@ def tick_effects(state: dict, player_buffs: dict, enemy_buffs: dict) -> None:
                 expired.append(key)
         for key in expired:
             del buffs[key]
+    return events
 
 def main_loop(state: dict) -> None:
     while True:
@@ -2164,10 +2709,10 @@ def main() -> None:
         return
 
     state = None
-    if SAVE_PATH.exists():
-        choice = save_prompt_panel()
-        if choice == 1:
-            state = load_game()
+    has_save = SAVE_PATH.exists()
+    choice = start_screen_panel(has_save)
+    if has_save and choice == 2:
+        state = load_game()
     if state is None:
         state = new_game()
     main_loop(state)
