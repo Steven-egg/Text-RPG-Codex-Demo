@@ -57,6 +57,7 @@ SLEEVE_BLADE_FOLLOWUP_MULTIPLIER = 0.35
 MAX_COMBAT_SUMMARY_LINES = 3
 TRAVEL_SHOP_CATEGORIES = ["全部", "補給品", "戰術道具", "飾品"]
 MAGIC_SHOP_CATEGORIES = ["全部", "攻擊魔法", "恢復魔法", "輔助魔法", "特殊魔法"]
+SYNTHESIS_CATEGORIES = ["全部", "裝備", "戰術道具"]
 FIRE_MARK_GUILD_INQUIRY_FLAG = "fire_mark_guild_inquiry_done"
 FIRE_MARK_CHURCH_BRIDGE_FLAG = "fire_mark_church_bridge_done"
 FIRE_MARK_CHURCH_LOOKUP_FLAG = "fire_mark_church_lookup_done"
@@ -1178,33 +1179,156 @@ def recipe_available(state: dict, recipe_id: str) -> bool:
     recipe = RECIPES[recipe_id]
     return is_unlocked(state, recipe.get("unlock"))
 
+def synthesis_recipe_category(recipe_id: str) -> str:
+    recipe = RECIPES[recipe_id]
+    for item_id in recipe["output"]:
+        if item_id in ITEMS and ITEMS[item_id].get("kind") == "battle":
+            return "戰術道具"
+    return "裝備"
+
+def synthesis_available_recipes(state: dict, recipe_ids: list[str], category: str = "全部") -> list[str]:
+    available = [recipe_id for recipe_id in recipe_ids if recipe_available(state, recipe_id)]
+    if category == "全部":
+        return available
+    return [recipe_id for recipe_id in available if synthesis_recipe_category(recipe_id) == category]
+
+def recipe_output_owned_status(state: dict, recipe: dict) -> str:
+    parts = []
+    for item_id in recipe["output"]:
+        if item_id in EQUIPMENT:
+            parts.append(f"{item_name(item_id)} x{equipment_owned_count(state, item_id)}（{equipment_status_line(state, item_id)}）")
+        else:
+            parts.append(f"{item_name(item_id)} x{state['inventory'].get(item_id, 0)}")
+    return "、".join(parts) if parts else "無"
+
+def recipe_base_owned_count(state: dict, recipe: dict) -> int:
+    base_item = recipe.get("base_item")
+    if not base_item:
+        return 0
+    return state["inventory"].get(base_item, 0) + (1 if base_item in state["equipment"].values() else 0)
+
+def synthesis_recipe_status(state: dict, recipe_id: str) -> str:
+    recipe = RECIPES[recipe_id]
+    if state["gold"] < recipe["gold"]:
+        return "金幣不足"
+    if not can_pay_items(state, recipe["materials"]):
+        return "素材不足"
+    base_item = recipe.get("base_item")
+    if base_item and not owns_item_or_equipped(state, base_item):
+        return "基底不足"
+    return "可製作"
+
+def max_synthesis_count(state: dict, recipe_id: str) -> int:
+    recipe = RECIPES[recipe_id]
+    limits = []
+    if recipe["gold"] > 0:
+        limits.append(state["gold"] // recipe["gold"])
+    for item_id, qty in recipe["materials"].items():
+        limits.append(state["inventory"].get(item_id, 0) // qty)
+    if recipe.get("base_item"):
+        limits.append(recipe_base_owned_count(state, recipe))
+    return min(limits) if limits else 0
+
+def synthesis_recipe_line(state: dict, recipe_id: str) -> str:
+    recipe = RECIPES[recipe_id]
+    return (
+        f"{recipe['name']} / {synthesis_recipe_category(recipe_id)} / "
+        f"{synthesis_recipe_status(state, recipe_id)} / "
+        f"產出：{recipe_output_summary(recipe)} / "
+        f"持有：{recipe_output_owned_status(state, recipe)} / "
+        f"最多 {max_synthesis_count(state, recipe_id)} 次 / "
+        f"{recipe['gold']}G / 素材：{recipe_material_status(state, recipe['materials'])}"
+    )
+
+def synthesis_recipe_detail_lines(state: dict, recipe_id: str) -> list[str]:
+    recipe = RECIPES[recipe_id]
+    return [
+        f"配方：{recipe['name']}",
+        f"分類：{synthesis_recipe_category(recipe_id)}",
+        f"狀態：{synthesis_recipe_status(state, recipe_id)}",
+        f"產出：{recipe_output_summary(recipe)}",
+        f"持有：{recipe_output_owned_status(state, recipe)}",
+        f"基底：{recipe_base_status(state, recipe)}",
+        f"素材需求：{recipe_material_status(state, recipe['materials'])}",
+        f"最多可製作：{max_synthesis_count(state, recipe_id)} 次",
+        f"費用：{recipe['gold']}G / 目前金幣：{state['gold']}G",
+        f"效果：{recipe['desc']}",
+        "合成會消耗素材；若需要基底裝備，已裝備物也可被消耗。",
+    ]
+
 def craft_menu(state: dict, title_text: str, recipe_ids: list[str]) -> None:
     while True:
-        available = [recipe_id for recipe_id in recipe_ids if recipe_available(state, recipe_id)]
+        available = synthesis_available_recipes(state, recipe_ids)
         if not available:
             render_panel(title_text, ["目前沒有可用配方。"], border_style="green")
             pause()
             return
-        options = []
-        for recipe_id in available:
-            recipe = RECIPES[recipe_id]
-            base = f"，消耗 {item_name(recipe['base_item'])}" if recipe.get("base_item") else ""
-            options.append(
-                f"{recipe['name']} / {recipe['gold']}G / {format_items(recipe['materials'])}{base} / {recipe['desc']}"
+        choice = action_menu_panel(
+            "選擇分類",
+            [
+                f"{category} / {len(synthesis_available_recipes(state, recipe_ids, category))} 張配方"
+                for category in SYNTHESIS_CATEGORIES
+            ],
+            title_text,
+            header_lines=[
+                "米菈把配方卡排成一列：「先看你想做什麼，再決定要不要動手。」",
+                f"持有金幣：{state['gold']}G",
+            ],
+            hint_lines=["分類瀏覽可用配方；選中配方後會顯示產出、持有數、基底與素材狀態。"],
+            allow_back=True,
+            border_style="green",
+        )
+        if choice == 0:
+            return
+        craft_recipe_list_menu(state, title_text, recipe_ids, SYNTHESIS_CATEGORIES[choice - 1])
+
+def craft_recipe_list_menu(state: dict, title_text: str, recipe_ids: list[str], category: str) -> None:
+    while True:
+        available = synthesis_available_recipes(state, recipe_ids, category)
+        if not available:
+            render_panel(
+                f"{title_text} - 配方列表",
+                [f"分類：{category}", "目前此分類沒有可用配方。"],
+                border_style="green",
             )
+            pause()
+            return
         choice = action_menu_panel(
             "選擇配方",
-            options,
-            title_text,
-            header_lines=[f"持有金幣：{state['gold']}G"],
-            hint_lines=["製作會消耗素材；若配方需要基底裝備，已裝備物也可被消耗。"],
+            [synthesis_recipe_line(state, recipe_id) for recipe_id in available],
+            f"{title_text} - 配方列表",
+            header_lines=[
+                f"持有金幣：{state['gold']}G",
+                f"分類：{category} / 配方 {len(available)} 張",
+            ],
+            hint_lines=["選擇配方可查看完整材料狀態與合成確認。"],
             allow_back=True,
             border_style="green",
         )
         if choice == 0:
             return
         recipe_id = available[choice - 1]
-        craft_recipe(state, recipe_id)
+        action = action_menu_panel(
+            "合成操作",
+            ["進行合成"],
+            f"{title_text} - 配方詳情",
+            header_lines=synthesis_recipe_detail_lines(state, recipe_id),
+            allow_back=True,
+            border_style="green",
+        )
+        if action == 0:
+            continue
+        result = craft_recipe_message(state, recipe_id)
+        recipe = RECIPES[recipe_id]
+        render_panel(
+            f"{title_text} - 合成結果",
+            [
+                result,
+                f"目前金幣：{state['gold']}G",
+                f"持有：{recipe_output_owned_status(state, recipe)}",
+            ],
+            border_style="green",
+        )
         pause()
 
 def craft_recipe(state: dict, recipe_id: str) -> None:

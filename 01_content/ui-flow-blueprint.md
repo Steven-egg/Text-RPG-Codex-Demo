@@ -1,10 +1,10 @@
 # UI Flow Blueprint
 
-狀態：第一版核心循環規格已落成 CLI thin display layer；Start Screen MVP、Travel Shop Catalog MVP、Workshop Catalog MVP、Magic Shop Catalog MVP 與 Combat UI Log Separation MVP 已完成。此文件記錄 UI 架構意圖；實際 runtime 狀態仍以 `README.md` 與 `03_engine/engine` 為準。
+狀態：第一版核心循環規格已落成 CLI thin display layer；Start Screen MVP、Travel Shop Catalog MVP、Workshop Catalog MVP、Magic Shop Catalog MVP、Synthesis Catalog MVP 與 Combat UI Log Separation MVP 已完成。下一階段改以 Screen Map、ScreenModel 與 UIAction 為主，不再優先擴大 CLI-only catalog polish。此文件記錄 UI 架構意圖；實際 runtime 狀態仍以 `README.md` 與 `03_engine/engine` 為準。
 
 ## 1. 規劃主軸
 
-採用「流程節點藍圖」反推 UI：
+採用「流程節點藍圖」反推 UI。既有 CLI 版本的第一版流程為：
 
 開始畫面 → 主選單 → 城鎮整備 → 迷宮選擇 → 迷宮探索 → 戰鬥 → 結算 / 回城
 
@@ -16,7 +16,24 @@
 - 行動：保留數字選單輸入。
 - 結算：集中顯示收益、損失與解鎖方向。
 
-## 2. 已落地畫面
+未來 GUI-oriented flow 暫定拆成兩條：
+
+- Flow A：Start Screen → World Map Screen → Town Hub Screen → Facility Screens。
+- Flow B：Start Screen → World Map Screen → Exploration Screen → Combat Screen → Result → 回到 Exploration 或 World Map / Town。
+
+World Map 是正式 UI 的中樞；Town Hub 與 Dungeon / Exploration 是從 World Map 進入的兩種目的地。CLI 目前的主選單可作為 UI-1 reference，但不應被視為最終主畫面架構。
+
+## 2. UI 升級階段
+
+三階段共用同一套 Screen Map、ScreenModel 與 UIAction；差異只在 render / presentation layer。
+
+- Phase UI-1：Home Hub / Main Menu 文字式 UI。最接近目前 CLI panel 行為，用來整理 screen flow、UIAction、ScreenModel，不追求正式美術或素材風格。
+- Phase UI-2：CLI / Rich 風格 wireframe。用框線、區塊、簡單圖示、選取狀態與操作回饋驗證 screen layout，不建立正式 asset pipeline。
+- Phase UI-3：最終 GUI 視覺版本。使用正式背景圖、角色圖、icon、UI skin，並需要 asset request schema、prompt builder、asset registry 與 style bible；此階段尚未開始。
+
+CLI 數字輸入、Rich wireframe 選取、GUI 點擊與未來觸控都應映射到同一批 UIAction。不要把目前 `input()` / `print()` menu 直接視為最終架構。
+
+## 3. 已落地畫面
 
 - 主選單：顯示角色、HP/MP、金幣與下一步提示。
 - 開始畫面：顯示遊戲標題與最小入口選項；有存檔時提供重新開始與載入進度，無存檔時直接開始新冒險。
@@ -32,9 +49,10 @@
 - 旅人小鋪：已從共用購買清單改為專屬分類商店流程，顯示全部 / 補給品 / 戰術道具 / 飾品、持有數、價格、商品詳情與購買確認。
 - 鐵刃 / 堅甲工坊：已從共用購買 / 強化入口改為專屬 catalog 流程，顯示購買、強化、我的裝備，並在詳情中呈現職業可用性、裝備狀態、基底裝備與素材狀態。
 - 星燈魔法商店：已從單層魔法書清單改為專屬 catalog 流程，顯示全部 / 攻擊魔法 / 恢復魔法 / 輔助魔法 / 特殊魔法，並在詳情中呈現技能、MP、職業、等級、金幣與素材條件。
+- 米菈合成屋：已從單層配方清單改為專屬 catalog 流程，顯示全部 / 裝備 / 戰術道具，並在詳情中呈現可製作狀態、產出、持有狀態、基底裝備、素材、最多可製作次數、金幣與合成確認。
 - 倉庫：城鎮入口已簡化為純倉庫；背包 / 裝備留在主選單作角色整理用途。
 
-## 3. 手動測試後調整
+## 4. 手動測試後調整
 
 - 迷宮 Boss/gate 提示不再全部集中在提示區，改放在每個迷宮選項上，避免「無 Boss」與「可挑戰 Boss」同時像是同一座迷宮的提示。
 - 葛倫已擊敗後會顯示已擊敗，不再顯示尚未滿足挑戰條件。
@@ -44,9 +62,11 @@
 - 倉庫從背包 / 裝備選單中抽出，成為城鎮內的獨立設施。
 - 戰鬥輸出不再讓攻擊、技能、道具、敵人反擊與狀態 tick 直接散落在同一條輸出流；各動作先產生事件文字，再由 combat loop 統一輸出 1-3 行回合摘要與完整 Battle Log。
 
-## 4. 邊界
+## 5. 邊界
 
 - 保留既有數字輸入、返回邏輯、save、schema、data 與 combat formula。
 - Rich 不可用時仍退回純文字輸出。
 - 使用者提供的 UI 草圖先視為探索稿，需映射到流程節點與 panel 職責後再判斷是否落地。
 - 後續 UI 只能做小步 CLI 顯示層改善；戰鬥主畫面服務決策，Battle Log 服務回溯，除非另外明確批准新平台或 UI framework。
+- 近期不直接選 pygame / HTML，不重構 `03_engine/engine/game.py`，不啟動正式美術 asset pipeline。
+- 下一個合理小切片是文件化 Screen Map / UIAction，或用米菈合成屋作第一個 ScreenModel 實驗。

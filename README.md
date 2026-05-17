@@ -1,6 +1,16 @@
 # 《元素迷宮：邊境冒險者》終端機版
 
-## 最新完成：Magic Shop Catalog MVP
+## 最新完成：Synthesis Catalog MVP
+
+最新 UI 變更仍只做 CLI 顯示層優化，範圍限定米菈合成屋：
+
+- 米菈合成屋改為專屬分類 catalog 流程：全部、裝備、戰術道具。
+- 配方清單顯示分類、可製作狀態、產出、持有 / 裝備狀態、最多可製作次數、費用與素材持有狀態。
+- 配方詳情顯示可製作狀態、基底裝備、素材需求、最多可製作次數、金幣、效果與合成確認。
+- 原本的配方解鎖、金幣、素材、基底裝備消耗與產出規則維持不變。
+- 本輪不碰工會、倉庫、背包 / 裝備管理、資料表或新增配方。
+
+## 前一輪完成：Magic Shop Catalog MVP
 
 最新 UI 變更仍只做 CLI 顯示層優化，範圍限定星燈魔法商店：
 
@@ -64,6 +74,7 @@
 - 依手動測試回饋修正迷宮 Boss/gate 提示：Boss 狀態改放在各迷宮選項中，避免不同迷宮提示混在一起；葛倫已擊敗後會正確顯示已擊敗。
 - 背包顯示補上物品描述、任務、配方與工會收購用途；城鎮倉庫入口已簡化為純倉庫功能。
 - 旅館、冒險者工會、工坊、商店、魔法書、合成與倉庫開始改為專屬設施 panel。
+- 米菈合成屋已從單層配方清單改為分類 catalog，顯示可製作狀態、產出、持有狀態、素材、基底裝備、最多可製作次數與合成確認。
 - 工會內部補上可交付、進行中委託與 Boss 挑戰狀態提示，避免重要線索只出現在主選單或迷宮選擇。
 - 數字輸入、返回邏輯、save/schema/data/combat formula 與 gameplay flow 維持原樣。
 - Rich 不可用時會退回原本的文字輸出，不影響啟動與 smoke test。
@@ -73,6 +84,25 @@
 `06_tools/content_inventory_report.py` 是 read-only 內容盤點工具，不是 gameplay 功能，也不是 validation 的替代品。
 
 UI 完成後要回頭處理的 demo 遊玩體驗、平衡、任務引導與內容節奏 polish，統一記錄在 `01_content/demo-playtest-notes.md`；它不是目前 runtime 施工清單。
+
+## 下一階段 UI 方向：ScreenModel / UIAction
+
+目前 CLI / Rich panel 已足以作為 playable reference。下一階段重點不再是繼續把每個 CLI 畫面 catalog 化，而是把既有流程整理成未來 GUI 可共用的互動模型。
+
+規劃中的 UI 升級分三階段：
+
+- Phase UI-1：Home Hub / Main Menu 文字式 UI。以目前 CLI / Rich 行為為參考，整理 screen flow、`ScreenModel` 與 `UIAction`，不追求正式美術。
+- Phase UI-2：CLI / Rich 風格 wireframe。用框線、區塊、簡單圖示與選取狀態驗證 layout、資訊分區與操作回饋，不建立正式 asset pipeline。
+- Phase UI-3：最終 GUI 視覺版本。使用正式背景圖、角色圖、icon、UI skin，並需要 asset request schema、prompt builder、asset registry 與 style bible；此階段尚未開始。
+
+三階段應共用同一套 Screen Map、ScreenModel 與 UIAction；CLI 數字輸入、Rich wireframe 選取與未來 GUI 點擊 / 觸控都只應映射到同一批遊戲語意 action。
+
+正式 UI flow 暫定為：
+
+- Flow A：Start Screen → World Map Screen → Town Hub Screen → Facility Screens（Guild / Shop / Forge / Synthesis / Inn / Storage）。
+- Flow B：Start Screen → World Map Screen → Exploration Screen → Combat Screen → Result → 回到 Exploration 或 World Map / Town。
+
+下一輪建議先做文件與架構草案：`01_content/gui-screen-map.md` 與 UIAction / ScreenModel 定義。第一個實驗對象建議為米菈合成屋，因為它已有分類、列表、詳情、狀態與確認流程，適合抽出 `category → item list → detail → confirm → result` 的通用模式。
 
 ## 近期完成：火之印記三碎片後的工會、神殿與教會查閱 MVP
 
@@ -139,7 +169,7 @@ UI 完成後要回頭處理的 demo 遊玩體驗、平衡、任務引導與內�
 - 工會收購 MVP：工會可收購白名單素材，只給金幣；第一版不收消耗品、裝備或關鍵道具
 - 倉庫 MVP：可花費 500G 開啟 LV1 倉庫，存取最多 10 種非 key item 背包物品
 - 怪物圖鑑 MVP：擊敗怪物後 100% 登錄，可從主選單查看已登錄怪物的基礎資訊
-- CLI UI MVP：核心循環已以 Rich `Panel` 薄層整理，涵蓋開始畫面、主選單、角色狀態、城鎮整備、工坊 catalog、旅人小鋪分類商店、星燈魔法商店 catalog、迷宮選擇、迷宮探索、戰鬥指令與結算；戰鬥已完成主畫面 / Battle Log 分流；輸入、資料、存檔與戰鬥規則維持原樣
+- CLI UI MVP：核心循環已以 Rich `Panel` 薄層整理，涵蓋開始畫面、主選單、角色狀態、城鎮整備、工坊 catalog、旅人小鋪分類商店、星燈魔法商店 catalog、米菈合成屋 catalog、迷宮選擇、迷宮探索、戰鬥指令與結算；戰鬥已完成主畫面 / Battle Log 分流；輸入、資料、存檔與戰鬥規則維持原樣
 - 轉職 preview-only MVP：轉職神殿顯示 `PROMOTIONS` 預覽方向與條件，正式轉職尚未開放
 - 聖物 preview-only MVP：城鎮「聖物調查」顯示 `RELICS` 預覽，聖物取得與效果尚未開放
 - 職業特化 preview-only MVP：角色狀態頁顯示 `JOB_SPECIALIZATIONS` 預覽，目前尚未生效
@@ -361,7 +391,8 @@ data validation ok
 - 維持 schema 文件。
 - 修改 data 後固定跑 validation。
 - 重要 gameplay 修改後固定跑 smoke test。
-- CLI UI 目前只做顯示層包裝；開始畫面、工坊 catalog、旅人小鋪分類商店、星燈魔法商店 catalog 與戰鬥主畫面 / Battle Log 分流已落地，後續 UI 仍不要在未批准範圍內擴張成 UI framework、Unity 或 HTML UI。
+- CLI UI 目前只做顯示層包裝；開始畫面、工坊 catalog、旅人小鋪分類商店、星燈魔法商店 catalog、米菈合成屋 catalog 與戰鬥主畫面 / Battle Log 分流已落地，後續 UI 仍不要在未批准範圍內擴張成 UI framework、Unity 或 HTML UI。
+- 下一階段 UI 重點是 Screen Map、ScreenModel 與 UIAction；暫停擴大 CLI-only catalog polish，不直接選 pygame / HTML，也不重構 `game.py`。
 - 下一輪若要繼續評估灰燼裂谷，優先改測法師、劍士、牧師或不同裝備狀態，不直接施工。
 - 暫不繼續提高灰燼裂谷普通怪 HP，暫不修改 combat formula、EXP/gold、升級全回復或新增怪物技能。
 - 灰燼裂谷目前已具備偵查版與灰燼守衛 Boss MVP；後續測試結論需避免用單次隨機遭遇過度外推。

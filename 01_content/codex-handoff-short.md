@@ -15,6 +15,8 @@
 - Travel Shop Catalog MVP 已完成：旅人小鋪改為專屬分類商店流程，顯示分類、持有數、價格、商品詳情與購買確認；其他商店仍維持原流程。
 - Workshop Catalog MVP 已完成：鐵刃工坊與堅甲工坊改為專屬 catalog 流程，分成購買、強化與我的裝備；顯示職業可用性、裝備狀態、強化基底與素材狀態；其他商店不變。
 - Magic Shop Catalog MVP 已完成：星燈魔法商店改為專屬 catalog 流程，依魔法功能分類，顯示學習狀態、職業 / 等級 / 素材條件、MP、價格與技能效果；其他商店不變。
+- Synthesis Catalog MVP 已完成：米菈合成屋改為專屬 catalog 流程，分成全部、裝備與戰術道具；顯示可製作狀態、產出、持有 / 裝備狀態、基底裝備、素材狀態、最多可製作次數、金幣與合成確認；不新增配方或改變合成規則。
+- UI 下一階段已定為三段式升級策略：UI-1 Home Hub / Main Menu 文字式 UI、UI-2 CLI / Rich wireframe、UI-3 最終 GUI 視覺版。三階段應共用 Screen Map、ScreenModel 與 UIAction，差異只在 render layer。
 - 手動測試回饋後已修正迷宮 Boss/gate 提示混雜問題，Boss 狀態現在放在各迷宮選項；背包補上用途提示，旅館改為專屬 panel。
 - 第二輪手動回饋後，城鎮第 9 項已簡化為純倉庫入口；工會、工坊、商店、魔法書、合成與倉庫開始比照旅館走專屬設施 panel。工會內部已補可交付、進行中委託與 Boss 挑戰狀態提示。
 - UI 完成後再處理的 demo 遊玩體驗、平衡、任務引導與內容節奏 polish，已集中記錄在 `01_content/demo-playtest-notes.md`；它不是目前 runtime 施工清單。
@@ -59,18 +61,21 @@
 
 1. `01_content/codex-handoff-short.md`
 2. `README.md`
-3. 需要詳細歷史時再讀 `01_content/codex-session-snapshot.md`
-4. 需要第二幕規劃脈絡時再讀 `01_content/act-2-content-plan.md`
-5. 需要長期幕次脈絡時再讀 `01_content/full-act-structure.md`
-6. 需要 UI 完成後的 demo polish backlog 時再讀 `01_content/demo-playtest-notes.md`
-7. 需要架構或玩法背景時再讀 `01_content/game-architecture.md`、`01_content/game-design.md`、`01_content/combat-growth-layering-plan.md`
+3. UI 架構下一步請讀 `01_content/ui-flow-blueprint.md` 與 `01_content/gui-screen-map.md`
+4. 需要詳細歷史時再讀 `01_content/codex-session-snapshot.md`
+5. 需要第二幕規劃脈絡時再讀 `01_content/act-2-content-plan.md`
+6. 需要長期幕次脈絡時再讀 `01_content/full-act-structure.md`
+7. 需要 UI 完成後的 demo polish backlog 時再讀 `01_content/demo-playtest-notes.md`
+8. 需要架構或玩法背景時再讀 `01_content/game-architecture.md`、`01_content/game-design.md`、`01_content/combat-growth-layering-plan.md`
 
 ## 下一步邊界
 
 - 目前沒有已批准的下一個 runtime 施工目標。
 - 教會查閱結果 MVP 已完成，不要再列為待做。
 - 火印熔爐、完整火印、火印守護 Boss、正式聖物、正式轉職、八元素、Act 3 都只能視為未來願景；不是當前下一步。
-- UI 目前只允許 CLI 顯示層薄包裝；開始畫面、工坊 catalog、旅人小鋪分類商店、星燈魔法商店 catalog 與戰鬥主畫面 / Battle Log 分流已落地，可延續 `render_panel()` / `action_menu_panel()` 做小步改善，不要擴張成 UI framework、Unity 或 HTML UI。
+- UI 目前只允許 CLI 顯示層薄包裝；開始畫面、工坊 catalog、旅人小鋪分類商店、星燈魔法商店 catalog、米菈合成屋 catalog 與戰鬥主畫面 / Battle Log 分流已落地，可延續 `render_panel()` / `action_menu_panel()` 做小步改善，不要擴張成 UI framework、Unity 或 HTML UI。
+- 下一步建議暫停擴大 CLI-only catalog，先做 read-only / markdown 規劃：Screen Map、UIAction、ScreenModel，第一個實驗對象建議為米菈合成屋。
+- 目前不要直接選 pygame / HTML，不實作 GUI，不重構 `game.py`，不建立正式 asset pipeline。
 - `content_inventory_report.py` 只做 read-only 盤點；不要把 report 輸出當成 SSOT 或 gameplay 變更依據。
 - 若未來要繼續 gameplay，仍需先做單一小切片 read-only 邊界確認，再由使用者明確批准施工範圍。
 - 若使用者指定文件同步輪，只改 markdown，不改 runtime / data / schema / save / combat formula。
@@ -90,6 +95,13 @@
 - `element_maze.py --smoke-test`
 - `git diff --check`
 - 額外魔法商店探針：分類、詳情、學習魔法書、金幣 / 素材 / 已學技能更新正常
+
+本輪 Synthesis Catalog MVP 已確認：
+- Python 語法編譯
+- `06_tools/validate_data.py`
+- `element_maze.py --smoke-test`
+- `git diff --check`
+- 額外合成屋探針：分類、詳情、可製作狀態、最多可製作次數、合成配方、金幣 / 素材 / 基底裝備 / 產出更新正常
 
 本輪 Workshop Catalog MVP 已確認：
 - Python 語法編譯
@@ -119,4 +131,4 @@
 - `git diff --check`
 - 額外非互動戰鬥探針：普通攻擊戰可跑完，回合摘要與 Battle Log 正常輸出
 
-建議穩定節點 commit message：`Add magic shop catalog UI`
+建議穩定節點 commit message：`Add synthesis catalog UI`
