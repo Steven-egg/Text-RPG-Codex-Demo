@@ -16,6 +16,12 @@
 | 任務 | 加讀文件 |
 |---|---|
 | Screen flow / UIAction / ScreenModel | `01_content/gui-screen-map.md`、`01_content/ui-flow-blueprint.md` |
+| Town Hub Screen model | `01_content/gui-town-hub-screen-model-draft.md`、`01_content/gui-screen-map.md`、`01_content/ui-flow-blueprint.md`、`01_content/gui-ui-direction-brief.md` |
+| Town Hub Screen review | `01_content/gui-town-hub-review-checklist.md`、`01_content/gui-town-hub-screen-model-draft.md`、`01_content/gui-ui-direction-brief.md` |
+| Town Hub mockup review record | `01_content/gui-town-hub-mockup-review-v1.md`、`01_content/gui-town-hub-review-checklist.md`、`01_content/gui-town-hub-screen-model-draft.md` |
+| Town Hub UI-2 wireframe planning | `01_content/gui-town-hub-wireframe-plan.md`、`01_content/gui-town-hub-screen-model-draft.md`、`01_content/gui-town-hub-mockup-review-v1.md` |
+| Town Hub UI-2 wireframe draft | `01_content/gui-town-hub-ui2-wireframe-draft.md`、`01_content/gui-town-hub-wireframe-plan.md`、`01_content/gui-town-hub-review-checklist.md` |
+| Town Hub UI-2 wireframe review | `01_content/gui-town-hub-ui2-wireframe-review-v1.md`、`01_content/gui-town-hub-ui2-wireframe-draft.md`、`01_content/gui-town-hub-review-checklist.md` |
 | Facility template | `01_content/gui-facility-screen-template.md` |
 | Guild Screen model | `01_content/gui-guild-screen-model-draft.md`、`01_content/gui-guild-screen-visual-baseline.md`、`01_content/gui-facility-screen-template.md`、`01_content/gui-asset-registry-draft.md` |
 | Guild Screen review | `01_content/gui-guild-screen-review-checklist.md`、`01_content/gui-guild-screen-model-draft.md`、`01_content/gui-guild-screen-visual-baseline.md` |
@@ -52,6 +58,12 @@ GUI 仍處於 planning / reference / mockup 階段。
 | `01_content/gui-ui-direction-brief.md` | core | GUI 整體方向、視覺語彙、禁止方向 | 是 |
 | `01_content/gui-screen-map.md` | core | Screen Map、UIAction、ScreenModel 草案 | 視任務 |
 | `01_content/ui-flow-blueprint.md` | core | CLI thin layer 到 GUI flow 的承接說明 | 視任務 |
+| `01_content/gui-town-hub-screen-model-draft.md` | core | Town Hub 的場景式 facility node、badge 與 UIAction 草案 | Town Hub 任務必讀 |
+| `01_content/gui-town-hub-review-checklist.md` | conditional | Town Hub reference、mockup、wireframe 或 implementation 的審查清單 | Town Hub review 任務必讀 |
+| `01_content/gui-town-hub-mockup-review-v1.md` | conditional | Town Hub V1 user mockup 的正式 review 記錄 | Town Hub mockup review 時讀 |
+| `01_content/gui-town-hub-wireframe-plan.md` | conditional | Town Hub UI-2 / Rich wireframe 與視覺補強規劃 | Town Hub wireframe 任務必讀 |
+| `01_content/gui-town-hub-ui2-wireframe-draft.md` | conditional | Town Hub UI-2 markdown wireframe 草圖與狀態變體 | Town Hub wireframe 任務必讀 |
+| `01_content/gui-town-hub-ui2-wireframe-review-v1.md` | conditional | Town Hub UI-2 markdown wireframe 的正式 review 記錄 | Town Hub wireframe review 時讀 |
 | `01_content/gui-facility-screen-template.md` | core | Facility 類畫面共用模板 | 視任務 |
 | `01_content/gui-guild-screen-visual-baseline.md` | core | Guild Screen 已採納 visual baseline | Guild 任務必讀 |
 | `01_content/gui-guild-screen-model-draft.md` | core | Guild Screen 的 ScreenModel、row model 與 UIAction 草案 | Guild 任務必讀 |
@@ -90,7 +102,24 @@ GUI 仍處於 planning / reference / mockup 階段。
 - screen 之間怎麼流動。
 - CLI 數字輸入、Rich wireframe 與未來 GUI 點擊如何映射到同一批 UIAction。
 
-### C. Facility template
+### C. Town Hub Screen model
+
+- `01_content/gui-town-hub-screen-model-draft.md`：Town Hub 的場景式 facility node、badge 與 UIAction 草案。
+- `01_content/gui-town-hub-review-checklist.md`：Town Hub reference、mockup、wireframe 或未來 implementation 的審查清單。
+- `01_content/gui-town-hub-mockup-review-v1.md`：目前 Town Hub user mockup 的正式 review 記錄，結論為 `pass_with_notes`。
+- `01_content/gui-town-hub-wireframe-plan.md`：Town Hub UI-2 / Rich wireframe 與視覺補強規劃。
+- `01_content/gui-town-hub-ui2-wireframe-draft.md`：Town Hub UI-2 markdown wireframe 草圖與狀態變體。
+- `01_content/gui-town-hub-ui2-wireframe-review-v1.md`：Town Hub UI-2 markdown wireframe 的正式 review 記錄，結論為 `pass_with_notes`。
+- `05_assets/gui_references/town_hub/town_hub_visual_reference_v1_user_mockup.png`：Town Hub visual reference / user mockup。
+
+Town Hub 目前採用「艾爾姆城鎮場景式 hub」方向：
+
+- facility 以建築或場景熱點呈現，不是純列表。
+- `facility_nodes` 承接工會、旅館、工坊、商店、合成屋、魔法商店、轉職神殿、聖物調查與倉庫等入口。
+- badge 只保留少量高價值提示，例如工會可回報、火印線索、合成屋未解鎖。
+- 不處理各 facility 內部流程，不新增 runtime gameplay。
+
+### D. Facility template
 
 - `01_content/gui-facility-screen-template.md`：Shop、Forge、Magic Shop、Synthesis 等設施畫面共用模板。
 
@@ -107,7 +136,7 @@ category
 
 這是 Facility 類 screen 的共用語法，不要求所有設施長得完全一樣。
 
-### D. Guild Screen baseline
+### E. Guild Screen baseline
 
 - `01_content/gui-guild-screen-visual-baseline.md`
 - `01_content/gui-guild-screen-model-draft.md`
@@ -127,17 +156,18 @@ Guild Screen 目前採納方向是「冒險者工會 / 委託板」：
 
 `gui-guild-screen-review-checklist.md` 用於評估 Guild baseline、mockup、wireframe 或未來 implementation 是否符合 model、dynamic text safety、asset governance 與 gameplay safety。
 
-### E. Asset / reference 管理
+### F. Asset / reference 管理
 
 - `01_content/gui-asset-request-schema.md`：素材需求描述 schema 草案。
 - `01_content/gui-asset-registry-draft.md`：reference / candidate / baseline 登記草案。
 - `05_assets/gui_references/README.md`：專案內 GUI reference 暫存區的邊界與命名規則。
+- `05_assets/gui_references/town_hub/`：Town Hub visual reference / user mockup 暫存區。
 - `05_assets/gui_references/guild_screen/README.md`：Guild Screen reference baseline 資料夾說明。
 - `05_assets/gui_references/facility_synthesis_screen/README.md`：Synthesis Screen candidate mockup 資料夾說明。
 
 這一層只管理 reference 與候選圖，不代表正式 asset pipeline 已開始。
 
-### F. Synthesis mockup 探索歷史
+### G. Synthesis mockup 探索歷史
 
 - `01_content/gui-facility-synthesis-mockup-request.md`
 - `01_content/gui-facility-synthesis-prompt-draft.md`
@@ -146,7 +176,7 @@ Guild Screen 目前採納方向是「冒險者工會 / 委託板」：
 
 注意：Synthesis v0 / v2 目前是 visual concept / reference history，不是正式採納 baseline，也不是 runtime asset。
 
-### G. Historical / optional 背景文件
+### H. Historical / optional 背景文件
 
 - `01_content/codex-session-snapshot.md`：精簡後的接續快照。
 - `01_content/game-design.md`：玩法與內容設計背景。
@@ -159,6 +189,22 @@ Guild Screen 目前採納方向是「冒險者工會 / 委託板」：
 這些文件可補脈絡，但不應在 GUI planning session 中自然導向 runtime 施工。
 
 ## 4. 已採納視覺方向
+
+### Town Hub Screen
+
+Town Hub Screen 採用使用者提供圖作為 visual reference / user mockup，不視為最終 layout，也不是 runtime asset。
+
+```text
+05_assets/gui_references/town_hub/town_hub_visual_reference_v1_user_mockup.png
+```
+
+目前採納方向：
+
+- Screen 定位是艾爾姆城鎮的設施入口 hub。
+- 主畫面是城鎮場景，facility 以建築或場景熱點呈現。
+- 上方保留城鎮 title / subtitle，左下保留返回世界地圖入口。
+- 玩家資源、下一步提示與 facility badge 必須由 render layer 動態輸出。
+- badge 只做少量高價值提示，不擴張成完整通知系統。
 
 ### Guild Screen
 
@@ -192,6 +238,60 @@ Facility / Synthesis 目前有 v0 / v2 candidate，但不視為正式 baseline�
 - 後續 Facility direction 應回到 `gui-facility-screen-template.md` 與可讀性規則，而不是直接把任一 candidate 當最終 UI。
 
 ## 5. 任務型閱讀建議
+
+### 若要做 Town Hub Screen model
+
+優先讀：
+
+1. `01_content/gui-planning-index.md`
+2. `01_content/codex-handoff-short.md`
+3. `README.md`
+4. `01_content/gui-ui-direction-brief.md`
+5. `01_content/gui-screen-map.md`
+6. `01_content/ui-flow-blueprint.md`
+7. `01_content/gui-town-hub-screen-model-draft.md`
+
+目標應是文件化 `TownHubScreenModel`、`facility_nodes`、少量高價值 badge 與 Town Hub-specific UIAction，不要直接改 runtime。
+
+### 若要 review Town Hub Screen mockup / wireframe
+
+優先讀：
+
+1. `01_content/gui-planning-index.md`
+2. `01_content/gui-ui-direction-brief.md`
+3. `01_content/gui-screen-map.md`
+4. `01_content/ui-flow-blueprint.md`
+5. `01_content/gui-town-hub-screen-model-draft.md`
+6. `01_content/gui-town-hub-review-checklist.md`
+7. 若需要查看既有 review 結論，再讀 `01_content/gui-town-hub-mockup-review-v1.md`
+
+目標應是評估場景式 hub、dynamic text safety、facility node 可讀性、badge 節制與 gameplay safety，不要生成新圖或直接改 runtime。
+
+### 若要做 Town Hub UI-2 / Rich wireframe planning
+
+優先讀：
+
+1. `01_content/gui-planning-index.md`
+2. `01_content/gui-ui-direction-brief.md`
+3. `01_content/gui-screen-map.md`
+4. `01_content/gui-town-hub-screen-model-draft.md`
+5. `01_content/gui-town-hub-mockup-review-v1.md`
+6. `01_content/gui-town-hub-wireframe-plan.md`
+
+目標應是驗證 resource strip、town guidance、facility nodes、少量 badge 與缺漏 facility 入口策略，不要生成新圖、不選平台、不改 runtime。
+
+### 若要 review 或延續 Town Hub UI-2 markdown wireframe
+
+優先讀：
+
+1. `01_content/gui-planning-index.md`
+2. `01_content/gui-town-hub-screen-model-draft.md`
+3. `01_content/gui-town-hub-review-checklist.md`
+4. `01_content/gui-town-hub-wireframe-plan.md`
+5. `01_content/gui-town-hub-ui2-wireframe-draft.md`
+6. 若需要查看既有 review 結論，再讀 `01_content/gui-town-hub-ui2-wireframe-review-v1.md`
+
+目標應是檢查 wireframe 是否滿足場景式 hub、resource strip、town guidance、facility node、badge discipline 與 dynamic text safety，不要生成新圖。
 
 ### 若要做 Guild Screen model
 
@@ -234,10 +334,17 @@ Facility / Synthesis 目前有 v0 / v2 candidate，但不視為正式 baseline�
 3. `01_content/gui-asset-request-schema.md`
 4. `01_content/gui-asset-registry-draft.md`
 5. 對應 screen 文件：
+   - Town Hub：`01_content/gui-town-hub-screen-model-draft.md`
+   - Town Hub review：`01_content/gui-town-hub-review-checklist.md`
+   - Town Hub mockup review record：`01_content/gui-town-hub-mockup-review-v1.md`
+   - Town Hub wireframe planning：`01_content/gui-town-hub-wireframe-plan.md`
+   - Town Hub UI-2 wireframe draft：`01_content/gui-town-hub-ui2-wireframe-draft.md`
+   - Town Hub UI-2 wireframe review：`01_content/gui-town-hub-ui2-wireframe-review-v1.md`
    - Guild：`01_content/gui-guild-screen-visual-baseline.md`
    - Facility / Synthesis：`01_content/gui-facility-screen-template.md`
 6. 對應 reference 資料夾 README：
    - `05_assets/gui_references/README.md`
+   - `05_assets/gui_references/town_hub/`
    - `05_assets/gui_references/guild_screen/README.md`
    - `05_assets/gui_references/facility_synthesis_screen/README.md`
 
@@ -291,6 +398,11 @@ mockup 評估重點：
 
 最適合的下一步是選一個小而清楚的文件化切片：
 
+- Town Hub Screen：可延續 `gui-town-hub-screen-model-draft.md`，補強場景式 `facility_nodes`、badge 優先級與 World Map / Facility Screen 銜接。
+- Town Hub mockup review 已完成：`gui-town-hub-mockup-review-v1.md` 結論為 `pass_with_notes`；下一步可小幅同步 `gui-screen-map.md`。
+- Town Hub UI-2 planning 已建立：`gui-town-hub-wireframe-plan.md`；下一步可做 markdown-only wireframe 草圖，不生成新圖。
+- Town Hub UI-2 wireframe draft 已建立：`gui-town-hub-ui2-wireframe-draft.md`；下一步可用 Town Hub review checklist 審查草圖。
+- Town Hub UI-2 wireframe review 已完成：`gui-town-hub-ui2-wireframe-review-v1.md` 結論為 `pass_with_notes`；下一步可寫 visual mockup prompt draft，但先不生成新圖。
 - Guild Screen：下一步可 read-only 對照 `guild_menu()` 與任務資料來源，列出未來 `build_guild_screen_model(...)` 可能需要的資料。
 - Facility Template：補強 `FacilityScreenModel` 與不同 facility variant 的欄位差異。
 - Mockup 評估：建立一份單一 screen 的 review checklist，不生成新圖。

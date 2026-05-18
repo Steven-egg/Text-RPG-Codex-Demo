@@ -72,7 +72,7 @@ World Map 是正式 UI 的中樞。Town Hub 與 Dungeon / Exploration 是從 Wor
 |---|---|---|---|
 | Start Screen | 開始新冒險、讀取進度 | `start_screen_panel()` | 已有 CLI MVP |
 | World Map Screen | 選擇目的地、查看主線目標與角色摘要 | `main_loop()` + `dungeon_menu()` 概念拆分 | 高 |
-| Town Hub Screen | 點選城鎮設施 | `town_menu()` | 高 |
+| Town Hub Screen | 場景式 facility hub，點選建築入口進入城鎮設施 | `town_menu()` | 高 |
 | Guild Screen | 任務列表、交付、素材收購、主線線索 | `guild_menu()` | 中 |
 | Shop Screen | 商品分類、列表、詳情、購買 | `travel_shop()` | 中 |
 | Forge Screen | 購買裝備、強化裝備、查看本店裝備 | `workshop_catalog()` | 中 |
@@ -110,6 +110,8 @@ World Map / Town action：
 - `select_destination`
 - `enter_dungeon`
 - `open_facility`
+
+Town Hub 目前仍可保留 `open_character` / `open_inventory` 作為現階段主 hub 相容入口；最終是否屬於全域導航，待後續 navigation model 再定。
 
 Facility action：
 
@@ -181,27 +183,32 @@ ListRow
 - detail
 ```
 
+Town Hub V1 補充摘要：
+
+```text
+TownHubScreenModel
+- resource_strip
+- town_guidance
+- facility_nodes
+- selected_facility_id
+- global_actions
+```
+
+Town Hub 採場景式 hub，不以純列表作為主要結構。`facility_nodes` 承接工會、旅館、工坊、商店、合成屋、魔法商店、轉職神殿、聖物調查與倉庫等建築入口；badge 只保留少量高價值提示，例如工會可回報、火印線索、合成屋未解鎖。完整規格見 `01_content/gui-town-hub-screen-model-draft.md`。
+
 ## 6. 第一個實驗對象
 
-建議先以米菈合成屋作第一個 ScreenModel / UIAction 實驗。
+建議先以 Town Hub 作下一個 UI-2 / Rich wireframe 或視覺補強實驗。
 
 原因：
 
-- 已有分類：全部 / 裝備 / 戰術道具。
-- 已有列表、詳情、狀態與確認流程。
-- 副作用清楚：扣金幣、扣素材、消耗基底裝備、取得產出。
-- 可抽出通用模式：`category → item list → detail → confirm → result`。
-- 風險低於戰鬥、背包、工會。
+- 已有場景式 user mockup，review 結論為 `pass_with_notes`。
+- 已有 `TownHubScreenModel` 與 review checklist。
+- 目前只需驗證 resource strip、town guidance、facility nodes 與少量 badge 的 layout。
+- 不需要進入各 facility 內部流程。
+- 不需要改 runtime、data、schema、save 或 combat formula。
 
-第一個實驗目標不應是 GUI，而是把現有合成屋拆成：
-
-```text
-build_synthesis_screen_model(state, selected_category, selected_recipe)
-handle_synthesis_action(state, action)
-render_with_cli_adapter(screen_model)
-```
-
-實作前仍需先 read-only 評估，不要直接重構 `game.py`。
+Town Hub 後續若做 wireframe，應只驗證畫面結構與資訊層，不選平台、不生成正式 asset、不重構 `game.py`。
 
 ## 7. 近期不要做
 
@@ -216,8 +223,7 @@ render_with_cli_adapter(screen_model)
 
 ## 8. 下一步建議
 
-1. Read-only 對照 `craft_menu()` / `craft_recipe_list_menu()`。
-2. 文件化 Synthesis ScreenModel 欄位。
-3. 文件化 Synthesis UIAction 列表。
-4. 再決定是否做最小 runtime 實驗：只抽「畫面模型建構函式」，不改合成規則。
-5. 成功後再評估 Shop Screen 是否沿用同一 pattern。
+1. 針對 Town Hub 做 UI-2 / Rich wireframe 或視覺補強規劃。
+2. 補強 resource strip、town guidance、少量 high-value badge 的版面位置。
+3. 確認 magic shop、temple、storage 在場景式 hub 中的入口策略。
+4. 暫不生成新圖、不選平台、不改 runtime。
