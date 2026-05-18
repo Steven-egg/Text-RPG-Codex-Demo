@@ -17,7 +17,8 @@
 |---|---|
 | Screen flow / UIAction / ScreenModel | `01_content/gui-screen-map.md`、`01_content/ui-flow-blueprint.md` |
 | Facility template | `01_content/gui-facility-screen-template.md` |
-| Guild Screen model | `01_content/gui-guild-screen-visual-baseline.md`、`01_content/gui-facility-screen-template.md`、`01_content/gui-asset-registry-draft.md` |
+| Guild Screen model | `01_content/gui-guild-screen-model-draft.md`、`01_content/gui-guild-screen-visual-baseline.md`、`01_content/gui-facility-screen-template.md`、`01_content/gui-asset-registry-draft.md` |
+| Guild Screen review | `01_content/gui-guild-screen-review-checklist.md`、`01_content/gui-guild-screen-model-draft.md`、`01_content/gui-guild-screen-visual-baseline.md` |
 | Mockup / reference 評估 | `01_content/gui-asset-request-schema.md`、`01_content/gui-asset-registry-draft.md`、對應 screen baseline / template |
 | 歷史追溯 | `01_content/codex-session-snapshot.md`，只在真的需要歷史決策時讀 |
 
@@ -53,6 +54,8 @@ GUI 仍處於 planning / reference / mockup 階段。
 | `01_content/ui-flow-blueprint.md` | core | CLI thin layer 到 GUI flow 的承接說明 | 視任務 |
 | `01_content/gui-facility-screen-template.md` | core | Facility 類畫面共用模板 | 視任務 |
 | `01_content/gui-guild-screen-visual-baseline.md` | core | Guild Screen 已採納 visual baseline | Guild 任務必讀 |
+| `01_content/gui-guild-screen-model-draft.md` | core | Guild Screen 的 ScreenModel、row model 與 UIAction 草案 | Guild 任務必讀 |
+| `01_content/gui-guild-screen-review-checklist.md` | conditional | Guild Screen baseline、mockup、wireframe 或 implementation 的審查清單 | Guild review 任務必讀 |
 | `01_content/gui-asset-registry-draft.md` | core | reference / candidate / baseline 狀態登記 | mockup 或 baseline 任務必讀 |
 | `01_content/gui-asset-request-schema.md` | conditional | 未來素材需求描述 schema | 只在 mockup / asset request 任務讀 |
 | `01_content/gui-facility-synthesis-mockup-request.md` | historical | Synthesis v0 mockup request 過程紀錄 | 否 |
@@ -107,6 +110,8 @@ category
 ### D. Guild Screen baseline
 
 - `01_content/gui-guild-screen-visual-baseline.md`
+- `01_content/gui-guild-screen-model-draft.md`
+- `01_content/gui-guild-screen-review-checklist.md`
 - `05_assets/gui_references/guild_screen/guild_screen_visual_baseline_v1_user_reference.png`
 
 Guild Screen 目前採納方向是「冒險者工會 / 委託板」：
@@ -117,6 +122,10 @@ Guild Screen 目前採納方向是「冒險者工會 / 委託板」：
 - 任務達成 / 回報條件檢查表。
 - 底部 NPC guidance / feedback bar。
 - 右下單一主要 action。
+
+`gui-guild-screen-model-draft.md` 將此 baseline 轉成 `GuildScreenModel`、`GuildTaskRow`、`GuildConditionRow`、`GuildRewardSummary` 與 Guild-specific UIAction，仍不代表 runtime 已實作。
+
+`gui-guild-screen-review-checklist.md` 用於評估 Guild baseline、mockup、wireframe 或未來 implementation 是否符合 model、dynamic text safety、asset governance 與 gameplay safety。
 
 ### E. Asset / reference 管理
 
@@ -196,7 +205,9 @@ Facility / Synthesis 目前有 v0 / v2 candidate，但不視為正式 baseline�
 6. `01_content/ui-flow-blueprint.md`
 7. `01_content/gui-facility-screen-template.md`
 8. `01_content/gui-guild-screen-visual-baseline.md`
-9. `01_content/gui-asset-registry-draft.md`
+9. `01_content/gui-guild-screen-model-draft.md`
+10. `01_content/gui-guild-screen-review-checklist.md`
+11. `01_content/gui-asset-registry-draft.md`
 
 目標應是文件化 `GuildScreenModel`、`GuildTaskRow`、`GuildConditionRow` 與 Guild-specific UIAction，不要直接改 runtime。
 
@@ -280,7 +291,7 @@ mockup 評估重點：
 
 最適合的下一步是選一個小而清楚的文件化切片：
 
-- Guild Screen：新增 `01_content/gui-guild-screen-model-draft.md`，定義 model / row / action，但不碰 runtime。
+- Guild Screen：下一步可 read-only 對照 `guild_menu()` 與任務資料來源，列出未來 `build_guild_screen_model(...)` 可能需要的資料。
 - Facility Template：補強 `FacilityScreenModel` 與不同 facility variant 的欄位差異。
 - Mockup 評估：建立一份單一 screen 的 review checklist，不生成新圖。
 

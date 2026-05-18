@@ -23,8 +23,10 @@ GUI planning 接續：
 Guild Screen 接續：
 
 1. `01_content/gui-guild-screen-visual-baseline.md`
-2. `01_content/gui-facility-screen-template.md`
-3. `01_content/gui-asset-registry-draft.md`
+2. `01_content/gui-guild-screen-model-draft.md`
+3. `01_content/gui-guild-screen-review-checklist.md`
+4. `01_content/gui-facility-screen-template.md`
+5. `01_content/gui-asset-registry-draft.md`
 
 Facility / Synthesis 接續：
 
@@ -78,6 +80,8 @@ GUI 文件入口：
 - `01_content/gui-ui-direction-brief.md`：整體 GUI 方向與視覺語彙。
 - `01_content/gui-screen-map.md`：Screen Map、UIAction、ScreenModel 草案。
 - `01_content/ui-flow-blueprint.md`：目前 CLI thin layer 與 GUI flow 的銜接。
+- `01_content/gui-guild-screen-model-draft.md`：Guild Screen 的 ScreenModel、row model 與 UIAction 草案。
+- `01_content/gui-guild-screen-review-checklist.md`：Guild Screen baseline、mockup、wireframe 或 implementation 的審查清單。
 
 ## 5. 已採納 / 未採納 visual direction
 
@@ -92,6 +96,8 @@ Guild Screen 已採用使用者提供圖作為 visual baseline。
 對應文件：
 
 - `01_content/gui-guild-screen-visual-baseline.md`
+- `01_content/gui-guild-screen-model-draft.md`
+- `01_content/gui-guild-screen-review-checklist.md`
 - `01_content/gui-asset-registry-draft.md`
 
 定位：
@@ -153,7 +159,7 @@ Facility / Synthesis 目前有 v0 / v2 candidate，但不視為正式 baseline�
 
 目前最適合的下一步仍是 markdown-only 小切片：
 
-- Guild Screen：新增 `01_content/gui-guild-screen-model-draft.md`，定義 `GuildScreenModel`、`GuildTaskRow`、`GuildConditionRow` 與 Guild-specific UIAction。
+- Guild Screen：read-only 對照目前 `guild_menu()` 與任務資料來源，列出未來 `build_guild_screen_model(...)` 可能需要的資料。
 - Facility Template：補強 `FacilityScreenModel` 與 Shop / Forge / Magic / Synthesis 的欄位差異。
 - Mockup 評估：建立單一 screen 的 review checklist，不生成新圖。
 
