@@ -22,6 +22,11 @@
 | Town Hub UI-2 wireframe planning | `01_content/gui-town-hub-wireframe-plan.md`、`01_content/gui-town-hub-screen-model-draft.md`、`01_content/gui-town-hub-mockup-review-v1.md` |
 | Town Hub UI-2 wireframe draft | `01_content/gui-town-hub-ui2-wireframe-draft.md`、`01_content/gui-town-hub-wireframe-plan.md`、`01_content/gui-town-hub-review-checklist.md` |
 | Town Hub UI-2 wireframe review | `01_content/gui-town-hub-ui2-wireframe-review-v1.md`、`01_content/gui-town-hub-ui2-wireframe-draft.md`、`01_content/gui-town-hub-review-checklist.md` |
+| Town Hub visual mockup prompt / candidate review | `01_content/gui-town-hub-visual-mockup-prompt-draft.md`、`01_content/gui-town-hub-visual-mockup-prompt-review-v1.md`、`01_content/gui-town-hub-visual-mockup-candidate-review-v1.md`、`01_content/gui-town-hub-review-checklist.md` |
+| Town Hub facility node mapping / programmatic layout | `01_content/gui-town-hub-facility-node-mapping-v1.md`、`01_content/gui-town-hub-programmatic-layout-plan-v1.md`、`01_content/gui-town-hub-screen-model-draft.md` |
+| GUI implementation platform tradeoff | `01_content/gui-implementation-platform-tradeoff.md`、`01_content/gui-ui-direction-brief.md`、`01_content/gui-town-hub-programmatic-layout-plan-v1.md` |
+| HTML Town Hub prototype planning | `01_content/gui-html-town-hub-prototype-plan.md`、`01_content/gui-implementation-platform-tradeoff.md`、`01_content/gui-town-hub-programmatic-layout-plan-v1.md` |
+| HTML Town Hub fixture spec | `01_content/gui-html-town-hub-fixture-spec.md`、`01_content/gui-html-town-hub-prototype-plan.md` |
 | Facility template | `01_content/gui-facility-screen-template.md` |
 | Guild Screen model | `01_content/gui-guild-screen-model-draft.md`、`01_content/gui-guild-screen-visual-baseline.md`、`01_content/gui-facility-screen-template.md`、`01_content/gui-asset-registry-draft.md` |
 | Guild Screen review | `01_content/gui-guild-screen-review-checklist.md`、`01_content/gui-guild-screen-model-draft.md`、`01_content/gui-guild-screen-visual-baseline.md` |
@@ -64,6 +69,14 @@ GUI 仍處於 planning / reference / mockup 階段。
 | `01_content/gui-town-hub-wireframe-plan.md` | conditional | Town Hub UI-2 / Rich wireframe 與視覺補強規劃 | Town Hub wireframe 任務必讀 |
 | `01_content/gui-town-hub-ui2-wireframe-draft.md` | conditional | Town Hub UI-2 markdown wireframe 草圖與狀態變體 | Town Hub wireframe 任務必讀 |
 | `01_content/gui-town-hub-ui2-wireframe-review-v1.md` | conditional | Town Hub UI-2 markdown wireframe 的正式 review 記錄 | Town Hub wireframe review 時讀 |
+| `01_content/gui-town-hub-visual-mockup-prompt-draft.md` | conditional | Town Hub visual mockup candidate 的 prompt draft | Town Hub mockup generation / review 任務讀 |
+| `01_content/gui-town-hub-visual-mockup-prompt-review-v1.md` | conditional | Town Hub visual mockup prompt 的 review gate | Town Hub mockup generation / review 任務讀 |
+| `01_content/gui-town-hub-visual-mockup-candidate-review-v1.md` | conditional | Town Hub generated visual mockup candidate 的正式 review 記錄 | Town Hub candidate review / governance 任務讀 |
+| `01_content/gui-town-hub-facility-node-mapping-v1.md` | conditional | Town Hub candidate 圖中建築入口與 `facility_id` 的對位 | Town Hub programmatic layout 任務讀 |
+| `01_content/gui-town-hub-programmatic-layout-plan-v1.md` | conditional | Town Hub programmatic GUI 的 layout zones、focus、action 與 badge 邊界 | Town Hub implementation planning 任務讀 |
+| `01_content/gui-implementation-platform-tradeoff.md` | conditional | pygame / HTML first prototype path 取捨；建議先用 HTML static fixture 驗證 Programmatic GUI | GUI platform decision 任務讀 |
+| `01_content/gui-html-town-hub-prototype-plan.md` | conditional | HTML Town Hub static fixture prototype 的範圍、layout、fixture、互動與 runtime adapter 邊界 | HTML prototype planning 任務讀 |
+| `01_content/gui-html-town-hub-fixture-spec.md` | conditional | HTML Town Hub prototype 的 `town-hub-default.json` / `town-hub-alerts.json` fixture 規格 | HTML prototype implementation 任務讀 |
 | `01_content/gui-facility-screen-template.md` | core | Facility 類畫面共用模板 | 視任務 |
 | `01_content/gui-guild-screen-visual-baseline.md` | core | Guild Screen 已採納 visual baseline | Guild 任務必讀 |
 | `01_content/gui-guild-screen-model-draft.md` | core | Guild Screen 的 ScreenModel、row model 與 UIAction 草案 | Guild 任務必讀 |
@@ -110,7 +123,13 @@ GUI 仍處於 planning / reference / mockup 階段。
 - `01_content/gui-town-hub-wireframe-plan.md`：Town Hub UI-2 / Rich wireframe 與視覺補強規劃。
 - `01_content/gui-town-hub-ui2-wireframe-draft.md`：Town Hub UI-2 markdown wireframe 草圖與狀態變體。
 - `01_content/gui-town-hub-ui2-wireframe-review-v1.md`：Town Hub UI-2 markdown wireframe 的正式 review 記錄，結論為 `pass_with_notes`。
+- `01_content/gui-town-hub-visual-mockup-prompt-draft.md`：Town Hub visual mockup candidate prompt 草案。
+- `01_content/gui-town-hub-visual-mockup-prompt-review-v1.md`：Town Hub prompt review，結論為 `pass_with_notes`。
+- `01_content/gui-town-hub-visual-mockup-candidate-review-v1.md`：Town Hub generated candidate review，結論為 `pass_with_notes`，使用者認為符合期待。
+- `01_content/gui-town-hub-facility-node-mapping-v1.md`：candidate 圖中建築入口與 `facility_id` 的對位。
+- `01_content/gui-town-hub-programmatic-layout-plan-v1.md`：Town Hub programmatic layout plan，維持 Programmatic GUI → Asset-driven 原則。
 - `05_assets/gui_references/town_hub/town_hub_visual_reference_v1_user_mockup.png`：Town Hub visual reference / user mockup。
+- `05_assets/gui_references/town_hub/town_hub_visual_mockup_candidate_v1_001.png`：Town Hub generated visual mockup candidate，僅作 reference。
 
 Town Hub 目前採用「艾爾姆城鎮場景式 hub」方向：
 
@@ -161,7 +180,8 @@ Guild Screen 目前採納方向是「冒險者工會 / 委託板」：
 - `01_content/gui-asset-request-schema.md`：素材需求描述 schema 草案。
 - `01_content/gui-asset-registry-draft.md`：reference / candidate / baseline 登記草案。
 - `05_assets/gui_references/README.md`：專案內 GUI reference 暫存區的邊界與命名規則。
-- `05_assets/gui_references/town_hub/`：Town Hub visual reference / user mockup 暫存區。
+- `05_assets/gui_references/town_hub/`：Town Hub visual reference / generated candidate 暫存區。
+- `05_assets/gui_references/town_hub/README.md`：Town Hub reference / candidate 的資料夾說明。
 - `05_assets/gui_references/guild_screen/README.md`：Guild Screen reference baseline 資料夾說明。
 - `05_assets/gui_references/facility_synthesis_screen/README.md`：Synthesis Screen candidate mockup 資料夾說明。
 
@@ -198,6 +218,12 @@ Town Hub Screen 採用使用者提供圖作為 visual reference / user mockup，
 05_assets/gui_references/town_hub/town_hub_visual_reference_v1_user_mockup.png
 ```
 
+另有一張 generated visual mockup candidate 已通過 review，使用者認為符合期待；目前只作 reference，不是 runtime asset。
+
+```text
+05_assets/gui_references/town_hub/town_hub_visual_mockup_candidate_v1_001.png
+```
+
 目前採納方向：
 
 - Screen 定位是艾爾姆城鎮的設施入口 hub。
@@ -205,6 +231,7 @@ Town Hub Screen 採用使用者提供圖作為 visual reference / user mockup，
 - 上方保留城鎮 title / subtitle，左下保留返回世界地圖入口。
 - 玩家資源、下一步提示與 facility badge 必須由 render layer 動態輸出。
 - badge 只做少量高價值提示，不擴張成完整通知系統。
+- Candidate 已先做 facility node mapping 與 programmatic layout plan，仍維持 Programmatic GUI → Asset-driven 的順序。
 
 ### Guild Screen
 
@@ -292,6 +319,68 @@ Facility / Synthesis 目前有 v0 / v2 candidate，但不視為正式 baseline�
 6. 若需要查看既有 review 結論，再讀 `01_content/gui-town-hub-ui2-wireframe-review-v1.md`
 
 目標應是檢查 wireframe 是否滿足場景式 hub、resource strip、town guidance、facility node、badge discipline 與 dynamic text safety，不要生成新圖。
+
+### 若要 review 或治理 Town Hub visual mockup candidate
+
+優先讀：
+
+1. `01_content/gui-planning-index.md`
+2. `01_content/gui-town-hub-review-checklist.md`
+3. `01_content/gui-town-hub-visual-mockup-prompt-draft.md`
+4. `01_content/gui-town-hub-visual-mockup-prompt-review-v1.md`
+5. `01_content/gui-town-hub-visual-mockup-candidate-review-v1.md`
+6. `01_content/gui-asset-registry-draft.md`
+7. `05_assets/gui_references/town_hub/README.md`
+
+目標應是確認 candidate 仍是 reference / visual direction，不是 runtime asset；並維持 dynamic text safety、facility entrance coverage 與 asset governance。
+
+### 若要延續 Town Hub programmatic layout planning
+
+優先讀：
+
+1. `01_content/gui-planning-index.md`
+2. `01_content/gui-town-hub-screen-model-draft.md`
+3. `01_content/gui-town-hub-facility-node-mapping-v1.md`
+4. `01_content/gui-town-hub-programmatic-layout-plan-v1.md`
+5. `01_content/gui-town-hub-ui2-wireframe-review-v1.md`
+
+目標應是把 Town Hub 轉成可操作 GUI 的 layout zones、focus order、badge render rules、disabled render rules 與 action dispatch 邊界；不要先進正式 asset pipeline。
+
+### 若要討論 GUI implementation platform
+
+優先讀：
+
+1. `01_content/gui-planning-index.md`
+2. `01_content/gui-ui-direction-brief.md`
+3. `01_content/gui-screen-map.md`
+4. `01_content/ui-flow-blueprint.md`
+5. `01_content/gui-town-hub-programmatic-layout-plan-v1.md`
+6. `01_content/gui-implementation-platform-tradeoff.md`
+
+目標應是評估 first programmatic GUI prototype path。此階段仍不修改 runtime、不接 save、不啟動 asset pipeline。
+
+### 若要規劃 HTML Town Hub prototype
+
+優先讀：
+
+1. `01_content/gui-planning-index.md`
+2. `01_content/gui-implementation-platform-tradeoff.md`
+3. `01_content/gui-town-hub-programmatic-layout-plan-v1.md`
+4. `01_content/gui-town-hub-facility-node-mapping-v1.md`
+5. `01_content/gui-html-town-hub-prototype-plan.md`
+
+目標應是建立 static fixture driven 的 HTML prototype 規格。此階段仍不接 Python runtime、不讀寫 save、不複製 gameplay logic 到 JS。
+
+### 若要開始 HTML Town Hub prototype implementation
+
+優先讀：
+
+1. `01_content/gui-planning-index.md`
+2. `01_content/gui-implementation-platform-tradeoff.md`
+3. `01_content/gui-html-town-hub-prototype-plan.md`
+4. `01_content/gui-html-town-hub-fixture-spec.md`
+
+目標應是建立 `07_gui_prototype/town_hub/` 的 static HTML prototype。只使用 fixture，不接 runtime、不讀寫 save、不啟動正式 asset pipeline。
 
 ### 若要做 Guild Screen model
 
@@ -403,6 +492,12 @@ mockup 評估重點：
 - Town Hub UI-2 planning 已建立：`gui-town-hub-wireframe-plan.md`；下一步可做 markdown-only wireframe 草圖，不生成新圖。
 - Town Hub UI-2 wireframe draft 已建立：`gui-town-hub-ui2-wireframe-draft.md`；下一步可用 Town Hub review checklist 審查草圖。
 - Town Hub UI-2 wireframe review 已完成：`gui-town-hub-ui2-wireframe-review-v1.md` 結論為 `pass_with_notes`；下一步可寫 visual mockup prompt draft，但先不生成新圖。
+- Town Hub visual mockup prompt review 已完成：`gui-town-hub-visual-mockup-prompt-review-v1.md` 結論為 `pass_with_notes`。
+- Town Hub visual mockup candidate review 已完成：`gui-town-hub-visual-mockup-candidate-review-v1.md` 結論為 `pass_with_notes`；candidate 已收進 `05_assets/gui_references/town_hub/`，僅作 reference。
+- Town Hub facility node mapping 與 programmatic layout plan 已建立：下一步可討論 pygame / HTML implementation tradeoff，但仍不啟動正式 asset pipeline。
+- GUI implementation platform tradeoff 已建立：`gui-implementation-platform-tradeoff.md` 建議第一個 Programmatic GUI prototype 優先走 HTML static fixture，不接 runtime。
+- HTML Town Hub prototype plan 已建立：`gui-html-town-hub-prototype-plan.md`；下一步可先寫完整 static fixture spec，或建立 `07_gui_prototype/town_hub/` prototype，但仍不接 runtime。
+- HTML Town Hub fixture spec 已建立：`gui-html-town-hub-fixture-spec.md`；下一步可在新 session 建立 `07_gui_prototype/town_hub/` static prototype。
 - Guild Screen：下一步可 read-only 對照 `guild_menu()` 與任務資料來源，列出未來 `build_guild_screen_model(...)` 可能需要的資料。
 - Facility Template：補強 `FacilityScreenModel` 與不同 facility variant 的欄位差異。
 - Mockup 評估：建立一份單一 screen 的 review checklist，不生成新圖。

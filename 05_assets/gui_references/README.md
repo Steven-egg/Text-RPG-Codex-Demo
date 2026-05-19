@@ -21,7 +21,14 @@ facility_synthesis_screen_mockup_v2_candidate_001.png
 ## 建議子資料夾
 
 ```text
+05_assets/gui_references/town_hub/
 05_assets/gui_references/guild_screen/
 05_assets/gui_references/facility_synthesis_screen/
 ```
 
+## 目前 reference / candidate
+
+- `town_hub/town_hub_visual_reference_v1_user_mockup.png`：Town Hub 使用者參考圖。
+- `town_hub/town_hub_visual_mockup_candidate_v1_001.png`：Town Hub generated visual mockup candidate，僅作 reference。
+- `guild_screen/guild_screen_visual_baseline_v1_user_reference.png`：Guild Screen visual baseline。
+- `facility_synthesis_screen/`：Synthesis Screen historical mockup candidates。

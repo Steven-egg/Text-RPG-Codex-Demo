@@ -19,7 +19,7 @@
 registry_id: gui_asset_registry_draft
 status: draft
 scope: gui_visual_concept_candidates
-current_focus_screen: facility_synthesis_screen
+current_focus_screen: town_hub
 formal_pipeline_started: false
 runtime_usage_allowed: false
 ```
@@ -39,6 +39,78 @@ runtime_usage_allowed: false
 | `archived` | 被更新版本或決策取代。 |
 
 ## 3. Candidate Entries
+
+### `gui_asset_town_hub_visual_mockup_candidate_v1_001`
+
+```yaml
+asset_id: gui_asset_town_hub_visual_mockup_candidate_v1_001
+status:
+  - generated_candidate
+  - reviewed_candidate
+  - accepted_direction
+
+screen_id: town_hub
+flow_id: flow_a_town_facility
+asset_type: screen_mockup
+asset_role: town_hub_visual_mockup_candidate
+version: v1
+candidate_number: 001
+
+project_asset_path: null
+project_reference_path: 05_assets/gui_references/town_hub/town_hub_visual_mockup_candidate_v1_001.png
+source_generated_path: C:\Users\user\.codex\generated_images\019e3bba-e6c2-78f0-97e2-59bb0436eaa8\ig_0978a4b347977fd9016a0b9da7c12c8191aa682dbfa91fc510.png
+
+linked_documents:
+  prompt: 01_content/gui-town-hub-visual-mockup-prompt-draft.md
+  prompt_review: 01_content/gui-town-hub-visual-mockup-prompt-review-v1.md
+  candidate_review: 01_content/gui-town-hub-visual-mockup-candidate-review-v1.md
+  facility_node_mapping: 01_content/gui-town-hub-facility-node-mapping-v1.md
+  programmatic_layout_plan: 01_content/gui-town-hub-programmatic-layout-plan-v1.md
+
+generation_scope:
+  generated_count: 1
+  copied_into_project_assets: false
+  copied_into_project_references: true
+  runtime_usage_allowed: false
+  formal_asset_pipeline_started: false
+
+intended_use:
+  - Town Hub V1 visual mockup reference candidate.
+  - Validate Elm Town scene-based facility hub direction.
+  - Validate facility entrance coverage and dynamic text safe areas.
+  - Support facility node mapping and programmatic layout planning.
+
+not_intended_for:
+  - Runtime use.
+  - Final GUI implementation.
+  - Direct import into 03_engine.
+  - Formal asset pipeline kickoff.
+  - Gameplay or facility rule source of truth.
+
+accepted_direction_notes:
+  - The image reads clearly as a fantasy RPG town hub.
+  - Facility entrances are scene-based and compatible with facility_nodes.
+  - Title, resource strip, town guidance, world map navigation, and global action safe areas are visible.
+  - No readable UI text is baked into the image.
+  - The visual direction supports warm but dangerous frontier town tone.
+
+known_issues:
+  - Facility labels and descriptions still need render layer output.
+  - Some visual plaques should be treated as icon_role / visual marker, not status badge.
+  - Workshop is best treated as a single visual group with iron / armor secondary choices unless a future layout chooses dual entrances.
+  - Candidate is not a formal runtime background asset.
+
+dynamic_text_policy:
+  baked_text_allowed: false
+  render_layer_text_required: true
+  candidate_contains_intentional_text: false
+
+approval_notes:
+  user_confirmed:
+    - Candidate looks good.
+    - Candidate符合期待.
+    - Continue with facility node mapping and programmatic layout planning before formal asset pipeline.
+```
 
 ### `gui_asset_facility_synthesis_screen_mockup_v0_candidate_001`
 

@@ -1,0 +1,270 @@
+{
+  "screen_id": "facility_guild_screen",
+  "facility_id": "guild",
+  "title": "冒險者工會 / 委託板",
+  "subtitle": "火印碎片已集齊，接待員把諾亞留下的訊息放在委託板旁。",
+  "visual_baseline_id": "gui_guild_screen_visual_baseline_v1",
+  "npc": {
+    "id": "guild_receptionist",
+    "name": "莉娜",
+    "role": "工會接待員，負責整理委託回報與鎮內傳聞。"
+  },
+  "task_filters": [
+    { "id": "all", "label": "全部委託", "count": 4, "selected": true, "enabled": true },
+    { "id": "ready_to_submit", "label": "可回報", "count": 2, "selected": false, "enabled": true },
+    { "id": "completed", "label": "已完成", "count": 1, "selected": false, "enabled": true }
+  ],
+  "selected_filter_id": "ready_to_submit",
+  "selected_task_id": "quest_fire_mark_report",
+  "task_rows": [
+    {
+      "task_id": "quest_fire_mark_report",
+      "title": "火印碎片回報",
+      "giver": "諾亞",
+      "status": "ready_to_submit",
+      "status_label": "可回報",
+      "status_icon_id": "ready",
+      "enabled": true,
+      "disabled_reason": null,
+      "sort_key": 10
+    },
+    {
+      "task_id": "quest_herb_delivery",
+      "title": "藥草補給回報",
+      "giver": "伊芙",
+      "status": "ready_to_submit",
+      "status_label": "可回報",
+      "status_icon_id": "ready",
+      "enabled": true,
+      "disabled_reason": null,
+      "sort_key": 20
+    },
+    {
+      "task_id": "quest_north_gate_trace",
+      "title": "北門火光調查",
+      "giver": "諾亞",
+      "status": "requirements_missing",
+      "status_label": "條件不足",
+      "status_icon_id": "missing",
+      "enabled": true,
+      "disabled_reason": null,
+      "sort_key": 30
+    },
+    {
+      "task_id": "quest_cellar_slime",
+      "title": "地下倉庫清理",
+      "giver": "拉比",
+      "status": "completed",
+      "status_label": "已完成",
+      "status_icon_id": "completed",
+      "enabled": true,
+      "disabled_reason": null,
+      "sort_key": 40
+    }
+  ],
+  "story_hint_card": {
+    "id": "story_hint_fire_mark_guild_inquiry",
+    "title": "詢問三枚印記碎片的事情",
+    "description": "三枚火印碎片已集齊。諾亞願意說明它們和遺跡之間的關係。",
+    "detail_description": "諾亞在櫃台旁留下了密封紙條。這是主線詢問入口，不是正式委託，也不計入任務篩選數。",
+    "status": "story_hint",
+    "status_label": "主線線索",
+    "visible": true,
+    "enabled": true,
+    "disabled_reason": null,
+    "primary_action": "open_story_hint",
+    "action_label": "詢問諾亞",
+    "notes": "Static prototype only；不改 flag、不寫 save。",
+    "feedback_message": { "tone": "info", "speaker": "莉娜", "text": "諾亞說，如果碎片都在你手上，就去櫃台旁找他。" },
+    "condition_rows": [
+      {
+        "id": "condition_fire_mark_shard_3",
+        "condition_type": "turn_in_item",
+        "label": "火印碎片",
+        "required_value": "x3",
+        "current_value": "x3",
+        "status": "met",
+        "status_label": "已滿足",
+        "status_icon_id": "met",
+        "disabled_reason": null,
+        "source": "fixture"
+      },
+      {
+        "id": "condition_inquiry_flag",
+        "condition_type": "flag_set",
+        "label": "尚未詢問諾亞",
+        "required_value": "未完成",
+        "current_value": "未完成",
+        "status": "met",
+        "status_label": "可詢問",
+        "status_icon_id": "met",
+        "disabled_reason": null,
+        "source": "fixture"
+      }
+    ],
+    "reward_summary": {
+      "gold": null,
+      "guild_points": null,
+      "items": [],
+      "unlocks": ["主線詢問入口"],
+      "notes": "特殊互動入口沒有任務報酬。"
+    }
+  },
+  "task_details": {
+    "quest_fire_mark_report": {
+      "task_id": "quest_fire_mark_report",
+      "title": "火印碎片回報",
+      "giver": "諾亞",
+      "description": "你已持有足夠的火印碎片。諾亞要求你把碎片交給工會保管，並確認它們是否來自同一座遺跡。",
+      "status_label": "可回報",
+      "notes": "任務可回報，但 static prototype 不會真的扣除物品或寫入完成狀態。",
+      "ready_feedback": { "tone": "success", "speaker": "莉娜", "text": "諾亞在等這份回報。你可以送出 UIAction 來驗證流程。" }
+    },
+    "quest_herb_delivery": {
+      "task_id": "quest_herb_delivery",
+      "title": "藥草補給回報",
+      "giver": "伊芙",
+      "description": "伊芙需要一批新鮮藥草交給旅店。你已經備齊材料，可以在工會櫃台完成回報。",
+      "status_label": "可回報",
+      "notes": "Static fixture display only；不代表正式任務資料。",
+      "ready_feedback": { "tone": "success", "speaker": "莉娜", "text": "材料看起來齊了，可以替你登記回報。" }
+    },
+    "quest_north_gate_trace": {
+      "task_id": "quest_north_gate_trace",
+      "title": "北門火光調查",
+      "giver": "諾亞",
+      "description": "北門外有人看見微弱火光。諾亞想確認是否和遺跡中的印記碎片有關。",
+      "status_label": "條件不足",
+      "notes": "條件不足時只能查看詳情，不能回報。",
+      "disabled_reason": "需要完成北門調查旗標，目前尚未成立。",
+      "missing_feedback": { "tone": "warning", "speaker": "莉娜", "text": "這份委託還差一個調查旗標。" }
+    },
+    "quest_cellar_slime": {
+      "task_id": "quest_cellar_slime",
+      "title": "地下倉庫清理",
+      "giver": "拉比",
+      "description": "拉比先前委託你清理地下倉庫的黏液怪。這份回報已經結束，保留在列表中供確認。",
+      "status_label": "已完成",
+      "notes": "已完成任務不提供再次回報。",
+      "completed_feedback": { "tone": "info", "speaker": "莉娜", "text": "這份委託已經結案，記錄仍會留在板上。" }
+    }
+  },
+  "reward_summaries": {
+    "quest_fire_mark_report": {
+      "gold": 260,
+      "guild_points": 6,
+      "items": [
+        { "item_id": "item_guardian_charm", "label": "守護護符", "quantity": 1, "icon_id": "charm" }
+      ],
+      "unlocks": ["諾亞主線詢問"],
+      "notes": "報酬只作 prototype display。"
+    },
+    "quest_herb_delivery": {
+      "gold": 120,
+      "guild_points": 3,
+      "items": [
+        { "item_id": "item_small_potion", "label": "小型治療藥", "quantity": 1, "icon_id": "potion" }
+      ],
+      "unlocks": [],
+      "notes": null
+    },
+    "quest_north_gate_trace": {
+      "gold": 180,
+      "guild_points": 4,
+      "items": [],
+      "unlocks": ["北門外傳聞紀錄"],
+      "notes": null
+    },
+    "quest_cellar_slime": {
+      "gold": 80,
+      "guild_points": 2,
+      "items": [],
+      "unlocks": [],
+      "notes": "已領取"
+    }
+  },
+  "condition_rows": {
+    "quest_fire_mark_report": [
+      {
+        "id": "condition_fire_mark_shard",
+        "condition_type": "turn_in_item",
+        "label": "火印碎片",
+        "required_value": "x3",
+        "current_value": "x3",
+        "status": "met",
+        "status_label": "已滿足",
+        "status_icon_id": "met",
+        "disabled_reason": null,
+        "source": "fixture"
+      }
+    ],
+    "quest_herb_delivery": [
+      {
+        "id": "condition_herb",
+        "condition_type": "turn_in_item",
+        "label": "新鮮藥草",
+        "required_value": "x3",
+        "current_value": "x3",
+        "status": "met",
+        "status_label": "已滿足",
+        "status_icon_id": "met",
+        "disabled_reason": null,
+        "source": "fixture"
+      }
+    ],
+    "quest_north_gate_trace": [
+      {
+        "id": "condition_north_gate_flag",
+        "condition_type": "flag_set",
+        "label": "北門火光調查旗標",
+        "required_value": "成立",
+        "current_value": "未成立",
+        "status": "missing",
+        "status_label": "未滿足",
+        "status_icon_id": "missing",
+        "disabled_reason": "需要完成北門調查旗標，目前尚未成立。",
+        "source": "fixture"
+      }
+    ],
+    "quest_cellar_slime": [
+      {
+        "id": "condition_completed",
+        "condition_type": "none",
+        "label": "任務已完成",
+        "required_value": "完成記錄",
+        "current_value": "已登記",
+        "status": "not_applicable",
+        "status_label": "已完成",
+        "status_icon_id": "completed",
+        "disabled_reason": null,
+        "source": "fixture"
+      }
+    ]
+  },
+  "feedback_message": {
+    "tone": "info",
+    "speaker": "莉娜",
+    "text": "火印碎片已集齊。可回報委託和諾亞詢問入口都在這份 fixture 裡。"
+  },
+  "secondary_actions": [
+    {
+      "action_id": "back_to_town_hub",
+      "label": "返回城鎮",
+      "description": "離開工會，回到 Town Hub。",
+      "enabled": true,
+      "disabled_reason": null,
+      "payload": {},
+      "visual_role": "secondary"
+    }
+  ],
+  "empty_state": {
+    "title": "沒有委託",
+    "message": "目前沒有符合篩選條件的已解鎖委託。",
+    "suggested_action": "切換其他篩選。"
+  },
+  "debug_notes": [
+    "Quest-ready Guild fixture is static display data only.",
+    "Story hint is not a formal quest and is not counted by filters.",
+    "No engine state, persistence, schema, or formulas are touched."
+  ]
+}

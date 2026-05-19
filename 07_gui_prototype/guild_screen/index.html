@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Guild Screen Static Prototype</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="guild-shell" data-load-state="loading">
+      <header class="guild-header">
+        <div class="title-copy">
+          <p class="screen-label">設施畫面</p>
+          <h1 id="screen-title">Loading</h1>
+          <p id="screen-subtitle" class="subtitle"></p>
+        </div>
+        <div class="fixture-switcher" aria-label="Prototype fixture">
+          <label for="fixture-select">測試狀態</label>
+          <select id="fixture-select">
+            <option value="./fixtures/guild-default.json">Default Board</option>
+            <option value="./fixtures/guild-quest-ready.json">Quest Ready / Fire Mark</option>
+          </select>
+        </div>
+      </header>
+
+      <main class="guild-layout">
+        <section class="npc-region" aria-label="Guild receptionist">
+          <div class="npc-portrait" id="npc-portrait" aria-hidden="true"></div>
+          <div class="npc-copy">
+            <p class="panel-label">接待員</p>
+            <h2 id="npc-name"></h2>
+            <p id="npc-role"></p>
+          </div>
+        </section>
+
+        <section class="task-board" aria-label="Quest board">
+          <div class="filter-row" id="task-filters"></div>
+          <div class="story-hint-slot" id="story-hint-slot"></div>
+          <div class="task-list" id="task-list"></div>
+        </section>
+
+        <section class="task-detail-area" aria-live="polite">
+          <div class="detail-card task-detail-card">
+            <p class="panel-label">委託詳情</p>
+            <div id="task-detail"></div>
+          </div>
+
+          <div class="detail-grid">
+            <section class="detail-card rewards-card">
+              <p class="panel-label">任務報酬</p>
+              <div id="reward-summary"></div>
+            </section>
+
+            <section class="detail-card conditions-card">
+              <p class="panel-label">回報條件</p>
+              <div id="condition-list"></div>
+            </section>
+          </div>
+        </section>
+      </main>
+
+      <footer class="guild-footer">
+        <button id="back-action" class="secondary-action" type="button">返回城鎮</button>
+        <section class="feedback-bar" aria-live="polite">
+          <p class="panel-label">工會提示</p>
+          <p id="feedback-message"></p>
+        </section>
+        <button id="primary-action" class="primary-action" type="button"></button>
+      </footer>
+
+      <section class="action-log-panel">
+        <div class="action-log-heading">
+          <p class="panel-label">UIAction Log</p>
+          <button id="clear-log" class="quiet-button" type="button" aria-label="Clear log">清除</button>
+        </div>
+        <ol id="action-log" class="action-log"></ol>
+      </section>
+    </div>
+
+    <script type="module" src="./guild-screen.js"></script>
+  </body>
+</html>

@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Town Hub Static Prototype</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="town-hub-shell" data-load-state="loading">
+      <header class="title-area">
+        <div class="title-copy">
+          <p class="screen-label">城鎮中樞</p>
+          <h1 id="screen-title">Loading</h1>
+          <p id="screen-subtitle" class="subtitle"></p>
+        </div>
+        <div class="fixture-switcher" aria-label="Fixture state">
+          <label for="fixture-select">狀態</label>
+          <select id="fixture-select">
+            <option value="./fixtures/town-hub-default.json">Default Town</option>
+            <option value="./fixtures/town-hub-alerts.json">Alert / Locked Town</option>
+          </select>
+        </div>
+      </header>
+
+      <section class="resource-strip" id="resource-strip" aria-label="Resources"></section>
+
+      <main class="town-layout">
+        <section class="scene-facility-node-area" id="facility-scene" aria-label="Facilities">
+          <div class="scene-layer scene-sky"></div>
+          <div class="scene-layer scene-rooftops"></div>
+          <div class="scene-layer scene-streets"></div>
+          <div class="facility-node-layer" id="facility-node-layer"></div>
+        </section>
+      </main>
+
+      <footer class="town-footer">
+        <section class="town-guidance-area">
+          <p class="panel-label">城鎮提示</p>
+          <div id="town-guidance"></div>
+        </section>
+
+        <section class="world-map-nav-area">
+          <p class="panel-label">移動</p>
+          <div id="navigation-actions" class="action-row"></div>
+        </section>
+      </footer>
+
+      <section class="action-log-panel">
+        <div class="action-log-heading">
+          <p class="panel-label">UIAction Log</p>
+          <button id="clear-log" class="quiet-button" type="button" aria-label="Clear log">清除</button>
+        </div>
+        <ol id="action-log" class="action-log"></ol>
+      </section>
+    </div>
+
+    <script type="module" src="./town-hub.js"></script>
+  </body>
+</html>

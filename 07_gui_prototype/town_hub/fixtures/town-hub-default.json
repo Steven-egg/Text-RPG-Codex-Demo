@@ -1,0 +1,165 @@
+{
+  "screen_id": "town_hub",
+  "title": "星燈鎮",
+  "subtitle": "薄霧散去，街道重新亮起微光。旅人聚在廣場邊等待下一道鐘聲。",
+  "resource_strip": [
+    { "id": "hero", "label": "艾琳 / 旅者 Lv8", "tone": "primary" },
+    { "id": "hp", "label": "HP 86/86", "tone": "healthy" },
+    { "id": "mp", "label": "MP 34/40", "tone": "mana" },
+    { "id": "gold", "label": "420G", "tone": "gold" },
+    { "id": "guild_points", "label": "公會聲望 12", "tone": "neutral" }
+  ],
+  "town_guidance": [
+    "公會的委託板換上了新的紙條，鎮民仍在討論北門外的火光。",
+    "先整理補給、確認任務，再決定下一段旅程。"
+  ],
+  "selected_facility_id": "guild",
+  "facility_nodes": [
+    {
+      "facility_id": "guild",
+      "label": "冒險者公會",
+      "description": "確認委託、回報線索，整理下一段旅程。",
+      "visual_group": "guild",
+      "visual_anchor": "top_center_guild_hall",
+      "icon_role": "guild",
+      "enabled": true,
+      "disabled_reason": null,
+      "badges": [
+        {
+          "badge_id": "quest_ready",
+          "label": "可回報",
+          "kind": "notification",
+          "priority": 80
+        }
+      ],
+      "primary_action": "open_facility",
+      "payload": { "facility_id": "guild" }
+    },
+    {
+      "facility_id": "inn",
+      "label": "旅店",
+      "description": "休息、恢復 HP/MP，聽聽旅人留下的傳聞。",
+      "visual_group": "rest",
+      "visual_anchor": "left_inn",
+      "icon_role": "bed",
+      "enabled": true,
+      "disabled_reason": null,
+      "badges": [],
+      "primary_action": "open_facility",
+      "payload": { "facility_id": "inn" }
+    },
+    {
+      "facility_id": "travel_shop",
+      "label": "行商鋪",
+      "description": "購買旅途補給與常用道具。",
+      "visual_group": "shop",
+      "visual_anchor": "mid_left_market",
+      "icon_role": "shop",
+      "enabled": true,
+      "disabled_reason": null,
+      "badges": [],
+      "primary_action": "open_facility",
+      "payload": { "facility_id": "travel_shop" }
+    },
+    {
+      "facility_id": "workshop",
+      "label": "工坊",
+      "description": "維修裝備，查看可強化的武器與護具。",
+      "visual_group": "workshop",
+      "visual_anchor": "right_workshop_group",
+      "icon_role": "hammer",
+      "enabled": true,
+      "disabled_reason": null,
+      "badges": [],
+      "primary_action": "open_facility",
+      "payload": { "facility_id": "workshop" }
+    },
+    {
+      "facility_id": "synthesis",
+      "label": "鍊成工房",
+      "description": "檢視材料與配方，準備後續合成流程。",
+      "visual_group": "alchemy",
+      "visual_anchor": "bottom_left_alchemy",
+      "icon_role": "alchemy",
+      "enabled": true,
+      "disabled_reason": null,
+      "badges": [
+        {
+          "badge_id": "new_recipe",
+          "label": "新配方",
+          "kind": "notification",
+          "priority": 55
+        }
+      ],
+      "primary_action": "open_facility",
+      "payload": { "facility_id": "synthesis" }
+    },
+    {
+      "facility_id": "magic_shop",
+      "label": "魔法商店",
+      "description": "購買法術卷軸、護符與魔力相關道具。",
+      "visual_group": "magic",
+      "visual_anchor": "right_arcane_shop",
+      "icon_role": "magic",
+      "enabled": true,
+      "disabled_reason": null,
+      "badges": [],
+      "primary_action": "open_facility",
+      "payload": { "facility_id": "magic_shop" }
+    },
+    {
+      "facility_id": "temple",
+      "label": "月井神殿",
+      "description": "祈禱、淨化異常狀態，詢問古老傳承。",
+      "visual_group": "temple",
+      "visual_anchor": "bottom_center_temple",
+      "icon_role": "temple",
+      "enabled": true,
+      "disabled_reason": null,
+      "badges": [],
+      "primary_action": "open_facility",
+      "payload": { "facility_id": "temple" }
+    },
+    {
+      "facility_id": "relic_preview",
+      "label": "遺物展示台",
+      "description": "查看已知遺物線索與未鑑定的殘片。",
+      "visual_group": "archive",
+      "visual_anchor": "bottom_right_archive",
+      "icon_role": "relic",
+      "enabled": true,
+      "disabled_reason": null,
+      "badges": [],
+      "primary_action": "open_facility",
+      "payload": { "facility_id": "relic_preview" }
+    },
+    {
+      "facility_id": "storage",
+      "label": "倉庫",
+      "description": "整理暫存物品與戰利品。",
+      "visual_group": "storage",
+      "visual_anchor": "far_bottom_right_depot",
+      "icon_role": "storage",
+      "enabled": true,
+      "disabled_reason": null,
+      "badges": [],
+      "primary_action": "open_facility",
+      "payload": { "facility_id": "storage" }
+    }
+  ],
+  "navigation_actions": [
+    {
+      "action_id": "open_world_map",
+      "label": "前往世界地圖",
+      "description": "離開城鎮，選擇下一個目的地。",
+      "enabled": true,
+      "disabled_reason": null,
+      "payload": {}
+    }
+  ],
+  "debug_notes": [
+    "Default fixture is static display data only.",
+    "Do not treat fixture values as gameplay SSOT.",
+    "World map is navigation, not a facility node."
+  ]
+}
