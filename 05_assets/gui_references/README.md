@@ -16,6 +16,8 @@
 guild_screen_visual_baseline_v1_user_reference.png
 facility_synthesis_screen_mockup_v0_candidate_001.png
 facility_synthesis_screen_mockup_v2_candidate_001.png
+world_map_visual_reference_v1_user_mockup_menu_open.png
+world_map_visual_reference_v1_user_mockup_detail_drawer.png
 ```
 
 ## 建議子資料夾
@@ -24,7 +26,15 @@ facility_synthesis_screen_mockup_v2_candidate_001.png
 05_assets/gui_references/town_hub/
 05_assets/gui_references/guild_screen/
 05_assets/gui_references/facility_synthesis_screen/
+05_assets/gui_references/world_map/
 ```
+
+## World Map references
+
+- `world_map/world_map_visual_reference_v1_user_mockup_menu_open.png`: World Map user mockup showing the top-left menu opened as a left-side drawer.
+- `world_map/world_map_visual_reference_v1_user_mockup_detail_drawer.png`: World Map user mockup showing a selected map point with the right-side information drawer open.
+
+These World Map files are reference-only images. They should guide the static prototype layout, drawer behavior, and visual direction, but they are not runtime assets and should not be imported into the engine or used as gameplay data.
 
 ## 目前 reference / candidate
 

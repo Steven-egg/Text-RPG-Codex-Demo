@@ -28,6 +28,14 @@ const roleTokens = {
   storage: "STO",
 };
 
+const staticFacilityRoutes = {
+  guild: "../guild_screen/index.html",
+};
+const staticActionRoutes = {
+  open_world_map: "../world_map/index.html",
+};
+const navigationDelayMs = 120;
+
 fixtureSelect.addEventListener("change", () => {
   loadFixture(fixtureSelect.value);
 });
@@ -263,6 +271,31 @@ function activateAction(action, source) {
     source,
     dispatched: true,
   });
+  navigateAfterAction(action);
+}
+
+function navigateAfterAction(action) {
+  if (action.action_id === "open_facility") {
+    const facilityId = action.payload?.facility_id;
+    const route = staticFacilityRoutes[facilityId];
+    if (!route) {
+      return;
+    }
+
+    window.setTimeout(() => {
+      window.location.href = route;
+    }, navigationDelayMs);
+    return;
+  }
+
+  const route = staticActionRoutes[action.action_id];
+  if (!route) {
+    return;
+  }
+
+  window.setTimeout(() => {
+    window.location.href = route;
+  }, navigationDelayMs);
 }
 
 function pushActionLog(entry) {

@@ -184,6 +184,7 @@ Guild Screen 目前採納方向是「冒險者工會 / 委託板」：
 - `05_assets/gui_references/town_hub/README.md`：Town Hub reference / candidate 的資料夾說明。
 - `05_assets/gui_references/guild_screen/README.md`：Guild Screen reference baseline 資料夾說明。
 - `05_assets/gui_references/facility_synthesis_screen/README.md`：Synthesis Screen candidate mockup 資料夾說明。
+- `05_assets/gui_references/world_map/README.md`：World Map menu drawer / detail drawer user mockup 資料夾說明。
 
 這一層只管理 reference 與候選圖，不代表正式 asset pipeline 已開始。
 
@@ -247,6 +248,24 @@ Guild Screen 採用使用者提供圖作為 visual baseline。
 - 保留接待員與工會互動感。
 - 以任務列表、任務詳情、報酬摘要、條件檢查、底部 feedback 與單一主要 action 為核心。
 - 所有文字、數值、任務名稱、條件與 action label 都必須由 render layer 動態輸出，不可畫死在圖片裡。
+
+### World Map Screen
+
+World Map 採用使用者提供的兩張 mockup 作為 static prototype visual reference。
+
+```text
+05_assets/gui_references/world_map/world_map_visual_reference_v1_user_mockup_menu_open.png
+05_assets/gui_references/world_map/world_map_visual_reference_v1_user_mockup_detail_drawer.png
+```
+
+目前採納方向：
+
+- 地圖本體優先使用 full-width main stage。
+- 左上角主選單按鈕開啟左側 drawer。
+- 初始狀態不顯示右側資訊欄。
+- 點選地圖點位後，右側 location detail drawer 才開啟或更新。
+- mockup 只作 layout / interaction / visual tone reference，不是 runtime asset。
+- 地點名稱、狀態、等級、屬性、action label 都必須由 render layer 動態輸出。
 
 ### Facility / Synthesis
 
@@ -436,6 +455,7 @@ Facility / Synthesis 目前有 v0 / v2 candidate，但不視為正式 baseline�
    - `05_assets/gui_references/town_hub/`
    - `05_assets/gui_references/guild_screen/README.md`
    - `05_assets/gui_references/facility_synthesis_screen/README.md`
+   - `05_assets/gui_references/world_map/README.md`
 
 mockup 評估重點：
 

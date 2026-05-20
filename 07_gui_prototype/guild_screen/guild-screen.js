@@ -25,6 +25,9 @@ const state = {
   actionLog: [],
 };
 
+const townHubRoute = "../town_hub/index.html";
+const navigationDelayMs = 120;
+
 fixtureSelect.addEventListener("change", () => {
   loadFixture(fixtureSelect.value);
 });
@@ -56,6 +59,7 @@ backActionEl.addEventListener("click", () => {
     source: "secondary_action",
     dispatched: true,
   });
+  navigateToPrototype(townHubRoute);
 });
 
 clearLogEl.addEventListener("click", () => {
@@ -552,6 +556,12 @@ function pushActionLog(entry) {
     ...state.actionLog,
   ].slice(0, 20);
   renderActionLog();
+}
+
+function navigateToPrototype(path) {
+  window.setTimeout(() => {
+    window.location.href = path;
+  }, navigationDelayMs);
 }
 
 function logSystem(message) {

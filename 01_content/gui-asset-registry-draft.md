@@ -327,6 +327,114 @@ approval_notes:
     - Use it as the baseline for Guild Screen planning.
 ```
 
+### `gui_asset_world_map_visual_reference_v1_user_mockup_menu_open`
+
+```yaml
+asset_id: gui_asset_world_map_visual_reference_v1_user_mockup_menu_open
+status:
+  - user_reference
+  - reviewed_candidate
+  - accepted_direction
+
+screen_id: world_map
+flow_id: flow_a_world_navigation
+asset_type: screen_mockup
+asset_role: world_map_menu_open_reference
+version: v1
+candidate_number: user_reference_001
+
+project_asset_path: null
+project_reference_path: 05_assets/gui_references/world_map/world_map_visual_reference_v1_user_mockup_menu_open.png
+source_user_path: 05_assets/gui_references/world_map/world_map_visual_reference_v1_user_mockup_menu_open.png
+
+linked_documents:
+  reference_readme: 05_assets/gui_references/world_map/README.md
+  prototype_progress: 01_content/gui-html-static-prototype-progress-v1.md
+  planning_index: 01_content/gui-planning-index.md
+
+generation_scope:
+  generated_by_current_session: false
+  user_provided_reference: true
+  copied_into_project_assets: false
+  copied_into_project_references: true
+  runtime_usage_allowed: false
+  formal_asset_pipeline_started: false
+
+intended_use:
+  - Preserve the World Map menu-open visual reference.
+  - Guide the static prototype left-side main menu drawer.
+  - Support top resource strip and map-first composition planning.
+
+not_intended_for:
+  - Runtime use.
+  - Direct import into 03_engine.
+  - Formal asset pipeline kickoff.
+  - Gameplay map source of truth.
+
+accepted_direction_notes:
+  - The top-left menu button opens a left-side drawer.
+  - Menu entries are static prototype actions and only log UIAction events.
+  - The World Map should remain the main visual stage.
+
+dynamic_text_policy:
+  baked_text_allowed: false
+  render_layer_text_required: true
+```
+
+### `gui_asset_world_map_visual_reference_v1_user_mockup_detail_drawer`
+
+```yaml
+asset_id: gui_asset_world_map_visual_reference_v1_user_mockup_detail_drawer
+status:
+  - user_reference
+  - reviewed_candidate
+  - accepted_direction
+
+screen_id: world_map
+flow_id: flow_a_world_navigation
+asset_type: screen_mockup
+asset_role: world_map_detail_drawer_reference
+version: v1
+candidate_number: user_reference_002
+
+project_asset_path: null
+project_reference_path: 05_assets/gui_references/world_map/world_map_visual_reference_v1_user_mockup_detail_drawer.png
+source_user_path: 05_assets/gui_references/world_map/world_map_visual_reference_v1_user_mockup_detail_drawer.png
+
+linked_documents:
+  reference_readme: 05_assets/gui_references/world_map/README.md
+  prototype_progress: 01_content/gui-html-static-prototype-progress-v1.md
+  planning_index: 01_content/gui-planning-index.md
+
+generation_scope:
+  generated_by_current_session: false
+  user_provided_reference: true
+  copied_into_project_assets: false
+  copied_into_project_references: true
+  runtime_usage_allowed: false
+  formal_asset_pipeline_started: false
+
+intended_use:
+  - Preserve the World Map selected-location visual reference.
+  - Guide the static prototype right-side location information drawer.
+  - Support map point selection, location metadata rows, and confirm-travel CTA planning.
+
+not_intended_for:
+  - Runtime use.
+  - Direct import into 03_engine.
+  - Formal asset pipeline kickoff.
+  - Gameplay location or travel source of truth.
+
+accepted_direction_notes:
+  - The right detail drawer is closed by default.
+  - Clicking a map location opens or updates the right-side information drawer.
+  - Location detail text and action labels must be rendered by the prototype layer.
+
+dynamic_text_policy:
+  baked_text_allowed: false
+  render_layer_text_required: true
+```
+
 ## 5. Future Registry Fields 草案
 
 若未來建立正式 registry，可考慮欄位：

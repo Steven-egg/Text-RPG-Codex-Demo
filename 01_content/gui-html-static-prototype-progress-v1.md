@@ -32,6 +32,13 @@ Status: static prototype progress note
   - fixtures/
     - guild-default.json
     - guild-quest-ready.json
+- world_map/
+  - index.html
+  - styles.css
+  - world-map.js
+  - fixtures/
+    - world-map-default.json
+    - world-map-frontier-alerts.json
 ```
 
 ## Town Hub Prototype
@@ -119,7 +126,47 @@ Deferred Guild items:
 - Real task data adapter.
 - Real image or formal NPC asset.
 - Final keyboard navigation graph.
-- Static navigation from Town Hub into Guild and back.
+
+## World Map Prototype
+
+Location:
+
+```text
+07_gui_prototype/world_map/
+```
+
+Reference images:
+
+```text
+05_assets/gui_references/world_map/world_map_visual_reference_v1_user_mockup_menu_open.png
+05_assets/gui_references/world_map/world_map_visual_reference_v1_user_mockup_detail_drawer.png
+```
+
+Current behavior:
+
+- Loads static fixtures only.
+- Renders top player/resource strip, full-width programmatic map placeholder, route lines, clickable location nodes, right-side location detail drawer, primary confirm action, fixture selector, and UIAction log.
+- Top-left menu button opens a left-side main menu drawer.
+- Main menu actions log UIAction events only.
+- Initial World Map view keeps the detail drawer closed so the map can use the full main width.
+- Clicking a map node logs `select_world_location` and opens/updates the right-side detail drawer.
+- Unlocked locations allow `confirm_travel`, which only logs the UIAction and does not start exploration.
+- Locked locations keep the detail panel visible but block `confirm_travel` with a reason.
+
+Accepted World Map decisions:
+
+- Treat the supplied mockups as reference only, not runtime assets.
+- Preserve the user-provided menu-open and detail-drawer mockups in `05_assets/gui_references/world_map/`.
+- Main menu is opened from the top-left button as a side drawer.
+- Selecting a map point updates the right-side information panel.
+- Static prototype navigation only; no runtime adapter and no exploration flow.
+
+Deferred World Map items:
+
+- Real world map art or formal asset pipeline.
+- Runtime adapter for location unlocks and travel.
+- Final animation for the side drawer.
+- Keyboard focus graph for map nodes.
 
 ## Verification Notes
 
@@ -135,22 +182,33 @@ Validated during this session:
 - Guild ready tasks dispatch `submit_quest`.
 - Guild unavailable states block primary action with a reason.
 - Guild right-side receptionist layout and 55/45 detail split were accepted by the user.
+- Town Hub `open_facility {"facility_id":"guild"}` logs before navigating to Guild Screen.
+- Guild `back_to_town_hub` logs before navigating to Town Hub.
+- World Map renders 9 location nodes from static fixtures.
+- World Map menu drawer opens and closes.
+- World Map selected location updates the right-side detail panel.
+- World Map detail panel opens as a right-side drawer and can be closed.
+- World Map locked locations block `confirm_travel` with a reason.
+- World Map unlocked locations dispatch `confirm_travel` without entering runtime.
+- Town Hub `open_world_map` logs before navigating to World Map.
+- World Map does not expose a return-to-town control in the current mockup pass.
+- Browser console error log was 0 during World Map static navigation checks.
 
 ## Recommended Next Step
 
 Recommended next session entry:
 
 ```text
-Build static fake navigation between Town Hub and Guild Screen.
+Review and refine the World Map static prototype, then decide the next facility or travel detail screen.
 ```
 
 Scope suggestion:
 
-- Keep both prototypes static.
+- Keep all prototypes static.
 - Do not connect runtime.
-- Town Hub `open_facility {"facility_id":"guild"}` can navigate to `../guild_screen/index.html`.
-- Guild `back_to_town_hub` can navigate back to `../town_hub/index.html`.
-- Keep UIAction logging before navigation if useful.
+- Do not use mockup/reference images as runtime assets.
+- Keep UIAction logging before navigation.
+- Refine World Map detail data, node placement, drawer behavior, and route readability before adding any runtime adapter.
 
 Alternative next steps:
 

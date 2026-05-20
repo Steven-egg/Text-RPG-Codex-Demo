@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>World Map Static Prototype</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="world-map-shell" data-load-state="loading" data-menu-open="false" data-detail-open="false">
+      <header class="top-status-bar">
+        <button id="menu-toggle" class="menu-toggle" type="button" aria-label="開啟主選單" aria-expanded="false">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+
+        <section class="player-strip" aria-label="Player summary">
+          <div class="player-title">
+            <strong id="hero-title">Loading</strong>
+            <span id="hero-meta"></span>
+          </div>
+          <div id="resource-strip" class="resource-strip"></div>
+        </section>
+      </header>
+
+      <main class="world-layout">
+        <section class="map-stage" aria-label="World map">
+          <div class="map-art" aria-hidden="true">
+            <div class="terrain terrain-sea"></div>
+            <div class="terrain terrain-island"></div>
+            <div class="terrain terrain-forest"></div>
+            <div class="terrain terrain-mountains"></div>
+            <div class="terrain terrain-volcano"></div>
+            <div class="terrain terrain-ruins"></div>
+          </div>
+          <svg id="route-layer" class="route-layer" viewBox="0 0 1000 1000" preserveAspectRatio="none"></svg>
+          <div id="location-layer" class="location-layer"></div>
+        </section>
+
+        <aside class="location-detail-panel" aria-live="polite" aria-hidden="true">
+          <div class="detail-heading">
+            <div>
+              <p class="panel-label">地點情報</p>
+              <h1 id="location-title">Loading</h1>
+            </div>
+            <div class="detail-heading-actions">
+              <span id="location-favorite" class="favorite-mark" aria-label="Favorite marker"></span>
+              <button id="close-detail" class="close-detail" type="button" aria-label="關閉地點情報">×</button>
+            </div>
+          </div>
+
+          <div id="location-preview" class="location-preview" aria-hidden="true"></div>
+          <p id="location-description" class="location-description"></p>
+          <div id="location-stats" class="location-stats"></div>
+          <p id="feedback-message" class="feedback-message"></p>
+
+          <div class="detail-actions">
+            <button id="confirm-action" class="primary-action" type="button"></button>
+          </div>
+        </aside>
+
+        <div id="drawer-backdrop" class="drawer-backdrop" hidden></div>
+        <aside id="menu-drawer" class="menu-drawer" aria-hidden="true">
+          <div class="menu-heading">
+            <div>
+              <p class="panel-label">Main Menu</p>
+              <h2>主選單</h2>
+            </div>
+            <button id="close-menu" class="close-menu" type="button" aria-label="關閉主選單">×</button>
+          </div>
+
+          <div id="menu-actions" class="menu-actions"></div>
+          <section class="drawer-player-card" aria-label="Player status summary">
+            <p class="panel-label">目前狀態</p>
+            <div id="drawer-player-summary"></div>
+          </section>
+        </aside>
+      </main>
+
+      <section class="prototype-debug-panel">
+        <div class="fixture-switcher" aria-label="Prototype fixture">
+          <label for="fixture-select">Fixture</label>
+          <select id="fixture-select">
+            <option value="./fixtures/world-map-default.json">Default Map</option>
+            <option value="./fixtures/world-map-frontier-alerts.json">Frontier Alerts</option>
+          </select>
+        </div>
+
+        <div class="action-log-panel">
+          <div class="action-log-heading">
+            <p class="panel-label">UIAction Log</p>
+            <button id="clear-log" class="quiet-button" type="button" aria-label="Clear log">清除</button>
+          </div>
+          <ol id="action-log" class="action-log"></ol>
+        </div>
+      </section>
+    </div>
+
+    <script type="module" src="./world-map.js"></script>
+  </body>
+</html>
