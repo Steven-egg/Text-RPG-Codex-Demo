@@ -58,12 +58,15 @@ button {
 }
 
 .combat-shell {
-  width: min(1540px, calc(100vw - 32px));
-  min-height: calc(100vh - 32px);
-  margin: 16px auto;
+  position: relative;
+  width: min(1600px, 100vw);
+  min-height: 100vh;
+  margin: 0 auto;
   display: grid;
-  grid-template-rows: auto auto minmax(560px, 1fr) auto minmax(88px, auto);
-  gap: 10px;
+  grid-template-columns: 1fr;
+  grid-template-rows: minmax(640px, calc(100vh - 78px)) minmax(78px, auto);
+  gap: 0;
+  overflow: hidden;
 }
 
 .combat-header,
@@ -80,12 +83,20 @@ button {
 }
 
 .combat-header {
-  min-height: 82px;
-  padding: 12px 16px;
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  z-index: 14;
+  width: min(330px, calc(100% - 850px));
+  min-height: 0;
+  border-color: rgba(208, 168, 76, 0.34);
+  padding: 8px 10px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
+  gap: 10px;
+  background: rgba(6, 10, 12, 0.78);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.32);
 }
 
 .title-copy {
@@ -94,7 +105,7 @@ button {
 
 .screen-label,
 .panel-label {
-  margin: 0 0 8px;
+  margin: 0 0 7px;
   color: var(--gold);
   font-size: 0.72rem;
   font-weight: 900;
@@ -104,7 +115,7 @@ button {
 
 h1 {
   margin: 0;
-  font-size: clamp(1.65rem, 2.4vw, 2.8rem);
+  font-size: clamp(1.1rem, 1.5vw, 1.8rem);
   line-height: 1;
   letter-spacing: 0;
 }
@@ -117,17 +128,19 @@ h2 {
 }
 
 .subtitle {
-  margin: 6px 0 0;
-  max-width: 78ch;
+  display: none;
+  margin: 5px 0 0;
+  max-width: 52ch;
   color: var(--paper-muted);
   font-size: 0.92rem;
   line-height: 1.45;
 }
 
 .fixture-switcher {
-  min-width: min(260px, 30vw);
+  width: min(220px, 32vw);
+  min-width: 170px;
   display: grid;
-  gap: 6px;
+  gap: 4px;
 }
 
 .fixture-switcher label {
@@ -140,7 +153,7 @@ h2 {
   width: 100%;
   border: 1px solid var(--line-strong);
   border-radius: 8px;
-  padding: 9px 11px;
+  padding: 7px 9px;
   background: var(--ink-soft);
   color: var(--paper);
 }
@@ -152,25 +165,41 @@ select:focus-visible {
 }
 
 .resource-strip {
-  min-height: 54px;
-  padding: 8px;
-  display: grid;
-  grid-template-columns: repeat(4, minmax(120px, 1fr));
-  gap: 8px;
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  z-index: 15;
+  width: auto;
+  min-width: 112px;
+  min-height: 0;
+  border: 0;
+  padding: 0;
+  display: flex;
+  transform: translateX(-50%);
+  background: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
+}
+
+.resource-strip[hidden] {
+  display: none;
 }
 
 .resource-item {
-  min-height: 38px;
-  border: 1px solid var(--line);
+  min-width: 112px;
+  min-height: 36px;
+  border: 1px solid rgba(208, 168, 76, 0.42);
   border-radius: 8px;
-  padding: 7px 10px;
+  padding: 7px 14px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(255, 255, 255, 0.055);
+  background: rgba(6, 10, 12, 0.82);
   color: var(--paper);
   font-weight: 900;
+  font-size: 0.9rem;
   text-align: center;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.32);
 }
 
 .resource-item[data-tone="hp"] {
@@ -199,20 +228,26 @@ select:focus-visible {
 }
 
 .combat-layout {
+  position: relative;
   min-height: 0;
-  display: grid;
-  grid-template-columns: minmax(640px, 1fr) minmax(320px, 0.32fr);
-  gap: 10px;
+  display: block;
+  grid-row: 1;
+  grid-column: 1;
 }
 
 .battlefield-stage {
   position: relative;
-  min-height: 560px;
+  width: 100%;
+  height: 100%;
+  min-height: 640px;
+  border: 0;
+  border-radius: 0;
   overflow: hidden;
   isolation: isolate;
   background:
     linear-gradient(180deg, rgba(56, 111, 145, 0.16), transparent 36%),
     #101513;
+  box-shadow: none;
 }
 
 .battlefield-stage::after {
@@ -234,13 +269,16 @@ select:focus-visible {
 
 .field-back {
   background:
-    linear-gradient(140deg, rgba(74, 155, 145, 0.23), transparent 38%),
-    linear-gradient(25deg, rgba(194, 95, 56, 0.34), transparent 46%),
-    linear-gradient(180deg, #182420, #111614 58%, #0a0d0c);
+    radial-gradient(ellipse at 50% 12%, rgba(131, 162, 194, 0.22), transparent 34%),
+    linear-gradient(140deg, rgba(74, 155, 145, 0.24), transparent 36%),
+    linear-gradient(25deg, rgba(194, 95, 56, 0.34), transparent 48%),
+    linear-gradient(180deg, #182420, #111614 56%, #0a0d0c);
 }
 
 .field-cracks {
   background:
+    linear-gradient(100deg, transparent 0 38%, rgba(239, 232, 216, 0.09) 39% 42%, transparent 43% 100%),
+    radial-gradient(ellipse at 54% 88%, rgba(239, 232, 216, 0.16), transparent 38%),
     linear-gradient(110deg, transparent 0 18%, rgba(239, 232, 216, 0.09) 19% 20%, transparent 21% 100%),
     linear-gradient(30deg, transparent 0 47%, rgba(194, 95, 56, 0.24) 48% 50%, transparent 51% 100%),
     linear-gradient(160deg, transparent 0 58%, rgba(208, 168, 76, 0.16) 59% 60%, transparent 61% 100%);
@@ -248,18 +286,37 @@ select:focus-visible {
 
 .field-flare {
   background:
-    radial-gradient(circle at 62% 48%, rgba(194, 95, 56, 0.42), transparent 12%),
-    radial-gradient(circle at 34% 74%, rgba(74, 155, 145, 0.24), transparent 13%),
-    radial-gradient(circle at 78% 20%, rgba(208, 168, 76, 0.2), transparent 7%);
+    radial-gradient(ellipse at 61% 48%, rgba(194, 95, 56, 0.42), transparent 16%),
+    radial-gradient(ellipse at 28% 73%, rgba(74, 155, 145, 0.24), transparent 17%),
+    radial-gradient(ellipse at 82% 22%, rgba(208, 168, 76, 0.2), transparent 9%);
+}
+
+.battlefield-art::after {
+  content: "";
+  position: absolute;
+  z-index: 1;
+  left: clamp(180px, 19vw, 330px);
+  bottom: clamp(110px, 14vh, 190px);
+  width: clamp(190px, 18vw, 290px);
+  height: clamp(270px, 31vw, 440px);
+  opacity: 0.62;
+  filter:
+    drop-shadow(0 24px 26px rgba(0, 0, 0, 0.44))
+    drop-shadow(0 0 18px rgba(56, 111, 145, 0.2));
+  background:
+    linear-gradient(120deg, rgba(239, 232, 216, 0.14), transparent 20%),
+    linear-gradient(155deg, rgba(8, 12, 14, 0.9), rgba(17, 22, 22, 0.95) 58%, rgba(86, 56, 42, 0.72));
+  clip-path: polygon(42% 0, 56% 4%, 62% 17%, 72% 32%, 88% 96%, 52% 84%, 22% 100%, 30% 54%, 18% 32%, 32% 14%);
+  transform: rotate(-6deg);
 }
 
 .enemy-silhouette {
   position: absolute;
   z-index: 1;
-  right: 16%;
-  top: 32%;
-  width: clamp(250px, 26vw, 390px);
-  height: clamp(180px, 19vw, 286px);
+  right: clamp(260px, 28vw, 450px);
+  top: clamp(210px, 29vh, 330px);
+  width: clamp(270px, 28vw, 450px);
+  height: clamp(194px, 20vw, 330px);
   filter:
     drop-shadow(0 0 26px rgba(194, 95, 56, 0.26))
     drop-shadow(0 18px 24px rgba(0, 0, 0, 0.34));
@@ -310,30 +367,33 @@ select:focus-visible {
 .player-focus-card {
   position: absolute;
   z-index: 4;
-  border: 1px solid var(--line);
+  border: 1px solid rgba(208, 168, 76, 0.42);
   border-radius: 8px;
-  padding: 12px 14px;
-  background: rgba(7, 10, 10, 0.76);
+  padding: 10px 13px;
+  background: rgba(5, 9, 11, 0.78);
   box-shadow: 0 14px 36px rgba(0, 0, 0, 0.38);
 }
 
 .enemy-focus-card {
-  top: 14px;
+  top: 68px;
   left: 50%;
-  width: min(520px, calc(100% - 36px));
+  width: min(450px, calc(100% - 640px));
+  min-width: 360px;
   text-align: center;
   transform: translateX(-50%);
 }
 
 .player-focus-card {
+  top: 158px;
   left: 18px;
-  bottom: 18px;
-  width: min(340px, calc(100% - 36px));
+  bottom: auto;
+  width: min(318px, calc(100% - 36px));
+  min-height: 232px;
 }
 
 .hp-meter {
-  height: 12px;
-  margin: 12px 0 8px;
+  height: 14px;
+  margin: 9px 0 7px;
   border: 1px solid rgba(239, 232, 216, 0.22);
   border-radius: 999px;
   overflow: hidden;
@@ -355,7 +415,7 @@ select:focus-visible {
 }
 
 .enemy-meta {
-  margin-top: 10px;
+  margin-top: 8px;
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
@@ -375,15 +435,19 @@ select:focus-visible {
 .focus-stat-grid {
   margin-top: 12px;
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: 1fr;
   gap: 8px;
 }
 
 .focus-stat {
-  min-height: 38px;
+  min-height: 34px;
   border: 1px solid var(--line);
   border-radius: 8px;
-  padding: 8px 10px;
+  padding: 7px 10px;
+  display: grid;
+  grid-template-columns: 52px minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
   background: rgba(255, 255, 255, 0.052);
 }
 
@@ -398,13 +462,19 @@ select:focus-visible {
 }
 
 .focus-stat span {
-  margin-top: 3px;
+  margin-top: 0;
   color: var(--paper);
   font-weight: 900;
 }
 
 .combat-side-panel {
-  min-height: 0;
+  position: absolute;
+  z-index: 6;
+  top: 138px;
+  right: 18px;
+  bottom: 226px;
+  width: min(330px, calc(100% - 36px));
+  min-height: 280px;
   display: grid;
   grid-template-rows: minmax(0, 1fr);
   gap: 10px;
@@ -412,7 +482,7 @@ select:focus-visible {
 
 .panel-card {
   min-height: 0;
-  padding: 14px;
+  padding: 16px;
   display: grid;
   grid-template-rows: auto minmax(0, 1fr);
   overflow: hidden;
@@ -453,7 +523,7 @@ select:focus-visible {
   margin: 0;
   padding-left: 22px;
   color: var(--paper-muted);
-  line-height: 1.42;
+  line-height: 1.52;
 }
 
 .battle-log li::marker {
@@ -461,23 +531,33 @@ select:focus-visible {
 }
 
 .combat-footer {
+  grid-row: 1;
+  grid-column: 1;
+  align-self: end;
+  justify-self: center;
+  width: min(1280px, calc(100% - 170px));
   min-height: 154px;
-  padding: 10px;
+  margin-bottom: 58px;
+  border: 0;
+  padding: 0;
   position: relative;
   z-index: 8;
   overflow: visible;
   display: grid;
   grid-template-columns: 1fr;
-  grid-template-rows: minmax(92px, auto) minmax(42px, auto);
-  gap: 8px;
+  grid-template-rows: minmax(108px, auto) minmax(42px, auto);
+  gap: 10px;
   align-items: stretch;
+  background: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
 }
 
 .command-submenu {
   position: absolute;
   z-index: 20;
   left: var(--submenu-left, 10px);
-  bottom: calc(100% + 12px);
+  bottom: calc(100% + 14px);
   width: var(--submenu-width, min(560px, calc(100% - 20px)));
   max-width: calc(100% - 20px);
   border: 1px solid rgba(239, 232, 216, 0.28);
@@ -624,7 +704,7 @@ select:focus-visible {
   grid-template-columns: auto minmax(0, 1fr);
   gap: 12px;
   align-items: center;
-  background: rgba(255, 255, 255, 0.052);
+  background: rgba(5, 9, 11, 0.82);
   overflow: hidden;
 }
 
@@ -643,7 +723,7 @@ select:focus-visible {
   min-width: 0;
   display: grid;
   grid-template-columns: repeat(5, minmax(128px, 1fr));
-  gap: 8px;
+  gap: 10px;
 }
 
 .command-button,
@@ -655,17 +735,51 @@ select:focus-visible {
 }
 
 .command-button {
-  min-height: 92px;
-  padding: 13px 14px;
+  min-height: 108px;
+  padding: 13px 14px 15px;
   display: grid;
   align-content: center;
   gap: 7px;
   text-align: center;
+  background:
+    linear-gradient(180deg, rgba(14, 24, 27, 0.92), rgba(6, 10, 12, 0.88)),
+    rgba(255, 255, 255, 0.055);
+  box-shadow:
+    inset 0 0 0 1px rgba(208, 168, 76, 0.08),
+    0 14px 30px rgba(0, 0, 0, 0.34);
+}
+
+.command-button::before {
+  display: block;
+  min-height: 30px;
+  color: rgba(239, 232, 216, 0.86);
+  font-size: 1.65rem;
+  line-height: 1;
+}
+
+.command-button[data-action-id="basic_attack"]::before {
+  content: "⚔";
+}
+
+.command-button[data-action-id="open_skill_menu"]::before {
+  content: "✦";
+}
+
+.command-button[data-action-id="open_item_menu"]::before {
+  content: "⚗";
+}
+
+.command-button[data-action-id="defend"]::before {
+  content: "⬟";
+}
+
+.command-button[data-action-id="retreat"]::before {
+  content: "↗";
 }
 
 .command-button strong {
   color: var(--paper);
-  font-size: 1.22rem;
+  font-size: 1.34rem;
   line-height: 1.08;
 }
 
@@ -677,7 +791,13 @@ select:focus-visible {
 
 .command-button[data-primary="true"] {
   border-color: rgba(242, 201, 93, 0.52);
-  background: linear-gradient(135deg, rgba(194, 95, 56, 0.32), rgba(56, 111, 145, 0.26));
+  background:
+    linear-gradient(135deg, rgba(56, 111, 145, 0.48), rgba(194, 95, 56, 0.24)),
+    rgba(8, 16, 19, 0.88);
+  box-shadow:
+    inset 0 0 0 2px rgba(242, 201, 93, 0.16),
+    0 0 24px rgba(56, 111, 145, 0.18),
+    0 18px 34px rgba(0, 0, 0, 0.36);
 }
 
 .command-button[data-active="true"] {
@@ -827,10 +947,14 @@ select:focus-visible {
 }
 
 .action-log-panel {
-  min-height: 96px;
-  height: 128px;
-  padding: 12px 14px;
+  grid-row: 2;
+  grid-column: 1;
+  min-height: 64px;
+  height: 64px;
+  margin: 0 18px 14px;
+  padding: 10px 12px;
   overflow: hidden;
+  background: rgba(6, 10, 12, 0.82);
 }
 
 .action-log-heading {
@@ -853,7 +977,7 @@ select:focus-visible {
 }
 
 .action-log {
-  max-height: 116px;
+  max-height: 31px;
   margin: 0;
   padding-left: 22px;
   overflow: auto;
@@ -897,7 +1021,41 @@ select:focus-visible {
 @media (max-width: 1180px) {
   .combat-shell {
     width: min(100vw - 20px, 980px);
+    min-height: calc(100vh - 20px);
+    margin: 10px auto;
+    overflow: visible;
     grid-template-rows: auto auto auto auto auto;
+    gap: 10px;
+  }
+
+  .combat-header {
+    position: static;
+    width: auto;
+    min-height: 82px;
+    padding: 12px 16px;
+  }
+
+  .subtitle {
+    display: block;
+  }
+
+  .resource-strip {
+    position: static;
+    justify-self: center;
+    width: auto;
+    min-width: 112px;
+    min-height: 0;
+    border: 0;
+    padding: 0;
+    display: flex;
+    transform: none;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .resource-item {
+    min-height: 36px;
+    padding: 7px 14px;
   }
 
   .combat-layout,
@@ -905,13 +1063,62 @@ select:focus-visible {
     grid-template-columns: 1fr;
   }
 
+  .combat-layout {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .battlefield-stage {
+    height: auto;
+    min-height: 520px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+  }
+
+  .battlefield-art::after {
+    left: 10%;
+    bottom: 92px;
+  }
+
+  .enemy-silhouette {
+    right: 11%;
+    top: 32%;
+  }
+
   .command-row {
     grid-template-columns: repeat(3, minmax(150px, 1fr));
   }
 
   .combat-side-panel {
+    position: static;
+    width: auto;
+    min-height: 220px;
     grid-template-rows: none;
     grid-template-columns: 1fr;
+  }
+
+  .combat-footer {
+    grid-row: auto;
+    width: auto;
+    min-height: 154px;
+    margin: 0;
+    border: 1px solid var(--line);
+    padding: 10px;
+    background: var(--panel);
+    box-shadow: var(--shadow);
+    backdrop-filter: blur(14px);
+  }
+
+  .action-log-panel {
+    grid-row: auto;
+    height: 128px;
+    margin: 0;
+    padding: 12px 14px;
+  }
+
+  .action-log {
+    max-height: 116px;
   }
 
   .battlefield-stage {
@@ -954,6 +1161,7 @@ select:focus-visible {
     width: auto;
     transform: none;
     margin: 12px;
+    min-width: 0;
   }
 }
 

@@ -24,6 +24,7 @@ const state = {
 
 const staticActionRoutes = {
   enter_combat_preview: "../combat_screen/index.html",
+  retreat: "../world_map/index.html",
 };
 const navigationDelayMs = 120;
 

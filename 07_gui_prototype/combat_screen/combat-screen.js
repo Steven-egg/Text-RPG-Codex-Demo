@@ -105,14 +105,22 @@ function render() {
 }
 
 function renderResources(items) {
+  const roundItem = items.find((item) => (item.label ?? "").includes("回合"));
+  if (!roundItem) {
+    resourceStripEl.hidden = true;
+    resourceStripEl.replaceChildren();
+    return;
+  }
+
+  resourceStripEl.hidden = false;
   resourceStripEl.replaceChildren(
-    ...items.map((item) => {
+    (() => {
       const el = document.createElement("div");
       el.className = "resource-item";
-      el.dataset.tone = item.tone ?? "neutral";
-      el.textContent = item.label ?? "";
+      el.dataset.tone = roundItem.tone ?? "neutral";
+      el.textContent = roundItem.label ?? "";
       return el;
-    }),
+    })(),
   );
 }
 

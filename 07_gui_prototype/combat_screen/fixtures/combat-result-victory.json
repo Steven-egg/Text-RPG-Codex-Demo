@@ -3,9 +3,6 @@
   "title": "戰鬥",
   "subtitle": "Static fixture driven prototype：Victory Result Preview 只驗證同畫面結算 overlay。",
   "resource_strip": [
-    { "label": "見習冒險者 / 劍士 Lv7", "tone": "primary" },
-    { "label": "HP 118/192", "tone": "hp" },
-    { "label": "MP 24/38", "tone": "mp" },
     { "label": "第 4 回合", "tone": "neutral" }
   ],
   "player": {

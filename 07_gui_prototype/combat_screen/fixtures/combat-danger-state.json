@@ -3,9 +3,6 @@
   "title": "戰鬥",
   "subtitle": "Danger fixture：測試低 HP、技能子選單 MP 不足、blocked command 與 Battle Log 展開。",
   "resource_strip": [
-    { "label": "見習冒險者 / 劍士 Lv7", "tone": "primary" },
-    { "label": "HP 34/192", "tone": "danger" },
-    { "label": "MP 2/38", "tone": "danger" },
     { "label": "第 6 回合", "tone": "danger" }
   ],
   "player": {

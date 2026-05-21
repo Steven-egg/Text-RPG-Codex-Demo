@@ -215,6 +215,7 @@ Current behavior:
 - Default fixture covers ordinary step-based exploration in Ash Valley.
 - Fixed Encounter Preview fixture covers a static prototype-only dangerous step without presenting a strong pre-encounter confirmation UI.
 - `advance_step` and `retreat` only write UIAction log and update the prototype feedback message.
+- `retreat` writes UIAction log, updates the prototype feedback message, then navigates back to the World Map static prototype.
 - In the Fixed Encounter Preview fixture, `advance_step` with prototype-only `encounter_hint` writes UIAction log, then navigates to `../combat_screen/index.html`.
 
 Accepted Dungeon Exploration decisions:
@@ -276,6 +277,15 @@ Current behavior:
 - The Combat Screen no longer shows the separate round card, previous-action summary card, enemy detail panel, or player detail panel.
 - The Combat Screen fixtures no longer depend on unused `round`, player item/effect summary, enemy weakness/intent/threat, or standalone last-action fields.
 - The Battle Log has a side-panel expand/collapse control and is not a bottom command.
+- Desktop mockup-alignment pass moved Combat Screen toward a HUD-over-battlefield composition:
+  - the battlefield placeholder is now the full main stage rather than a card in a page grid
+  - compact prototype header sits as a top HUD overlay
+  - the former top-left resource strip was removed; only a small round chip remains above the enemy HUD
+  - enemy focus HUD is top-centered
+  - player focus and Battle Log render as left/right floating panels
+  - the five bottom commands render as a larger command deck over the lower battlefield area
+  - UIAction Log remains available as a compact prototype/debug panel below the main stage
+- The battlefield placeholder gained additional programmatic depth/silhouette treatment; no reference/mockup image is used as a runtime or prototype background asset.
 
 Accepted Combat Screen decisions:
 
@@ -331,6 +341,7 @@ Validated during this session:
 - Dungeon Exploration browser DOM check confirmed the red-marked bottom actions are no longer visible, the action row width is constrained to the left command area, and the green-marked right panel is summarized.
 - Dungeon Exploration browser DOM check confirmed the CLI-aligned surface: HP/MP only in the resource strip, no `1957G`, no item summary panel, no inventory/status/world-map commands, no strong encounter prompt wording, current-run rewards, latest event, and advance/retreat only.
 - Dungeon Exploration Fixed Encounter Preview fixture browser check confirmed `advance_step` still navigates to `../combat_screen/index.html`.
+- Dungeon Exploration `retreat` action browser check confirmed navigation to `../world_map/index.html` from both Default Exploration and Fixed Encounter Preview fixtures.
 - Dungeon Exploration visual tune-up confirmed the fixture selector labels the combat-transition fixture as `Fixed Encounter Preview`.
 - Dungeon Exploration screenshot capture in the in-app browser timed out after layout and interaction checks; DOM and console checks were still completed.
 - Combat Screen fixtures parse as UTF-8 JSON.
@@ -352,7 +363,14 @@ Validated during this session:
 - Combat Screen result next actions navigate to the expected static prototype targets: victory/retreat to Dungeon Exploration, defeat to Town Hub.
 - Combat Screen Victory / Defeat / Retreat Result Preview fixtures no longer show a duplicated `下一步` row inside `本場結果`; navigation remains on the bottom result action button.
 - Combat Screen Defeat / Retreat Result Preview fixtures no longer show extra `角色狀態` or `本趟素材` rows inside `本場結果`.
-- Manual review after the latest Combat Screen result and popover polish was reported OK; remaining Combat Screen work is mockup-alignment layout tuning only.
+- Manual review after the latest Combat Screen result and popover polish was reported OK; first Combat Screen mockup-alignment layout tuning pass is now complete, with any remaining work expected to be minor user-review adjustments.
+- Combat Screen mockup-alignment layout tuning pass confirmed desktop 1280x720 geometry with no page scroll and no overlap between top HUDs, enemy HUD, player HUD, right Battle Log, bottom command deck, or compact UIAction Log.
+- Combat Screen skill and item popover geometry confirmed no overlap with the command row or Battle Log after the mockup-alignment layout pass.
+- Combat Screen responsive layout sanity checks confirmed 5 command buttons, no horizontal overflow, and no HUD/footer overlap at 1280x720, 900x900, and 390x844.
+- Combat Screen item popover responsive checks confirmed desktop `above-command` placement and tablet/mobile `under-command` placement without command-row or side-panel overlap.
+- Combat Screen result overlay geometry confirmed central overlay display, disabled command buttons, and unchanged no-scroll desktop layout after the mockup-alignment layout pass.
+- Combat Screen round HUD revision confirmed only one `第 N 回合` chip renders from fixture data; HP/MP/player identity are no longer duplicated in the top HUD area.
+- Combat Screen cache-resilience follow-up added CSS/JS query-versioning and reduced all Combat Screen `resource_strip` fixture arrays to the round chip only, so stale script instances cannot keep rendering the removed HP/MP/player top-left block after fixture changes.
 
 ## Recommended Next Step
 
