@@ -1,35 +1,35 @@
 {
   "screen_id": "combat_screen",
   "title": "戰鬥",
-  "subtitle": "Danger fixture：測試低 HP、技能子選單 MP 不足、blocked command 與 Battle Log 展開。",
+  "subtitle": "Static fixture driven prototype：Defeat Result Preview 只驗證同畫面結算 overlay。",
   "resource_strip": [
     { "label": "見習冒險者 / 劍士 Lv7", "tone": "primary" },
-    { "label": "HP 34/192", "tone": "danger" },
-    { "label": "MP 2/38", "tone": "danger" },
-    { "label": "第 6 回合", "tone": "danger" }
+    { "label": "HP 9/192", "tone": "danger" },
+    { "label": "MP 3/38", "tone": "mp" },
+    { "label": "第 6 回合", "tone": "neutral" }
   ],
   "player": {
     "name": "見習冒險者",
     "class_label": "劍士",
     "level_label": "Lv7",
-    "hp_label": "34 / 192",
-    "mp_label": "2 / 38",
-    "status_label": "危險",
-    "stance_label": "可行動"
+    "hp_label": "9 / 192",
+    "mp_label": "3 / 38",
+    "status_label": "危急",
+    "stance_label": "勉強站立"
   },
   "enemy": {
     "enemy_id": "mon_ember_stalker",
-    "name": "燼火潛獵者",
-    "hp_label": "HP 91 / 148",
-    "hp_percent": 61,
-    "attribute": "火 / 獸",
-    "status_label": "警戒"
+    "name": "餘燼潛獵者",
+    "hp_label": "HP 88 / 146",
+    "hp_percent": 60,
+    "attribute": "火",
+    "status_label": "蓄勢"
   },
-  "command_message": "上一動：燼火潛獵者從側面撲來，你勉強避開致命一擊。HP 偏低，MP 幾乎耗盡。",
+  "command_message": "固定戰敗預覽：按「防禦」會寫入 UIAction，並開啟同畫面的 Combat Result overlay。",
   "skill_menu": {
     "label": "技能選擇",
     "title": "技能",
-    "summary": "目前 MP 2/38。目標：燼火潛獵者 / 屬性 火 / 獸 / 狀態 警戒。再次按技能可收回。",
+    "summary": "目前 MP 3/38。目標：餘燼潛獵者 / 屬性 火 / 狀態 蓄勢。再次按技能可收回。",
     "empty_message": "尚無可用技能。",
     "items": [
       {
@@ -40,7 +40,7 @@
         "enabled": false,
         "disabled_reason": "MP 不足，無法使用重斬。",
         "payload": { "skill_id": "skill_power_slash", "enemy_id": "mon_ember_stalker" },
-        "feedback_message": ""
+        "feedback_message": "已送出 use_skill：重斬。static prototype 不會計算傷害或消耗 MP。"
       },
       {
         "action_id": "use_skill",
@@ -50,23 +50,23 @@
         "enabled": false,
         "disabled_reason": "MP 不足，無法使用守護符文。",
         "payload": { "skill_id": "skill_guardian_rune" },
-        "feedback_message": ""
+        "feedback_message": "已送出 use_skill：守護符文。static prototype 不會套用 buff 或消耗 MP。"
       }
     ]
   },
   "item_menu": {
     "label": "道具選擇",
     "title": "道具",
-    "summary": "目標：燼火潛獵者 / 狀態 警戒。再次按道具可收回。",
+    "summary": "目標：餘燼潛獵者 / 狀態 蓄勢。再次按道具可收回。",
     "empty_message": "沒有可用道具。",
     "items": [
       {
         "action_id": "use_item",
         "label": "小藥水",
-        "meta": "x1",
+        "meta": "x0",
         "description": "回復 HP 35。",
-        "enabled": true,
-        "disabled_reason": null,
+        "enabled": false,
+        "disabled_reason": "小藥水已用完。",
         "payload": { "item_id": "item_potion_s" },
         "feedback_message": "已送出 use_item：小藥水。static prototype 不會回復 HP 或消耗道具。"
       },
@@ -77,20 +77,35 @@
         "description": "解除中毒；v1 中也可緩解灼傷。",
         "enabled": true,
         "disabled_reason": null,
-        "payload": { "item_id": "item_herb_antidote" },
+        "payload": { "item_id": "item_antidote" },
         "feedback_message": "已送出 use_item：解毒草。static prototype 不會解除狀態或消耗道具。"
       }
     ]
   },
+  "result_overlay": {
+    "outcome": "defeat",
+    "label": "戰鬥結算",
+    "title": "戰敗",
+    "status_summary": "你被迫撤離戰場，戰鬥結束。",
+    "battle_summary": "餘燼潛獵者的追擊突破防線。這些內容只是戰敗結算畫面的 fixture 顯示資料，尚未套用 runtime 或 save。",
+    "reward_title": "本場結果",
+    "rows": [
+      { "label": "戰鬥獎勵", "value": "未取得", "tone": "danger" },
+      { "label": "本趟收益", "value": "未套用", "tone": "danger", "detail": "static prototype 不處理實際素材、金幣或 EXP 結算。" }
+    ],
+    "next_action": {
+      "action_id": "return_to_town_hub",
+      "label": "返回城鎮",
+      "description": "回到 Town Hub static prototype。",
+      "payload": { "from": "combat_result_defeat" },
+      "navigate_to": "../town_hub/index.html",
+      "feedback_message": "已送出 return_to_town_hub。"
+    }
+  },
   "battle_log": [
-    "第 1 回合：燼火潛獵者從熱霧裡現身。",
-    "第 1 回合：你以普通攻擊試探距離。",
-    "第 2 回合：敵人繞到側翼，造成擦傷。",
-    "第 3 回合：你使用技能壓制敵人動作。",
-    "第 4 回合：灼傷狀態開始影響你的體力。",
-    "第 5 回合：你使用小型治療藥水回復部分 HP。",
-    "第 6 回合：敵人伏低身形，準備追擊。",
-    "第 6 回合：目前等待玩家行動。"
+    "第 4 回合：你試圖重整姿勢，但 MP 已經見底。",
+    "第 5 回合：餘燼潛獵者逼近，火星沿著地面散開。",
+    "第 6 回合：戰敗預覽 fixture 等待玩家按防禦開啟結算 overlay。"
   ],
   "actions": [
     {
@@ -99,7 +114,7 @@
       "description": "進行普通攻擊",
       "enabled": true,
       "disabled_reason": null,
-      "primary": true,
+      "primary": false,
       "payload": { "enemy_id": "mon_ember_stalker" },
       "feedback_message": "已送出 basic_attack。static prototype 不會改變敵人 HP。"
     },
@@ -126,12 +141,13 @@
     {
       "action_id": "defend",
       "label": "防禦",
-      "description": "降低下次傷害",
+      "description": "固定預覽：承受最後一擊",
       "enabled": true,
       "disabled_reason": null,
-      "primary": false,
+      "primary": true,
+      "opens_result": true,
       "payload": {},
-      "feedback_message": "已送出 defend。static prototype 不會進入敵方回合。"
+      "feedback_message": "已送出 defend。static prototype 固定開啟戰敗結算預覽。"
     },
     {
       "action_id": "retreat",

@@ -1,35 +1,35 @@
 {
   "screen_id": "combat_screen",
   "title": "戰鬥",
-  "subtitle": "Static fixture driven prototype：呈現回合決策資訊，不計算傷害、不推進 runtime。",
+  "subtitle": "Static fixture driven prototype：Victory Result Preview 只驗證同畫面結算 overlay。",
   "resource_strip": [
     { "label": "見習冒險者 / 劍士 Lv7", "tone": "primary" },
-    { "label": "HP 126/192", "tone": "hp" },
-    { "label": "MP 28/38", "tone": "mp" },
-    { "label": "第 3 回合", "tone": "neutral" }
+    { "label": "HP 118/192", "tone": "hp" },
+    { "label": "MP 24/38", "tone": "mp" },
+    { "label": "第 4 回合", "tone": "neutral" }
   ],
   "player": {
     "name": "見習冒險者",
     "class_label": "劍士",
     "level_label": "Lv7",
-    "hp_label": "126 / 192",
-    "mp_label": "28 / 38",
+    "hp_label": "118 / 192",
+    "mp_label": "24 / 38",
     "status_label": "穩定",
     "stance_label": "可行動"
   },
   "enemy": {
     "enemy_id": "mon_molten_shell",
     "name": "熔殼小魔",
-    "hp_label": "HP 74 / 126",
-    "hp_percent": 59,
+    "hp_label": "HP 12 / 126",
+    "hp_percent": 10,
     "attribute": "火",
-    "status_label": "灼熱外殼"
+    "status_label": "外殼崩裂"
   },
-  "command_message": "上一動：你架開熔殼小魔的撞擊，盾面殘留一圈暗紅火星。選擇下一個戰鬥指令。",
+  "command_message": "固定勝利預覽：按「攻擊」會寫入 UIAction，並開啟同畫面的 Combat Result overlay。",
   "skill_menu": {
     "label": "技能選擇",
     "title": "技能",
-    "summary": "目前 MP 28/38。目標：熔殼小魔 / 屬性 火 / 狀態 灼熱外殼。再次按技能可收回。",
+    "summary": "目前 MP 24/38。目標：熔殼小魔 / 屬性 火 / 狀態 外殼崩裂。再次按技能可收回。",
     "empty_message": "尚無可用技能。",
     "items": [
       {
@@ -57,7 +57,7 @@
   "item_menu": {
     "label": "道具選擇",
     "title": "道具",
-    "summary": "目標：熔殼小魔 / 狀態 灼熱外殼。再次按道具可收回。",
+    "summary": "目標：熔殼小魔 / 狀態 外殼崩裂。再次按道具可收回。",
     "empty_message": "沒有可用道具。",
     "items": [
       {
@@ -102,24 +102,44 @@
       }
     ]
   },
+  "result_overlay": {
+    "outcome": "victory",
+    "label": "戰鬥結算",
+    "title": "勝利",
+    "status_summary": "熔殼小魔被擊退，戰鬥結束。",
+    "battle_summary": "你抓住外殼裂開的一瞬間斬下最後一擊。這些數值都是 fixture 顯示資料，尚未套用 runtime 結算。",
+    "reward_title": "本場結果",
+    "rows": [
+      { "label": "EXP", "value": "+42", "tone": "reward" },
+      { "label": "金幣", "value": "+38G", "tone": "reward" },
+      { "label": "掉落", "value": "熔殼碎片 x1", "tone": "reward" }
+    ],
+    "next_action": {
+      "action_id": "back_to_exploration",
+      "label": "返回探索",
+      "description": "回到 Dungeon Exploration static prototype。",
+      "payload": { "from": "combat_result_victory" },
+      "navigate_to": "../dungeon_exploration/index.html",
+      "feedback_message": "已送出 back_to_exploration。"
+    }
+  },
   "battle_log": [
     "第 1 回合：你以普通攻擊命中熔殼小魔，造成輕傷。",
-    "第 1 回合：熔殼小魔以灼熱外殼擦過你的手臂。",
     "第 2 回合：你選擇防禦，穩住姿勢。",
-    "第 2 回合：熔殼小魔撞擊盾面，傷害被減輕。",
-    "第 3 回合：敵人的外殼裂縫裡冒出紅光。",
-    "第 3 回合：目前等待玩家行動。"
+    "第 3 回合：熔殼小魔的外殼裂縫裡冒出紅光。",
+    "第 4 回合：勝利預覽 fixture 等待玩家按攻擊開啟結算 overlay。"
   ],
   "actions": [
     {
       "action_id": "basic_attack",
       "label": "攻擊",
-      "description": "進行普通攻擊",
+      "description": "固定預覽：結束戰鬥",
       "enabled": true,
       "disabled_reason": null,
       "primary": true,
+      "opens_result": true,
       "payload": { "enemy_id": "mon_molten_shell" },
-      "feedback_message": "已送出 basic_attack。static prototype 不會改變敵人 HP。"
+      "feedback_message": "已送出 basic_attack。static prototype 固定開啟勝利結算預覽。"
     },
     {
       "action_id": "open_skill_menu",

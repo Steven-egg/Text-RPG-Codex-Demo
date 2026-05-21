@@ -9,7 +9,8 @@
 1. `01_content/codex-handoff-short.md`
 2. `README.md`
 3. `01_content/gui-planning-index.md`
-4. `01_content/gui-ui-direction-brief.md`
+4. `01_content/gui-html-static-prototype-progress-v1.md`
+5. `01_content/gui-ui-direction-brief.md`
 
 接著依任務加讀：
 
@@ -27,6 +28,7 @@
 | GUI implementation platform tradeoff | `01_content/gui-implementation-platform-tradeoff.md`、`01_content/gui-ui-direction-brief.md`、`01_content/gui-town-hub-programmatic-layout-plan-v1.md` |
 | HTML Town Hub prototype planning | `01_content/gui-html-town-hub-prototype-plan.md`、`01_content/gui-implementation-platform-tradeoff.md`、`01_content/gui-town-hub-programmatic-layout-plan-v1.md` |
 | HTML Town Hub fixture spec | `01_content/gui-html-town-hub-fixture-spec.md`、`01_content/gui-html-town-hub-prototype-plan.md` |
+| HTML static prototype handoff / Combat polish | `01_content/gui-html-static-prototype-progress-v1.md`、`01_content/gui-planning-index.md` |
 | Facility template | `01_content/gui-facility-screen-template.md` |
 | Guild Screen model | `01_content/gui-guild-screen-model-draft.md`、`01_content/gui-guild-screen-visual-baseline.md`、`01_content/gui-facility-screen-template.md`、`01_content/gui-asset-registry-draft.md` |
 | Guild Screen review | `01_content/gui-guild-screen-review-checklist.md`、`01_content/gui-guild-screen-model-draft.md`、`01_content/gui-guild-screen-visual-baseline.md` |
@@ -44,13 +46,15 @@
 
 ## 1. 目前 GUI 狀態
 
-GUI 仍處於 planning / reference / mockup 階段。
+GUI 目前處於 HTML static prototype 驗證階段；正式 runtime UI 仍是 Python CLI / Rich，尚未建立 runtime adapter。
 
-- 尚未實作 GUI。
-- 尚未選定 pygame / HTML / Unity / WebView 或其他 GUI 技術。
+- 第一個可操作 prototype path 已採 HTML static fixtures，位置在 `07_gui_prototype/`。
+- 已建立 Town Hub、Guild Screen、World Map、Dungeon Exploration、Combat Screen static prototype。
+- Combat Screen 目前只剩與使用者 mockup 對齊的版面微調。
+- 尚未選定最終 GUI 技術；HTML prototype 不等於正式 app，也不等於 runtime integration。
 - 尚未啟動正式 asset pipeline。
 - 目前 CLI / Rich panel 只作為 playable reference，不等於最終 GUI 架構。
-- GUI 規劃應先整理 Screen Map、ScreenModel 與 UIAction，再考慮 render layer。
+- GUI prototype 仍應維持 Screen Map、ScreenModel 與 UIAction 邊界；fixture 是 render-layer 驗證資料，不是 gameplay SSOT。
 - reference image、candidate mockup 與 prompt draft 都不等於 runtime asset。
 - runtime、data、schema、save、combat formula 都不可因 GUI 規劃而修改。
 - 不重構 `03_engine/engine/game.py`，除非未來另開明確小切片並先 read-only 評估。
@@ -77,6 +81,7 @@ GUI 仍處於 planning / reference / mockup 階段。
 | `01_content/gui-implementation-platform-tradeoff.md` | conditional | pygame / HTML first prototype path 取捨；建議先用 HTML static fixture 驗證 Programmatic GUI | GUI platform decision 任務讀 |
 | `01_content/gui-html-town-hub-prototype-plan.md` | conditional | HTML Town Hub static fixture prototype 的範圍、layout、fixture、互動與 runtime adapter 邊界 | HTML prototype planning 任務讀 |
 | `01_content/gui-html-town-hub-fixture-spec.md` | conditional | HTML Town Hub prototype 的 `town-hub-default.json` / `town-hub-alerts.json` fixture 規格 | HTML prototype implementation 任務讀 |
+| `01_content/gui-html-static-prototype-progress-v1.md` | core | 目前 `07_gui_prototype/` static prototype 的 handoff、驗證紀錄與下一步 | 是 |
 | `01_content/gui-facility-screen-template.md` | core | Facility 類畫面共用模板 | 視任務 |
 | `01_content/gui-guild-screen-visual-baseline.md` | core | Guild Screen 已採納 visual baseline | Guild 任務必讀 |
 | `01_content/gui-guild-screen-model-draft.md` | core | Guild Screen 的 ScreenModel、row model 與 UIAction 草案 | Guild 任務必讀 |
@@ -102,6 +107,7 @@ GUI 仍處於 planning / reference / mockup 階段。
 - `01_content/codex-handoff-short.md`：目前專案穩定狀態、禁止事項與下一步邊界。
 - `README.md`：project-level SSOT，包含目前 runtime 狀態、資料夾職責、驗證方式與 roadmap。
 - `01_content/gui-planning-index.md`：GUI 文件入口與治理索引。
+- `01_content/gui-html-static-prototype-progress-v1.md`：目前 `07_gui_prototype/` static prototype 的最新 handoff、驗證紀錄與下一步。
 - `01_content/gui-ui-direction-brief.md`：GUI vertical slice 的整體方向、視覺語彙、禁止方向與三階段策略。
 
 ### B. Screen map / flow
@@ -505,8 +511,10 @@ mockup 評估重點：
 
 ## 8. 建議下一步
 
-最適合的下一步是選一個小而清楚的文件化切片：
+最適合的下一步是延續目前 HTML static prototype，小步完成 Combat Screen 對齊：
 
+- Combat Screen：只做與使用者 mockup 對齊的版面微調；維持 static fixtures，不接 runtime、不讀寫 save、不把 reference/mockup 圖當 runtime asset。
+- `01_content/gui-html-static-prototype-progress-v1.md` 是目前 `07_gui_prototype/` 的最新 handoff；接續 prototype 前先讀它。
 - Town Hub Screen：可延續 `gui-town-hub-screen-model-draft.md`，補強場景式 `facility_nodes`、badge 優先級與 World Map / Facility Screen 銜接。
 - Town Hub mockup review 已完成：`gui-town-hub-mockup-review-v1.md` 結論為 `pass_with_notes`；下一步可小幅同步 `gui-screen-map.md`。
 - Town Hub UI-2 planning 已建立：`gui-town-hub-wireframe-plan.md`；下一步可做 markdown-only wireframe 草圖，不生成新圖。
@@ -516,8 +524,7 @@ mockup 評估重點：
 - Town Hub visual mockup candidate review 已完成：`gui-town-hub-visual-mockup-candidate-review-v1.md` 結論為 `pass_with_notes`；candidate 已收進 `05_assets/gui_references/town_hub/`，僅作 reference。
 - Town Hub facility node mapping 與 programmatic layout plan 已建立：下一步可討論 pygame / HTML implementation tradeoff，但仍不啟動正式 asset pipeline。
 - GUI implementation platform tradeoff 已建立：`gui-implementation-platform-tradeoff.md` 建議第一個 Programmatic GUI prototype 優先走 HTML static fixture，不接 runtime。
-- HTML Town Hub prototype plan 已建立：`gui-html-town-hub-prototype-plan.md`；下一步可先寫完整 static fixture spec，或建立 `07_gui_prototype/town_hub/` prototype，但仍不接 runtime。
-- HTML Town Hub fixture spec 已建立：`gui-html-town-hub-fixture-spec.md`；下一步可在新 session 建立 `07_gui_prototype/town_hub/` static prototype。
+- HTML Town Hub prototype plan / fixture spec 已建立且 `07_gui_prototype/town_hub/` 已落地；後續以 `gui-html-static-prototype-progress-v1.md` 為實作 handoff。
 - Guild Screen：下一步可 read-only 對照 `guild_menu()` 與任務資料來源，列出未來 `build_guild_screen_model(...)` 可能需要的資料。
 - Facility Template：補強 `FacilityScreenModel` 與不同 facility variant 的欄位差異。
 - Mockup 評估：建立一份單一 screen 的 review checklist，不生成新圖。

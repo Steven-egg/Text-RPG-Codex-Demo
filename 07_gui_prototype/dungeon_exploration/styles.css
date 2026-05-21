@@ -18,6 +18,7 @@
   --danger: #d9665d;
   --focus: #f2c95d;
   --shadow: 0 18px 52px rgba(0, 0, 0, 0.38);
+  --panel-glow: 0 20px 58px rgba(0, 0, 0, 0.44), 0 0 0 1px rgba(239, 232, 215, 0.04) inset;
 }
 
 * {
@@ -158,6 +159,7 @@ select:focus-visible {
   display: grid;
   grid-template-columns: repeat(2, minmax(160px, 1fr));
   gap: 8px;
+  background: rgba(13, 18, 16, 0.78);
 }
 
 .resource-item {
@@ -210,6 +212,18 @@ select:focus-visible {
     #101715;
 }
 
+.dungeon-stage::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse at 50% 46%, rgba(242, 201, 93, 0.18), transparent 16%),
+    radial-gradient(ellipse at 50% 63%, rgba(74, 155, 145, 0.2), transparent 22%),
+    linear-gradient(90deg, rgba(0, 0, 0, 0.36), transparent 29%, transparent 69%, rgba(0, 0, 0, 0.4));
+}
+
 .dungeon-stage::after {
   content: "";
   position: absolute;
@@ -227,24 +241,28 @@ select:focus-visible {
   inset: 0;
 }
 
+.dungeon-art {
+  z-index: 0;
+}
+
 .scene-back {
   background:
-    linear-gradient(140deg, rgba(74, 155, 145, 0.3), transparent 38%),
-    linear-gradient(25deg, rgba(194, 95, 56, 0.28), transparent 46%),
-    linear-gradient(180deg, #172622, #101614 54%, #0b0e0d);
+    linear-gradient(140deg, rgba(74, 155, 145, 0.34), transparent 36%),
+    linear-gradient(25deg, rgba(194, 95, 56, 0.3), transparent 44%),
+    linear-gradient(180deg, #172622, #101614 50%, #0b0e0d);
 }
 
 .scene-arches {
-  clip-path: polygon(0 8%, 18% 0, 27% 42%, 38% 8%, 50% 53%, 63% 3%, 76% 46%, 88% 0, 100% 12%, 100% 72%, 0 72%);
+  clip-path: polygon(0 8%, 16% 0, 27% 46%, 38% 8%, 50% 56%, 63% 3%, 76% 48%, 88% 0, 100% 12%, 100% 74%, 0 74%);
   background:
     linear-gradient(90deg, rgba(239, 232, 215, 0.1) 0 2px, transparent 2px 16%),
     linear-gradient(180deg, rgba(109, 92, 68, 0.72), rgba(30, 32, 29, 0.9));
-  opacity: 0.78;
+  opacity: 0.84;
 }
 
 .scene-path {
-  top: 42%;
-  clip-path: polygon(35% 0, 66% 0, 92% 100%, 9% 100%);
+  top: 39%;
+  clip-path: polygon(37% 0, 63% 0, 91% 100%, 10% 100%);
   background:
     linear-gradient(90deg, transparent 0 48%, rgba(208, 168, 76, 0.18) 49% 51%, transparent 52% 100%),
     linear-gradient(180deg, rgba(109, 92, 68, 0.36), rgba(29, 25, 21, 0.94));
@@ -272,7 +290,7 @@ select:focus-visible {
   z-index: 4;
   height: 100%;
   min-height: 590px;
-  padding: 18px 390px 18px 18px;
+  padding: 22px 410px 22px 22px;
   display: flex;
   align-items: flex-start;
 }
@@ -283,11 +301,13 @@ select:focus-visible {
   border-radius: 8px;
   padding: 14px;
   background: rgba(11, 14, 13, 0.74);
-  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.34);
+  box-shadow: var(--panel-glow);
 }
 
 .location-card {
-  width: min(360px, 100%);
+  width: min(380px, 100%);
+  border-left: 4px solid rgba(208, 168, 76, 0.7);
+  background: linear-gradient(180deg, rgba(18, 24, 21, 0.86), rgba(9, 12, 11, 0.78));
 }
 
 .location-card p:last-child {
@@ -317,7 +337,7 @@ select:focus-visible {
   grid-template-columns: minmax(88px, 0.42fr) minmax(0, 1fr);
   gap: 10px;
   align-items: center;
-  background: rgba(255, 255, 255, 0.052);
+  background: rgba(255, 255, 255, 0.058);
 }
 
 .meta-row span:first-child,
@@ -355,7 +375,7 @@ select:focus-visible {
 }
 
 .meter-track {
-  height: 12px;
+  height: 13px;
   border: 1px solid rgba(239, 232, 215, 0.22);
   border-radius: 999px;
   overflow: hidden;
@@ -379,17 +399,20 @@ select:focus-visible {
 .side-panel {
   position: absolute;
   z-index: 6;
-  top: 18px;
-  right: 18px;
-  bottom: 18px;
-  width: min(344px, calc(100% - 36px));
-  padding: 16px;
+  top: 22px;
+  right: 22px;
+  bottom: 22px;
+  width: min(362px, calc(100% - 44px));
+  padding: 18px;
   min-height: 0;
   display: grid;
   grid-template-rows: auto auto minmax(0, 1fr);
-  gap: 12px;
+  gap: 14px;
   overflow: hidden;
-  background: rgba(9, 13, 13, 0.78);
+  background:
+    linear-gradient(180deg, rgba(13, 18, 17, 0.92), rgba(8, 11, 11, 0.84)),
+    rgba(9, 13, 13, 0.82);
+  box-shadow: var(--panel-glow);
 }
 
 .side-panel .run-card,
@@ -397,8 +420,8 @@ select:focus-visible {
   min-height: 0;
   border: 0;
   border-radius: 0;
-  border-bottom: 1px solid rgba(239, 232, 215, 0.15);
-  padding: 0 0 10px;
+  border-bottom: 1px solid rgba(239, 232, 215, 0.18);
+  padding: 0 0 12px;
   background: transparent;
   box-shadow: none;
 }
@@ -437,7 +460,8 @@ select:focus-visible {
 .side-panel .run-stat {
   min-height: 0;
   display: block;
-  padding: 6px 8px;
+  padding: 7px 9px;
+  border-color: rgba(239, 232, 215, 0.16);
 }
 
 .side-panel .run-stat span {
@@ -464,21 +488,22 @@ select:focus-visible {
 }
 
 .exploration-footer {
-  min-height: 150px;
-  padding: 10px;
+  min-height: 148px;
+  padding: 12px;
   display: grid;
   grid-template-columns: 1fr;
   grid-template-rows: minmax(64px, auto) minmax(72px, auto);
-  gap: 8px;
+  gap: 10px;
   align-items: stretch;
+  background: rgba(12, 17, 15, 0.86);
 }
 
 .message-panel {
   min-height: 0;
   border: 1px solid var(--line);
   border-radius: 8px;
-  padding: 11px 14px;
-  background: rgba(255, 255, 255, 0.052);
+  padding: 12px 15px;
+  background: rgba(255, 255, 255, 0.058);
   overflow: hidden;
 }
 
@@ -493,11 +518,11 @@ select:focus-visible {
 }
 
 .action-row {
-  width: min(790px, 100%);
+  width: min(720px, 100%);
   min-width: 0;
   display: grid;
   grid-template-columns: repeat(2, minmax(180px, 1fr));
-  gap: 8px;
+  gap: 10px;
 }
 
 .action-button,
@@ -510,7 +535,7 @@ select:focus-visible {
 
 .action-button {
   min-height: 72px;
-  padding: 13px 14px;
+  padding: 13px 16px;
   display: grid;
   align-content: center;
   gap: 7px;
@@ -531,7 +556,7 @@ select:focus-visible {
 
 .action-button[data-primary="true"] {
   border-color: rgba(242, 201, 93, 0.52);
-  background: linear-gradient(135deg, rgba(74, 155, 145, 0.34), rgba(56, 111, 145, 0.28));
+  background: linear-gradient(135deg, rgba(74, 155, 145, 0.38), rgba(56, 111, 145, 0.3));
 }
 
 .action-button[aria-disabled="true"] {
@@ -611,7 +636,7 @@ select:focus-visible {
   }
 
   .stage-overlay {
-    padding-right: 350px;
+    padding-right: 386px;
   }
 
   .dungeon-stage,
@@ -642,6 +667,8 @@ select:focus-visible {
   .stage-overlay {
     min-height: auto;
     padding: 12px;
+    display: grid;
+    gap: 10px;
   }
 
   .side-panel {

@@ -2,7 +2,7 @@
 
 用途：提供新 session 在需要歷史脈絡時的精簡接續快照。本檔不再承擔完整流水帳；日常接續請先讀 `01_content/codex-handoff-short.md`、`README.md` 與 `01_content/gui-planning-index.md`。
 
-狀態日期：2026-05-18
+狀態日期：2026-05-21
 
 ## 1. 最短閱讀順序
 
@@ -11,14 +11,16 @@
 1. `01_content/codex-handoff-short.md`
 2. `README.md`
 3. `01_content/gui-planning-index.md`
-4. 依任務加讀對應文件
+4. 若接續 GUI HTML static prototype，再讀 `01_content/gui-html-static-prototype-progress-v1.md`
+5. 依任務加讀對應文件
 
-GUI planning 接續：
+GUI static prototype 接續：
 
 1. `01_content/gui-planning-index.md`
-2. `01_content/gui-ui-direction-brief.md`
-3. `01_content/gui-screen-map.md`
-4. `01_content/ui-flow-blueprint.md`
+2. `01_content/gui-html-static-prototype-progress-v1.md`
+3. `01_content/gui-ui-direction-brief.md`
+4. `01_content/gui-screen-map.md`
+5. `01_content/ui-flow-blueprint.md`
 
 Guild Screen 接續：
 
@@ -64,19 +66,23 @@ Facility / Synthesis 接續：
 
 ## 4. GUI planning 目前結論
 
-GUI 仍處於 planning / reference / mockup 階段。
+GUI 已進入 HTML static prototype 驗證階段；正式 runtime UI 仍是 Python CLI / Rich，尚未建立 runtime adapter。
 
-- 尚未實作 GUI。
-- 尚未選定 pygame / HTML / Unity / WebView 或其他 GUI 技術。
+- `07_gui_prototype/` 已建立 Town Hub、Guild Screen、World Map、Dungeon Exploration、Combat Screen static prototype。
+- static prototype 只使用 fixtures 驗證 render layer、layout、互動與 UIAction logging。
+- Combat Screen 已有技能 / 道具 popover、Battle Log、Victory / Defeat / Retreat result preview fixtures，以及整合在 Combat Screen 內的 Combat Result overlay。
+- 最近手動測試回報整體 OK；目前 Combat 面板只剩與使用者 mockup 對齊的版面微調。
+- 尚未選定最終 GUI 技術；HTML prototype 不等於正式 app，也不等於 runtime integration。
 - 尚未啟動正式 asset pipeline。
 - 尚未建立正式 prompt builder、style bible 或 production asset registry。
 - 目前不應把 CLI `input()` / `print()` menu 視為最終架構。
-- 三階段策略仍是 UI-1 文字式 UI、UI-2 CLI / Rich wireframe、UI-3 最終 GUI 視覺版。
+- 三階段策略目前可視為 UI-1 CLI / Rich playable reference、UI-2 HTML static fixture prototype、UI-3 最終 GUI 視覺版。
 - 三階段應共用 Screen Map、ScreenModel 與 UIAction；差異只在 render layer。
 
 GUI 文件入口：
 
 - `01_content/gui-planning-index.md`：唯一 GUI 文件入口與閱讀順序。
+- `01_content/gui-html-static-prototype-progress-v1.md`：目前 HTML static prototype handoff、驗證紀錄與下一步。
 - `01_content/gui-ui-direction-brief.md`：整體 GUI 方向與視覺語彙。
 - `01_content/gui-screen-map.md`：Screen Map、UIAction、ScreenModel 草案。
 - `01_content/ui-flow-blueprint.md`：目前 CLI thin layer 與 GUI flow 的銜接。
@@ -143,11 +149,11 @@ Facility / Synthesis 目前有 v0 / v2 candidate，但不視為正式 baseline�
 
 - 不修改 runtime、data、schema、save、combat formula。
 - 不重構 `03_engine/engine/game.py`。
-- 不實作 GUI。
-- 不啟動 dev server。
+- 不把 HTML static prototype 接入 runtime。
+- 不讀寫 `save.json`。
 - 不生成新圖片。
 - 不移動圖片。
-- 不選定 pygame / HTML / Unity / WebView。
+- 不選定最終 pygame / HTML / Unity / WebView 技術。
 - 不建立正式 asset pipeline。
 - 不把 Synthesis v0 / v2 candidate 當正式 baseline。
 - 不把 Guild baseline 當 runtime asset。
@@ -157,11 +163,11 @@ Facility / Synthesis 目前有 v0 / v2 candidate，但不視為正式 baseline�
 
 ## 8. 下一步建議
 
-目前最適合的下一步仍是 markdown-only 小切片：
+目前最適合的下一步是延續既有 HTML static prototype：
 
-- Guild Screen：read-only 對照目前 `guild_menu()` 與任務資料來源，列出未來 `build_guild_screen_model(...)` 可能需要的資料。
-- Facility Template：補強 `FacilityScreenModel` 與 Shop / Forge / Magic / Synthesis 的欄位差異。
-- Mockup 評估：建立單一 screen 的 review checklist，不生成新圖。
+- Combat Screen：只做與使用者 mockup 對齊的版面微調。
+- 維持 static fixtures only，不接 Python runtime、不讀寫 save、不修改 runtime / data / schema / combat formula。
+- 完成 Combat mockup alignment 後，再決定是否移往下一個 approved static prototype。
 
 若下一步要碰 runtime，必須先做 read-only 評估，明確列出會碰到的檔案、風險、驗證方式與不碰範圍，再等使用者批准。
 

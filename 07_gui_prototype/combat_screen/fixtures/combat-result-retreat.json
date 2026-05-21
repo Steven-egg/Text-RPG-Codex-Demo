@@ -1,35 +1,35 @@
 {
   "screen_id": "combat_screen",
   "title": "戰鬥",
-  "subtitle": "Static fixture driven prototype：呈現回合決策資訊，不計算傷害、不推進 runtime。",
+  "subtitle": "Static fixture driven prototype：Retreat Result Preview 只驗證同畫面結算 overlay。",
   "resource_strip": [
     { "label": "見習冒險者 / 劍士 Lv7", "tone": "primary" },
-    { "label": "HP 126/192", "tone": "hp" },
-    { "label": "MP 28/38", "tone": "mp" },
-    { "label": "第 3 回合", "tone": "neutral" }
+    { "label": "HP 64/192", "tone": "hp" },
+    { "label": "MP 11/38", "tone": "mp" },
+    { "label": "第 5 回合", "tone": "neutral" }
   ],
   "player": {
     "name": "見習冒險者",
     "class_label": "劍士",
     "level_label": "Lv7",
-    "hp_label": "126 / 192",
-    "mp_label": "28 / 38",
-    "status_label": "穩定",
-    "stance_label": "可行動"
+    "hp_label": "64 / 192",
+    "mp_label": "11 / 38",
+    "status_label": "疲憊",
+    "stance_label": "可撤退"
   },
   "enemy": {
-    "enemy_id": "mon_molten_shell",
-    "name": "熔殼小魔",
-    "hp_label": "HP 74 / 126",
-    "hp_percent": 59,
+    "enemy_id": "mon_ash_hound",
+    "name": "灰燼獵犬",
+    "hp_label": "HP 51 / 118",
+    "hp_percent": 43,
     "attribute": "火",
-    "status_label": "灼熱外殼"
+    "status_label": "追擊中"
   },
-  "command_message": "上一動：你架開熔殼小魔的撞擊，盾面殘留一圈暗紅火星。選擇下一個戰鬥指令。",
+  "command_message": "固定撤退預覽：按「逃跑」會寫入 UIAction，並開啟同畫面的 Combat Result overlay。",
   "skill_menu": {
     "label": "技能選擇",
     "title": "技能",
-    "summary": "目前 MP 28/38。目標：熔殼小魔 / 屬性 火 / 狀態 灼熱外殼。再次按技能可收回。",
+    "summary": "目前 MP 11/38。目標：灰燼獵犬 / 屬性 火 / 狀態 追擊中。再次按技能可收回。",
     "empty_message": "尚無可用技能。",
     "items": [
       {
@@ -39,7 +39,7 @@
         "description": "物理傷害，倍率 1.25。",
         "enabled": true,
         "disabled_reason": null,
-        "payload": { "skill_id": "skill_power_slash", "enemy_id": "mon_molten_shell" },
+        "payload": { "skill_id": "skill_power_slash", "enemy_id": "mon_ash_hound" },
         "feedback_message": "已送出 use_skill：重斬。static prototype 不會計算傷害或消耗 MP。"
       },
       {
@@ -57,38 +57,18 @@
   "item_menu": {
     "label": "道具選擇",
     "title": "道具",
-    "summary": "目標：熔殼小魔 / 狀態 灼熱外殼。再次按道具可收回。",
+    "summary": "目標：灰燼獵犬 / 狀態 追擊中。再次按道具可收回。",
     "empty_message": "沒有可用道具。",
     "items": [
       {
         "action_id": "use_item",
         "label": "小藥水",
-        "meta": "x2",
+        "meta": "x1",
         "description": "回復 HP 35。",
         "enabled": true,
         "disabled_reason": null,
         "payload": { "item_id": "item_potion_s" },
         "feedback_message": "已送出 use_item：小藥水。static prototype 不會回復 HP 或消耗道具。"
-      },
-      {
-        "action_id": "use_item",
-        "label": "集中滴露",
-        "meta": "x1",
-        "description": "回復 MP 12。",
-        "enabled": true,
-        "disabled_reason": null,
-        "payload": { "item_id": "item_focus_drop" },
-        "feedback_message": "已送出 use_item：集中滴露。static prototype 不會回復 MP 或消耗道具。"
-      },
-      {
-        "action_id": "use_item",
-        "label": "破甲釘",
-        "meta": "x1",
-        "description": "造成少量傷害，並 3 回合降低敵方防禦 20%。",
-        "enabled": true,
-        "disabled_reason": null,
-        "payload": { "item_id": "item_armor_piercer", "enemy_id": "mon_molten_shell" },
-        "feedback_message": "已送出 use_item：破甲釘。static prototype 不會計算傷害或套用 debuff。"
       },
       {
         "action_id": "use_item",
@@ -102,13 +82,30 @@
       }
     ]
   },
+  "result_overlay": {
+    "outcome": "retreat",
+    "label": "戰鬥結算",
+    "title": "撤退",
+    "status_summary": "你脫離戰鬥，暫時保住探索進度。",
+    "battle_summary": "你趁灰燼獵犬被煙塵遮住視線時退回通道。這些內容只是撤退結算畫面的 fixture 顯示資料，尚未套用 runtime 或 save。",
+    "reward_title": "本場結果",
+    "rows": [
+      { "label": "戰鬥 EXP", "value": "未取得", "tone": "danger" },
+      { "label": "戰鬥掉落", "value": "未取得", "tone": "danger" }
+    ],
+    "next_action": {
+      "action_id": "back_to_exploration",
+      "label": "返回探索",
+      "description": "回到 Dungeon Exploration static prototype。",
+      "payload": { "from": "combat_result_retreat" },
+      "navigate_to": "../dungeon_exploration/index.html",
+      "feedback_message": "已送出 back_to_exploration。"
+    }
+  },
   "battle_log": [
-    "第 1 回合：你以普通攻擊命中熔殼小魔，造成輕傷。",
-    "第 1 回合：熔殼小魔以灼熱外殼擦過你的手臂。",
-    "第 2 回合：你選擇防禦，穩住姿勢。",
-    "第 2 回合：熔殼小魔撞擊盾面，傷害被減輕。",
-    "第 3 回合：敵人的外殼裂縫裡冒出紅光。",
-    "第 3 回合：目前等待玩家行動。"
+    "第 3 回合：灰燼獵犬繞到側面，逼迫你後退。",
+    "第 4 回合：你保留體力，觀察撤退路線。",
+    "第 5 回合：撤退預覽 fixture 等待玩家按逃跑開啟結算 overlay。"
   ],
   "actions": [
     {
@@ -117,8 +114,8 @@
       "description": "進行普通攻擊",
       "enabled": true,
       "disabled_reason": null,
-      "primary": true,
-      "payload": { "enemy_id": "mon_molten_shell" },
+      "primary": false,
+      "payload": { "enemy_id": "mon_ash_hound" },
       "feedback_message": "已送出 basic_attack。static prototype 不會改變敵人 HP。"
     },
     {
@@ -154,12 +151,13 @@
     {
       "action_id": "retreat",
       "label": "逃跑",
-      "description": "嘗試脫離戰鬥",
+      "description": "固定預覽：脫離戰鬥",
       "enabled": true,
       "disabled_reason": null,
-      "primary": false,
-      "payload": { "enemy_id": "mon_molten_shell" },
-      "feedback_message": "已送出 retreat。static prototype 不會結算逃跑。"
+      "primary": true,
+      "opens_result": true,
+      "payload": { "enemy_id": "mon_ash_hound" },
+      "feedback_message": "已送出 retreat。static prototype 固定開啟撤退結算預覽。"
     }
   ]
 }

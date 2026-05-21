@@ -1,7 +1,7 @@
 {
   "screen_id": "dungeon_exploration",
   "title": "迷宮探索",
-  "subtitle": "High risk fixture：測試低 HP/MP 與高風險步驟，仍只保留 CLI 探索主動作。",
+  "subtitle": "Static prototype 固定遇怪預覽：這是測試用 fixture，用來驗證「前進 → Combat Screen」流程，正式遊玩仍應由未來 runtime 隨機判定。",
   "resource_strip": [
     { "label": "HP 71/192", "tone": "warning" },
     { "label": "MP 12/38", "tone": "mp" }
@@ -44,7 +44,7 @@
       "disabled_reason": null,
       "primary": true,
       "payload": { "dungeon_id": "ash_valley", "current_step": 13, "encounter_hint": true },
-      "feedback_message": "已送出 advance_step。即將進入 Combat Screen static prototype。"
+      "feedback_message": "已送出 advance_step。固定遇怪預覽將進入 Combat Screen static prototype。"
     },
     {
       "action_id": "retreat",

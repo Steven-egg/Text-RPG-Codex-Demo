@@ -1,6 +1,18 @@
 # 《元素迷宮：邊境冒險者》終端機版
 
-## 最新完成：Synthesis Catalog MVP
+## 最新完成：GUI HTML Static Prototype（static fixtures）
+
+目前最新工作是 `07_gui_prototype/` 的 HTML static prototype。它只驗證 GUI render layer、layout、互動與 UIAction logging，不接 Python runtime，不讀寫 `save.json`，不修改 runtime / data / schema / combat formula，也不啟動正式 asset pipeline。
+
+- 已建立 Town Hub、Guild Screen、World Map、Dungeon Exploration、Combat Screen 五個 static prototype。
+- World Map 可用靜態 fixture 導向 Dungeon Exploration；Dungeon Exploration 的 `Fixed Encounter Preview` 可導向 Combat Screen。
+- Combat Screen 已有 5 個底部指令、技能 / 道具 floating popover、右側 Battle Log、Victory / Defeat / Retreat result preview fixtures。
+- Combat Result 已整合為 Combat Screen 內的中央 terminal overlay，不再新增獨立 Combat Result Screen。
+- Result overlay 開啟後 command bar 停用；勝利 / 撤退下一步回 Dungeon Exploration，戰敗下一步回 Town Hub。
+- 最新手動測試回報整體 OK；目前 Combat 面板只剩與使用者 mockup 對齊的版面微調。
+- 詳細狀態與驗證紀錄見 `01_content/gui-html-static-prototype-progress-v1.md`。
+
+## 前一輪 runtime 完成：Synthesis Catalog MVP
 
 最新 UI 變更仍只做 CLI 顯示層優化，範圍限定米菈合成屋：
 
@@ -85,24 +97,24 @@
 
 UI 完成後要回頭處理的 demo 遊玩體驗、平衡、任務引導與內容節奏 polish，統一記錄在 `01_content/demo-playtest-notes.md`；它不是目前 runtime 施工清單。
 
-## 下一階段 UI 方向：ScreenModel / UIAction
+## 目前 GUI prototype 方向：ScreenModel / UIAction
 
-目前 CLI / Rich panel 已足以作為 playable reference。下一階段重點不再是繼續把每個 CLI 畫面 catalog 化，而是把既有流程整理成未來 GUI 可共用的互動模型。
+目前 CLI / Rich panel 已足以作為 playable reference；HTML static prototype 已用 static fixtures 驗證第一批 GUI screen 的 layout 與互動。正式 runtime 仍是 Python CLI，HTML prototype 不是正式遊戲入口，也不是 runtime adapter。
 
-規劃中的 UI 升級分三階段：
+GUI 升級分三層看待：
 
-- Phase UI-1：Home Hub / Main Menu 文字式 UI。以目前 CLI / Rich 行為為參考，整理 screen flow、`ScreenModel` 與 `UIAction`，不追求正式美術。
-- Phase UI-2：CLI / Rich 風格 wireframe。用框線、區塊、簡單圖示與選取狀態驗證 layout、資訊分區與操作回饋，不建立正式 asset pipeline。
+- Phase UI-1：CLI / Rich playable reference。已完成核心循環與設施 catalog 的顯示層整理。
+- Phase UI-2：HTML static fixture prototype。已建立 Town Hub、Guild、World Map、Dungeon Exploration、Combat Screen；仍只用 fixture，不接 runtime。
 - Phase UI-3：最終 GUI 視覺版本。使用正式背景圖、角色圖、icon、UI skin，並需要 asset request schema、prompt builder、asset registry 與 style bible；此階段尚未開始。
 
-三階段應共用同一套 Screen Map、ScreenModel 與 UIAction；CLI 數字輸入、Rich wireframe 選取與未來 GUI 點擊 / 觸控都只應映射到同一批遊戲語意 action。
+三層應共用同一套 Screen Map、ScreenModel 與 UIAction；CLI 數字輸入、Rich wireframe 選取與未來 GUI 點擊 / 觸控都只應映射到同一批遊戲語意 action。
 
 正式 UI flow 暫定為：
 
 - Flow A：Start Screen → World Map Screen → Town Hub Screen → Facility Screens（Guild / Shop / Forge / Synthesis / Inn / Storage）。
 - Flow B：Start Screen → World Map Screen → Exploration Screen → Combat Screen → Result → 回到 Exploration 或 World Map / Town。
 
-下一輪建議先做文件與架構草案：`01_content/gui-screen-map.md` 與 UIAction / ScreenModel 定義。第一個實驗對象建議為米菈合成屋，因為它已有分類、列表、詳情、狀態與確認流程，適合抽出 `category → item list → detail → confirm → result` 的通用模式。
+下一步建議維持 static prototype 邊界，先完成 Combat Screen 與使用者 mockup 的版面對齊；不要接 Python runtime、不要讀寫 save、不要把 reference/mockup 圖當 runtime asset。
 
 ## 近期完成：火之印記三碎片後的工會、神殿與教會查閱 MVP
 
@@ -170,6 +182,7 @@ UI 完成後要回頭處理的 demo 遊玩體驗、平衡、任務引導與內�
 - 倉庫 MVP：可花費 500G 開啟 LV1 倉庫，存取最多 10 種非 key item 背包物品
 - 怪物圖鑑 MVP：擊敗怪物後 100% 登錄，可從主選單查看已登錄怪物的基礎資訊
 - CLI UI MVP：核心循環已以 Rich `Panel` 薄層整理，涵蓋開始畫面、主選單、角色狀態、城鎮整備、工坊 catalog、旅人小鋪分類商店、星燈魔法商店 catalog、米菈合成屋 catalog、迷宮選擇、迷宮探索、戰鬥指令與結算；戰鬥已完成主畫面 / Battle Log 分流；輸入、資料、存檔與戰鬥規則維持原樣
+- GUI HTML static prototype：`07_gui_prototype/` 目前包含 Town Hub、Guild Screen、World Map、Dungeon Exploration、Combat Screen；只用 fixtures 驗證 GUI layout / interaction，不是正式 runtime UI
 - 轉職 preview-only MVP：轉職神殿顯示 `PROMOTIONS` 預覽方向與條件，正式轉職尚未開放
 - 聖物 preview-only MVP：城鎮「聖物調查」顯示 `RELICS` 預覽，聖物取得與效果尚未開放
 - 職業特化 preview-only MVP：角色狀態頁顯示 `JOB_SPECIALIZATIONS` 預覽，目前尚未生效
@@ -267,6 +280,19 @@ C:\Users\user\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\py
 C:\Users\user\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe .\06_tools\validate_data.py
 ```
 
+HTML static prototype 檢查目前以 fixture / syntax / browser 手測為主，不接 runtime：
+
+```powershell
+C:\Users\user\.cache\codex-runtimes\codex-primary-runtime\dependencies\node\bin\node.exe --check .\07_gui_prototype\combat_screen\combat-screen.js
+```
+
+Combat Screen fixtures 可用 PowerShell JSON parser 檢查；這只驗證 static display data，不代表 gameplay 結算：
+
+```powershell
+Get-ChildItem .\07_gui_prototype\combat_screen\fixtures -Filter *.json |
+  ForEach-Object { Get-Content -Raw -Encoding UTF8 $_.FullName | ConvertFrom-Json | Out-Null }
+```
+
 內容盤點工具：
 
 ```powershell
@@ -285,6 +311,7 @@ python .\06_tools\content_inventory_report.py --json
 - `04_data/data/`：runtime 實際讀取的資料表。
 - `05_assets/`：未來素材資源預留。
 - `06_tools/`：開發、驗證與 read-only 盤點工具；目前包含 `validate_data.py` 與 `content_inventory_report.py`。
+- `07_gui_prototype/`：HTML static prototype；只用 fixture 驗證 GUI layout / interaction / UIAction logging，不是正式 runtime UI。
 
 ## 5. SSOT 分層規則
 
@@ -391,8 +418,9 @@ data validation ok
 - 維持 schema 文件。
 - 修改 data 後固定跑 validation。
 - 重要 gameplay 修改後固定跑 smoke test。
-- CLI UI 目前只做顯示層包裝；開始畫面、工坊 catalog、旅人小鋪分類商店、星燈魔法商店 catalog、米菈合成屋 catalog 與戰鬥主畫面 / Battle Log 分流已落地，後續 UI 仍不要在未批准範圍內擴張成 UI framework、Unity 或 HTML UI。
-- 下一階段 UI 重點是 Screen Map、ScreenModel 與 UIAction；暫停擴大 CLI-only catalog polish，不直接選 pygame / HTML，也不重構 `game.py`。
+- CLI UI 目前只做顯示層包裝；開始畫面、工坊 catalog、旅人小鋪分類商店、星燈魔法商店 catalog、米菈合成屋 catalog 與戰鬥主畫面 / Battle Log 分流已落地。
+- HTML static prototype 目前只允許在 `07_gui_prototype/` 內用 static fixtures 驗證畫面，不接 runtime、不讀寫 save、不啟動正式 asset pipeline。
+- 下一步 UI 重點是 Combat Screen 與 mockup 對齊的版面微調；完成前不移往新的正式 runtime adapter。
 - 下一輪若要繼續評估灰燼裂谷，優先改測法師、劍士、牧師或不同裝備狀態，不直接施工。
 - 暫不繼續提高灰燼裂谷普通怪 HP，暫不修改 combat formula、EXP/gold、升級全回復或新增怪物技能。
 - 灰燼裂谷目前已具備偵查版與灰燼守衛 Boss MVP；後續測試結論需避免用單次隨機遭遇過度外推。

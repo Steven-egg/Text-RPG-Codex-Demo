@@ -54,6 +54,9 @@ Last updated: 2026-05-21
   - fixtures/
     - combat-command-default.json
     - combat-danger-state.json
+    - combat-result-victory.json
+    - combat-result-defeat.json
+    - combat-result-retreat.json
 ```
 
 ## Town Hub Prototype
@@ -210,9 +213,9 @@ Current behavior:
 - The right-side exploration status panel is CLI-aligned: current step meter, three compact status chips, current-run reward summary, and the latest event only.
 - The visible bottom action bar only shows CLI exploration actions: advance and retreat.
 - Default fixture covers ordinary step-based exploration in Ash Valley.
-- High-risk fixture covers a dangerous exploration step without presenting a strong pre-encounter confirmation UI.
+- Fixed Encounter Preview fixture covers a static prototype-only dangerous step without presenting a strong pre-encounter confirmation UI.
 - `advance_step` and `retreat` only write UIAction log and update the prototype feedback message.
-- In the high-risk fixture, `advance_step` with `encounter_hint` writes UIAction log, then navigates to `../combat_screen/index.html`.
+- In the Fixed Encounter Preview fixture, `advance_step` with prototype-only `encounter_hint` writes UIAction log, then navigates to `../combat_screen/index.html`.
 
 Accepted Dungeon Exploration decisions:
 
@@ -222,6 +225,7 @@ Accepted Dungeon Exploration decisions:
 - Keep the current step, HP/MP, current-run rewards, latest event, and narrative text rendered by the prototype layer.
 - Do not show total money, a full inventory list, exploration-time inventory/status actions, or return-to-world-map as Dungeon Exploration commands until the CLI supports those commitments.
 - Do not implement random events, real step advancement, reward calculation, combat trigger logic, or runtime adapters.
+- Treat Fixed Encounter Preview as test fixture data only; the final gameplay expectation remains random encounter logic inside the future runtime flow.
 
 Deferred Dungeon Exploration items:
 
@@ -254,29 +258,41 @@ Current behavior:
 - Loads static fixtures only.
 - Renders a compact title/subtitle header, combat resource strip, enlarged battlefield placeholder, top enemy HUD, lower-left player HUD, right-side Battle Log panel, bottom command bar, fixture selector, and UIAction log.
 - Default command fixture covers a normal player decision state.
-- Danger fixture covers low HP/MP, a disabled `use_skill` command, and a longer Battle Log.
-- `basic_attack`, `open_skill_menu`, `open_item_menu`, `use_skill`, `defend`, and `retreat` only write UIAction log and update prototype feedback.
-- The bottom command bar is a single battle-action row: attack, skill or Fire Mark Slash fixture, item, defend, and flee.
+- Danger fixture covers low HP/MP, disabled skill submenu items, and a longer Battle Log.
+- Victory / Defeat / Retreat Result Preview fixtures cover static prototype-only terminal combat states.
+- `basic_attack`, `open_skill_menu`, `open_item_menu`, `use_skill`, `use_item`, `defend`, and `retreat` only write UIAction log and update prototype feedback.
+- Result Preview fixture actions may include `opens_result: true`; those actions write UIAction log, then open the in-screen Combat Result overlay.
+- The bottom command bar is a single battle-action row: attack, skill, item, defend, and flee.
+- Skill and item commands open an in-screen floating popover submenu; submenu selection records static `use_skill` / `use_item` UIAction only.
+- The skill/item popover has no internal return button; pressing the active Skill or Item command a second time closes the popover.
+- The submenu does not occupy layout flow: wide layout anchors it above the command row, while stacked/narrow layout keeps it near the command controls without covering Battle Log or pushing the command bar.
+- Combat Result is integrated as a central terminal overlay inside Combat Screen, not a separate prototype page.
+- When the Result overlay is open, the command bar remains visible but disabled; the overlay has no close/back-to-combat action.
+- Result overlay next actions write UIAction log before navigating: victory/retreat return to Dungeon Exploration, defeat returns to Town Hub.
+- Result overlay no longer repeats the next-step navigation as a result row; the bottom overlay button is the sole next-step control.
+- Result overlay result rows stay limited to direct battle/result data; defeat and retreat previews do not include extra static-only status/carryover explanation rows.
 - The command bar no longer includes `view_battle_log` or `back_to_exploration`.
 - The Combat Screen no longer shows gold in the top combat resource strip.
 - The Combat Screen no longer shows the separate round card, previous-action summary card, enemy detail panel, or player detail panel.
+- The Combat Screen fixtures no longer depend on unused `round`, player item/effect summary, enemy weakness/intent/threat, or standalone last-action fields.
 - The Battle Log has a side-panel expand/collapse control and is not a bottom command.
 
 Accepted Combat Screen decisions:
 
 - Treat the supplied combat mockup as visual/layout reference only, not a runtime asset.
 - Keep the battlefield as the main visual stage.
-- Keep enemy name, enemy HP, round count, player HP/MP, command labels, and Battle Log text rendered by the prototype layer.
+- Keep enemy name, enemy HP, round count, player HP/MP, command labels, submenu labels, and Battle Log text rendered by the prototype layer.
 - Battle Log remains readable in a side panel and does not cover the command controls.
 - Per review, Battle Log stays as a side display panel but is not a bottom command.
-- Do not implement damage calculation, enemy turn advancement, skill menus, item menus, flee checks, animations, effects, runtime adapters, or combat formulas.
+- Do not implement damage calculation, enemy turn advancement, flee checks, animations, effects, runtime adapters, or combat formulas.
+- Treat skill and item submenus as static fixture display only; selecting an entry does not consume MP/items, change HP, or advance turns.
+- Treat Combat Result overlay data as fixture display only; it does not calculate, award, consume, save, or resolve combat.
 
 Deferred Combat Screen items:
 
-- Static navigation from combat command/result state to Combat Result Screen after Combat Result Screen exists.
 - Runtime adapter for combat state.
 - Real combat background/enemy art or formal asset pipeline.
-- Skill submenu, item submenu, target selection, and final keyboard focus graph.
+- Target selection and final keyboard focus graph.
 
 ## Verification Notes
 
@@ -307,31 +323,43 @@ Validated during this session:
 - Dungeon Exploration JS and World Map JS pass syntax check with the bundled Node.js runtime.
 - Dungeon Exploration default fixture renders 2 visible action buttons, Ash Valley location data, step meter, compact current-run rewards, latest event preview, and UIAction log.
 - Dungeon Exploration default fixture dispatches `advance_step` and updates the narrative feedback message without changing fixture state.
-- Dungeon Exploration high-risk fixture renders 2 visible action buttons: `advance_step` and `retreat`.
-- Dungeon Exploration high-risk fixture `advance_step` logs before navigating to Combat Screen static prototype.
+- Dungeon Exploration Fixed Encounter Preview fixture renders 2 visible action buttons: `advance_step` and `retreat`.
+- Dungeon Exploration Fixed Encounter Preview fixture `advance_step` logs before navigating to Combat Screen static prototype.
 - World Map `confirm_travel` logs before navigating to Dungeon Exploration static prototype.
 - Browser console error log was 0 during Dungeon Exploration static checks.
 - Dungeon Exploration browser DOM check confirmed left dungeon overlay, right exploration status panel, bottom action row, and 591px desktop stage height.
 - Dungeon Exploration browser DOM check confirmed the red-marked bottom actions are no longer visible, the action row width is constrained to the left command area, and the green-marked right panel is summarized.
 - Dungeon Exploration browser DOM check confirmed the CLI-aligned surface: HP/MP only in the resource strip, no `1957G`, no item summary panel, no inventory/status/world-map commands, no strong encounter prompt wording, current-run rewards, latest event, and advance/retreat only.
-- Dungeon Exploration high-risk fixture browser check confirmed `advance_step` still navigates to `../combat_screen/index.html`.
+- Dungeon Exploration Fixed Encounter Preview fixture browser check confirmed `advance_step` still navigates to `../combat_screen/index.html`.
+- Dungeon Exploration visual tune-up confirmed the fixture selector labels the combat-transition fixture as `Fixed Encounter Preview`.
 - Dungeon Exploration screenshot capture in the in-app browser timed out after layout and interaction checks; DOM and console checks were still completed.
 - Combat Screen fixtures parse as UTF-8 JSON.
 - Combat Screen JS and Dungeon Exploration JS pass syntax check with the bundled Node.js runtime.
 - Combat Screen default fixture renders 5 command buttons, top enemy HUD, lower-left player HUD, right-side Battle Log, and UIAction log.
 - Combat Screen default fixture dispatches `basic_attack` and updates command feedback without changing fixture state.
-- Combat Screen danger fixture renders disabled `use_skill` with disabled reason.
-- Combat Screen blocked `use_skill` logs a blocked UIAction with reason.
+- Combat Screen default fixture opens a floating skill submenu from `open_skill_menu` and logs `use_skill` when a skill row is selected.
+- Combat Screen default fixture opens a floating item submenu from `open_item_menu` and logs `use_item` when an item row is selected.
+- Combat Screen skill/item popovers no longer show an internal `返回` button; clicking the active command button again closes the popover.
+- Combat Screen danger fixture renders disabled skill submenu rows with disabled reasons.
+- Combat Screen blocked submenu `use_skill` logs a blocked UIAction with reason.
 - Combat Screen command bar does not include `view_battle_log` or `back_to_exploration`.
 - Browser console error log was 0 during Combat Screen static checks.
 - Combat Screen browser check confirmed no `1957G` in the combat resource strip and no Battle Log or return-to-exploration command in the bottom command bar.
+- Combat Screen browser check confirmed the main command bar remains 5 commands and no longer shows the old Fire Mark Slash command as a main command.
+- Combat Screen browser layout check confirmed the floating submenu does not overlap the command row or Battle Log on desktop or narrow viewport, and opening/closing it does not increase page height.
+- Combat Screen Victory / Defeat / Retreat Result Preview fixtures render 5 command buttons before terminal action selection.
+- Combat Screen result preview actions open central Combat Result overlay, disable the command bar, preserve page height, and keep console error/warning count at 0.
+- Combat Screen result next actions navigate to the expected static prototype targets: victory/retreat to Dungeon Exploration, defeat to Town Hub.
+- Combat Screen Victory / Defeat / Retreat Result Preview fixtures no longer show a duplicated `下一步` row inside `本場結果`; navigation remains on the bottom result action button.
+- Combat Screen Defeat / Retreat Result Preview fixtures no longer show extra `角色狀態` or `本趟素材` rows inside `本場結果`.
+- Manual review after the latest Combat Screen result and popover polish was reported OK; remaining Combat Screen work is mockup-alignment layout tuning only.
 
 ## Recommended Next Step
 
 Recommended next session entry:
 
 ```text
-Review the CLI-aligned Dungeon Exploration static prototype, then decide whether another visual pass is needed before moving to the next approved screen.
+Continue Combat Screen mockup-alignment layout tuning inside the existing static prototype.
 ```
 
 Scope suggestion:
@@ -341,11 +369,11 @@ Scope suggestion:
 - Do not use mockup/reference images as runtime assets.
 - Keep UIAction logging before navigation.
 - Preserve Dungeon Exploration and Combat Screen as static fixture display only until a runtime adapter is explicitly approved.
+- Treat the next Combat pass as visual/layout alignment only; do not add gameplay logic, new combat formulas, runtime adapters, or save reads/writes.
 
 Alternative next steps:
 
-- Review and refine the Dungeon Exploration static prototype layout before adding a runtime adapter.
-- Build the Combat Result Screen static prototype only after explicit approval to move on from Combat Screen.
+- After Combat Screen mockup alignment is accepted, review and refine the Dungeon Exploration static prototype layout before adding a runtime adapter.
 - Build the next facility static prototype, likely Shop or Synthesis.
 - Add a proper keyboard focus graph for Town Hub and Guild.
 - Add a shared prototype shell / fixture loader after Combat Screen exists.

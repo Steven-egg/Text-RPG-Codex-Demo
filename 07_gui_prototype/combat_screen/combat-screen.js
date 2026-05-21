@@ -12,8 +12,22 @@ const playerFocusStatsEl = document.querySelector("#player-focus-stats");
 const battleLogEl = document.querySelector("#battle-log");
 const logModeLabelEl = document.querySelector("#log-mode-label");
 const toggleBattleLogEl = document.querySelector("#toggle-battle-log");
+const combatFooterEl = document.querySelector(".combat-footer");
 const commandMessageEl = document.querySelector("#command-message");
 const commandRowEl = document.querySelector("#command-row");
+const submenuPanelEl = document.querySelector("#command-submenu");
+const submenuLabelEl = document.querySelector("#submenu-label");
+const submenuTitleEl = document.querySelector("#submenu-title");
+const submenuSummaryEl = document.querySelector("#submenu-summary");
+const submenuListEl = document.querySelector("#submenu-list");
+const resultOverlayEl = document.querySelector("#result-overlay");
+const resultLabelEl = document.querySelector("#result-label");
+const resultTitleEl = document.querySelector("#result-title");
+const resultStatusEl = document.querySelector("#result-status");
+const resultSummaryEl = document.querySelector("#result-summary");
+const resultRewardTitleEl = document.querySelector("#result-reward-title");
+const resultLinesEl = document.querySelector("#result-lines");
+const resultNextActionEl = document.querySelector("#result-next-action");
 const actionLogEl = document.querySelector("#action-log");
 const clearLogEl = document.querySelector("#clear-log");
 
@@ -21,6 +35,9 @@ const state = {
   model: null,
   actionLog: [],
   logExpanded: false,
+  activeSubmenu: null,
+  submenuAnchorActionId: null,
+  resultOpen: false,
 };
 
 fixtureSelect.addEventListener("change", () => {
@@ -37,6 +54,16 @@ toggleBattleLogEl.addEventListener("click", () => {
   renderBattleLog();
 });
 
+resultNextActionEl.addEventListener("click", () => {
+  activateResultNextAction();
+});
+
+window.addEventListener("resize", () => {
+  if (state.activeSubmenu) {
+    positionSubmenu();
+  }
+});
+
 loadFixture(fixtureSelect.value);
 
 async function loadFixture(path) {
@@ -51,6 +78,9 @@ async function loadFixture(path) {
     state.model = model;
     state.actionLog = [];
     state.logExpanded = false;
+    state.activeSubmenu = null;
+    state.submenuAnchorActionId = null;
+    state.resultOpen = false;
     render();
     logSystem(`loaded ${path}`);
     shellEl.dataset.loadState = "ready";
@@ -69,6 +99,8 @@ function render() {
   renderBattleLog();
   commandMessageEl.textContent = model.command_message ?? "";
   renderCommands(model.actions ?? []);
+  renderSubmenu();
+  renderResultOverlay();
   renderActionLog();
 }
 
@@ -119,8 +151,7 @@ function renderBattlefield(model) {
 function renderEnemyMeta(enemy) {
   const rows = [
     ["屬性", enemy.attribute],
-    ["弱點", enemy.weakness],
-    ["威脅", enemy.threat_label],
+    ["狀態", enemy.status_label],
   ].filter(([, value]) => Boolean(value));
 
   enemyMetaEl.replaceChildren(
@@ -163,7 +194,10 @@ function renderCommands(actions) {
       button.dataset.payload = JSON.stringify(action.payload ?? {});
       button.dataset.disabledReason = action.disabled_reason ?? "";
       button.dataset.primary = String(Boolean(action.primary));
+      button.dataset.active = "false";
+      button.dataset.enabled = String(Boolean(action.enabled));
       button.setAttribute("aria-disabled", String(!action.enabled));
+      button.disabled = state.resultOpen;
       button.title = action.enabled ? action.description ?? "" : action.disabled_reason ?? "";
 
       const label = document.createElement("strong");
@@ -173,10 +207,11 @@ function renderCommands(actions) {
       description.textContent = action.description ?? "";
 
       button.append(label, description);
-      button.addEventListener("click", () => activateAction(action, "command_bar"));
+      button.addEventListener("click", () => activateAction(action, "command_bar", button));
       return button;
     }),
   );
+  updateCommandActiveState();
 }
 
 function renderActionLog() {
@@ -199,7 +234,19 @@ function renderActionLog() {
   );
 }
 
-function activateAction(action, source) {
+function activateAction(action, source, triggerEl = null) {
+  if (state.resultOpen) {
+    pushActionLog({
+      action_id: action.action_id,
+      payload: action.payload ?? {},
+      source,
+      dispatched: false,
+      reason: "combat already resolved",
+    });
+    commandMessageEl.textContent = "戰鬥已結束，請確認結算。";
+    return;
+  }
+
   if (!action.enabled) {
     pushActionLog({
       action_id: action.action_id,
@@ -212,6 +259,16 @@ function activateAction(action, source) {
     return;
   }
 
+  if (action.action_id === "open_skill_menu" && state.activeSubmenu === "skill") {
+    closeSubmenu("已收回技能選單。");
+    return;
+  }
+
+  if (action.action_id === "open_item_menu" && state.activeSubmenu === "item") {
+    closeSubmenu("已收回道具選單。");
+    return;
+  }
+
   pushActionLog({
     action_id: action.action_id,
     payload: action.payload ?? {},
@@ -219,8 +276,276 @@ function activateAction(action, source) {
     dispatched: true,
   });
 
+  if (action.action_id === "open_skill_menu") {
+    commandMessageEl.textContent = action.feedback_message ?? "已開啟技能選單。再次按技能可收回。";
+    openSubmenu("skill", triggerEl);
+    return;
+  }
+
+  if (action.action_id === "open_item_menu") {
+    commandMessageEl.textContent = action.feedback_message ?? "已開啟道具選單。再次按道具可收回。";
+    openSubmenu("item", triggerEl);
+    return;
+  }
+
+  state.activeSubmenu = null;
+  state.submenuAnchorActionId = null;
+  renderSubmenu();
   commandMessageEl.textContent =
     action.feedback_message ?? `已送出 ${action.action_id}。static prototype 不會計算戰鬥結果。`;
+
+  if (action.opens_result) {
+    openResultOverlay(action);
+  }
+}
+
+function openSubmenu(type, triggerEl = null) {
+  state.activeSubmenu = type;
+  state.submenuAnchorActionId =
+    triggerEl?.dataset.actionId ?? (type === "skill" ? "open_skill_menu" : "open_item_menu");
+  renderSubmenu();
+}
+
+function closeSubmenu(message) {
+  state.activeSubmenu = null;
+  state.submenuAnchorActionId = null;
+  renderSubmenu();
+  if (message) {
+    commandMessageEl.textContent = message;
+  }
+}
+
+function renderSubmenu() {
+  const menu = getActiveMenu();
+  if (!menu) {
+    submenuPanelEl.hidden = true;
+    submenuPanelEl.dataset.menuType = "none";
+    submenuLabelEl.textContent = "";
+    submenuTitleEl.textContent = "";
+    submenuSummaryEl.textContent = "";
+    submenuListEl.replaceChildren();
+    submenuPanelEl.dataset.placement = "none";
+    submenuPanelEl.style.removeProperty("--submenu-left");
+    submenuPanelEl.style.removeProperty("--submenu-width");
+    submenuPanelEl.style.removeProperty("--submenu-anchor-x");
+    submenuPanelEl.style.removeProperty("--submenu-under-top");
+    submenuPanelEl.style.removeProperty("--submenu-under-max-height");
+    updateCommandActiveState();
+    return;
+  }
+
+  submenuPanelEl.hidden = false;
+  submenuPanelEl.dataset.menuType = state.activeSubmenu;
+  submenuLabelEl.textContent = menu.label ?? "";
+  submenuTitleEl.textContent = menu.title ?? "";
+  submenuSummaryEl.textContent = menu.summary ?? "";
+
+  const items = menu.items ?? [];
+  if (items.length === 0) {
+    submenuListEl.replaceChildren(createEmptyState(menu.empty_message ?? "沒有可用項目。"));
+    positionSubmenu();
+    updateCommandActiveState();
+    return;
+  }
+
+  submenuListEl.replaceChildren(
+    ...items.map((item) => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "submenu-option";
+      button.dataset.actionId = item.action_id ?? "unavailable";
+      button.dataset.payload = JSON.stringify(item.payload ?? {});
+      button.dataset.disabledReason = item.disabled_reason ?? "";
+      button.setAttribute("aria-disabled", String(!item.enabled));
+      button.title = item.enabled ? item.description ?? "" : item.disabled_reason ?? "";
+
+      const title = document.createElement("strong");
+      title.textContent = item.label ?? item.action_id;
+
+      const meta = document.createElement("span");
+      meta.textContent = item.meta ?? "";
+
+      const description = document.createElement("small");
+      description.textContent = item.enabled ? item.description ?? "" : item.disabled_reason ?? item.description ?? "";
+
+      button.append(title, meta, description);
+      button.addEventListener("click", () => activateSubmenuItem(item));
+      return button;
+    }),
+  );
+  positionSubmenu();
+  updateCommandActiveState();
+}
+
+function renderResultOverlay() {
+  const result = state.model?.result_overlay ?? null;
+  shellEl.dataset.resultOpen = String(state.resultOpen && Boolean(result));
+
+  if (!state.resultOpen || !result) {
+    resultOverlayEl.hidden = true;
+    resultOverlayEl.dataset.outcome = "none";
+    resultLabelEl.textContent = "";
+    resultTitleEl.textContent = "";
+    resultStatusEl.textContent = "";
+    resultSummaryEl.textContent = "";
+    resultRewardTitleEl.textContent = "";
+    resultLinesEl.replaceChildren();
+    resultNextActionEl.textContent = "";
+    resultNextActionEl.disabled = true;
+    updateCommandActiveState();
+    return;
+  }
+
+  resultOverlayEl.hidden = false;
+  resultOverlayEl.dataset.outcome = result.outcome ?? "neutral";
+  resultLabelEl.textContent = result.label ?? "戰鬥結算";
+  resultTitleEl.textContent = result.title ?? "";
+  resultStatusEl.textContent = result.status_summary ?? "";
+  resultSummaryEl.textContent = result.battle_summary ?? "";
+  resultRewardTitleEl.textContent = result.reward_title ?? "結果";
+  resultLinesEl.replaceChildren(...(result.rows ?? []).map(createResultLine));
+
+  const nextAction = result.next_action ?? {};
+  resultNextActionEl.textContent = nextAction.label ?? "下一步";
+  resultNextActionEl.title = nextAction.description ?? "";
+  resultNextActionEl.disabled = !nextAction.action_id;
+  updateCommandActiveState();
+}
+
+function openResultOverlay(action) {
+  if (!state.model?.result_overlay) {
+    commandMessageEl.textContent = "這個 static fixture 尚未提供 result_overlay。";
+    return;
+  }
+
+  state.resultOpen = true;
+  state.activeSubmenu = null;
+  state.submenuAnchorActionId = null;
+  renderSubmenu();
+  renderResultOverlay();
+  commandMessageEl.textContent =
+    action.result_message ?? action.feedback_message ?? "戰鬥已結束，請確認結算。";
+}
+
+function activateResultNextAction() {
+  const nextAction = state.model?.result_overlay?.next_action ?? null;
+  if (!state.resultOpen || !nextAction?.action_id) {
+    return;
+  }
+
+  pushActionLog({
+    action_id: nextAction.action_id,
+    payload: nextAction.payload ?? {},
+    source: "result_overlay",
+    dispatched: true,
+  });
+  commandMessageEl.textContent = nextAction.feedback_message ?? `已送出 ${nextAction.action_id}。`;
+
+  if (nextAction.navigate_to) {
+    window.setTimeout(() => {
+      window.location.href = nextAction.navigate_to;
+    }, 140);
+  }
+}
+
+function createResultLine(row) {
+  const item = document.createElement("div");
+  item.className = "result-line";
+  item.dataset.tone = row.tone ?? "neutral";
+
+  const label = document.createElement("strong");
+  label.textContent = row.label ?? "";
+
+  const value = document.createElement("span");
+  value.textContent = row.value ?? "";
+
+  item.append(label, value);
+  if (row.detail) {
+    const detail = document.createElement("small");
+    detail.textContent = row.detail;
+    item.append(detail);
+  }
+  return item;
+}
+
+function positionSubmenu() {
+  const anchorId =
+    state.submenuAnchorActionId ?? (state.activeSubmenu === "skill" ? "open_skill_menu" : "open_item_menu");
+  const anchorEl = commandRowEl.querySelector(`[data-action-id="${anchorId}"]`);
+  if (!anchorEl || !combatFooterEl) {
+    return;
+  }
+
+  const footerRect = combatFooterEl.getBoundingClientRect();
+  const anchorRect = anchorEl.getBoundingClientRect();
+  const commandRowRect = commandRowEl.getBoundingClientRect();
+  const inset = 10;
+  const preferredWidth = 560;
+  const minWidth = 300;
+  const availableWidth = Math.max(minWidth, footerRect.width - inset * 2);
+  const width = Math.min(preferredWidth, availableWidth);
+  const anchorCenter = anchorRect.left - footerRect.left + anchorRect.width / 2;
+  const left = Math.max(inset, Math.min(anchorCenter - width / 2, footerRect.width - width - inset));
+  const anchorX = Math.max(18, Math.min(anchorCenter - left, width - 18));
+
+  const useStackedPlacement = window.innerWidth <= 1180;
+  submenuPanelEl.dataset.placement = useStackedPlacement ? "under-command" : "above-command";
+  submenuPanelEl.style.setProperty("--submenu-left", `${left}px`);
+  submenuPanelEl.style.setProperty("--submenu-width", `${width}px`);
+  submenuPanelEl.style.setProperty("--submenu-anchor-x", `${anchorX}px`);
+  submenuPanelEl.style.setProperty("--submenu-under-top", `${commandRowRect.bottom - footerRect.top + 10}px`);
+  submenuPanelEl.style.setProperty(
+    "--submenu-under-max-height",
+    `${Math.max(140, Math.min(220, window.innerHeight - commandRowRect.bottom - 22))}px`,
+  );
+}
+
+function updateCommandActiveState() {
+  commandRowEl.querySelectorAll(".command-button").forEach((button) => {
+    const actionId = button.dataset.actionId;
+    const isBaseDisabled = button.dataset.enabled !== "true";
+    const isActive =
+      (state.activeSubmenu === "skill" && actionId === "open_skill_menu") ||
+      (state.activeSubmenu === "item" && actionId === "open_item_menu");
+    button.dataset.active = String(isActive);
+    button.disabled = state.resultOpen;
+    button.setAttribute("aria-disabled", String(state.resultOpen || isBaseDisabled));
+  });
+}
+
+function getActiveMenu() {
+  if (state.activeSubmenu === "skill") {
+    return state.model?.skill_menu ?? null;
+  }
+
+  if (state.activeSubmenu === "item") {
+    return state.model?.item_menu ?? null;
+  }
+
+  return null;
+}
+
+function activateSubmenuItem(item) {
+  if (!item.enabled) {
+    pushActionLog({
+      action_id: item.action_id,
+      payload: item.payload ?? {},
+      source: `${state.activeSubmenu}_submenu`,
+      dispatched: false,
+      reason: item.disabled_reason ?? "disabled",
+    });
+    commandMessageEl.textContent = item.disabled_reason || "目前無法使用這個項目。";
+    return;
+  }
+
+  pushActionLog({
+    action_id: item.action_id,
+    payload: item.payload ?? {},
+    source: `${state.activeSubmenu}_submenu`,
+    dispatched: true,
+  });
+  commandMessageEl.textContent =
+    item.feedback_message ?? `已送出 ${item.action_id}。static prototype 不會計算戰鬥結果。`;
 }
 
 function pushActionLog(entry) {
@@ -255,6 +580,7 @@ function createEmptyState(message) {
 }
 
 function renderLoadError(error) {
+  state.resultOpen = false;
   titleEl.textContent = "Fixture 載入失敗";
   subtitleEl.textContent = "無法讀取 Combat Screen static fixture。";
   resourceStripEl.replaceChildren();
@@ -266,4 +592,6 @@ function renderLoadError(error) {
   battleLogEl.replaceChildren();
   commandMessageEl.textContent = "";
   commandRowEl.replaceChildren(createEmptyState("沒有可用指令。"));
+  closeSubmenu();
+  renderResultOverlay();
 }

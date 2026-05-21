@@ -19,6 +19,9 @@
           <select id="fixture-select">
             <option value="./fixtures/combat-command-default.json">Command Default</option>
             <option value="./fixtures/combat-danger-state.json">Danger / Disabled Skill</option>
+            <option value="./fixtures/combat-result-victory.json">Victory Result Preview</option>
+            <option value="./fixtures/combat-result-defeat.json">Defeat Result Preview</option>
+            <option value="./fixtures/combat-result-retreat.json">Retreat Result Preview</option>
           </select>
         </div>
       </header>
@@ -64,12 +67,36 @@
       </main>
 
       <footer class="combat-footer">
+        <section id="command-submenu" class="command-submenu" data-menu-type="none" aria-live="polite" hidden>
+          <div class="submenu-heading">
+            <div class="submenu-copy">
+              <p id="submenu-label" class="panel-label">選單</p>
+              <h2 id="submenu-title"></h2>
+              <p id="submenu-summary"></p>
+            </div>
+          </div>
+          <div id="submenu-list" class="submenu-list"></div>
+        </section>
         <section class="command-message" aria-live="polite">
           <p class="panel-label">戰鬥提示</p>
           <p id="command-message"></p>
         </section>
         <div id="command-row" class="command-row" aria-label="Combat commands"></div>
       </footer>
+
+      <section id="result-overlay" class="result-overlay" data-outcome="none" aria-live="polite" hidden>
+        <div class="result-panel">
+          <p id="result-label" class="panel-label"></p>
+          <h2 id="result-title"></h2>
+          <p id="result-status" class="result-status"></p>
+          <p id="result-summary" class="result-summary"></p>
+          <section class="result-reward-block">
+            <p id="result-reward-title" class="panel-label"></p>
+            <div id="result-lines" class="result-lines"></div>
+          </section>
+          <button id="result-next-action" class="result-next-action" type="button"></button>
+        </div>
+      </section>
 
       <section class="action-log-panel">
         <div class="action-log-heading">
