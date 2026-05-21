@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Combat Screen Static Prototype</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="combat-shell" data-load-state="loading" data-log-expanded="false">
+      <header class="combat-header">
+        <div class="title-copy">
+          <p class="screen-label">戰鬥畫面</p>
+          <h1 id="screen-title">Loading</h1>
+          <p id="screen-subtitle" class="subtitle"></p>
+        </div>
+        <div class="fixture-switcher" aria-label="Prototype fixture">
+          <label for="fixture-select">測試狀態</label>
+          <select id="fixture-select">
+            <option value="./fixtures/combat-command-default.json">Command Default</option>
+            <option value="./fixtures/combat-danger-state.json">Danger / Disabled Skill</option>
+          </select>
+        </div>
+      </header>
+
+      <section id="resource-strip" class="resource-strip" aria-label="Combat resources"></section>
+
+      <main class="combat-layout">
+        <section class="battlefield-stage" aria-label="Battlefield">
+          <div class="battlefield-art" aria-hidden="true">
+            <div class="field-layer field-back"></div>
+            <div class="field-layer field-cracks"></div>
+            <div class="field-layer field-flare"></div>
+            <div class="enemy-silhouette"></div>
+          </div>
+
+        <section class="enemy-focus-card" aria-label="Enemy focus">
+          <p class="panel-label">敵方</p>
+          <h2 id="enemy-name"></h2>
+          <div class="hp-meter" aria-hidden="true">
+            <span id="enemy-hp-fill"></span>
+          </div>
+          <p id="enemy-hp-label"></p>
+          <div id="enemy-meta" class="enemy-meta"></div>
+        </section>
+
+          <section class="player-focus-card" aria-label="Player focus">
+            <p class="panel-label">我方</p>
+            <h2 id="player-name"></h2>
+            <div id="player-focus-stats" class="focus-stat-grid"></div>
+          </section>
+        </section>
+
+        <aside class="combat-side-panel" aria-label="Combat details">
+          <section class="panel-card battle-log-card">
+            <div class="battle-log-heading">
+              <p class="panel-label">戰鬥記錄</p>
+              <span id="log-mode-label"></span>
+              <button id="toggle-battle-log" class="quiet-button log-toggle" type="button">展開</button>
+            </div>
+            <ol id="battle-log" class="battle-log"></ol>
+          </section>
+        </aside>
+      </main>
+
+      <footer class="combat-footer">
+        <section class="command-message" aria-live="polite">
+          <p class="panel-label">戰鬥提示</p>
+          <p id="command-message"></p>
+        </section>
+        <div id="command-row" class="command-row" aria-label="Combat commands"></div>
+      </footer>
+
+      <section class="action-log-panel">
+        <div class="action-log-heading">
+          <p class="panel-label">UIAction Log</p>
+          <button id="clear-log" class="quiet-button" type="button" aria-label="Clear log">清除</button>
+        </div>
+        <ol id="action-log" class="action-log"></ol>
+      </section>
+    </div>
+
+    <script type="module" src="./combat-screen.js"></script>
+  </body>
+</html>

@@ -1,0 +1,101 @@
+{
+  "screen_id": "combat_screen",
+  "title": "戰鬥",
+  "subtitle": "Danger fixture：測試低 HP、MP 不足、blocked command 與 Battle Log 展開。",
+  "resource_strip": [
+    { "label": "見習冒險者 / 劍士 Lv7", "tone": "primary" },
+    { "label": "HP 34/192", "tone": "danger" },
+    { "label": "MP 2/38", "tone": "danger" },
+    { "label": "第 6 回合", "tone": "danger" }
+  ],
+  "round": {
+    "label": "第 6 回合",
+    "turn_label": "玩家行動 / 危險"
+  },
+  "player": {
+    "name": "見習冒險者",
+    "class_label": "劍士",
+    "level_label": "Lv7",
+    "hp_label": "34 / 192",
+    "mp_label": "2 / 38",
+    "status_label": "危險",
+    "stance_label": "可行動",
+    "effect_summary": "灼傷：每回合受少量傷害",
+    "item_summary": "治療藥水 x1 / 魔力藥草 x0"
+  },
+  "enemy": {
+    "enemy_id": "mon_ember_stalker",
+    "name": "燼火潛獵者",
+    "hp_label": "HP 91 / 148",
+    "hp_percent": 61,
+    "attribute": "火 / 獸",
+    "weakness": "冰 / 突刺",
+    "status_label": "警戒",
+    "intent": "蓄勢追擊",
+    "threat_label": "高"
+  },
+  "last_action_summary": "燼火潛獵者從側面撲來，你勉強避開致命一擊，但灼傷讓呼吸變得急促。",
+  "command_message": "HP 偏低，MP 幾乎耗盡。這裡只呈現危險狀態，不做公式或狀態 tick。",
+  "battle_log": [
+    "第 1 回合：燼火潛獵者從熱霧裡現身。",
+    "第 1 回合：你以普通攻擊試探距離。",
+    "第 2 回合：敵人繞到側翼，造成擦傷。",
+    "第 3 回合：你使用技能壓制敵人動作。",
+    "第 4 回合：灼傷狀態開始影響你的體力。",
+    "第 5 回合：你使用小型治療藥水回復部分 HP。",
+    "第 6 回合：敵人伏低身形，準備追擊。",
+    "第 6 回合：目前等待玩家行動。"
+  ],
+  "actions": [
+    {
+      "action_id": "basic_attack",
+      "label": "攻擊",
+      "description": "進行普通攻擊",
+      "enabled": true,
+      "disabled_reason": null,
+      "primary": true,
+      "payload": { "enemy_id": "mon_ember_stalker" },
+      "feedback_message": "已送出 basic_attack。static prototype 不會改變敵人 HP。"
+    },
+    {
+      "action_id": "use_skill",
+      "label": "火印斬",
+      "description": "MP 不足",
+      "enabled": false,
+      "disabled_reason": "MP 不足，無法使用火印斬",
+      "primary": false,
+      "payload": { "skill_id": "skill_fire_mark_slash" },
+      "feedback_message": ""
+    },
+    {
+      "action_id": "open_item_menu",
+      "label": "道具",
+      "description": "使用戰鬥道具",
+      "enabled": true,
+      "disabled_reason": null,
+      "primary": false,
+      "payload": { "source": "combat_screen" },
+      "feedback_message": "已送出 open_item_menu。此 prototype 不開啟道具選單。"
+    },
+    {
+      "action_id": "defend",
+      "label": "防禦",
+      "description": "降低下次傷害",
+      "enabled": true,
+      "disabled_reason": null,
+      "primary": false,
+      "payload": {},
+      "feedback_message": "已送出 defend。static prototype 不會進入敵方回合。"
+    },
+    {
+      "action_id": "retreat",
+      "label": "逃跑",
+      "description": "嘗試脫離戰鬥",
+      "enabled": true,
+      "disabled_reason": null,
+      "primary": false,
+      "payload": { "enemy_id": "mon_ember_stalker" },
+      "feedback_message": "已送出 retreat。static prototype 不會結算逃跑。"
+    }
+  ]
+}

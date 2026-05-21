@@ -1,0 +1,60 @@
+{
+  "screen_id": "dungeon_exploration",
+  "title": "迷宮探索",
+  "subtitle": "Static fixture driven prototype：對齊 CLI 的步數制探索，不推進 runtime、不讀寫 save。",
+  "resource_strip": [
+    { "label": "HP 183/192", "tone": "hp" },
+    { "label": "MP 38/38", "tone": "mp" }
+  ],
+  "dungeon": {
+    "dungeon_id": "ash_valley",
+    "name": "灰燼裂谷",
+    "summary": "裂谷底部流動著暗紅熔脈，焦土與鐵鏽味讓每一次前進都需要重新確認補給。",
+    "recommended_level": "Lv7-9",
+    "player_level": "Lv7",
+    "attribute": "火 / 地形",
+    "route_length": "24 步",
+    "clear_state": "未通關",
+    "boss_state": "未確認"
+  },
+  "run_status": {
+    "current_step": 7,
+    "total_steps": 24,
+    "step_note": "目前位於裂谷中段，前方有熔岩冷卻後形成的黑石台階。",
+    "status_label": "探索中",
+    "risk_label": "中高風險",
+    "supply_label": "可再推進數步",
+    "next_node": "焦黑石階"
+  },
+  "run_rewards": [
+    { "label": "金幣", "value": "86G" },
+    { "label": "素材", "value": "焦黑鐵礦 x2" },
+    { "label": "素材", "value": "熔岩碎片 x1" }
+  ],
+  "event_preview": [
+    "第 7 步：你看見前方有一段可以繞過熱風的狹窄石階。"
+  ],
+  "narrative_message": "熱風從裂谷深處往上捲起，灰燼像雪一樣落在肩上。你還能穩定前進，但最好留意 HP 與回復道具。",
+  "actions": [
+    {
+      "action_id": "advance_step",
+      "label": "前進一步",
+      "description": "進入下一步",
+      "enabled": true,
+      "disabled_reason": null,
+      "primary": true,
+      "payload": { "dungeon_id": "ash_valley", "current_step": 7 },
+      "feedback_message": "已送出 advance_step。static prototype 不會改變目前步數。"
+    },
+    {
+      "action_id": "retreat",
+      "label": "撤退",
+      "description": "結束探索",
+      "enabled": true,
+      "disabled_reason": null,
+      "primary": false,
+      "payload": { "dungeon_id": "ash_valley" },
+      "feedback_message": "已送出 retreat。static prototype 不會計算撤退結果。"
+    }
+  ]
+}

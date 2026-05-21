@@ -1,0 +1,60 @@
+{
+  "screen_id": "dungeon_exploration",
+  "title": "迷宮探索",
+  "subtitle": "High risk fixture：測試低 HP/MP 與高風險步驟，仍只保留 CLI 探索主動作。",
+  "resource_strip": [
+    { "label": "HP 71/192", "tone": "warning" },
+    { "label": "MP 12/38", "tone": "mp" }
+  ],
+  "dungeon": {
+    "dungeon_id": "ash_valley",
+    "name": "灰燼裂谷",
+    "summary": "裂谷深處的火光忽明忽暗，碎石間出現了不屬於你的腳印。",
+    "recommended_level": "Lv7-9",
+    "player_level": "Lv7",
+    "attribute": "火 / 地形",
+    "route_length": "24 步",
+    "clear_state": "未通關",
+    "boss_state": "未確認"
+  },
+  "run_status": {
+    "current_step": 13,
+    "total_steps": 24,
+    "step_note": "熱霧變厚，前方岩面傳來細碎摩擦聲。",
+    "status_label": "探索中",
+    "risk_label": "高風險",
+    "supply_label": "建議謹慎",
+    "next_node": "熱霧岔路"
+  },
+  "run_rewards": [
+    { "label": "金幣", "value": "142G" },
+    { "label": "素材", "value": "焦黑鐵礦 x3" },
+    { "label": "素材", "value": "火焰石 x1" }
+  ],
+  "event_preview": [
+    "第 13 步：熱霧裡傳來快速摩擦岩面的聲音。"
+  ],
+  "narrative_message": "霧中的影子伏低身形，像是在等待你踏入更窄的通道。你仍只有兩個選擇：前進，或撤退。",
+  "actions": [
+    {
+      "action_id": "advance_step",
+      "label": "前進一步",
+      "description": "進入下一步",
+      "enabled": true,
+      "disabled_reason": null,
+      "primary": true,
+      "payload": { "dungeon_id": "ash_valley", "current_step": 13, "encounter_hint": true },
+      "feedback_message": "已送出 advance_step。即將進入 Combat Screen static prototype。"
+    },
+    {
+      "action_id": "retreat",
+      "label": "撤退",
+      "description": "結束探索",
+      "enabled": true,
+      "disabled_reason": null,
+      "primary": false,
+      "payload": { "dungeon_id": "ash_valley" },
+      "feedback_message": "已送出 retreat。static prototype 不會計算撤退結果。"
+    }
+  ]
+}

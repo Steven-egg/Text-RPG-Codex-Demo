@@ -31,6 +31,7 @@ const state = {
 
 const staticActionRoutes = {
   back_to_town_hub: "../town_hub/index.html",
+  confirm_travel: "../dungeon_exploration/index.html",
 };
 const navigationDelayMs = 120;
 
@@ -388,7 +389,7 @@ function activateAction(action, source) {
 
   if (action.action_id === "confirm_travel") {
     const location = getSelectedLocation();
-    feedbackMessageEl.textContent = `已送出 confirm_travel：${location?.label ?? action.payload?.location_id ?? ""}。static prototype 不進入探索流程。`;
+    feedbackMessageEl.textContent = `已送出 confirm_travel：${location?.label ?? action.payload?.location_id ?? ""}。即將進入 Dungeon Exploration static prototype。`;
   } else {
     feedbackMessageEl.textContent = `已送出 ${action.action_id}。static prototype 不執行正式流程。`;
   }

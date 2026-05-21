@@ -4,6 +4,7 @@ Purpose: handoff note for the current HTML static prototype work. This file reco
 
 Date: 2026-05-19
 Status: static prototype progress note
+Last updated: 2026-05-21
 
 ## Boundary
 
@@ -39,6 +40,20 @@ Status: static prototype progress note
   - fixtures/
     - world-map-default.json
     - world-map-frontier-alerts.json
+- dungeon_exploration/
+  - index.html
+  - styles.css
+  - dungeon-exploration.js
+  - fixtures/
+    - dungeon-exploration-default.json
+    - dungeon-exploration-encounter.json
+- combat_screen/
+  - index.html
+  - styles.css
+  - combat-screen.js
+  - fixtures/
+    - combat-command-default.json
+    - combat-danger-state.json
 ```
 
 ## Town Hub Prototype
@@ -150,7 +165,7 @@ Current behavior:
 - Main menu actions log UIAction events only.
 - Initial World Map view keeps the detail drawer closed so the map can use the full main width.
 - Clicking a map node logs `select_world_location` and opens/updates the right-side detail drawer.
-- Unlocked locations allow `confirm_travel`, which only logs the UIAction and does not start exploration.
+- Unlocked locations allow `confirm_travel`, write the UIAction log, then navigate to the Dungeon Exploration static prototype.
 - Locked locations keep the detail panel visible but block `confirm_travel` with a reason.
 
 Accepted World Map decisions:
@@ -159,7 +174,7 @@ Accepted World Map decisions:
 - Preserve the user-provided menu-open and detail-drawer mockups in `05_assets/gui_references/world_map/`.
 - Main menu is opened from the top-left button as a side drawer.
 - Selecting a map point updates the right-side information panel.
-- Static prototype navigation only; no runtime adapter and no exploration flow.
+- Static prototype navigation only; no runtime adapter, no runtime exploration, and no save writes.
 
 Deferred World Map items:
 
@@ -167,6 +182,101 @@ Deferred World Map items:
 - Runtime adapter for location unlocks and travel.
 - Final animation for the side drawer.
 - Keyboard focus graph for map nodes.
+
+## Dungeon Exploration Prototype
+
+Location:
+
+```text
+07_gui_prototype/dungeon_exploration/
+```
+
+Current local preview during this session:
+
+```text
+http://127.0.0.1:8767/dungeon_exploration/index.html
+```
+
+Reference image:
+
+```text
+05_assets/gui_references/dungeon_exploration_screen/dungeon_exploration_visual_reference_v1_user_mockup_main.png
+```
+
+Current behavior:
+
+- Loads static fixtures only.
+- Renders a compact title/subtitle header, HP/MP resource strip, enlarged dungeon scene placeholder, left-side dungeon summary overlay, right-side exploration status panel, narrative message, bottom action bar, fixture selector, and UIAction log.
+- The right-side exploration status panel is CLI-aligned: current step meter, three compact status chips, current-run reward summary, and the latest event only.
+- The visible bottom action bar only shows CLI exploration actions: advance and retreat.
+- Default fixture covers ordinary step-based exploration in Ash Valley.
+- High-risk fixture covers a dangerous exploration step without presenting a strong pre-encounter confirmation UI.
+- `advance_step` and `retreat` only write UIAction log and update the prototype feedback message.
+- In the high-risk fixture, `advance_step` with `encounter_hint` writes UIAction log, then navigates to `../combat_screen/index.html`.
+
+Accepted Dungeon Exploration decisions:
+
+- Treat the supplied dungeon exploration mockup as visual/layout reference only, not a runtime asset.
+- Use a programmatic scene placeholder instead of the reference image as a background.
+- Keep the central dungeon scene as the main stage.
+- Keep the current step, HP/MP, current-run rewards, latest event, and narrative text rendered by the prototype layer.
+- Do not show total money, a full inventory list, exploration-time inventory/status actions, or return-to-world-map as Dungeon Exploration commands until the CLI supports those commitments.
+- Do not implement random events, real step advancement, reward calculation, combat trigger logic, or runtime adapters.
+
+Deferred Dungeon Exploration items:
+
+- Runtime adapter for dungeon state.
+- Real dungeon background art or formal asset pipeline.
+- Final keyboard focus graph for exploration actions.
+
+## Combat Screen Prototype
+
+Location:
+
+```text
+07_gui_prototype/combat_screen/
+```
+
+Current local preview during this session:
+
+```text
+http://127.0.0.1:8767/combat_screen/index.html
+```
+
+Reference image:
+
+```text
+05_assets/gui_references/combat_screen/combat_screen_visual_reference_v1_user_mockup_command.png
+```
+
+Current behavior:
+
+- Loads static fixtures only.
+- Renders a compact title/subtitle header, combat resource strip, enlarged battlefield placeholder, top enemy HUD, lower-left player HUD, right-side Battle Log panel, bottom command bar, fixture selector, and UIAction log.
+- Default command fixture covers a normal player decision state.
+- Danger fixture covers low HP/MP, a disabled `use_skill` command, and a longer Battle Log.
+- `basic_attack`, `open_skill_menu`, `open_item_menu`, `use_skill`, `defend`, and `retreat` only write UIAction log and update prototype feedback.
+- The bottom command bar is a single battle-action row: attack, skill or Fire Mark Slash fixture, item, defend, and flee.
+- The command bar no longer includes `view_battle_log` or `back_to_exploration`.
+- The Combat Screen no longer shows gold in the top combat resource strip.
+- The Combat Screen no longer shows the separate round card, previous-action summary card, enemy detail panel, or player detail panel.
+- The Battle Log has a side-panel expand/collapse control and is not a bottom command.
+
+Accepted Combat Screen decisions:
+
+- Treat the supplied combat mockup as visual/layout reference only, not a runtime asset.
+- Keep the battlefield as the main visual stage.
+- Keep enemy name, enemy HP, round count, player HP/MP, command labels, and Battle Log text rendered by the prototype layer.
+- Battle Log remains readable in a side panel and does not cover the command controls.
+- Per review, Battle Log stays as a side display panel but is not a bottom command.
+- Do not implement damage calculation, enemy turn advancement, skill menus, item menus, flee checks, animations, effects, runtime adapters, or combat formulas.
+
+Deferred Combat Screen items:
+
+- Static navigation from combat command/result state to Combat Result Screen after Combat Result Screen exists.
+- Runtime adapter for combat state.
+- Real combat background/enemy art or formal asset pipeline.
+- Skill submenu, item submenu, target selection, and final keyboard focus graph.
 
 ## Verification Notes
 
@@ -189,17 +299,39 @@ Validated during this session:
 - World Map selected location updates the right-side detail panel.
 - World Map detail panel opens as a right-side drawer and can be closed.
 - World Map locked locations block `confirm_travel` with a reason.
-- World Map unlocked locations dispatch `confirm_travel` without entering runtime.
+- World Map unlocked locations dispatch `confirm_travel` and navigate to Dungeon Exploration static prototype without entering runtime.
 - Town Hub `open_world_map` logs before navigating to World Map.
 - World Map does not expose a return-to-town control in the current mockup pass.
 - Browser console error log was 0 during World Map static navigation checks.
+- Dungeon Exploration fixtures parse as UTF-8 JSON.
+- Dungeon Exploration JS and World Map JS pass syntax check with the bundled Node.js runtime.
+- Dungeon Exploration default fixture renders 2 visible action buttons, Ash Valley location data, step meter, compact current-run rewards, latest event preview, and UIAction log.
+- Dungeon Exploration default fixture dispatches `advance_step` and updates the narrative feedback message without changing fixture state.
+- Dungeon Exploration high-risk fixture renders 2 visible action buttons: `advance_step` and `retreat`.
+- Dungeon Exploration high-risk fixture `advance_step` logs before navigating to Combat Screen static prototype.
+- World Map `confirm_travel` logs before navigating to Dungeon Exploration static prototype.
+- Browser console error log was 0 during Dungeon Exploration static checks.
+- Dungeon Exploration browser DOM check confirmed left dungeon overlay, right exploration status panel, bottom action row, and 591px desktop stage height.
+- Dungeon Exploration browser DOM check confirmed the red-marked bottom actions are no longer visible, the action row width is constrained to the left command area, and the green-marked right panel is summarized.
+- Dungeon Exploration browser DOM check confirmed the CLI-aligned surface: HP/MP only in the resource strip, no `1957G`, no item summary panel, no inventory/status/world-map commands, no strong encounter prompt wording, current-run rewards, latest event, and advance/retreat only.
+- Dungeon Exploration high-risk fixture browser check confirmed `advance_step` still navigates to `../combat_screen/index.html`.
+- Dungeon Exploration screenshot capture in the in-app browser timed out after layout and interaction checks; DOM and console checks were still completed.
+- Combat Screen fixtures parse as UTF-8 JSON.
+- Combat Screen JS and Dungeon Exploration JS pass syntax check with the bundled Node.js runtime.
+- Combat Screen default fixture renders 5 command buttons, top enemy HUD, lower-left player HUD, right-side Battle Log, and UIAction log.
+- Combat Screen default fixture dispatches `basic_attack` and updates command feedback without changing fixture state.
+- Combat Screen danger fixture renders disabled `use_skill` with disabled reason.
+- Combat Screen blocked `use_skill` logs a blocked UIAction with reason.
+- Combat Screen command bar does not include `view_battle_log` or `back_to_exploration`.
+- Browser console error log was 0 during Combat Screen static checks.
+- Combat Screen browser check confirmed no `1957G` in the combat resource strip and no Battle Log or return-to-exploration command in the bottom command bar.
 
 ## Recommended Next Step
 
 Recommended next session entry:
 
 ```text
-Review and refine the World Map static prototype, then decide the next facility or travel detail screen.
+Review the CLI-aligned Dungeon Exploration static prototype, then decide whether another visual pass is needed before moving to the next approved screen.
 ```
 
 Scope suggestion:
@@ -208,10 +340,12 @@ Scope suggestion:
 - Do not connect runtime.
 - Do not use mockup/reference images as runtime assets.
 - Keep UIAction logging before navigation.
-- Refine World Map detail data, node placement, drawer behavior, and route readability before adding any runtime adapter.
+- Preserve Dungeon Exploration and Combat Screen as static fixture display only until a runtime adapter is explicitly approved.
 
 Alternative next steps:
 
+- Review and refine the Dungeon Exploration static prototype layout before adding a runtime adapter.
+- Build the Combat Result Screen static prototype only after explicit approval to move on from Combat Screen.
 - Build the next facility static prototype, likely Shop or Synthesis.
 - Add a proper keyboard focus graph for Town Hub and Guild.
-- Add a shared prototype shell / fixture loader after one more screen exists.
+- Add a shared prototype shell / fixture loader after Combat Screen exists.

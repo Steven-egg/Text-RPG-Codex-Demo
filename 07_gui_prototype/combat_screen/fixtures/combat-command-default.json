@@ -1,0 +1,99 @@
+{
+  "screen_id": "combat_screen",
+  "title": "戰鬥",
+  "subtitle": "Static fixture driven prototype：呈現回合決策資訊，不計算傷害、不推進 runtime。",
+  "resource_strip": [
+    { "label": "見習冒險者 / 劍士 Lv7", "tone": "primary" },
+    { "label": "HP 126/192", "tone": "hp" },
+    { "label": "MP 28/38", "tone": "mp" },
+    { "label": "第 3 回合", "tone": "neutral" }
+  ],
+  "round": {
+    "label": "第 3 回合",
+    "turn_label": "玩家行動"
+  },
+  "player": {
+    "name": "見習冒險者",
+    "class_label": "劍士",
+    "level_label": "Lv7",
+    "hp_label": "126 / 192",
+    "mp_label": "28 / 38",
+    "status_label": "穩定",
+    "stance_label": "可行動",
+    "effect_summary": "火抗護符：火傷減輕",
+    "item_summary": "治療藥水 x2 / 魔力藥草 x1"
+  },
+  "enemy": {
+    "enemy_id": "mon_molten_shell",
+    "name": "熔殼小魔",
+    "hp_label": "HP 74 / 126",
+    "hp_percent": 59,
+    "attribute": "火",
+    "weakness": "冰 / 斬擊",
+    "status_label": "灼熱外殼",
+    "intent": "準備撞擊",
+    "threat_label": "中等"
+  },
+  "last_action_summary": "你架開熔殼小魔的撞擊，盾面殘留一圈暗紅火星。",
+  "command_message": "選擇下一個戰鬥指令。這裡只記錄 UIAction，不進行戰鬥計算。",
+  "battle_log": [
+    "第 1 回合：你以普通攻擊命中熔殼小魔，造成輕傷。",
+    "第 1 回合：熔殼小魔以灼熱外殼擦過你的手臂。",
+    "第 2 回合：你選擇防禦，穩住姿勢。",
+    "第 2 回合：熔殼小魔撞擊盾面，傷害被減輕。",
+    "第 3 回合：敵人的外殼裂縫裡冒出紅光。",
+    "第 3 回合：目前等待玩家行動。"
+  ],
+  "actions": [
+    {
+      "action_id": "basic_attack",
+      "label": "攻擊",
+      "description": "進行普通攻擊",
+      "enabled": true,
+      "disabled_reason": null,
+      "primary": true,
+      "payload": { "enemy_id": "mon_molten_shell" },
+      "feedback_message": "已送出 basic_attack。static prototype 不會改變敵人 HP。"
+    },
+    {
+      "action_id": "open_skill_menu",
+      "label": "技能",
+      "description": "查看可用技能",
+      "enabled": true,
+      "disabled_reason": null,
+      "primary": false,
+      "payload": { "source": "combat_screen" },
+      "feedback_message": "已送出 open_skill_menu。技能列表會在後續切片再做。"
+    },
+    {
+      "action_id": "open_item_menu",
+      "label": "道具",
+      "description": "使用戰鬥道具",
+      "enabled": true,
+      "disabled_reason": null,
+      "primary": false,
+      "payload": { "source": "combat_screen" },
+      "feedback_message": "已送出 open_item_menu。此 prototype 不開啟道具選單。"
+    },
+    {
+      "action_id": "defend",
+      "label": "防禦",
+      "description": "降低下次傷害",
+      "enabled": true,
+      "disabled_reason": null,
+      "primary": false,
+      "payload": {},
+      "feedback_message": "已送出 defend。static prototype 不會進入敵方回合。"
+    },
+    {
+      "action_id": "retreat",
+      "label": "逃跑",
+      "description": "嘗試脫離戰鬥",
+      "enabled": true,
+      "disabled_reason": null,
+      "primary": false,
+      "payload": { "enemy_id": "mon_molten_shell" },
+      "feedback_message": "已送出 retreat。static prototype 不會結算逃跑。"
+    }
+  ]
+}
