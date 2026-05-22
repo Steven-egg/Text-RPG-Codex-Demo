@@ -28,7 +28,7 @@
 | GUI implementation platform tradeoff | `01_content/gui-implementation-platform-tradeoff.md`、`01_content/gui-ui-direction-brief.md`、`01_content/gui-town-hub-programmatic-layout-plan-v1.md` |
 | HTML Town Hub prototype planning | `01_content/gui-html-town-hub-prototype-plan.md`、`01_content/gui-implementation-platform-tradeoff.md`、`01_content/gui-town-hub-programmatic-layout-plan-v1.md` |
 | HTML Town Hub fixture spec | `01_content/gui-html-town-hub-fixture-spec.md`、`01_content/gui-html-town-hub-prototype-plan.md` |
-| HTML static prototype handoff / Combat polish | `01_content/gui-html-static-prototype-progress-v1.md`、`01_content/gui-planning-index.md` |
+| HTML static prototype handoff / next prototype planning | `01_content/gui-html-static-prototype-progress-v1.md`、`01_content/gui-planning-index.md` |
 | Facility template | `01_content/gui-facility-screen-template.md` |
 | Guild Screen model | `01_content/gui-guild-screen-model-draft.md`、`01_content/gui-guild-screen-visual-baseline.md`、`01_content/gui-facility-screen-template.md`、`01_content/gui-asset-registry-draft.md` |
 | Guild Screen review | `01_content/gui-guild-screen-review-checklist.md`、`01_content/gui-guild-screen-model-draft.md`、`01_content/gui-guild-screen-visual-baseline.md` |
@@ -49,8 +49,9 @@
 GUI 目前處於 HTML static prototype 驗證階段；正式 runtime UI 仍是 Python CLI / Rich，尚未建立 runtime adapter。
 
 - 第一個可操作 prototype path 已採 HTML static fixtures，位置在 `07_gui_prototype/`。
-- 已建立 Town Hub、Guild Screen、World Map、Dungeon Exploration、Combat Screen static prototype。
-- Combat Screen 目前只剩與使用者 mockup 對齊的版面微調。
+- 已建立 Start Screen、Town Hub、Guild Screen、World Map、Dungeon Exploration、Combat Screen static prototype。
+- Start Screen alignment review 已通過；目前只剩文件同步與 `screen_label` 小修作為收斂項。
+- Combat Screen 第一輪 mockup-alignment layout tuning pass 已完成，不再是目前下一步主線。
 - 尚未選定最終 GUI 技術；HTML prototype 不等於正式 app，也不等於 runtime integration。
 - 尚未啟動正式 asset pipeline。
 - 目前 CLI / Rich panel 只作為 playable reference，不等於最終 GUI 架構。
@@ -529,10 +530,12 @@ mockup 評估重點：
 
 ## 8. 建議下一步
 
-最適合的下一步是延續目前 HTML static prototype，小步完成 Combat Screen 對齊：
+最適合的下一步是延續目前 HTML static prototype，先完成本輪文件同步與 Start Screen `screen_label` 小修，然後進入 Synthesis Screen static prototype planning / implementation；Shop Screen 為第二候選。
 
-- Combat Screen：只做與使用者 mockup 對齊的版面微調；維持 static fixtures，不接 runtime、不讀寫 save、不把 reference/mockup 圖當 runtime asset。
 - `01_content/gui-html-static-prototype-progress-v1.md` 是目前 `07_gui_prototype/` 的最新 handoff；接續 prototype 前先讀它。
+- Synthesis Screen：下一個主線候選；只做 static fixtures、list-detail-requirement-confirm-result 的 prototype 驗證，不接 runtime、不讀寫 save、不新增配方、不啟動 asset pipeline。
+- Shop Screen：第二候選；若 Synthesis 暫緩，可用同一 Facility template 驗證商品分類、詳情、價格與購買確認。
+- Combat Screen：第一輪 mockup-alignment layout tuning pass 已完成；若後續還要調整，應視為使用者 review 後的小幅微調。
 - Town Hub Screen：可延續 `gui-town-hub-screen-model-draft.md`，補強場景式 `facility_nodes`、badge 優先級與 World Map / Facility Screen 銜接。
 - Town Hub mockup review 已完成：`gui-town-hub-mockup-review-v1.md` 結論為 `pass_with_notes`；下一步可小幅同步 `gui-screen-map.md`。
 - Town Hub UI-2 planning 已建立：`gui-town-hub-wireframe-plan.md`；下一步可做 markdown-only wireframe 草圖，不生成新圖。
