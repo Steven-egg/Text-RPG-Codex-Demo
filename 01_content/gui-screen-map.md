@@ -105,6 +105,7 @@ Action 應描述遊戲語意，不綁定鍵盤、滑鼠或觸控。
 
 World Map / Town action：
 
+- `back_to_start_screen`
 - `open_world_map`
 - `open_town`
 - `select_destination`
@@ -112,6 +113,8 @@ World Map / Town action：
 - `open_facility`
 
 Town Hub 目前仍可保留 `open_character` / `open_inventory` 作為現階段主 hub 相容入口；最終是否屬於全域導航，待後續 navigation model 再定。
+
+World Map static prototype 目前不使用 `exit_game`。回到標題以 `back_to_start_screen` 表示，並先寫入 UIAction log 再導向 Start Screen static prototype；`view_status`、`open_inventory`、`open_bestiary`、`save_game` 與 `open_settings` 在 World Map drawer 中只作語意展示與 UIAction logging，不接 runtime、不讀寫 `save.json`。
 
 Facility action：
 

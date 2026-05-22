@@ -228,6 +228,20 @@ Accepted World Map decisions:
 - Selecting a map point updates the right-side information panel.
 - Static prototype navigation only; no runtime adapter, no runtime exploration, and no save writes.
 
+World Map main menu read-only classification:
+
+- Keep as current static prototype navigation:
+  - `back_to_start_screen`: keep as the accepted return-to-title path; it writes UIAction log before navigating to Start Screen.
+- Keep as semantic GUI actions, but only as fake interactions in the current static prototype:
+  - `view_status`: CLI already has character/status meaning, but no GUI Status Screen or runtime adapter is connected yet.
+  - `open_inventory`: CLI already has inventory/equipment meaning, but no GUI Inventory Screen or runtime adapter is connected yet.
+  - `open_bestiary`: CLI already has bestiary meaning, but no GUI Bestiary Screen or runtime adapter is connected yet.
+  - `save_game`: static prototype may show/log the action or a blocked state, but must not read or write `save.json`.
+  - `open_settings`: static prototype may show/log the action, but no formal Settings Screen exists yet.
+- Future handling:
+  - Status, inventory/equipment, bestiary, settings, and save all need a formal screen and/or runtime adapter before doing real work.
+  - `exit_game` should not be reintroduced into the World Map static prototype; `back_to_start_screen` replaces the duplicate static-only return-to-title purpose.
+
 Deferred World Map items:
 
 - Real world map art or formal asset pipeline.
