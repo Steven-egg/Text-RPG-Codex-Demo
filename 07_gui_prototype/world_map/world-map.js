@@ -31,6 +31,7 @@ const state = {
 
 const staticActionRoutes = {
   back_to_town_hub: "../town_hub/index.html",
+  back_to_start_screen: "../start_screen/index.html",
   confirm_travel: "../dungeon_exploration/index.html",
 };
 const navigationDelayMs = 120;

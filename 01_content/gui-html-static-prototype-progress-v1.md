@@ -4,7 +4,7 @@ Purpose: handoff note for the current HTML static prototype work. This file reco
 
 Date: 2026-05-19
 Status: static prototype progress note
-Last updated: 2026-05-21
+Last updated: 2026-05-22
 
 ## Boundary
 
@@ -19,6 +19,13 @@ Last updated: 2026-05-21
 
 ```text
 07_gui_prototype/
+- start_screen/
+  - index.html
+  - styles.css
+  - start-screen.js
+  - fixtures/
+    - start-empty.json
+    - start-has-save.json
 - town_hub/
   - index.html
   - styles.css
@@ -58,6 +65,45 @@ Last updated: 2026-05-21
     - combat-result-defeat.json
     - combat-result-retreat.json
 ```
+
+## Start Screen Prototype
+
+Location:
+
+```text
+07_gui_prototype/start_screen/
+```
+
+Current behavior:
+
+- Loads static fixtures only.
+- Renders the game title, hero copy, centered primary action buttons, fixture selector, and UIAction log.
+- The former central save-state / summary information card has been removed.
+- No-save fixture aligns with CLI `start_screen_panel(has_save=False)`: only `start_new_game` is offered, labelled as `開始新冒險（New Game）`.
+- Has-save fixture aligns with CLI `start_screen_panel(has_save=True)`: `load_game` is offered as `繼續冒險（Continue）`, and `restart_game` is offered as `重新開始（New Game）`.
+- `start_new_game` and `restart_game` open an in-screen modal dialog for the CLI `new_game()` data entry step.
+- The modal dialog includes adventurer name input, four initial job cards (`劍士`, `法師`, `盜賊`, `牧師`), guidance text, return, and confirm.
+- The modal uses a full-screen dark overlay with light blur, blocks background interaction, and closes from the return action or backdrop.
+- Confirming the modal writes the final `start_new_game` or `restart_game` UIAction, then navigates to the World Map static prototype.
+- `load_game` writes UIAction log before navigating to the World Map static prototype.
+- Save presence is fixture data only; the prototype does not read or write `save.json`.
+
+Accepted Start Screen decisions:
+
+- Start Screen V1 is accepted as a minimal entry surface, not a standalone character creation screen.
+- Keep Start Screen as a single screen; the adventurer registration step is an overlay modal component, not a new page.
+- Keep the central surface focused on primary actions only; do not show character, location, resource, or recent-progress summary cards in the center.
+- Treat existing save / no-save states as static fixtures.
+- Navigation from Start Screen enters World Map only; no runtime adapter is connected.
+- User-provided Start Screen mockups are accepted as panel layout references only, not visual-language requirements and not runtime assets.
+- Start Screen reference files live under `05_assets/gui_references/start_screen/`.
+
+Deferred Start Screen items:
+
+- Runtime save detection or save-load adapter.
+- Real character creation / `new_game()` adapter.
+- Multiple save slots, settings, exit-game handling, or account-login semantics.
+- Real title art, animation, video, or formal asset pipeline.
 
 ## Town Hub Prototype
 
@@ -166,6 +212,8 @@ Current behavior:
 - Renders top player/resource strip, full-width programmatic map placeholder, route lines, clickable location nodes, right-side location detail drawer, primary confirm action, fixture selector, and UIAction log.
 - Top-left menu button opens a left-side main menu drawer.
 - Main menu actions log UIAction events only.
+- Main menu includes `back_to_start_screen`, which writes UIAction log before navigating back to the Start Screen static prototype.
+- Main menu no longer includes `exit_game` / `離開遊戲`; this static-only action duplicated the return-to-title purpose.
 - Initial World Map view keeps the detail drawer closed so the map can use the full main width.
 - Clicking a map node logs `select_world_location` and opens/updates the right-side detail drawer.
 - Unlocked locations allow `confirm_travel`, write the UIAction log, then navigate to the Dungeon Exploration static prototype.
@@ -176,6 +224,7 @@ Accepted World Map decisions:
 - Treat the supplied mockups as reference only, not runtime assets.
 - Preserve the user-provided menu-open and detail-drawer mockups in `05_assets/gui_references/world_map/`.
 - Main menu is opened from the top-left button as a side drawer.
+- Keep return-to-title through `back_to_start_screen`; do not keep a separate static-only `exit_game` command in this prototype.
 - Selecting a map point updates the right-side information panel.
 - Static prototype navigation only; no runtime adapter, no runtime exploration, and no save writes.
 
@@ -308,6 +357,19 @@ Deferred Combat Screen items:
 
 Validated during this session:
 
+- Start Screen fixtures parse as UTF-8 JSON.
+- Start Screen JS and World Map JS pass syntax check with the bundled Node.js runtime.
+- Start Screen no-save fixture renders only `start_new_game`.
+- Start Screen has-save fixture renders `load_game` and `restart_game`.
+- Start Screen central surface renders only primary action buttons and no longer renders the save-state / summary information card.
+- Start Screen no-save `start_new_game` opens the adventurer registration modal.
+- Start Screen has-save `restart_game` opens the adventurer registration modal.
+- Start Screen modal renders name input, four initial job cards, return, and confirm actions.
+- Start Screen modal closes from return and backdrop.
+- Start Screen modal confirm writes `start_new_game` / `restart_game` UIAction and navigates to World Map static prototype.
+- Start Screen `load_game` logs before navigating to World Map static prototype.
+- World Map `back_to_start_screen` menu action logs before navigating to Start Screen static prototype.
+- World Map main menu fixtures no longer contain `exit_game` / `離開遊戲`.
 - Town Hub fixtures parse as UTF-8 JSON.
 - Guild fixtures parse as UTF-8 JSON.
 - Town Hub renders 9 facility nodes.
@@ -377,7 +439,7 @@ Validated during this session:
 Recommended next session entry:
 
 ```text
-Continue Combat Screen mockup-alignment layout tuning inside the existing static prototype.
+Review Start Screen alignment and choose the next unfinished static prototype, likely Shop or Synthesis.
 ```
 
 Scope suggestion:
@@ -386,12 +448,12 @@ Scope suggestion:
 - Do not connect runtime.
 - Do not use mockup/reference images as runtime assets.
 - Keep UIAction logging before navigation.
-- Preserve Dungeon Exploration and Combat Screen as static fixture display only until a runtime adapter is explicitly approved.
-- Treat the next Combat pass as visual/layout alignment only; do not add gameplay logic, new combat formulas, runtime adapters, or save reads/writes.
+- Preserve Start Screen, World Map, Dungeon Exploration, and Combat Screen as static fixture display only until a runtime adapter is explicitly approved.
+- Do not add gameplay logic, new combat formulas, runtime adapters, or save reads/writes.
 
 Alternative next steps:
 
-- After Combat Screen mockup alignment is accepted, review and refine the Dungeon Exploration static prototype layout before adding a runtime adapter.
+- Review and refine the Dungeon Exploration static prototype layout before adding a runtime adapter.
 - Build the next facility static prototype, likely Shop or Synthesis.
 - Add a proper keyboard focus graph for Town Hub and Guild.
 - Add a shared prototype shell / fixture loader after Combat Screen exists.

@@ -1,0 +1,49 @@
+{
+  "screen_id": "start_screen",
+  "screen_label": "登入畫面",
+  "title": "《元素迷宮：邊境冒險者》",
+  "hero_kicker": "邊境公會記錄",
+  "hero_title": "元素迷宮",
+  "hero_copy": "城門外的礦道仍在發熱，公會只留下新的登錄名冊。你可以從這裡建立一段新的冒險。",
+  "registration": {
+    "panel_label": "冒險者登錄",
+    "title": "建立冒險者名冊",
+    "chip": "REG",
+    "name_label": "冒險者名字",
+    "name_placeholder": "見習冒險者",
+    "fallback_name": "見習冒險者",
+    "job_label": "初始職業",
+    "job_hint": "對照 CLI 的四個初始職業，只做 static prototype 選取。",
+    "default_job_id": "warrior",
+    "feedback": "輸入名字並選擇初始職業；空白名字會使用「見習冒險者」。",
+    "back_label": "返回",
+    "back_description": "回到開始畫面",
+    "confirm_label": "確認開始",
+    "confirm_description": "記錄 UIAction 後前往 World Map static prototype",
+    "jobs": [
+      { "id": "warrior", "index": "1.", "label": "劍士", "summary": "穩定近戰，適合承受壓力。" },
+      { "id": "mage", "index": "2.", "label": "法師", "summary": "使用魔法，重視 MP 與爆發。" },
+      { "id": "rogue", "index": "3.", "label": "盜賊", "summary": "行動靈活，適合快速探索。" },
+      { "id": "cleric", "index": "4.", "label": "牧師", "summary": "能恢復與支援，續航較佳。" }
+    ]
+  },
+  "actions": [
+    {
+      "action_id": "start_new_game",
+      "label": "開始新冒險（New Game）",
+      "description": "",
+      "token": "新",
+      "kind": "primary",
+      "enabled": true,
+      "disabled_reason": null,
+      "opens_registration": true,
+      "final_action_id": "start_new_game",
+      "registration_entry": "new_game",
+      "registration_title": "建立冒險者名冊",
+      "registration_feedback": "輸入名字並選擇初始職業；空白名字會使用「見習冒險者」。",
+      "confirm_label": "確認開始",
+      "dispatch_message": "已記錄 start_new_game；static prototype 不建立角色或進入 runtime。",
+      "payload": { "entry": "new_game" }
+    }
+  ]
+}

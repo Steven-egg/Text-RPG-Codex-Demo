@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Start Screen Static Prototype</title>
+    <link rel="stylesheet" href="./styles.css?v=start-screen-v3" />
+  </head>
+  <body>
+    <div class="start-screen-shell" data-load-state="loading">
+      <main class="start-stage" aria-label="Start Screen">
+        <div class="stage-art" aria-hidden="true">
+          <span class="terrain terrain-coast"></span>
+          <span class="terrain terrain-gate"></span>
+          <span class="terrain terrain-path"></span>
+          <span class="terrain terrain-fire"></span>
+          <span class="terrain terrain-rune terrain-rune-a"></span>
+          <span class="terrain terrain-rune terrain-rune-b"></span>
+        </div>
+
+        <header class="prototype-header">
+          <div>
+            <p class="panel-label" id="screen-kicker">登入畫面</p>
+            <h1 id="game-title">Loading</h1>
+          </div>
+
+          <label class="fixture-control" for="fixture-select">
+            <span>測試狀態</span>
+            <select id="fixture-select">
+              <option value="./fixtures/start-empty.json">No Save</option>
+              <option value="./fixtures/start-has-save.json">Has Save</option>
+            </select>
+          </label>
+        </header>
+
+        <section class="start-layout">
+          <section class="title-block" aria-labelledby="game-title">
+            <p id="hero-kicker" class="hero-kicker"></p>
+            <h2 id="hero-title"></h2>
+            <p id="hero-copy" class="hero-copy"></p>
+          </section>
+
+          <section class="login-panel" aria-label="Start actions">
+            <div id="entry-view" class="panel-view action-panel-view">
+              <div id="action-list" class="action-list"></div>
+            </div>
+          </section>
+        </section>
+
+        <div id="registration-modal" class="modal-overlay" data-state="closed" hidden>
+          <div class="modal-scrim" aria-hidden="true"></div>
+          <form id="registration-view" class="registration-dialog" role="dialog" aria-modal="true" aria-labelledby="registration-title">
+              <div class="login-heading">
+                <div>
+                  <p class="panel-label" id="registration-subtitle"></p>
+                  <h3 id="registration-title"></h3>
+                </div>
+                <span id="registration-chip" class="save-state-chip">REG</span>
+              </div>
+
+              <label class="field-group" for="adventurer-name">
+                <span id="name-label" class="field-label"></span>
+                <input id="adventurer-name" type="text" maxlength="16" autocomplete="off" />
+              </label>
+
+              <section class="job-section" aria-labelledby="job-label">
+                <div class="job-section-heading">
+                  <p id="job-label" class="field-label"></p>
+                  <p id="job-hint" class="job-hint"></p>
+                </div>
+                <div id="job-list" class="job-list"></div>
+              </section>
+
+              <p id="registration-feedback" class="feedback-message"></p>
+
+              <div class="registration-actions">
+                <button id="registration-back" class="start-action start-action-secondary" type="button">
+                  <span class="action-token" aria-hidden="true">返</span>
+                  <span class="action-copy">
+                    <strong id="registration-back-label"></strong>
+                    <span id="registration-back-description"></span>
+                  </span>
+                </button>
+                <button id="registration-confirm" class="start-action" data-kind="primary" type="submit">
+                  <span class="action-token" aria-hidden="true">始</span>
+                  <span class="action-copy">
+                    <strong id="registration-confirm-label"></strong>
+                    <span id="registration-confirm-description"></span>
+                  </span>
+                </button>
+              </div>
+            </form>
+        </div>
+      </main>
+
+      <section class="prototype-debug-panel">
+        <div class="action-log-heading">
+          <p class="panel-label">UIAction Log</p>
+          <button id="clear-log" class="quiet-button" type="button">清除</button>
+        </div>
+        <ol id="action-log" class="action-log"></ol>
+      </section>
+    </div>
+
+    <script type="module" src="./start-screen.js?v=start-screen-v3"></script>
+  </body>
+</html>

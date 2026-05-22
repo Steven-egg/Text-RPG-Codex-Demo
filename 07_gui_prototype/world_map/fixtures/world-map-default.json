@@ -54,9 +54,9 @@
       "payload": {}
     },
     {
-      "action_id": "exit_game",
-      "label": "離開遊戲",
-      "description": "static prototype 不結束應用程式",
+      "action_id": "back_to_start_screen",
+      "label": "回到標題",
+      "description": "返回 Start Screen static prototype",
       "enabled": true,
       "disabled_reason": null,
       "payload": {}

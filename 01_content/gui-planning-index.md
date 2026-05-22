@@ -188,6 +188,7 @@ Guild Screen 目前採納方向是「冒險者工會 / 委託板」：
 - `05_assets/gui_references/README.md`：專案內 GUI reference 暫存區的邊界與命名規則。
 - `05_assets/gui_references/town_hub/`：Town Hub visual reference / generated candidate 暫存區。
 - `05_assets/gui_references/town_hub/README.md`：Town Hub reference / candidate 的資料夾說明。
+- `05_assets/gui_references/start_screen/`：Start Screen panel layout reference 暫存區；只用於對照入口按鈕與登錄 modal 排版，不是 runtime asset。
 - `05_assets/gui_references/guild_screen/README.md`：Guild Screen reference baseline 資料夾說明。
 - `05_assets/gui_references/facility_synthesis_screen/README.md`：Synthesis Screen candidate mockup 資料夾說明。
 - `05_assets/gui_references/world_map/README.md`：World Map menu drawer / detail drawer user mockup 資料夾說明。
@@ -272,6 +273,23 @@ World Map 採用使用者提供的兩張 mockup 作為 static prototype visual r
 - 點選地圖點位後，右側 location detail drawer 才開啟或更新。
 - mockup 只作 layout / interaction / visual tone reference，不是 runtime asset。
 - 地點名稱、狀態、等級、屬性、action label 都必須由 render layer 動態輸出。
+
+### Start Screen
+
+Start Screen 採用使用者提供的兩張 mockup 作為 panel layout reference，不要求沿用其視覺語言，也不是 runtime asset。
+
+```text
+05_assets/gui_references/start_screen/start_screen_layout_reference_v1_user_mockup_main.png
+05_assets/gui_references/start_screen/start_screen_layout_reference_v1_user_mockup_alt.png
+```
+
+目前採納方向：
+
+- Start Screen V1 是單一 static prototype screen，不新增 character creation screen。
+- 中央只保留主操作按鈕；No Save 顯示 `開始新冒險（New Game）`，Has Save 顯示 `繼續冒險（Continue）` 與 `重新開始（New Game）`。
+- 建立冒險者名冊用 modal / dialog overlay 承接 CLI `new_game()` 的名字輸入與初始職業選擇。
+- Modal 只做 static UIAction logging 與 prototype navigation，不接 runtime、不讀寫 `save.json`。
+- 確認新冒險 / 重新開始後導向 World Map static prototype。
 
 ### Facility / Synthesis
 
