@@ -4,7 +4,7 @@ Purpose: handoff note for the current HTML static prototype work. This file reco
 
 Date: 2026-05-19
 Status: static prototype progress note
-Last updated: 2026-05-22
+Last updated: 2026-05-23
 
 ## Boundary
 
@@ -40,6 +40,13 @@ Last updated: 2026-05-22
   - fixtures/
     - guild-default.json
     - guild-quest-ready.json
+- synthesis_screen/
+  - index.html
+  - styles.css
+  - synthesis-screen.js
+  - fixtures/
+    - synthesis-default.json
+    - synthesis-constrained.json
 - world_map/
   - index.html
   - styles.css
@@ -190,6 +197,53 @@ Deferred Guild items:
 - Real task data adapter.
 - Real image or formal NPC asset.
 - Final keyboard navigation graph.
+
+## Synthesis Screen Prototype
+
+Location:
+
+```text
+07_gui_prototype/synthesis_screen/
+```
+
+Current behavior:
+
+- Loads static fixtures only.
+- Renders Synthesis title/subtitle, category tabs, recipe list, selected recipe detail, output summary, NPC/workshop presence, requirement/status rows, feedback bar, primary craft action, back action, and UIAction log. The resource strip remains fixture-backed but is hidden in the accepted base layout.
+- Category tabs are UI-only: `all`, `equipment`, `battle`, labelled as `全部`, `裝備`, and `戰術道具`.
+- Selecting a category dispatches `select_category`, filters the recipe list, and selects the first visible recipe.
+- Selecting a recipe dispatches `select_recipe`, then updates detail, output summary, requirements, feedback, and primary action state.
+- Default fixture covers a craftable state with four current synthesis recipes: `recipe_fire_cloak`, `recipe_focus_pouch`, `recipe_heat_charm`, and `recipe_piercing_bundle`.
+- Constrained fixture covers missing-gold, missing-material, and missing-base-equipment states.
+- Enabled `craft_recipe` writes UIAction log and updates static feedback only; it does not consume gold, materials, base equipment, or produce items.
+- Disabled `craft_recipe` writes blocked UIAction log with `disabled_reason` and updates static feedback.
+- `back_to_town_hub` writes UIAction log before navigating to the Town Hub static prototype.
+- Town Hub `open_facility {"facility_id":"synthesis"}` now writes UIAction log before navigating to Synthesis Screen.
+- Base layout tuning pass moved Synthesis Screen toward a facility decision layout:
+  - the standalone player/resource strip is hidden so it no longer occupies a full row
+  - the center recipe detail card is reduced to the core recipe name, category/status, short description, effect, and brief disabled reason
+  - requirement rows moved from the right side into the center decision area under the recipe detail
+  - the right side is now a larger Mira/NPC portrait presence area with only a small identity label
+  - the bottom feedback/action bar remains the primary place for Mira/system guidance and craft availability feedback
+  - UIAction Log remains available as a collapsed debug-only panel by default
+- Follow-up layout tuning adjusted the center decision area so the upper recipe detail panel is larger than the lower requirement panel, and requirement rows render as full-width strips rather than button-like tiles.
+- User review accepted the current Synthesis Screen static prototype base layout on 2026-05-23. Future adjustments are deferred until the formal bridge or UI image/portrait asset insertion reveals a concrete issue.
+
+Accepted Synthesis decisions:
+
+- Synthesis Screen V1 is a Facility list-detail-requirement-confirm-result validation surface.
+- Treat fixture values as GUI display data only, not gameplay SSOT.
+- Use programmatic HTML/CSS visuals only; existing Synthesis mockups remain reference history, not runtime or prototype backgrounds.
+- Keep categories aligned with CLI Synthesis Catalog MVP: all, equipment, and battle/tactical items.
+- Keep primary action as static UIAction logging; do not copy runtime synthesis rules into JS.
+- Treat the current base layout as settled for prototype purposes; do not keep tuning it unless a later bridge or visual asset integration pass exposes a problem.
+
+Deferred Synthesis items:
+
+- Runtime adapter for `craft_menu()` / recipe state.
+- Real inventory, gold, equipment, or save mutation.
+- Real NPC art, item icons, material icons, or formal asset pipeline.
+- Batch crafting, selling, recipe expansion, or final keyboard focus graph.
 
 ## World Map Prototype
 
@@ -447,13 +501,28 @@ Validated during this session:
 - Combat Screen result overlay geometry confirmed central overlay display, disabled command buttons, and unchanged no-scroll desktop layout after the mockup-alignment layout pass.
 - Combat Screen round HUD revision confirmed only one `第 N 回合` chip renders from fixture data; HP/MP/player identity are no longer duplicated in the top HUD area.
 - Combat Screen cache-resilience follow-up added CSS/JS query-versioning and reduced all Combat Screen `resource_strip` fixture arrays to the round chip only, so stale script instances cannot keep rendering the removed HP/MP/player top-left block after fixture changes.
+- Synthesis Screen fixtures parse as UTF-8 JSON.
+- Synthesis Screen JS and Town Hub JS pass syntax check with the available Node.js runtime.
+- Synthesis Screen default fixture renders the planned category, recipe, detail, output, requirement, feedback, primary action, and UIAction log data surfaces.
+- Synthesis Screen constrained fixture covers disabled craft actions with readable missing-gold, missing-material, and missing-base reasons.
+- Town Hub `synthesis` facility now has a static prototype route to `../synthesis_screen/index.html`.
+- Browser console error/warning log was 0 during Synthesis Screen static checks.
+- Synthesis Screen default fixture browser check confirmed category switching dispatches `select_category`, recipe selection dispatches `select_recipe`, and enabled `craft_recipe` updates static feedback without mutating fixture counts.
+- Synthesis Screen constrained fixture browser check confirmed disabled craft action exposes `aria-disabled`, and a forced click writes blocked `craft_recipe` UIAction with `disabled_reason`.
+- Synthesis Screen `back_to_town_hub` browser check confirmed navigation to Town Hub static prototype.
+- Town Hub `synthesis` facility browser check confirmed navigation to Synthesis Screen static prototype.
+- Synthesis Screen responsive layout sanity checks confirmed no horizontal overflow, no major section overlap, and visible recipe/requirement surfaces at 1280x720, 900x900, and 390x844.
+- Synthesis Screen base layout tuning pass browser check confirmed the resource strip is hidden, center recipe detail is compact, requirement rows render in the center area, the right side has no requirement rows, NPC role copy is hidden, and UIAction Log is collapsed by default.
+- Synthesis Screen base layout tuning pass responsive checks confirmed no horizontal overflow, no major section overlap, hidden resource strip, centered requirement rows, no right-side requirement rows, and collapsed UIAction Log at 1280x720, 900x900, and 390x844.
+- Synthesis Screen follow-up layout check confirmed the upper center detail panel is larger than the lower requirement panel, requirement rows render as single-column strip rows, and scrollbar behavior remains local/fallback-only for long lists or unusually long requirement content.
+- Synthesis Screen current base layout was accepted by user review on 2026-05-23; future tuning is deferred until formal bridge work or UI image/portrait asset insertion surfaces a specific issue.
 
 ## Recommended Next Step
 
 Recommended next session entry:
 
 ```text
-Review Start Screen alignment and choose the next unfinished static prototype, likely Shop or Synthesis.
+Treat Synthesis Screen static prototype base layout as accepted, then choose the next unfinished static prototype, likely Shop.
 ```
 
 Scope suggestion:
@@ -462,12 +531,12 @@ Scope suggestion:
 - Do not connect runtime.
 - Do not use mockup/reference images as runtime assets.
 - Keep UIAction logging before navigation.
-- Preserve Start Screen, World Map, Dungeon Exploration, and Combat Screen as static fixture display only until a runtime adapter is explicitly approved.
+- Preserve Start Screen, World Map, Dungeon Exploration, Combat Screen, and Synthesis Screen as static fixture display only until a runtime adapter is explicitly approved.
 - Do not add gameplay logic, new combat formulas, runtime adapters, or save reads/writes.
 
 Alternative next steps:
 
 - Review and refine the Dungeon Exploration static prototype layout before adding a runtime adapter.
-- Build the next facility static prototype, likely Shop or Synthesis.
+- Build the next facility static prototype, likely Shop.
 - Add a proper keyboard focus graph for Town Hub and Guild.
 - Add a shared prototype shell / fixture loader after Combat Screen exists.

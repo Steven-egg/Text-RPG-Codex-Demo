@@ -1,0 +1,312 @@
+{
+  "screen_id": "facility_synthesis_screen",
+  "facility_id": "synthesis",
+  "title": "米菈合成屋",
+  "subtitle": "把迷宮素材整理成裝備與戰術道具。這裡只呈現 Synthesis Screen 的 static fixture。",
+  "npc": {
+    "id": "mira",
+    "name": "米菈",
+    "role": "合成屋主人，擅長把素材、基底裝備與金幣整理成可執行的配方。"
+  },
+  "resource_strip": [
+    { "id": "hero", "label": "艾琳 / 盜賊 Lv8", "tone": "primary" },
+    { "id": "hp", "label": "HP 86/86", "tone": "healthy" },
+    { "id": "mp", "label": "MP 34/40", "tone": "mana" },
+    { "id": "gold", "label": "420G", "tone": "gold" },
+    { "id": "recipes", "label": "可用配方 4", "tone": "neutral" }
+  ],
+  "category_tabs": [
+    { "id": "all", "label": "全部", "count": 4, "selected": true, "enabled": true },
+    { "id": "equipment", "label": "裝備", "count": 3, "selected": false, "enabled": true },
+    { "id": "battle", "label": "戰術道具", "count": 1, "selected": false, "enabled": true }
+  ],
+  "selected_category_id": "all",
+  "selected_recipe_id": "recipe_fire_cloak",
+  "recipe_rows": [
+    {
+      "recipe_id": "recipe_fire_cloak",
+      "title": "抗火斗篷",
+      "category": "equipment",
+      "category_label": "裝備",
+      "status": "craftable",
+      "status_label": "可製作",
+      "output_summary": "抗火斗篷 x1",
+      "owned_summary": "0 件",
+      "max_count": 1,
+      "gold": 300
+    },
+    {
+      "recipe_id": "recipe_focus_pouch",
+      "title": "集中藥袋",
+      "category": "equipment",
+      "category_label": "裝備",
+      "status": "craftable",
+      "status_label": "可製作",
+      "output_summary": "集中藥袋 x1",
+      "owned_summary": "0 件",
+      "max_count": 2,
+      "gold": 140
+    },
+    {
+      "recipe_id": "recipe_heat_charm",
+      "title": "暖石墜改",
+      "category": "equipment",
+      "category_label": "裝備",
+      "status": "limited",
+      "status_label": "基底有限",
+      "output_summary": "暖石墜改 x1",
+      "owned_summary": "0 件",
+      "max_count": 1,
+      "gold": 260
+    },
+    {
+      "recipe_id": "recipe_piercing_bundle",
+      "title": "破甲釘組",
+      "category": "battle",
+      "category_label": "戰術道具",
+      "status": "craftable",
+      "status_label": "可製作",
+      "output_summary": "破甲釘 x3",
+      "owned_summary": "1 個",
+      "max_count": 1,
+      "gold": 120
+    }
+  ],
+  "recipe_details": {
+    "recipe_fire_cloak": {
+      "title": "抗火斗篷",
+      "description": "以火焰石與焦黑鐵礦縫入斗篷內襯，降低焦石礦坑與火系迷宮的壓力。",
+      "effect": "火傷害 -25%。",
+      "base_note": "基底：不需要基底裝備。",
+      "notes": "合成會消耗素材與金幣；此 prototype 只記錄 UIAction。",
+      "outputs": [
+        { "item_id": "acc_fire_cloak", "label": "抗火斗篷", "quantity": 1 }
+      ],
+      "primary_action": {
+        "action_id": "craft_recipe",
+        "label": "合成抗火斗篷",
+        "enabled": true,
+        "disabled_reason": null,
+        "payload": { "recipe_id": "recipe_fire_cloak" },
+        "result_message": "已送出合成 UIAction；static prototype 不會扣除素材、金幣或產出裝備。"
+      },
+      "ready_feedback": {
+        "tone": "success",
+        "speaker": "米菈",
+        "text": "材料齊了。這張配方可以驗證確認與結果提示。"
+      }
+    },
+    "recipe_focus_pouch": {
+      "title": "集中藥袋",
+      "description": "把青苔纖維與小魔晶縫成小袋，進入迷宮前可整理集中滴露。",
+      "effect": "每次進入迷宮時取得集中滴露 x1。",
+      "base_note": "基底：不需要基底裝備。",
+      "notes": "此處只展示配方狀態，不進入 runtime。",
+      "outputs": [
+        { "item_id": "special_focus_pouch", "label": "集中藥袋", "quantity": 1 }
+      ],
+      "primary_action": {
+        "action_id": "craft_recipe",
+        "label": "合成集中藥袋",
+        "enabled": true,
+        "disabled_reason": null,
+        "payload": { "recipe_id": "recipe_focus_pouch" },
+        "result_message": "已送出合成 UIAction；static prototype 不會修改持有數。"
+      },
+      "ready_feedback": {
+        "tone": "success",
+        "speaker": "米菈",
+        "text": "這張配方適合檢查裝備類輸出與材料列。"
+      }
+    },
+    "recipe_heat_charm": {
+      "title": "暖石墜改",
+      "description": "把暖石墜重新封入熔岩碎片，換取更穩定的火抗與些微敏捷。",
+      "effect": "火傷害 -18%，敏捷 +1。",
+      "base_note": "基底：暖石墜 x1，可消耗背包或已裝備物。",
+      "notes": "基底裝備列用來驗證 Requirement row 的非素材條件。",
+      "outputs": [
+        { "item_id": "acc_warm_stone_plus", "label": "暖石墜改", "quantity": 1 }
+      ],
+      "primary_action": {
+        "action_id": "craft_recipe",
+        "label": "合成暖石墜改",
+        "enabled": true,
+        "disabled_reason": null,
+        "payload": { "recipe_id": "recipe_heat_charm" },
+        "result_message": "已送出合成 UIAction；static prototype 不會消耗暖石墜。"
+      },
+      "ready_feedback": {
+        "tone": "info",
+        "speaker": "米菈",
+        "text": "有基底裝備的配方也可以走同一套確認流程。"
+      }
+    },
+    "recipe_piercing_bundle": {
+      "title": "破甲釘組",
+      "description": "把焦黑鐵礦與破裂石片磨成簡易釘組，方便在戰鬥中削弱敵方防禦。",
+      "effect": "取得破甲釘 x3。",
+      "base_note": "基底：不需要基底裝備。",
+      "notes": "戰術道具分類用來驗證 category tab 過濾。",
+      "outputs": [
+        { "item_id": "item_armor_piercer", "label": "破甲釘", "quantity": 3 }
+      ],
+      "primary_action": {
+        "action_id": "craft_recipe",
+        "label": "合成破甲釘組",
+        "enabled": true,
+        "disabled_reason": null,
+        "payload": { "recipe_id": "recipe_piercing_bundle" },
+        "result_message": "已送出合成 UIAction；static prototype 不會新增破甲釘。"
+      },
+      "ready_feedback": {
+        "tone": "success",
+        "speaker": "米菈",
+        "text": "切到戰術道具分類時，列表應只剩這類配方。"
+      }
+    }
+  },
+  "requirement_rows": {
+    "recipe_fire_cloak": [
+      {
+        "id": "gold",
+        "icon_label": "G",
+        "label": "金幣",
+        "required_value": "300G",
+        "current_value": "420G",
+        "status": "met",
+        "status_label": "已滿足",
+        "disabled_reason": null
+      },
+      {
+        "id": "mat_fire_stone",
+        "icon_label": "火",
+        "label": "火焰石",
+        "required_value": "x3",
+        "current_value": "x4",
+        "status": "met",
+        "status_label": "已滿足",
+        "disabled_reason": null
+      },
+      {
+        "id": "mat_scorched_iron",
+        "icon_label": "鐵",
+        "label": "焦黑鐵礦",
+        "required_value": "x2",
+        "current_value": "x2",
+        "status": "met",
+        "status_label": "已滿足",
+        "disabled_reason": null
+      }
+    ],
+    "recipe_focus_pouch": [
+      {
+        "id": "gold",
+        "icon_label": "G",
+        "label": "金幣",
+        "required_value": "140G",
+        "current_value": "420G",
+        "status": "met",
+        "status_label": "已滿足",
+        "disabled_reason": null
+      },
+      {
+        "id": "mat_moss_fiber",
+        "icon_label": "苔",
+        "label": "青苔纖維",
+        "required_value": "x3",
+        "current_value": "x8",
+        "status": "met",
+        "status_label": "已滿足",
+        "disabled_reason": null
+      },
+      {
+        "id": "mat_small_crystal",
+        "icon_label": "晶",
+        "label": "小魔晶",
+        "required_value": "x2",
+        "current_value": "x5",
+        "status": "met",
+        "status_label": "已滿足",
+        "disabled_reason": null
+      }
+    ],
+    "recipe_heat_charm": [
+      {
+        "id": "gold",
+        "icon_label": "G",
+        "label": "金幣",
+        "required_value": "260G",
+        "current_value": "420G",
+        "status": "met",
+        "status_label": "已滿足",
+        "disabled_reason": null
+      },
+      {
+        "id": "base_acc_warm_stone",
+        "icon_label": "基",
+        "label": "基底裝備：暖石墜",
+        "required_value": "x1",
+        "current_value": "x1（已裝備）",
+        "status": "limited",
+        "status_label": "可消耗",
+        "disabled_reason": null
+      },
+      {
+        "id": "mat_lava_shard",
+        "icon_label": "熔",
+        "label": "熔岩碎片",
+        "required_value": "x1",
+        "current_value": "x1",
+        "status": "met",
+        "status_label": "已滿足",
+        "disabled_reason": null
+      }
+    ],
+    "recipe_piercing_bundle": [
+      {
+        "id": "gold",
+        "icon_label": "G",
+        "label": "金幣",
+        "required_value": "120G",
+        "current_value": "420G",
+        "status": "met",
+        "status_label": "已滿足",
+        "disabled_reason": null
+      },
+      {
+        "id": "mat_scorched_iron",
+        "icon_label": "鐵",
+        "label": "焦黑鐵礦",
+        "required_value": "x2",
+        "current_value": "x2",
+        "status": "met",
+        "status_label": "已滿足",
+        "disabled_reason": null
+      },
+      {
+        "id": "mat_cracked_stone",
+        "icon_label": "石",
+        "label": "破裂石片",
+        "required_value": "x3",
+        "current_value": "x6",
+        "status": "met",
+        "status_label": "已滿足",
+        "disabled_reason": null
+      }
+    ]
+  },
+  "feedback_message": {
+    "tone": "info",
+    "speaker": "米菈",
+    "text": "選一張配方，右側會顯示金幣、素材與基底裝備狀態。"
+  },
+  "empty_state": {
+    "message": "目前沒有符合分類的可用配方。"
+  },
+  "debug_notes": [
+    "Default Synthesis fixture is static display data only.",
+    "Craft action logs UIAction only and does not change inventory, gold, or equipment.",
+    "Fixture values mirror current runtime recipes for readability but are not gameplay SSOT."
+  ]
+}
