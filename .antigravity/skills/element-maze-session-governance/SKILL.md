@@ -38,6 +38,19 @@ Current GUI prototype boundary:
 - do not modify runtime, data, schema, combat formula, or save format
 - do not start formal asset pipeline
 
+GUI Prototype Server Helper:
+- When verifying HTML static prototypes, always use the local server started by the root batch file:
+  - Run `start_gui_prototype_server.bat` to launch the Python `http.server` from `07_gui_prototype` on port `8000`.
+  - Do not open static HTML files via `file://` directly in browsers to prevent CORS/file-loading errors.
+- Standard Local URLs for manual or browser verification:
+  - Synthesis Screen: http://localhost:8000/synthesis_screen/index.html
+  - Combat Screen: http://localhost:8000/combat_screen/index.html
+  - Start Screen: http://localhost:8000/start_screen/index.html
+  - Town Hub: http://localhost:8000/town_hub/index.html
+  - Guild Screen: http://localhost:8000/guild_screen/index.html
+  - World Map: http://localhost:8000/world_map/index.html
+  - Dungeon Exploration: http://localhost:8000/dungeon_exploration/index.html
+
 ## Strictly Forbidden Drift Areas
 
 Do not expand into the following unless the user explicitly asks and confirms a scoped plan:
@@ -321,13 +334,21 @@ New session prompt format:
 目前狀態：
 <current state>
 
-目前邊界：
+目前邊界與伺服器 URLs：
 - static fixtures only
 - 不接 Python runtime
 - 不讀寫 save.json
 - 不修改 runtime / data / schema / combat formula / save format
 - 不啟動正式 asset pipeline
 - 不開啟大型系統或多系統重構
+- 原型網頁測試不可直接點擊 `file://` 開啟，必須執行 `start_gui_prototype_server.bat` 透過 `http://localhost:8000` 伺服器啟動：
+  - Synthesis: http://localhost:8000/synthesis_screen/index.html
+  - Combat: http://localhost:8000/combat_screen/index.html
+  - Town Hub: http://localhost:8000/town_hub/index.html
+  - World Map: http://localhost:8000/world_map/index.html
+  - Guild: http://localhost:8000/guild_screen/index.html
+  - Dungeon: http://localhost:8000/dungeon_exploration/index.html
+  - Start Screen: http://localhost:8000/start_screen/index.html
 
 本次任務：
 <specific task>
