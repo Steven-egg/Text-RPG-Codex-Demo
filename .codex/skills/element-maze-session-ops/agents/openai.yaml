@@ -1,0 +1,4 @@
+interface:
+  display_name: "Element Maze Session Ops"
+  short_description: "Handoffs and GUI prototype checks"
+  default_prompt: "Use $element-maze-session-ops to decide whether to continue this session or produce a next-session handoff prompt."
