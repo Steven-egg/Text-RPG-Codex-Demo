@@ -139,6 +139,43 @@ Before editing or planning an HTML static prototype, run this decision gate:
 
 For a new prototype planning prompt, include the expected layout pattern, fixture names, key UIAction events, navigation target, and verification checklist, but keep final implementation decisions aligned with live planning docs.
 
+### GUI Prototype Server Helper
+
+Use when the user asks how to launch, preview, smoke test, or browser test HTML static prototypes.
+
+Always remind the user to use a local HTTP server rather than `file://`, because fixture `fetch()` calls may fail from direct file URLs.
+
+Standard server root:
+
+```text
+C:\Users\User\OneDrive\文字冒險遊戲\07_gui_prototype
+```
+
+Standard command:
+
+```powershell
+cd C:\Users\User\OneDrive\文字冒險遊戲\07_gui_prototype
+python -m http.server 8000
+```
+
+If the repo helper exists, prefer telling the user to run:
+
+```powershell
+.\start_gui_prototype_server.bat
+```
+
+Standard URLs:
+
+- Start Screen: `http://localhost:8000/start_screen/index.html`
+- Town Hub: `http://localhost:8000/town_hub/index.html`
+- Guild Screen: `http://localhost:8000/guild_screen/index.html`
+- World Map: `http://localhost:8000/world_map/index.html`
+- Dungeon Exploration: `http://localhost:8000/dungeon_exploration/index.html`
+- Combat Screen: `http://localhost:8000/combat_screen/index.html`
+- Synthesis Screen: `http://localhost:8000/synthesis_screen/index.html`
+
+When a new prototype screen is added, update this URL list in the project-local skill copy and sync it to the user skill copy.
+
 ### Runtime Preflight
 
 Use when the user asks to continue gameplay/runtime work.
