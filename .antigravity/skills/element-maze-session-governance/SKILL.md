@@ -197,21 +197,31 @@ Preflight response format:
 
 ## Token / Context Status Requests
 
-When the user asks about token usage, context pressure, whether the session is getting long, or whether to start a new session:
+### Trigger Keywords / Semantic Triggers
 
-Do:
+AI must trigger this governance gate automatically when the user asks about context length, session size, or tokens. Explicit trigger keywords include:
+
+* 中文觸發語句：`需要開新對話嗎`、`目前上下文是否過長`、`context 是否過長`、`session 是否太長`、`是否需要 handoff`、`是否需要 new conversation`、`目前 token 壓力`、`對話是否該切換`、`請做 session governance gate`、`請做 context gate`、`上下文壓力`、`是否該開新 session`
+* 英文及語意觸發詞：`context pressure`、`token usage`、`session size`、`is context too long`、`new session check`、`handoff check`
+
+### Rules of Engagement
+
+1. When these trigger words or similar semantics are detected, AI must immediately enter a read-only session governance gate.
+2. Under no circumstances should AI proceed with code modifications or change GUI / runtime / data / schema / save files in this state.
+3. If safe environment access is available, AI may execute `git status --short` to verify repository state. If the environment or state cannot be reliably confirmed, AI must state that Git state was not checked, rather than forcing execution.
+4. AI must use a tone based on "best qualitative estimation from visible context". Do not make absolute or over-confident guarantees such as "completely safe", "100% accurate", or "perfectly synchronized".
+
+### Action & Output Format
 
 * Estimate context pressure qualitatively.
 * Identify whether current task should continue or hand off.
 * Recommend one of:
-
   * continue current session
   * summarize and continue
   * generate new session prompt
   * stop and commit/snapshot first
 
 Do not:
-
 * invent exact token counts unless the tool provides them
 * claim exact remaining token amount
 * continue large analysis when the safer answer is to hand off

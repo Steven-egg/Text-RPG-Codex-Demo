@@ -192,6 +192,7 @@ Guild Screen 目前採納方向是「冒險者工會 / 委託板」：
 - `05_assets/gui_references/start_screen/`：Start Screen panel layout reference 暫存區；只用於對照入口按鈕與登錄 modal 排版，不是 runtime asset。
 - `05_assets/gui_references/guild_screen/README.md`：Guild Screen reference baseline 資料夾說明。
 - `05_assets/gui_references/facility_synthesis_screen/README.md`：Synthesis Screen candidate mockup 資料夾說明。
+- `05_assets/gui_references/facility_shop_screen/README.md`：Shop Screen visual reference 與 mockup 規劃說明。
 - `05_assets/gui_references/world_map/README.md`：World Map menu drawer / detail drawer user mockup 資料夾說明。
 
 這一層只管理 reference 與候選圖，不代表正式 asset pipeline 已開始。

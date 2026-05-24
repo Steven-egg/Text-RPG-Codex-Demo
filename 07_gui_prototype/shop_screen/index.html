@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Shop Screen Static Prototype</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="shop-shell" data-load-state="loading">
+      <header class="shop-header">
+        <div class="title-copy">
+          <p class="screen-label">設施畫面</p>
+          <h1 id="screen-title">Loading</h1>
+          <p id="screen-subtitle" class="subtitle"></p>
+        </div>
+        <div class="fixture-switcher" aria-label="Prototype fixture">
+          <label for="fixture-select">測試狀態</label>
+          <select id="fixture-select">
+            <option value="./fixtures/shop-default.json">Default Shop (正常購買)</option>
+            <option value="./fixtures/shop-constrained.json">Constrained Shop (受限狀態)</option>
+          </select>
+        </div>
+      </header>
+
+
+      <main class="shop-layout">
+        <section class="item-browser" aria-label="Item list">
+          <div class="category-tabs" id="category-tabs"></div>
+          <div class="item-list" id="item-list"></div>
+        </section>
+
+        <section class="item-detail-area" aria-live="polite">
+          <section class="item-detail-card">
+            <div class="detail-heading">
+              <p class="panel-label">商品詳情</p>
+              <span id="detail-status" class="status-badge"></span>
+            </div>
+            <div id="item-detail" class="item-detail"></div>
+          </section>
+
+          <section class="requirement-panel">
+            <p class="panel-label">購買要求與限制</p>
+            <div id="requirement-list" class="requirement-list"></div>
+          </section>
+        </section>
+
+        <aside class="shopkeeper-side" aria-label="Shopkeeper">
+          <section class="npc-region">
+            <div class="npc-portrait" id="npc-portrait" aria-hidden="true"></div>
+            <div class="npc-copy">
+              <p class="panel-label">行商</p>
+              <h2 id="npc-name"></h2>
+              <p id="npc-role" class="npc-role"></p>
+            </div>
+          </section>
+        </aside>
+      </main>
+
+      <footer class="shop-footer">
+        <button id="back-action" class="secondary-action" type="button">返回城鎮</button>
+        <section class="feedback-bar" aria-live="polite">
+          <p class="panel-label" id="feedback-speaker">提示</p>
+          <p id="feedback-message"></p>
+        </section>
+        <button id="primary-action" class="primary-action" type="button"></button>
+      </footer>
+
+      <details class="action-log-panel">
+        <summary class="panel-label">UIAction Log</summary>
+        <div class="action-log-heading">
+          <button id="clear-log" class="quiet-button" type="button" aria-label="Clear log">清除</button>
+        </div>
+        <ol id="action-log" class="action-log"></ol>
+      </details>
+    </div>
+
+    <script type="module" src="./shop-screen.js"></script>
+  </body>
+</html>

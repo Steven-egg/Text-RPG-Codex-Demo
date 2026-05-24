@@ -1,0 +1,444 @@
+{
+  "screen_id": "facility_shop_screen",
+  "facility_id": "travel_shop",
+  "title": "星燈行商鋪",
+  "subtitle": "販售迷宮探險所需的常用藥水、戰術道具與精美飾品。點擊商品可查看詳情並進行模擬購買。",
+  "npc": {
+    "id": "terry",
+    "name": "特里",
+    "role": "行商特里，常年往返於迷宮城鎮之間，販售各種實用的補給品。",
+    "guidance": "「歡迎光臨！今天的貨色都很齊全喔！特別是生命補給藥水，剛從公會那裡進了一批新鮮的！」",
+    "portrait_placeholder": "TR"
+  },
+  "player_summary": {
+    "name": "艾琳",
+    "level": 8,
+    "job": "盜賊",
+    "gold": 420
+  },
+  "category_tabs": [
+    { "id": "all", "label": "全部商品", "count": 9, "enabled": true },
+    { "id": "consumables", "label": "補給品", "count": 4, "enabled": true },
+    { "id": "tactical", "label": "戰術道具", "count": 2, "enabled": true },
+    { "id": "accessories", "label": "飾品", "count": 3, "enabled": true }
+  ],
+  "selected_category_id": "all",
+  "selected_item_id": "item_potion_s",
+  "list_rows": [
+    {
+      "id": "row_potion_s",
+      "item_id": "item_potion_s",
+      "title": "小藥水",
+      "category": "consumables",
+      "summary": "回復 HP 35。旅行最基礎的保障。",
+      "price": 30,
+      "owned_count": 2,
+      "stock_label": "無限庫存",
+      "status": "purchasable",
+      "enabled": true,
+      "disabled_reason": null,
+      "badges": [
+        { "badge_id": "hot", "label": "熱銷", "kind": "info" }
+      ]
+    },
+    {
+      "id": "row_potion_m",
+      "item_id": "item_potion_m",
+      "title": "中藥水",
+      "category": "consumables",
+      "summary": "回復 HP 70。效果顯著的優質藥水。",
+      "price": 80,
+      "owned_count": 0,
+      "stock_label": "庫存：5",
+      "status": "purchasable",
+      "enabled": true,
+      "disabled_reason": null,
+      "badges": []
+    },
+    {
+      "id": "row_herb_antidote",
+      "item_id": "item_herb_antidote",
+      "title": "解毒草",
+      "category": "consumables",
+      "summary": "解除中毒，v1 中也可緩解灼傷。",
+      "price": 25,
+      "owned_count": 4,
+      "stock_label": "無限庫存",
+      "status": "purchasable",
+      "enabled": true,
+      "disabled_reason": null,
+      "badges": []
+    },
+    {
+      "id": "row_focus_drop",
+      "item_id": "item_focus_drop",
+      "title": "集中滴露",
+      "category": "consumables",
+      "summary": "回復 MP 12。活化魔力流動的藥水。",
+      "price": 45,
+      "owned_count": 1,
+      "stock_label": "庫存：3",
+      "status": "purchasable",
+      "enabled": true,
+      "disabled_reason": null,
+      "badges": []
+    },
+    {
+      "id": "row_escape_scroll",
+      "item_id": "item_escape_scroll",
+      "title": "逃脫卷軸",
+      "category": "tactical",
+      "summary": "非 Boss 戰中撤退，保留已取得素材。",
+      "price": 120,
+      "owned_count": 0,
+      "stock_label": "庫存：2",
+      "status": "purchasable",
+      "enabled": true,
+      "disabled_reason": null,
+      "badges": []
+    },
+    {
+      "id": "row_armor_piercer",
+      "item_id": "item_armor_piercer",
+      "title": "破甲釘",
+      "category": "tactical",
+      "summary": "造成少量傷害，並 3 回合降低敵方防禦 20%。",
+      "price": 150,
+      "owned_count": 1,
+      "stock_label": "庫存：4",
+      "status": "purchasable",
+      "enabled": true,
+      "disabled_reason": null,
+      "badges": []
+    },
+    {
+      "id": "row_lucky_charm",
+      "item_id": "acc_lucky_charm",
+      "title": "幸運小符",
+      "category": "accessories",
+      "summary": "稀有素材掉落機率 +3%。",
+      "price": 160,
+      "owned_count": 0,
+      "stock_label": "獨家限量：1",
+      "status": "purchasable",
+      "enabled": true,
+      "disabled_reason": null,
+      "badges": []
+    },
+    {
+      "id": "row_scout_ring",
+      "item_id": "acc_scout_ring",
+      "title": "斥候戒指",
+      "category": "accessories",
+      "summary": "陷阱迴避 +8%。",
+      "price": 180,
+      "owned_count": 1,
+      "stock_label": "獨家限量：1",
+      "status": "purchasable",
+      "enabled": true,
+      "disabled_reason": null,
+      "badges": []
+    },
+    {
+      "id": "row_warm_stone",
+      "item_id": "acc_warm_stone",
+      "title": "暖石墜",
+      "category": "accessories",
+      "summary": "火傷害 -10%。",
+      "price": 260,
+      "owned_count": 0,
+      "stock_label": "獨家限量：1",
+      "status": "purchasable",
+      "enabled": true,
+      "disabled_reason": null,
+      "badges": [
+        { "badge_id": "rare", "label": "防禦飾品", "kind": "warning" }
+      ]
+    }
+  ],
+  "item_details": {
+    "item_potion_s": {
+      "item_id": "item_potion_s",
+      "title": "小藥水",
+      "category_label": "補給品",
+      "description": "星燈鎮藥劑師調配的基礎恢復藥水，輕便好攜帶，是初階冒險者的必備補給。",
+      "effect_summary": "回復 HP 35 點",
+      "use_context": "可在戰鬥中或非戰鬥狀態下使用。",
+      "price": 30,
+      "owned_count": 2,
+      "status": "purchasable",
+      "disabled_reason": null
+    },
+    "item_potion_m": {
+      "item_id": "item_potion_m",
+      "title": "中藥水",
+      "category_label": "補給品",
+      "description": "含有更多星燈草提取物的高階恢復藥水，能快速癒合較深的傷口。",
+      "effect_summary": "回復 HP 70 點",
+      "use_context": "可在戰鬥中或非戰鬥狀態下使用。",
+      "price": 80,
+      "owned_count": 0,
+      "status": "purchasable",
+      "disabled_reason": null
+    },
+    "item_herb_antidote": {
+      "item_id": "item_herb_antidote",
+      "title": "解毒草",
+      "category_label": "補給品",
+      "description": "採集自森林邊緣的天然藥草，能有效中和毒素；在 v1 中也可用於緩解輕微灼傷。",
+      "effect_summary": "解除中毒狀態；v1 中亦可消除灼傷 buff",
+      "use_context": "可在戰鬥中或非戰鬥狀態下使用。",
+      "price": 25,
+      "owned_count": 4,
+      "status": "purchasable",
+      "disabled_reason": null
+    },
+    "item_focus_drop": {
+      "item_id": "item_focus_drop",
+      "title": "集中滴露",
+      "category_label": "補給品",
+      "description": "蒸餾自魔力花露的澄澈液體，能微幅活化精神力與法力迴路。",
+      "effect_summary": "回復 MP 12 點",
+      "use_context": "可在戰鬥中或非戰鬥狀態下使用。",
+      "price": 45,
+      "owned_count": 1,
+      "status": "purchasable",
+      "disabled_reason": null
+    },
+    "item_escape_scroll": {
+      "item_id": "item_escape_scroll",
+      "title": "逃脫卷軸",
+      "category_label": "戰術道具",
+      "description": "刻印有傳送法術的單次消耗型法術卷軸。能在迷宮深處將冒險者安全送回地表。",
+      "effect_summary": "非 Boss 戰中立即撤退，保留當前已取得的所有素材",
+      "use_context": "限於迷宮探索或戰鬥狀態中使用 (Boss 戰無效)。",
+      "price": 120,
+      "owned_count": 0,
+      "status": "purchasable",
+      "disabled_reason": null
+    },
+    "item_armor_piercer": {
+      "item_id": "item_armor_piercer",
+      "title": "破甲釘",
+      "category_label": "戰術道具",
+      "description": "表面塗有腐蝕性毒素的特製鐵釘，可用於削弱強防禦型魔物的裝甲。",
+      "effect_summary": "造成少量傷害，並在 3 回合內降低敵方防禦 20%",
+      "use_context": "僅限在戰鬥狀態下投擲使用。",
+      "price": 150,
+      "owned_count": 1,
+      "status": "purchasable",
+      "disabled_reason": null
+    },
+    "acc_lucky_charm": {
+      "item_id": "acc_lucky_charm",
+      "title": "幸運小符",
+      "category_label": "飾品",
+      "description": "用幸運草編製的幸運護身符，能帶來些微的運氣加持。",
+      "effect_summary": "稀有素材掉落機率 +3%",
+      "use_context": "購買後需在角色背包或裝備介面手動裝備。",
+      "price": 160,
+      "owned_count": 0,
+      "status": "purchasable",
+      "disabled_reason": null
+    },
+    "acc_scout_ring": {
+      "item_id": "acc_scout_ring",
+      "title": "斥候戒指",
+      "category_label": "飾品",
+      "description": "斥候公會推薦的黃銅戒指，表面刻有偵測魔法迴路，能提早警示陷阱。",
+      "effect_summary": "陷阱迴避機率 +8%",
+      "use_context": "購買後需在角色背包或裝備介面手動裝備。",
+      "price": 180,
+      "owned_count": 1,
+      "status": "purchasable",
+      "disabled_reason": null
+    },
+    "acc_warm_stone": {
+      "item_id": "acc_warm_stone",
+      "title": "暖石墜",
+      "category_label": "飾品",
+      "description": "鑲嵌有微熱火山砂的墜飾，常備於前進燼印鎮與高溫焦石礦坑的旅人身上。",
+      "effect_summary": "火元素傷害減免 -10%",
+      "use_context": "購買後需在角色背包或裝備介面手動裝備。",
+      "price": 260,
+      "owned_count": 0,
+      "status": "purchasable",
+      "disabled_reason": null
+    }
+  },
+  "requirement_rows": {
+    "item_potion_s": [
+      {
+        "id": "gold",
+        "label": "金幣需求",
+        "required_value": "30G",
+        "current_value": "420G",
+        "status": "met",
+        "disabled_reason": null
+      }
+    ],
+    "item_potion_m": [
+      {
+        "id": "gold",
+        "label": "金幣需求",
+        "required_value": "80G",
+        "current_value": "420G",
+        "status": "met",
+        "disabled_reason": null
+      }
+    ],
+    "item_herb_antidote": [
+      {
+        "id": "gold",
+        "label": "金幣需求",
+        "required_value": "25G",
+        "current_value": "420G",
+        "status": "met",
+        "disabled_reason": null
+      }
+    ],
+    "item_focus_drop": [
+      {
+        "id": "gold",
+        "label": "金幣需求",
+        "required_value": "45G",
+        "current_value": "420G",
+        "status": "met",
+        "disabled_reason": null
+      }
+    ],
+    "item_escape_scroll": [
+      {
+        "id": "gold",
+        "label": "金幣需求",
+        "required_value": "120G",
+        "current_value": "420G",
+        "status": "met",
+        "disabled_reason": null
+      }
+    ],
+    "item_armor_piercer": [
+      {
+        "id": "gold",
+        "label": "金幣需求",
+        "required_value": "150G",
+        "current_value": "420G",
+        "status": "met",
+        "disabled_reason": null
+      }
+    ],
+    "acc_lucky_charm": [
+      {
+        "id": "gold",
+        "label": "金幣需求",
+        "required_value": "160G",
+        "current_value": "420G",
+        "status": "met",
+        "disabled_reason": null
+      }
+    ],
+    "acc_scout_ring": [
+      {
+        "id": "gold",
+        "label": "金幣需求",
+        "required_value": "180G",
+        "current_value": "420G",
+        "status": "met",
+        "disabled_reason": null
+      }
+    ],
+    "acc_warm_stone": [
+      {
+        "id": "gold",
+        "label": "金幣需求",
+        "required_value": "260G",
+        "current_value": "420G",
+        "status": "met",
+        "disabled_reason": null
+      }
+    ]
+  },
+  "primary_actions": {
+    "item_potion_s": {
+      "action_id": "buy_item",
+      "label": "購買小藥水",
+      "enabled": true,
+      "disabled_reason": null,
+      "payload": { "item_id": "item_potion_s", "price": 30 },
+      "result_message": "成功購買小藥水！獲得小藥水 x1，扣除金幣 30G (此為 Static Prototype，實際數值不變)。"
+    },
+    "item_potion_m": {
+      "action_id": "buy_item",
+      "label": "購買中藥水",
+      "enabled": true,
+      "disabled_reason": null,
+      "payload": { "item_id": "item_potion_m", "price": 80 },
+      "result_message": "成功購買中藥水！獲得中藥水 x1，扣除金幣 80G (此為 Static Prototype，實際數值不變)。"
+    },
+    "item_herb_antidote": {
+      "action_id": "buy_item",
+      "label": "購買解毒草",
+      "enabled": true,
+      "disabled_reason": null,
+      "payload": { "item_id": "item_herb_antidote", "price": 25 },
+      "result_message": "成功購買解毒草！獲得解毒草 x1，扣除金幣 25G (此為 Static Prototype，實際數值不變)。"
+    },
+    "item_focus_drop": {
+      "action_id": "buy_item",
+      "label": "購買集中滴露",
+      "enabled": true,
+      "disabled_reason": null,
+      "payload": { "item_id": "item_focus_drop", "price": 45 },
+      "result_message": "成功購買集中滴露！獲得集中滴露 x1，扣除金幣 45G (此為 Static Prototype，實際數值不變)。"
+    },
+    "item_escape_scroll": {
+      "action_id": "buy_item",
+      "label": "購買逃脫卷軸",
+      "enabled": true,
+      "disabled_reason": null,
+      "payload": { "item_id": "item_escape_scroll", "price": 120 },
+      "result_message": "成功購買逃脫卷軸！獲得逃脫卷軸 x1，扣除金幣 120G (此為 Static Prototype，實際數值不變)。"
+    },
+    "item_armor_piercer": {
+      "action_id": "buy_item",
+      "label": "購買破甲釘",
+      "enabled": true,
+      "disabled_reason": null,
+      "payload": { "item_id": "item_armor_piercer", "price": 150 },
+      "result_message": "成功購買破甲釘！獲得破甲釘 x1，扣除金幣 150G (此為 Static Prototype，實際數值不變)。"
+    },
+    "acc_lucky_charm": {
+      "action_id": "buy_item",
+      "label": "購買幸運小符",
+      "enabled": true,
+      "disabled_reason": null,
+      "payload": { "item_id": "acc_lucky_charm", "price": 160 },
+      "result_message": "成功購買幸運小符！獲得幸運小符 x1，扣除金幣 160G (此為 Static Prototype，實際數值不變)。"
+    },
+    "acc_scout_ring": {
+      "action_id": "buy_item",
+      "label": "購買斥候戒指",
+      "enabled": true,
+      "disabled_reason": null,
+      "payload": { "item_id": "acc_scout_ring", "price": 180 },
+      "result_message": "成功購買斥候戒指！獲得斥候戒指 x1，扣除金幣 180G (此為 Static Prototype，實際數值不變)。"
+    },
+    "acc_warm_stone": {
+      "action_id": "buy_item",
+      "label": "購買暖石墜",
+      "enabled": true,
+      "disabled_reason": null,
+      "payload": { "item_id": "acc_warm_stone", "price": 260 },
+      "result_message": "成功購買暖石墜！獲得暖石墜 x1，扣除金幣 260G (此為 Static Prototype，實際數值不變)。"
+    }
+  },
+  "feedback_message": {
+    "tone": "info",
+    "speaker": "特里",
+    "text": "「挑選想要的物品，右側會顯示購買所需的條件與持有狀況。」"
+  },
+  "debug_notes": [
+    "Default Shop fixture is static display data only.",
+    "Buy action logs UIAction only and does not change player inventory or gold."
+  ]
+}
