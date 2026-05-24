@@ -1,0 +1,170 @@
+{
+  "player": {
+    "name": "米菈亞",
+    "job": "法師",
+    "level": 3,
+    "current_hp": 32,
+    "max_hp": 32,
+    "current_mp": 45,
+    "max_mp": 45,
+    "gold": 50,
+    "completed_quests": ["quest_register"],
+    "inventory": {
+      "mat_cracked_stone": 1,
+      "weapon_apprentice_wand": 1
+    },
+    "equipment": {
+      "weapon": "weapon_apprentice_wand",
+      "head": "armor_cloth_cap",
+      "body": "armor_traveler_cloth"
+    }
+  },
+  "weapons": [
+    {
+      "id": "weapon_wood_sword",
+      "name": "木劍",
+      "slot": "weapon",
+      "subtype": "劍",
+      "price": 80,
+      "jobs": ["劍士"],
+      "stats": {"attack": 5},
+      "desc": "初期過渡武器。"
+    },
+    {
+      "id": "weapon_iron_sword",
+      "name": "鐵劍",
+      "slot": "weapon",
+      "subtype": "劍",
+      "price": 220,
+      "jobs": ["劍士"],
+      "stats": {"attack": 12},
+      "desc": "劍士 v1 的主要武器目標。"
+    },
+    {
+      "id": "weapon_apprentice_wand",
+      "name": "見習短杖",
+      "slot": "weapon",
+      "subtype": "杖",
+      "price": 180,
+      "jobs": ["法師", "牧師"],
+      "stats": {"attack": 3, "magic_attack": 8},
+      "desc": "初期施法裝。"
+    },
+    {
+      "id": "weapon_hunter_dagger",
+      "name": "獵人短匕",
+      "slot": "weapon",
+      "subtype": "匕首",
+      "price": 160,
+      "jobs": ["盜賊"],
+      "stats": {"attack": 8, "accuracy": 3},
+      "desc": "提高盜賊穩定輸出。"
+    },
+    {
+      "id": "weapon_oak_staff",
+      "name": "橡木法杖",
+      "slot": "weapon",
+      "subtype": "杖",
+      "price": 260,
+      "jobs": ["法師", "牧師"],
+      "stats": {"attack": 5, "magic_attack": 12},
+      "desc": "魔法書流派核心。"
+    }
+  ],
+  "armors": [
+    {
+      "id": "armor_cloth_cap",
+      "name": "布帽",
+      "slot": "head",
+      "subtype": "帽",
+      "price": 50,
+      "jobs": ["劍士", "法師", "盜賊", "牧師"],
+      "stats": {"defense": 2},
+      "desc": "低價防具。"
+    },
+    {
+      "id": "armor_leather_cap",
+      "name": "皮帽",
+      "slot": "head",
+      "subtype": "帽",
+      "price": 90,
+      "jobs": ["劍士", "法師", "盜賊", "牧師"],
+      "stats": {"defense": 4},
+      "desc": "初期通用頭部防具。"
+    },
+    {
+      "id": "armor_rogue_sleeve_blade",
+      "name": "影袖副刃",
+      "slot": "head",
+      "subtype": "副武器",
+      "price": 240,
+      "jobs": ["盜賊"],
+      "stats": {"attack": 3, "agility": 2, "crit": 3},
+      "desc": "犧牲頭部防護，換取盜賊近身爆發與機動性的暗藏副刃。"
+    },
+    {
+      "id": "armor_traveler_cloth",
+      "name": "旅人衣",
+      "slot": "body",
+      "subtype": "衣",
+      "price": 120,
+      "jobs": ["劍士", "法師", "盜賊", "牧師"],
+      "stats": {"defense": 5, "agility": 1},
+      "desc": "輕便的通用防具。"
+    },
+    {
+      "id": "armor_leather_armor",
+      "name": "皮甲",
+      "slot": "body",
+      "subtype": "甲",
+      "price": 220,
+      "jobs": ["劍士", "盜賊", "牧師"],
+      "stats": {"defense": 10, "agility": -1},
+      "desc": "青苔洞窟後的主要防具。"
+    },
+    {
+      "id": "armor_round_shield",
+      "name": "圓盾",
+      "slot": "special",
+      "subtype": "盾",
+      "price": 180,
+      "jobs": ["劍士"],
+      "stats": {"defense": 6, "agility": -1},
+      "desc": "防禦型配置。"
+    }
+  ],
+  "upgrades": [
+    {
+      "id": "recipe_iron_sword_plus_1",
+      "name": "鐵劍 +1",
+      "output_id": "weapon_iron_sword_plus_1",
+      "output_name": "鐵劍 +1",
+      "base_item": "weapon_iron_sword",
+      "base_name": "鐵劍",
+      "materials": {
+        "mat_cracked_stone": { "name": "裂石", "required": 5 },
+        "mat_scorched_iron": { "name": "焦鐵", "required": 1 }
+      },
+      "gold": 180,
+      "stats": {"attack": 18},
+      "desc": "消耗鐵劍，製作攻擊 +18 的鐵劍 +1。",
+      "unlock_quest": "quest_cave_gathering"
+    },
+    {
+      "id": "recipe_leather_armor_plus_1",
+      "name": "皮甲 +1",
+      "output_id": "armor_leather_armor_plus_1",
+      "output_name": "皮甲 +1",
+      "base_item": "armor_leather_armor",
+      "base_name": "皮甲",
+      "materials": {
+        "mat_moss_fiber": { "name": "苔蘚纖維", "required": 4 },
+        "mat_cracked_stone": { "name": "裂石", "required": 3 }
+      },
+      "gold": 160,
+      "stats": {"defense": 15, "agility": -1},
+      "desc": "消耗皮甲，製作防禦 +15 的皮甲 +1。",
+      "unlock_quest": "quest_cave_gathering"
+    }
+  ]
+}

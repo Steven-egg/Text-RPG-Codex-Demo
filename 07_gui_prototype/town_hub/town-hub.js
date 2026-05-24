@@ -32,6 +32,7 @@ const staticFacilityRoutes = {
   guild: "../guild_screen/index.html",
   synthesis: "../synthesis_screen/index.html",
   travel_shop: "../shop_screen/index.html",
+  workshop: "../workshop_screen/index.html",
 };
 const staticActionRoutes = {
   open_world_map: "../world_map/index.html",
