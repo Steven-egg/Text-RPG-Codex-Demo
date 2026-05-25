@@ -3,32 +3,33 @@ const titleEl = document.querySelector("#screen-title");
 const subtitleEl = document.querySelector("#screen-subtitle");
 const resourceStripEl = document.querySelector("#resource-strip");
 const backpackTabsEl = document.querySelector("#backpack-tabs");
-const inventoryGridEl = document.querySelector("#inventory-item-grid");
-const storageGridEl = document.querySelector("#storage-item-grid");
+
+// Lists
+const inventoryListEl = document.querySelector("#inventory-item-list");
+const storageListEl = document.querySelector("#storage-item-list");
+
+// Capacity
 const capacityStatusEl = document.querySelector("#storage-status-badge");
 const capacityBarFillEl = document.querySelector("#capacity-bar-fill");
 const capacityTextEl = document.querySelector("#capacity-text");
-const quickDetailEl = document.querySelector("#item-quick-detail");
 
-// NPC
-const npcNameEl = document.querySelector("#npc-name");
-const npcRoleEl = document.querySelector("#npc-role");
-const npcSpeechBubbleEl = document.querySelector("#npc-speech-bubble");
-const npcPortraitEl = document.querySelector("#npc-portrait");
+// Center Transfer Action Panel & Inline Details
+const transferActionPanelEl = document.querySelector("#transfer-action-panel");
+const transferEmptyStateEl = document.querySelector("#transfer-empty-state");
+const transferControlContentEl = document.querySelector("#transfer-control-content");
+const transferItemNameEl = document.querySelector("#transfer-item-name");
+const transferModeBadgeEl = document.querySelector("#transfer-mode-badge");
+const transferItemUsageEl = document.querySelector("#transfer-item-usage");
+const transferItemDescEl = document.querySelector("#transfer-item-desc");
+const transferCountInfoEl = document.querySelector("#transfer-count-info");
 
-// Popover Modal Elements
-const popoverOverlayEl = document.querySelector("#transfer-popover");
-const popoverTitleEl = document.querySelector("#popover-title");
-const popoverModeBadgeEl = document.querySelector("#popover-mode-badge");
-const popoverItemNameEl = document.querySelector("#popover-item-name");
-const popoverItemMetaEl = document.querySelector("#popover-item-meta");
+// Stepper controls
 const popoverValueEl = document.querySelector("#popover-value");
 const popoverLimitLabelEl = document.querySelector("#popover-limit-label");
 const popoverRequirementListEl = document.querySelector("#popover-requirement-list");
 const popoverDecEl = document.querySelector("#popover-dec");
 const popoverIncEl = document.querySelector("#popover-inc");
 const popoverMaxEl = document.querySelector("#popover-max");
-const popoverCancelEl = document.querySelector("#popover-cancel");
 const popoverConfirmEl = document.querySelector("#popover-confirm");
 
 // Footer
@@ -51,9 +52,9 @@ const state = {
 
 const townHubRoute = "../town_hub/index.html";
 const navigationDelayMs = 120;
-const totalSlotCount = 12; // Grid fixed slot sizes ( JRPG standards )
+const warehouseCapacityLimit = 10; // Fixed storage capacity rows
 
-// Emoji dictionary for grid items
+// Emoji dictionary for list items
 const emojiMap = {
   mat_iron_ore: "🪨",
   item_potion_s: "🧪",
@@ -66,7 +67,7 @@ fixtureSelect.addEventListener("change", () => {
   loadFixture(fixtureSelect.value);
 });
 
-// Stepper within Popover listeners
+// Inline Stepper Listeners
 popoverDecEl.addEventListener("click", () => adjustQuantity(-1));
 popoverIncEl.addEventListener("click", () => adjustQuantity(1));
 popoverMaxEl.addEventListener("click", () => {
@@ -76,15 +77,8 @@ popoverMaxEl.addEventListener("click", () => {
   logQuantityChange();
 });
 
-popoverCancelEl.addEventListener("click", closePopover);
-popoverOverlayEl.addEventListener("click", (e) => {
-  if (e.target === popoverOverlayEl) {
-    closePopover();
-  }
-});
-
 popoverConfirmEl.addEventListener("click", () => {
-  executePopoverAction();
+  executeTransferAction();
 });
 
 primaryActionEl.addEventListener("click", () => {
@@ -124,9 +118,15 @@ async function loadFixture(path) {
     state.quantityValue = 1;
     state.actionLog = [];
     
-    closePopover();
+    closeTransferControls();
     render();
     logSystem(`loaded ${path}`);
+    
+    // Set initial JRPG NPC welcome guidance into bottom bar
+    const speaker = model.npc?.name ?? "諾亞";
+    const welcome = model.npc?.avatar_text ?? "選擇左側背包物品 (存入) 或右側倉庫物品 (取出) 來進行轉移整理。";
+    renderFeedback(speaker, welcome);
+    
     shellEl.dataset.loadState = "ready";
   } catch (error) {
     renderLoadError(error);
@@ -138,26 +138,17 @@ function render() {
   const { model } = state;
   titleEl.textContent = model.title ?? "";
   subtitleEl.textContent = model.subtitle ?? "";
-  
-  // NPC
-  npcNameEl.textContent = model.npc?.name ?? "諾亞";
-  npcRoleEl.textContent = model.npc?.role ?? "冒險者工會會長";
-  npcSpeechBubbleEl.replaceChildren();
-  const speechText = document.createElement("p");
-  speechText.textContent = model.npc?.avatar_text ?? "";
-  npcSpeechBubbleEl.appendChild(speechText);
-  npcPortraitEl.querySelector(".avatar-silhouette").textContent = model.npc?.portrait_placeholder ?? "Noah";
 
   renderResources(model.resource_strip ?? []);
   renderBackpackCategoryTabs(model.category_tabs ?? []);
   renderCapacityCard();
   
-  // Grids
-  renderBackpackGrid();
-  renderStorageGrid();
+  // Long Lists
+  renderBackpackList();
+  renderStorageList();
   
-  // Details & log
-  renderQuickDetail();
+  // Details & Action panel
+  updateTransferPanel();
   renderFooterActions();
   renderActionLog();
 }
@@ -207,164 +198,279 @@ function renderCapacityCard() {
   }
   
   const capacityUsed = model.storage_rows ? model.storage_rows.length : 0;
-  const percentage = Math.min((capacityUsed / 10) * 100, 100);
+  const percentage = Math.min((capacityUsed / warehouseCapacityLimit) * 100, 100);
   capacityBarFillEl.style.width = `${percentage}%`;
-  capacityTextEl.textContent = `容量: ${capacityUsed} / 10`;
+  capacityTextEl.textContent = `容量: ${capacityUsed} / ${warehouseCapacityLimit}`;
 }
 
-function renderBackpackGrid() {
+function renderBackpackList() {
   const { model, selectedCategory } = state;
-  inventoryGridEl.replaceChildren();
+  inventoryListEl.replaceChildren();
 
   const rows = model.inventory_rows ?? [];
   const filtered = selectedCategory === "all" ? rows : rows.filter(row => row.category === selectedCategory);
   
-  // Always render fixed size of 12 slots to align JRPG interface feeling
-  for (let i = 0; i < totalSlotCount; i++) {
-    const row = filtered[i];
+  if (filtered.length === 0) {
+    inventoryListEl.appendChild(createEmptyState("背包內沒有此類物品"));
+    return;
+  }
+
+  filtered.forEach((row) => {
     const button = document.createElement("button");
     button.type = "button";
+    button.className = "item-row";
     
-    if (!row) {
-      // Empty slot card
-      button.className = "slot-card is-empty";
-      const emptyDash = document.createElement("span");
-      emptyDash.className = "slot-empty-dash";
-      emptyDash.textContent = "--";
-      button.append(emptyDash);
-    } else {
-      // Normal item slot card
-      button.className = "slot-card";
-      button.classList.toggle("is-selected", row.item_id === state.selectedItemId && state.selectedListType === "deposit");
-      button.setAttribute("aria-pressed", String(row.item_id === state.selectedItemId && state.selectedListType === "deposit"));
-      button.dataset.itemId = row.item_id;
+    const isSelected = row.item_id === state.selectedItemId && state.selectedListType === "deposit";
+    button.classList.toggle("is-selected", isSelected);
+    button.setAttribute("aria-pressed", String(isSelected));
+    button.dataset.itemId = row.item_id;
 
-      if (!row.enabled) {
-        button.classList.add("is-blocked");
-        const badge = document.createElement("span");
-        badge.className = "slot-badge";
-        badge.dataset.status = row.item_id === "key_fire_mark_shard" ? "blocked" : "full";
-        badge.textContent = row.item_id === "key_fire_mark_shard" ? "貴重物" : "滿";
-        button.append(badge);
-      }
-
-      const icon = document.createElement("span");
-      icon.className = "slot-icon-area";
-      icon.textContent = emojiMap[row.item_id] ?? "📦";
-
-      const title = document.createElement("span");
-      title.className = "slot-name";
-      title.textContent = row.short_title ?? row.title ?? "";
-
-      const count = document.createElement("span");
-      count.className = "slot-quantity";
-      count.textContent = `x${row.owned_count ?? 0}`;
-
-      button.append(icon, title, count);
-      button.addEventListener("click", () => handleSlotClick(row, "deposit"));
+    if (!row.enabled) {
+      button.classList.add("is-blocked");
     }
+
+    // Left info
+    const leftPart = document.createElement("div");
+    leftPart.className = "item-row-left";
+
+    const icon = document.createElement("span");
+    icon.className = "item-row-icon";
+    icon.textContent = emojiMap[row.item_id] ?? "📦";
+
+    const textPart = document.createElement("div");
+    textPart.className = "item-row-text";
+
+    const name = document.createElement("span");
+    name.className = "item-row-name";
+    name.textContent = row.title ?? "";
+
+    const summary = document.createElement("span");
+    summary.className = "item-row-summary";
+    summary.textContent = row.summary ?? "";
+
+    textPart.append(name, summary);
+    leftPart.append(icon, textPart);
+
+    // Right info
+    const rightPart = document.createElement("div");
+    rightPart.className = "item-row-right";
+
+    const count = document.createElement("span");
+    count.className = "item-row-quantity";
+    count.textContent = `x${row.owned_count ?? 0}`;
+
+    rightPart.append(count);
+
+    // Badge if blocked
+    if (!row.enabled) {
+      const badge = document.createElement("span");
+      badge.className = "item-row-badge";
+      badge.dataset.status = row.item_id === "key_fire_mark_shard" ? "blocked" : "full";
+      badge.textContent = row.item_id === "key_fire_mark_shard" ? "貴重物" : "容量滿";
+      rightPart.append(badge);
+    }
+
+    button.append(leftPart, rightPart);
+    button.addEventListener("click", () => handleRowClick(row, "deposit"));
     
-    inventoryGridEl.appendChild(button);
-  }
+    inventoryListEl.appendChild(button);
+  });
 }
 
-function renderStorageGrid() {
+function renderStorageList() {
   const { model } = state;
-  storageGridEl.replaceChildren();
+  storageListEl.replaceChildren();
 
   const locked = model.storage_state && !model.storage_state.unlocked;
   const rows = locked ? [] : (model.storage_rows ?? []);
   
-  // Render fixed 12 storage slots
-  for (let i = 0; i < totalSlotCount; i++) {
+  // JRPG standard visual limit: Always render exactly 10 rows
+  for (let i = 0; i < warehouseCapacityLimit; i++) {
     const row = rows[i];
-    const button = document.createElement("button");
-    button.type = "button";
     
     if (locked) {
-      button.className = "slot-card is-empty";
-      button.style.opacity = "0.3";
-      const emptyDash = document.createElement("span");
-      emptyDash.className = "slot-empty-dash";
-      emptyDash.textContent = "🔒";
-      button.append(emptyDash);
+      // Locked warehouse slot placeholder row
+      const el = document.createElement("div");
+      el.className = "item-row is-locked";
+      
+      const leftPart = document.createElement("div");
+      leftPart.className = "item-row-left";
+      
+      const icon = document.createElement("span");
+      icon.className = "item-row-icon";
+      icon.textContent = "🔒";
+      
+      const textPart = document.createElement("div");
+      textPart.className = "item-row-text";
+      
+      const name = document.createElement("span");
+      name.className = "item-row-name";
+      name.textContent = "保管欄位鎖定";
+      
+      const summary = document.createElement("span");
+      summary.className = "item-row-summary";
+      summary.textContent = "尚未支付工會解鎖會費";
+      
+      textPart.append(name, summary);
+      leftPart.append(icon, textPart);
+      el.append(leftPart);
+      storageListEl.appendChild(el);
+      
     } else if (!row) {
-      button.className = "slot-card is-empty";
-      const emptyDash = document.createElement("span");
-      emptyDash.className = "slot-empty-dash";
-      emptyDash.textContent = "--";
-      button.append(emptyDash);
+      // Empty placeholder row
+      const el = document.createElement("div");
+      el.className = "item-row is-empty";
+      
+      const leftPart = document.createElement("div");
+      leftPart.className = "item-row-left";
+      
+      const icon = document.createElement("span");
+      icon.className = "item-row-icon";
+      icon.textContent = "➖";
+      
+      const emptyText = document.createElement("span");
+      emptyText.className = "item-row-empty-text";
+      emptyText.textContent = "[ 空置保管欄位 ]";
+      
+      leftPart.append(icon, emptyText);
+      el.append(leftPart);
+      storageListEl.appendChild(el);
+      
     } else {
-      button.className = "slot-card";
-      button.classList.toggle("is-selected", row.item_id === state.selectedItemId && state.selectedListType === "withdraw");
-      button.setAttribute("aria-pressed", String(row.item_id === state.selectedItemId && state.selectedListType === "withdraw"));
+      // Occupied storage row
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "item-row";
+      
+      const isSelected = row.item_id === state.selectedItemId && state.selectedListType === "withdraw";
+      button.classList.toggle("is-selected", isSelected);
+      button.setAttribute("aria-pressed", String(isSelected));
       button.dataset.itemId = row.item_id;
 
+      // Left info
+      const leftPart = document.createElement("div");
+      leftPart.className = "item-row-left";
+
       const icon = document.createElement("span");
-      icon.className = "slot-icon-area";
+      icon.className = "item-row-icon";
       icon.textContent = emojiMap[row.item_id] ?? "📦";
 
-      const title = document.createElement("span");
-      title.className = "slot-name";
-      title.textContent = row.short_title ?? row.title ?? "";
+      const textPart = document.createElement("div");
+      textPart.className = "item-row-text";
+
+      const name = document.createElement("span");
+      name.className = "item-row-name";
+      name.textContent = row.title ?? "";
+
+      const summary = document.createElement("span");
+      summary.className = "item-row-summary";
+      summary.textContent = row.summary ?? "";
+
+      textPart.append(name, summary);
+      leftPart.append(icon, textPart);
+
+      // Right info
+      const rightPart = document.createElement("div");
+      rightPart.className = "item-row-right";
 
       const count = document.createElement("span");
-      count.className = "slot-quantity";
+      count.className = "item-row-quantity";
       count.textContent = `x${row.owned_count ?? 0}`;
 
-      button.append(icon, title, count);
-      button.addEventListener("click", () => handleSlotClick(row, "withdraw"));
+      rightPart.append(count);
+
+      button.append(leftPart, rightPart);
+      button.addEventListener("click", () => handleRowClick(row, "withdraw"));
+      
+      storageListEl.appendChild(button);
     }
-    
-    storageGridEl.appendChild(button);
   }
 }
 
-function renderQuickDetail() {
+function updateTransferPanel() {
   const { model } = state;
-  quickDetailEl.replaceChildren();
-
-  // If storage is locked
+  
+  // If warehouse is locked, keep inline panel showing the guide
   if (model.storage_state && !model.storage_state.unlocked) {
-    const header = document.createElement("h3");
-    header.textContent = "倉庫服務未開啟";
-    const body = document.createElement("p");
-    body.className = "detail-desc";
-    body.textContent = "工會倉庫現處於未啟用狀態，可點選右下角「解鎖倉庫」並提供諾亞 500G 金幣開啟。";
-    quickDetailEl.append(header, body);
+    transferEmptyStateEl.style.display = "flex";
+    transferControlContentEl.style.display = "none";
+    
+    transferEmptyStateEl.replaceChildren();
+    const h3 = document.createElement("h3");
+    h3.textContent = "倉庫保管服務未啟用";
+    h3.style.color = "var(--accent-gold)";
+    h3.style.fontSize = "0.95rem";
+    
+    const p1 = document.createElement("p");
+    p1.textContent = "請點選右下角「解鎖倉庫」";
+    p1.style.fontSize = "0.82rem";
+    p1.style.marginTop = "0.5rem";
+    
+    const p2 = document.createElement("p");
+    p2.textContent = "支付諾亞 500G 保管金開啟服務。";
+    p2.style.fontSize = "0.75rem";
+    p2.className = "empty-sub";
+    
+    transferEmptyStateEl.append(h3, p1, p2);
     return;
   }
 
   const item = getSelectedItemRow();
   if (!item) {
-    const empty = document.createElement("div");
-    empty.className = "empty-state";
-    empty.textContent = "選擇左側背包格子 (存入) 或右側倉庫格子 (取出) 來快速轉移道具";
-    quickDetailEl.append(empty);
+    // Show default instruction empty state
+    transferEmptyStateEl.style.display = "flex";
+    transferControlContentEl.style.display = "none";
+    
+    transferEmptyStateEl.replaceChildren();
+    const p1 = document.createElement("p");
+    p1.textContent = "選擇左側背包物品 (存入)";
+    const p2 = document.createElement("p");
+    p2.textContent = "或右側倉庫物品 (取出)";
+    const p3 = document.createElement("p");
+    p3.className = "empty-sub";
+    p3.textContent = "即可進行物品整理";
+    
+    transferEmptyStateEl.append(p1, p2, p3);
     return;
   }
 
+  // Show active controls
+  transferEmptyStateEl.style.display = "none";
+  transferControlContentEl.style.display = "block";
+
   const detail = model.item_details?.[item.item_id] ?? {};
   
-  const header = document.createElement("h3");
-  header.textContent = detail.title ?? item.title ?? "";
+  transferItemNameEl.textContent = item.title ?? "";
   
-  const type = document.createElement("p");
-  type.className = "detail-type";
-  type.textContent = `${detail.category_label ?? ""} | 持有量：${item.owned_count ?? 0} 個`;
+  const isDeposit = state.selectedListType === "deposit";
+  transferModeBadgeEl.textContent = isDeposit ? "存入倉庫 ➔" : "🠔 取出背包";
   
-  const body = document.createElement("p");
-  body.className = "detail-desc";
-  body.textContent = `${detail.description ?? ""} (${detail.use_context ?? ""})`;
+  // Badge styling
+  transferModeBadgeEl.style.borderColor = isDeposit ? "var(--accent-gold)" : "var(--accent-green)";
+  transferModeBadgeEl.style.color = isDeposit ? "var(--accent-gold)" : "var(--accent-green)";
+  transferModeBadgeEl.style.background = isDeposit ? "rgba(212, 175, 55, 0.05)" : "rgba(141, 163, 130, 0.05)";
+  
+  transferItemUsageEl.textContent = detail.category_label ?? "物品";
+  transferItemDescEl.textContent = `${detail.description ?? ""} (${detail.use_context ?? ""})`;
 
-  quickDetailEl.append(header, type, body);
+  // Meta count preview
+  const backpackCount = isDeposit ? item.owned_count : (model.inventory_rows?.find(r => r.item_id === item.item_id)?.owned_count ?? 0);
+  const storageCount = isDeposit ? (model.storage_rows?.find(r => r.item_id === item.item_id)?.owned_count ?? 0) : item.owned_count;
+  transferCountInfoEl.textContent = `我的背包：${backpackCount} 個 | 工會倉庫：${storageCount} 個`;
 
-  if (!item.enabled) {
-    const warn = document.createElement("p");
-    warn.className = "detail-warn";
-    warn.textContent = `⚠️ 限制提示: ${item.disabled_reason ?? "未滿足存取條件"}`;
-    quickDetailEl.append(warn);
-  }
+  updateStepperDisplay();
+  
+  // Render inline requirements
+  renderPopoverRequirements(model.requirement_rows?.[item.item_id] ?? []);
+
+  // Confirm button settings
+  const action = model.primary_actions?.[item.item_id] ?? {};
+  popoverConfirmEl.textContent = isDeposit ? "確認存入" : "確認取出";
+  popoverConfirmEl.dataset.actionId = action.action_id ?? "blocked_action";
+  popoverConfirmEl.dataset.disabledReason = action.disabled_reason ?? "";
+  
+  const canConfirm = action.enabled && item.enabled;
+  popoverConfirmEl.setAttribute("aria-disabled", String(!canConfirm));
 }
 
 function renderFooterActions() {
@@ -379,7 +485,6 @@ function renderFooterActions() {
     primaryActionEl.setAttribute("aria-disabled", String(!action.enabled));
     primaryActionEl.dataset.payload = JSON.stringify(action.payload ?? {});
   } else {
-    // Unlocked: upgrade warehouse preview button
     const action = model.primary_actions?.["upgrade_storage"] ?? {};
     primaryActionEl.textContent = action.label ?? "升級倉庫容量 (未開放)";
     primaryActionEl.dataset.actionId = "upgrade_storage";
@@ -389,7 +494,7 @@ function renderFooterActions() {
   }
 }
 
-// User tab filter triggers
+// Category tabs triggers
 function selectBackpackCategory(categoryId) {
   state.selectedCategory = categoryId;
   pushActionLog({
@@ -401,82 +506,49 @@ function selectBackpackCategory(categoryId) {
   render();
 }
 
-// User click grid cell triggers
-function handleSlotClick(row, listType) {
+// Click long list item triggers
+function handleRowClick(row, listType) {
   const { model } = state;
   state.selectedItemId = row.item_id;
   state.selectedListType = listType;
   
-  // 1. Log item select UIAction
+  // 1. Log select action
   const actionId = listType === "deposit" ? "select_inventory_item" : "select_storage_item";
   pushActionLog({
     action_id: actionId,
     payload: { item_id: row.item_id },
-    source: "grid_slot",
+    source: "list_row",
     dispatched: true,
   });
 
-  renderQuickDetail();
-  
-  // 2. Adjust speech bubble context
-  npcSpeechBubbleEl.replaceChildren();
-  const speechText = document.createElement("p");
+  // 2. NPC response dialog printed to the bottom JRPG guidance bar
+  const speaker = model.npc?.name ?? "諾亞";
   if (!row.enabled) {
-    speechText.textContent = model.npc?.dialog_locked ?? "「此物品無法寄放，請確認種類或倉庫容量。」";
-    npcSpeechBubbleEl.appendChild(speechText);
+    const reason = row.disabled_reason ? `（原因：${row.disabled_reason}）` : "";
+    renderFeedback(speaker, `「此物品無法寄放 ${reason}。普通素材可以存，貴重物請隨身保管。」`);
+    state.quantityValue = 0;
     render();
     return;
   }
   
-  const direction = listType === "deposit" ? "寄放" : "提取";
-  speechText.textContent = `「好的，想把 ${row.title} ${direction} 嗎？請在面板中選擇你要轉移的數量。」`;
-  npcSpeechBubbleEl.appendChild(speechText);
+  const directionText = listType === "deposit" ? "存入" : "取出";
+  renderFeedback(speaker, `「好的，想把 ${row.title} ${directionText} 嗎？請在面板中選擇你要轉移的數量。」`);
 
-  // 3. Open popover controls
+  // 3. Reset stepper
   state.quantityValue = 1;
-  openPopover(row, listType);
   render();
 }
 
-// Steppers inside Modal logic
-function openPopover(row, listType) {
-  const { model } = state;
-  const detail = model.item_details?.[row.item_id] ?? {};
-  
-  popoverItemNameEl.textContent = row.title ?? "";
-  
-  const isDeposit = listType === "deposit";
-  popoverModeBadgeEl.textContent = isDeposit ? "存入" : "取出";
-  popoverModeBadgeEl.style.borderColor = isDeposit ? "var(--accent-gold)" : "var(--accent-green)";
-  popoverModeBadgeEl.style.color = isDeposit ? "var(--accent-gold)" : "var(--accent-green)";
-  popoverModeBadgeEl.style.background = isDeposit ? "rgba(212, 175, 55, 0.08)" : "rgba(141, 163, 130, 0.08)";
-
-  const backpackCount = isDeposit ? row.owned_count : (model.inventory_rows?.find(r => r.item_id === row.item_id)?.owned_count ?? 0);
-  const storageCount = isDeposit ? (model.storage_rows?.find(r => r.item_id === row.item_id)?.owned_count ?? 0) : row.owned_count;
-  
-  popoverItemMetaEl.textContent = `我的背包：${backpackCount} 個 | 工會倉庫：${storageCount} 個`;
-  
-  updateStepperDisplay();
-
-  // Render modal validations rows
-  renderPopoverRequirements(model.requirement_rows?.[row.item_id] ?? []);
-
-  // Sync confirm payload details
-  const action = model.primary_actions?.[row.item_id] ?? {};
-  popoverConfirmEl.textContent = isDeposit ? "確認存入" : "確認取出";
-  popoverConfirmEl.dataset.actionId = action.action_id ?? "blocked_action";
-  
-  popoverOverlayEl.style.display = "flex";
-  popoverOverlayEl.setAttribute("aria-hidden", "false");
-}
-
-function closePopover() {
-  popoverOverlayEl.style.display = "none";
-  popoverOverlayEl.setAttribute("aria-hidden", "true");
+function closeTransferControls() {
+  state.selectedItemId = null;
+  state.selectedListType = null;
+  state.quantityValue = 1;
 }
 
 function adjustQuantity(delta) {
   const max = getMaxAllowedQuantity();
+  if (max === 0) return;
+  
   let next = state.quantityValue + delta;
   next = Math.max(next, 1);
   next = Math.min(next, max);
@@ -494,24 +566,22 @@ function updateStepperDisplay() {
   popoverLimitLabelEl.textContent = `轉移數量範圍：1 ~ ${max}`;
 
   popoverDecEl.disabled = state.quantityValue <= 1;
-  popoverIncEl.disabled = state.quantityValue >= max;
-  popoverMaxEl.disabled = state.quantityValue === max;
+  popoverIncEl.disabled = state.quantityValue >= max || max === 0;
+  popoverMaxEl.disabled = state.quantityValue === max || max === 0;
 }
 
 function logQuantityChange() {
   pushActionLog({
     action_id: "set_transfer_quantity",
     payload: { item_id: state.selectedItemId, quantity: state.quantityValue },
-    source: "stepper_popover",
+    source: "inline_stepper",
     dispatched: true,
   });
 }
 
 function renderPopoverRequirements(rows) {
   popoverRequirementListEl.replaceChildren();
-  if (rows.length === 0) {
-    return;
-  }
+  if (rows.length === 0) return;
 
   popoverRequirementListEl.replaceChildren(
     ...rows.map((row) => {
@@ -545,31 +615,42 @@ function renderPopoverRequirements(rows) {
   );
 }
 
-function executePopoverAction() {
-  const actionId = popoverConfirmEl.dataset.actionId ?? "blocked_action";
+// Inline confirm button execute
+function executeTransferAction() {
+  const isEnabled = popoverConfirmEl.getAttribute("aria-disabled") !== "true";
+  if (!isEnabled) {
+    const disabledReason = popoverConfirmEl.dataset.disabledReason || "未滿足存取條件";
+    pushActionLog({
+      action_id: "blocked_action",
+      payload: { item_id: state.selectedItemId, quantity: state.quantityValue },
+      source: "inline_confirm",
+      dispatched: false,
+      reason: disabledReason,
+    });
+    
+    renderFeedback("諾亞", `「無法存取：${disabledReason}，請重新選取。」`);
+    return;
+  }
+
   const direction = state.selectedListType === "deposit" ? "deposit_item" : "withdraw_item";
   
   pushActionLog({
     action_id: direction,
     payload: { item_id: state.selectedItemId, quantity: state.quantityValue },
-    source: "popover_confirm",
+    source: "inline_confirm",
     dispatched: true,
   });
 
   const transferName = getSelectedItemRow()?.title ?? "物品";
   const feedbackWord = state.selectedListType === "deposit" ? "存入" : "取出";
   
-  npcSpeechBubbleEl.replaceChildren();
-  const speechText = document.createElement("p");
-  speechText.textContent = `「妥當了！${state.quantityValue} 個 ${transferName} 已順利${feedbackWord}完畢。」`;
-  npcSpeechBubbleEl.appendChild(speechText);
+  renderFeedback("諾亞", `「妥當了！${state.quantityValue} 個 ${transferName} 已順利${feedbackWord}完畢，保管箱容量已即時更新。」`);
   
-  renderFeedback("諾亞", `「${transferName} 存取轉移操作成功！（已寫入 UIAction日誌）」`);
-  closePopover();
+  closeTransferControls();
   render();
 }
 
-// Rightmost bottom unlock button trigger
+// Unlock storage bottom button trigger
 function activatePrimaryAction() {
   const actionId = primaryActionEl.dataset.actionId ?? "blocked_action";
   const payload = safeJson(primaryActionEl.dataset.payload, {});
@@ -587,7 +668,7 @@ function activatePrimaryAction() {
     
     let warning = "「此功能目前無法使用。」";
     if (actionId === "unlock_storage") {
-      warning = "「抱歉，米菈小隊攜帶的金幣不夠支付 500G 保管保管金喔。」";
+      warning = "「抱歉，米菈小隊攜帶的金幣不夠支付 500G 保管金喔。」";
     } else {
       warning = "「升級保管箱需要更高等級的工會許可證，目前第二幕 demo 暫未開放。」";
     }
@@ -604,11 +685,7 @@ function activatePrimaryAction() {
   });
 
   if (actionId === "unlock_storage") {
-    renderFeedback("諾亞", "「解鎖倉庫成功！倉庫空間現已為米菈的小隊啟用。（本模擬不寫入存檔，請切換測試狀態觀看其它畫面。）」");
-    npcSpeechBubbleEl.replaceChildren();
-    const speechText = document.createElement("p");
-    speechText.textContent = "「太好了，會費已經收訖。這就幫米菈小隊辦理開啟手續！」";
-    npcSpeechBubbleEl.appendChild(speechText);
+    renderFeedback("諾亞", "「解鎖成功！這就幫米菈小隊開啟專屬的保管箱空間！（請切換上方測試狀態以觀看開啟後畫面）」");
   }
 }
 
@@ -699,15 +776,15 @@ function renderLoadError(error) {
   titleEl.textContent = "Fixture 載入失敗";
   subtitleEl.textContent = "無法讀取 Storage static fixture。";
   resourceStripEl.replaceChildren();
-  inventoryGridEl.replaceChildren();
-  storageGridEl.replaceChildren();
+  inventoryListEl.replaceChildren();
+  storageListEl.replaceChildren();
   backpackTabsEl.replaceChildren();
-  quickDetailEl.replaceChildren();
-  disableStepperControls();
+  closeTransferControls();
+  updateTransferPanel();
   renderFeedback("系統", "請確認 fixtures 路徑與 JSON 格式。");
 
   const errorEl = document.createElement("div");
   errorEl.className = "load-error";
   errorEl.textContent = error instanceof Error ? error.message : String(error);
-  inventoryGridEl.append(errorEl);
+  inventoryListEl.append(errorEl);
 }
