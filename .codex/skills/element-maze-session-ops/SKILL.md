@@ -13,17 +13,27 @@ Default to Traditional Chinese output unless the user asks otherwise.
 
 ## Read-Only Catch-Up
 
-Before producing a commit package, handoff prompt, next-session prompt, continuation decision, or status summary, gather current state with read-only commands and files:
+At new session startup, first follow `01_content/agent-startup-reading-list.md`:
+
+- Default startup reads only the Hot Zone.
+- Task Zone files are read only when the explicit task needs them.
+- Cold Zone files are not bulk-loaded at startup.
+- Do not reopen settled GUI decisions based on older historical files.
+
+Before producing a commit package, handoff prompt, next-session prompt, continuation decision, or status summary, gather current state with read-only commands and Hot Zone files:
 
 1. Run `git status --short`.
 2. Read recent commits with `git log --oneline --decorate --date=short --pretty=format:"%h %ad %s" -n 8`.
 3. Read `README.md`.
 4. Read `01_content/codex-handoff-short.md`.
+5. Read `01_content/gui-html-static-prototype-progress-v1.md`.
+6. Read `01_content/agent-startup-reading-list.md`.
 
-For GUI static prototype work, also read:
+For GUI static prototype work, read Task Zone planning files only when the task needs them, such as:
 
 1. `01_content/gui-planning-index.md`.
-2. `01_content/gui-html-static-prototype-progress-v1.md`.
+2. `01_content/ui-flow-blueprint.md`.
+3. `01_content/gui-screen-map.md`.
 
 For task-specific context, use `01_content/gui-planning-index.md` or the relevant handoff file to decide what to read next. Prefer the minimum necessary extra files. Do not read broad historical files unless the task requires history.
 
@@ -37,6 +47,8 @@ Preserve these boundaries unless the user explicitly approves a different scope:
 - Do not copy gameplay rules into JavaScript prototypes.
 - Do not modify runtime, data, schema, save, or combat formulas for GUI prototype or handoff tasks.
 - Do not start a formal asset pipeline.
+- For HTML static prototypes, use fixtures only to validate render layer, layout, interaction, navigation flow, and UIAction logging.
+- Do not treat reference images or mockups as runtime assets.
 - Do not commit, push, stage, or create branches unless the user explicitly asks.
 - Do not make the skill duplicate project status that already lives in `README.md`, `codex-handoff-short.md`, or planning index files.
 
@@ -57,7 +69,7 @@ After read-only catch-up, produce:
 - Not run / residual risk.
 - Explicit note that no commit or push was performed unless it actually was.
 
-Keep the title conventional and scoped, such as `docs(gui): ...`, `feat(gui): ...`, or `fix(gui): ...`, based on the actual changes.
+Keep the title conventional and scoped, such as `docs(gui): ...`, `feat(gui): ...`, or `fix(gui): ...`, based on the actual changes. When Codex creates a commit, the subject must start with `[codex]`, for example `[codex] docs(governance): sync skill startup rules`. Commits produced by Antigravity use `[antig]`. Do not expand this into a large commit convention.
 
 ### Next-Session Prompt
 
@@ -181,6 +193,8 @@ When a new prototype screen is added, update this URL list in the project-local 
 ### Runtime Preflight
 
 Use when the user asks to continue gameplay/runtime work.
+
+For high-risk tasks involving schema, save, combat, engine flow, inventory, economy, or cross-system changes, the first round must be read-only planning. Do not edit files in that first round. Report affected files, risk, smallest safe slice, validation plan, and whether a higher reasoning model is needed.
 
 Do a read-only boundary check first. Identify:
 
