@@ -69,6 +69,8 @@ After read-only catch-up, produce:
 - Not run / residual risk.
 - Explicit note that no commit or push was performed unless it actually was.
 
+When the user asks for commit content, prefer a single paste-ready commit block: subject on the first line, a blank line, then the body. Include `Changed files:` and `Verification:` sections when useful for future agent catch-up. Keep commit text in clear English unless the user asks otherwise.
+
 Keep the title conventional and scoped, such as `docs(gui): ...`, `feat(gui): ...`, or `fix(gui): ...`, based on the actual changes. When Codex creates a commit, the subject must start with `[codex]`, for example `[codex] docs(governance): sync skill startup rules`. Commits produced by Antigravity use `[antig]`. Do not expand this into a large commit convention.
 
 ### Next-Session Prompt
