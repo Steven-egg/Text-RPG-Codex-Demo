@@ -1,6 +1,6 @@
 # GUI Screen Map Draft
 
-用途：記錄從目前 CLI / Rich prototype 轉向 GUI-oriented vertical slice 前的 screen map、UI action 與分階段策略。此文件只做規劃，不代表已開始 GUI 實作。
+用途：記錄從目前 CLI / Rich playable reference 轉向 GUI-oriented vertical slice 的 screen map、UI action 與分階段策略。此文件只做規劃；目前已存在的 GUI work 是 `07_gui_prototype/` HTML static prototype，不代表正式 runtime GUI 或 runtime adapter。
 
 ## 1. UI 三階段策略
 
@@ -14,11 +14,11 @@
 - 目標是整理 screen flow、ScreenModel 與 UIAction。
 - 不追求美術、不追求正式地圖、不處理素材風格。
 
-### Phase UI-2：CLI / Rich 風格 Wireframe
+### Phase UI-2：HTML Static Fixture Prototype
 
-- 用框線、區塊、簡單圖示與選取狀態組裝畫面。
-- 類似低成本 GUI wireframe。
-- 目標是驗證 screen layout、資訊分區、選取狀態與操作回饋。
+- 用 HTML/CSS/JS render layer、static fixtures、靜態 navigation 與 UIAction logging 組裝畫面。
+- 目標是驗證 screen layout、資訊分區、選取狀態、操作回饋與 prototype navigation。
+- 不接 Python runtime，不讀寫 `save.json`，不把 gameplay rules 複製進 JS。
 - 不處理正式美術 asset pipeline。
 - 不要求每個場景有正式背景圖。
 - 不先建立嚴格 prompt / schema / style bible。
@@ -58,7 +58,7 @@ Start Screen
    - Step forward
    - Event / material / battle / boss trigger
 → Combat Screen
-→ Combat Result
+→ Combat Result overlay
 → Exploration Screen
 → Dungeon Clear / Retreat / Defeat Result
 → World Map Screen or Town Hub Screen
@@ -70,18 +70,18 @@ World Map 是正式 UI 的中樞。Town Hub 與 Dungeon / Exploration 是從 Wor
 
 | Screen | Purpose | 現有 CLI 參考 | 優先級 |
 |---|---|---|---|
-| Start Screen | 開始新冒險、讀取進度 | `start_screen_panel()` | 已有 CLI MVP |
-| World Map Screen | 選擇目的地、查看主線目標與角色摘要 | `main_loop()` + `dungeon_menu()` 概念拆分 | 高 |
-| Town Hub Screen | 場景式 facility hub，點選建築入口進入城鎮設施 | `town_menu()` | 高 |
-| Guild Screen | 任務列表、交付、素材收購、主線線索 | `guild_menu()` | 中 |
-| Shop Screen | 商品分類、列表、詳情、購買 | `travel_shop()` | 中 |
-| Forge Screen | 購買裝備、強化裝備、查看本店裝備 | `workshop_catalog()` | 中 |
-| Synthesis Screen | 配方分類、列表、詳情、合成 | `craft_menu()` | 最高 |
+| Start Screen | 開始新冒險、讀取進度 | `start_screen_panel()` | static prototype 已落地 |
+| World Map Screen | 選擇目的地、查看主線目標與角色摘要 | `main_loop()` + `dungeon_menu()` 概念拆分 | static prototype 已落地 |
+| Town Hub Screen | 場景式 facility hub，點選建築入口進入城鎮設施 | `town_menu()` | static prototype 已落地 |
+| Guild Screen | 任務列表、交付、素材收購、主線線索 | `guild_menu()` | static prototype 已落地 |
+| Shop Screen | 商品分類、列表、詳情、購買 | `travel_shop()` | static prototype 已落地 |
+| Forge / Workshop Screen | 購買裝備、強化裝備、查看本店裝備 | `workshop_catalog()` | static prototype 已落地 |
+| Synthesis Screen | 配方分類、列表、詳情、合成 | `craft_menu()` | static prototype 已落地 |
 | Inn Screen | 休息確認與資源回復 | `rest_inn()` | 低 |
 | Storage Screen | 存入、取出、查看容量 | `storage_menu()` | 低 |
-| Exploration Screen | 單一路線步數制探索、事件與撤退 | `explore_dungeon()` | 中 |
-| Combat Screen | 回合制戰鬥決策與戰鬥紀錄 | `combat()` | 中後 |
-| Result Screen | 戰鬥、探索、任務或合成結果 | 多處 `render_panel()` | 中 |
+| Exploration Screen | 單一路線步數制探索、事件與撤退 | `explore_dungeon()` | static prototype 已落地 |
+| Combat Screen | 回合制戰鬥決策與戰鬥紀錄 | `combat()` | static prototype 已落地 |
+| Result Screen | 結果概念；Combat Result 目前整合為 Combat Screen overlay | 多處 `render_panel()` | 概念保留 |
 
 ## 4. UIAction 草案
 
@@ -199,23 +199,21 @@ TownHubScreenModel
 
 Town Hub 採場景式 hub，不以純列表作為主要結構。`facility_nodes` 承接工會、旅館、工坊、商店、合成屋、魔法商店、轉職神殿、聖物調查與倉庫等建築入口；badge 只保留少量高價值提示，例如工會可回報、火印線索、合成屋未解鎖。完整規格見 `01_content/gui-town-hub-screen-model-draft.md`。
 
-## 6. 第一個實驗對象
+## 6. 後續實驗對象
 
-建議先以 Town Hub 作下一個 UI-2 / Rich wireframe 或視覺補強實驗。
+Start Screen、Town Hub、Guild、Synthesis、World Map、Dungeon Exploration、Combat、Shop、Workshop static prototype 都已落地。後續實驗對象應由使用者指定單一小切片，並先做 read-only preflight。
 
-原因：
+較安全的候選：
 
-- 已有場景式 user mockup，review 結論為 `pass_with_notes`。
-- 已有 `TownHubScreenModel` 與 review checklist。
-- 目前只需驗證 resource strip、town guidance、facility nodes 與少量 badge 的 layout。
-- 不需要進入各 facility 內部流程。
-- 不需要改 runtime、data、schema、save 或 combat formula。
+- Town Hub / Guild 的 keyboard focus graph。
+- shared prototype shell / fixture loader。
+- 單一既有 static prototype 的使用者指名小幅 review 調整。
 
-Town Hub 後續若做 wireframe，應只驗證畫面結構與資訊層，不選平台、不生成正式 asset、不重構 `game.py`。
+任何後續 UI-2 工作仍只驗證 static fixtures、render layer、layout、interaction、navigation flow 與 UIAction logging；不接 runtime、不讀寫 save、不啟動正式 asset pipeline。
 
 ## 7. 近期不要做
 
-- 不直接選 pygame / HTML。
+- 不把 HTML static prototype 視為正式 GUI app 或 runtime adapter。
 - 不建立新 GUI framework。
 - 不啟動正式美術 asset pipeline。
 - 不建立 prompt builder / asset registry / style bible。
@@ -226,7 +224,7 @@ Town Hub 後續若做 wireframe，應只驗證畫面結構與資訊層，不選�
 
 ## 8. 下一步建議
 
-1. 針對 Town Hub 做 UI-2 / Rich wireframe 或視覺補強規劃。
-2. 補強 resource strip、town guidance、少量 high-value badge 的版面位置。
-3. 確認 magic shop、temple、storage 在場景式 hub 中的入口策略。
-4. 暫不生成新圖、不選平台、不改 runtime。
+1. 先維持 HTML static prototype 邊界，由使用者指定單一小切片。
+2. 若是 GUI 任務，先做 Task Zone read-only preflight，再決定是否進行 docs-only 或 prototype-only 小修。
+3. Synthesis / Shop / Workshop static prototype v1 已落地，不再列為未完成候選。
+4. 暫不接 runtime、不讀寫 save、不生成新圖、不啟動正式 asset pipeline。

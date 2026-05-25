@@ -1,6 +1,6 @@
 # UI Flow Blueprint
 
-狀態：第一版核心循環規格已落成 CLI thin display layer；Start Screen MVP、Travel Shop Catalog MVP、Workshop Catalog MVP、Magic Shop Catalog MVP、Synthesis Catalog MVP 與 Combat UI Log Separation MVP 已完成。下一階段改以 Screen Map、ScreenModel 與 UIAction 為主，不再優先擴大 CLI-only catalog polish。此文件記錄 UI 架構意圖；實際 runtime 狀態仍以 `README.md` 與 `03_engine/engine` 為準。
+狀態：第一版核心循環規格已落成 CLI thin display layer；Start Screen MVP、Travel Shop Catalog MVP、Workshop Catalog MVP、Magic Shop Catalog MVP、Synthesis Catalog MVP 與 Combat UI Log Separation MVP 已完成。GUI Phase UI-2 目前已改以 `07_gui_prototype/` 的 HTML static fixtures 驗證 screen layout、互動、navigation flow 與 UIAction logging。此文件記錄 UI 架構意圖；實際 runtime 狀態仍以 `README.md` 與 `03_engine/engine` 為準。
 
 ## 1. 規劃主軸
 
@@ -28,7 +28,7 @@ World Map 是正式 UI 的中樞；Town Hub 與 Dungeon / Exploration 是從 Wor
 三階段共用同一套 Screen Map、ScreenModel 與 UIAction；差異只在 render / presentation layer。
 
 - Phase UI-1：Home Hub / Main Menu 文字式 UI。最接近目前 CLI panel 行為，用來整理 screen flow、UIAction、ScreenModel，不追求正式美術或素材風格。
-- Phase UI-2：CLI / Rich 風格 wireframe。用框線、區塊、簡單圖示、選取狀態與操作回饋驗證 screen layout，不建立正式 asset pipeline。
+- Phase UI-2：HTML static fixture prototype。用 fixture、HTML/CSS/JS render layer、靜態 navigation 與 UIAction logging 驗證 screen layout，不接 Python runtime、不讀寫 `save.json`、不建立正式 asset pipeline。
 - Phase UI-3：最終 GUI 視覺版本。使用正式背景圖、角色圖、icon、UI skin，並需要 asset request schema、prompt builder、asset registry 與 style bible；此階段尚未開始。
 
 CLI 數字輸入、Rich wireframe 選取、GUI 點擊與未來觸控都應映射到同一批 UIAction。不要把目前 `input()` / `print()` menu 直接視為最終架構。
@@ -68,5 +68,5 @@ CLI 數字輸入、Rich wireframe 選取、GUI 點擊與未來觸控都應映射
 - Rich 不可用時仍退回純文字輸出。
 - 使用者提供的 UI 草圖先視為探索稿，需映射到流程節點與 panel 職責後再判斷是否落地。
 - 後續 UI 只能做小步 CLI 顯示層改善；戰鬥主畫面服務決策，Battle Log 服務回溯，除非另外明確批准新平台或 UI framework。
-- 近期不直接選 pygame / HTML，不重構 `03_engine/engine/game.py`，不啟動正式美術 asset pipeline。
-- 下一個合理小切片是文件化 Screen Map / UIAction，或用米菈合成屋作第一個 ScreenModel 實驗。
+- 目前 UI-2 已採 HTML static prototype 作驗證路線；這不等於正式 GUI app，也不等於 runtime adapter。
+- 下一個合理小切片應由使用者指定，並先做 read-only preflight；Synthesis / Shop / Workshop static prototype v1 已落地，不再作為未完成候選。

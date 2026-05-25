@@ -4,13 +4,14 @@
 
 ## 0. 預設閱讀順序
 
-新 session 若只是接續 GUI planning，不需要掃過全部 GUI 文件。預設只讀：
+新 session 啟動先遵守 `01_content/agent-startup-reading-list.md`。預設只讀 Hot Zone；GUI planning 文件屬於 Task Zone，只有在本輪明確是 GUI 規劃、drift audit 或 prototype 任務時才加讀。
 
-1. `01_content/codex-handoff-short.md`
-2. `README.md`
-3. `01_content/gui-planning-index.md`
+GUI planning Task Zone 最小入口：
+
+1. `01_content/gui-planning-index.md`
+2. `01_content/ui-flow-blueprint.md`
+3. `01_content/gui-screen-map.md`
 4. `01_content/gui-html-static-prototype-progress-v1.md`
-5. `01_content/gui-ui-direction-brief.md`
 
 接著依任務加讀：
 
@@ -65,7 +66,7 @@ GUI 目前處於 HTML static prototype 驗證階段；正式 runtime UI 仍是 P
 | 文件 | 狀態 | 角色 | 預設讀取 |
 |---|---|---|---|
 | `01_content/gui-planning-index.md` | core | GUI 文件入口、閱讀順序、治理規則 | 是 |
-| `01_content/gui-ui-direction-brief.md` | core | GUI 整體方向、視覺語彙、禁止方向 | 是 |
+| `01_content/gui-ui-direction-brief.md` | archive candidate | 舊 GUI 整體方向與視覺語彙脈絡；不作新 session 入口 | 否 |
 | `01_content/gui-screen-map.md` | core | Screen Map、UIAction、ScreenModel 草案 | 視任務 |
 | `01_content/ui-flow-blueprint.md` | core | CLI thin layer 到 GUI flow 的承接說明 | 視任務 |
 | `01_content/gui-town-hub-screen-model-draft.md` | core | Town Hub 的場景式 facility node、badge 與 UIAction 草案 | Town Hub 任務必讀 |
@@ -103,13 +104,14 @@ GUI 目前處於 HTML static prototype 驗證階段；正式 runtime UI 仍是 P
 
 ## 3. 文件分層導覽
 
-### A. 新 session 必讀入口
+### A. 新 session / GUI Task Zone 入口
 
-- `01_content/codex-handoff-short.md`：目前專案穩定狀態、禁止事項與下一步邊界。
-- `README.md`：project-level SSOT，包含目前 runtime 狀態、資料夾職責、驗證方式與 roadmap。
+新 session 必讀入口以 `01_content/agent-startup-reading-list.md` 的 Hot Zone 為準。若本輪明確進入 GUI Task Zone，再加讀：
+
 - `01_content/gui-planning-index.md`：GUI 文件入口與治理索引。
+- `01_content/ui-flow-blueprint.md`：目前 CLI thin layer 與 HTML static prototype flow 的銜接。
+- `01_content/gui-screen-map.md`：主要 screen、flow、UIAction、ScreenModel 草案。
 - `01_content/gui-html-static-prototype-progress-v1.md`：目前 `07_gui_prototype/` static prototype 的最新 handoff、驗證紀錄與下一步。
-- `01_content/gui-ui-direction-brief.md`：GUI vertical slice 的整體方向、視覺語彙、禁止方向與三階段策略。
 
 ### B. Screen map / flow
 
