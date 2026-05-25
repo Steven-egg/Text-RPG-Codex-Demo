@@ -37,6 +37,8 @@ Current GUI prototype boundary:
 - do not read or write save.json
 - do not modify runtime, data, schema, combat formula, or save format
 - do not start formal asset pipeline
+- do not copy gameplay rules into JavaScript prototypes
+- do not treat reference images or mockup candidates as runtime assets
 
 GUI Prototype Server Helper:
 - When verifying HTML static prototypes, always use the local server started by the root batch file:
@@ -152,7 +154,7 @@ For destructive or state-changing commands, always ask for explicit user approva
 
 ## Default Preflight Procedure
 
-When the user asks Antigravity to catch up, continue Codex work, check project status, or prepare a new session, perform a read-only preflight first.
+When starting a new session or catching up, strictly follow the loading zones in `01_content/agent-startup-reading-list.md`. Never perform bulk directory scans or load Cold Zone files without explicit user approval.
 
 Default preflight:
 
@@ -161,19 +163,20 @@ Default preflight:
    * `git status --short`
    * `git log -1 --oneline`
 
-2. Read only the minimum project handoff files:
+2. Read only the Hot Zone files at startup to align project state:
 
    * `README.md`
    * `01_content/codex-handoff-short.md`
    * `01_content/gui-html-static-prototype-progress-v1.md`
-   * `01_content/gui-planning-index.md`
-   * this skill file
+   * `01_content/agent-startup-reading-list.md`
+   * this skill file (element-maze-session-governance/SKILL.md)
 
-3. Do not read additional files unless needed.
+3. Task Zone files (e.g., `01_content/gui-planning-index.md`, `ui-flow-blueprint.md`) are read only when explicitly required by the active task (e.g., GUI mapping or layout refinement tasks).
 
-4. If additional files are needed, explain why before reading them.
+4. Cold Zone files (e.g., Act 2/3 planning, playtest notes) are not loaded at startup.
 
-5. Do not implement during preflight.
+5. High-Risk Change Gate:
+   For high-risk gameplay or runtime changes involving schema, save format, combat formulas, engine flow, data structures, inventory, or economy, the first round MUST be a read-only planning gate. Do not modify or edit files in that first round. Propose affected files, risks, smallest safe slice, and a validation plan, and wait for explicit user approval before implementation.
 
 Preflight response format:
 
@@ -278,6 +281,15 @@ Then classify:
    * Require manual browser check or stated static verification.
    * Do not connect runtime.
 
+Commit Format Rules:
+* The commit subject for modifications made by Antigravity must start with `[antig] ` (e.g., `[antig] docs(governance): sync skill preflight rules`).
+* When the user requests commit content or a commit message, prioritize providing a single, paste-ready commit block:
+  - First line is the subject
+  - A blank line
+  - The commit body (in clear, concise English for downstream catch-up)
+  - The body must include a `Changed files:` list and a `Verification:` section detailing what checks passed (e.g., node syntax checks, validate_data run, or manual browser verification).
+* This is a lightweight packaging guideline; do not expand it into a heavy commit convention.
+
 Commit response format:
 
 ```text
@@ -295,6 +307,19 @@ No change / docs-only / GUI static prototype / runtime / data / schema / mixed
 
 ## 5. 建議 commit message
 <one concise commit message, only if commit is appropriate>
+
+## 6. Paste-ready Commit Block
+```text
+[antig] <type>(<scope>): <subject>
+
+<body>
+
+Changed files:
+- <file>
+
+Verification:
+- <checks run>
+```
 ```
 
 Do not run:
