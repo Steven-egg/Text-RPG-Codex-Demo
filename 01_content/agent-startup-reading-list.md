@@ -16,8 +16,10 @@
    - *用途*：確認最新穩定狀態、已完成的 MVP 項目與下一步清晰的施工邊界。
 3. [01_content/gui-html-static-prototype-progress-v1.md](file:///c:/Users/user/OneDrive/文字冒險遊戲/01_content/gui-html-static-prototype-progress-v1.md)
    - *用途*：確認當前 GUI HTML 原型的最新進度、已定案設施畫面與驗證紀錄。
-4. [.antigravity/skills/element-maze-session-governance/SKILL.md](file:///c:/Users/user/OneDrive/文字冒險遊戲/.antigravity/skills/element-maze-session-governance/SKILL.md)
-   - *用途*：載入專案本機專屬的協作與治理規範、指令匯報格式與嚴格禁止事項。
+4. 專案內目前有效的 `SKILL.md`
+   - Codex：`.codex/skills/element-maze-session-ops/SKILL.md`
+   - Antigravity：`.antigravity/skills/element-maze-session-governance/SKILL.md`
+   - *用途*：依目前 agent 工具環境載入專案本機專屬的協作與治理規範、指令匯報格式與嚴格禁止事項；不要把 Codex / Antigravity skill 混用成同一份狀態來源。
 5. [01_content/agent-startup-reading-list.md](file:///c:/Users/user/OneDrive/文字冒險遊戲/01_content/agent-startup-reading-list.md) *(本檔案)*
    - *用途*：本載入指南，用於約束載入範圍。
 
@@ -55,6 +57,9 @@
 
 > [!NOTE]
 > 治理政策：為了避免檔案遺失或路徑中斷，本階段**嚴禁在硬碟上進行實體搬移或刪除檔案動作**，僅在文件中進行邏輯分類標記，待未來啟動正式文件整理輪時一次性處理。
+
+> [!NOTE]
+> 若 Hot Zone 文件與最新 commit 或現有目錄狀態出現落差，新 Session 應先回報 drift 風險，並以 read-only 方式確認差異；不得直接讀取 Cold Zone 大文件來「補歷史」。
 
 1. [gui-asset-registry-draft.md](file:///c:/Users/user/OneDrive/文字冒險遊戲/01_content/gui-asset-registry-draft.md)
 2. [gui-asset-request-schema.md](file:///c:/Users/user/OneDrive/文字冒險遊戲/01_content/gui-asset-request-schema.md)

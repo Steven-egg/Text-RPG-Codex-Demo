@@ -16,12 +16,16 @@
 - Workshop Catalog MVP 已完成：鐵刃工坊與堅甲工坊改為專屬 catalog 流程，分成購買、強化與我的裝備；顯示職業可用性、裝備狀態、強化基底與素材狀態；其他商店不變。
 - Magic Shop Catalog MVP 已完成：星燈魔法商店改為專屬 catalog 流程，依魔法功能分類，顯示學習狀態、職業 / 等級 / 素材條件、MP、價格與技能效果；其他商店不變。
 - Synthesis Catalog MVP 已完成：米菈合成屋改為專屬 catalog 流程，分成全部、裝備與戰術道具；顯示可製作狀態、產出、持有 / 裝備狀態、基底裝備、素材狀態、最多可製作次數、金幣與合成確認；不新增配方或改變合成規則。
-- GUI HTML static prototype 已進入可互動驗證階段，位置在 `07_gui_prototype/`；目前包含 Start Screen、Town Hub、Guild Screen、World Map、Dungeon Exploration、Combat Screen、Synthesis Screen。
+- v0.2-2 技能系統最小版已完成收尾，Final Smoke Test：PASS；完成背包選單整併、初始背包正式化、寶箱技能書 MVP 化、技能書使用、技能學習、戰鬥施放與 MP 消耗正常。
+- 「Element Decay 引擎」不是正式專案術語，不納入正式紀錄。
+- GUI HTML static prototype 已進入可互動驗證階段，位置在 `07_gui_prototype/`；目前包含 Start Screen、Town Hub、Guild Screen、Synthesis Screen、World Map、Dungeon Exploration、Combat Screen、Shop Screen、Workshop Screen。
 - static prototype 只使用 fixtures 驗證 render layer、layout、互動與 UIAction logging；不接 Python runtime、不讀寫 `save.json`、不修改 runtime / data / schema / combat formula、不啟動正式 asset pipeline。
 - Start Screen alignment review 已通過；no-save / has-save fixtures、開始 / 讀取 / 重新開始入口、冒險者登錄 modal 與前往 World Map 的 static navigation 都維持 static-only 邊界。
 - Combat Screen static prototype 已有底部 5 指令、技能 / 道具 floating popover、右側 Battle Log、Victory / Defeat / Retreat result preview fixtures，以及整合在 Combat Screen 內的中央 Combat Result overlay。
 - Combat Result overlay 不新增獨立 Combat Result Screen；勝利 / 撤退下一步回 Dungeon Exploration，戰敗下一步回 Town Hub。Combat Screen 第一輪 mockup-alignment layout tuning pass 已完成，不再是目前下一步主線。
 - Synthesis Screen static prototype 已建立並完成基礎版面定案：左側分類 / 配方列表、中央配方詳情與需求缺口決策流、右側米菈視覺區、底部提示與合成 action；未來正式 bridge 或 UI 圖片 / portrait 貼入時若出現問題再調整。
+- Shop Screen static prototype v1 已建立：使用 static fixtures 驗證商品分類、商品詳情、價格 / 持有數 / 庫存顯示、`buy_item`、blocked state、`back_to_town_hub` 與 UIAction logging；不消耗金幣、不改背包、不接 runtime。
+- Workshop Screen static prototype v1 已建立：使用 static fixtures 驗證購買 / 強化 tab、裝備詳情、職業 / 金幣 / 材料限制、`buy_equipment`、`upgrade_equipment`、blocked state、`back_to_town_hub` 與 UIAction logging；不消耗素材、不改裝備、不接 runtime。
 - UI 下一階段仍共用 Screen Map、ScreenModel 與 UIAction；CLI / Rich、HTML static prototype 與未來正式 GUI 的差異只在 render layer。
 - 手動測試回饋後已修正迷宮 Boss/gate 提示混雜問題，Boss 狀態現在放在各迷宮選項；背包補上用途提示，旅館改為專屬 panel。
 - 第二輪手動回饋後，城鎮第 9 項已簡化為純倉庫入口；工會、工坊、商店、魔法書、合成與倉庫開始比照旅館走專屬設施 panel。工會內部已補可交付、進行中委託與 Boss 挑戰狀態提示。
@@ -65,15 +69,19 @@
 
 ## 新 Session 讀檔順序
 
-1. `01_content/codex-handoff-short.md`
-2. `README.md`
-3. 接續 GUI HTML static prototype 請讀 `01_content/gui-html-static-prototype-progress-v1.md` 與 `01_content/gui-planning-index.md`
-4. UI 架構下一步再讀 `01_content/ui-flow-blueprint.md` 與 `01_content/gui-screen-map.md`
-5. 需要詳細歷史時再讀 `01_content/codex-session-snapshot.md`
-6. 需要第二幕規劃脈絡時再讀 `01_content/act-2-content-plan.md`
-7. 需要長期幕次脈絡時再讀 `01_content/full-act-structure.md`
-8. 需要 UI 完成後的 demo polish backlog 時再讀 `01_content/demo-playtest-notes.md`
-9. 需要架構或玩法背景時再讀 `01_content/game-architecture.md`、`01_content/game-design.md`、`01_content/combat-growth-layering-plan.md`
+以 `01_content/agent-startup-reading-list.md` 的 Hot Zone / Task Zone / Cold Zone 規則為準。
+
+Hot Zone 啟動必讀：
+
+1. `README.md`
+2. `01_content/codex-handoff-short.md`
+3. `01_content/gui-html-static-prototype-progress-v1.md`
+4. 專案內目前有效的 `SKILL.md`（Codex 讀 `.codex/skills/element-maze-session-ops/SKILL.md`，Antigravity 讀 `.antigravity/skills/element-maze-session-governance/SKILL.md`）
+5. `01_content/agent-startup-reading-list.md`
+
+Task Zone 只在任務需要時選讀，例如 GUI 任務才讀 `01_content/gui-planning-index.md`、`01_content/ui-flow-blueprint.md`、`01_content/gui-screen-map.md` 或對應 `07_gui_prototype/<screen>/`。
+
+Cold Zone 不在新 session 啟動時主動大量讀取；需要詳細歷史、第二幕規劃、長期幕次、demo polish 或架構背景時，才依使用者明確指示讀取對應文件。
 
 ## 下一步邊界
 
@@ -82,7 +90,7 @@
 - 火印熔爐、完整火印、火印守護 Boss、正式聖物、正式轉職、八元素、Act 3 都只能視為未來願景；不是當前下一步。
 - runtime UI 仍是 CLI / Rich 顯示層薄包裝；不要把 HTML static prototype 接進 runtime，也不要重構 `game.py`。
 - HTML static prototype 只允許在 `07_gui_prototype/` 內用 fixtures 小步調整，不讀寫 save、不接 Python、不複製 gameplay logic 到 JS。
-- Synthesis Screen static prototype 目前視為定案，不再作為主線調整項；下一個 static prototype 候選是 Shop Screen 或其他未完成設施。仍不接 runtime adapter 或正式 asset pipeline。
+- Synthesis Screen、Shop Screen、Workshop Screen static prototype v1 目前都視為已落地，不再作為未完成候選；下一個 UI 任務需由使用者指定單一小切片。仍不接 runtime adapter 或正式 asset pipeline。
 - `content_inventory_report.py` 只做 read-only 盤點；不要把 report 輸出當成 SSOT 或 gameplay 變更依據。
 - 若未來要繼續 gameplay，仍需先做單一小切片 read-only 邊界確認，再由使用者明確批准施工範圍。
 - 若使用者指定文件同步輪，只改 markdown，不改 runtime / data / schema / save / combat formula。
@@ -111,8 +119,8 @@
 - 額外合成屋探針：分類、詳情、可製作狀態、最多可製作次數、合成配方、金幣 / 素材 / 基底裝備 / 產出更新正常
 
 本輪 GUI HTML static prototype 已確認：
-- Start Screen / Town Hub / Guild / World Map / Dungeon Exploration / Combat Screen 皆只用 static fixtures。
-- Start Screen alignment review 已通過；下一步只需文件同步與 `screen_label` 小修即可收斂。
+- Start Screen / Town Hub / Guild / Synthesis / World Map / Dungeon Exploration / Combat Screen / Shop Screen / Workshop Screen 皆只用 static fixtures。
+- Start Screen alignment review 已通過；Synthesis / Shop / Workshop static prototype v1 已落地，目前不應回到已定案畫面做無指名重工。
 - Dungeon Exploration 的 `Fixed Encounter Preview` 可導向 Combat Screen static prototype。
 - Combat Screen skill / item popover、Battle Log、Victory / Defeat / Retreat result overlay 與 result next navigation 已完成互動驗證。
 - Combat Screen 第一輪 mockup-alignment layout tuning pass 已完成；後續若有調整，應視為使用者 review 後的小幅微調。

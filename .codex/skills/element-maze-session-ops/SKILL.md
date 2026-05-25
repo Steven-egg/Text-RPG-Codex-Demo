@@ -173,6 +173,8 @@ Standard URLs:
 - Dungeon Exploration: `http://localhost:8000/dungeon_exploration/index.html`
 - Combat Screen: `http://localhost:8000/combat_screen/index.html`
 - Synthesis Screen: `http://localhost:8000/synthesis_screen/index.html`
+- Shop Screen: `http://localhost:8000/shop_screen/index.html`
+- Workshop Screen: `http://localhost:8000/workshop_screen/index.html`
 
 When a new prototype screen is added, update this URL list in the project-local skill copy and sync it to the user skill copy.
 

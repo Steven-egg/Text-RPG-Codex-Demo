@@ -4,7 +4,7 @@ Purpose: handoff note for the current HTML static prototype work. This file reco
 
 Date: 2026-05-19
 Status: static prototype progress note
-Last updated: 2026-05-23
+Last updated: 2026-05-25
 
 ## Boundary
 
@@ -47,6 +47,20 @@ Last updated: 2026-05-23
   - fixtures/
     - synthesis-default.json
     - synthesis-constrained.json
+- shop_screen/
+  - index.html
+  - styles.css
+  - shop-screen.js
+  - fixtures/
+    - shop-default.json
+    - shop-constrained.json
+- workshop_screen/
+  - index.html
+  - styles.css
+  - workshop-screen.js
+  - fixtures/
+    - workshop-default.json
+    - workshop-constrained.json
 - world_map/
   - index.html
   - styles.css
@@ -244,6 +258,72 @@ Deferred Synthesis items:
 - Real inventory, gold, equipment, or save mutation.
 - Real NPC art, item icons, material icons, or formal asset pipeline.
 - Batch crafting, selling, recipe expansion, or final keyboard focus graph.
+
+## Shop Screen Prototype
+
+Location:
+
+```text
+07_gui_prototype/shop_screen/
+```
+
+Current behavior:
+
+- Loads static fixtures only.
+- Renders Shop title/subtitle, category tabs, item list, selected item detail, shopkeeper presence, price / owned / stock display, feedback bar, primary buy action, back action, and UIAction log.
+- Default fixture covers purchasable travel shop items such as consumables, tactical items, and accessories.
+- Constrained fixture covers blocked purchase states such as missing gold, locked stock, or unavailable items.
+- Selecting a category dispatches `select_category`; selecting an item dispatches `select_item`.
+- Enabled `buy_item` writes UIAction log and static feedback only; it does not consume gold, change inventory, or update stock.
+- Disabled `buy_item` writes blocked UIAction log with `disabled_reason` and static feedback.
+- `back_to_town_hub` writes UIAction log before navigating to the Town Hub static prototype.
+- Town Hub `open_facility {"facility_id":"travel_shop"}` routes to `../shop_screen/index.html`.
+
+Accepted Shop decisions:
+
+- Shop Screen V1 is a Facility list-detail-price-confirm-feedback validation surface.
+- Treat fixture values as GUI display data only, not gameplay SSOT.
+- Keep primary action as static UIAction logging; do not copy runtime shop rules into JS.
+- Keep category meaning aligned with CLI Travel Shop Catalog MVP: all goods, consumables, tactical items, and accessories.
+
+Deferred Shop items:
+
+- Runtime adapter for shop inventory, gold, stock, or purchase mutation.
+- Batch buying, selling, final shop economy tuning, item icons, NPC art, or formal asset pipeline.
+- Final keyboard focus graph.
+
+## Workshop Screen Prototype
+
+Location:
+
+```text
+07_gui_prototype/workshop_screen/
+```
+
+Current behavior:
+
+- Loads static fixtures only.
+- Renders Workshop title/subtitle, player/equipment summary, buy and upgrade tabs, equipment or recipe list, selected detail, requirement/status rows, feedback, primary action, back action, and UIAction log.
+- Default fixture covers a normal warrior-like state with enough gold/materials for buying or upgrading.
+- Constrained fixture covers low-gold, missing-material, job-restricted, and locked/unavailable states.
+- Selecting a tab dispatches `select_tab`; selecting equipment dispatches `select_item`; selecting an upgrade recipe dispatches `select_recipe`.
+- Enabled `buy_equipment` and `upgrade_equipment` write UIAction log and static feedback only; they do not consume gold/materials, change equipment, or mutate inventory.
+- Blocked states write `blocked_action` with the intended action and reason.
+- `back_to_town_hub` writes UIAction log before navigating to the Town Hub static prototype.
+- Town Hub `open_facility {"facility_id":"workshop"}` routes to `../workshop_screen/index.html`.
+
+Accepted Workshop decisions:
+
+- Workshop Screen V1 is a Facility buy/upgrade-detail-requirement-confirm-feedback validation surface.
+- Treat fixture values as GUI display data only, not gameplay SSOT.
+- Keep primary actions as static UIAction logging; do not copy runtime forge/workshop rules into JS.
+- Keep the prototype focused on equipment purchase and upgrade readability, not economy or data changes.
+
+Deferred Workshop items:
+
+- Runtime adapter for equipment purchase, upgrade, inventory, material, or gold mutation.
+- Real equipment icons, blacksmith/NPC art, animation, or formal asset pipeline.
+- Final keyboard focus graph.
 
 ## World Map Prototype
 
@@ -516,13 +596,21 @@ Validated during this session:
 - Synthesis Screen base layout tuning pass responsive checks confirmed no horizontal overflow, no major section overlap, hidden resource strip, centered requirement rows, no right-side requirement rows, and collapsed UIAction Log at 1280x720, 900x900, and 390x844.
 - Synthesis Screen follow-up layout check confirmed the upper center detail panel is larger than the lower requirement panel, requirement rows render as single-column strip rows, and scrollbar behavior remains local/fallback-only for long lists or unusually long requirement content.
 - Synthesis Screen current base layout was accepted by user review on 2026-05-23; future tuning is deferred until formal bridge work or UI image/portrait asset insertion surfaces a specific issue.
+- Shop Screen static prototype v1 exists with default and constrained fixtures.
+- Shop Screen dispatches `select_category`, `select_item`, `buy_item`, and `back_to_town_hub` as static UIAction events only.
+- Town Hub `travel_shop` facility routes to Shop Screen static prototype.
+- Shop Screen fixture notes explicitly state that buy action logging does not change player inventory or gold.
+- Workshop Screen static prototype v1 exists with default and constrained fixtures.
+- Workshop Screen dispatches `select_tab`, `select_item`, `select_recipe`, `buy_equipment`, `upgrade_equipment`, `blocked_action`, and `back_to_town_hub` as static UIAction events only.
+- Town Hub `workshop` facility routes to Workshop Screen static prototype.
+- Workshop Screen logic treats buy/upgrade success as simulated feedback only and does not mutate runtime SSOT data.
 
 ## Recommended Next Step
 
 Recommended next session entry:
 
 ```text
-Treat Synthesis Screen static prototype base layout as accepted, then choose the next unfinished static prototype, likely Shop.
+Treat Synthesis, Shop, and Workshop static prototype v1 as landed. Start the next session with read-only Hot Zone catch-up, then ask the user to select one small convergence target before implementation.
 ```
 
 Scope suggestion:
@@ -531,12 +619,12 @@ Scope suggestion:
 - Do not connect runtime.
 - Do not use mockup/reference images as runtime assets.
 - Keep UIAction logging before navigation.
-- Preserve Start Screen, World Map, Dungeon Exploration, Combat Screen, and Synthesis Screen as static fixture display only until a runtime adapter is explicitly approved.
+- Preserve Start Screen, Town Hub, Guild, Synthesis, World Map, Dungeon Exploration, Combat, Shop, and Workshop as static fixture display only until a runtime adapter is explicitly approved.
 - Do not add gameplay logic, new combat formulas, runtime adapters, or save reads/writes.
 
 Alternative next steps:
 
-- Review and refine the Dungeon Exploration static prototype layout before adding a runtime adapter.
-- Build the next facility static prototype, likely Shop.
+- Read-only audit the remaining GUI planning docs for drift after Shop/Workshop landed.
+- Review and refine a single existing static prototype only if the user points to a concrete issue.
 - Add a proper keyboard focus graph for Town Hub and Guild.
 - Add a shared prototype shell / fixture loader after Combat Screen exists.

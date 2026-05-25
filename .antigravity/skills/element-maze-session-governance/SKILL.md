@@ -50,6 +50,8 @@ GUI Prototype Server Helper:
   - Guild Screen: http://localhost:8000/guild_screen/index.html
   - World Map: http://localhost:8000/world_map/index.html
   - Dungeon Exploration: http://localhost:8000/dungeon_exploration/index.html
+  - Shop Screen: http://localhost:8000/shop_screen/index.html
+  - Workshop Screen: http://localhost:8000/workshop_screen/index.html
 
 ## Strictly Forbidden Drift Areas
 
@@ -359,6 +361,8 @@ New session prompt format:
   - Guild: http://localhost:8000/guild_screen/index.html
   - Dungeon: http://localhost:8000/dungeon_exploration/index.html
   - Start Screen: http://localhost:8000/start_screen/index.html
+  - Shop: http://localhost:8000/shop_screen/index.html
+  - Workshop: http://localhost:8000/workshop_screen/index.html
 
 本次任務：
 <specific task>
