@@ -1,0 +1,71 @@
+{
+  "screen_id": "storage_screen",
+  "facility_id": "storage",
+  "title": "工會倉庫",
+  "subtitle": "存放與取出非關鍵物品，保障行囊空間",
+  "selected_mode": "deposit",
+  "selected_item_id": null,
+  "storage_state": {
+    "unlocked": false,
+    "unlock_cost": 500,
+    "can_unlock": false,
+    "disabled_reason": "金幣不足以支付開啟費用"
+  },
+  "resource_strip": [
+    { "id": "player_name", "label": "米菈的小隊", "tone": "neutral" },
+    { "id": "player_gold", "label": "金幣：420G", "tone": "warning" },
+    { "id": "storage_status", "label": "倉庫狀態：未開啟", "tone": "danger" },
+    { "id": "storage_capacity", "label": "容量：0 / 10 種物品", "tone": "neutral" }
+  ],
+  "npc": {
+    "name": "諾亞",
+    "role": "冒險者工會會長",
+    "portrait_placeholder": "Noah",
+    "avatar_text": "「普通素材可以寄放在這裡，貴重物品請隨身保管。」",
+    "dialog_locked": "花費 500G 金幣可為米菈小隊解鎖工會專屬的無限期保管箱。"
+  },
+  "category_tabs": [
+    { "id": "all", "label": "全部", "count": 2, "enabled": true },
+    { "id": "materials", "label": "材料", "count": 1, "enabled": true },
+    { "id": "consumables", "label": "消耗品", "count": 1, "enabled": true },
+    { "id": "equipment", "label": "裝備", "count": 0, "enabled": true },
+    { "id": "valuables", "label": "貴重物", "count": 0, "enabled": true }
+  ],
+  "inventory_rows": [
+    { "item_id": "mat_iron_ore", "title": "鐵礦石", "category": "materials", "short_title": "鐵礦", "summary": "普通金屬素材 / 持有：5", "owned_count": 5, "enabled": false, "disabled_reason": "倉庫未開啟" },
+    { "item_id": "item_potion_s", "title": "微效生命藥水", "category": "consumables", "short_title": "小生命", "summary": "消耗品 / 持有：3", "owned_count": 3, "enabled": false, "disabled_reason": "倉庫未開啟" }
+  ],
+  "storage_rows": [],
+  "item_details": {
+    "mat_iron_ore": {
+      "item_id": "mat_iron_ore",
+      "title": "鐵礦石",
+      "category_label": "普通素材",
+      "description": "散發微弱金屬光澤的粗糙礦石，常用於裝備的鍛造與強化。",
+      "effect_summary": "無直接效果",
+      "use_context": "工坊強化、合成材料"
+    },
+    "item_potion_s": {
+      "item_id": "item_potion_s",
+      "title": "微效生命藥水",
+      "category_label": "消耗性道具",
+      "description": "工會配發的微效藥水，能回復少許生命值。",
+      "effect_summary": "戰鬥中或探索中回復 20 點生命值",
+      "use_context": "生存與恢復"
+    }
+  },
+  "primary_actions": {
+    "unlock_storage": {
+      "action_id": "unlock_storage",
+      "label": "解鎖倉庫 (500G)",
+      "enabled": false,
+      "disabled_reason": "金幣不足，需要 500G",
+      "payload": { "cost": 500 }
+    }
+  },
+  "requirement_rows": {
+    "unlock_storage": [
+      { "id": "req_gold", "label": "金幣需求", "required_value": "500G", "current_value": "420G", "status": "unmet", "disabled_reason": "金幣不足" }
+    ]
+  }
+}

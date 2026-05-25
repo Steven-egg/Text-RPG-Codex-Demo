@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Storage Screen Static Prototype</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="storage-shell" data-load-state="loading">
+      <header class="storage-header">
+        <div class="title-copy">
+          <p class="screen-label">設施畫面</p>
+          <h1 id="screen-title">Loading</h1>
+          <p id="screen-subtitle" class="subtitle"></p>
+        </div>
+        <div class="fixture-switcher" aria-label="Prototype fixture">
+          <label for="fixture-select">測試狀態</label>
+          <select id="fixture-select">
+            <option value="./fixtures/storage-locked.json">Storage Locked (未開啟倉庫)</option>
+            <option value="./fixtures/storage-empty.json">Storage Empty (已開啟但倉庫空)</option>
+            <option value="./fixtures/storage-filled.json">Storage Filled (正常存取測試)</option>
+            <option value="./fixtures/storage-blocked.json">Storage Blocked (各種受限展示)</option>
+          </select>
+        </div>
+      </header>
+
+      <section class="resource-strip" id="resource-strip" aria-label="Resource Strip"></section>
+
+      <main class="storage-layout">
+        <!-- Backpack Browser Column (Grid-based with filters) -->
+        <section class="list-browser inventory-browser" aria-label="Backpack slot grid">
+          <div class="column-heading">
+            <h2>我的背包行囊</h2>
+          </div>
+          <div class="category-tabs-container">
+            <div class="category-tabs" id="backpack-tabs">
+              <!-- Rendered via JS -->
+            </div>
+          </div>
+          <div class="slot-grid-container">
+            <div class="slot-grid" id="inventory-item-grid">
+              <!-- Rendered via JS as grid cards -->
+            </div>
+          </div>
+        </section>
+
+        <!-- Center Warehouse Stage Column (Grids + quick detail) -->
+        <section class="center-stage" aria-label="Warehouse center stage">
+          <section class="capacity-stage-card">
+            <div class="capacity-heading">
+              <span class="panel-label">工會保管箱資訊</span>
+              <span id="storage-status-badge" class="status-badge"></span>
+            </div>
+            <div class="capacity-bar-row">
+              <div class="capacity-bar-bg">
+                <div class="capacity-bar-fill" id="capacity-bar-fill" style="width: 0%;"></div>
+              </div>
+              <span id="capacity-text" class="capacity-text">容量: 0 / 10</span>
+            </div>
+          </section>
+
+          <section class="list-browser storage-browser" aria-label="Warehouse slot grid">
+            <div class="column-heading">
+              <h2>寄放物品格子</h2>
+            </div>
+            <div class="slot-grid-container">
+              <div class="slot-grid" id="storage-item-grid">
+                <!-- Rendered via JS as grid cards -->
+              </div>
+            </div>
+          </section>
+
+          <!-- Quick Detail Area (lower center) -->
+          <section class="item-quick-detail" id="item-quick-detail" aria-live="polite">
+            <!-- Rendered via JS -->
+            <div class="empty-state">選擇背包或倉庫格子即可進行物品整理</div>
+          </section>
+        </section>
+
+        <!-- NPC Side Panel Column (Right) -->
+        <aside class="npc-side-panel" aria-label="Warehouse manager NPC">
+          <section class="npc-region">
+            <div class="npc-portrait" id="npc-portrait" aria-hidden="true">
+              <span class="avatar-silhouette">Noah</span>
+            </div>
+            <div class="npc-copy">
+              <p class="panel-label">設施主事</p>
+              <h2 id="npc-name">諾亞</h2>
+              <p id="npc-role" class="npc-role">冒險者工會會長</p>
+              <div class="npc-speech-bubble" id="npc-speech-bubble">
+                <p>「普通素材可以寄放在這裡，貴重物品請隨身保管。」</p>
+              </div>
+            </div>
+          </section>
+        </aside>
+      </main>
+
+      <!-- Bottom Bar -->
+      <footer class="storage-footer">
+        <button id="back-action" class="secondary-action" type="button">返回城鎮</button>
+        <section class="feedback-bar" aria-live="polite">
+          <p class="panel-label" id="feedback-speaker">系統提示</p>
+          <p id="feedback-message">點選任何格子來開啟存取數量面板。</p>
+        </section>
+        <button id="primary-action" class="primary-action" type="button">解鎖倉庫</button>
+      </footer>
+
+      <!-- Transfer Quantity Popover Overlay (Hidden by default) -->
+      <div class="popover-overlay" id="transfer-popover" aria-hidden="true" style="display: none;">
+        <div class="popover-modal" role="dialog" aria-modal="true" aria-labelledby="popover-title">
+          <div class="popover-header">
+            <h3 id="popover-title">存取轉移物品</h3>
+            <span class="popover-badge" id="popover-mode-badge">存入</span>
+          </div>
+          <div class="popover-body">
+            <div class="popover-item-info">
+              <p class="popover-item-name" id="popover-item-name">鐵礦石</p>
+              <p class="popover-item-meta" id="popover-item-meta">持有：5 / 倉庫：0</p>
+            </div>
+            <div class="stepper-controls">
+              <button type="button" id="popover-dec" class="stepper-btn" aria-label="Decrease quantity">-</button>
+              <span id="popover-value" class="stepper-val">1</span>
+              <button type="button" id="popover-inc" class="stepper-btn" aria-label="Increase quantity">+</button>
+              <button type="button" id="popover-max" class="stepper-btn max-btn" aria-label="Set to maximum">MAX</button>
+            </div>
+            <p class="stepper-limit-label" id="popover-limit-label">轉移範圍：1 ~ 5</p>
+            <div class="requirement-list" id="popover-requirement-list">
+              <!-- Met/unmet check rows here -->
+            </div>
+          </div>
+          <div class="popover-footer">
+            <button type="button" id="popover-cancel" class="secondary-action">取消</button>
+            <button type="button" id="popover-confirm" class="primary-action">確認執行</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Collapsible UIAction Log Panel (Compact details footer) -->
+      <details class="action-log-panel">
+        <summary class="panel-label">UIAction Log</summary>
+        <div class="action-log-heading">
+          <button id="clear-log" class="quiet-button" type="button" aria-label="Clear log">清除</button>
+        </div>
+        <ol id="action-log" class="action-log"></ol>
+      </details>
+    </div>
+
+    <script type="module" src="./storage-screen.js"></script>
+  </body>
+</html>
