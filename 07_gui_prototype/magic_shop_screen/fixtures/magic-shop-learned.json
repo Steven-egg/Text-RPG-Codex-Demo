@@ -1,0 +1,215 @@
+{
+  "screen_id": "facility_magic_shop_screen",
+  "facility_id": "magic_shop",
+  "title": "星燈魔法商店 (術式飽和版)",
+  "subtitle": "願星辰指引你的靈魂，冒險者。在這裡可以購買並學習永久的戰鬥魔法與輔助技能。",
+  "npc": {
+    "id": "eve",
+    "name": "伊芙",
+    "role": "星燈魔法商店的館長，專注於古老星辰與元素術式的研究。",
+    "guidance": "伊芙微笑著合上書本：「不愧是智慧超群的學者，我這裡能傳授你的魔法奧秘，已然盡數鐫刻於你的法術書中了。」",
+    "portrait_placeholder": "EV"
+  },
+  "player_summary": {
+    "name": "米菈",
+    "level": 5,
+    "job": "法師",
+    "gold": 1500
+  },
+  "category_tabs": [
+    { "id": "all", "label": "全部魔法", "count": 6, "enabled": true },
+    { "id": "damage", "label": "攻擊魔法", "count": 3, "enabled": true },
+    { "id": "heal", "label": "恢復魔法", "count": 1, "enabled": true },
+    { "id": "buff", "label": "輔助魔法", "count": 2, "enabled": true }
+  ],
+  "selected_category_id": "all",
+  "selected_book_id": "book_spark",
+  "list_rows": [
+    {
+      "id": "row_book_spark",
+      "book_id": "book_spark",
+      "title": "《火花術書》",
+      "category": "damage",
+      "summary": "學會火花術。火屬性小傷害魔法。",
+      "price": 180,
+      "mp": 5,
+      "req_level": 2,
+      "jobs": ["法師", "牧師"],
+      "status": "learned",
+      "enabled": false,
+      "disabled_reason": "已學會",
+      "badges": [
+        { "badge_id": "learned", "label": "已學會", "kind": "success" }
+      ]
+    },
+    {
+      "id": "row_book_ice_needle",
+      "book_id": "book_ice_needle",
+      "title": "《冰針術書》",
+      "category": "damage",
+      "summary": "學會冰針術。冰屬性小傷害魔法，克制火屬性敵人。",
+      "price": 220,
+      "mp": 6,
+      "req_level": 3,
+      "jobs": ["法師"],
+      "status": "learned",
+      "enabled": false,
+      "disabled_reason": "已學會",
+      "badges": [
+        { "badge_id": "learned", "label": "已學會", "kind": "success" }
+      ]
+    },
+    {
+      "id": "row_book_minor_heal",
+      "book_id": "book_minor_heal",
+      "title": "《小治癒術書》",
+      "category": "heal",
+      "summary": "學會小治癒術。回復我方 HP 45 點。",
+      "price": 200,
+      "mp": 7,
+      "req_level": 2,
+      "jobs": ["牧師"],
+      "status": "job_restricted",
+      "enabled": false,
+      "disabled_reason": "職業不符",
+      "badges": []
+    },
+    {
+      "id": "row_book_guardian_rune",
+      "book_id": "book_guardian_rune",
+      "title": "《守護符文書》",
+      "category": "buff",
+      "summary": "學會守護符文。3 回合內提高防禦力 20%。",
+      "price": 300,
+      "mp": 8,
+      "req_level": 4,
+      "jobs": ["劍士", "牧師"],
+      "status": "job_restricted",
+      "enabled": false,
+      "disabled_reason": "職業不符",
+      "badges": []
+    },
+    {
+      "id": "row_book_quickstep",
+      "book_id": "book_quickstep",
+      "title": "《迅步術書》",
+      "category": "buff",
+      "summary": "學會迅步術。3 回合內提高敏捷 25%。",
+      "price": 240,
+      "mp": 6,
+      "req_level": 3,
+      "jobs": ["盜賊", "劍士"],
+      "status": "job_restricted",
+      "enabled": false,
+      "disabled_reason": "職業不符",
+      "badges": []
+    },
+    {
+      "id": "row_book_cinder_mark",
+      "book_id": "book_cinder_mark",
+      "title": "《燼印術書》",
+      "category": "damage",
+      "summary": "學會燼印術。使敵人更容易受到火屬性傷害。",
+      "price": 360,
+      "mp": 9,
+      "req_level": 5,
+      "jobs": ["法師", "牧師"],
+      "status": "learned",
+      "enabled": false,
+      "disabled_reason": "已學會",
+      "badges": [
+        { "badge_id": "learned", "label": "已學會", "kind": "success" }
+      ]
+    }
+  ],
+  "book_details": {
+    "book_spark": {
+      "book_id": "book_spark",
+      "title": "《火花術書》",
+      "category_label": "攻擊魔法",
+      "skill_name": "火花術",
+      "mp_cost": 5,
+      "description": "凝聚精純的初階火元素術式，從法杖前端射出燃燒的火花。米菈法杖頂端長燃的微光見證了對此術式的精確掌握。",
+      "effect_summary": "造成火屬性小傷害 (基礎倍率 1.25)",
+      "jobs": ["法師", "牧師"],
+      "req_level": 2,
+      "price": 180,
+      "status": "learned",
+      "disabled_reason": "已學會"
+    },
+    "book_cinder_mark": {
+      "book_id": "book_cinder_mark",
+      "title": "《燼印術書》",
+      "category_label": "攻擊魔法",
+      "skill_name": "燼印術",
+      "mp_cost": 9,
+      "description": "釋放火山微粒覆蓋於敵方目標身上，留下容易被高熱點燃的隱密標記。火花術的絕佳增傷搭配。",
+      "effect_summary": "3 回合內降低火抗性，使敵人更容易受到火屬性傷害",
+      "jobs": ["法師", "牧師"],
+      "req_level": 5,
+      "price": 360,
+      "status": "learned",
+      "disabled_reason": "已學會"
+    }
+  },
+  "requirement_rows": {
+    "book_spark": [
+      {
+        "id": "gold",
+        "label": "金幣需求",
+        "required_value": "180G",
+        "current_value": "1500G",
+        "status": "met",
+        "disabled_reason": null
+      },
+      {
+        "id": "learned",
+        "label": "學習狀態",
+        "required_value": "未學習",
+        "current_value": "已學習",
+        "status": "unmet",
+        "disabled_reason": "已學會"
+      }
+    ],
+    "book_cinder_mark": [
+      {
+        "id": "gold",
+        "label": "金幣需求",
+        "required_value": "360G",
+        "current_value": "1500G",
+        "status": "met",
+        "disabled_reason": null
+      },
+      {
+        "id": "learned",
+        "label": "學習狀態",
+        "required_value": "未學習",
+        "current_value": "已學習",
+        "status": "unmet",
+        "disabled_reason": "已學會"
+      }
+    ]
+  },
+  "primary_actions": {
+    "book_spark": {
+      "action_id": "learn_magic_book",
+      "label": "已學會此法術",
+      "enabled": false,
+      "disabled_reason": "已學會",
+      "payload": { "book_id": "book_spark", "price": 180 },
+      "result_message": null
+    },
+    "book_cinder_mark": {
+      "action_id": "learn_magic_book",
+      "label": "已學會此法術",
+      "enabled": false,
+      "disabled_reason": "已學會",
+      "payload": { "book_id": "book_cinder_mark", "price": 360 },
+      "result_message": null
+    }
+  },
+  "debug_notes": [
+    "Full-learn state Mage level 5.",
+    "All eligible magic books are already learned."
+  ]
+}

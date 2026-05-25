@@ -1,0 +1,191 @@
+{
+  "screen_id": "facility_magic_shop_screen",
+  "facility_id": "magic_shop",
+  "title": "星燈魔法商店 (受限展示版)",
+  "subtitle": "願星辰指引你的靈魂，冒險者。在這裡可以購買並學習永久的戰鬥魔法與輔助技能。",
+  "npc": {
+    "id": "eve",
+    "name": "伊芙",
+    "role": "星燈魔法商店的館長，專注於古老星辰與元素術式的研究。",
+    "guidance": "伊芙微微皺起眉頭：「嗯... 你的魔力波動有些奇特，似乎並不符合這些術式的需求。」",
+    "portrait_placeholder": "EV"
+  },
+  "player_summary": {
+    "name": "艾琳",
+    "level": 1,
+    "job": "盜賊",
+    "gold": 50
+  },
+  "category_tabs": [
+    { "id": "all", "label": "全部魔法", "count": 6, "enabled": true },
+    { "id": "damage", "label": "攻擊魔法", "count": 3, "enabled": true },
+    { "id": "heal", "label": "恢復魔法", "count": 1, "enabled": true },
+    { "id": "buff", "label": "輔助魔法", "count": 2, "enabled": true }
+  ],
+  "selected_category_id": "all",
+  "selected_book_id": "book_quickstep",
+  "list_rows": [
+    {
+      "id": "row_book_spark",
+      "book_id": "book_spark",
+      "title": "《火花術書》",
+      "category": "damage",
+      "summary": "學會火花術。火屬性小傷害魔法。",
+      "price": 180,
+      "mp": 5,
+      "req_level": 2,
+      "jobs": ["法師", "牧師"],
+      "status": "job_restricted",
+      "enabled": false,
+      "disabled_reason": "職業不符",
+      "badges": []
+    },
+    {
+      "id": "row_book_ice_needle",
+      "book_id": "book_ice_needle",
+      "title": "《冰針術書》",
+      "category": "damage",
+      "summary": "學會冰針術。冰屬性小傷害魔法，克制火屬性敵人。",
+      "price": 220,
+      "mp": 6,
+      "req_level": 3,
+      "jobs": ["法師"],
+      "status": "job_restricted",
+      "enabled": false,
+      "disabled_reason": "職業不符",
+      "badges": []
+    },
+    {
+      "id": "row_book_minor_heal",
+      "book_id": "book_minor_heal",
+      "title": "《小治癒術書》",
+      "category": "heal",
+      "summary": "學會小治癒術。回復我方 HP 45 點。",
+      "price": 200,
+      "mp": 7,
+      "req_level": 2,
+      "jobs": ["牧師"],
+      "status": "job_restricted",
+      "enabled": false,
+      "disabled_reason": "職業不符",
+      "badges": []
+    },
+    {
+      "id": "row_book_guardian_rune",
+      "book_id": "book_guardian_rune",
+      "title": "《守護符文書》",
+      "category": "buff",
+      "summary": "學會守護符文。3 回合內提高防禦力 20%。",
+      "price": 300,
+      "mp": 8,
+      "req_level": 4,
+      "jobs": ["劍士", "牧師"],
+      "status": "job_restricted",
+      "enabled": false,
+      "disabled_reason": "職業不符",
+      "badges": []
+    },
+    {
+      "id": "row_book_quickstep",
+      "book_id": "book_quickstep",
+      "title": "《迅步術書》",
+      "category": "buff",
+      "summary": "學會迅步術。3 回合內提高敏捷 25%。",
+      "price": 240,
+      "mp": 6,
+      "req_level": 3,
+      "jobs": ["盜賊", "劍士"],
+      "status": "level_restricted",
+      "enabled": false,
+      "disabled_reason": "等級不足 Lv3",
+      "badges": []
+    },
+    {
+      "id": "row_book_cinder_mark",
+      "book_id": "book_cinder_mark",
+      "title": "《燼印術書》",
+      "category": "damage",
+      "summary": "學會燼印術。使敵人更容易受到火屬性傷害。",
+      "price": 360,
+      "mp": 9,
+      "req_level": 5,
+      "jobs": ["法師", "牧師"],
+      "status": "job_restricted",
+      "enabled": false,
+      "disabled_reason": "職業不符",
+      "badges": []
+    }
+  ],
+  "book_details": {
+    "book_quickstep": {
+      "book_id": "book_quickstep",
+      "title": "《迅步術書》",
+      "category_label": "輔助魔法",
+      "skill_name": "迅步術",
+      "mp_cost": 6,
+      "description": "為雙足加持微弱風行之術，能更容易閃避敵人攻擊，或在戰場上搶先做出應對。此法術完美契合盜賊的靈活身手，但你的等階尚低，難以掌握其風軌流動。",
+      "effect_summary": "3 回合內敏捷 +25%",
+      "jobs": ["盜賊", "劍士"],
+      "req_level": 3,
+      "price": 240,
+      "status": "level_restricted",
+      "disabled_reason": "等級不足 Lv3"
+    },
+    "book_spark": {
+      "book_id": "book_spark",
+      "title": "《火花術書》",
+      "category_label": "攻擊魔法",
+      "skill_name": "火花術",
+      "mp_cost": 5,
+      "description": "凝聚精純的初階火元素術式，從法杖前端射出燃燒的火花。非編織魔網的純粹武力職業無法解讀其符文奧秘。",
+      "effect_summary": "造成火屬性小傷害 (基礎倍率 1.25)",
+      "jobs": ["法師", "牧師"],
+      "req_level": 2,
+      "price": 180,
+      "status": "job_restricted",
+      "disabled_reason": "職業不符"
+    }
+  },
+  "requirement_rows": {
+    "book_quickstep": [
+      {
+        "id": "gold",
+        "label": "金幣需求",
+        "required_value": "240G",
+        "current_value": "50G",
+        "status": "unmet",
+        "disabled_reason": "金幣不足"
+      },
+      {
+        "id": "level",
+        "label": "等級限制",
+        "required_value": "Lv 3",
+        "current_value": "Lv 1",
+        "status": "unmet",
+        "disabled_reason": "等級不足"
+      },
+      {
+        "id": "mat_moss_fiber",
+        "label": "苔蘚纖維",
+        "required_value": "2 個",
+        "current_value": "0 個",
+        "status": "unmet",
+        "disabled_reason": "素材不足"
+      }
+    ]
+  },
+  "primary_actions": {
+    "book_quickstep": {
+      "action_id": "learn_magic_book",
+      "label": "等級不足",
+      "enabled": false,
+      "disabled_reason": "等級不足 Lv3",
+      "payload": { "book_id": "book_quickstep", "price": 240 },
+      "result_message": null
+    }
+  },
+  "debug_notes": [
+    "Thief level 1 constrained display.",
+    "Quickstep requires Level 3, sufficient gold, and moss fiber."
+  ]
+}

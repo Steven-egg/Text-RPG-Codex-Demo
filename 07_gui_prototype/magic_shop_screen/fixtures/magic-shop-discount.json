@@ -1,0 +1,213 @@
+{
+  "screen_id": "facility_magic_shop_screen",
+  "facility_id": "magic_shop",
+  "title": "星燈魔法商店 (魔晶折扣版)",
+  "subtitle": "願星辰指引你的靈魂，冒險者。在這裡可以購買並學習永久的戰鬥魔法與輔助技能。",
+  "npc": {
+    "id": "eve",
+    "name": "伊芙",
+    "role": "星燈魔法商店的館長，專注於古老星辰與元素術式的研究。",
+    "guidance": "伊芙眼睛一亮：「啊，多虧你幫忙收集的魔晶，關於低階元素的研究有了很大突破！火花術書現在為你永久折價 50G！」",
+    "portrait_placeholder": "EV"
+  },
+  "player_summary": {
+    "name": "米菈",
+    "level": 4,
+    "job": "法師",
+    "gold": 350
+  },
+  "category_tabs": [
+    { "id": "all", "label": "全部魔法", "count": 6, "enabled": true },
+    { "id": "damage", "label": "攻擊魔法", "count": 3, "enabled": true },
+    { "id": "heal", "label": "恢復魔法", "count": 1, "enabled": true },
+    { "id": "buff", "label": "輔助魔法", "count": 2, "enabled": true }
+  ],
+  "selected_category_id": "all",
+  "selected_book_id": "book_spark",
+  "list_rows": [
+    {
+      "id": "row_book_spark",
+      "book_id": "book_spark",
+      "title": "《火花術書》",
+      "category": "damage",
+      "summary": "學會火花術。火屬性小傷害魔法。[魔晶研究已折價 50G]",
+      "price": 130,
+      "mp": 5,
+      "req_level": 2,
+      "jobs": ["法師", "牧師"],
+      "status": "learnable",
+      "enabled": true,
+      "disabled_reason": null,
+      "badges": [
+        { "badge_id": "discount", "label": "折價 50G", "kind": "warning" }
+      ]
+    },
+    {
+      "id": "row_book_ice_needle",
+      "book_id": "book_ice_needle",
+      "title": "《冰針術書》",
+      "category": "damage",
+      "summary": "學會冰針術。冰屬性小傷害魔法，克制火屬性敵人。",
+      "price": 220,
+      "mp": 6,
+      "req_level": 3,
+      "jobs": ["法師"],
+      "status": "learnable",
+      "enabled": true,
+      "disabled_reason": null,
+      "badges": []
+    },
+    {
+      "id": "row_book_minor_heal",
+      "book_id": "book_minor_heal",
+      "title": "《小治癒術書》",
+      "category": "heal",
+      "summary": "學會小治癒術。回復我方 HP 45 點。",
+      "price": 200,
+      "mp": 7,
+      "req_level": 2,
+      "jobs": ["牧師"],
+      "status": "job_restricted",
+      "enabled": false,
+      "disabled_reason": "職業不符",
+      "badges": []
+    },
+    {
+      "id": "row_book_guardian_rune",
+      "book_id": "book_guardian_rune",
+      "title": "《守護符文書》",
+      "category": "buff",
+      "summary": "學會守護符文。3 回合內提高防禦力 20%。",
+      "price": 300,
+      "mp": 8,
+      "req_level": 4,
+      "jobs": ["劍士", "牧師"],
+      "status": "job_restricted",
+      "enabled": false,
+      "disabled_reason": "職業不符",
+      "badges": []
+    },
+    {
+      "id": "row_book_quickstep",
+      "book_id": "book_quickstep",
+      "title": "《迅步術書》",
+      "category": "buff",
+      "summary": "學會迅步術。3 回合內提高敏捷 25%。",
+      "price": 240,
+      "mp": 6,
+      "req_level": 3,
+      "jobs": ["盜賊", "劍士"],
+      "status": "job_restricted",
+      "enabled": false,
+      "disabled_reason": "職業不符",
+      "badges": []
+    },
+    {
+      "id": "row_book_cinder_mark",
+      "book_id": "book_cinder_mark",
+      "title": "《燼印術書》",
+      "category": "damage",
+      "summary": "學會燼印術。使敵人更容易受到火屬性傷害。",
+      "price": 360,
+      "mp": 9,
+      "req_level": 5,
+      "jobs": ["法師", "牧師"],
+      "status": "level_restricted",
+      "enabled": false,
+      "disabled_reason": "等級不足 Lv5",
+      "badges": [
+        { "badge_id": "rare", "label": "高階", "kind": "warning" }
+      ]
+    }
+  ],
+  "book_details": {
+    "book_spark": {
+      "book_id": "book_spark",
+      "title": "《火花術書》",
+      "category_label": "攻擊魔法",
+      "skill_name": "火花術",
+      "mp_cost": 5,
+      "description": "凝聚精純的初階火元素術式，從法杖前端射出燃燒的火花。因已完成工會「魔晶研究」委託，伊芙為你提供了特惠折扣！",
+      "effect_summary": "造成火屬性小傷害 (基礎倍率 1.25)",
+      "jobs": ["法師", "牧師"],
+      "req_level": 2,
+      "price": 130,
+      "status": "learnable",
+      "disabled_reason": null
+    },
+    "book_ice_needle": {
+      "book_id": "book_ice_needle",
+      "title": "《冰針術書》",
+      "category_label": "攻擊魔法",
+      "skill_name": "冰針術",
+      "mp_cost": 6,
+      "description": "凝聚周遭的水元素並凝結成銳利的冰針，能有效穿透敌人的防線。對付焦石礦坑與燼印深窟的火系魔物效果卓越。",
+      "effect_summary": "造成冰屬性小傷害 (基礎倍率 1.35)，火系敵人剋星",
+      "jobs": ["法師"],
+      "req_level": 3,
+      "price": 220,
+      "status": "learnable",
+      "disabled_reason": null
+    }
+  },
+  "requirement_rows": {
+    "book_spark": [
+      {
+        "id": "gold",
+        "label": "金幣需求",
+        "required_value": "130G",
+        "current_value": "350G",
+        "status": "met",
+        "disabled_reason": null
+      },
+      {
+        "id": "mat_small_crystal",
+        "label": "小魔晶",
+        "required_value": "1 個",
+        "current_value": "1 個",
+        "status": "met",
+        "disabled_reason": null
+      }
+    ],
+    "book_ice_needle": [
+      {
+        "id": "gold",
+        "label": "金幣需求",
+        "required_value": "220G",
+        "current_value": "350G",
+        "status": "met",
+        "disabled_reason": null
+      },
+      {
+        "id": "mat_small_crystal",
+        "label": "小魔晶",
+        "required_value": "2 個",
+        "current_value": "1 個",
+        "status": "unmet",
+        "disabled_reason": "素材不足"
+      }
+    ]
+  },
+  "primary_actions": {
+    "book_spark": {
+      "action_id": "learn_magic_book",
+      "label": "學習火花術 (130G)",
+      "enabled": true,
+      "disabled_reason": null,
+      "payload": { "book_id": "book_spark", "price": 130 },
+      "result_message": "你成功研讀了《火花術書》！扣除金幣 130G 與小魔晶 x1，已永久學會法術「火花術」！"
+    },
+    "book_ice_needle": {
+      "action_id": "learn_magic_book",
+      "label": "學習冰針術 (220G)",
+      "enabled": false,
+      "disabled_reason": "素材不足",
+      "payload": { "book_id": "book_ice_needle", "price": 220 },
+      "result_message": null
+    }
+  },
+  "debug_notes": [
+    "Discount Magic Shop fixture covers magic crystal quest completion.",
+    "Spark book is discounted to 130G."
+  ]
+}

@@ -61,6 +61,24 @@ Last updated: 2026-05-25
   - fixtures/
     - workshop-default.json
     - workshop-constrained.json
+- storage_screen/
+  - index.html
+  - styles.css
+  - storage-screen.js
+  - fixtures/
+    - storage-locked.json
+    - storage-empty.json
+    - storage-filled.json
+    - storage-blocked.json
+- magic_shop_screen/
+  - index.html
+  - styles.css
+  - magic-shop-screen.js
+  - fixtures/
+    - magic-shop-default.json
+    - magic-shop-discount.json
+    - magic-shop-constrained.json
+    - magic-shop-learned.json
 - world_map/
   - index.html
   - styles.css
@@ -324,6 +342,73 @@ Deferred Workshop items:
 - Runtime adapter for equipment purchase, upgrade, inventory, material, or gold mutation.
 - Real equipment icons, blacksmith/NPC art, animation, or formal asset pipeline.
 - Final keyboard focus graph.
+
+## Storage Screen Prototype
+
+Location:
+
+```text
+07_gui_prototype/storage_screen/
+```
+
+Current behavior:
+
+- Loads static fixtures only.
+- Renders Storage title/subtitle, player resources, capacity bar ("容量: N / 10") with status badge, left Backpack item list with category tabs, right Warehouse list showing exactly 10 slots (occupied rows, empty slots `[ 空置保管欄位 ]`, locked placeholders `🔒 保管欄位鎖定`), center Transfer Action Panel, feedback atmospheric bar, primary/secondary action buttons, and UIAction log.
+- Supports four JSON fixtures: `storage-locked.json` (unopened state), `storage-empty.json` (unlocked but empty), `storage-filled.json` (normal storage usage), and `storage-blocked.json` (low-gold or key item storage block details).
+- Clicking Backpack list row logs `select_inventory_item` and opens center panel for simulated "deposit" transfer.
+- Clicking Warehouse list row logs `select_storage_item` and opens center panel for simulated "withdraw" transfer.
+- Center panel combines selected item name, usage description, transfer mode badge ("存入倉庫 ➔" or "🠔 取出背包"), quantity stepper controls (`-`, `+`, `MAX` buttons), and the primary "確認轉移/存入/取出" confirm button.
+- Bottom primary action buttons are dynamic: triggers simulated `unlock_storage` (500G) when locked, or shows disabled `upgrade_storage` (disabled placeholder) when unlocked.
+- Bottom feedback bar acts as the main JRPG receptionist dialogue interface: prints receptionist Noah's custom welcomes, guidelines, and warning feedbacks.
+- Back action dispatches `back_to_town_hub` and returns to Town Hub static prototype.
+
+Accepted Storage decisions:
+
+- Storage Screen V1 is a JRPG 3-Column Dual-List horizontal transfer panel, not an in-backpack menu.
+- Keep the middle column clean by removing redundant NPC avatars or duplicate grids; NPC portrait assets and roles are completely unified under the bottom feedback bar interface.
+- Warehouse items must always render exactly 10 slots (visual cap matching JRPG constraints), cleanly displaying populated, empty placeholder, and locked rows.
+- Quantity adjustment must utilize stepper buttons (`-`, `+`, `MAX`) directly in the center detail panel, rather than popover overlays.
+
+Deferred Storage items:
+
+- Real storage expansion or vault upgrades beyond level 1.
+- Runtime state updates mapping back to `save.json`.
+- Automatic item categorization beyond basic tabs.
+- Keyboard navigation focus grid for transfer columns.
+
+## Magic Shop Screen Prototype
+
+Location:
+
+```text
+07_gui_prototype/magic_shop_screen/
+```
+
+Current behavior:
+
+- Loads static fixtures only.
+- Renders Magic Shop title/subtitle, left-side Spellbook list with categories, center Scroll Detail card with item/gold requirements, right-side Eve's NPC Observatory portrait card, bottom feedback atmospheric bar, primary buy/learn action, back action, and UIAction log.
+- Category tabs are aligned with the CLI Magic Shop Catalog MVP: `全部`, `攻擊魔法`, `恢復魔法`, `輔助魔法`, `特殊魔法`.
+- Spellbook rows render status badges dynamically: `已學會` (gold), `可學習` (green), `等級不足` (red/gray), `素材不足` (red/gray).
+- Selecting a spellbook details its spell name, MP cost, job requirements, level conditions, and price.
+- If `quest_magic_crystal` is completed, book spark price drops by 50G (150G -> 100G) and prints custom Eve welcome text.
+- Enabled `learn_magic_book` writes UIAction log and static feedback only; it does not subtract gold/materials or learn active runtime skills.
+- Bottom feedback bar acts as Eve's communication channel (e.g. `伊芙：「願星辰指引你的靈魂，冒險者。」`).
+- Back action dispatches `back_to_town_hub` and returns to Town Hub.
+
+Accepted Magic Shop decisions:
+
+- Magic Shop Screen V1 is a Facility Spellbook list-detail-requirement-learn validation surface.
+- Keep color accent unified under a high-fidelity magenta/purple arcane theme (`var(--accent-magenta)`).
+- Renders requirements as full-width strip rows under the detail panel, complying with Synthesis Screen layout structure.
+- Renders Eve's illustration inside a dedicated right-hand portrait area with a standard JRPG aspect ratio.
+
+Deferred Magic Shop items:
+
+- Runtime integration of learned skills into player combat arrays.
+- Real spellbook/magic icons or observatory background animations.
+- Selling magic books, multiple spell slots, or advanced magic schools.
 
 ## World Map Prototype
 
@@ -604,6 +689,14 @@ Validated during this session:
 - Workshop Screen dispatches `select_tab`, `select_item`, `select_recipe`, `buy_equipment`, `upgrade_equipment`, `blocked_action`, and `back_to_town_hub` as static UIAction events only.
 - Town Hub `workshop` facility routes to Workshop Screen static prototype.
 - Workshop Screen logic treats buy/upgrade success as simulated feedback only and does not mutate runtime SSOT data.
+- Storage Screen static prototype v1 exists with locked, empty, filled, and blocked fixtures.
+- Storage Screen dispatches `select_category`, `select_inventory_item`, `select_storage_item`, `set_transfer_quantity`, `deposit_item`, `withdraw_item`, `unlock_storage`, and `back_to_town_hub` as static UIAction events.
+- Town Hub `storage` facility node correctly routes to Storage Screen static prototype.
+- Storage Screen 10-row capacity bar and visual rendering logic pass browser checks with zero console errors.
+- Magic Shop Screen static prototype v1 exists with default, discount, constrained, and learned fixtures.
+- Magic Shop Screen dispatches `select_category`, `select_book`, `learn_magic_book`, and `back_to_town_hub` as static UIAction events only.
+- Town Hub `magic_shop` facility node correctly routes to Magic Shop Screen static prototype.
+- Magic Shop Screen requirements rendering and Eve's portrait card pass layout checks with zero console errors.
 
 ## Recommended Next Step
 
