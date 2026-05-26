@@ -68,7 +68,7 @@ Facility / Synthesis 接續：
 
 GUI 已進入 HTML static prototype 驗證階段；正式 runtime UI 仍是 Python CLI / Rich，尚未建立 runtime adapter。
 
-- `07_gui_prototype/` 已建立 Town Hub、Guild Screen、World Map、Dungeon Exploration、Combat Screen static prototype。
+- `07_gui_prototype/` 已建立 Start Screen、Town Hub、Guild Screen、Synthesis Screen、World Map、Dungeon Exploration、Combat Screen、Shop Screen、Workshop Screen、Storage Screen、Magic Shop Screen 共 11 個 static prototype 畫面。
 - static prototype 只使用 fixtures 驗證 render layer、layout、互動與 UIAction logging。
 - Combat Screen 已有技能 / 道具 popover、Battle Log、Victory / Defeat / Retreat result preview fixtures，以及整合在 Combat Screen 內的 Combat Result overlay。
 - 最近手動測試回報整體 OK；目前 Combat 面板只剩與使用者 mockup 對齊的版面微調。

@@ -4,7 +4,7 @@
 
 目前最新工作是 `07_gui_prototype/` 的 HTML static prototype。它只驗證 GUI render layer、layout、互動與 UIAction logging，不接 Python runtime，不讀寫 `save.json`，不修改 runtime / data / schema / combat formula，也不啟動正式 asset pipeline。
 
-- 已建立 Start Screen、Town Hub、Guild Screen、Synthesis Screen、World Map、Dungeon Exploration、Combat Screen、Shop Screen、Workshop Screen 九個 static prototype。
+- 已建立 Start Screen、Town Hub、Guild Screen、Synthesis Screen、World Map、Dungeon Exploration、Combat Screen、Shop Screen、Workshop Screen、Storage Screen、Magic Shop Screen 十一個 static prototype。
 - Start Screen 已有 no-save / has-save fixtures、開始 / 讀取 / 重新開始入口，以及只寫 UIAction 的冒險者登錄 modal。
 - World Map 可用靜態 fixture 導向 Dungeon Exploration；Dungeon Exploration 的 `Fixed Encounter Preview` 可導向 Combat Screen。
 - Combat Screen 已有 5 個底部指令、技能 / 道具 floating popover、右側 Battle Log、Victory / Defeat / Retreat result preview fixtures。
@@ -117,7 +117,7 @@ UI 完成後要回頭處理的 demo 遊玩體驗、平衡、任務引導與內�
 GUI 升級分三層看待：
 
 - Phase UI-1：CLI / Rich playable reference。已完成核心循環與設施 catalog 的顯示層整理。
-- Phase UI-2：HTML static fixture prototype。已建立 Start Screen、Town Hub、Guild、Synthesis、World Map、Dungeon Exploration、Combat、Shop、Workshop；仍只用 fixture，不接 runtime。
+- Phase UI-2：HTML static fixture prototype。已建立 Start Screen、Town Hub、Guild、Synthesis、World Map、Dungeon Exploration、Combat、Shop、Workshop、Storage、Magic Shop；仍只用 fixture，不接 runtime。
 - Phase UI-3：最終 GUI 視覺版本。使用正式背景圖、角色圖、icon、UI skin，並需要 asset request schema、prompt builder、asset registry 與 style bible；此階段尚未開始。
 
 三層應共用同一套 Screen Map、ScreenModel 與 UIAction；CLI 數字輸入、Rich wireframe 選取與未來 GUI 點擊 / 觸控都只應映射到同一批遊戲語意 action。
@@ -195,7 +195,7 @@ GUI 升級分三層看待：
 - 倉庫 MVP：可花費 500G 開啟 LV1 倉庫，存取最多 10 種非 key item 背包物品
 - 怪物圖鑑 MVP：擊敗怪物後 100% 登錄，可從主選單查看已登錄怪物的基礎資訊
 - CLI UI MVP：核心循環已以 Rich `Panel` 薄層整理，涵蓋開始畫面、主選單、角色狀態、城鎮整備、工坊 catalog、旅人小鋪分類商店、星燈魔法商店 catalog、米菈合成屋 catalog、迷宮選擇、迷宮探索、戰鬥指令與結算；戰鬥已完成主畫面 / Battle Log 分流；輸入、資料、存檔與戰鬥規則維持原樣
-- GUI HTML static prototype：`07_gui_prototype/` 目前包含 Start Screen、Town Hub、Guild Screen、Synthesis Screen、World Map、Dungeon Exploration、Combat Screen、Shop Screen、Workshop Screen；只用 fixtures 驗證 GUI layout / interaction，不是正式 runtime UI
+- GUI HTML static prototype：`07_gui_prototype/` 目前包含 Start Screen、Town Hub、Guild Screen、Synthesis Screen、World Map、Dungeon Exploration、Combat Screen、Shop Screen、Workshop Screen、Storage Screen、Magic Shop Screen；只用 fixtures 驗證 GUI layout / interaction，不是正式 runtime UI
 - 轉職 preview-only MVP：轉職神殿顯示 `PROMOTIONS` 預覽方向與條件，正式轉職尚未開放
 - 聖物 preview-only MVP：城鎮「聖物調查」顯示 `RELICS` 預覽，聖物取得與效果尚未開放
 - 職業特化 preview-only MVP：角色狀態頁顯示 `JOB_SPECIALIZATIONS` 預覽，目前尚未生效

@@ -69,4 +69,4 @@ CLI 數字輸入、Rich wireframe 選取、GUI 點擊與未來觸控都應映射
 - 使用者提供的 UI 草圖先視為探索稿，需映射到流程節點與 panel 職責後再判斷是否落地。
 - 後續 UI 只能做小步 CLI 顯示層改善；戰鬥主畫面服務決策，Battle Log 服務回溯，除非另外明確批准新平台或 UI framework。
 - 目前 UI-2 已採 HTML static prototype 作驗證路線；這不等於正式 GUI app，也不等於 runtime adapter。
-- 下一個合理小切片應由使用者指定，並先做 read-only preflight；Synthesis / Shop / Workshop static prototype v1 已落地，不再作為未完成候選。
+- 下一個合理小切片應由使用者指定，並先做 read-only preflight；Synthesis / Shop / Workshop / Storage / Magic Shop static prototype v1 都已落地，不再作為未完成候選。

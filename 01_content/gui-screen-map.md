@@ -78,7 +78,8 @@ World Map 是正式 UI 的中樞。Town Hub 與 Dungeon / Exploration 是從 Wor
 | Forge / Workshop Screen | 購買裝備、強化裝備、查看本店裝備 | `workshop_catalog()` | static prototype 已落地 |
 | Synthesis Screen | 配方分類、列表、詳情、合成 | `craft_menu()` | static prototype 已落地 |
 | Inn Screen | 休息確認與資源回復 | `rest_inn()` | 低 |
-| Storage Screen | 存入、取出、查看容量 | `storage_menu()` | 低 |
+| Storage Screen | 存入、取出、查看容量 | `storage_menu()` | static prototype 已落地 |
+| Magic Shop Screen | 購買與學習技能書 | `magic_shop_catalog()` | static prototype 已落地 |
 | Exploration Screen | 單一路線步數制探索、事件與撤退 | `explore_dungeon()` | static prototype 已落地 |
 | Combat Screen | 回合制戰鬥決策與戰鬥紀錄 | `combat()` | static prototype 已落地 |
 | Result Screen | 結果概念；Combat Result 目前整合為 Combat Screen overlay | 多處 `render_panel()` | 概念保留 |
@@ -201,13 +202,14 @@ Town Hub 採場景式 hub，不以純列表作為主要結構。`facility_nodes`
 
 ## 6. 後續實驗對象
 
-Start Screen、Town Hub、Guild、Synthesis、World Map、Dungeon Exploration、Combat、Shop、Workshop static prototype 都已落地。後續實驗對象應由使用者指定單一小切片，並先做 read-only preflight。
+Start Screen、Town Hub、Guild、Synthesis、World Map、Dungeon Exploration、Combat、Shop、Workshop、Storage、Magic Shop static prototype 都已落地。後續實驗對象應由使用者指定單一小切片，並先做 read-only preflight。
 
 較安全的候選：
 
-- Town Hub / Guild 的 keyboard focus graph。
-- shared prototype shell / fixture loader。
-- 單一既有 static prototype 的使用者指名小幅 review 調整。
+- Inn Screen static prototype
+- Town Hub / Guild 的 keyboard focus graph
+- 單一既有畫面小幅 polish
+- shared prototype shell / fixture loader（僅列為後續候選，不要實作）
 
 任何後續 UI-2 工作仍只驗證 static fixtures、render layer、layout、interaction、navigation flow 與 UIAction logging；不接 runtime、不讀寫 save、不啟動正式 asset pipeline。
 
@@ -226,5 +228,5 @@ Start Screen、Town Hub、Guild、Synthesis、World Map、Dungeon Exploration、
 
 1. 先維持 HTML static prototype 邊界，由使用者指定單一小切片。
 2. 若是 GUI 任務，先做 Task Zone read-only preflight，再決定是否進行 docs-only 或 prototype-only 小修。
-3. Synthesis / Shop / Workshop static prototype v1 已落地，不再列為未完成候選。
+3. Synthesis / Shop / Workshop / Storage / Magic Shop static prototype v1 都已落地，不再列為未完成候選。
 4. 暫不接 runtime、不讀寫 save、不生成新圖、不啟動正式 asset pipeline。
