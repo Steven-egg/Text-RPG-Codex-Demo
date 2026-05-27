@@ -73,13 +73,15 @@
 
 Hot Zone 啟動必讀：
 
-1. `README.md`
-2. `01_content/codex-handoff-short.md`
-3. `01_content/gui-html-static-prototype-progress-v1.md`
-4. 專案內目前有效的 `SKILL.md`（Codex 讀 `.codex/skills/element-maze-session-ops/SKILL.md`，Antigravity 讀 `.antigravity/skills/element-maze-session-governance/SKILL.md`）
-5. `01_content/agent-startup-reading-list.md`
+1. `AGENTS.md`
+2. `01_content/agent-startup-reading-list.md`
+3. 專案內目前有效的 `SKILL.md`（Codex 讀 `.codex/skills/element-maze-session-ops/SKILL.md`，Antigravity 讀 `.antigravity/skills/element-maze-session-governance/SKILL.md`）
+4. `README.md`
+5. `01_content/codex-handoff-short.md`
 
-Task Zone 只在任務需要時選讀，例如 GUI 任務才讀 `01_content/gui-planning-index.md`、`01_content/ui-flow-blueprint.md`、`01_content/gui-screen-map.md` 或對應 `07_gui_prototype/<screen>/`。
+GUI static prototype 任務需再讀目前 agent 對應的 GUI skill。`01_content/gui-html-static-prototype-progress-v1.md` 只在需要 GUI screen 細節或驗證紀錄時讀取相關段落，不列入 Hot Zone 啟動必讀。
+
+Task Zone 只在任務需要時選讀，例如 GUI planning、drift audit 或 task routing 才讀 `01_content/gui-planning-index.md`；需要流程或畫面地圖時才讀 `01_content/ui-flow-blueprint.md`、`01_content/gui-screen-map.md` 或對應 `07_gui_prototype/<screen>/`。
 
 Cold Zone 不在新 session 啟動時主動大量讀取；需要詳細歷史、第二幕規劃、長期幕次、demo polish 或架構背景時，才依使用者明確指示讀取對應文件。
 
