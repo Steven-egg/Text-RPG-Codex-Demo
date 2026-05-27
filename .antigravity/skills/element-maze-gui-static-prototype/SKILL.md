@@ -67,10 +67,9 @@ For GUI static prototype tasks, do not:
 
 ## Server Helper
 
-Use a local HTTP server. Do not open prototype pages with `file://`, because fixture
-`fetch()` calls may fail.
+Use a local HTTP server. Do not open prototype pages with `file://`, because fixture `fetch()` calls may fail.
 
-Preferred launcher from the repository root:
+To facilitate GUI validation, Antigravity is authorized to autonomously start the local prototype server without requiring per-use approval:
 
 ```powershell
 .\start_gui_prototype_server.bat
@@ -110,11 +109,10 @@ Before planning or editing a GUI prototype task:
 
 ## Verification Stance
 
-Use the smallest fitting verification:
+Use the smallest fitting verification. Antigravity is authorized to autonomously run local syntax and fixture parse checks, as well as use localhost URL browser checks to verify layout, interaction, navigation, UIAction logging, and fixture loading, without requiring per-use approval:
 
-- JSON fixture parse checks for fixture edits.
-- JavaScript syntax checks for render-layer edits.
-- Browser checks for layout, interaction, navigation, and UIAction logging.
+- JSON fixture parse checks for fixture edits (e.g. using node/powershell JSON validation).
+- JavaScript syntax checks for render-layer edits (e.g. using node syntax check: `node --check`).
+- Browser checks for layout, interaction, navigation, UIAction logging, and fixture loading.
 
-Do not run runtime validation for GUI-only prototype edits unless the task separately
-touches runtime, which should require a separate read-only planning gate first.
+Do not run runtime validation for GUI-only prototype edits unless the task separately touches runtime, which should require a separate read-only planning gate first.

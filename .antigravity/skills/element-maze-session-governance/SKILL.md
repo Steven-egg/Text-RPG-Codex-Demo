@@ -131,7 +131,7 @@ Read-only / Modified files / Changed Git state / Unknown
 
 ## Safe Read-only Commands
 
-These commands are considered read-only and may be used for preflight when allowed by the user or project permissions:
+These status checking and preflight commands are considered read-only and may be executed autonomously by Antigravity without requiring per-use explicit approval:
 
 ```bash
 git status --short
@@ -149,7 +149,7 @@ Even for read-only commands:
 
 ## Commands Requiring Explicit Per-use Approval
 
-Never permanently assume permission for these:
+Never permanently assume permission for these (except for specific autonomous execution permissions granted under the GUI Static Prototype skill for local server and syntax/fixture verification):
 
 ```bash
 python
@@ -157,7 +157,7 @@ py
 pytest
 npm
 pip
-git diff
+git diff (except --stat or --name-only)
 git add
 git commit
 git push
