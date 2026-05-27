@@ -7,19 +7,20 @@
 
 ## 1. 文件載入分區規則 (Loading Zones)
 
-### 🔴 Hot Zone (新 Session 啟動必讀 - 核心治理與進度)
-*每次新對話/Session 開始時，Agent 必須主動加載且僅加載以下 5 個核心文件，以快速對齊專案現況與治理邊界：*
+### 🔴 Hot Zone (新 Session 啟動必讀 - 核心治理與精簡現況)
+*每次新對話/Session 開始時，Agent 必須主動加載且僅加載以下核心入口，以快速對齊專案現況與治理邊界。長篇 GUI 詳細紀錄不應在每次啟動時全文讀取：*
 
-1. [README.md](file:///c:/Users/user/OneDrive/文字冒險遊戲/README.md)
+1. [AGENTS.md](file:///c:/Users/user/OneDrive/文字冒險遊戲/AGENTS.md)
+   - *用途*：Codex / Antigravity 的共同入口路由，確認本輪應使用哪個 agent-local skill 與哪些檔案不可碰。
+2. [README.md](file:///c:/Users/user/OneDrive/文字冒險遊戲/README.md)
    - *用途*：確認專案結構、啟動方式、SSOT 規則與最新進度摘要。
-2. [01_content/codex-handoff-short.md](file:///c:/Users/user/OneDrive/文字冒險遊戲/01_content/codex-handoff-short.md)
+3. [01_content/codex-handoff-short.md](file:///c:/Users/user/OneDrive/文字冒險遊戲/01_content/codex-handoff-short.md)
    - *用途*：確認最新穩定狀態、已完成的 MVP 項目與下一步清晰的施工邊界。
-3. [01_content/gui-html-static-prototype-progress-v1.md](file:///c:/Users/user/OneDrive/文字冒險遊戲/01_content/gui-html-static-prototype-progress-v1.md)
-   - *用途*：確認當前 GUI HTML 原型的最新進度、已定案設施畫面與驗證紀錄。
 4. 專案內目前有效的 `SKILL.md`
    - Codex：`.codex/skills/element-maze-session-ops/SKILL.md`
    - Antigravity：`.antigravity/skills/element-maze-session-governance/SKILL.md`
    - *用途*：依目前 agent 工具環境載入專案本機專屬的協作與治理規範、指令匯報格式與嚴格禁止事項；不要把 Codex / Antigravity skill 混用成同一份狀態來源。
+   - GUI static prototype 任務再讀：`.codex/skills/element-maze-gui-static-prototype/SKILL.md` 或 `.antigravity/skills/element-maze-gui-static-prototype/SKILL.md`
 5. [01_content/agent-startup-reading-list.md](file:///c:/Users/user/OneDrive/文字冒險遊戲/01_content/agent-startup-reading-list.md) *(本檔案)*
    - *用途*：本載入指南，用於約束載入範圍。
 
@@ -29,9 +30,11 @@
 *僅在進行與該主題相關的開發或規劃任務時，才允許依需讀取，平常啟動時不主動讀取：*
 
 * **GUI 目標與架構關聯任務**：
+  - [gui-html-static-prototype-progress-v1.md](file:///c:/Users/user/OneDrive/文字冒險遊戲/01_content/gui-html-static-prototype-progress-v1.md) (GUI static prototype 詳細 handoff / 驗證紀錄；只讀本次任務需要的 screen 章節或 recommended next step，不在啟動時全文讀取)
   - [gui-planning-index.md](file:///c:/Users/user/OneDrive/文字冒險遊戲/01_content/gui-planning-index.md) (GUI 規劃總索引)
   - [ui-flow-blueprint.md](file:///c:/Users/user/OneDrive/文字冒險遊戲/01_content/ui-flow-blueprint.md) (UI 流程藍圖)
   - [gui-screen-map.md](file:///c:/Users/user/OneDrive/文字冒險遊戲/01_content/gui-screen-map.md) (GUI 畫面地圖)
+  - `gui-planning-index.md` 是 Task Zone 導覽索引；只有 GUI planning、drift audit 或 task routing 需要時才讀，不在每次啟動時全文讀取。
 * **具體畫面實作與調整任務**：
   - 僅加載對應設施的 HTML/CSS/JS 代碼，例如當前在處理 Workshop 任務時，只讀取 `07_gui_prototype/workshop_screen/` 下的檔案。
 

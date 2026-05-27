@@ -1,6 +1,6 @@
 ---
 name: element-maze-session-ops
-description: Project-specific session operations for Element Maze. Use when Codex needs to prepare commit notes, summarize end-of-session status, generate a next-session handoff prompt with the minimum read list, decide whether to continue the current session or start a new one, perform read-only project catch-up, classify HTML static prototype work stages, or enforce GUI static prototype boundaries for this repository.
+description: Project-specific session operations for Element Maze. Use when Codex needs commit notes, status summaries, next-session handoff prompts, continuation gates, read-only catch-up, Git packaging, startup governance, or runtime planning gates. For GUI static prototype boundaries, load element-maze-gui-static-prototype.
 ---
 
 # Element Maze Session Ops
@@ -13,9 +13,9 @@ Default to Traditional Chinese output unless the user asks otherwise.
 
 ## Read-Only Catch-Up
 
-At new session startup, first follow `01_content/agent-startup-reading-list.md`:
+At new session startup, first follow `AGENTS.md` and `01_content/agent-startup-reading-list.md`:
 
-- Default startup reads only the Hot Zone.
+- Default startup reads only the Hot Zone and the current Codex skill.
 - Task Zone files are read only when the explicit task needs them.
 - Cold Zone files are not bulk-loaded at startup.
 - Do not reopen settled GUI decisions based on older historical files.
@@ -24,18 +24,18 @@ Before producing a commit package, handoff prompt, next-session prompt, continua
 
 1. Run `git status --short`.
 2. Read recent commits with `git log --oneline --decorate --date=short --pretty=format:"%h %ad %s" -n 8`.
-3. Read `README.md`.
-4. Read `01_content/codex-handoff-short.md`.
-5. Read `01_content/gui-html-static-prototype-progress-v1.md`.
-6. Read `01_content/agent-startup-reading-list.md`.
+3. Read `AGENTS.md`.
+4. Read `01_content/agent-startup-reading-list.md`.
+5. Read `README.md`.
+6. Read `01_content/codex-handoff-short.md`.
+7. Read this skill file.
 
-For GUI static prototype work, read Task Zone planning files only when the task needs them, such as:
+For GUI static prototype work, also read:
 
-1. `01_content/gui-planning-index.md`.
-2. `01_content/ui-flow-blueprint.md`.
-3. `01_content/gui-screen-map.md`.
+1. `.codex/skills/element-maze-gui-static-prototype/SKILL.md`.
+2. Targeted sections of `01_content/gui-html-static-prototype-progress-v1.md` only when screen-level detail or verification history is needed.
 
-For task-specific context, use `01_content/gui-planning-index.md` or the relevant handoff file to decide what to read next. Prefer the minimum necessary extra files. Do not read broad historical files unless the task requires history.
+For GUI planning, drift audit, or task routing, read `01_content/gui-planning-index.md` only as a Task Zone index. Do not full-load `gui-html-static-prototype-progress-v1.md` or `gui-planning-index.md` at every startup. Prefer the minimum necessary extra files. Do not read broad historical files unless the task requires history.
 
 ## Permanent Boundaries
 
@@ -115,82 +115,11 @@ After read-only catch-up, produce:
 
 Do not propose implementation as already approved unless the user explicitly asks to start implementation.
 
-### GUI Static Prototype Preflight
+### GUI Static Prototype Tasks
 
-Use for Start Screen, Town Hub, Guild, World Map, Dungeon Exploration, Combat Screen, Synthesis Screen, Shop Screen, or other `07_gui_prototype/` tasks.
+Use `.codex/skills/element-maze-gui-static-prototype/SKILL.md` for all `07_gui_prototype/` planning, preview, edit, URL, fixture, UIAction logging, and GUI drift-boundary details.
 
-Always restate these GUI-specific boundaries in the output or plan when relevant:
-
-- Static fixtures only.
-- Validate render layer, layout, interaction, and UIAction logging only.
-- No Python runtime adapter.
-- No `save.json` access.
-- No runtime, data, schema, or combat formula changes.
-- No formal asset pipeline.
-- Reference images and mockups are visual references, not runtime assets.
-
-Before editing or planning an HTML static prototype, run this decision gate:
-
-1. Classify the current work stage.
-   - `content mapping`: Align fixture fields, render surfaces, and UIAction meaning. Prioritize what data appears and which actions exist.
-   - `layout refinement`: Adjust CSS, spacing, proportions, responsive behavior, and small HTML class structure. Do not change gameplay meaning.
-   - `player-facing polish`: Improve readable hierarchy, information density, debug-log visibility, labels, empty states, and user-facing feedback.
-   - `reference alignment`: Compare against a mockup/reference for layout weight, panel role, text-safe area, and character or NPC presence only.
-2. Declare the allowed surface for this pass.
-   - Examples: `styles.css only`, `CSS + fixture display copy`, `render-layer JS only`, or `HTML/CSS/fixture within 07_gui_prototype only`.
-   - If the pass is limited to layout, CSS, fixture, or render layer, do not modify runtime, data, schema, save, or combat formulas.
-3. Decide whether mockup/reference reading is needed.
-   - Read mockups only for `reference alignment` or explicit user review tasks.
-   - Use mockups for layout weight, panel role, text-safe area, and character presence.
-   - Do not copy mockup text into data, treat the image as a runtime background, or infer gameplay rules from the image.
-4. Decide the debug log stance.
-   - Player-facing passes should collapse or minimize large debug areas by default.
-   - Debug/testing passes may keep UIAction Log visible if it is needed for interaction verification.
-   - Never let a large debug log permanently dominate the primary player layout.
-5. Decide whether documentation must be updated.
-   - Pure CSS/layout micro-tuning usually does not need docs.
-   - Update handoff/progress docs when a new screen lands, a baseline is accepted, a navigation route changes, a prototype boundary changes, or verification records need to be preserved.
-
-For a new prototype planning prompt, include the expected layout pattern, fixture names, key UIAction events, navigation target, and verification checklist, but keep final implementation decisions aligned with live planning docs.
-
-### GUI Prototype Server Helper
-
-Use when the user asks how to launch, preview, smoke test, or browser test HTML static prototypes.
-
-Always remind the user to use a local HTTP server rather than `file://`, because fixture `fetch()` calls may fail from direct file URLs.
-
-Standard server root:
-
-```text
-C:\Users\User\OneDrive\文字冒險遊戲\07_gui_prototype
-```
-
-Standard command:
-
-```powershell
-cd C:\Users\User\OneDrive\文字冒險遊戲\07_gui_prototype
-python -m http.server 8000
-```
-
-If the repo helper exists, prefer telling the user to run:
-
-```powershell
-.\start_gui_prototype_server.bat
-```
-
-Standard URLs:
-
-- Start Screen: `http://localhost:8000/start_screen/index.html`
-- Town Hub: `http://localhost:8000/town_hub/index.html`
-- Guild Screen: `http://localhost:8000/guild_screen/index.html`
-- World Map: `http://localhost:8000/world_map/index.html`
-- Dungeon Exploration: `http://localhost:8000/dungeon_exploration/index.html`
-- Combat Screen: `http://localhost:8000/combat_screen/index.html`
-- Synthesis Screen: `http://localhost:8000/synthesis_screen/index.html`
-- Shop Screen: `http://localhost:8000/shop_screen/index.html`
-- Workshop Screen: `http://localhost:8000/workshop_screen/index.html`
-
-When a new prototype screen is added, update this URL list in the project-local skill copy and sync it to the user skill copy.
+This session ops skill should not duplicate landed screen progress, server URL lists, or screen-level GUI decisions. Keep this file focused on startup governance, handoff, Git packaging, context gates, and runtime planning gates.
 
 ### Runtime Preflight
 

@@ -29,6 +29,7 @@ Project:
 - Current main direction: GUI planning / HTML static prototype
 - Python CLI runtime is the playable reference.
 - HTML GUI prototypes are static fixtures only.
+- For GUI static prototype boundaries, also load `.antigravity/skills/element-maze-gui-static-prototype/SKILL.md`.
 
 Current GUI prototype boundary:
 - static fixtures only
@@ -40,20 +41,39 @@ Current GUI prototype boundary:
 - do not copy gameplay rules into JavaScript prototypes
 - do not treat reference images or mockup candidates as runtime assets
 
+Current landed GUI static prototype screens:
+- Start Screen
+- Town Hub
+- Guild Screen
+- Synthesis Screen
+- Shop Screen
+- Workshop Screen
+- Storage Screen
+- Magic Shop Screen
+- World Map
+- Dungeon Exploration
+- Combat Screen
+
+Treat all 11 screens above as landed static prototypes. Do not list Storage Screen or
+Magic Shop Screen as missing, and do not reopen Synthesis / Shop / Workshop as unfinished
+unless the user explicitly asks for a targeted revision.
+
 GUI Prototype Server Helper:
 - When verifying HTML static prototypes, always use the local server started by the root batch file:
   - Run `start_gui_prototype_server.bat` to launch the Python `http.server` from `07_gui_prototype` on port `8000`.
   - Do not open static HTML files via `file://` directly in browsers to prevent CORS/file-loading errors.
 - Standard Local URLs for manual or browser verification:
-  - Synthesis Screen: http://localhost:8000/synthesis_screen/index.html
-  - Combat Screen: http://localhost:8000/combat_screen/index.html
   - Start Screen: http://localhost:8000/start_screen/index.html
   - Town Hub: http://localhost:8000/town_hub/index.html
   - Guild Screen: http://localhost:8000/guild_screen/index.html
-  - World Map: http://localhost:8000/world_map/index.html
-  - Dungeon Exploration: http://localhost:8000/dungeon_exploration/index.html
+  - Synthesis Screen: http://localhost:8000/synthesis_screen/index.html
   - Shop Screen: http://localhost:8000/shop_screen/index.html
   - Workshop Screen: http://localhost:8000/workshop_screen/index.html
+  - Storage Screen: http://localhost:8000/storage_screen/index.html
+  - Magic Shop Screen: http://localhost:8000/magic_shop_screen/index.html
+  - World Map: http://localhost:8000/world_map/index.html
+  - Dungeon Exploration: http://localhost:8000/dungeon_exploration/index.html
+  - Combat Screen: http://localhost:8000/combat_screen/index.html
 
 ## Strictly Forbidden Drift Areas
 
@@ -165,17 +185,19 @@ Default preflight:
 
 2. Read only the Hot Zone files at startup to align project state:
 
+   * `AGENTS.md`
+   * `01_content/agent-startup-reading-list.md`
    * `README.md`
    * `01_content/codex-handoff-short.md`
-   * `01_content/gui-html-static-prototype-progress-v1.md`
-   * `01_content/agent-startup-reading-list.md`
    * this skill file (element-maze-session-governance/SKILL.md)
 
-3. Task Zone files (e.g., `01_content/gui-planning-index.md`, `ui-flow-blueprint.md`) are read only when explicitly required by the active task (e.g., GUI mapping or layout refinement tasks).
+3. For GUI static prototype tasks, also read `.antigravity/skills/element-maze-gui-static-prototype/SKILL.md`.
 
-4. Cold Zone files (e.g., Act 2/3 planning, playtest notes) are not loaded at startup.
+4. Task Zone files (e.g., `01_content/gui-planning-index.md`, `ui-flow-blueprint.md`) are read only when explicitly required by the active task (e.g., GUI mapping or layout refinement tasks). Do not full-load `01_content/gui-html-static-prototype-progress-v1.md` or `01_content/gui-planning-index.md` at every startup.
 
-5. High-Risk Change Gate:
+5. Cold Zone files (e.g., Act 2/3 planning, playtest notes) are not loaded at startup.
+
+6. High-Risk Change Gate:
    For high-risk gameplay or runtime changes involving schema, save format, combat formulas, engine flow, data structures, inventory, or economy, the first round MUST be a read-only planning gate. Do not modify or edit files in that first round. Propose affected files, risks, smallest safe slice, and a validation plan, and wait for explicit user approval before implementation.
 
 Preflight response format:
@@ -362,11 +384,14 @@ New session prompt format:
 請先 read-only 承接目前專案狀態，不要修改 any files。
 
 優先讀取：
-1. README.md
-2. 01_content/codex-handoff-short.md
-3. 01_content/gui-html-static-prototype-progress-v1.md
-4. 01_content/gui-planning-index.md
+1. AGENTS.md
+2. 01_content/agent-startup-reading-list.md
+3. README.md
+4. 01_content/codex-handoff-short.md
 5. .antigravity/skills/element-maze-session-governance/SKILL.md
+6. 若本次是 GUI static prototype 任務，再讀 .antigravity/skills/element-maze-gui-static-prototype/SKILL.md
+7. 只有需要畫面細節時，才讀 01_content/gui-html-static-prototype-progress-v1.md 的相關段落
+8. 只有 GUI planning / drift audit / task routing 需要時，才讀 01_content/gui-planning-index.md
 
 目前狀態：
 <current state>
@@ -378,16 +403,19 @@ New session prompt format:
 - 不修改 runtime / data / schema / combat formula / save format
 - 不啟動正式 asset pipeline
 - 不開啟大型系統或多系統重構
+- 11 個 GUI static prototype screens 已 landed：Start、Town Hub、Guild、Synthesis、Shop、Workshop、Storage、Magic Shop、World Map、Dungeon Exploration、Combat
 - 原型網頁測試不可直接點擊 `file://` 開啟，必須執行 `start_gui_prototype_server.bat` 透過 `http://localhost:8000` 伺服器啟動：
-  - Synthesis: http://localhost:8000/synthesis_screen/index.html
-  - Combat: http://localhost:8000/combat_screen/index.html
-  - Town Hub: http://localhost:8000/town_hub/index.html
-  - World Map: http://localhost:8000/world_map/index.html
-  - Guild: http://localhost:8000/guild_screen/index.html
-  - Dungeon: http://localhost:8000/dungeon_exploration/index.html
   - Start Screen: http://localhost:8000/start_screen/index.html
+  - Town Hub: http://localhost:8000/town_hub/index.html
+  - Guild: http://localhost:8000/guild_screen/index.html
+  - Synthesis: http://localhost:8000/synthesis_screen/index.html
   - Shop: http://localhost:8000/shop_screen/index.html
   - Workshop: http://localhost:8000/workshop_screen/index.html
+  - Storage: http://localhost:8000/storage_screen/index.html
+  - Magic Shop: http://localhost:8000/magic_shop_screen/index.html
+  - World Map: http://localhost:8000/world_map/index.html
+  - Dungeon: http://localhost:8000/dungeon_exploration/index.html
+  - Combat: http://localhost:8000/combat_screen/index.html
 
 本次任務：
 <specific task>
