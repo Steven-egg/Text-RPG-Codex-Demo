@@ -33,46 +33,18 @@ Default startup route:
 For GUI static prototype tasks, also read the current agent's GUI static prototype
 skill. Read detailed GUI progress only when the task needs screen-level detail.
 
-## 3. GUI Static Prototype Boundary
+## 3. GUI Static Prototype Route
 
 Current GUI work lives in `07_gui_prototype/`.
 
-Landed static prototype screens:
+For GUI static prototype work, load the current agent's GUI static prototype
+skill and follow its GUI Static Sprint Mode rules. The detailed screen list,
+current progress, and drift decisions live in README / handoff / planning docs,
+not in AGENTS.md.
 
-1. Start Screen
-2. Town Hub
-3. Guild Screen
-4. Synthesis Screen
-5. Shop Screen
-6. Workshop Screen
-7. Storage Screen
-8. Magic Shop Screen
-9. World Map
-10. Dungeon Exploration
-11. Combat Screen
-
-Allowed GUI prototype work:
-
-- static fixtures
-- render layer validation
-- layout validation
-- interaction validation
-- navigation flow validation
-- UIAction logging validation
-
-Forbidden for GUI prototype work:
-
-- Python runtime connection
-- reading or writing `save.json`
-- runtime, data, schema, save, or combat formula changes
-- copying gameplay rules into JavaScript
-- formal asset pipeline work
-- treating reference images or mockup candidates as runtime assets
-
-Planned static prototype additions may include Inn, Temple, and Relic Preview
-screens. Do not treat those folders or routes as drift when they are introduced
-as static fixtures, render-layer validation, navigation flow validation, or
-UIAction logging validation.
+At this level, static GUI work remains limited to prototype render surfaces:
+HTML/CSS/render-layer JS/fixtures, static navigation, UIAction logging, and
+browser or syntax verification. It is not runtime gameplay work.
 
 ## 4. Runtime-Connected Prototype Exception
 
@@ -80,19 +52,8 @@ Runtime-connected prototype work is not the default GUI prototype mode. It is
 allowed only when the user explicitly approves that exact scope.
 
 When approved, first read `01_content/gui-runtime-bridge-plan-v1.md` and stop at
-a read-only planning gate before implementation. The narrow implementation
-surface may include:
-
-- `06_tools/` local bridge server or bridge smoke helpers
-- `03_engine/engine/` small action adapter/helper functions that reuse existing
-  runtime logic
-- `07_gui_prototype/` live-mode client or render integration
-- `save.json` only through existing runtime save/load behavior, never by manual
-  editing or fixture-style writes
-
-Static prototype rules still apply to ordinary GUI work. Runtime, data, schema,
-save migration, and combat formula changes remain forbidden unless separately
-approved after a read-only planning gate.
+a read-only planning gate before implementation. Static prototype sprint approval
+does not imply runtime bridge approval.
 
 ## 5. Reading Discipline
 
@@ -113,3 +74,5 @@ schema, or save files unless the user explicitly approves that exact surface.
 Do not stage, commit, push, create branches, or archive files unless explicitly asked.
 
 Runtime/data/schema/save/combat work must stop at a read-only planning gate first.
+Never manually read, write, or edit `save.json` unless the user explicitly approves
+the exact runtime/save surface and the plan uses existing runtime behavior.

@@ -20,7 +20,16 @@ At new session startup, first follow `AGENTS.md` and `01_content/agent-startup-r
 - Cold Zone files are not bulk-loaded at startup.
 - Do not reopen settled GUI decisions based on older historical files.
 
-Before producing a commit package, handoff prompt, next-session prompt, continuation decision, or status summary, gather current state with read-only commands and Hot Zone files:
+Full read-only catch-up is conditional, not required for every ordinary task.
+Use full catch-up before producing any of these:
+
+- commit package or commit summary
+- handoff prompt or next-session prompt
+- status summary or drift audit
+- continuation decision after high context usage or long time since sync
+- runtime/data/schema/save/combat planning gate
+
+Full catch-up means gather current state with read-only commands and Hot Zone files:
 
 1. Run `git status --short`.
 2. Read recent commits with `git log --oneline --decorate --date=short --pretty=format:"%h %ad %s" -n 8`.
@@ -30,12 +39,42 @@ Before producing a commit package, handoff prompt, next-session prompt, continua
 6. Read `01_content/codex-handoff-short.md`.
 7. Read this skill file.
 
-For GUI static prototype work, also read:
+For ordinary GUI static sprint work, do not default to full catch-up. Read only:
 
 1. `.codex/skills/element-maze-gui-static-prototype/SKILL.md`.
-2. Targeted sections of `01_content/gui-html-static-prototype-progress-v1.md` only when screen-level detail or verification history is needed.
+2. The relevant `07_gui_prototype/<screen>/` files for the touched screen(s).
+3. Targeted handoff/progress sections only when screen-level detail, verification history, drift audit, or task routing needs them.
 
 For GUI planning, drift audit, or task routing, read `01_content/gui-planning-index.md` only as a Task Zone index. Do not full-load `gui-html-static-prototype-progress-v1.md` or `gui-planning-index.md` at every startup. Prefer the minimum necessary extra files. Do not read broad historical files unless the task requires history.
+
+## Planning, Reporting, And Next Steps
+
+Default to read-only analysis before planning, reviewing, restructuring skills or
+docs, or touching runtime, bridge, schema, save, combat, data, or other
+cross-system surfaces. Present the proposed slice and wait for explicit approval
+before implementation.
+
+For an already-approved GUI static sprint, do not stop for every small HTML/CSS,
+fixture, render-layer JS, static navigation, or UIAction logging edit inside the
+declared sprint surface. Keep moving within the approved sprint and surface only
+new risks or scope changes.
+
+Report only the boundaries relevant to the current task. Do not append a fixed
+"no stage / commit / push" note unless the task involves Git, commit packaging,
+handoff, or the user asks for it.
+
+Verification is guidance, not ceremony. Suggest checks that fit the risk and
+blast radius. Reserve strict verification gates for runtime, bridge, data,
+schema, save, combat, and cross-system changes; use smaller checks for docs and
+GUI static prototype edits.
+
+After finishing a task, suggest useful next steps when they help the user choose
+a path. Distinguish same-phase continuation from cross-phase escalation, and do
+not start a new phase or broaden implementation without user approval.
+
+For Codex sessions, if the next task is likely to require broad reading,
+multi-zone work, or high context usage, briefly say so and let the user decide
+whether to continue, split, or defer. Do not apply this as an Antigravity policy.
 
 ## Permanent Boundaries
 
@@ -99,7 +138,7 @@ After read-only catch-up when needed, decide:
 - Continue current session if the next task is very small, the relevant files were recently read, and the allowed surface is narrow.
 - Recommend a new session if context usage is high, the next task requires broad reading, the workflow is changing, or the current session has just completed a stable convergence item.
 - If recommending a new session, produce a compact next-session prompt with the minimum read list and current boundaries.
-- If continuing, propose only one smallest safe task and require read-only preflight before implementation.
+- If continuing, propose only one smallest safe task. Runtime/data/schema/save/combat work still requires a read-only preflight; GUI static sprint work follows the GUI skill's sprint preflight.
 - Do not modify any files during this gate.
 
 ### Read-Only Catch-Up Summary
@@ -119,7 +158,7 @@ Do not propose implementation as already approved unless the user explicitly ask
 
 Use `.codex/skills/element-maze-gui-static-prototype/SKILL.md` for all `07_gui_prototype/` planning, preview, edit, URL, fixture, UIAction logging, and GUI drift-boundary details.
 
-This session ops skill should not duplicate landed screen progress, server URL lists, or screen-level GUI decisions. Keep this file focused on startup governance, handoff, Git packaging, context gates, and runtime planning gates.
+This session ops skill should not duplicate landed screen progress, server URL lists, or screen-level GUI decisions. Keep this file focused on startup governance, handoff, Git packaging, context gates, catch-up conditions, and runtime planning gates.
 
 ### Runtime Preflight
 

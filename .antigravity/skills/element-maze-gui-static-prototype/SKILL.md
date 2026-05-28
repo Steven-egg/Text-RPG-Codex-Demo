@@ -7,9 +7,9 @@ description: Project-specific GUI static prototype boundaries for Element Maze. 
 
 ## Core Rule
 
-This skill is the source for GUI static prototype boundaries. It is not a progress
-log. For current screen details, read targeted sections of
-`01_content/gui-html-static-prototype-progress-v1.md` only when the task needs them.
+This skill defines GUI static prototype working habits and boundaries. It is not
+a progress log. Current screen state, landed status, detailed verification logs,
+and drift decisions belong in README, handoff, progress, and planning docs.
 
 Default to Traditional Chinese output unless the user asks otherwise.
 
@@ -21,22 +21,41 @@ GUI static prototypes live in:
 07_gui_prototype/
 ```
 
-The current landed screen set has 11 static prototypes:
+For current screen folders, landed screens, and detailed status, read live files
+or targeted sections of `01_content/gui-html-static-prototype-progress-v1.md`
+only when the task needs screen-level detail.
 
-1. Start Screen: `start_screen/`
-2. Town Hub: `town_hub/`
-3. Guild Screen: `guild_screen/`
-4. Synthesis Screen: `synthesis_screen/`
-5. Shop Screen: `shop_screen/`
-6. Workshop Screen: `workshop_screen/`
-7. Storage Screen: `storage_screen/`
-8. Magic Shop Screen: `magic_shop_screen/`
-9. World Map: `world_map/`
-10. Dungeon Exploration: `dungeon_exploration/`
-11. Combat Screen: `combat_screen/`
+Do not copy or maintain the current landed screen set inside this skill.
 
-Treat Synthesis, Shop, Workshop, Storage, and Magic Shop static prototype v1 as
-landed. Do not list them as unfinished candidates unless live files or the user say so.
+## GUI Static Sprint Mode
+
+When the user explicitly approves a GUI static sprint, Antigravity may work
+through multiple small static prototype edits inside the approved surface without
+asking for approval at every small step.
+
+Run one sprint preflight per session or sprint:
+
+1. Name the screen, route, or screen family being touched.
+2. Name the allowed surface, such as `HTML/CSS only`, `fixture only`,
+   `render-layer JS only`, or `07_gui_prototype static shell only`.
+3. Confirm that runtime, data, schema, save, combat formula, manual `save.json`,
+   formal asset pipeline, and JS gameplay authority are out of scope.
+4. Read only relevant screen files and targeted handoff/progress sections needed
+   for the sprint.
+
+Within that sprint, allowed consecutive work may include:
+
+- HTML/CSS static layout changes
+- fixture edits
+- render-layer JavaScript for static fixtures
+- static navigation flow
+- UIAction logging
+- localhost browser verification
+- syntax or fixture parse checks for the prototype layer
+
+Pause and start a new planning gate if the work crosses into another mode,
+another file surface, runtime/live bridge, data/schema/save/combat, formal asset
+pipeline, or a materially different screen family.
 
 ## Allowed Surface
 
@@ -50,14 +69,15 @@ For GUI static prototype tasks, allowed work is limited to:
 - UIAction logging
 - browser or syntax verification of the prototype layer
 
-HTML fixtures are display data for GUI validation only. They are not gameplay SSOT.
+HTML fixtures are display data for GUI validation only. They are not gameplay
+SSOT.
 
 ## Forbidden Drift
 
 For GUI static prototype tasks, do not:
 
 - connect to the Python runtime
-- read or write `save.json`
+- read, write, or manually edit `save.json`
 - modify runtime, data, schema, save, or combat formulas
 - copy gameplay rules into JavaScript prototypes
 - treat reference images or mockup candidates as runtime assets
@@ -65,11 +85,24 @@ For GUI static prototype tasks, do not:
 - infer gameplay changes from mockup text or screenshots
 - refactor `03_engine/engine/game.py`
 
+## Runtime-Connected Prototype Exception
+
+Runtime-connected GUI work is not GUI Static Sprint Mode.
+
+It is allowed only when the user explicitly approves that exact scope. When
+approved, first read `01_content/gui-runtime-bridge-plan-v1.md` and stop at a
+read-only planning gate before implementation.
+
+Static sprint approval does not imply runtime bridge approval. Python remains
+the gameplay authority, and JavaScript must not copy gameplay rules.
+
 ## Server Helper
 
-Use a local HTTP server. Do not open prototype pages with `file://`, because fixture `fetch()` calls may fail.
+Use a local HTTP server. Do not open prototype pages with `file://`, because
+fixture `fetch()` calls may fail.
 
-To facilitate GUI validation, Antigravity is authorized to autonomously start the local prototype server without requiring per-use approval:
+Antigravity may autonomously start the local prototype server for GUI static
+prototype verification:
 
 ```powershell
 .\start_gui_prototype_server.bat
@@ -81,38 +114,52 @@ Server root:
 07_gui_prototype/
 ```
 
-Standard URLs:
+URL pattern:
 
-- Start Screen: `http://localhost:8000/start_screen/index.html`
-- Town Hub: `http://localhost:8000/town_hub/index.html`
-- Guild Screen: `http://localhost:8000/guild_screen/index.html`
-- Synthesis Screen: `http://localhost:8000/synthesis_screen/index.html`
-- Shop Screen: `http://localhost:8000/shop_screen/index.html`
-- Workshop Screen: `http://localhost:8000/workshop_screen/index.html`
-- Storage Screen: `http://localhost:8000/storage_screen/index.html`
-- Magic Shop Screen: `http://localhost:8000/magic_shop_screen/index.html`
-- World Map: `http://localhost:8000/world_map/index.html`
-- Dungeon Exploration: `http://localhost:8000/dungeon_exploration/index.html`
-- Combat Screen: `http://localhost:8000/combat_screen/index.html`
+```text
+http://localhost:8000/<screen_folder>/index.html
+```
 
-## Preflight Gate
+Use the relevant screen folder from `07_gui_prototype/` rather than maintaining
+a duplicated full URL list in this skill.
 
-Before planning or editing a GUI prototype task:
+## Read Strategy
 
-1. Name the screen or route being touched.
-2. Declare the allowed surface, such as `CSS only`, `fixture only`, `render-layer JS
-   only`, or `HTML/CSS/fixture within 07_gui_prototype only`.
-3. Restate that no Python runtime, `save.json`, runtime, data, schema, save, combat
-   formula, or formal asset pipeline work is included.
-4. Read only the relevant screen files and targeted handoff sections needed for that
-   screen.
+- Read relevant screen files first.
+- Read targeted progress or planning sections only when the task requires
+  screen-level status, prior decisions, or drift context.
+- Do not full-load GUI progress logs or planning indexes for ordinary sprint
+  edits.
+- Do not read Cold Zone files unless the user names them or the active task truly
+  requires them.
 
 ## Verification Stance
 
-Use the smallest fitting verification. Antigravity is authorized to autonomously run local syntax and fixture parse checks, as well as use localhost URL browser checks to verify layout, interaction, navigation, UIAction logging, and fixture loading, without requiring per-use approval:
+Use the smallest fitting verification.
 
-- JSON fixture parse checks for fixture edits (e.g. using node/powershell JSON validation).
-- JavaScript syntax checks for render-layer edits (e.g. using node syntax check: `node --check`).
-- Browser checks for layout, interaction, navigation, UIAction logging, and fixture loading.
+Antigravity may autonomously run local syntax and fixture parse checks, and may
+use localhost browser checks to verify layout, interaction, navigation, UIAction
+logging, and fixture loading.
 
-Do not run runtime validation for GUI-only prototype edits unless the task separately touches runtime, which should require a separate read-only planning gate first.
+Examples:
+
+- JSON fixture parse checks for fixture edits
+- JavaScript syntax checks for render-layer edits
+- Browser checks for layout, interaction, navigation, UIAction logging, and
+  fixture loading
+
+Verification is guidance, not a mandatory gate for every small CSS, HTML,
+fixture-text, or docs adjustment. Use stricter gates only when the task touches
+runtime, bridge, data, schema, save, combat, or another high-risk surface.
+
+## Reporting
+
+After GUI static prototype implementation, report:
+
+- actual modified files
+- concise change summary
+- checks performed, if any
+- unresolved or intentionally deferred items
+- relevant boundaries, especially if `07_gui_prototype/` was or was not touched
+
+Do not report unrelated governance boilerplate.

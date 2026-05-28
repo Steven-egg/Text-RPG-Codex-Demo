@@ -21,32 +21,10 @@ GUI static prototypes live in:
 07_gui_prototype/
 ```
 
-The current landed screen set has 11 static prototypes:
-
-1. Start Screen: `start_screen/`
-2. Town Hub: `town_hub/`
-3. Guild Screen: `guild_screen/`
-4. Synthesis Screen: `synthesis_screen/`
-5. Shop Screen: `shop_screen/`
-6. Workshop Screen: `workshop_screen/`
-7. Storage Screen: `storage_screen/`
-8. Magic Shop Screen: `magic_shop_screen/`
-9. World Map: `world_map/`
-10. Dungeon Exploration: `dungeon_exploration/`
-11. Combat Screen: `combat_screen/`
-
-Treat Synthesis, Shop, Workshop, Storage, and Magic Shop static prototype v1 as
-landed. Do not list them as unfinished candidates unless live files or the user say so.
-
-Planned static prototype additions may include:
-
-- Inn Screen: `inn_screen/`
-- Temple Screen: `temple_screen/`
-- Relic Preview Screen: `relic_preview_screen/`
-
-Do not treat these as drift when they are introduced as static fixtures,
-render-layer validation, navigation flow validation, or UIAction logging
-validation.
+This skill is not the project status SSOT. Current landed screens, planned
+screens, and detailed progress live in README / handoff / GUI planning or
+progress docs. Read those only when the task needs current screen status or drift
+context.
 
 ## Allowed Surface
 
@@ -61,6 +39,42 @@ For GUI static prototype tasks, allowed work is limited to:
 - browser or syntax verification of the prototype layer
 
 HTML fixtures are display data for GUI validation only. They are not gameplay SSOT.
+
+## GUI Static Sprint Mode
+
+Use this mode when the user asks for a GUI static prototype sprint, screen pass,
+review fix pass, layout pass, fixture pass, UIAction logging pass, navigation
+pass, or browser verification pass inside `07_gui_prototype/`.
+
+At the start of each session or sprint, do one sprint preflight:
+
+1. Name the touched screen(s) or route family.
+2. Declare the allowed static surface, such as HTML/CSS/render-layer JS/fixtures,
+   static navigation, UIAction logging, and browser or syntax verification within
+   `07_gui_prototype/`.
+3. Restate that the sprint excludes Python runtime, `save.json`, runtime, data,
+   schema, save migration, combat formula, JS gameplay authority, and formal asset
+   pipeline work.
+4. Read the relevant screen files. Read targeted handoff/progress sections only
+   when screen-level detail, verification history, drift audit, or task routing
+   needs them.
+
+After sprint preflight, the agent may make a sequence of small related static
+prototype edits without repeating the preflight for every CSS rule, fixture row,
+button, navigation link, or UIAction log adjustment.
+
+Allowed sprint edits include:
+
+- adding or editing HTML/CSS inside `07_gui_prototype/`
+- render-layer JavaScript that only renders fixture/live-shaped screen models or
+  dispatches prototype UIAction events
+- static JSON fixtures
+- static navigation flow
+- UIAction logging
+- browser verification and syntax checks for the prototype layer
+
+Start a new preflight when the task changes screen family, changes mode, asks for
+runtime/live bridge work, or touches anything outside the declared static surface.
 
 ## Forbidden Drift
 
@@ -122,23 +136,15 @@ Server root:
 07_gui_prototype/
 ```
 
-Standard URLs:
+Screen URL pattern:
 
-- Start Screen: `http://localhost:8000/start_screen/index.html`
-- Town Hub: `http://localhost:8000/town_hub/index.html`
-- Guild Screen: `http://localhost:8000/guild_screen/index.html`
-- Synthesis Screen: `http://localhost:8000/synthesis_screen/index.html`
-- Shop Screen: `http://localhost:8000/shop_screen/index.html`
-- Workshop Screen: `http://localhost:8000/workshop_screen/index.html`
-- Storage Screen: `http://localhost:8000/storage_screen/index.html`
-- Magic Shop Screen: `http://localhost:8000/magic_shop_screen/index.html`
-- World Map: `http://localhost:8000/world_map/index.html`
-- Dungeon Exploration: `http://localhost:8000/dungeon_exploration/index.html`
-- Combat Screen: `http://localhost:8000/combat_screen/index.html`
+```text
+http://localhost:8000/<screen_folder>/index.html
+```
 
 ## Preflight Gate
 
-Before planning or editing a GUI prototype task:
+For a one-off GUI prototype task outside a declared sprint:
 
 1. Name the screen or route being touched.
 2. Declare the allowed surface, such as `CSS only`, `fixture only`, `render-layer JS
@@ -148,6 +154,9 @@ Before planning or editing a GUI prototype task:
 4. Read only the relevant screen files and targeted handoff sections needed for that
    screen.
 
+For GUI Static Sprint Mode, run the sprint preflight once per session or sprint
+instead of repeating this gate for each small edit.
+
 ## Verification Stance
 
 Use the smallest fitting verification:
@@ -155,6 +164,11 @@ Use the smallest fitting verification:
 - JSON fixture parse checks for fixture edits.
 - JavaScript syntax checks for render-layer edits.
 - Browser checks for layout, interaction, navigation, and UIAction logging.
+
+Treat these checks as guidance for choosing a fitting confidence level, not as a
+mandatory gate for every small static edit. Avoid turning ordinary CSS, fixture,
+copy, or UIAction logging tweaks into a full verification matrix unless the risk
+or user request calls for it.
 
 Do not run runtime validation for GUI-only prototype edits unless the task separately
 touches runtime, which should require a separate read-only planning gate first.
