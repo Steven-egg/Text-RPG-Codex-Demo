@@ -1,3 +1,5 @@
+import { runtimeClient } from "../shared/runtime-client.js";
+
 const fixtureSelect = document.querySelector("#fixture-select");
 const shellEl = document.querySelector(".combat-shell");
 const titleEl = document.querySelector("#screen-title");
@@ -67,6 +69,11 @@ window.addEventListener("resize", () => {
 loadFixture(fixtureSelect.value);
 
 async function loadFixture(path) {
+  if (runtimeClient.isLiveMode()) {
+    await loadLiveScreen(path);
+    return;
+  }
+
   shellEl.dataset.loadState = "loading";
   try {
     const response = await fetch(path, { cache: "no-store" });
@@ -83,6 +90,53 @@ async function loadFixture(path) {
     state.resultOpen = false;
     render();
     logSystem(`loaded ${path}`);
+    shellEl.dataset.loadState = "ready";
+  } catch (error) {
+    renderLoadError(error);
+    shellEl.dataset.loadState = "error";
+  }
+}
+
+async function loadLiveScreen(path) {
+  shellEl.dataset.loadState = "loading";
+  try {
+    const model = await runtimeClient.getScreen("combat_screen");
+    state.model = model;
+    state.actionLog = [];
+    state.logExpanded = false;
+    state.activeSubmenu = null;
+    state.submenuAnchorActionId = null;
+    state.resultOpen = Boolean(model.result_overlay);
+    render();
+    logSystem(`live runtime screen loaded from ${path}`);
+    shellEl.dataset.loadState = "ready";
+  } catch (error) {
+    await loadStaticFallback(path, error);
+  }
+}
+
+async function loadStaticFallback(path, liveError) {
+  try {
+    const response = await fetch(path, { cache: "no-store" });
+    if (!response.ok) {
+      throw new Error(`Fixture request failed: ${response.status}`);
+    }
+    const model = await response.json();
+    state.model = model;
+    state.actionLog = [];
+    state.logExpanded = false;
+    state.activeSubmenu = null;
+    state.submenuAnchorActionId = null;
+    state.resultOpen = false;
+    render();
+    logSystem(`live unavailable; loaded fixture ${path}`);
+    pushActionLog({
+      action_id: "live_bridge_unavailable",
+      payload: { reason: liveError instanceof Error ? liveError.message : String(liveError) },
+      source: "live_loader",
+      dispatched: false,
+      reason: "fallback_to_fixture",
+    });
     shellEl.dataset.loadState = "ready";
   } catch (error) {
     renderLoadError(error);
@@ -242,7 +296,7 @@ function renderActionLog() {
   );
 }
 
-function activateAction(action, source, triggerEl = null) {
+async function activateAction(action, source, triggerEl = null) {
   if (state.resultOpen) {
     pushActionLog({
       action_id: action.action_id,
@@ -296,6 +350,11 @@ function activateAction(action, source, triggerEl = null) {
     return;
   }
 
+  if (runtimeClient.isLiveMode()) {
+    await dispatchRuntimeAction(action, source);
+    return;
+  }
+
   state.activeSubmenu = null;
   state.submenuAnchorActionId = null;
   renderSubmenu();
@@ -304,6 +363,37 @@ function activateAction(action, source, triggerEl = null) {
 
   if (action.opens_result) {
     openResultOverlay(action);
+  }
+}
+
+async function dispatchRuntimeAction(action, source) {
+  try {
+    const result = await runtimeClient.dispatchAction("combat_screen", action.action_id, action.payload ?? {});
+    if (result.screen_model) {
+      state.model = result.screen_model;
+      state.activeSubmenu = null;
+      state.submenuAnchorActionId = null;
+      state.resultOpen = Boolean(result.screen_model.result_overlay);
+      render();
+    }
+    if (result.message && !state.resultOpen) {
+      commandMessageEl.textContent = result.message;
+    }
+    if (result.next_route) {
+      window.setTimeout(() => {
+        window.location.href = runtimeClient.nextRoute(result, "../town_hub/index.html");
+      }, 140);
+    }
+  } catch (error) {
+    const reason = error instanceof Error ? error.message : String(error);
+    pushActionLog({
+      action_id: action.action_id,
+      payload: action.payload ?? {},
+      source,
+      dispatched: false,
+      reason,
+    });
+    commandMessageEl.textContent = reason;
   }
 }
 
@@ -435,7 +525,7 @@ function openResultOverlay(action) {
     action.result_message ?? action.feedback_message ?? "戰鬥已結束，請確認結算。";
 }
 
-function activateResultNextAction() {
+async function activateResultNextAction() {
   const nextAction = state.model?.result_overlay?.next_action ?? null;
   if (!state.resultOpen || !nextAction?.action_id) {
     return;
@@ -448,6 +538,24 @@ function activateResultNextAction() {
     dispatched: true,
   });
   commandMessageEl.textContent = nextAction.feedback_message ?? `已送出 ${nextAction.action_id}。`;
+
+  if (runtimeClient.isLiveMode()) {
+    try {
+      const result = await runtimeClient.dispatchAction("combat_screen", nextAction.action_id, nextAction.payload ?? {});
+      window.setTimeout(() => {
+        window.location.href = runtimeClient.nextRoute(result, nextAction.navigate_to ?? "../town_hub/index.html");
+      }, 140);
+    } catch (error) {
+      pushActionLog({
+        action_id: nextAction.action_id,
+        payload: nextAction.payload ?? {},
+        source: "result_overlay",
+        dispatched: false,
+        reason: error instanceof Error ? error.message : String(error),
+      });
+    }
+    return;
+  }
 
   if (nextAction.navigate_to) {
     window.setTimeout(() => {
@@ -533,7 +641,7 @@ function getActiveMenu() {
   return null;
 }
 
-function activateSubmenuItem(item) {
+async function activateSubmenuItem(item) {
   if (!item.enabled) {
     pushActionLog({
       action_id: item.action_id,
@@ -552,6 +660,10 @@ function activateSubmenuItem(item) {
     source: `${state.activeSubmenu}_submenu`,
     dispatched: true,
   });
+  if (runtimeClient.isLiveMode()) {
+    await dispatchRuntimeAction(item, `${state.activeSubmenu}_submenu`);
+    return;
+  }
   commandMessageEl.textContent =
     item.feedback_message ?? `已送出 ${item.action_id}。static prototype 不會計算戰鬥結果。`;
 }

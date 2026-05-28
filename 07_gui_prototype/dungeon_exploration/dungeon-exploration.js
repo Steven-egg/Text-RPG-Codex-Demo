@@ -1,3 +1,5 @@
+import { runtimeClient } from "../shared/runtime-client.js";
+
 const fixtureSelect = document.querySelector("#fixture-select");
 const shellEl = document.querySelector(".exploration-shell");
 const titleEl = document.querySelector("#screen-title");
@@ -40,6 +42,11 @@ clearLogEl.addEventListener("click", () => {
 loadFixture(fixtureSelect.value);
 
 async function loadFixture(path) {
+  if (runtimeClient.isLiveMode()) {
+    await loadLiveScreen(path);
+    return;
+  }
+
   shellEl.dataset.loadState = "loading";
   try {
     const response = await fetch(path, { cache: "no-store" });
@@ -52,6 +59,45 @@ async function loadFixture(path) {
     state.actionLog = [];
     render();
     logSystem(`loaded ${path}`);
+    shellEl.dataset.loadState = "ready";
+  } catch (error) {
+    renderLoadError(error);
+    shellEl.dataset.loadState = "error";
+  }
+}
+
+async function loadLiveScreen(path) {
+  shellEl.dataset.loadState = "loading";
+  try {
+    const model = await runtimeClient.getScreen("dungeon_exploration");
+    state.model = model;
+    state.actionLog = [];
+    render();
+    logSystem(`live runtime screen loaded from ${path}`);
+    shellEl.dataset.loadState = "ready";
+  } catch (error) {
+    await loadStaticFallback(path, error);
+  }
+}
+
+async function loadStaticFallback(path, liveError) {
+  try {
+    const response = await fetch(path, { cache: "no-store" });
+    if (!response.ok) {
+      throw new Error(`Fixture request failed: ${response.status}`);
+    }
+    const model = await response.json();
+    state.model = model;
+    state.actionLog = [];
+    render();
+    logSystem(`live unavailable; loaded fixture ${path}`);
+    pushActionLog({
+      action_id: "live_bridge_unavailable",
+      payload: { reason: liveError instanceof Error ? liveError.message : String(liveError) },
+      source: "live_loader",
+      dispatched: false,
+      reason: "fallback_to_fixture",
+    });
     shellEl.dataset.loadState = "ready";
   } catch (error) {
     renderLoadError(error);
@@ -185,7 +231,7 @@ function renderActionLog() {
   );
 }
 
-function activateAction(action, source) {
+async function activateAction(action, source) {
   if (!action.enabled) {
     pushActionLog({
       action_id: action.action_id,
@@ -205,6 +251,11 @@ function activateAction(action, source) {
     dispatched: true,
   });
 
+  if (runtimeClient.isLiveMode()) {
+    await dispatchRuntimeAction(action, source);
+    return;
+  }
+
   if (action.feedback_message) {
     narrativeMessageEl.textContent = action.feedback_message;
   } else {
@@ -214,10 +265,36 @@ function activateAction(action, source) {
   navigateAfterAction(action);
 }
 
+async function dispatchRuntimeAction(action, source) {
+  try {
+    const result = await runtimeClient.dispatchAction("dungeon_exploration", action.action_id, action.payload ?? {});
+    if (result.screen_model) {
+      state.model = result.screen_model;
+      render();
+    }
+    narrativeMessageEl.textContent = result.message ?? `Dispatched ${action.action_id}`;
+    if (result.next_route) {
+      window.setTimeout(() => {
+        window.location.href = runtimeClient.nextRoute(result, staticActionRoutes[action.action_id]);
+      }, navigationDelayMs);
+    }
+  } catch (error) {
+    const reason = error instanceof Error ? error.message : String(error);
+    pushActionLog({
+      action_id: action.action_id,
+      payload: action.payload ?? {},
+      source,
+      dispatched: false,
+      reason,
+    });
+    narrativeMessageEl.textContent = reason;
+  }
+}
+
 function navigateAfterAction(action) {
   if (action.action_id === "advance_step" && action.payload?.encounter_hint) {
     window.setTimeout(() => {
-      window.location.href = staticActionRoutes.enter_combat_preview;
+      window.location.href = runtimeClient.withLiveMode(staticActionRoutes.enter_combat_preview);
     }, navigationDelayMs);
     return;
   }
@@ -228,7 +305,7 @@ function navigateAfterAction(action) {
   }
 
   window.setTimeout(() => {
-    window.location.href = route;
+    window.location.href = runtimeClient.withLiveMode(route);
   }, navigationDelayMs);
 }
 

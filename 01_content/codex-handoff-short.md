@@ -23,6 +23,7 @@
 - Start Screen alignment review 已通過；no-save / has-save fixtures、開始 / 讀取 / 重新開始入口、冒險者登錄 modal 與前往 World Map 的 static navigation 都維持 static-only 邊界。
 - Combat Screen static prototype 已有底部 5 指令、技能 / 道具 floating popover、右側 Battle Log、Victory / Defeat / Retreat result preview fixtures，以及整合在 Combat Screen 內的中央 Combat Result overlay。
 - Combat Result overlay 不新增獨立 Combat Result Screen；勝利 / 撤退下一步回 Dungeon Exploration，戰敗下一步回 Town Hub。Combat Screen 第一輪 mockup-alignment layout tuning pass 已完成，不再是目前下一步主線。
+- Dynamic Traversal Continuity v1 方向已討論並同意，規格記錄在 `01_content/gui-dynamic-traversal-continuity-v1-spec.md`：GUI live mode 應以 CLI traversal semantics 與 static UX shell 為準；combat victory / successful combat retreat 回同一個 `dungeon_exploration`，combat defeat 回 `town_hub`，`dungeon_exploration` retreat 回 `world_map`；玩家主 UI 改中文 RPG 語氣，工程字眼只留 log/debug。此規格不是 runtime 施工批准。
 - Synthesis Screen static prototype 已建立並完成基礎版面定案：左側分類 / 配方列表、中央配方詳情與需求缺口決策流、右側米菈視覺區、底部提示與合成 action；未來正式 bridge 或 UI 圖片 / portrait 貼入時若出現問題再調整。
 - Shop Screen static prototype v1 已建立：使用 static fixtures 驗證商品分類、商品詳情、價格 / 持有數 / 庫存顯示、`buy_item`、blocked state、`back_to_town_hub` 與 UIAction logging；不消耗金幣、不改背包、不接 runtime。
 - Workshop Screen static prototype v1 已建立：使用 static fixtures 驗證購買 / 強化 tab、裝備詳情、職業 / 金幣 / 材料限制、`buy_equipment`、`upgrade_equipment`、blocked state、`back_to_town_hub` 與 UIAction logging；不消耗素材、不改裝備、不接 runtime。
@@ -87,10 +88,10 @@ Cold Zone 不在新 session 啟動時主動大量讀取；需要詳細歷史、�
 
 ## 下一步邊界
 
-- 目前沒有已批准的下一個 runtime 施工目標。
+- 目前已批准文件紀錄與 Dynamic Traversal Continuity v1 規格撰寫；尚未批准下一個 runtime 施工目標。
 - 教會查閱結果 MVP 已完成，不要再列為待做。
 - 火印熔爐、完整火印、火印守護 Boss、正式聖物、正式轉職、八元素、Act 3 都只能視為未來願景；不是當前下一步。
-- runtime UI 仍是 CLI / Rich 顯示層薄包裝；不要把 HTML static prototype 接進 runtime，也不要重構 `game.py`。
+- runtime UI 仍以 CLI / Rich 行為語意為準；GUI live mode 若後續施工，應沿用 static UX shell 並透過 Python bridge 注入 ScreenModel，不要重構 `game.py`。
 - HTML static prototype 只允許在 `07_gui_prototype/` 內用 fixtures 小步調整，不讀寫 save、不接 Python、不複製 gameplay logic 到 JS。
 - Synthesis Screen、Shop Screen、Workshop Screen、Storage Screen、Magic Shop Screen、Inn Screen、Temple Screen、Relic Preview Screen static prototype v1 目前都已落地，不再作為未完成候選；下一個 UI 任務需由使用者指定單一小切片。仍不接 runtime adapter 或正式 asset pipeline。但旅店 (Inn Screen) 休息 rest_at_inn 的 payload 欄位 { "service_id": "overnight_rest", "cost": 30 } 已與 Python bridge 端實現點對點對齊。
 - `content_inventory_report.py` 只做 read-only 盤點；不要把 report 輸出當成 SSOT 或 gameplay 變更依據。
