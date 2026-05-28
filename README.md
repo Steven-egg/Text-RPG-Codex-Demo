@@ -4,14 +4,14 @@
 
 目前最新工作是 `07_gui_prototype/` 的 HTML static prototype。它只驗證 GUI render layer、layout、互動與 UIAction logging，不接 Python runtime，不讀寫 `save.json`，不修改 runtime / data / schema / combat formula，也不啟動正式 asset pipeline。
 
-- 已建立 Start Screen、Town Hub、Guild Screen、Synthesis Screen、World Map、Dungeon Exploration、Combat Screen、Shop Screen、Workshop Screen、Storage Screen、Magic Shop Screen 十一個 static prototype。
+- 已建立 Start Screen、Town Hub、Guild Screen、Synthesis Screen、World Map、Dungeon Exploration、Combat Screen、Shop Screen、Workshop Screen、Storage Screen、Magic Shop Screen、Inn Screen、Temple Screen、Relic Preview Screen 十四個 static prototype。
 - Start Screen 已有 no-save / has-save fixtures、開始 / 讀取 / 重新開始入口，以及只寫 UIAction 的冒險者登錄 modal。
 - World Map 可用靜態 fixture 導向 Dungeon Exploration；Dungeon Exploration 的 `Fixed Encounter Preview` 可導向 Combat Screen。
 - Combat Screen 已有 5 個底部指令、技能 / 道具 floating popover、右側 Battle Log、Victory / Defeat / Retreat result preview fixtures。
 - Combat Result 已整合為 Combat Screen 內的中央 terminal overlay，不再新增獨立 Combat Result Screen。
 - Result overlay 開啟後 command bar 停用；勝利 / 撤退下一步回 Dungeon Exploration，戰敗下一步回 Town Hub。
 - Combat Screen 第一輪 mockup-alignment layout tuning pass 已完成；若後續還有調整，應視為使用者 review 後的小幅微調。
-- Synthesis Screen 已完成基礎版面定案；Shop Screen 與 Workshop Screen static prototype v1 也已落地，Town Hub 可用 static route 導向對應畫面。
+- Synthesis Screen 已完成基礎版面定案；Shop Screen、Workshop Screen、Storage Screen、Magic Shop Screen static prototype v1 皆已落地；旅店 (Inn Screen)、轉職神殿 (Temple Screen) 與遺物展示台 (Relic Preview Screen) 原型亦已完備落地並連通。
 - 下一步仍須維持 static prototype 邊界；目前沒有已批准的新 runtime 施工目標，也不要再把 Synthesis / Shop / Workshop 視為未完成候選。
 - 詳細狀態與驗證紀錄見 `01_content/gui-html-static-prototype-progress-v1.md`。
 
@@ -195,7 +195,7 @@ GUI 升級分三層看待：
 - 倉庫 MVP：可花費 500G 開啟 LV1 倉庫，存取最多 10 種非 key item 背包物品
 - 怪物圖鑑 MVP：擊敗怪物後 100% 登錄，可從主選單查看已登錄怪物的基礎資訊
 - CLI UI MVP：核心循環已以 Rich `Panel` 薄層整理，涵蓋開始畫面、主選單、角色狀態、城鎮整備、工坊 catalog、旅人小鋪分類商店、星燈魔法商店 catalog、米菈合成屋 catalog、迷宮選擇、迷宮探索、戰鬥指令與結算；戰鬥已完成主畫面 / Battle Log 分流；輸入、資料、存檔與戰鬥規則維持原樣
-- GUI HTML static prototype：`07_gui_prototype/` 目前包含 Start Screen、Town Hub、Guild Screen、Synthesis Screen、World Map、Dungeon Exploration、Combat Screen、Shop Screen、Workshop Screen、Storage Screen、Magic Shop Screen；只用 fixtures 驗證 GUI layout / interaction，不是正式 runtime UI
+- GUI HTML static prototype：`07_gui_prototype/` 目前包含 Start Screen、Town Hub、Guild Screen、Synthesis Screen、World Map、Dungeon Exploration、Combat Screen、Shop Screen、Workshop Screen、Storage Screen、Magic Shop Screen、Inn Screen、Temple Screen、Relic Preview Screen；只用 fixtures 驗證 GUI layout / interaction，不是正式 runtime UI
 - 轉職 preview-only MVP：轉職神殿顯示 `PROMOTIONS` 預覽方向與條件，正式轉職尚未開放
 - 聖物 preview-only MVP：城鎮「聖物調查」顯示 `RELICS` 預覽，聖物取得與效果尚未開放
 - 職業特化 preview-only MVP：角色狀態頁顯示 `JOB_SPECIALIZATIONS` 預覽，目前尚未生效
@@ -432,8 +432,8 @@ data validation ok
 - 修改 data 後固定跑 validation。
 - 重要 gameplay 修改後固定跑 smoke test。
 - CLI UI 目前只做顯示層包裝；開始畫面、工坊 catalog、旅人小鋪分類商店、星燈魔法商店 catalog、米菈合成屋 catalog 與戰鬥主畫面 / Battle Log 分流已落地。
-- HTML static prototype 目前只允許在 `07_gui_prototype/` 內用 static fixtures 驗證畫面，不接 runtime、不讀寫 save、不啟動正式 asset pipeline。
-- Synthesis Screen、Shop Screen、Workshop Screen static prototype v1 皆已落地；下一步 UI 工作需先 read-only 確認單一小切片，正式 runtime adapter 仍未批准。
+- HTML static prototype 目前只允許在 `07_gui_prototype/` 內用 static fixtures 驗證畫面，不接 runtime、不讀寫 save、不啟動正式 asset pipeline。但新加入的旅店 (Inn Screen)、轉職神殿 (Temple Screen) 與遺物展示台 (Relic Preview Screen) 原型已 landed，旅店休息 rest_at_inn 的 payload 欄位 { "service_id": "overnight_rest", "cost": 30 } 已與 Python bridge 端實現點對點對齊。
+- Synthesis Screen 已完成基礎版面定案；Shop Screen、Workshop Screen、Storage Screen、Magic Shop Screen、Inn Screen、Temple Screen、Relic Preview Screen static prototype v1 皆已落地；下一步 UI 工作需先 read-only 確認單一小切片，正式 runtime adapter 仍未批准。
 - 下一輪若要繼續評估灰燼裂谷，優先改測法師、劍士、牧師或不同裝備狀態，不直接施工。
 - 暫不繼續提高灰燼裂谷普通怪 HP，暫不修改 combat formula、EXP/gold、升級全回復或新增怪物技能。
 - 灰燼裂谷目前已具備偵查版與灰燼守衛 Boss MVP；後續測試結論需避免用單次隨機遭遇過度外推。

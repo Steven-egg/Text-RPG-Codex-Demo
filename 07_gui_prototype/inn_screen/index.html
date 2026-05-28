@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Inn Static Prototype</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="inn-shell" data-load-state="loading">
+      <header class="title-area">
+        <div class="title-copy">
+          <p class="screen-label">旅店設施</p>
+          <h1 id="screen-title">Loading</h1>
+          <p id="screen-subtitle" class="subtitle"></p>
+        </div>
+        <div class="fixture-switcher" aria-label="Fixture state">
+          <label for="fixture-select">測試狀態</label>
+          <select id="fixture-select">
+            <option value="./fixtures/inn-default.json">Default Inn</option>
+          </select>
+        </div>
+      </header>
+
+      <section class="resource-strip" id="resource-strip" aria-label="Resources"></section>
+
+      <main class="inn-layout">
+        <!-- 左側：休息整備區 -->
+        <section class="service-card" aria-label="Inn Service">
+          <p class="panel-label">客房服務</p>
+          <div class="service-detail">
+            <h2 id="service-name">Loading...</h2>
+            <p id="service-description" class="service-description"></p>
+            <div class="service-cost-row">
+              <span>休息費用：</span>
+              <strong id="service-cost" class="cost-value">--</strong>
+            </div>
+            <p id="feedback-message" class="feedback-message"></p>
+            <button id="confirm-rest-btn" class="primary-action-btn" type="button">確認休息</button>
+          </div>
+        </section>
+
+        <!-- 中央：大廳傳聞看板 -->
+        <section class="rumor-card" aria-label="Rumor Board">
+          <p class="panel-label">大廳傳聞看板</p>
+          <div id="rumors-container" class="rumors-list"></div>
+        </section>
+
+        <!-- 右側：NPC 莉莉展示區 -->
+        <section class="npc-card" aria-label="NPC Card">
+          <p class="panel-label">旅店老闆娘</p>
+          <div class="npc-detail">
+            <div class="npc-avatar-box">
+              <span id="npc-avatar" class="avatar-placeholder">LY</span>
+            </div>
+            <div class="npc-meta">
+              <h3 id="npc-name">Loading...</h3>
+              <p id="npc-description" class="npc-description"></p>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <footer class="inn-footer">
+        <div class="footer-nav">
+          <button id="back-to-town" class="back-btn" type="button">返回城鎮</button>
+        </div>
+        <div class="footer-speech">
+          <p class="panel-label">莉莉 提示</p>
+          <p id="npc-bubble" class="speech-bubble"></p>
+        </div>
+      </footer>
+
+      <section class="action-log-panel">
+        <div class="action-log-heading">
+          <p class="panel-label">UIAction Log</p>
+          <button id="clear-log" class="quiet-button" type="button" aria-label="Clear log">清除</button>
+        </div>
+        <ol id="action-log" class="action-log"></ol>
+      </section>
+    </div>
+
+    <script type="module" src="./inn-screen.js"></script>
+  </body>
+</html>

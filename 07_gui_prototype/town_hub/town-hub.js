@@ -37,6 +37,9 @@ const staticFacilityRoutes = {
   workshop: "../workshop_screen/index.html",
   storage: "../storage_screen/index.html",
   magic_shop: "../magic_shop_screen/index.html",
+  inn: "../inn_screen/index.html",
+  temple: "../temple_screen/index.html",
+  relic_preview: "../relic_preview_screen/index.html",
 };
 const staticActionRoutes = {
   open_world_map: "../world_map/index.html",

@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Temple Static Prototype</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="temple-shell" data-load-state="loading">
+      <header class="title-area">
+        <div class="title-copy">
+          <p class="screen-label">教堂與轉職神殿</p>
+          <h1 id="screen-title">Loading</h1>
+          <p id="screen-subtitle" class="subtitle"></p>
+        </div>
+        <div class="fixture-switcher" aria-label="Fixture state">
+          <label for="fixture-select">測試狀態</label>
+          <select id="fixture-select">
+            <option value="./fixtures/temple-default.json">Default Temple</option>
+          </select>
+        </div>
+      </header>
+
+      <section class="resource-strip" id="resource-strip" aria-label="Resources"></section>
+
+      <main class="temple-layout">
+        <!-- 左側：月井祈福區 -->
+        <section class="well-card" aria-label="Moon Well">
+          <p class="panel-label">月神之井</p>
+          <div class="well-detail">
+            <h2 id="well-name">Loading...</h2>
+            <p id="well-description" class="well-description"></p>
+            <p id="well-feedback" class="well-feedback"></p>
+            <button id="draw-wellwater-btn" class="primary-action-btn" type="button">汲取月露祈願</button>
+          </div>
+        </section>
+
+        <!-- 中央：二階轉職祭壇 -->
+        <section class="altar-card" aria-label="Promotion Altar">
+          <p class="panel-label">職業晉升祭壇</p>
+          <div id="promotions-container" class="promotions-list"></div>
+        </section>
+
+        <!-- 右側：教堂詢問與古代解譯 -->
+        <section class="inquiry-card" aria-label="Church Inquiry">
+          <p class="panel-label">教堂諮詢與解譯</p>
+          <div class="inquiry-detail">
+            <h3>古代殘頁與傳說</h3>
+            <p class="inquiry-instruction">在此向大祭司賽恩詢問探索中取得的線索，解密古代遺物的秘密。</p>
+            <div id="inquiries-container" class="inquiries-list"></div>
+            <p id="inquiry-feedback" class="inquiry-feedback"></p>
+          </div>
+        </section>
+      </main>
+
+      <footer class="temple-footer">
+        <button id="back-to-town" class="back-btn" type="button">返回城鎮</button>
+      </footer>
+
+      <section class="action-log-panel">
+        <div class="action-log-heading">
+          <p class="panel-label">UIAction Log</p>
+          <button id="clear-log" class="quiet-button" type="button" aria-label="Clear log">清除</button>
+        </div>
+        <ol id="action-log" class="action-log"></ol>
+      </section>
+    </div>
+
+    <script type="module" src="./temple-screen.js"></script>
+  </body>
+</html>
