@@ -69,7 +69,32 @@ Forbidden for GUI prototype work:
 - formal asset pipeline work
 - treating reference images or mockup candidates as runtime assets
 
-## 4. Reading Discipline
+Planned static prototype additions may include Inn, Temple, and Relic Preview
+screens. Do not treat those folders or routes as drift when they are introduced
+as static fixtures, render-layer validation, navigation flow validation, or
+UIAction logging validation.
+
+## 4. Runtime-Connected Prototype Exception
+
+Runtime-connected prototype work is not the default GUI prototype mode. It is
+allowed only when the user explicitly approves that exact scope.
+
+When approved, first read `01_content/gui-runtime-bridge-plan-v1.md` and stop at
+a read-only planning gate before implementation. The narrow implementation
+surface may include:
+
+- `06_tools/` local bridge server or bridge smoke helpers
+- `03_engine/engine/` small action adapter/helper functions that reuse existing
+  runtime logic
+- `07_gui_prototype/` live-mode client or render integration
+- `save.json` only through existing runtime save/load behavior, never by manual
+  editing or fixture-style writes
+
+Static prototype rules still apply to ordinary GUI work. Runtime, data, schema,
+save migration, and combat formula changes remain forbidden unless separately
+approved after a read-only planning gate.
+
+## 5. Reading Discipline
 
 Do not full-load `01_content/gui-html-static-prototype-progress-v1.md` at every
 startup. It is the detailed GUI handoff and verification log; read targeted sections
@@ -80,7 +105,7 @@ Zone navigation index; read it only for GUI planning, drift audit, or task routi
 
 Do not load Cold Zone files unless the user explicitly names them.
 
-## 5. Change Discipline
+## 6. Change Discipline
 
 Do not modify `README.md`, `01_content/`, `07_gui_prototype/`, runtime, data,
 schema, or save files unless the user explicitly approves that exact surface.

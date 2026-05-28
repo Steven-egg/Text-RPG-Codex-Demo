@@ -1,3 +1,5 @@
+import { runtimeClient } from "../shared/runtime-client.js";
+
 const fixtureSelect = document.querySelector("#fixture-select");
 const shellEl = document.querySelector(".world-map-shell");
 const menuToggleEl = document.querySelector("#menu-toggle");
@@ -83,6 +85,11 @@ clearLogEl.addEventListener("click", () => {
 loadFixture(fixtureSelect.value);
 
 async function loadFixture(path) {
+  if (runtimeClient.isLiveMode()) {
+    await loadLiveScreen(path);
+    return;
+  }
+
   shellEl.dataset.loadState = "loading";
   try {
     const response = await fetch(path, { cache: "no-store" });
@@ -98,6 +105,51 @@ async function loadFixture(path) {
     setDetailOpen(false);
     render();
     logSystem(`loaded ${path}`);
+    shellEl.dataset.loadState = "ready";
+  } catch (error) {
+    renderLoadError(error);
+    shellEl.dataset.loadState = "error";
+  }
+}
+
+async function loadLiveScreen(path) {
+  shellEl.dataset.loadState = "loading";
+  try {
+    const model = await runtimeClient.getScreen("world_map");
+    state.model = model;
+    state.selectedLocationId = model.selected_location_id ?? model.locations?.[0]?.location_id ?? null;
+    state.actionLog = [];
+    setMenuOpen(false, false);
+    setDetailOpen(false);
+    render();
+    logSystem(`live runtime screen loaded from ${path}`);
+    shellEl.dataset.loadState = "ready";
+  } catch (error) {
+    await loadStaticFallback(path, error);
+  }
+}
+
+async function loadStaticFallback(path, liveError) {
+  try {
+    const response = await fetch(path, { cache: "no-store" });
+    if (!response.ok) {
+      throw new Error(`Fixture request failed: ${response.status}`);
+    }
+    const model = await response.json();
+    state.model = model;
+    state.selectedLocationId = model.selected_location_id ?? model.locations?.[0]?.location_id ?? null;
+    state.actionLog = [];
+    setMenuOpen(false, false);
+    setDetailOpen(false);
+    render();
+    logSystem(`live unavailable; loaded fixture ${path}`);
+    pushActionLog({
+      action_id: "live_bridge_unavailable",
+      payload: { reason: liveError instanceof Error ? liveError.message : String(liveError) },
+      source: "live_loader",
+      dispatched: false,
+      reason: "fallback_to_fixture",
+    });
     shellEl.dataset.loadState = "ready";
   } catch (error) {
     renderLoadError(error);
@@ -368,7 +420,7 @@ function activateStoredAction(button, source) {
   activateAction(action, source);
 }
 
-function activateAction(action, source) {
+async function activateAction(action, source) {
   if (!action.enabled) {
     pushActionLog({
       action_id: action.action_id,
@@ -388,6 +440,11 @@ function activateAction(action, source) {
     dispatched: true,
   });
 
+  if (runtimeClient.isLiveMode() && action.action_id !== "back_to_start_screen") {
+    await dispatchRuntimeAction(action, source);
+    return;
+  }
+
   if (action.action_id === "confirm_travel") {
     const location = getSelectedLocation();
     feedbackMessageEl.textContent = `已送出 confirm_travel：${location?.label ?? action.payload?.location_id ?? ""}。即將進入 Dungeon Exploration static prototype。`;
@@ -405,8 +462,35 @@ function navigateAfterAction(action) {
   }
 
   window.setTimeout(() => {
-    window.location.href = route;
+    window.location.href = runtimeClient.withLiveMode(route);
   }, navigationDelayMs);
+}
+
+async function dispatchRuntimeAction(action, source) {
+  try {
+    const result = await runtimeClient.dispatchAction("world_map", action.action_id, action.payload ?? {});
+    if (result.screen_model) {
+      state.model = result.screen_model;
+      state.selectedLocationId = result.screen_model.selected_location_id ?? state.selectedLocationId;
+      render();
+    }
+    feedbackMessageEl.textContent = result.message ?? `Dispatched ${action.action_id}`;
+    if (result.next_route) {
+      window.setTimeout(() => {
+        window.location.href = runtimeClient.nextRoute(result, staticActionRoutes[action.action_id]);
+      }, navigationDelayMs);
+    }
+  } catch (error) {
+    const reason = error instanceof Error ? error.message : String(error);
+    pushActionLog({
+      action_id: action.action_id,
+      payload: action.payload ?? {},
+      source,
+      dispatched: false,
+      reason,
+    });
+    feedbackMessageEl.textContent = reason;
+  }
 }
 
 function setMenuOpen(open, shouldLog) {

@@ -38,6 +38,16 @@ The current landed screen set has 11 static prototypes:
 Treat Synthesis, Shop, Workshop, Storage, and Magic Shop static prototype v1 as
 landed. Do not list them as unfinished candidates unless live files or the user say so.
 
+Planned static prototype additions may include:
+
+- Inn Screen: `inn_screen/`
+- Temple Screen: `temple_screen/`
+- Relic Preview Screen: `relic_preview_screen/`
+
+Do not treat these as drift when they are introduced as static fixtures,
+render-layer validation, navigation flow validation, or UIAction logging
+validation.
+
 ## Allowed Surface
 
 For GUI static prototype tasks, allowed work is limited to:
@@ -64,6 +74,36 @@ For GUI static prototype tasks, do not:
 - start a formal asset pipeline
 - infer gameplay changes from mockup text or screenshots
 - refactor `03_engine/engine/game.py`
+
+## Runtime-Connected Prototype Exception
+
+Runtime-connected prototype work is a separate opt-in mode, not ordinary static
+prototype work. Use it only when the user explicitly approves that exact scope.
+
+Before implementation, read:
+
+```text
+01_content/gui-runtime-bridge-plan-v1.md
+```
+
+Then stop at a read-only planning gate and identify the exact slice, touched
+files, validation commands, and forbidden adjacent systems.
+
+When approved, the narrow implementation surface may include:
+
+- `06_tools/`: local runtime bridge server or bridge smoke helpers.
+- `03_engine/engine/`: small action adapter/helper functions that reuse existing
+  runtime logic.
+- `07_gui_prototype/`: live-mode client or render integration.
+- `save.json`: only through existing runtime save/load behavior, never by manual
+  editing or fixture-style writes.
+
+Keep JavaScript out of gameplay authority. In live mode, JavaScript dispatches
+UIAction payloads and renders returned screen models; Python remains responsible
+for state changes, save/load, validation, and gameplay rules.
+
+Runtime, data, schema, save migration, and combat formula changes remain
+forbidden unless separately approved after a read-only planning gate.
 
 ## Server Helper
 

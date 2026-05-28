@@ -1,3 +1,5 @@
+import { runtimeClient } from "../shared/runtime-client.js";
+
 const fixtureSelect = document.querySelector("#fixture-select");
 const titleEl = document.querySelector("#screen-title");
 const subtitleEl = document.querySelector("#screen-subtitle");
@@ -80,6 +82,11 @@ clearLogEl.addEventListener("click", () => {
 loadFixture(fixtureSelect.value);
 
 async function loadFixture(path) {
+  if (runtimeClient.isLiveMode()) {
+    await loadLiveScreen(path);
+    return;
+  }
+
   shellEl.dataset.loadState = "loading";
   try {
     const response = await fetch(path, { cache: "no-store" });
@@ -92,6 +99,47 @@ async function loadFixture(path) {
     state.actionLog = [];
     render();
     logSystem(`loaded ${path}`);
+    shellEl.dataset.loadState = "ready";
+  } catch (error) {
+    renderLoadError(error);
+    shellEl.dataset.loadState = "error";
+  }
+}
+
+async function loadLiveScreen(path) {
+  shellEl.dataset.loadState = "loading";
+  try {
+    const model = await runtimeClient.getScreen("town_hub");
+    state.model = model;
+    state.selectedFacilityId = model.selected_facility_id ?? model.facility_nodes?.[0]?.facility_id ?? null;
+    state.actionLog = [];
+    render();
+    logSystem(`live runtime screen loaded from ${path}`);
+    shellEl.dataset.loadState = "ready";
+  } catch (error) {
+    await loadStaticFallback(path, error);
+  }
+}
+
+async function loadStaticFallback(path, liveError) {
+  try {
+    const response = await fetch(path, { cache: "no-store" });
+    if (!response.ok) {
+      throw new Error(`Fixture request failed: ${response.status}`);
+    }
+    const model = await response.json();
+    state.model = model;
+    state.selectedFacilityId = model.selected_facility_id ?? model.facility_nodes?.[0]?.facility_id ?? null;
+    state.actionLog = [];
+    render();
+    logSystem(`live unavailable; loaded fixture ${path}`);
+    pushActionLog({
+      action_id: "live_bridge_unavailable",
+      payload: { reason: liveError instanceof Error ? liveError.message : String(liveError) },
+      source: "live_loader",
+      dispatched: false,
+      reason: "fallback_to_fixture",
+    });
     shellEl.dataset.loadState = "ready";
   } catch (error) {
     renderLoadError(error);
@@ -258,7 +306,7 @@ function activateFacility(node, source) {
   activateAction(action, source);
 }
 
-function activateAction(action, source) {
+async function activateAction(action, source) {
   if (!action.enabled) {
     pushActionLog({
       action_id: action.action_id,
@@ -276,6 +324,11 @@ function activateAction(action, source) {
     source,
     dispatched: true,
   });
+
+  if (runtimeClient.isLiveMode()) {
+    await dispatchRuntimeAction(action, source);
+    return;
+  }
   navigateAfterAction(action);
 }
 
@@ -288,7 +341,7 @@ function navigateAfterAction(action) {
     }
 
     window.setTimeout(() => {
-      window.location.href = route;
+      window.location.href = runtimeClient.withLiveMode(route);
     }, navigationDelayMs);
     return;
   }
@@ -299,8 +352,40 @@ function navigateAfterAction(action) {
   }
 
   window.setTimeout(() => {
-    window.location.href = route;
+    window.location.href = runtimeClient.withLiveMode(route);
   }, navigationDelayMs);
+}
+
+async function dispatchRuntimeAction(action, source) {
+  try {
+    const result = await runtimeClient.dispatchAction("town_hub", action.action_id, action.payload ?? {});
+    if (result.screen_model) {
+      state.model = result.screen_model;
+      state.selectedFacilityId = result.screen_model.selected_facility_id ?? state.selectedFacilityId;
+      render();
+    }
+    if (result.message) {
+      pushActionLog({
+        action_id: "runtime_feedback",
+        payload: { message: result.message },
+        source,
+        dispatched: true,
+      });
+    }
+    if (result.next_route) {
+      window.setTimeout(() => {
+        window.location.href = runtimeClient.nextRoute(result, staticActionRoutes[action.action_id]);
+      }, navigationDelayMs);
+    }
+  } catch (error) {
+    pushActionLog({
+      action_id: action.action_id,
+      payload: action.payload ?? {},
+      source,
+      dispatched: false,
+      reason: error instanceof Error ? error.message : String(error),
+    });
+  }
 }
 
 function pushActionLog(entry) {

@@ -1,0 +1,272 @@
+# GUI Runtime Bridge Plan v1
+
+Purpose: plan the path from HTML static prototypes to a local runtime-connected
+prototype without blurring project boundaries.
+
+This file is a planning document, not implementation status. Read live files for
+current state before making changes.
+
+## 1. Intent
+
+The current GUI work in `07_gui_prototype/` is static by design. It validates
+screen layout, interaction feel, navigation, fixtures, and UIAction logging. It
+does not connect to Python runtime, read or write `save.json`, or copy gameplay
+rules into JavaScript.
+
+The runtime bridge should add a separate live mode where browser clicks dispatch
+UIAction payloads to the Python runtime. The Python side remains responsible for
+state changes, save/load, validation, and gameplay rules.
+
+## 2. Modes
+
+### Static Prototype Mode
+
+Static prototype mode remains the default for GUI screen work.
+
+- Source: static JSON fixtures under `07_gui_prototype/<screen>/fixtures/`.
+- Behavior: render fixture data, validate layout, validate UIAction logging.
+- Forbidden: Python runtime connection, `save.json`, runtime/data/schema/combat
+  changes, gameplay rule duplication in JavaScript.
+
+### Runtime-Connected Prototype Mode
+
+Runtime-connected prototype mode is opt-in and requires explicit user approval.
+
+- Source: a local Python bridge service that owns runtime state.
+- Behavior: browser UIActions call bridge endpoints; bridge mutates state through
+  Python runtime helpers and returns screen models.
+- Save/load: only through the runtime bridge using existing runtime save/load
+  behavior. Do not manually edit `save.json`.
+- JavaScript role: dispatch UIAction, render returned screen model, show result
+  feedback. JavaScript must not become gameplay SSOT.
+
+## 3. Approved Surfaces After Explicit Runtime Bridge Approval
+
+When the user explicitly approves runtime-connected prototype work, the narrow
+implementation surface may include:
+
+- `06_tools/`: local runtime bridge server and bridge smoke helpers.
+- `03_engine/engine/`: small action adapter/helper functions that reuse existing
+  runtime logic.
+- `07_gui_prototype/`: live-mode client and render integration.
+- `save.json`: only as an output/input of existing runtime save/load behavior,
+  never as direct hand-edited fixture data.
+
+Runtime/data/schema/combat formula changes remain out of scope unless the user
+separately approves that exact work after a read-only planning gate.
+
+## 4. Bridge Shape
+
+Recommended local-only architecture:
+
+```text
+browser UIAction
+  -> runtime-client.js
+  -> localhost bridge API
+  -> Python action dispatcher
+  -> existing engine/state helpers
+  -> in-memory state
+  -> optional save_game/load_game
+  -> screen model JSON response
+```
+
+The bridge should be local development tooling, not a production server.
+
+Suggested endpoints:
+
+- `GET /api/session`
+  - Returns bridge health, whether save exists, and current player summary if a
+    state is loaded.
+- `POST /api/session/new`
+  - Payload: `{ "name": "...", "job_id": "..." }`.
+  - Creates runtime state through `create_state`.
+- `POST /api/session/load`
+  - Loads existing runtime save through `load_game`.
+- `POST /api/save`
+  - Persists current state through `save_game`.
+- `GET /api/screen/<screen_id>`
+  - Returns a live screen model shaped close to existing fixtures.
+- `POST /api/action`
+  - Payload: `{ "action_id": "...", "payload": {...}, "screen_id": "..." }`.
+  - Dispatches a whitelisted action and returns `{ ok, message, state_summary,
+    screen_model }`.
+
+## 5. Phases
+
+### Phase 0 - Governance And Static Readiness
+
+- Keep existing static prototype mode intact.
+- Let Antigravity add static prototype screens for Inn, Temple, and Relic Preview
+  without treating those files as drift.
+- Use stable action ids in those static screens so the bridge can map them later.
+
+Recommended static screen folders:
+
+- `07_gui_prototype/inn_screen/`
+- `07_gui_prototype/temple_screen/`
+- `07_gui_prototype/relic_preview_screen/`
+
+### Phase 1 - Start, Load, Save
+
+Goal: prove the browser can talk to the runtime and save through Python.
+
+Live actions:
+
+- `start_new_game`
+- `restart_game`
+- `load_game`
+- `save_game`
+
+Live screens:
+
+- Start Screen
+- World Map summary
+- Town Hub summary/navigation
+
+This phase should not touch combat, data, schema, or save migration.
+
+### Phase 2 - Inn As First Mutating Facility
+
+Goal: prove a simple facility action mutates runtime state and can be saved.
+
+Live action:
+
+- `rest_at_inn`
+  - Payload: `{ "service_id": "overnight_rest", "cost": 30 }`.
+  - Runtime effect: deduct gold, restore HP/MP to current max values.
+
+The inn is the best first facility because it has a small, visible state change:
+gold down, HP/MP restored.
+
+### Phase 3 - Town Facilities With Existing Mutators
+
+Map current GUI UIActions to Python runtime helpers:
+
+- `buy_item` -> travel shop purchase helper.
+- `buy_equipment` -> workshop equipment purchase helper.
+- `upgrade_equipment` -> recipe craft helper.
+- `craft_recipe` -> recipe craft helper.
+- `learn_magic_book` -> magic shop learn helper.
+- `unlock_storage` -> storage unlock helper.
+- `deposit_item` -> storage deposit helper.
+- `withdraw_item` -> storage withdraw helper.
+
+Where CLI functions currently prompt for input, add small non-interactive helper
+functions instead of simulating CLI input.
+
+### Phase 4 - Temple And Relic Preview
+
+Temple should avoid changing story flags merely because the screen opens.
+
+Live actions:
+
+- `view_promotion_preview`
+- `advance_church_story`
+- `fire_mark_church_bridge`
+- `fire_mark_church_lookup`
+
+Relic Preview should remain preview-first until relic gameplay is explicitly
+approved.
+
+Live actions:
+
+- `view_relic_preview`
+- `select_relic_preview`
+
+### Phase 5 - Exploration And Combat
+
+Exploration and combat are last because current CLI flow is blocking and
+turn-based.
+
+Expected actions:
+
+- `confirm_travel`
+- `advance_step`
+- `retreat`
+- `basic_attack`
+- `defend`
+- `open_skill_menu`
+- `use_skill`
+- `open_item_menu`
+- `use_item`
+
+This phase should introduce explicit runtime session state for exploration/combat
+turns rather than trying to drive the CLI input loop from the browser.
+
+## 6. Action Contract
+
+Each live action should have:
+
+- stable `action_id`
+- explicit payload schema
+- server-side validation
+- deterministic success/failure response
+- returned state summary for resource strips
+- returned screen model or next route suggestion
+- UIAction log entry in the browser
+
+Do not trust fixture `enabled` flags as runtime authority. The bridge must
+validate whether the action is legal against current runtime state.
+
+## 7. Screen Model Contract
+
+Prefer returning JSON shaped close to the existing static fixtures so the render
+layer can switch between fixture mode and live mode.
+
+Minimum useful model fields:
+
+- `screen_id`
+- player/resource summary
+- selected entity id, if applicable
+- rows/cards/actions to render
+- disabled reasons from runtime validation
+- feedback message
+- next route or suggested screen id
+
+## 8. Verification Plan
+
+Static mode verification:
+
+- JSON fixture parse checks.
+- JavaScript syntax checks.
+- Browser checks for layout, navigation, and UIAction logging.
+
+Runtime-connected mode verification:
+
+- Data validation.
+- Runtime smoke test.
+- Bridge endpoint smoke tests.
+- Browser click smoke for one happy path and one blocked path.
+- Confirm save/load through runtime behavior, not manual `save.json` editing.
+
+Recommended first live acceptance test:
+
+1. Start a new game from the browser.
+2. Reach World Map or Town Hub live summary.
+3. Save from the browser.
+4. Reload the bridge session from the browser.
+5. Confirm player name/job/resources are preserved.
+
+Recommended first mutating facility test:
+
+1. Load a state with partial HP/MP and at least 30G.
+2. Open Inn live screen.
+3. Click `rest_at_inn`.
+4. Confirm gold decreases by 30 and HP/MP are restored.
+5. Save and reload to confirm persistence.
+
+## 9. Open Decisions
+
+- Whether live mode is toggled by query string, local setting, or separate server
+  root.
+- Whether successful mutating actions auto-save or require explicit `save_game`.
+- Whether bridge responses should include full screen models every time or only
+  patches.
+- Whether combat live mode should be deterministic for testability.
+
+Default recommendation:
+
+- Query string or local toggle for live mode.
+- Manual save in Phase 1, optional auto-save decision after Inn test.
+- Full screen model response until payload size becomes a real issue.
+- Deterministic combat test hooks only in bridge smoke tests, not normal play.

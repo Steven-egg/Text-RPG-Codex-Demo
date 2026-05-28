@@ -1,3 +1,5 @@
+import { runtimeClient } from "../shared/runtime-client.js";
+
 const fixtureSelectEl = document.querySelector("#fixture-select");
 const shellEl = document.querySelector(".start-screen-shell");
 const screenKickerEl = document.querySelector("#screen-kicker");
@@ -74,6 +76,11 @@ document.addEventListener("keydown", (event) => {
 loadFixture(fixtureSelectEl.value);
 
 async function loadFixture(path) {
+  if (runtimeClient.isLiveMode()) {
+    await loadLiveScreen(path);
+    return;
+  }
+
   shellEl.dataset.loadState = "loading";
 
   try {
@@ -90,6 +97,50 @@ async function loadFixture(path) {
     state.selectedJobId = getDefaultJobId(model);
     render();
     logSystem(`loaded ${path}`);
+    shellEl.dataset.loadState = "ready";
+  } catch (error) {
+    renderLoadError(error);
+    shellEl.dataset.loadState = "error";
+  }
+}
+
+async function loadLiveScreen(path) {
+  shellEl.dataset.loadState = "loading";
+  try {
+    const model = await runtimeClient.getScreen("start_screen");
+    state.model = model;
+    state.actionLog = [];
+    state.modalOpen = false;
+    state.registrationAction = null;
+    state.selectedJobId = getDefaultJobId(model);
+    render();
+    logSystem(`live runtime screen loaded from ${path}`);
+    shellEl.dataset.loadState = "ready";
+  } catch (error) {
+    await loadStaticFallback(path, error);
+  }
+}
+
+async function loadStaticFallback(path, liveError) {
+  try {
+    const response = await fetch(path, { cache: "no-store" });
+    if (!response.ok) {
+      throw new Error(`Fixture request failed: ${response.status}`);
+    }
+    const model = await response.json();
+    state.model = model;
+    state.actionLog = [];
+    state.modalOpen = false;
+    state.registrationAction = null;
+    state.selectedJobId = getDefaultJobId(model);
+    render();
+    logSystem(`live unavailable; loaded fixture ${path}`);
+    pushActionLog({
+      action_id: "live_bridge_unavailable",
+      payload: { reason: liveError instanceof Error ? liveError.message : String(liveError) },
+      dispatched: false,
+      reason: "fallback_to_fixture",
+    });
     shellEl.dataset.loadState = "ready";
   } catch (error) {
     renderLoadError(error);
@@ -206,7 +257,7 @@ function renderModalState() {
   entryViewEl.inert = state.modalOpen;
 }
 
-function activateAction(action) {
+async function activateAction(action) {
   if (!action.enabled) {
     pushActionLog({
       action_id: action.action_id,
@@ -219,6 +270,11 @@ function activateAction(action) {
 
   if (action.opens_registration) {
     openRegistration(action);
+    return;
+  }
+
+  if (runtimeClient.isLiveMode()) {
+    await dispatchRuntimeAction(action, action.payload ?? {});
     return;
   }
 
@@ -259,7 +315,7 @@ function cancelRegistration() {
   renderModalState();
 }
 
-function confirmRegistration() {
+async function confirmRegistration() {
   const registration = state.model?.registration ?? {};
   const jobs = registration.jobs ?? [];
   const selectedJob = jobs.find((job) => job.id === state.selectedJobId) ?? jobs[0];
@@ -279,6 +335,19 @@ function confirmRegistration() {
 
   const finalActionId = state.registrationAction?.final_action_id ?? state.registrationAction?.action_id ?? "start_new_game";
   const entry = state.registrationAction?.registration_entry ?? state.registrationAction?.payload?.entry ?? "new_game";
+
+  if (runtimeClient.isLiveMode()) {
+    await dispatchRuntimeAction(
+      { action_id: finalActionId, payload: { entry } },
+      {
+        entry,
+        name,
+        job_id: selectedJob.id,
+        job_label: selectedJob.label,
+      },
+    );
+    return;
+  }
 
   pushActionLog({
     action_id: finalActionId,
@@ -302,8 +371,45 @@ function navigateAfterAction(actionId) {
   }
 
   window.setTimeout(() => {
-    window.location.href = route;
+    window.location.href = runtimeClient.withLiveMode(route);
   }, navigationDelayMs);
+}
+
+async function dispatchRuntimeAction(action, payload) {
+  try {
+    let result;
+    if (action.action_id === "load_game") {
+      result = await runtimeClient.loadGame();
+    } else if (action.action_id === "load_demo_seed") {
+      result = await runtimeClient.loadDemoSeed();
+    } else if (action.action_id === "start_new_game" || action.action_id === "restart_game") {
+      result = await runtimeClient.startNewGame(payload);
+    } else {
+      result = await runtimeClient.dispatchAction("start_screen", action.action_id, payload);
+    }
+
+    pushActionLog({
+      action_id: action.action_id,
+      payload,
+      dispatched: true,
+    });
+    registrationFeedbackEl.textContent = result.message ?? `Dispatched ${action.action_id}`;
+    const route = runtimeClient.nextRoute(result, staticActionRoutes[action.action_id] ?? "../town_hub/index.html");
+    if (route) {
+      window.setTimeout(() => {
+        window.location.href = route;
+      }, navigationDelayMs);
+    }
+  } catch (error) {
+    const reason = error instanceof Error ? error.message : String(error);
+    pushActionLog({
+      action_id: action.action_id,
+      payload,
+      dispatched: false,
+      reason,
+    });
+    registrationFeedbackEl.textContent = reason;
+  }
 }
 
 function getDefaultJobId(model) {
