@@ -20,6 +20,7 @@
 - 「Element Decay 引擎」不是正式專案術語，不納入正式紀錄。
 - GUI HTML static prototype 已進入可互動驗證階段，位置在 `07_gui_prototype/`；目前包含 Start Screen、Town Hub、Guild Screen、Synthesis Screen、World Map、Dungeon Exploration、Combat Screen、Shop Screen、Workshop Screen、Storage Screen、Magic Shop Screen、Inn Screen、Temple Screen、Relic Preview Screen 十四個畫面。
 - static prototype 只使用 fixtures 驗證 render layer、layout、互動與 UIAction logging；不接 Python runtime、不讀寫 `save.json`、不修改 runtime / data / schema / combat formula、不啟動正式 asset pipeline。
+- Inn Screen 與 Temple Screen 已完成 JRPG dialogue/menu static prototype 調整；mockup reference 只放在 `05_assets/gui_references/facility_inn_screen/` 與 `05_assets/gui_references/facility_temple_screen/`，不作 runtime asset。
 - Start Screen alignment review 已通過；no-save / has-save fixtures、開始 / 讀取 / 重新開始入口、冒險者登錄 modal 與前往 World Map 的 static navigation 都維持 static-only 邊界。
 - Combat Screen static prototype 已有底部 5 指令、技能 / 道具 floating popover、右側 Battle Log、Victory / Defeat / Retreat result preview fixtures，以及整合在 Combat Screen 內的中央 Combat Result overlay。
 - Combat Result overlay 不新增獨立 Combat Result Screen；勝利 / 撤退下一步回 Dungeon Exploration，戰敗下一步回 Town Hub。Combat Screen 第一輪 mockup-alignment layout tuning pass 已完成，不再是目前下一步主線。
@@ -93,7 +94,8 @@ Cold Zone 不在新 session 啟動時主動大量讀取；需要詳細歷史、�
 - 火印熔爐、完整火印、火印守護 Boss、正式聖物、正式轉職、八元素、Act 3 都只能視為未來願景；不是當前下一步。
 - runtime UI 仍以 CLI / Rich 行為語意為準；GUI live mode 若後續施工，應沿用 static UX shell 並透過 Python bridge 注入 ScreenModel，不要重構 `game.py`。
 - HTML static prototype 只允許在 `07_gui_prototype/` 內用 fixtures 小步調整，不讀寫 save、不接 Python、不複製 gameplay logic 到 JS。
-- Synthesis Screen、Shop Screen、Workshop Screen、Storage Screen、Magic Shop Screen、Inn Screen、Temple Screen、Relic Preview Screen static prototype v1 目前都已落地，不再作為未完成候選；下一個 UI 任務需由使用者指定單一小切片。仍不接 runtime adapter 或正式 asset pipeline。但旅店 (Inn Screen) 休息 rest_at_inn 的 payload 欄位 { "service_id": "overnight_rest", "cost": 30 } 已與 Python bridge 端實現點對點對齊。
+- Synthesis Screen、Shop Screen、Workshop Screen、Storage Screen、Magic Shop Screen、Inn Screen、Temple Screen、Relic Preview Screen static prototype v1 目前都已完成，不再作為未完成候選；Inn Screen 與 Temple Screen 已完成 JRPG dialogue/menu static prototype 調整。
+- 下一個 UI 任務需由使用者指定單一小切片。仍不接 runtime adapter、不讀寫 `save.json`、不修改 data / schema / combat formula、不啟動 formal asset pipeline，也不要把 reference/mockup 圖當 runtime asset。
 - `content_inventory_report.py` 只做 read-only 盤點；不要把 report 輸出當成 SSOT 或 gameplay 變更依據。
 - 若未來要繼續 gameplay，仍需先做單一小切片 read-only 邊界確認，再由使用者明確批准施工範圍。
 - 若使用者指定文件同步輪，只改 markdown，不改 runtime / data / schema / save / combat formula。

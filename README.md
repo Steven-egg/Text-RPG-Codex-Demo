@@ -11,7 +11,8 @@
 - Combat Result 已整合為 Combat Screen 內的中央 terminal overlay，不再新增獨立 Combat Result Screen。
 - Result overlay 開啟後 command bar 停用；勝利 / 撤退下一步回 Dungeon Exploration，戰敗下一步回 Town Hub。
 - Combat Screen 第一輪 mockup-alignment layout tuning pass 已完成；若後續還有調整，應視為使用者 review 後的小幅微調。
-- Synthesis Screen 已完成基礎版面定案；Shop Screen、Workshop Screen、Storage Screen、Magic Shop Screen static prototype v1 皆已落地；旅店 (Inn Screen)、轉職神殿 (Temple Screen) 與遺物展示台 (Relic Preview Screen) 原型亦已完備落地並連通。
+- Synthesis Screen 已完成基礎版面定案；Shop Screen、Workshop Screen、Storage Screen、Magic Shop Screen static prototype v1 皆已完成；旅店 (Inn Screen)、轉職神殿 (Temple Screen) 與遺物展示台 (Relic Preview Screen) 目前也停在 static prototype 階段。
+- Inn Screen 與 Temple Screen 已完成 JRPG dialogue/menu static prototype 調整；mockup reference 只存放於 `05_assets/gui_references/facility_inn_screen/` 與 `05_assets/gui_references/facility_temple_screen/`，不作 runtime asset。
 - 下一步仍須維持 static prototype 邊界；目前沒有已批准的新 runtime 施工目標，也不要再把 Synthesis / Shop / Workshop 視為未完成候選。
 - 詳細狀態與驗證紀錄見 `01_content/gui-html-static-prototype-progress-v1.md`。
 
@@ -117,7 +118,7 @@ UI 完成後要回頭處理的 demo 遊玩體驗、平衡、任務引導與內�
 GUI 升級分三層看待：
 
 - Phase UI-1：CLI / Rich playable reference。已完成核心循環與設施 catalog 的顯示層整理。
-- Phase UI-2：HTML static fixture prototype。已建立 Start Screen、Town Hub、Guild、Synthesis、World Map、Dungeon Exploration、Combat、Shop、Workshop、Storage、Magic Shop；仍只用 fixture，不接 runtime。
+- Phase UI-2：HTML static fixture prototype。已建立 Start Screen、Town Hub、Guild、Synthesis、World Map、Dungeon Exploration、Combat、Shop、Workshop、Storage、Magic Shop、Inn、Temple、Relic Preview；仍只用 fixture，不接 runtime。
 - Phase UI-3：最終 GUI 視覺版本。使用正式背景圖、角色圖、icon、UI skin，並需要 asset request schema、prompt builder、asset registry 與 style bible；此階段尚未開始。
 
 三層應共用同一套 Screen Map、ScreenModel 與 UIAction；CLI 數字輸入、Rich wireframe 選取與未來 GUI 點擊 / 觸控都只應映射到同一批遊戲語意 action。
@@ -432,8 +433,9 @@ data validation ok
 - 修改 data 後固定跑 validation。
 - 重要 gameplay 修改後固定跑 smoke test。
 - CLI UI 目前只做顯示層包裝；開始畫面、工坊 catalog、旅人小鋪分類商店、星燈魔法商店 catalog、米菈合成屋 catalog 與戰鬥主畫面 / Battle Log 分流已落地。
-- HTML static prototype 目前只允許在 `07_gui_prototype/` 內用 static fixtures 驗證畫面，不接 runtime、不讀寫 save、不啟動正式 asset pipeline。但新加入的旅店 (Inn Screen)、轉職神殿 (Temple Screen) 與遺物展示台 (Relic Preview Screen) 原型已 landed，旅店休息 rest_at_inn 的 payload 欄位 { "service_id": "overnight_rest", "cost": 30 } 已與 Python bridge 端實現點對點對齊。
-- Synthesis Screen 已完成基礎版面定案；Shop Screen、Workshop Screen、Storage Screen、Magic Shop Screen、Inn Screen、Temple Screen、Relic Preview Screen static prototype v1 皆已落地；下一步 UI 工作需先 read-only 確認單一小切片，正式 runtime adapter 仍未批准。
+- HTML static prototype 目前只允許在 `07_gui_prototype/` 內用 static fixtures 驗證畫面，不接 Python runtime、不讀寫 `save.json`、不啟動正式 asset pipeline；reference/mockup 圖只作設計參考，不作 runtime asset。
+- Synthesis Screen 已完成基礎版面定案；Shop Screen、Workshop Screen、Storage Screen、Magic Shop Screen、Inn Screen、Temple Screen、Relic Preview Screen static prototype v1 目前皆已完成。Inn Screen 與 Temple Screen 已完成 JRPG dialogue/menu static prototype 調整，reference-only mockup 位置為 `05_assets/gui_references/facility_inn_screen/` 與 `05_assets/gui_references/facility_temple_screen/`。
+- 下一步 UI 工作需先 read-only 確認單一小切片，正式 runtime adapter 仍未批准；不得為這些 reference/mockup 圖啟動 formal asset pipeline。
 - 下一輪若要繼續評估灰燼裂谷，優先改測法師、劍士、牧師或不同裝備狀態，不直接施工。
 - 暫不繼續提高灰燼裂谷普通怪 HP，暫不修改 combat formula、EXP/gold、升級全回復或新增怪物技能。
 - 灰燼裂谷目前已具備偵查版與灰燼守衛 Boss MVP；後續測試結論需避免用單次隨機遭遇過度外推。

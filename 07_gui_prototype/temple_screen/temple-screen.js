@@ -15,6 +15,13 @@ const backToTownBtnEl = document.querySelector("#back-to-town");
 const actionLogEl = document.querySelector("#action-log");
 const clearLogEl = document.querySelector("#clear-log");
 const shellEl = document.querySelector(".temple-shell");
+const npcBubbleEl = document.querySelector("#npc-bubble");
+
+// Modal Selectors
+const openInquiriesBtnEl = document.querySelector("#open-inquiries-btn");
+const openPromotionsBtnEl = document.querySelector("#open-promotions-btn");
+const closePromotionsBtnEl = document.querySelector("#close-promotions-btn");
+const promotionsModalEl = document.querySelector("#promotions-modal");
 
 const state = {
   model: null,
@@ -32,8 +39,42 @@ clearLogEl.addEventListener("click", () => {
   renderActionLog();
 });
 
-drawWellwaterBtnEl.addEventListener("click", () => {
-  handlePray();
+// Hidden Moon Well listener for compatibility
+if (drawWellwaterBtnEl) {
+  drawWellwaterBtnEl.addEventListener("click", () => {
+    handlePray();
+  });
+}
+
+// Directly trigger inquiry dialog in the main dialogue box
+openInquiriesBtnEl.addEventListener("click", () => {
+  const inq = state.model?.inquiries?.[0];
+  if (inq) {
+    handleInquiry(inq);
+  } else {
+    npcBubbleEl.textContent = "大祭司賽恩：「願聖光指引你，旅人。目前沒有新的線索。」";
+  }
+});
+
+openPromotionsBtnEl.addEventListener("click", () => {
+  promotionsModalEl.style.display = "flex";
+  pushActionLog({
+    action_id: "open_promotions_modal",
+    payload: {},
+    source: "open_promotions_btn",
+    dispatched: true,
+  });
+});
+
+closePromotionsBtnEl.addEventListener("click", () => {
+  promotionsModalEl.style.display = "none";
+});
+
+// Close promotions modal when clicking backdrop
+promotionsModalEl.addEventListener("click", (e) => {
+  if (e.target === promotionsModalEl) {
+    promotionsModalEl.style.display = "none";
+  }
 });
 
 backToTownBtnEl.addEventListener("click", () => {
@@ -93,10 +134,10 @@ function renderResources(items) {
 }
 
 function renderMoonWell(well) {
-  wellNameEl.textContent = well.label ?? "月神之井";
-  wellDescriptionEl.textContent = well.description ?? "";
-  drawWellwaterBtnEl.disabled = !well.enabled;
-  wellFeedbackEl.textContent = "";
+  if (wellNameEl) wellNameEl.textContent = well.label ?? "月神之井";
+  if (wellDescriptionEl) wellDescriptionEl.textContent = well.description ?? "";
+  if (drawWellwaterBtnEl) drawWellwaterBtnEl.disabled = !well.enabled;
+  if (wellFeedbackEl) wellFeedbackEl.textContent = "";
 }
 
 function renderPromotions(promotions) {
@@ -193,11 +234,12 @@ function handlePray() {
     dispatched: true,
   });
 
-  wellFeedbackEl.textContent = "汲取了微光閃爍的泉水... 您獲得了 [月華庇護] (冰/火抗性 +10%，持續下一次探索)！(靜態模擬)";
+  if (wellFeedbackEl) {
+    wellFeedbackEl.textContent = "汲取了微光閃爍的泉水... 您獲得了 [月華庇護] (冰/火抗性 +10%，持續下一次探索)！(靜態模擬)";
+  }
 }
 
 function handlePromotion(promo) {
-  // 這是一個 blocked 動作示範，因為等級不夠
   pushActionLog({
     action_id: "claim_promotion",
     payload: { class_id: promo.class_id },
@@ -215,7 +257,11 @@ function handleInquiry(inq) {
     dispatched: true,
   });
 
-  inquiryFeedbackEl.textContent = inq.response_text ?? "大祭司表示該線索十分深奧...";
+  // Direct JRPG dialog bubble integration
+  npcBubbleEl.textContent = `大祭司賽恩：「${inq.response_text ?? "該線索十分深奧..."}」`;
+  if (inquiryFeedbackEl) {
+    inquiryFeedbackEl.textContent = inq.response_text ?? "大祭司表示該線索十分深奧...";
+  }
 }
 
 function pushActionLog(entry) {
@@ -248,7 +294,7 @@ function renderLoadError(error) {
   resourceStripEl.replaceChildren();
   promotionsContainerEl.replaceChildren();
   inquiriesContainerEl.replaceChildren();
-  drawWellwaterBtnEl.disabled = true;
+  if (drawWellwaterBtnEl) drawWellwaterBtnEl.disabled = true;
 
   const errorEl = document.createElement("div");
   errorEl.className = "load-error";

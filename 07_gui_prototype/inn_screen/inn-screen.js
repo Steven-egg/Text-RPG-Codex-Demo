@@ -19,9 +19,15 @@ const actionLogEl = document.querySelector("#action-log");
 const clearLogEl = document.querySelector("#clear-log");
 const shellEl = document.querySelector(".inn-shell");
 
+// JRPG dialogue choices selectors
+const dialogueChoicesEl = document.querySelector("#dialogue-choices");
+const choiceYesEl = document.querySelector("#choice-yes");
+const choiceNoEl = document.querySelector("#choice-no");
+
 const state = {
   model: null,
   actionLog: [],
+  uiState: "welcome", // welcome, confirm, rested
 };
 
 const navigationDelayMs = 120;
@@ -35,8 +41,35 @@ clearLogEl.addEventListener("click", () => {
   renderActionLog();
 });
 
+// Trigger 2-step confirmation on rest click
 confirmRestBtnEl.addEventListener("click", () => {
-  handleRest();
+  if (state.uiState === "welcome") {
+    enterConfirmState();
+  }
+});
+
+// Dialogue choices event listeners
+choiceYesEl.addEventListener("click", () => {
+  triggerRest();
+});
+
+choiceNoEl.addEventListener("click", () => {
+  cancelRest();
+});
+
+// Keyboard listener for JRPG-CLI alignment (Y/N/Enter)
+document.addEventListener("keydown", (e) => {
+  if (state.uiState === "confirm") {
+    if (e.key === "y" || e.key === "Y") {
+      triggerRest();
+    } else if (e.key === "n" || e.key === "N") {
+      cancelRest();
+    }
+  } else if (state.uiState === "rested") {
+    if (e.key === "Enter" || e.key === " ") {
+      resetToWelcome();
+    }
+  }
 });
 
 backToTownBtnEl.addEventListener("click", () => {
@@ -139,13 +172,15 @@ function renderService(service) {
   serviceDescriptionEl.textContent = service.description ?? "";
   serviceCostEl.textContent = `${service.cost ?? 30} G`;
   
-  confirmRestBtnEl.disabled = !service.enabled;
-  if (!service.enabled) {
-    confirmRestBtnEl.title = service.disabled_reason ?? "";
-    feedbackMessageEl.textContent = service.disabled_reason ?? "";
-  } else {
-    confirmRestBtnEl.removeAttribute("title");
-    feedbackMessageEl.textContent = "";
+  if (state.uiState === "welcome") {
+    confirmRestBtnEl.disabled = !service.enabled;
+    if (!service.enabled) {
+      confirmRestBtnEl.title = service.disabled_reason ?? "";
+      feedbackMessageEl.textContent = service.disabled_reason ?? "";
+    } else {
+      confirmRestBtnEl.removeAttribute("title");
+      feedbackMessageEl.textContent = "";
+    }
   }
 }
 
@@ -173,7 +208,9 @@ function renderNPC(npc) {
   npcNameEl.textContent = npc.name ?? "莉莉 (Lily)";
   npcDescriptionEl.textContent = npc.description ?? "";
   npcAvatarEl.textContent = npc.avatar_token ?? "LY";
-  npcBubbleEl.textContent = npc.prompt ?? "歡迎來到旅店！";
+  if (state.uiState === "welcome") {
+    npcBubbleEl.textContent = npc.prompt ?? "歡迎來到旅店！";
+  }
 }
 
 function renderActionLog() {
@@ -196,6 +233,49 @@ function renderActionLog() {
   );
 }
 
+// 2-Step Confirmation States
+function enterConfirmState() {
+  state.uiState = "confirm";
+  dialogueChoicesEl.style.display = "flex";
+  confirmRestBtnEl.disabled = true;
+  backToTownBtnEl.disabled = true;
+
+  const cost = state.model?.service?.cost ?? 30;
+  const goldResource = state.model?.resource_strip?.find((r) => r.id === "gold");
+  const goldText = goldResource ? goldResource.label : "1957G";
+
+  npcBubbleEl.textContent = `莉莉 (Lily)：「要休息一晚嗎？費用：${cost}G / 目前金幣：${goldText}」`;
+
+  pushActionLog({
+    action_id: "inn_rest_prompt",
+    payload: { cost },
+    source: "confirm_rest_btn",
+    dispatched: true,
+  });
+}
+
+function cancelRest() {
+  state.uiState = "welcome";
+  dialogueChoicesEl.style.display = "none";
+  confirmRestBtnEl.disabled = false;
+  backToTownBtnEl.disabled = false;
+
+  npcBubbleEl.textContent = state.model?.npc?.prompt ?? "歡迎來到旅店！";
+  feedbackMessageEl.textContent = "";
+
+  pushActionLog({
+    action_id: "inn_rest_cancel",
+    payload: {},
+    source: "choice_no_btn",
+    dispatched: true,
+  });
+}
+
+function triggerRest() {
+  dialogueChoicesEl.style.display = "none";
+  handleRest();
+}
+
 async function handleRest() {
   const service = state.model?.service ?? { service_id: "overnight_rest", cost: 30 };
   
@@ -215,8 +295,9 @@ async function handleRest() {
       }
       if (result.message) {
         feedbackMessageEl.textContent = result.message;
-        npcBubbleEl.textContent = "休息好了嗎？祝你今天冒險順利！";
+        npcBubbleEl.textContent = "莉莉 (Lily)：「休息好了嗎？祝你今天冒險順利！」";
       }
+      enterRestedState();
     } catch (error) {
       feedbackMessageEl.textContent = error instanceof Error ? error.message : String(error);
       pushActionLog({
@@ -226,6 +307,7 @@ async function handleRest() {
         dispatched: false,
         reason: error instanceof Error ? error.message : String(error),
       });
+      resetToWelcome();
     }
     return;
   }
@@ -238,8 +320,8 @@ async function handleRest() {
     dispatched: true,
   });
 
-  feedbackMessageEl.textContent = "一夜好眠。您的體力與魔力已完全恢復！(靜態模擬)";
-  npcBubbleEl.textContent = "看起來精神飽滿呢！今天也是充滿活力的一天！";
+  feedbackMessageEl.textContent = "在旅館休息了一晚，HP/MP 已完全回滿。";
+  npcBubbleEl.textContent = "莉莉 (Lily)：「看起來精神飽滿呢！今天也是充滿活力的一天！」";
   
   // 更新前端資源條模擬回滿
   const updatedStrip = [
@@ -248,6 +330,40 @@ async function handleRest() {
     { id: "gold", label: "1927G", tone: "gold" } // 扣除 30G
   ];
   renderResources(updatedStrip);
+
+  enterRestedState();
+}
+
+function enterRestedState() {
+  state.uiState = "rested";
+  confirmRestBtnEl.disabled = true;
+  backToTownBtnEl.disabled = true;
+
+  const hint = document.createElement("div");
+  hint.className = "continue-hint";
+  hint.style.fontSize = "11px";
+  hint.style.color = "var(--gold-color)";
+  hint.style.marginTop = "8px";
+  hint.style.cursor = "pointer";
+  hint.textContent = "按 Enter 鍵或點選此處繼續...";
+  feedbackMessageEl.appendChild(hint);
+
+  hint.addEventListener("click", () => {
+    resetToWelcome();
+  });
+}
+
+function resetToWelcome() {
+  state.uiState = "welcome";
+  confirmRestBtnEl.disabled = false;
+  backToTownBtnEl.disabled = false;
+  feedbackMessageEl.textContent = "";
+
+  npcBubbleEl.textContent = state.model?.npc?.prompt ?? "歡迎來到旅店！";
+
+  if (state.model) {
+    render();
+  }
 }
 
 function pushActionLog(entry) {
