@@ -305,6 +305,8 @@ function activateFacility(node, source) {
     enabled: node.enabled,
     disabled_reason: node.disabled_reason,
     payload: node.payload ?? {},
+    navigation_route: node.navigation_route,
+    target_screen_id: node.target_screen_id,
   };
   activateAction(action, source);
 }
@@ -329,6 +331,10 @@ async function activateAction(action, source) {
   });
 
   if (runtimeClient.isLiveMode()) {
+    if (action.action_id === "open_facility") {
+      navigateAfterAction(action);
+      return;
+    }
     await dispatchRuntimeAction(action, source);
     return;
   }
@@ -338,7 +344,7 @@ async function activateAction(action, source) {
 function navigateAfterAction(action) {
   if (action.action_id === "open_facility") {
     const facilityId = action.payload?.facility_id;
-    const route = staticFacilityRoutes[facilityId];
+    const route = action.navigation_route ?? staticFacilityRoutes[facilityId];
     if (!route) {
       return;
     }
@@ -362,6 +368,7 @@ function navigateAfterAction(action) {
 async function dispatchRuntimeAction(action, source) {
   try {
     const result = await runtimeClient.dispatchAction("town_hub", action.action_id, action.payload ?? {});
+    shellEl.dataset.runtimeStatus = result.status ?? "success";
     if (result.screen_model) {
       state.model = result.screen_model;
       state.selectedFacilityId = result.screen_model.selected_facility_id ?? state.selectedFacilityId;
@@ -381,12 +388,13 @@ async function dispatchRuntimeAction(action, source) {
       }, navigationDelayMs);
     }
   } catch (error) {
+    shellEl.dataset.runtimeStatus = error?.runtimeStatus ?? "error";
     pushActionLog({
       action_id: action.action_id,
       payload: action.payload ?? {},
       source,
       dispatched: false,
-      reason: error instanceof Error ? error.message : String(error),
+      reason: runtimeClient.errorMessage(error),
     });
   }
 }

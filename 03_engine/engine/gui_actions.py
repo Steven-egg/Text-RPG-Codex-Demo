@@ -16,12 +16,134 @@ JOB_IDS = ["warrior", "mage", "rogue", "cleric"]
 JOB_ID_TO_KEY = dict(zip(JOB_IDS, JOBS.keys()))
 JOB_KEY_TO_ID = {value: key for key, value in JOB_ID_TO_KEY.items()}
 SAVE_BACKUP_PREFIX = "save.gui-backup"
+FACILITY_VISUALS = {
+    "guild": {"visual_group": "guild", "visual_anchor": "top_center_guild_hall"},
+    "inn": {"visual_group": "rest", "visual_anchor": "left_inn"},
+    "travel_shop": {"visual_group": "shop", "visual_anchor": "mid_left_market"},
+    "workshop": {"visual_group": "workshop", "visual_anchor": "right_workshop_group"},
+    "synthesis": {"visual_group": "alchemy", "visual_anchor": "bottom_left_alchemy"},
+    "magic_shop": {"visual_group": "magic", "visual_anchor": "right_arcane_shop"},
+    "temple": {"visual_group": "temple", "visual_anchor": "bottom_center_temple"},
+    "relic_preview": {"visual_group": "archive", "visual_anchor": "bottom_right_archive"},
+    "storage": {"visual_group": "storage", "visual_anchor": "far_bottom_right_depot"},
+}
+WORLD_MAP_PRESENTATION = {
+    "dungeon_moss_cave": {
+        "location_id": "moss_cave",
+        "position": {"x": 24, "y": 48},
+        "tone": "nature",
+        "icon_token": "葉",
+        "preview_role": "cave",
+        "description": "潮濕陰暗的洞窟，布滿青苔與藤蔓，棲息著各種小型魔物。",
+        "detail_note": "適合作為早期探索地點，live mode 會交由 Python runtime 驗證前往條件。",
+        "exploration_rating": "低風險",
+    },
+    "dungeon_scorched_mine": {
+        "location_id": "ember_quarry",
+        "position": {"x": 49, "y": 42},
+        "tone": "fire",
+        "icon_token": "火",
+        "preview_role": "quarry",
+        "description": "黑色岩壁間冒著餘燼，舊礦道仍殘留火元素的熱度。",
+        "detail_note": "推薦攜帶回復道具。live mode 會交由 Python runtime 驗證前往條件。",
+        "exploration_rating": "中等風險",
+    },
+    "dungeon_ash_ravine": {
+        "location_id": "ash_valley",
+        "position": {"x": 48, "y": 67},
+        "tone": "fire",
+        "icon_token": "火",
+        "preview_role": "valley",
+        "description": "裂谷底部流動著暗紅熔脈，空氣裡混著鐵鏽與焦土味。",
+        "detail_note": "比焦石礦坑更危險，適合裝備更新後挑戰。",
+        "exploration_rating": "高風險",
+    },
+    "dungeon_cinder_seal_depths": {
+        "location_id": "cinder_depths",
+        "position": {"x": 64, "y": 82},
+        "tone": "fire",
+        "icon_token": "燼",
+        "preview_role": "plateau",
+        "description": "深處的岩層帶著燼印反光，火印線索在洞壁間若隱若現。",
+        "detail_note": "目前由 runtime unlock 狀態決定是否可前往。",
+        "exploration_rating": "高風險",
+    },
+}
+WORLD_MAP_ROUTE_SEGMENTS = [
+    {"id": "town_to_cave", "from": "border_town", "to": "moss_cave", "points": [[35, 22], [29, 34], [24, 48]]},
+    {"id": "cave_to_quarry", "from": "moss_cave", "to": "ember_quarry", "points": [[24, 48], [37, 44], [49, 42]]},
+    {"id": "quarry_to_valley", "from": "ember_quarry", "to": "ash_valley", "points": [[49, 42], [49, 55], [48, 67]]},
+    {"id": "valley_to_depths", "from": "ash_valley", "to": "cinder_depths", "points": [[48, 67], [56, 77], [64, 82]]},
+    {"id": "town_to_frost", "from": "border_town", "to": "frost_pass", "points": [[35, 22], [50, 15], [66, 18]]},
+    {"id": "quarry_to_forest", "from": "ember_quarry", "to": "mist_forest", "points": [[49, 42], [62, 38], [75, 38]]},
+    {"id": "forest_to_tower", "from": "mist_forest", "to": "moon_tower", "points": [[75, 38], [72, 49], [70, 57]]},
+    {"id": "cave_to_ruins", "from": "moss_cave", "to": "drowned_ruins", "points": [[24, 48], [23, 64], [26, 78]]},
+]
+WORLD_MAP_PREVIEW_LOCATIONS = [
+    {
+        "location_id": "frost_pass",
+        "label": "冰封峽谷",
+        "description": "北方山脈被冰雪封住，峽谷入口覆著厚重霜霧。",
+        "detail_note": "尚未解鎖。這裡只提供地圖瀏覽與 blocked action。",
+        "position": {"x": 66, "y": 18},
+        "tone": "ice",
+        "icon_token": "冰",
+        "locked_reason": "尚未取得北境通行線索",
+        "attribute": "冰 / 山脈",
+        "preview_role": "frost",
+    },
+    {
+        "location_id": "mist_forest",
+        "label": "遺忘森林",
+        "description": "林間常年飄著薄霧，路徑會在日落後改變方向。",
+        "detail_note": "尚未解鎖。未來可接故事線索或公會委託。",
+        "position": {"x": 75, "y": 38},
+        "tone": "nature",
+        "icon_token": "森",
+        "locked_reason": "需要完成青苔洞窟後續調查",
+        "attribute": "自然 / 幻霧",
+        "preview_role": "forest",
+    },
+    {
+        "location_id": "moon_tower",
+        "label": "影月塔",
+        "description": "高塔矗立在灰白岩脊上，塔頂會在夜裡反射紫色月光。",
+        "detail_note": "尚未解鎖。這裡只提供地圖瀏覽與 blocked action。",
+        "position": {"x": 70, "y": 57},
+        "tone": "arcane",
+        "icon_token": "月",
+        "locked_reason": "需要影月塔入口鑰印",
+        "attribute": "秘法 / 月影",
+        "preview_role": "tower",
+    },
+    {
+        "location_id": "drowned_ruins",
+        "label": "沉沒遺跡",
+        "description": "海岸旁的古代遺跡半沉在潮水裡，退潮時才露出入口。",
+        "detail_note": "尚未解鎖。可檢查低亮度地點和鎖定狀態。",
+        "position": {"x": 26, "y": 78},
+        "tone": "water",
+        "icon_token": "潮",
+        "locked_reason": "尚未取得潮汐時刻表",
+        "attribute": "水 / 遺跡",
+        "preview_role": "ruins",
+    },
+]
 
 
 class GuiActionError(Exception):
-    def __init__(self, message: str, *, status: int = 400):
+    def __init__(
+        self,
+        message: str,
+        *,
+        status: int = 400,
+        result_status: str | None = None,
+        blocked_reason: str | None = None,
+    ):
         super().__init__(message)
         self.status = status
+        self.result_status = result_status or ("blocked" if status in {403, 409} else "error")
+        self.blocked_reason = blocked_reason or (message if self.result_status == "blocked" else None)
 
 
 class GuiRuntimeSession:
@@ -79,7 +201,12 @@ class GuiRuntimeSession:
     def load_game(self) -> dict[str, Any]:
         loaded = game.load_game()
         if loaded is None:
-            raise GuiActionError("No valid save file is available.", status=404)
+            raise GuiActionError(
+                "No valid save file is available.",
+                status=404,
+                result_status="blocked",
+                blocked_reason="No valid save file is available.",
+            )
         self.state = loaded
         self._clear_live_run()
         return action_response(
@@ -443,11 +570,13 @@ class GuiRuntimeSession:
     ) -> dict[str, Any]:
         return {
             "ok": True,
+            "status": "success",
             "action_id": action_id,
             "message": message,
             "state_summary": state_summary(self.state),
             "screen_model": screen_model,
             "next_route": next_route,
+            "next_screen_id": screen_model.get("screen_id") if screen_model else None,
         }
 
     def _clear_live_run(self) -> None:
@@ -457,23 +586,37 @@ class GuiRuntimeSession:
     def rest_at_inn(self, payload: dict[str, Any], *, screen_id: str | None = None) -> dict[str, Any]:
         state = self.require_state()
         service_id = payload.get("service_id", "overnight_rest")
-        cost = int(payload.get("cost", 30))
+        cost_payload = payload.get("cost", 30)
+        if isinstance(cost_payload, bool):
+            raise GuiActionError("Inn cost must be a number.", status=400)
+        try:
+            cost = int(cost_payload)
+        except (TypeError, ValueError) as exc:
+            raise GuiActionError("Inn cost must be a number.", status=400) from exc
         if service_id != "overnight_rest":
             raise GuiActionError("Unknown inn service.", status=400)
         if cost != 30:
             raise GuiActionError("Inn cost mismatch.", status=400)
         if state.get("gold", 0) < cost:
-            raise GuiActionError("Not enough gold for the inn.", status=409)
+            raise GuiActionError(
+                "Not enough gold for the inn.",
+                status=409,
+                result_status="blocked",
+                blocked_reason="Not enough gold for the inn.",
+            )
         stats = game.get_stats(state)
         state["gold"] -= cost
         state["current_hp"] = stats["max_hp"]
         state["current_mp"] = stats["max_mp"]
-        return action_response(
+        response = action_response(
             "rest_at_inn",
             "Rested at the inn. Save manually to persist.",
             state,
             screen_id="inn_screen" if screen_id == "inn_screen" else "town_hub",
         )
+        if response.get("screen_model"):
+            response["screen_model"]["feedback_message"] = response["message"]
+        return response
 
     def screen_model(self, screen_id: str) -> dict[str, Any]:
         if screen_id == "start_screen":
@@ -652,6 +795,7 @@ class GuiRuntimeSession:
     def session_info(self) -> dict[str, Any]:
         return {
             "ok": True,
+            "status": "success",
             "save_exists": save_exists(),
             "state_loaded": self.state_loaded,
             "state_summary": state_summary(self.state) if self.state is not None else None,
@@ -709,11 +853,13 @@ def action_response(
 ) -> dict[str, Any]:
     return {
         "ok": True,
+        "status": "success",
         "action_id": action_id,
         "message": message,
         "state_summary": state_summary(state),
         "screen_model": build_screen_model(screen_id, state) if screen_id else None,
         "next_route": next_route,
+        "next_screen_id": screen_id,
     }
 
 
@@ -761,8 +907,25 @@ def start_screen_model(has_save: bool) -> dict[str, Any]:
             "payload": {},
         },
     ]
+    if has_save:
+        actions.insert(
+            1,
+            {
+                "action_id": "restart_game",
+                "label": "Restart Game",
+                "description": "Create a fresh live runtime session in memory.",
+                "token": "RST",
+                "kind": "secondary",
+                "enabled": True,
+                "opens_registration": True,
+                "final_action_id": "restart_game",
+                "registration_entry": "restart_game",
+                "payload": {"entry": "restart_game"},
+            },
+        )
     return {
         "screen_id": "start_screen",
+        "layout_family": "entry",
         "screen_label": "Live Runtime",
         "title": "Element Maze",
         "hero_kicker": "Runtime-connected prototype",
@@ -824,54 +987,129 @@ def resource_strip(state: dict[str, Any]) -> list[dict[str, str]]:
 
 
 def world_map_model(state: dict[str, Any]) -> dict[str, Any]:
-    locations = []
-    positions = [(35, 22), (24, 48), (49, 42), (48, 67)]
-    for index, (dungeon_id, dungeon) in enumerate(DUNGEONS.items()):
-        unlocked = game.is_unlocked(state, dungeon.get("unlock"))
-        x, y = positions[index] if index < len(positions) else (40 + index * 8, 50)
-        locations.append(
+    locations = [
+        {
+            "location_id": "border_town",
+            "label": "邊境城鎮 艾爾姆",
+            "description": "旅程的據點，公會、旅店與工坊都集中在城牆內。",
+            "detail_note": "目前所在城鎮。可從這裡返回 Town Hub live screen。",
+            "position": {"x": 35, "y": 22},
+            "tone": "town",
+            "icon_token": "城",
+            "unlocked": True,
+            "locked_reason": None,
+            "favorite": False,
+            "status_label": "目前據點",
+            "recommended_level": "安全",
+            "steps": "0 步",
+            "attribute": "城鎮 / 無",
+            "clear_state": "可返回",
+            "exploration_rating": "整備中",
+            "boss": "無",
+            "preview_role": "town",
+            "primary_action": {
+                "action_id": "back_to_town_hub",
+                "label": "返回城鎮",
+                "enabled": True,
+                "disabled_reason": None,
+                "payload": {"location_id": "border_town"},
+            },
+        }
+    ]
+    unlocked_location_ids = {"border_town"}
+    for dungeon_id, dungeon in DUNGEONS.items():
+        presentation = WORLD_MAP_PRESENTATION.get(
+            dungeon_id,
             {
                 "location_id": dungeon_id,
-                "label": dungeon["name"],
-                "description": f"{dungeon['recommended']} / {dungeon['steps']} steps",
-                "detail_note": "Live runtime validates travel availability.",
-                "position": {"x": x, "y": y},
+                "position": {"x": 50, "y": 50},
                 "tone": "fire" if "fire" in dungeon_id or "cinder" in dungeon_id else "nature",
-                "icon_token": "DG",
-                "unlocked": unlocked,
-                "locked_reason": None if unlocked else "Locked by runtime state.",
-                "favorite": index == 0,
-                "status_label": "Open" if unlocked else "Locked",
-                "recommended_level": dungeon["recommended"],
-                "steps": f"{dungeon['steps']} steps",
-                "attribute": dungeon["element"],
-                "clear_state": "Cleared" if dungeon_id in state.get("cleared_dungeons", []) else "Uncleared",
-                "exploration_rating": "Runtime",
-                "boss": boss_label(dungeon.get("boss")),
+                "icon_token": "地",
                 "preview_role": "cave",
+                "description": f"{dungeon['recommended']} / {dungeon['steps']} 步",
+                "detail_note": "Live runtime validates travel availability.",
+                "exploration_rating": "Runtime",
+            },
+        )
+        unlocked = game.is_unlocked(state, dungeon.get("unlock"))
+        location_id = presentation["location_id"]
+        if unlocked:
+            unlocked_location_ids.add(location_id)
+        locations.append(
+            {
+                "location_id": location_id,
+                "label": dungeon["name"],
+                "description": presentation["description"],
+                "detail_note": presentation["detail_note"],
+                "position": presentation["position"],
+                "tone": presentation["tone"],
+                "icon_token": presentation["icon_token"],
+                "unlocked": unlocked,
+                "locked_reason": None if unlocked else "尚未由 runtime 解鎖。",
+                "favorite": dungeon_id in {"dungeon_moss_cave", "dungeon_scorched_mine", "dungeon_ash_ravine"},
+                "status_label": "可探索" if unlocked else "尚未解鎖",
+                "recommended_level": dungeon["recommended"],
+                "steps": f"{dungeon['steps']} 步",
+                "attribute": dungeon["element"],
+                "clear_state": "已通關" if dungeon_id in state.get("cleared_dungeons", []) else "未通關",
+                "exploration_rating": presentation["exploration_rating"],
+                "boss": boss_label(dungeon.get("boss")),
+                "preview_role": presentation["preview_role"],
                 "primary_action": {
                     "action_id": "confirm_travel",
-                    "label": "Travel",
+                    "label": "確認前往",
                     "enabled": unlocked,
-                    "disabled_reason": None if unlocked else "Dungeon is locked.",
-                    "payload": {"dungeon_id": dungeon_id},
+                    "disabled_reason": None if unlocked else "尚未由 runtime 解鎖。",
+                    "payload": {"dungeon_id": dungeon_id, "location_id": location_id},
                 },
             }
         )
+    for location in WORLD_MAP_PREVIEW_LOCATIONS:
+        locations.append(
+            {
+                **location,
+                "unlocked": False,
+                "favorite": False,
+                "status_label": "尚未解鎖",
+                "recommended_level": "未知",
+                "steps": "未知",
+                "clear_state": "鎖定",
+                "exploration_rating": "無資料",
+                "boss": "未知",
+                "primary_action": {
+                    "action_id": "confirm_travel",
+                    "label": "確認前往",
+                    "enabled": False,
+                    "disabled_reason": location["locked_reason"],
+                    "payload": {"location_id": location["location_id"]},
+                },
+            }
+        )
+    route_segments = [
+        {
+            "id": route["id"],
+            "status": "open" if route["from"] in unlocked_location_ids and route["to"] in unlocked_location_ids else "locked",
+            "points": route["points"],
+        }
+        for route in WORLD_MAP_ROUTE_SEGMENTS
+    ]
     return {
         "screen_id": "world_map",
-        "title": "World Map",
-        "subtitle": "Live runtime map model.",
-        "selected_location_id": locations[0]["location_id"] if locations else None,
-        "current_location_id": "town_hub",
+        "layout_family": "navigation_map",
+        "title": "世界地圖",
+        "subtitle": "Live mode 使用 Python runtime 狀態；畫面結構維持 static prototype。",
+        "selected_location_id": next((location["location_id"] for location in locations if location["location_id"] != "border_town" and location["unlocked"]), "border_town"),
+        "current_location_id": "border_town",
         "player": player_model(state),
         "menu_actions": [
-            {"action_id": "open_world_map", "label": "Refresh Map", "description": "Reload live map state.", "enabled": True, "payload": {}},
-            {"action_id": "save_game", "label": "Save Game", "description": "Write the shared runtime save.", "enabled": True, "payload": {}},
-            {"action_id": "back_to_town_hub", "label": "Town Hub", "description": "Return to live town.", "enabled": True, "payload": {}},
-            {"action_id": "back_to_start_screen", "label": "Start Screen", "description": "Return to start screen.", "enabled": True, "payload": {}},
+            {"action_id": "view_status", "label": "查看狀態", "description": "此 live slice 尚未接入狀態頁。", "enabled": False, "disabled_reason": "此 live slice 尚未接入狀態頁。", "payload": {}},
+            {"action_id": "open_bestiary", "label": "怪物圖鑑", "description": "此 live slice 尚未接入圖鑑。", "enabled": False, "disabled_reason": "此 live slice 尚未接入圖鑑。", "payload": {}},
+            {"action_id": "open_inventory", "label": "背包 / 裝備", "description": "此 live slice 尚未接入背包。", "enabled": False, "disabled_reason": "此 live slice 尚未接入背包。", "payload": {}},
+            {"action_id": "save_game", "label": "存檔", "description": "透過 Python runtime 寫入存檔。", "enabled": True, "payload": {}},
+            {"action_id": "back_to_town_hub", "label": "返回城鎮", "description": "返回 live Town Hub。", "enabled": True, "payload": {}},
+            {"action_id": "back_to_start_screen", "label": "回到標題", "description": "返回 Start Screen。", "enabled": True, "payload": {}},
         ],
-        "route_segments": [],
+        "route_segments": route_segments,
         "locations": locations,
     }
 
@@ -879,6 +1117,7 @@ def world_map_model(state: dict[str, Any]) -> dict[str, Any]:
 def town_hub_model(state: dict[str, Any]) -> dict[str, Any]:
     return {
         "screen_id": "town_hub",
+        "layout_family": "hub",
         "title": "Live Town Hub",
         "subtitle": "Resource strip and key actions are backed by Python runtime state.",
         "resource_strip": resource_strip(state),
@@ -898,7 +1137,16 @@ def town_hub_model(state: dict[str, Any]) -> dict[str, Any]:
 def facility_nodes(state: dict[str, Any]) -> list[dict[str, Any]]:
     return [
         facility("guild", "Guild", "Quest board and material turn-in are later bridge slices.", "guild", "open_facility", enabled=False),
-        facility("inn", "Inn", "Spend 30G to restore HP/MP.", "bed", "rest_at_inn", payload={"service_id": "overnight_rest", "cost": 30}),
+        facility(
+            "inn",
+            "Inn",
+            "Open the runtime-backed inn screen.",
+            "bed",
+            "open_facility",
+            payload={"facility_id": "inn", "target_screen_id": "inn_screen"},
+            target_screen_id="inn_screen",
+            navigation_route="../inn_screen/index.html",
+        ),
         facility("travel_shop", "Travel Shop", "Buying and selling are later bridge slices.", "shop", "open_facility", enabled=False),
         facility("workshop", "Workshop", "Equipment buying and upgrades are later bridge slices.", "hammer", "open_facility", enabled=False),
         facility("synthesis", "Synthesis", "Crafting is a later bridge slice.", "alchemy", "open_facility", enabled=False),
@@ -918,19 +1166,24 @@ def facility(
     *,
     payload: dict[str, Any] | None = None,
     enabled: bool = True,
+    target_screen_id: str | None = None,
+    navigation_route: str | None = None,
 ) -> dict[str, Any]:
+    visual = FACILITY_VISUALS.get(facility_id, {})
     return {
         "facility_id": facility_id,
         "label": label,
         "description": description,
-        "visual_group": facility_id,
-        "visual_anchor": facility_id,
+        "visual_group": visual.get("visual_group", facility_id),
+        "visual_anchor": visual.get("visual_anchor", facility_id),
         "icon_role": icon_role,
         "enabled": enabled,
         "disabled_reason": None if enabled else "This live action is scheduled for a later slice.",
         "badges": [],
         "primary_action": action_id,
         "payload": payload or {"facility_id": facility_id},
+        "target_screen_id": target_screen_id,
+        "navigation_route": navigation_route,
     }
 
 
@@ -938,17 +1191,40 @@ def inn_screen_model(state: dict[str, Any]) -> dict[str, Any]:
     summary = state_summary(state) or {}
     return {
         "screen_id": "inn_screen",
+        "layout_family": "dialogue_node",
         "title": "Live Inn",
         "subtitle": "Runtime-backed rest action.",
         "resource_strip": resource_strip(state),
+        "feedback_message": None,
         "service": {
             "service_id": "overnight_rest",
             "label": "Overnight Rest",
+            "description": "Deduct 30G and restore HP/MP through Python runtime.",
             "cost": 30,
             "enabled": summary.get("gold", 0) >= 30,
             "disabled_reason": None if summary.get("gold", 0) >= 30 else "Not enough gold.",
+            "action_id": "rest_at_inn",
             "payload": {"service_id": "overnight_rest", "cost": 30},
         },
+        "actions": [
+            {
+                "action_id": "rest_at_inn",
+                "label": "Rest",
+                "description": "Deduct 30G and restore HP/MP.",
+                "enabled": summary.get("gold", 0) >= 30,
+                "disabled_reason": None if summary.get("gold", 0) >= 30 else "Not enough gold.",
+                "payload": {"service_id": "overnight_rest", "cost": 30},
+            }
+        ],
+        "navigation_actions": [
+            {
+                "action_id": "back_to_town_hub",
+                "label": "Town Hub",
+                "description": "Return to live Town Hub.",
+                "enabled": True,
+                "payload": {"from": "inn_screen"},
+            }
+        ],
     }
 
 

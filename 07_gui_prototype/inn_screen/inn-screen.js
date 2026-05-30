@@ -73,6 +73,10 @@ document.addEventListener("keydown", (e) => {
 });
 
 backToTownBtnEl.addEventListener("click", () => {
+  if (runtimeClient.isLiveMode()) {
+    handleBackToTown();
+    return;
+  }
   window.setTimeout(() => {
     window.location.href = runtimeClient.withLiveMode("../town_hub/index.html");
   }, navigationDelayMs);
@@ -153,6 +157,9 @@ function render() {
   renderRumors(model.rumors ?? []);
   renderNPC(model.npc ?? {});
   renderActionLog();
+  if (state.uiState === "welcome" && model.feedback_message) {
+    feedbackMessageEl.textContent = model.feedback_message;
+  }
 }
 
 function renderResources(items) {
@@ -289,6 +296,7 @@ async function handleRest() {
     
     try {
       const result = await runtimeClient.dispatchAction("inn_screen", "rest_at_inn", service.payload ?? {});
+      shellEl.dataset.runtimeStatus = result.status ?? "success";
       if (result.screen_model) {
         state.model = result.screen_model;
         render();
@@ -299,15 +307,17 @@ async function handleRest() {
       }
       enterRestedState();
     } catch (error) {
-      feedbackMessageEl.textContent = error instanceof Error ? error.message : String(error);
+      const reason = runtimeClient.errorMessage(error);
+      shellEl.dataset.runtimeStatus = error?.runtimeStatus ?? "error";
       pushActionLog({
         action_id: "rest_at_inn",
         payload: service.payload ?? {},
         source: "confirm_rest_btn",
         dispatched: false,
-        reason: error instanceof Error ? error.message : String(error),
+        reason,
       });
       resetToWelcome();
+      feedbackMessageEl.textContent = reason;
     }
     return;
   }
@@ -363,6 +373,34 @@ function resetToWelcome() {
 
   if (state.model) {
     render();
+  }
+}
+
+async function handleBackToTown() {
+  const payload = { from: "inn_screen" };
+  pushActionLog({
+    action_id: "back_to_town_hub",
+    payload,
+    source: "back_to_town",
+    dispatched: true,
+  });
+  try {
+    const result = await runtimeClient.dispatchAction("inn_screen", "back_to_town_hub", payload);
+    shellEl.dataset.runtimeStatus = result.status ?? "success";
+    window.setTimeout(() => {
+      window.location.href = runtimeClient.nextRoute(result, "../town_hub/index.html");
+    }, navigationDelayMs);
+  } catch (error) {
+    const reason = runtimeClient.errorMessage(error);
+    shellEl.dataset.runtimeStatus = error?.runtimeStatus ?? "error";
+    feedbackMessageEl.textContent = reason;
+    pushActionLog({
+      action_id: "back_to_town_hub",
+      payload,
+      source: "back_to_town",
+      dispatched: false,
+      reason,
+    });
   }
 }
 

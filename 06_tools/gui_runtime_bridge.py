@@ -38,9 +38,22 @@ class GuiRuntimeBridgeHandler(SimpleHTTPRequestHandler):
         if parsed.path.startswith("/api/screen/"):
             screen_id = unquote(parsed.path.rsplit("/", 1)[-1])
             try:
-                self.write_json({"ok": True, "screen_model": SESSION.screen_model(screen_id)})
+                screen_model = SESSION.screen_model(screen_id)
+                self.write_json(
+                    {
+                        "ok": True,
+                        "status": "success",
+                        "screen_model": screen_model,
+                        "next_screen_id": screen_model.get("screen_id"),
+                    }
+                )
             except GuiActionError as error:
-                self.write_error_json(error.status, str(error))
+                self.write_error_json(
+                    error.status,
+                    str(error),
+                    result_status=error.result_status,
+                    blocked_reason=error.blocked_reason,
+                )
             return
         if parsed.path == "/":
             self.path = "/start_screen/index.html"
@@ -70,7 +83,12 @@ class GuiRuntimeBridgeHandler(SimpleHTTPRequestHandler):
                 return
             self.write_error_json(HTTPStatus.NOT_FOUND, "Unknown API endpoint.")
         except GuiActionError as error:
-            self.write_error_json(error.status, str(error))
+            self.write_error_json(
+                error.status,
+                str(error),
+                result_status=error.result_status,
+                blocked_reason=error.blocked_reason,
+            )
         except json.JSONDecodeError:
             self.write_error_json(HTTPStatus.BAD_REQUEST, "Invalid JSON payload.")
 
@@ -99,8 +117,24 @@ class GuiRuntimeBridgeHandler(SimpleHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(encoded)
 
-    def write_error_json(self, status: int | HTTPStatus, message: str) -> None:
-        self.write_json({"ok": False, "error": message}, status=status)
+    def write_error_json(
+        self,
+        status: int | HTTPStatus,
+        message: str,
+        *,
+        result_status: str | None = None,
+        blocked_reason: str | None = None,
+    ) -> None:
+        status_code = int(status)
+        response_status = result_status or ("blocked" if status_code in {403, 409} else "error")
+        data = {
+            "ok": False,
+            "status": response_status,
+            "error": message,
+        }
+        if response_status == "blocked":
+            data["blocked_reason"] = blocked_reason or message
+        self.write_json(data, status=status)
 
 
 def parse_args() -> argparse.Namespace:

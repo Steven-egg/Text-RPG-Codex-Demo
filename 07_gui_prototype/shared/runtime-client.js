@@ -24,7 +24,12 @@ async function requestJson(path, options = {}) {
   });
   const body = await response.json().catch(() => ({}));
   if (!response.ok || body.ok === false) {
-    throw new Error(body.error || `Runtime request failed: ${response.status}`);
+    const error = new Error(body.blocked_reason || body.error || `Runtime request failed: ${response.status}`);
+    error.runtimeStatus = body.status || (response.status === 403 || response.status === 409 ? "blocked" : "error");
+    error.blockedReason = body.blocked_reason || "";
+    error.responseBody = body;
+    error.httpStatus = response.status;
+    throw error;
   }
   return body;
 }
@@ -87,6 +92,10 @@ function nextRoute(result, fallbackRoute) {
   return withLiveMode(result?.next_route || fallbackRoute);
 }
 
+function errorMessage(error) {
+  return error?.blockedReason || error?.message || String(error);
+}
+
 persistLiveMode();
 
 export const runtimeClient = {
@@ -99,5 +108,6 @@ export const runtimeClient = {
   saveGame,
   dispatchAction,
   nextRoute,
+  errorMessage,
   withLiveMode,
 };

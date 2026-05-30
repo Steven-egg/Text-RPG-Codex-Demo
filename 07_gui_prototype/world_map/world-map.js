@@ -469,6 +469,7 @@ function navigateAfterAction(action) {
 async function dispatchRuntimeAction(action, source) {
   try {
     const result = await runtimeClient.dispatchAction("world_map", action.action_id, action.payload ?? {});
+    shellEl.dataset.runtimeStatus = result.status ?? "success";
     if (result.screen_model) {
       state.model = result.screen_model;
       state.selectedLocationId = result.screen_model.selected_location_id ?? state.selectedLocationId;
@@ -481,7 +482,8 @@ async function dispatchRuntimeAction(action, source) {
       }, navigationDelayMs);
     }
   } catch (error) {
-    const reason = error instanceof Error ? error.message : String(error);
+    const reason = runtimeClient.errorMessage(error);
+    shellEl.dataset.runtimeStatus = error?.runtimeStatus ?? "error";
     pushActionLog({
       action_id: action.action_id,
       payload: action.payload ?? {},

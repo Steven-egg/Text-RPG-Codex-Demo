@@ -382,12 +382,15 @@ async function dispatchRuntimeAction(action, payload) {
       result = await runtimeClient.loadGame();
     } else if (action.action_id === "load_demo_seed") {
       result = await runtimeClient.loadDemoSeed();
-    } else if (action.action_id === "start_new_game" || action.action_id === "restart_game") {
+    } else if (action.action_id === "start_new_game") {
       result = await runtimeClient.startNewGame(payload);
+    } else if (action.action_id === "restart_game") {
+      result = await runtimeClient.dispatchAction("start_screen", "restart_game", payload);
     } else {
       result = await runtimeClient.dispatchAction("start_screen", action.action_id, payload);
     }
 
+    shellEl.dataset.runtimeStatus = result.status ?? "success";
     pushActionLog({
       action_id: action.action_id,
       payload,
@@ -401,7 +404,8 @@ async function dispatchRuntimeAction(action, payload) {
       }, navigationDelayMs);
     }
   } catch (error) {
-    const reason = error instanceof Error ? error.message : String(error);
+    const reason = runtimeClient.errorMessage(error);
+    shellEl.dataset.runtimeStatus = error?.runtimeStatus ?? "error";
     pushActionLog({
       action_id: action.action_id,
       payload,
