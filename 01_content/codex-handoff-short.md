@@ -5,7 +5,7 @@
 ## 最新穩定狀態
 
 - 專案是 Python CLI 文字冒險 RPG《元素迷宮：邊境冒險者》。
-- 最新穩定 commit 是 `0dabe51 [codex] feat(gui): normalize blessed bridge live slice`。
+- 最近 handoff 基準 commit 是 `8eb7b24 docs(gui): sync bridge live slice handoff`。
 - v1 第一幕可通關；第二幕火系 demo 已進 runtime。
 - 灰燼裂谷、灰燼守衛 Boss MVP、補給線升級、燼印深窟、燼印鎮衛 Boss MVP 已完成。
 - `quest_supply_upgrade` 已素材化：需要 `mat_flame_stone_refined x3` 與 `mat_lava_shard x2`，完成後取得 `item_potion_m x2`，並解鎖旅人小鋪販售中藥水。
@@ -24,7 +24,8 @@
 - GUI runtime bridge blessed live slice 已落地並手測通過，範圍只包含 Start Screen、Town Hub、Inn Screen、World Map 與 `start_new_game` / `restart_game` / `load_demo_seed` / `load_game` / `open_world_map` / `save_game` / `back_to_town_hub` / `rest_at_inn`。
 - `start_gui_runtime_bridge_server.bat` 可啟動 local live test server；使用者手測 `Start -> Load Demo Seed -> Town Hub -> Inn -> rest_at_inn -> back_to_town_hub -> World Map -> Save Game` 通過，無 traceback 或 fatal error。
 - Blessed live slice 仍以 Python runtime 為 gameplay authority；GUI JavaScript 只 dispatch UIAction 並 render ScreenModel。Dungeon / Combat live bridge 雛形仍是 experimental / off-contract。
-- 手測後確認三個後續對齊點：live Start Screen copy / entry state 是否要貼近 static Start Screen；Town Hub live 版 `Save Game` 是否移到更像主選單的位置；`fixture_loaded` action log 命名在 live 成功載入時會誤導。
+- Live bootstrap log naming cleanup 已完成：Start、Town Hub、Inn、World Map 在 live 成功載入時記錄 `live_screen_loaded` / `live_loader`，payload 帶 `mode: "live"` 與 `screen_id`；static fixture load 與 live fallback 仍保留 `fixture_loaded`，fallback 仍會另外記 `live_bridge_unavailable`。
+- 手測後剩餘兩個後續對齊點：live Start Screen copy / entry state 是否要貼近 static Start Screen；Town Hub live 版 `Save Game` 是否移到更像主選單的位置。
 - `save.gui-backup-*.json` 是 bridge save 前安全備份產物，已加入 `.gitignore`；不要手動讀寫 `save.json`。
 - Inn Screen 與 Temple Screen 已完成 JRPG dialogue/menu static prototype 調整；mockup reference 只放在 `05_assets/gui_references/facility_inn_screen/` 與 `05_assets/gui_references/facility_temple_screen/`，不作 runtime asset。
 - Start Screen alignment review 已通過；no-save / has-save fixtures、開始 / 讀取 / 重新開始入口、冒險者登錄 modal 與前往 World Map 的 static navigation 都維持 static-only 邊界。
@@ -99,7 +100,7 @@ Cold Zone 不在新 session 啟動時主動大量讀取；需要詳細歷史、�
 - 教會查閱結果 MVP 已完成，不要再列為待做。
 - 火印熔爐、完整火印、火印守護 Boss、正式聖物、正式轉職、八元素、Act 3 都只能視為未來願景；不是當前下一步。
 - runtime UI 仍以 CLI / Rich 行為語意為準；GUI live mode 若後續施工，應沿用 static UX shell 並透過 Python bridge 注入 ScreenModel，不要重構 `game.py`。
-- 後續可選的小切片：修正 live 成功載入時 `fixture_loaded` log 命名；對齊 live Start Screen copy / entry state；評估 Town Hub `Save Game` placement。
+- 後續可選的小切片：對齊 live Start Screen copy / entry state；評估 Town Hub `Save Game` placement。
 - HTML static prototype 只允許在 `07_gui_prototype/` 內用 fixtures 小步調整，不讀寫 save、不接 Python、不複製 gameplay logic 到 JS。
 - Synthesis Screen、Shop Screen、Workshop Screen、Storage Screen、Magic Shop Screen、Inn Screen、Temple Screen、Relic Preview Screen static prototype v1 目前都已完成，不再作為未完成候選；Inn Screen 與 Temple Screen 已完成 JRPG dialogue/menu static prototype 調整。
 - 下一個 UI 任務需由使用者指定單一小切片。不得擴張 Guild、Shop、Workshop、Synthesis、Storage、Magic Shop、Temple、Relic、Dungeon 或 Combat live bridge；不讀寫 `save.json`、不修改 data / schema / combat formula、不啟動 formal asset pipeline，也不要把 reference/mockup 圖當 runtime asset。
@@ -128,6 +129,13 @@ Cold Zone 不在新 session 啟動時主動大量讀取；需要詳細歷史、�
 - `element_maze.py --smoke-test`：PASS
 - `git diff --check`：PASS，僅 CRLF warning
 - 使用者手測 `Start -> Load Demo Seed -> Town Hub -> Inn -> rest_at_inn -> back_to_town_hub -> World Map -> Save Game`：PASS，無 traceback 或 fatal error
+
+本輪 live bootstrap log naming cleanup 已確認：
+- Start / Town Hub / Inn / World Map live 成功載入 log 改為 `live_screen_loaded`：PASS
+- Live 成功路徑不再誤顯示 `fixture_loaded` 或 `live_bridge_unavailable`：PASS
+- Static-server fallback 仍保留 `fixture_loaded` 並正確顯示 `live_bridge_unavailable`：PASS
+- 4 個 blessed screen JavaScript syntax checks：PASS
+- `git diff --check`：PASS，僅 CRLF warning
 
 本輪 Magic Shop Catalog MVP 已確認：
 - Python 語法編譯

@@ -115,7 +115,11 @@ async function loadLiveScreen() {
     state.model = model;
     state.actionLog = [];
     render();
-    logSystem(`live runtime screen model loaded`);
+    logSystem("live runtime screen loaded", {
+      actionId: "live_screen_loaded",
+      source: "live_loader",
+      payload: { mode: "live", screen_id: "inn_screen" },
+    });
     shellEl.dataset.loadState = "ready";
   } catch (error) {
     await loadStaticFallback(fixtureSelect.value, error);
@@ -415,13 +419,13 @@ function pushActionLog(entry) {
   renderActionLog();
 }
 
-function logSystem(message) {
+function logSystem(message, options = {}) {
   state.actionLog = [
     {
       time: new Date().toLocaleTimeString("zh-TW", { hour12: false }),
-      action_id: "fixture_loaded",
-      payload: { message },
-      source: "fixture_loader",
+      action_id: options.actionId ?? "fixture_loaded",
+      payload: { message, ...(options.payload ?? {}) },
+      source: options.source ?? "fixture_loader",
       dispatched: true,
     },
   ];

@@ -2,7 +2,7 @@
 
 ## 最新完成：GUI Runtime Bridge Blessed Live Slice（local live mode）
 
-最新穩定 commit：`0dabe51 [codex] feat(gui): normalize blessed bridge live slice`。
+最近 handoff 基準 commit：`8eb7b24 docs(gui): sync bridge live slice handoff`。
 
 `07_gui_prototype/` 目前仍以 HTML static prototype 為預設模式；另外已落地一條明確受限的 local runtime-connected live slice，用來驗證 browser UIAction → Python bridge → runtime ScreenModel 的最小閉環。
 
@@ -15,13 +15,14 @@ Blessed live slice 目前只包含：
 
 手測已通過：`start_gui_runtime_bridge_server.bat` 可正常啟動；`Start -> Load Demo Seed -> Town Hub -> Inn -> rest_at_inn -> back_to_town_hub -> World Map -> Save Game` 可完成，無 traceback 或 fatal error。Python runtime 仍是 gameplay authority；GUI live mode 只 dispatch UIAction 並 render ScreenModel。
 
+Live bootstrap log naming cleanup 已完成：Start、Town Hub、Inn、World Map 在 live 成功載入時會記錄 `live_screen_loaded` / `live_loader`，並帶 `mode: "live"` 與 `screen_id`；static fixture load 與 live fallback 仍保留 `fixture_loaded`，fallback 仍會另外記 `live_bridge_unavailable`。
+
 目前仍不提升 Guild、Shop、Workshop、Synthesis、Storage、Magic Shop、Temple、Relic Preview、Dungeon Exploration 或 Combat 到正式 bridge contract。Dungeon / Combat live bridge 雛形仍視為 experimental / off-contract。
 
 已知後續對齊點：
 
 - live Start Screen copy / entry state 與 static Start Screen 視覺語氣仍需確認是否對齊。
 - Town Hub live 版 `Save Game` 目前在 World Map 旁邊；後續可評估是否移到更像主選單的位置。
-- action log 的 `fixture_loaded` 命名在 live 成功載入時會誤導；後續可改成更精準的 live/bootstrap log 名稱。
 - `save.gui-backup-*.json` 是 bridge save 前安全備份產物，已列入 `.gitignore`；不要手動讀寫 `save.json`。
 
 ## 仍然有效：GUI HTML Static Prototype（static fixtures）
