@@ -256,6 +256,17 @@ class GuiRuntimeSession:
                 screen_id="town_hub",
                 next_route="../town_hub/index.html?mode=live",
             )
+        if action_id in {"return_to_exploration", "back_to_exploration"}:
+            state = self.require_state()
+            exploration = self.require_exploration()
+            self.combat = None
+            exploration["status"] = "exploring"
+            return self._live_response(
+                action_id,
+                "正在返回探索...",
+                screen_model=self.exploration_screen_model(),
+                next_route="../dungeon_exploration/index.html?mode=live",
+            )
         if action_id == "confirm_travel":
             return self.confirm_travel(payload)
         if action_id == "advance_step":
@@ -288,13 +299,13 @@ class GuiRuntimeSession:
             "current_step": 0,
             "run_log": run_log,
             "events": [opening_event],
-            "last_message": "Live exploration session ready. Advance to enter the first runtime encounter.",
+            "last_message": "已成功進入迷宮。請點擊前進一步開始探索。",
             "status": "exploring",
         }
         self.combat = None
         return self._live_response(
             "confirm_travel",
-            f"Travel confirmed: {dungeon['name']}.",
+            f"已進入迷宮：{dungeon['name']}。",
             screen_model=self.exploration_screen_model(),
             next_route="../dungeon_exploration/index.html?mode=live",
         )
@@ -311,26 +322,27 @@ class GuiRuntimeSession:
         monster_id = random.choice(dungeon["monsters"])
         self.start_combat(monster_id)
         exploration["status"] = "combat"
-        exploration["last_message"] = f"Step {exploration['current_step']}: encountered {game.MONSTERS[monster_id]['name']}."
+        exploration["last_message"] = f"第 {exploration['current_step']} 步：遭遇 {game.MONSTERS[monster_id]['name']}。"
         exploration.setdefault("events", []).append(exploration["last_message"])
         return self._live_response(
             "advance_step",
-            f"Encounter: {game.MONSTERS[monster_id]['name']}.",
+            f"遭遇魔物：{game.MONSTERS[monster_id]['name']}。",
             screen_model=self.combat_screen_model(),
             next_route="../combat_screen/index.html?mode=live",
         )
 
     def retreat_from_exploration(self) -> dict[str, Any]:
-        self.require_state()
+        state = self.require_state()
         exploration = self.require_exploration()
         exploration["status"] = "resolved"
-        exploration["last_message"] = "Returned to town with the current run rewards."
+        exploration["last_message"] = "已撤退並回到世界地圖。"
         self.combat = None
+        self._clear_live_run()
         return self._live_response(
             "retreat",
-            "Returned to live Town Hub.",
-            screen_model=town_hub_model(self.require_state()),
-            next_route="../town_hub/index.html?mode=live",
+            "已撤退並回到世界地圖。",
+            screen_model=world_map_model(state),
+            next_route="../world_map/index.html?mode=live",
         )
 
     def start_combat(self, monster_id: str) -> None:
@@ -644,8 +656,8 @@ class GuiRuntimeSession:
         status = exploration.get("status", "exploring")
         return {
             "screen_id": "dungeon_exploration",
-            "title": "Live Dungeon Exploration",
-            "subtitle": "Runtime-connected exploration state. Static fixture mode remains unchanged.",
+            "title": "迷宮探索",
+            "subtitle": "正在進行迷宮探索，冒險的下一步正等待著你。",
             "resource_strip": [
                 {"id": "hp", "label": f"HP {state['current_hp']}/{stats['max_hp']}", "tone": "hp" if state["current_hp"] > stats["max_hp"] * 0.35 else "warning"},
                 {"id": "mp", "label": f"MP {state['current_mp']}/{stats['max_mp']}", "tone": "mp"},
@@ -654,7 +666,7 @@ class GuiRuntimeSession:
             "dungeon": {
                 "dungeon_id": exploration["dungeon_id"],
                 "name": dungeon["name"],
-                "summary": f"{dungeon['element']} dungeon validated by Python runtime.",
+                "summary": f"屬性：{dungeon['element']} / 推薦等級：{dungeon['recommended']}",
                 "recommended_level": dungeon["recommended"],
                 "player_level": f"Lv{state.get('level', 1)}",
                 "attribute": dungeon["element"],
@@ -665,9 +677,9 @@ class GuiRuntimeSession:
             "run_status": {
                 "current_step": current_step,
                 "total_steps": total_steps,
-                "step_note": exploration.get("last_message", "Ready to advance."),
+                "step_note": exploration.get("last_message", "已抵達入口，準備前進。"),
                 "status_label": "戰鬥中" if status == "combat" else "探索中",
-                "risk_label": "Runtime",
+                "risk_label": "普通",
                 "supply_label": f"HP {state['current_hp']}/{stats['max_hp']}",
                 "next_node": "下一步",
             },
@@ -678,18 +690,18 @@ class GuiRuntimeSession:
                 {
                     "action_id": "advance_step",
                     "label": "前進一步",
-                    "description": "Ask the Python runtime to advance exploration.",
+                    "description": "前進探索下一步。",
                     "enabled": status == "exploring",
-                    "disabled_reason": None if status == "exploring" else "Combat is active.",
+                    "disabled_reason": None if status == "exploring" else "戰鬥中無法執行此動作。",
                     "primary": True,
                     "payload": {"dungeon_id": exploration["dungeon_id"], "current_step": current_step},
                 },
                 {
                     "action_id": "retreat",
                     "label": "撤退",
-                    "description": "Return to live Town Hub.",
+                    "description": "撤離當前迷宮並返回地圖。",
                     "enabled": status == "exploring",
-                    "disabled_reason": None if status == "exploring" else "Resolve combat first.",
+                    "disabled_reason": None if status == "exploring" else "請先結束戰鬥。",
                     "primary": False,
                     "payload": {"dungeon_id": exploration["dungeon_id"]},
                 },
@@ -706,8 +718,8 @@ class GuiRuntimeSession:
         usable_items = combat_item_rows(state)
         return {
             "screen_id": "combat_screen",
-            "title": "Live Combat",
-            "subtitle": "Runtime-connected combat turn. Python owns damage, items, and enemy actions.",
+            "title": "戰鬥",
+            "subtitle": "迎擊眼前的強敵，取得勝利以推進探索。",
             "resource_strip": [{"label": f"第 {combat['turn']} 回合", "tone": "neutral"}],
             "player": {
                 "name": state.get("name", ""),
@@ -730,8 +742,8 @@ class GuiRuntimeSession:
             "skill_menu": {
                 "label": "技能選擇",
                 "title": "技能",
-                "summary": "Live skill use is scheduled for a later slice.",
-                "empty_message": "此 live slice 尚未開放技能。",
+                "summary": "技能系統準備中。",
+                "empty_message": "當前無法使用技能。",
                 "items": [],
             },
             "item_menu": {
@@ -747,45 +759,45 @@ class GuiRuntimeSession:
                 {
                     "action_id": "basic_attack",
                     "label": "攻擊",
-                    "description": "Resolve a basic attack through Python runtime.",
+                    "description": "進行普通攻擊。",
                     "enabled": not resolved,
-                    "disabled_reason": None if not resolved else "Combat is resolved.",
+                    "disabled_reason": None if not resolved else "戰鬥已結束。",
                     "primary": True,
                     "payload": {"enemy_id": combat["enemy_id"]},
                 },
                 {
                     "action_id": "open_skill_menu",
                     "label": "技能",
-                    "description": "Live skill use is a later slice.",
+                    "description": "職業特殊技能。",
                     "enabled": False,
-                    "disabled_reason": "Skills are not wired in this live slice.",
+                    "disabled_reason": "此 live slice 尚未開放技能。",
                     "primary": False,
                     "payload": {"source": "combat_screen"},
                 },
                 {
                     "action_id": "open_item_menu",
                     "label": "道具",
-                    "description": "Use a supported combat item.",
+                    "description": "使用攜帶的戰鬥道具。",
                     "enabled": not resolved and bool(usable_items),
-                    "disabled_reason": None if usable_items else "No supported combat items.",
+                    "disabled_reason": None if usable_items else "沒有可用道具。",
                     "primary": False,
                     "payload": {"source": "combat_screen"},
                 },
                 {
                     "action_id": "defend",
                     "label": "防禦",
-                    "description": "Reduce the next enemy damage.",
+                    "description": "採取防禦姿態降低下回合所受傷害。",
                     "enabled": not resolved,
-                    "disabled_reason": None if not resolved else "Combat is resolved.",
+                    "disabled_reason": None if not resolved else "戰鬥已結束。",
                     "primary": False,
                     "payload": {},
                 },
                 {
                     "action_id": "retreat",
                     "label": "逃跑",
-                    "description": "Try to leave this ordinary encounter.",
+                    "description": "嘗試逃離當前戰鬥。",
                     "enabled": not resolved,
-                    "disabled_reason": None if not resolved else "Combat is resolved.",
+                    "disabled_reason": None if not resolved else "戰鬥已結束。",
                     "primary": False,
                     "payload": {"enemy_id": combat["enemy_id"]},
                 },
@@ -1271,9 +1283,27 @@ def combat_item_rows(state: dict[str, Any]) -> list[dict[str, Any]]:
 
 
 def result_overlay_model(outcome: str, title: str, status: str, summary: str, rows: list[str]) -> dict[str, Any]:
+    if outcome in ("victory", "retreat"):
+        next_action = {
+            "action_id": "back_to_exploration",
+            "label": "返回探索",
+            "description": "回到探索畫面繼續前進。",
+            "payload": {"from": f"combat_result_{outcome}"},
+            "feedback_message": "正在返回探索...",
+            "navigate_to": "../dungeon_exploration/index.html?mode=live",
+        }
+    else:
+        next_action = {
+            "action_id": "back_to_town_hub",
+            "label": "回到城鎮",
+            "description": "返回城鎮廣場進行休整。",
+            "payload": {"from": f"combat_result_{outcome}"},
+            "feedback_message": "正在返回城鎮...",
+            "navigate_to": "../town_hub/index.html?mode=live",
+        }
     return {
         "outcome": outcome,
-        "label": "Live Combat Result",
+        "label": "戰鬥結束",
         "title": title,
         "status_summary": status,
         "battle_summary": summary,
@@ -1282,14 +1312,7 @@ def result_overlay_model(outcome: str, title: str, status: str, summary: str, ro
             {"label": f"{index}.", "value": row, "tone": "danger" if outcome == "defeat" and index == 1 else "neutral"}
             for index, row in enumerate(rows, start=1)
         ],
-        "next_action": {
-            "action_id": "back_to_town_hub",
-            "label": "回到城鎮",
-            "description": "Return to the live Town Hub.",
-            "payload": {"from": f"combat_result_{outcome}"},
-            "feedback_message": "Returning to live Town Hub.",
-            "navigate_to": "../town_hub/index.html?mode=live",
-        },
+        "next_action": next_action,
     }
 
 

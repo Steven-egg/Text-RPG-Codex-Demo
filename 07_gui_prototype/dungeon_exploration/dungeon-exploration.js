@@ -136,8 +136,11 @@ function renderDungeon(dungeon) {
   locationSummaryEl.textContent = dungeon.summary ?? "";
 
   const rows = [
+    ["屬性", dungeon.attribute ?? ""],
     ["路線", dungeon.route_length ?? ""],
-  ];
+    ["通關狀態", dungeon.clear_state ?? ""],
+    ["守護者", dungeon.boss_state ?? ""],
+  ].filter(([, value]) => Boolean(value));
   locationMetaEl.replaceChildren(...rows.map(([label, value]) => createInfoRow("meta-row", label, value)));
 }
 
