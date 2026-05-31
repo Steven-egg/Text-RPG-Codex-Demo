@@ -236,7 +236,7 @@ function renderRegistration() {
   registrationBackDescriptionEl.textContent = registration.back_description ?? "回到開始畫面";
   registrationConfirmLabelEl.textContent = getConfirmLabel();
   registrationConfirmDescriptionEl.textContent =
-    registration.confirm_description ?? "只記錄 static UIAction，前往 World Map prototype。";
+    registration.confirm_description ?? "只記錄靜態 UIAction，前往世界地圖原型。";
 
   const jobs = registration.jobs ?? [];
   jobListEl.replaceChildren(

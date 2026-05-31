@@ -216,7 +216,7 @@ function renderRumors(rumors) {
 }
 
 function renderNPC(npc) {
-  npcNameEl.textContent = npc.name ?? "莉莉 (Lily)";
+  npcNameEl.textContent = npc.name ?? "莉莉";
   npcDescriptionEl.textContent = npc.description ?? "";
   npcAvatarEl.textContent = npc.avatar_token ?? "LY";
   if (state.uiState === "welcome") {
@@ -255,7 +255,7 @@ function enterConfirmState() {
   const goldResource = state.model?.resource_strip?.find((r) => r.id === "gold");
   const goldText = goldResource ? goldResource.label : "1957G";
 
-  npcBubbleEl.textContent = `莉莉 (Lily)：「要休息一晚嗎？費用：${cost}G / 目前金幣：${goldText}」`;
+  npcBubbleEl.textContent = `莉莉：「要休息一晚嗎？費用：${cost}G / 目前金幣：${goldText}」`;
 
   pushActionLog({
     action_id: "inn_rest_prompt",
@@ -307,7 +307,7 @@ async function handleRest() {
       }
       if (result.message) {
         feedbackMessageEl.textContent = result.message;
-        npcBubbleEl.textContent = "莉莉 (Lily)：「休息好了嗎？祝你今天冒險順利！」";
+        npcBubbleEl.textContent = "莉莉：「休息好了嗎？祝你今天冒險順利！」";
       }
       enterRestedState();
     } catch (error) {
@@ -335,7 +335,7 @@ async function handleRest() {
   });
 
   feedbackMessageEl.textContent = "在旅館休息了一晚，HP/MP 已完全回滿。";
-  npcBubbleEl.textContent = "莉莉 (Lily)：「看起來精神飽滿呢！今天也是充滿活力的一天！」";
+  npcBubbleEl.textContent = "莉莉：「看起來精神飽滿呢！今天也是充滿活力的一天！」";
   
   // 更新前端資源條模擬回滿
   const updatedStrip = [

@@ -457,9 +457,9 @@ async function activateAction(action, source) {
 
   if (action.action_id === "confirm_travel") {
     const location = getSelectedLocation();
-    feedbackMessageEl.textContent = `已送出 confirm_travel：${location?.label ?? action.payload?.location_id ?? ""}。即將進入 Dungeon Exploration static prototype。`;
+    feedbackMessageEl.textContent = `已送出 confirm_travel：${location?.label ?? action.payload?.location_id ?? ""}。即將進入迷宮探索靜態原型。`;
   } else {
-    feedbackMessageEl.textContent = `已送出 ${action.action_id}。static prototype 不執行正式流程。`;
+    feedbackMessageEl.textContent = `已送出 ${action.action_id}。靜態原型不執行正式流程。`;
   }
 
   navigateAfterAction(action);

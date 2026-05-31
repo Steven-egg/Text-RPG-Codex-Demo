@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Inn Static JRPG Prototype</title>
+    <title>《元素迷宮：邊境冒險者》旅店</title>
     <link rel="stylesheet" href="./styles.css" />
   </head>
   <body>
@@ -28,7 +28,7 @@
           <div class="fixture-switcher" aria-label="Fixture state">
             <label for="fixture-select">測試狀態</label>
             <select id="fixture-select">
-              <option value="./fixtures/inn-default.json">Default Inn</option>
+              <option value="./fixtures/inn-default.json">預設旅店狀態</option>
             </select>
           </div>
         </div>
@@ -54,7 +54,7 @@
       <footer class="jrpg-footer-bar">
         <!-- 左側：對話框 (Dialogue Box) -->
         <section class="dialogue-box">
-          <div class="speaker-name" id="npc-name">Lily</div>
+          <div class="speaker-name" id="npc-name">莉莉</div>
           <div class="dialogue-content-area">
             <p id="npc-bubble" class="speech-bubble">Loading...</p>
             <p id="feedback-message" class="feedback-message"></p>
@@ -92,7 +92,7 @@
       <section class="action-log-panel">
         <details>
           <summary class="action-log-heading">
-            <span class="panel-label">UIAction Log (Debug)</span>
+            <span class="panel-label">UIAction 事件日誌 (Debug)</span>
             <button id="clear-log" class="quiet-button" type="button" aria-label="Clear log">清除</button>
           </summary>
           <ol id="action-log" class="action-log"></ol>

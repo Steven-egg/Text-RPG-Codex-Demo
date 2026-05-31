@@ -159,7 +159,7 @@ class GuiRuntimeSession:
 
     def require_state(self) -> dict[str, Any]:
         if self.state is None:
-            raise GuiActionError("No runtime state is loaded.", status=409)
+            raise GuiActionError("未載入遊戲核心狀態。", status=409)
         return self.state
 
     def new_game(self, name: str | None, job_id: str | None) -> dict[str, Any]:
@@ -169,7 +169,7 @@ class GuiRuntimeSession:
         self._clear_live_run()
         return action_response(
             "start_new_game",
-            "新的冒險者名冊已建立。可在 World Map 主選單存檔。",
+            "新的冒險者名冊已建立。可在世界地圖主選單進行存檔。",
             self.state,
             screen_id="town_hub",
             next_route="../town_hub/index.html?mode=live",
@@ -192,7 +192,7 @@ class GuiRuntimeSession:
         self._clear_live_run()
         return action_response(
             "load_demo_seed",
-            "Demo seed loaded in memory. Save manually to persist it.",
+            "Demo 初始存檔已載入記憶體。請手動存檔以儲存進度。",
             self.state,
             screen_id="town_hub",
             next_route="../town_hub/index.html?mode=live",
@@ -202,16 +202,16 @@ class GuiRuntimeSession:
         loaded = game.load_game()
         if loaded is None:
             raise GuiActionError(
-                "No valid save file is available.",
+                "無可用的有效存檔資料。",
                 status=404,
                 result_status="blocked",
-                blocked_reason="No valid save file is available.",
+                blocked_reason="無可用的有效存檔資料。",
             )
         self.state = loaded
         self._clear_live_run()
         return action_response(
             "load_game",
-            "Save loaded into the live GUI session.",
+            "存檔已成功載入 Live 遊戲會話中。",
             self.state,
             screen_id="town_hub",
             next_route="../town_hub/index.html?mode=live",
@@ -221,7 +221,7 @@ class GuiRuntimeSession:
         state = self.require_state()
         self._backup_save_once()
         game.save_game(state)
-        return action_response("save_game", "Runtime save written.", state, screen_id=screen_id)
+        return action_response("save_game", "存檔寫入成功。", state, screen_id=screen_id)
 
     def dispatch(self, action_id: str, payload: dict[str, Any] | None = None, screen_id: str | None = None) -> dict[str, Any]:
         payload = payload or {}
@@ -241,7 +241,7 @@ class GuiRuntimeSession:
             state = self.require_state()
             return action_response(
                 action_id,
-                "Opening live World Map.",
+                "正在開啟世界地圖...",
                 state,
                 screen_id="world_map",
                 next_route="../world_map/index.html?mode=live",
@@ -251,7 +251,7 @@ class GuiRuntimeSession:
             self._clear_live_run()
             return action_response(
                 action_id,
-                "Returning to live Town Hub.",
+                "正在返回城鎮...",
                 state,
                 screen_id="town_hub",
                 next_route="../town_hub/index.html?mode=live",
@@ -588,21 +588,21 @@ class GuiRuntimeSession:
         service_id = payload.get("service_id", "overnight_rest")
         cost_payload = payload.get("cost", 30)
         if isinstance(cost_payload, bool):
-            raise GuiActionError("Inn cost must be a number.", status=400)
+            raise GuiActionError("旅店費用必須是數字。", status=400)
         try:
             cost = int(cost_payload)
         except (TypeError, ValueError) as exc:
-            raise GuiActionError("Inn cost must be a number.", status=400) from exc
+            raise GuiActionError("旅店費用必須是數字。", status=400) from exc
         if service_id != "overnight_rest":
-            raise GuiActionError("Unknown inn service.", status=400)
+            raise GuiActionError("未知的旅店服務。", status=400)
         if cost != 30:
-            raise GuiActionError("Inn cost mismatch.", status=400)
+            raise GuiActionError("旅店費用不符合。", status=400)
         if state.get("gold", 0) < cost:
             raise GuiActionError(
-                "Not enough gold for the inn.",
+                "身上金幣不足，無法在旅店住宿。",
                 status=409,
                 result_status="blocked",
-                blocked_reason="Not enough gold for the inn.",
+                blocked_reason="身上金幣不足，無法在旅店住宿。",
             )
         stats = game.get_stats(state)
         state["gold"] -= cost
@@ -610,7 +610,7 @@ class GuiRuntimeSession:
         state["current_mp"] = stats["max_mp"]
         response = action_response(
             "rest_at_inn",
-            "Rested at the inn. Save manually to persist.",
+            "已在旅店住宿休整完畢，HP/MP 已恢復全滿。請記得進行存檔以儲存進度。",
             state,
             screen_id="inn_screen" if screen_id == "inn_screen" else "town_hub",
         )
@@ -632,7 +632,7 @@ class GuiRuntimeSession:
             return self.exploration_screen_model()
         if screen_id == "combat_screen":
             return self.combat_screen_model()
-        raise GuiActionError(f"Unsupported live screen: {screen_id}", status=404)
+        raise GuiActionError(f"未支援的 Live 畫面：{screen_id}", status=404)
 
     def exploration_screen_model(self) -> dict[str, Any]:
         state = self.require_state()
@@ -1039,8 +1039,8 @@ def world_map_model(state: dict[str, Any]) -> dict[str, Any]:
                 "icon_token": "地",
                 "preview_role": "cave",
                 "description": f"{dungeon['recommended']} / {dungeon['steps']} 步",
-                "detail_note": "Live runtime validates travel availability.",
-                "exploration_rating": "Runtime",
+                "detail_note": "Live 模式將由遊戲核心驗證前往條件。",
+                "exploration_rating": "核心驗證",
             },
         )
         unlocked = game.is_unlocked(state, dungeon.get("unlock"))
@@ -1109,7 +1109,7 @@ def world_map_model(state: dict[str, Any]) -> dict[str, Any]:
         "screen_id": "world_map",
         "layout_family": "navigation_map",
         "title": "世界地圖",
-        "subtitle": "Live mode 使用 Python runtime 狀態；畫面結構維持 static prototype。",
+        "subtitle": "Live 模式使用遊戲核心狀態；畫面結構與靜態原型保持一致。",
         "selected_location_id": next((location["location_id"] for location in locations if location["location_id"] != "border_town" and location["unlocked"]), "border_town"),
         "current_location_id": "border_town",
         "player": player_model(state),
@@ -1117,9 +1117,9 @@ def world_map_model(state: dict[str, Any]) -> dict[str, Any]:
             {"action_id": "view_status", "label": "查看狀態", "description": "此 live slice 尚未接入狀態頁。", "enabled": False, "disabled_reason": "此 live slice 尚未接入狀態頁。", "payload": {}},
             {"action_id": "open_bestiary", "label": "怪物圖鑑", "description": "此 live slice 尚未接入圖鑑。", "enabled": False, "disabled_reason": "此 live slice 尚未接入圖鑑。", "payload": {}},
             {"action_id": "open_inventory", "label": "背包 / 裝備", "description": "此 live slice 尚未接入背包。", "enabled": False, "disabled_reason": "此 live slice 尚未接入背包。", "payload": {}},
-            {"action_id": "save_game", "label": "存檔", "description": "透過 Python runtime 寫入存檔。", "enabled": True, "payload": {}},
+            {"action_id": "save_game", "label": "存檔", "description": "透過遊戲核心寫入目前的進度。", "enabled": True, "payload": {}},
             {"action_id": "open_settings", "label": "設定", "description": "保留 GUI 設定入口；此 live slice 尚未接入設定面板。", "enabled": True, "payload": {}},
-            {"action_id": "back_to_start_screen", "label": "回到標題", "description": "返回 Start Screen。", "enabled": True, "payload": {}},
+            {"action_id": "back_to_start_screen", "label": "回到標題", "description": "返回遊戲開始標題畫面。", "enabled": True, "payload": {}},
         ],
         "route_segments": route_segments,
         "locations": locations,
@@ -1130,12 +1130,12 @@ def town_hub_model(state: dict[str, Any]) -> dict[str, Any]:
     return {
         "screen_id": "town_hub",
         "layout_family": "hub",
-        "title": "Live Town Hub",
-        "subtitle": "Resource strip and key actions are backed by Python runtime state.",
+        "title": "艾爾姆城鎮 (Live)",
+        "subtitle": "角色資源狀態與核心行為皆與 Python 遊戲引擎同步。",
         "resource_strip": resource_strip(state),
         "town_guidance": [
-            "Live mode: actions are validated by Python runtime.",
-            "Use World Map to continue the playable loop, or rest at the inn from this hub.",
+            "Live 模式：所有冒險行為皆經由 Python 核心驗證。",
+            "可前往世界地圖繼續冒險，或在城鎮旅店進行休整。",
         ],
         "selected_facility_id": "guild",
         "facility_nodes": facility_nodes(state),
@@ -1147,24 +1147,24 @@ def town_hub_model(state: dict[str, Any]) -> dict[str, Any]:
 
 def facility_nodes(state: dict[str, Any]) -> list[dict[str, Any]]:
     return [
-        facility("guild", "Guild", "Quest board and material turn-in are later bridge slices.", "guild", "open_facility", enabled=False),
+        facility("guild", "冒險者工會", "委託板與物資交付功能將在後續版本開放。", "guild", "open_facility", enabled=False),
         facility(
             "inn",
-            "Inn",
-            "Open the runtime-backed inn screen.",
+            "旅店",
+            "前往旅店，提供金幣休整並回復狀態。",
             "bed",
             "open_facility",
             payload={"facility_id": "inn", "target_screen_id": "inn_screen"},
             target_screen_id="inn_screen",
             navigation_route="../inn_screen/index.html",
         ),
-        facility("travel_shop", "Travel Shop", "Buying and selling are later bridge slices.", "shop", "open_facility", enabled=False),
-        facility("workshop", "Workshop", "Equipment buying and upgrades are later bridge slices.", "hammer", "open_facility", enabled=False),
-        facility("synthesis", "Synthesis", "Crafting is a later bridge slice.", "alchemy", "open_facility", enabled=False),
-        facility("magic_shop", "Magic Shop", "Learning magic is a later bridge slice.", "magic", "open_facility", enabled=False),
-        facility("temple", "Temple", "Preview-only for now; story mutation needs explicit action.", "temple", "open_facility", enabled=False),
-        facility("relic_preview", "Relic Preview", "Preview-only for now.", "relic", "open_facility", enabled=False),
-        facility("storage", "Storage", "Storage transfer is a later bridge slice.", "storage", "open_facility", enabled=False),
+        facility("travel_shop", "旅人小鋪", "道具交易功能將在後續版本開放。", "shop", "open_facility", enabled=False),
+        facility("workshop", "鐵刃 / 堅甲工坊", "裝備購買與強化功能將在後續版本開放。", "hammer", "open_facility", enabled=False),
+        facility("synthesis", "米菈合成屋", "煉金合成配方將在後續版本開放。", "alchemy", "open_facility", enabled=False),
+        facility("magic_shop", "星燈魔法商店", "魔法書購買與學習將在後續版本開放。", "magic", "open_facility", enabled=False),
+        facility("temple", "轉職神殿", "神殿目前僅供預覽；轉職與故事線索解鎖需特定條件。", "temple", "open_facility", enabled=False),
+        facility("relic_preview", "聖物調查", "聖物調查目前僅供預覽。", "relic", "open_facility", enabled=False),
+        facility("storage", "城鎮倉庫", "倉庫轉移與物件存放功能將在後續版本開放。", "storage", "open_facility", enabled=False),
     ]
 
 
@@ -1189,7 +1189,7 @@ def facility(
         "visual_anchor": visual.get("visual_anchor", facility_id),
         "icon_role": icon_role,
         "enabled": enabled,
-        "disabled_reason": None if enabled else "This live action is scheduled for a later slice.",
+        "disabled_reason": None if enabled else "此設施的 Live 模式功能將在後續版本開放。",
         "badges": [],
         "primary_action": action_id,
         "payload": payload or {"facility_id": facility_id},
@@ -1203,35 +1203,35 @@ def inn_screen_model(state: dict[str, Any]) -> dict[str, Any]:
     return {
         "screen_id": "inn_screen",
         "layout_family": "dialogue_node",
-        "title": "Live Inn",
-        "subtitle": "Runtime-backed rest action.",
+        "title": "艾爾姆旅店 (Live)",
+        "subtitle": "與遊戲核心同步的休息休整服務。",
         "resource_strip": resource_strip(state),
         "feedback_message": None,
         "service": {
             "service_id": "overnight_rest",
-            "label": "Overnight Rest",
-            "description": "Deduct 30G and restore HP/MP through Python runtime.",
+            "label": "住宿休息",
+            "description": "支付 30G 住宿費用，並由遊戲核心回復所有生命值與魔力值。",
             "cost": 30,
             "enabled": summary.get("gold", 0) >= 30,
-            "disabled_reason": None if summary.get("gold", 0) >= 30 else "Not enough gold.",
+            "disabled_reason": None if summary.get("gold", 0) >= 30 else "身上金幣不足。",
             "action_id": "rest_at_inn",
             "payload": {"service_id": "overnight_rest", "cost": 30},
         },
         "actions": [
             {
                 "action_id": "rest_at_inn",
-                "label": "Rest",
-                "description": "Deduct 30G and restore HP/MP.",
+                "label": "休息休整",
+                "description": "支付 30G 費用以完全回復狀態。",
                 "enabled": summary.get("gold", 0) >= 30,
-                "disabled_reason": None if summary.get("gold", 0) >= 30 else "Not enough gold.",
+                "disabled_reason": None if summary.get("gold", 0) >= 30 else "身上金幣不足。",
                 "payload": {"service_id": "overnight_rest", "cost": 30},
             }
         ],
         "navigation_actions": [
             {
                 "action_id": "back_to_town_hub",
-                "label": "Town Hub",
-                "description": "Return to live Town Hub.",
+                "label": "返回城鎮",
+                "description": "離開旅店返回城鎮廣場。",
                 "enabled": True,
                 "payload": {"from": "inn_screen"},
             }
