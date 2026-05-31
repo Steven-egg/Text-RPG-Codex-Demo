@@ -29,6 +29,7 @@ const registrationConfirmLabelEl = document.querySelector("#registration-confirm
 const registrationConfirmDescriptionEl = document.querySelector("#registration-confirm-description");
 const actionLogEl = document.querySelector("#action-log");
 const clearLogEl = document.querySelector("#clear-log");
+const fixtureControlLabelEl = document.querySelector(".fixture-control span");
 
 const state = {
   model: null,
@@ -75,6 +76,20 @@ document.addEventListener("keydown", (event) => {
 
 loadFixture(fixtureSelectEl.value);
 
+function setFixtureControlMode(mode, model = null) {
+  const isLive = mode === "live";
+  fixtureSelectEl.disabled = isLive;
+  fixtureControlLabelEl.textContent = isLive ? "Runtime 狀態" : "測試狀態";
+  fixtureSelectEl.title = "";
+  if (!isLive || !model) {
+    return;
+  }
+
+  const hasSaveAction = (model.actions ?? []).some((action) => action.action_id === "load_game");
+  fixtureSelectEl.value = hasSaveAction ? "./fixtures/start-has-save.json" : "./fixtures/start-empty.json";
+  fixtureSelectEl.title = hasSaveAction ? "Live runtime 偵測到可讀取存檔" : "Live runtime 未偵測到存檔";
+}
+
 async function loadFixture(path) {
   if (runtimeClient.isLiveMode()) {
     await loadLiveScreen(path);
@@ -91,6 +106,7 @@ async function loadFixture(path) {
 
     const model = await response.json();
     state.model = model;
+    setFixtureControlMode("static");
     state.actionLog = [];
     state.modalOpen = false;
     state.registrationAction = null;
@@ -109,6 +125,7 @@ async function loadLiveScreen(path) {
   try {
     const model = await runtimeClient.getScreen("start_screen");
     state.model = model;
+    setFixtureControlMode("live", model);
     state.actionLog = [];
     state.modalOpen = false;
     state.registrationAction = null;
@@ -133,6 +150,7 @@ async function loadStaticFallback(path, liveError) {
     }
     const model = await response.json();
     state.model = model;
+    setFixtureControlMode("static");
     state.actionLog = [];
     state.modalOpen = false;
     state.registrationAction = null;

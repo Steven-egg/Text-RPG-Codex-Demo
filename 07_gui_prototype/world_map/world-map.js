@@ -36,6 +36,7 @@ const staticActionRoutes = {
   back_to_start_screen: "../start_screen/index.html",
   confirm_travel: "../dungeon_exploration/index.html",
 };
+const liveShellOnlyActions = new Set(["open_settings"]);
 const navigationDelayMs = 120;
 
 fixtureSelect.addEventListener("change", () => {
@@ -443,6 +444,11 @@ async function activateAction(action, source) {
     source,
     dispatched: true,
   });
+
+  if (runtimeClient.isLiveMode() && liveShellOnlyActions.has(action.action_id)) {
+    feedbackMessageEl.textContent = "已記錄設定入口；此 live slice 尚未接入設定面板。";
+    return;
+  }
 
   if (runtimeClient.isLiveMode() && action.action_id !== "back_to_start_screen") {
     await dispatchRuntimeAction(action, source);

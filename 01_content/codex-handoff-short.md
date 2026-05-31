@@ -5,7 +5,7 @@
 ## 最新穩定狀態
 
 - 專案是 Python CLI 文字冒險 RPG《元素迷宮：邊境冒險者》。
-- 最近 handoff 基準 commit 是 `8eb7b24 docs(gui): sync bridge live slice handoff`。
+- 最近 handoff 基準 commit 是 `d8ba004 [codex] fix(gui): clarify live bootstrap logs`。
 - v1 第一幕可通關；第二幕火系 demo 已進 runtime。
 - 灰燼裂谷、灰燼守衛 Boss MVP、補給線升級、燼印深窟、燼印鎮衛 Boss MVP 已完成。
 - `quest_supply_upgrade` 已素材化：需要 `mat_flame_stone_refined x3` 與 `mat_lava_shard x2`，完成後取得 `item_potion_m x2`，並解鎖旅人小鋪販售中藥水。
@@ -21,11 +21,13 @@
 - 「Element Decay 引擎」不是正式專案術語，不納入正式紀錄。
 - GUI HTML static prototype 已進入可互動驗證階段，位置在 `07_gui_prototype/`；目前包含 Start Screen、Town Hub、Guild Screen、Synthesis Screen、World Map、Dungeon Exploration、Combat Screen、Shop Screen、Workshop Screen、Storage Screen、Magic Shop Screen、Inn Screen、Temple Screen、Relic Preview Screen 十四個畫面。
 - static prototype 只使用 fixtures 驗證 render layer、layout、互動與 UIAction logging；不接 Python runtime、不讀寫 `save.json`、不修改 runtime / data / schema / combat formula、不啟動正式 asset pipeline。
-- GUI runtime bridge blessed live slice 已落地並手測通過，範圍只包含 Start Screen、Town Hub、Inn Screen、World Map 與 `start_new_game` / `restart_game` / `load_demo_seed` / `load_game` / `open_world_map` / `save_game` / `back_to_town_hub` / `rest_at_inn`。
-- `start_gui_runtime_bridge_server.bat` 可啟動 local live test server；使用者手測 `Start -> Load Demo Seed -> Town Hub -> Inn -> rest_at_inn -> back_to_town_hub -> World Map -> Save Game` 通過，無 traceback 或 fatal error。
+- GUI runtime bridge blessed live slice 已落地並手測通過，範圍只包含 Start Screen、Town Hub、Inn Screen、World Map 與 `start_new_game` / `restart_game` / `load_game` / `open_world_map` / `save_game` / `open_settings` / `back_to_start_screen` / `back_to_town_hub` / `rest_at_inn`；其中 `back_to_town_hub` 只保留在城鎮節點 / detail action，不在 World Map 主選單。
+- `load_demo_seed` 保留為 backend smoke/helper，不再顯示為 live Start Screen 主要入口；live Start Screen copy / no-save / has-save 狀態已對齊 static Start Screen。
+- Town Hub live 不再顯示 `save_game`；World Map 主選單保留 `save_game`，新增 shell-only `open_settings`，移除主選單 `back_to_town_hub`。
+- `start_gui_runtime_bridge_server.bat` 可啟動 local live test server；使用者手測重新開啟 bat 後，新狀態重新開始、在 World Map 主選單存檔、回到標題後繼續遊戲，runtime 狀態可保留，無 traceback 或 fatal error。
 - Blessed live slice 仍以 Python runtime 為 gameplay authority；GUI JavaScript 只 dispatch UIAction 並 render ScreenModel。Dungeon / Combat live bridge 雛形仍是 experimental / off-contract。
 - Live bootstrap log naming cleanup 已完成：Start、Town Hub、Inn、World Map 在 live 成功載入時記錄 `live_screen_loaded` / `live_loader`，payload 帶 `mode: "live"` 與 `screen_id`；static fixture load 與 live fallback 仍保留 `fixture_loaded`，fallback 仍會另外記 `live_bridge_unavailable`。
-- 手測後剩餘兩個後續對齊點：live Start Screen copy / entry state 是否要貼近 static Start Screen；Town Hub live 版 `Save Game` 是否移到更像主選單的位置。
+- 手測後已完成本輪 live Start Screen copy / entry state 與 Town Hub / World Map 主選單 placement 對齊；本 slice 不再有必做 follow-up。
 - `save.gui-backup-*.json` 是 bridge save 前安全備份產物，已加入 `.gitignore`；不要手動讀寫 `save.json`。
 - Inn Screen 與 Temple Screen 已完成 JRPG dialogue/menu static prototype 調整；mockup reference 只放在 `05_assets/gui_references/facility_inn_screen/` 與 `05_assets/gui_references/facility_temple_screen/`，不作 runtime asset。
 - Start Screen alignment review 已通過；no-save / has-save fixtures、開始 / 讀取 / 重新開始入口、冒險者登錄 modal 與前往 World Map 的 static navigation 都維持 static-only 邊界。
@@ -96,11 +98,11 @@ Cold Zone 不在新 session 啟動時主動大量讀取；需要詳細歷史、�
 
 ## 下一步邊界
 
-- Blessed GUI runtime bridge live slice 已完成 normalization 並手測通過；下一步只建議做同一 slice 的小型對齊 cleanup 或文件收斂，不自動擴張 runtime bridge。
+- Blessed GUI runtime bridge live slice 已完成 normalization、Start Screen / entry state 對齊、Town Hub / World Map 主選單 placement cleanup，並經使用者手測通過；下一步只建議做同一 slice 的小型 copy polish 或文件收斂，不自動擴張 runtime bridge。
 - 教會查閱結果 MVP 已完成，不要再列為待做。
 - 火印熔爐、完整火印、火印守護 Boss、正式聖物、正式轉職、八元素、Act 3 都只能視為未來願景；不是當前下一步。
 - runtime UI 仍以 CLI / Rich 行為語意為準；GUI live mode 若後續施工，應沿用 static UX shell 並透過 Python bridge 注入 ScreenModel，不要重構 `game.py`。
-- 後續可選的小切片：對齊 live Start Screen copy / entry state；評估 Town Hub `Save Game` placement。
+- 後續可選的小切片：若使用者要求，可只做同一 blessed slice 的 live copy polish，例如殘留英文文案本地化；若要把 `open_settings` 接成真設定面板，需另開單一小切片與 read-only planning gate。
 - HTML static prototype 只允許在 `07_gui_prototype/` 內用 fixtures 小步調整，不讀寫 save、不接 Python、不複製 gameplay logic 到 JS。
 - Synthesis Screen、Shop Screen、Workshop Screen、Storage Screen、Magic Shop Screen、Inn Screen、Temple Screen、Relic Preview Screen static prototype v1 目前都已完成，不再作為未完成候選；Inn Screen 與 Temple Screen 已完成 JRPG dialogue/menu static prototype 調整。
 - 下一個 UI 任務需由使用者指定單一小切片。不得擴張 Guild、Shop、Workshop、Synthesis、Storage、Magic Shop、Temple、Relic、Dungeon 或 Combat live bridge；不讀寫 `save.json`、不修改 data / schema / combat formula、不啟動 formal asset pipeline，也不要把 reference/mockup 圖當 runtime asset。
@@ -117,18 +119,16 @@ Cold Zone 不在新 session 啟動時主動大量讀取；需要詳細歷史、�
   - `element_maze.py --smoke-test`：`smoke test ok`
   - `06_tools/content_inventory_report.py --json`：成功輸出 report
 
-本輪 blessed GUI runtime bridge live slice 已確認：
-- Python compile：PASS
-- JavaScript syntax checks：PASS
-- bridge contract smoke with temp `SAVE_PATH`：PASS
-- HTTP bridge smoke：PASS
-- Town Hub visual anchor smoke：PASS
-- World Map static-shape smoke：PASS
-- `start_gui_runtime_bridge_server.bat` smoke on `PORT=8025`：PASS
+本輪 blessed GUI runtime bridge live slice cleanup 已確認：
+- `python -m py_compile 03_engine/engine/gui_actions.py`：PASS
+- live model smoke：Town Hub navigation 只剩 `open_world_map`；World Map 主選單含 `save_game` / `open_settings` 並移除 `back_to_town_hub`；Start Screen no-save / has-save 入口對齊 static；新遊戲 fallback 名稱為 `見習冒險者`：PASS
+- `node --check 07_gui_prototype/start_screen/start-screen.js`：PASS
+- `node --check 07_gui_prototype/world_map/world-map.js`：PASS
 - `06_tools/validate_data.py`：PASS
 - `element_maze.py --smoke-test`：PASS
+- bridge HTTP smoke：PASS
 - `git diff --check`：PASS，僅 CRLF warning
-- 使用者手測 `Start -> Load Demo Seed -> Town Hub -> Inn -> rest_at_inn -> back_to_town_hub -> World Map -> Save Game`：PASS，無 traceback 或 fatal error
+- 使用者手測重新開啟 bat、新狀態重新開始、在 World Map 主選單存檔、回到標題後繼續遊戲：PASS，runtime 狀態可保留，無 traceback 或 fatal error
 
 本輪 live bootstrap log naming cleanup 已確認：
 - Start / Town Hub / Inn / World Map live 成功載入 log 改為 `live_screen_loaded`：PASS

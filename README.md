@@ -2,18 +2,18 @@
 
 ## 最新完成：GUI Runtime Bridge Blessed Live Slice（local live mode）
 
-最近 handoff 基準 commit：`8eb7b24 docs(gui): sync bridge live slice handoff`。
+最近 handoff 基準 commit：`d8ba004 [codex] fix(gui): clarify live bootstrap logs`。
 
 `07_gui_prototype/` 目前仍以 HTML static prototype 為預設模式；另外已落地一條明確受限的 local runtime-connected live slice，用來驗證 browser UIAction → Python bridge → runtime ScreenModel 的最小閉環。
 
 Blessed live slice 目前只包含：
 
-- Start Screen：`start_new_game`、`restart_game`、`load_demo_seed`、`load_game`
-- Town Hub：live resource strip、facility nodes、`open_world_map`、`save_game`
-- Inn Screen：`rest_at_inn` 扣 30G 並由 Python runtime 回滿 HP/MP
-- World Map：沿用 static shell 顯示 runtime-backed location / route ScreenModel
+- Start Screen：`start_new_game`、`restart_game`、`load_game`；live 入口 copy / no-save / has-save 狀態已對齊 static Start Screen，`load_demo_seed` 保留為 backend smoke/helper，不再顯示為 live Start Screen 主要入口。
+- Town Hub：live resource strip、facility nodes、`open_world_map`；Town Hub 不再顯示 `save_game`。
+- Inn Screen：`rest_at_inn` 扣 30G 並由 Python runtime 回滿 HP/MP。
+- World Map：沿用 static shell 顯示 runtime-backed location / route ScreenModel；主選單保留 `save_game` 與 shell-only `open_settings`，移除主選單 `back_to_town_hub`，返回城鎮只透過城鎮節點 / detail action。
 
-手測已通過：`start_gui_runtime_bridge_server.bat` 可正常啟動；`Start -> Load Demo Seed -> Town Hub -> Inn -> rest_at_inn -> back_to_town_hub -> World Map -> Save Game` 可完成，無 traceback 或 fatal error。Python runtime 仍是 gameplay authority；GUI live mode 只 dispatch UIAction 並 render ScreenModel。
+手測已通過：`start_gui_runtime_bridge_server.bat` 可正常啟動；重新開啟 bat 後，使用者確認新狀態重新開始、在 World Map 主選單存檔、回到標題後繼續遊戲，runtime 狀態可保留，且無 traceback 或 fatal error。Python runtime 仍是 gameplay authority；GUI live mode 只 dispatch UIAction 並 render ScreenModel。
 
 Live bootstrap log naming cleanup 已完成：Start、Town Hub、Inn、World Map 在 live 成功載入時會記錄 `live_screen_loaded` / `live_loader`，並帶 `mode: "live"` 與 `screen_id`；static fixture load 與 live fallback 仍保留 `fixture_loaded`，fallback 仍會另外記 `live_bridge_unavailable`。
 
@@ -21,8 +21,8 @@ Live bootstrap log naming cleanup 已完成：Start、Town Hub、Inn、World Map
 
 已知後續對齊點：
 
-- live Start Screen copy / entry state 與 static Start Screen 視覺語氣仍需確認是否對齊。
-- Town Hub live 版 `Save Game` 目前在 World Map 旁邊；後續可評估是否移到更像主選單的位置。
+- Blessed live slice 本輪已收斂到 Start Screen / Town Hub / Inn / World Map 的最小可測 GUI shell；後續只建議做同 slice 小型 copy polish 或文件收斂，不自動擴張其他 live bridge surface。
+- 若未來要讓 `open_settings` 變成真正設定面板，需另開單一小切片；目前只是 GUI shell 入口，不 dispatch 到 Python runtime。
 - `save.gui-backup-*.json` 是 bridge save 前安全備份產物，已列入 `.gitignore`；不要手動讀寫 `save.json`。
 
 ## 仍然有效：GUI HTML Static Prototype（static fixtures）

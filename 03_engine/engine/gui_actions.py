@@ -164,12 +164,12 @@ class GuiRuntimeSession:
 
     def new_game(self, name: str | None, job_id: str | None) -> dict[str, Any]:
         job_key = normalize_job_id(job_id)
-        character_name = str(name or "").strip() or "GUI Adventurer"
+        character_name = str(name or "").strip() or "見習冒險者"
         self.state = game.create_state(character_name, job_key)
         self._clear_live_run()
         return action_response(
             "start_new_game",
-            "New game session created. Save manually to persist it.",
+            "新的冒險者名冊已建立。可在 World Map 主選單存檔。",
             self.state,
             screen_id="town_hub",
             next_route="../town_hub/index.html?mode=live",
@@ -874,86 +874,98 @@ def build_screen_model(screen_id: str | None, state: dict[str, Any]) -> dict[str
 
 
 def start_screen_model(has_save: bool) -> dict[str, Any]:
-    actions = [
-        {
-            "action_id": "start_new_game",
-            "label": "Start New Game",
-            "description": "Create a live runtime session in memory.",
-            "token": "NEW",
-            "kind": "primary",
-            "enabled": True,
-            "opens_registration": True,
-            "final_action_id": "start_new_game",
-            "registration_entry": "new_game",
-            "payload": {"entry": "new_game"},
-        },
-        {
-            "action_id": "load_demo_seed",
-            "label": "Load Demo Seed",
-            "description": "Load a prepared in-memory state without writing save.json.",
-            "token": "DEM",
-            "kind": "secondary",
-            "enabled": True,
-            "payload": {},
-        },
-        {
-            "action_id": "load_game",
-            "label": "Load Save",
-            "description": "Load the shared CLI/runtime save file.",
-            "token": "LOD",
-            "kind": "secondary",
-            "enabled": has_save,
-            "disabled_reason": None if has_save else "No save file is available.",
-            "payload": {},
-        },
-    ]
     if has_save:
-        actions.insert(
-            1,
+        actions = [
+            {
+                "action_id": "load_game",
+                "label": "繼續冒險（Continue）",
+                "description": "",
+                "token": "續",
+                "kind": "primary",
+                "enabled": True,
+                "disabled_reason": None,
+                "payload": {"entry": "load_game"},
+            },
             {
                 "action_id": "restart_game",
-                "label": "Restart Game",
-                "description": "Create a fresh live runtime session in memory.",
-                "token": "RST",
+                "label": "重新開始（New Game）",
+                "description": "",
+                "token": "重",
                 "kind": "secondary",
                 "enabled": True,
+                "disabled_reason": None,
                 "opens_registration": True,
                 "final_action_id": "restart_game",
                 "registration_entry": "restart_game",
+                "registration_title": "重新登錄冒險者",
+                "registration_feedback": "這會建立一份新的 live runtime 狀態；需要存檔時請到 World Map 主選單執行存檔。",
+                "confirm_label": "確認重新開始",
                 "payload": {"entry": "restart_game"},
             },
-        )
+        ]
+        hero_copy = "既有名冊仍封存在公會櫃台。你可以重新出發，也可以讀取最近一次的冒險足跡。"
+    else:
+        actions = [
+            {
+                "action_id": "start_new_game",
+                "label": "開始新冒險（New Game）",
+                "description": "",
+                "token": "新",
+                "kind": "primary",
+                "enabled": True,
+                "disabled_reason": None,
+                "opens_registration": True,
+                "final_action_id": "start_new_game",
+                "registration_entry": "new_game",
+                "registration_title": "建立冒險者名冊",
+                "registration_feedback": "輸入名字並選擇初始職業；空白名字會使用「見習冒險者」。",
+                "confirm_label": "確認開始",
+                "payload": {"entry": "new_game"},
+            }
+        ]
+        hero_copy = "城門外的礦道仍在發熱，公會只留下新的登錄名冊。你可以從這裡建立一段新的冒險。"
     return {
         "screen_id": "start_screen",
         "layout_family": "entry",
-        "screen_label": "Live Runtime",
-        "title": "Element Maze",
-        "hero_kicker": "Runtime-connected prototype",
-        "hero_title": "Playable GUI Bridge",
-        "hero_copy": "Start, load, or seed a Python runtime session. Static fixture mode remains available without ?mode=live.",
+        "screen_label": "開始畫面",
+        "title": "《元素迷宮：邊境冒險者》",
+        "hero_kicker": "邊境公會記錄",
+        "hero_title": "元素迷宮",
+        "hero_copy": hero_copy,
         "registration": registration_model(),
         "actions": actions,
     }
 
 
 def registration_model() -> dict[str, Any]:
+    job_summaries = {
+        "劍士": "穩定近戰，適合承受壓力。",
+        "法師": "使用魔法，重視 MP 與爆發。",
+        "盜賊": "行動靈活，適合快速探索。",
+        "牧師": "能恢復與支援，續航較佳。",
+    }
     return {
-        "panel_label": "Adventurer Registration",
-        "title": "Create Runtime Character",
-        "chip": "LIVE",
-        "name_label": "Name",
-        "name_placeholder": "GUI Adventurer",
-        "fallback_name": "GUI Adventurer",
-        "job_label": "Job",
-        "job_hint": "Jobs are generated from Python runtime data.",
+        "panel_label": "冒險者登錄",
+        "title": "建立冒險者名冊",
+        "chip": "REG",
+        "name_label": "冒險者名字",
+        "name_placeholder": "見習冒險者",
+        "fallback_name": "見習冒險者",
+        "job_label": "初始職業",
+        "job_hint": "對照 CLI 的四個初始職業，由 Python runtime 建立角色。",
         "default_job_id": "warrior",
-        "feedback": "This creates an in-memory state. Use Save Game to persist it.",
-        "back_label": "Back",
-        "back_description": "Return to start actions",
-        "confirm_label": "Create",
-        "confirm_description": "Create live runtime state and open Town Hub",
+        "feedback": "輸入名字並選擇初始職業；空白名字會使用「見習冒險者」。",
+        "back_label": "返回",
+        "back_description": "回到開始畫面",
+        "confirm_label": "確認開始",
+        "confirm_description": "建立 live runtime 狀態後開啟 Town Hub",
         "jobs": [
-            {"id": job_id, "index": f"{idx}.", "label": job_key, "summary": ", ".join(JOBS[job_key]["base_skills"])}
+            {
+                "id": job_id,
+                "index": f"{idx}.",
+                "label": job_key,
+                "summary": job_summaries.get(job_key, "依照 Python runtime 職業資料建立。"),
+            }
             for idx, (job_id, job_key) in enumerate(JOB_ID_TO_KEY.items(), start=1)
         ],
     }
@@ -1106,7 +1118,7 @@ def world_map_model(state: dict[str, Any]) -> dict[str, Any]:
             {"action_id": "open_bestiary", "label": "怪物圖鑑", "description": "此 live slice 尚未接入圖鑑。", "enabled": False, "disabled_reason": "此 live slice 尚未接入圖鑑。", "payload": {}},
             {"action_id": "open_inventory", "label": "背包 / 裝備", "description": "此 live slice 尚未接入背包。", "enabled": False, "disabled_reason": "此 live slice 尚未接入背包。", "payload": {}},
             {"action_id": "save_game", "label": "存檔", "description": "透過 Python runtime 寫入存檔。", "enabled": True, "payload": {}},
-            {"action_id": "back_to_town_hub", "label": "返回城鎮", "description": "返回 live Town Hub。", "enabled": True, "payload": {}},
+            {"action_id": "open_settings", "label": "設定", "description": "保留 GUI 設定入口；此 live slice 尚未接入設定面板。", "enabled": True, "payload": {}},
             {"action_id": "back_to_start_screen", "label": "回到標題", "description": "返回 Start Screen。", "enabled": True, "payload": {}},
         ],
         "route_segments": route_segments,
@@ -1128,8 +1140,7 @@ def town_hub_model(state: dict[str, Any]) -> dict[str, Any]:
         "selected_facility_id": "guild",
         "facility_nodes": facility_nodes(state),
         "navigation_actions": [
-            {"action_id": "open_world_map", "label": "World Map", "description": "Open live World Map.", "enabled": True, "payload": {}},
-            {"action_id": "save_game", "label": "Save Game", "description": "Write the shared runtime save.", "enabled": True, "payload": {}},
+            {"action_id": "open_world_map", "label": "前往世界地圖", "description": "離開城鎮，選擇下一個目的地。", "enabled": True, "payload": {}},
         ],
     }
 
