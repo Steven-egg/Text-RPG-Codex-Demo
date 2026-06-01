@@ -193,6 +193,23 @@ Expected actions:
 This phase should introduce explicit runtime session state for exploration/combat
 turns rather than trying to drive the CLI input loop from the browser.
 
+Status note, 2026-06-01:
+
+- A narrow traversal and combat loop slice has landed through
+  `be6b06c [antig] feat(gui): complete live combat loop feedback`.
+- Completed coverage is limited to World Map `confirm_travel`, Dungeon
+  Exploration `advance_step` / `retreat`, Combat `basic_attack` / `defend` /
+  supported `use_item` / `retreat`, victory result overlay feedback, return to
+  Dungeon Exploration, minimal route clear / resolved state, and leaving the
+  dungeon back to World Map.
+- Victory result overlay now reports EXP, gold, drops, bestiary status, and
+  level-up feedback. Defeat and retreat routing remain aligned with the approved
+  traversal semantics.
+- This status note does not approve a complete skill system, inventory /
+  equipment interaction, facility family, generic boss framework, complete
+  dungeon event framework, combat formula changes, data/schema changes, or save
+  migration.
+
 ## 6. Action Contract
 
 Each live action should have:
