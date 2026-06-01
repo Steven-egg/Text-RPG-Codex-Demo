@@ -569,8 +569,16 @@ function createResultLine(row) {
   item.className = "result-line";
   item.dataset.tone = row.tone ?? "neutral";
 
+  const labelText = row.label ?? "";
+  const isNumericLabel = /^\d+\.?$/.test(labelText.trim());
+  if (isNumericLabel) {
+    item.classList.add("result-line-list");
+  } else {
+    item.classList.add("result-line-kv");
+  }
+
   const label = document.createElement("strong");
-  label.textContent = row.label ?? "";
+  label.textContent = labelText;
 
   const value = document.createElement("span");
   value.textContent = row.value ?? "";
