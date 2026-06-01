@@ -300,6 +300,38 @@ class GuiRuntimeSession:
             exploration = self.require_exploration()
             self.combat = None
             exploration["status"] = "exploring"
+
+            dungeon_id = exploration["dungeon_id"]
+            dungeon = DUNGEONS[dungeon_id]
+            total_steps = dungeon["steps"]
+            current_step = exploration["current_step"]
+
+            if current_step >= total_steps:
+                if not exploration.get("cleared_marked"):
+                    exploration["cleared_marked"] = True
+                    first_clear = dungeon_id not in state.get("cleared_dungeons", [])
+                    if first_clear:
+                        state.setdefault("cleared_dungeons", []).append(dungeon_id)
+                        state["guild_points"] = state.get("guild_points", 0) + dungeon["clear_guild"]
+                        msg = f"你走完了 {dungeon['name']} 的探索路線！首次通關，工會積分 +{dungeon['clear_guild']}。"
+                    else:
+                        msg = f"你走完了 {dungeon['name']} 的探索路線！"
+
+                    # 終點守護者提示
+                    boss_id = dungeon.get("boss")
+                    if boss_id:
+                        boss_name = game.MONSTERS[boss_id]["name"]
+                        if game.boss_available_at_dungeon_end(state, dungeon_id, boss_id):
+                            msg += f" 終點傳來強烈的氣息……可挑戰守護者 {boss_name}。出發前請確認 HP、藥水與火抗。"
+                        else:
+                            if state.get("flags", {}).get(f"{boss_id}_defeated") or (boss_id == "boss_glen" and state.get("flags", {}).get("boss_glen_defeated")) or (boss_id == "boss_ash_guardian" and state.get("flags", {}).get("ash_guardian_defeated")) or (boss_id == "boss_cinder_seal_sentinel" and state.get("flags", {}).get("cinder_seal_sentinel_defeated")):
+                                msg += f" 守護者 {boss_name} 已被擊敗。"
+                            else:
+                                msg += f" {boss_name} 尚未滿足挑戰條件，先處理工會委託線索。"
+                    exploration["last_message"] = msg
+                    exploration.setdefault("events", []).append(msg)
+                exploration["status"] = "resolved"
+
             return self._live_response(
                 action_id,
                 "正在返回探索...",
@@ -525,22 +557,60 @@ class GuiRuntimeSession:
         enemy = combat["enemy"]
         enemy_id = combat["enemy_id"]
         run_log = self.current_run_log()
-        game.try_register_bestiary(state, enemy_id)
+
+        # 記錄升級前狀態與 Level
+        level_before = state.get("level", 1)
+
+        # 登錄圖鑑並判斷是否為首次登錄
+        newly_registered = game.try_register_bestiary(state, enemy_id)
+
+        # 獲得經驗值與 Level Up 處理
         game.gain_exp(state, enemy["exp"])
+        level_after = state.get("level", 1)
+        level_up_occurred = level_after > level_before
+
+        # 獲得金幣
         gold = random.randint(*enemy["gold"])
         game.add_gold(state, gold, run_log)
-        reward_lines = [f"獲得 {gold}G。"]
+
+        reward_lines = []
+        reward_lines.append(f"獲得金幣：+{gold}G")
+
+        # 處理 EXP 顯示
+        if level_up_occurred:
+            reward_lines.append(f"🎉 等級提升！升級為 Lv{level_after}，HP/MP 已恢復全滿！")
+        else:
+            reward_lines.append(f"獲得經驗：+{enemy['exp']} EXP (目前 {state['exp']}/{game.exp_to_next(level_after)})")
+
+        # 處理掉落素材
+        drops_found = []
         for item_id, chance, qty in enemy["drops"]:
             stats = game.get_stats(state)
             final_chance = chance + stats.get("rare_drop", 0) / 100
             if random.random() <= final_chance:
                 game.add_loot(state, item_id, qty, run_log)
-                reward_lines.append(f"取得 {item_name(item_id)} x{qty}。")
+                drops_found.append(f"{item_name(item_id)} x{qty}")
+
+        if drops_found:
+            reward_lines.append("掉落物品：" + "、".join(drops_found))
+        else:
+            reward_lines.append("掉落物品：無")
+
+        # 處理圖鑑登錄狀態提示
+        if newly_registered:
+            reward_lines.append(f"📖 圖鑑登錄：已將 {enemy['name']} 登錄至魔物圖鑑！")
+        else:
+            reward_lines.append(f"📖 圖鑑提示：{enemy['name']} 的資料已存在於圖鑑中。")
+
+        # 處理特定守護者特殊解鎖提示
         if enemy_id == "mon_scorched_guard":
             game.unlock(state, "item_armor_piercer")
             game.unlock(state, "recipe_piercing_bundle")
+            reward_lines.append("🔑 解鎖配方：[破甲釘組] 與道具 [破甲釘]。")
         if enemy_id == "mon_lava_imp":
             game.unlock(state, "recipe_heat_charm")
+            reward_lines.append("🔑 解鎖配方：[暖石墜]。")
+
         combat["outcome"] = "victory"
         combat["last_action_summary"] = " / ".join(summary_lines[:2]) if summary_lines else f"擊敗 {enemy['name']}。"
         combat["result_overlay"] = result_overlay_model(
@@ -556,12 +626,18 @@ class GuiRuntimeSession:
         combat = self.require_combat()
         combat["outcome"] = "retreat"
         combat["last_action_summary"] = " / ".join(summary_lines[:2]) if summary_lines else "你撤出戰鬥。"
+
+        reward_lines = [
+            "撤退安全無恙。",
+            game.run_loot_summary(self.current_run_log())
+        ]
+
         combat["result_overlay"] = result_overlay_model(
             "retreat",
             "撤退成功",
             "你撤回通往城鎮的路線。",
             combat["last_action_summary"],
-            [game.run_loot_summary(self.current_run_log())],
+            reward_lines,
         )
         game.record_battle_events(combat["battle_log"], combat["turn"], summary_lines or ["你撤出戰鬥。"])
         return self._live_response("retreat", "Retreated from combat.", screen_model=self.combat_screen_model())
@@ -586,12 +662,19 @@ class GuiRuntimeSession:
         combat = self.require_combat()
         combat["outcome"] = "defeat"
         combat["last_action_summary"] = message
+
+        reward_lines = [
+            f"扣減本趟所獲金幣的 30% ({lost_gold}G)。",
+            "散落丟失本趟 30% 素材：" + "、".join(lost_items) if lost_items else "本趟素材大致都保住了。",
+            "公會救援隊收取了救援代價，已平安把你帶回據點城鎮艾爾姆。"
+        ]
+
         combat["result_overlay"] = result_overlay_model(
             "defeat",
             "戰鬥失敗",
             "工會救援隊把你帶回艾爾姆。",
             message,
-            [f"失去本趟金幣 {lost_gold}G。", "散落素材：" + "、".join(lost_items) if lost_items else "素材大致都保住了。"],
+            reward_lines,
         )
         combat.setdefault("battle_log", []).append("戰鬥結束：你倒下了。")
         return self._live_response("defeat", "Defeated. Returned by rescue.", screen_model=self.combat_screen_model())
@@ -730,17 +813,21 @@ class GuiRuntimeSession:
                     "action_id": "advance_step",
                     "label": "前進一步",
                     "description": "前進探索下一步。",
-                    "enabled": status == "exploring",
-                    "disabled_reason": None if status == "exploring" else "戰鬥中無法執行此動作。",
+                    "enabled": status == "exploring" and current_step < total_steps,
+                    "disabled_reason": (
+                        "戰鬥中無法執行此動作。" if status == "combat" else (
+                            "已抵達終點，請點擊離開返回地圖。" if current_step >= total_steps else None
+                        )
+                    ),
                     "primary": True,
                     "payload": {"dungeon_id": exploration["dungeon_id"], "current_step": current_step},
                 },
                 {
                     "action_id": "retreat",
-                    "label": "撤退",
-                    "description": "撤離當前迷宮並返回地圖。",
-                    "enabled": status == "exploring",
-                    "disabled_reason": None if status == "exploring" else "請先結束戰鬥。",
+                    "label": "離開迷宮" if current_step >= total_steps else "撤退",
+                    "description": "返回世界地圖。" if current_step >= total_steps else "撤離當前迷宮並返回地圖。",
+                    "enabled": status != "combat",
+                    "disabled_reason": None if status != "combat" else "請先結束戰鬥。",
                     "primary": False,
                     "payload": {"dungeon_id": exploration["dungeon_id"]},
                 },
