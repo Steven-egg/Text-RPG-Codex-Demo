@@ -235,6 +235,45 @@ class GuiRuntimeSession:
             return self.load_game()
         if action_id == "save_game":
             return self.save_game(screen_id=screen_id or "world_map")
+        if action_id == "view_status":
+            state = self.require_state()
+            model = world_map_model(state)
+            model["utility_preview"] = {
+                "type": "status",
+                "title": "角色狀態摘要",
+                "data": get_status_preview_data(state)
+            }
+            return self._live_response(
+                action_id,
+                "已開啟角色狀態摘要。",
+                screen_model=model,
+            )
+        if action_id == "open_inventory":
+            state = self.require_state()
+            model = world_map_model(state)
+            model["utility_preview"] = {
+                "type": "inventory",
+                "title": "背包唯讀摘要",
+                "data": get_inventory_preview_data(state)
+            }
+            return self._live_response(
+                action_id,
+                "已開啟背包唯讀摘要。",
+                screen_model=model,
+            )
+        if action_id == "open_bestiary":
+            state = self.require_state()
+            model = world_map_model(state)
+            model["utility_preview"] = {
+                "type": "bestiary",
+                "title": "魔物圖鑑摘要",
+                "data": get_bestiary_preview_data(state)
+            }
+            return self._live_response(
+                action_id,
+                "已開啟魔物圖鑑摘要。",
+                screen_model=model,
+            )
         if action_id == "rest_at_inn":
             return self.rest_at_inn(payload, screen_id=screen_id)
         if action_id == "open_world_map":
@@ -1126,11 +1165,11 @@ def world_map_model(state: dict[str, Any]) -> dict[str, Any]:
         "current_location_id": "border_town",
         "player": player_model(state),
         "menu_actions": [
-            {"action_id": "view_status", "label": "查看狀態", "description": "此 live slice 尚未接入狀態頁。", "enabled": False, "disabled_reason": "此 live slice 尚未接入狀態頁。", "payload": {}},
-            {"action_id": "open_bestiary", "label": "怪物圖鑑", "description": "此 live slice 尚未接入圖鑑。", "enabled": False, "disabled_reason": "此 live slice 尚未接入圖鑑。", "payload": {}},
-            {"action_id": "open_inventory", "label": "背包 / 裝備", "description": "此 live slice 尚未接入背包。", "enabled": False, "disabled_reason": "此 live slice 尚未接入背包。", "payload": {}},
+            {"action_id": "view_status", "label": "查看狀態", "description": "查看冒險者的能力數值與目前裝備。", "enabled": True, "payload": {}},
+            {"action_id": "open_bestiary", "label": "怪物圖鑑", "description": "查看冒險中已登錄的魔物資訊。", "enabled": True, "payload": {}},
+            {"action_id": "open_inventory", "label": "背包 / 裝備", "description": "查看背包內持有的道具、裝備與素材。", "enabled": True, "payload": {}},
             {"action_id": "save_game", "label": "存檔", "description": "透過遊戲核心寫入目前的進度。", "enabled": True, "payload": {}},
-            {"action_id": "open_settings", "label": "設定", "description": "保留 GUI 設定入口；此 live slice 尚未接入設定面板。", "enabled": True, "payload": {}},
+            {"action_id": "open_settings", "label": "設定", "description": "調整遊戲設定。", "enabled": True, "payload": {}},
             {"action_id": "back_to_start_screen", "label": "回到標題", "description": "返回遊戲開始標題畫面。", "enabled": True, "payload": {}},
         ],
         "route_segments": route_segments,
@@ -1334,4 +1373,97 @@ def inventory_preview(state: dict[str, Any]) -> list[dict[str, Any]]:
     for item_id, qty in state.get("inventory", {}).items():
         data = ITEMS.get(item_id) or EQUIPMENT.get(item_id) or {}
         entries.append({"item_id": item_id, "label": data.get("name", item_name(item_id)), "quantity": qty})
+    return entries
+
+
+def get_status_preview_data(state: dict[str, Any]) -> dict[str, Any]:
+    stats = game.get_stats(state)
+    slot_names = {"weapon": "武器", "head": "頭部", "body": "身體", "accessory": "飾品", "special": "特殊"}
+    equipment = []
+    for slot, label in slot_names.items():
+        item_id = state.get("equipment", {}).get(slot)
+        equipment.append({
+            "slot_label": label,
+            "item_name": item_name(item_id) if item_id else "無",
+            "item_id": item_id
+        })
+    skills = []
+    for skill_id in state.get("learned_skills", []):
+        skill = game.SKILLS.get(skill_id, {})
+        skills.append({
+            "name": skill.get("name", skill_id),
+            "mp": skill.get("mp", 0),
+            "desc": skill.get("desc", "")
+        })
+    return {
+        "name": state.get("name", ""),
+        "job_label": state.get("job", ""),
+        "level": state.get("level", 1),
+        "exp": state.get("exp", 0),
+        "exp_next": game.exp_to_next(state.get("level", 1)),
+        "gold": state.get("gold", 0),
+        "guild_points": state.get("guild_points", 0),
+        "hp_current": state.get("current_hp", stats["max_hp"]),
+        "hp_max": stats["max_hp"],
+        "mp_current": state.get("current_mp", stats["max_mp"]),
+        "mp_max": stats["max_mp"],
+        "attack": stats.get("attack", 0),
+        "magic_attack": stats.get("magic_attack", 0),
+        "defense": stats.get("defense", 0),
+        "agility": stats.get("agility", 0),
+        "crit": stats.get("crit", 0),
+        "fire_resist": stats.get("fire_resist", 0),
+        "equipment": equipment,
+        "skills": skills
+    }
+
+
+def get_inventory_preview_data(state: dict[str, Any]) -> list[dict[str, Any]]:
+    entries = []
+    for item_id, qty in sorted(state.get("inventory", {}).items()):
+        category = "其他"
+        if item_id in EQUIPMENT:
+            category = "裝備"
+        else:
+            item_data = ITEMS.get(item_id, {})
+            kind = item_data.get("kind")
+            if kind == "consumable":
+                category = "補給品"
+            elif kind in {"battle", "special"}:
+                category = "戰術道具"
+            elif item_id.startswith("key_"):
+                category = "關鍵道具"
+            elif item_id.startswith("mat_"):
+                category = "素材"
+
+        entries.append({
+            "item_id": item_id,
+            "name": item_name(item_id),
+            "quantity": qty,
+            "category": category,
+            "desc": game.item_usage_summary(item_id)
+        })
+    return entries
+
+
+def get_bestiary_preview_data(state: dict[str, Any]) -> list[dict[str, Any]]:
+    entries = []
+    for monster_id in state.get("bestiary", []):
+        monster = game.MONSTERS.get(monster_id)
+        if monster:
+            drops_formatted = []
+            for item_id, chance, qty in monster.get("drops", []):
+                drops_formatted.append(f"{item_name(item_id)} ({int(chance*100)}%機率 x{qty})")
+            drops_str = "、".join(drops_formatted) if drops_formatted else "無"
+
+            entries.append({
+                "monster_id": monster_id,
+                "name": monster["name"],
+                "level": monster["level"],
+                "hp": monster["hp"],
+                "element": monster["element"],
+                "exp": monster["exp"],
+                "gold_range": f"{monster['gold'][0]} - {monster['gold'][1]}G" if isinstance(monster["gold"], tuple) else f"{monster['gold']}G",
+                "drops": drops_str
+            })
     return entries

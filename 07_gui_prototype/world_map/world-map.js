@@ -39,6 +39,13 @@ const staticActionRoutes = {
 const liveShellOnlyActions = new Set(["open_settings"]);
 const navigationDelayMs = 120;
 
+let utilityPanelEl = null;
+let utilityTitleEl = null;
+let utilityPanelLabelEl = null;
+let utilityContentEl = null;
+let closeUtilityEl = null;
+let utilityBackActionEl = null;
+
 fixtureSelect.addEventListener("change", () => {
   loadFixture(fixtureSelect.value);
 });
@@ -67,6 +74,11 @@ document.addEventListener("keydown", (event) => {
 
   if (shellEl.dataset.detailOpen === "true") {
     setDetailOpen(false);
+    return;
+  }
+
+  if (shellEl.dataset.utilityOpen === "true") {
+    setUtilityOpen(false);
   }
 });
 
@@ -83,6 +95,7 @@ clearLogEl.addEventListener("click", () => {
   renderActionLog();
 });
 
+initUtilityPanel();
 loadFixture(fixtureSelect.value);
 
 async function loadFixture(path) {
@@ -446,7 +459,73 @@ async function activateAction(action, source) {
   });
 
   if (runtimeClient.isLiveMode() && liveShellOnlyActions.has(action.action_id)) {
-    feedbackMessageEl.textContent = "已記錄設定入口；此 live slice 尚未接入設定面板。";
+    feedbackMessageEl.textContent = "設定功能尚未開放。";
+    return;
+  }
+
+  // Handle Offline Static Fallback for utilities
+  if (!runtimeClient.isLiveMode() && ["view_status", "open_inventory", "open_bestiary"].includes(action.action_id)) {
+    let mockPreview = null;
+    if (action.action_id === "view_status") {
+      mockPreview = {
+        type: "status",
+        title: "角色狀態摘要",
+        data: {
+          name: state.model?.player?.name ?? "見習冒險者",
+          job_label: state.model?.player?.class_label ?? "劍士",
+          level: 7,
+          exp: 280,
+          exp_next: 490,
+          gold: 1957,
+          guild_points: 120,
+          hp_current: 183,
+          hp_max: 192,
+          mp_current: 38,
+          mp_max: 38,
+          attack: 24,
+          magic_attack: 4,
+          defense: 18,
+          agility: 12,
+          crit: 5,
+          fire_resist: 15,
+          equipment: [
+            { slot_label: "武器", item_name: "微光鐵劍" },
+            { slot_label: "頭部", item_name: "皮帽" },
+            { slot_label: "身體", item_name: "硬皮甲" },
+            { slot_label: "飾品", item_name: "溫暖護身符" },
+            { slot_label: "特殊", item_name: "見習徽章" }
+          ],
+          skills: [
+            { name: "斬擊", mp: 3, desc: "凝聚鬥氣的快速揮砍，造成 1.35x 物理傷害。" },
+            { name: "重擊", mp: 5, desc: "蓄力猛擊，造成 1.7x 物理傷害並有機會擊暈敵人。" }
+          ]
+        }
+      };
+    } else if (action.action_id === "open_inventory") {
+      mockPreview = {
+        type: "inventory",
+        title: "背包唯讀摘要",
+        data: [
+          { name: "小回復藥水", quantity: 3, category: "補給品", desc: "微風平原產的草藥製成。戰鬥中可用，回復 35 HP。" },
+          { name: "集中滴露", quantity: 1, category: "補給品", desc: "晶瑩的露珠。戰鬥中可用，回復 12 MP。" },
+          { name: "微光鐵劍", quantity: 1, category: "裝備", desc: "鐵刃工坊精製的輕型鐵劍。可用職業：劍士、盜賊。" },
+          { name: "青苔纖維", quantity: 5, category: "素材", desc: "青苔洞窟黏附的韌性纖維。可用於合成配方。" },
+          { name: "裂石碎片", quantity: 3, category: "素材", desc: "小魔像崩落的岩石碎片。可用於合成強化。" }
+        ]
+      };
+    } else if (action.action_id === "open_bestiary") {
+      mockPreview = {
+        type: "bestiary",
+        title: "魔物圖鑑摘要",
+        data: [
+          { name: "青苔鼠", level: 1, hp: 28, element: "自然", exp: 12, gold_range: "8 - 14G", drops: "青苔纖維 (45%機率)、小回復藥水 (8%機率)" },
+          { name: "洞窟黏蟲", level: 2, hp: 42, element: "自然", exp: 18, gold_range: "10 - 18G", drops: "青苔纖維 (55%機率)、微光水晶 (18%機率)" }
+        ]
+      };
+    }
+
+    renderUtilityPreview(mockPreview);
+    feedbackMessageEl.textContent = `已載入${action.label}預覽。`;
     return;
   }
 
@@ -484,6 +563,9 @@ async function dispatchRuntimeAction(action, source) {
       state.model = result.screen_model;
       state.selectedLocationId = result.screen_model.selected_location_id ?? state.selectedLocationId;
       render();
+      if (result.screen_model.utility_preview) {
+        renderUtilityPreview(result.screen_model.utility_preview);
+      }
     }
     feedbackMessageEl.textContent = result.message ?? `Dispatched ${action.action_id}`;
     if (result.next_route) {
@@ -524,6 +606,9 @@ function setMenuOpen(open, shouldLog) {
 function setDetailOpen(open) {
   shellEl.dataset.detailOpen = String(open);
   detailPanelEl.setAttribute("aria-hidden", String(!open));
+  if (open) {
+    setUtilityOpen(false);
+  }
 }
 
 function pushActionLog(entry) {
@@ -612,4 +697,188 @@ function renderLoadError(error) {
   feedbackMessageEl.textContent = "";
   confirmActionEl.textContent = "無法前往";
   confirmActionEl.dataset.disabled = "true";
+}
+
+/* --- World Map Utility Read-Only Preview Dynamic Controllers --- */
+function escapeHtml(str) {
+  if (str === null || str === undefined) {
+    return "";
+  }
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+function initUtilityPanel() {
+  utilityPanelEl = document.createElement("aside");
+  utilityPanelEl.className = "utility-preview-panel";
+  utilityPanelEl.setAttribute("aria-live", "polite");
+  utilityPanelEl.setAttribute("aria-hidden", "true");
+  utilityPanelEl.innerHTML = `
+    <div class="detail-heading">
+      <div>
+        <p id="utility-panel-label" class="panel-label">工具預覽</p>
+        <h1 id="utility-title">預覽摘要</h1>
+      </div>
+      <div class="detail-heading-actions">
+        <button id="close-utility" class="close-detail" type="button" aria-label="關閉預覽">×</button>
+      </div>
+    </div>
+    <div id="utility-content" class="utility-content"></div>
+    <div class="detail-actions">
+      <button id="utility-back-action" class="secondary-action" type="button" style="width: 100%;">返回地圖</button>
+    </div>
+  `;
+  document.querySelector(".world-layout").appendChild(utilityPanelEl);
+
+  utilityTitleEl = utilityPanelEl.querySelector("#utility-title");
+  utilityPanelLabelEl = utilityPanelEl.querySelector("#utility-panel-label");
+  utilityContentEl = utilityPanelEl.querySelector("#utility-content");
+  closeUtilityEl = utilityPanelEl.querySelector("#close-utility");
+  utilityBackActionEl = utilityPanelEl.querySelector("#utility-back-action");
+
+  closeUtilityEl.addEventListener("click", () => {
+    setUtilityOpen(false);
+  });
+  utilityBackActionEl.addEventListener("click", () => {
+    setUtilityOpen(false);
+  });
+}
+
+function setUtilityOpen(open) {
+  shellEl.dataset.utilityOpen = String(open);
+  utilityPanelEl.setAttribute("aria-hidden", String(!open));
+  if (open) {
+    setDetailOpen(false);
+  }
+}
+
+function renderUtilityPreview(preview) {
+  if (!preview) {
+    return;
+  }
+
+  utilityPanelLabelEl.textContent = preview.type === "status" ? "角色狀態" :
+                                    preview.type === "inventory" ? "背包 / 裝備" :
+                                    preview.type === "bestiary" ? "怪物圖鑑" : "工具預覽";
+  utilityTitleEl.textContent = preview.title ?? "預覽摘要";
+
+  let html = "";
+  if (preview.type === "status") {
+    html = `
+      <div class="utility-section">
+        <p class="utility-section-title">基礎屬性</p>
+        <div class="utility-grid">
+          <div class="utility-grid-item"><span class="label">名字</span><span class="value">${escapeHtml(preview.data.name)}</span></div>
+          <div class="utility-grid-item"><span class="label">職業</span><span class="value">${escapeHtml(preview.data.job_label)}</span></div>
+          <div class="utility-grid-item"><span class="label">等級</span><span class="value">Lv${escapeHtml(preview.data.level)}</span></div>
+          <div class="utility-grid-item"><span class="label">經驗值</span><span class="value">${escapeHtml(preview.data.exp)}/${escapeHtml(preview.data.exp_next)}</span></div>
+          <div class="utility-grid-item"><span class="label">金幣</span><span class="value">${escapeHtml(preview.data.gold)}G</span></div>
+          <div class="utility-grid-item"><span class="label">工會積分</span><span class="value">${escapeHtml(preview.data.guild_points)}</span></div>
+          <div class="utility-grid-item"><span class="label">生命值</span><span class="value">${escapeHtml(preview.data.hp_current)}/${escapeHtml(preview.data.hp_max)}</span></div>
+          <div class="utility-grid-item"><span class="label">魔力值</span><span class="value">${escapeHtml(preview.data.mp_current)}/${escapeHtml(preview.data.mp_max)}</span></div>
+        </div>
+      </div>
+      <div class="utility-section">
+        <p class="utility-section-title">戰鬥能力</p>
+        <div class="utility-grid">
+          <div class="utility-grid-item"><span class="label">攻擊力</span><span class="value">${escapeHtml(preview.data.attack)}</span></div>
+          <div class="utility-grid-item"><span class="label">魔法攻擊</span><span class="value">${escapeHtml(preview.data.magic_attack)}</span></div>
+          <div class="utility-grid-item"><span class="label">防禦力</span><span class="value">${escapeHtml(preview.data.defense)}</span></div>
+          <div class="utility-grid-item"><span class="label">敏捷度</span><span class="value">${escapeHtml(preview.data.agility)}</span></div>
+          <div class="utility-grid-item"><span class="label">暴擊率</span><span class="value">${escapeHtml(preview.data.crit)}%</span></div>
+          <div class="utility-grid-item"><span class="label">火抗性</span><span class="value">${escapeHtml(preview.data.fire_resist)}%</span></div>
+        </div>
+      </div>
+      <div class="utility-section">
+        <p class="utility-section-title">目前裝備</p>
+        <div style="display: grid; gap: 6px;">
+          ${preview.data.equipment.map(eq => `
+            <div class="utility-grid-item">
+              <span class="label">${escapeHtml(eq.slot_label)}</span>
+              <span class="value" style="color: var(--gold);">${escapeHtml(eq.item_name)}</span>
+            </div>
+          `).join("")}
+        </div>
+      </div>
+      <div class="utility-section">
+        <p class="utility-section-title">已學技能</p>
+        <div style="display: grid; gap: 8px;">
+          ${preview.data.skills.length === 0 ? `<p class="utility-empty-msg">尚未學習任何特殊技能。</p>` : preview.data.skills.map(skill => `
+            <div class="utility-list-item">
+              <div class="utility-list-item-header">
+                <span class="name">${escapeHtml(skill.name)}</span>
+                <span class="meta">MP ${escapeHtml(skill.mp)}</span>
+              </div>
+              <div class="utility-list-item-desc">${escapeHtml(skill.desc)}</div>
+            </div>
+          `).join("")}
+        </div>
+      </div>
+    `;
+  } else if (preview.type === "inventory") {
+    const categories = ["補給品", "戰術道具", "裝備", "素材", "關鍵道具", "其他"];
+    if (preview.data.length === 0) {
+      html = `<p class="utility-empty-msg">背包目前沒有任何物品。</p>`;
+    } else {
+      categories.forEach(cat => {
+        const items = preview.data.filter(item => item.category === cat);
+        if (items.length > 0) {
+          html += `
+            <div class="utility-section">
+              <p class="utility-section-title">${escapeHtml(cat)} (${items.length})</p>
+              <div style="display: grid; gap: 8px;">
+                ${items.map(item => `
+                  <div class="utility-list-item">
+                    <div class="utility-list-item-header">
+                      <span class="name">${escapeHtml(item.name)}</span>
+                      <span class="meta">x${escapeHtml(item.quantity)}</span>
+                    </div>
+                    <div class="utility-list-item-desc">${escapeHtml(item.desc)}</div>
+                  </div>
+                `).join("")}
+              </div>
+            </div>
+          `;
+        }
+      });
+    }
+  } else if (preview.type === "bestiary") {
+    if (preview.data.length === 0) {
+      html = `
+        <p class="utility-empty-msg">
+          目前尚未登錄任何魔物資訊。<br>
+          前往迷宮探索並戰勝魔物來登錄圖鑑。
+        </p>
+      `;
+    } else {
+      html = `
+        <div style="display: grid; gap: 10px;">
+          ${preview.data.map(monster => `
+            <div class="utility-list-item" style="padding: 10px; gap: 6px;">
+              <div class="utility-list-item-header" style="border-bottom: 1px solid rgba(239, 231, 211, 0.08); padding-bottom: 4px;">
+                <span class="name" style="font-size: 0.96rem; color: var(--gold);">${escapeHtml(monster.name)}</span>
+                <span class="meta">Lv${escapeHtml(monster.level)}</span>
+              </div>
+              <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 4px; font-size: 0.76rem; color: var(--paper-muted);">
+                <div>生命值: <strong style="color: var(--paper);">${escapeHtml(monster.hp)}</strong></div>
+                <div>屬性: <strong style="color: var(--paper);">${escapeHtml(monster.element)}</strong></div>
+                <div>經驗值: <strong style="color: var(--paper);">${escapeHtml(monster.exp)}</strong></div>
+                <div>金幣: <strong style="color: var(--paper);">${escapeHtml(monster.gold_range)}</strong></div>
+              </div>
+              <div class="utility-list-item-desc" style="border-top: 1px solid rgba(239, 231, 211, 0.05); padding-top: 4px; margin-top: 2px;">
+                <strong>掉落：</strong>${escapeHtml(monster.drops)}
+              </div>
+            </div>
+          `).join("")}
+        </div>
+      `;
+    }
+  }
+
+  utilityContentEl.innerHTML = html;
+  setUtilityOpen(true);
 }
