@@ -1,3 +1,5 @@
+import { runtimeClient } from "../shared/runtime-client.js";
+
 const fixtureSelect = document.querySelector("#fixture-select");
 const titleEl = document.querySelector("#screen-title");
 const subtitleEl = document.querySelector("#screen-subtitle");
@@ -53,6 +55,10 @@ primaryActionEl.addEventListener("click", () => {
 });
 
 backActionEl.addEventListener("click", () => {
+  if (runtimeClient.isLiveMode()) {
+    handleBackToTown();
+    return;
+  }
   pushActionLog({
     action_id: "back_to_town_hub",
     payload: {},
@@ -62,6 +68,34 @@ backActionEl.addEventListener("click", () => {
   navigateToPrototype(townHubRoute);
 });
 
+async function handleBackToTown() {
+  const payload = { from: "guild_screen" };
+  pushActionLog({
+    action_id: "back_to_town_hub",
+    payload,
+    source: "secondary_action",
+    dispatched: true,
+  });
+  try {
+    const result = await runtimeClient.dispatchAction("guild_screen", "back_to_town_hub", payload);
+    shellEl.dataset.runtimeStatus = result.status ?? "success";
+    window.setTimeout(() => {
+      window.location.href = runtimeClient.nextRoute(result, townHubRoute);
+    }, navigationDelayMs);
+  } catch (error) {
+    const reason = runtimeClient.errorMessage(error);
+    shellEl.dataset.runtimeStatus = error?.runtimeStatus ?? "error";
+    feedbackMessageEl.textContent = reason;
+    pushActionLog({
+      action_id: "back_to_town_hub",
+      payload,
+      source: "secondary_action",
+      dispatched: false,
+      reason,
+    });
+  }
+}
+
 clearLogEl.addEventListener("click", () => {
   state.actionLog = [];
   renderActionLog();
@@ -70,6 +104,11 @@ clearLogEl.addEventListener("click", () => {
 loadFixture(fixtureSelect.value);
 
 async function loadFixture(path) {
+  if (runtimeClient.isLiveMode()) {
+    await loadLiveScreen();
+    return;
+  }
+
   shellEl.dataset.loadState = "loading";
   try {
     const response = await fetch(path, { cache: "no-store" });
@@ -84,6 +123,55 @@ async function loadFixture(path) {
     state.actionLog = [];
     render();
     logSystem(`loaded ${path}`);
+    shellEl.dataset.loadState = "ready";
+  } catch (error) {
+    renderLoadError(error);
+    shellEl.dataset.loadState = "error";
+  }
+}
+
+async function loadLiveScreen() {
+  shellEl.dataset.loadState = "loading";
+  try {
+    const model = await runtimeClient.getScreen("guild_screen");
+    state.model = model;
+    state.selectedFilterId = model.selected_filter_id ?? model.task_filters?.[0]?.id ?? "all";
+    state.selectedTaskId = model.selected_task_id ?? model.task_rows?.[0]?.task_id ?? null;
+    state.selectedStoryHint = false;
+    state.actionLog = [];
+    render();
+    logSystem("live runtime screen loaded", {
+      actionId: "live_screen_loaded",
+      source: "live_loader",
+      payload: { mode: "live", screen_id: "guild_screen" },
+    });
+    shellEl.dataset.loadState = "ready";
+  } catch (error) {
+    await loadStaticFallback(fixtureSelect.value, error);
+  }
+}
+
+async function loadStaticFallback(path, liveError) {
+  try {
+    const response = await fetch(path, { cache: "no-store" });
+    if (!response.ok) {
+      throw new Error(`Fixture request failed: ${response.status}`);
+    }
+    const model = await response.json();
+    state.model = model;
+    state.selectedFilterId = model.selected_filter_id ?? model.task_filters?.[0]?.id ?? "all";
+    state.selectedTaskId = model.selected_task_id ?? model.task_rows?.[0]?.task_id ?? null;
+    state.selectedStoryHint = false;
+    state.actionLog = [];
+    render();
+    logSystem(`live unavailable; loaded fixture ${path}`);
+    pushActionLog({
+      action_id: "live_bridge_unavailable",
+      payload: { reason: liveError instanceof Error ? liveError.message : String(liveError) },
+      source: "live_loader",
+      dispatched: false,
+      reason: "fallback_to_fixture",
+    });
     shellEl.dataset.loadState = "ready";
   } catch (error) {
     renderLoadError(error);
@@ -478,7 +566,42 @@ function activatePrimaryAction() {
     source: "primary_action",
     dispatched: true,
   });
+
+  if (runtimeClient.isLiveMode()) {
+    handleLivePrimaryAction(actionId, payload);
+    return;
+  }
+
   renderFeedback({ speaker: state.model.npc?.name, text: "已送出 UIAction；static prototype 不會修改任務狀態。" });
+}
+
+async function handleLivePrimaryAction(actionId, payload) {
+  try {
+    const result = await runtimeClient.dispatchAction("guild_screen", actionId, payload);
+    shellEl.dataset.runtimeStatus = result.status ?? "success";
+    if (result.screen_model) {
+      state.model = result.screen_model;
+      const visibleRows = getVisibleTaskRows();
+      if (!visibleRows.some(row => row.task_id === state.selectedTaskId)) {
+        state.selectedTaskId = visibleRows[0]?.task_id ?? null;
+      }
+      render();
+    }
+    if (result.message) {
+      renderFeedback({ speaker: state.model.npc?.name, text: result.message });
+    }
+  } catch (error) {
+    const reason = runtimeClient.errorMessage(error);
+    shellEl.dataset.runtimeStatus = error?.runtimeStatus ?? "error";
+    renderFeedback({ speaker: state.model.npc?.name, text: reason });
+    pushActionLog({
+      action_id: actionId,
+      payload,
+      source: "primary_action",
+      dispatched: false,
+      reason,
+    });
+  }
 }
 
 function getVisibleTaskRows() {
@@ -564,13 +687,13 @@ function navigateToPrototype(path) {
   }, navigationDelayMs);
 }
 
-function logSystem(message) {
+function logSystem(message, options = {}) {
   state.actionLog = [
     {
       time: new Date().toLocaleTimeString("zh-TW", { hour12: false }),
-      action_id: "fixture_loaded",
-      payload: { message },
-      source: "fixture_loader",
+      action_id: options.actionId ?? "fixture_loaded",
+      payload: { message, ...(options.payload ?? {}) },
+      source: options.source ?? "fixture_loader",
       dispatched: true,
     },
   ];

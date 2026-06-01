@@ -276,6 +276,8 @@ class GuiRuntimeSession:
             )
         if action_id == "rest_at_inn":
             return self.rest_at_inn(payload, screen_id=screen_id)
+        if action_id in {"submit_quest", "report_dungeon_clear"}:
+            return self.report_dungeon_clear(payload, screen_id=screen_id)
         if action_id == "open_world_map":
             state = self.require_state()
             return action_response(
@@ -752,6 +754,32 @@ class GuiRuntimeSession:
             response["screen_model"]["feedback_message"] = response["message"]
         return response
 
+    def guild_screen_model(self) -> dict[str, Any]:
+        return guild_screen_model(self.require_state())
+
+    def report_dungeon_clear(self, payload: dict[str, Any], *, screen_id: str | None = None) -> dict[str, Any]:
+        state = self.require_state()
+        dungeon_id = payload.get("task_id") or payload.get("dungeon_id")
+        if not dungeon_id or dungeon_id not in DUNGEONS:
+            raise GuiActionError("未指定有效的迷宮 ID。", status=400)
+
+        dungeon = DUNGEONS[dungeon_id]
+        cleared = dungeon_id in state.get("cleared_dungeons", [])
+        reported = state.get("flags", {}).get(f"guild_reported_{dungeon_id}", False)
+
+        if not cleared:
+            raise GuiActionError(f"尚未通關 {dungeon['name']}，無法登記回報。", status=409)
+        if reported:
+            raise GuiActionError(f"{dungeon['name']} 的探索回報已經登記過了。", status=409)
+
+        state.setdefault("flags", {})[f"guild_reported_{dungeon_id}"] = True
+
+        return self._live_response(
+            "report_dungeon_clear",
+            f"已成功登記 {dungeon['name']} 的探索回報！首次通關獎勵（工會積分）已於通關當下登記完畢。",
+            screen_model=self.guild_screen_model(),
+        )
+
     def screen_model(self, screen_id: str) -> dict[str, Any]:
         if screen_id == "start_screen":
             return start_screen_model(save_exists())
@@ -762,6 +790,8 @@ class GuiRuntimeSession:
             return town_hub_model(state)
         if screen_id == "inn_screen":
             return inn_screen_model(state)
+        if screen_id in {"guild_screen", "facility_guild_screen"}:
+            return self.guild_screen_model()
         if screen_id == "dungeon_exploration":
             return self.exploration_screen_model()
         if screen_id == "combat_screen":
@@ -1008,6 +1038,8 @@ def build_screen_model(screen_id: str | None, state: dict[str, Any]) -> dict[str
         return town_hub_model(state)
     if screen_id == "inn_screen":
         return inn_screen_model(state)
+    if screen_id in {"guild_screen", "facility_guild_screen"}:
+        return guild_screen_model(state)
     return None
 
 
@@ -1285,7 +1317,16 @@ def town_hub_model(state: dict[str, Any]) -> dict[str, Any]:
 
 def facility_nodes(state: dict[str, Any]) -> list[dict[str, Any]]:
     return [
-        facility("guild", "冒險者工會", "委託板與物資交付功能將在後續版本開放。", "guild", "open_facility", enabled=False),
+        facility(
+            "guild",
+            "冒險者工會",
+            "前往冒險者工會，回報已通關的迷宮探索。",
+            "guild",
+            "open_facility",
+            payload={"facility_id": "guild", "target_screen_id": "guild_screen"},
+            target_screen_id="guild_screen",
+            navigation_route="../guild_screen/index.html",
+        ),
         facility(
             "inn",
             "旅店",
@@ -1374,6 +1415,167 @@ def inn_screen_model(state: dict[str, Any]) -> dict[str, Any]:
                 "payload": {"from": "inn_screen"},
             }
         ],
+    }
+
+
+def guild_screen_model(state: dict[str, Any]) -> dict[str, Any]:
+    unlocked_dungeons = []
+    for d_id, d_data in DUNGEONS.items():
+        if game.is_unlocked(state, d_data.get("unlock")):
+            unlocked_dungeons.append((d_id, d_data))
+
+    task_rows = []
+    task_details = {}
+    reward_summaries = {}
+    condition_rows = {}
+
+    for d_id, d_data in unlocked_dungeons:
+        cleared = d_id in state.get("cleared_dungeons", [])
+        reported = state.get("flags", {}).get(f"guild_reported_{d_id}", False)
+
+        if not cleared:
+            status = "requirements_missing"
+            status_label = "未通關"
+            status_icon_id = "missing"
+            desc = f"你尚未完成 {d_data['name']} 的探索路線。請前往世界地圖並挑戰通關後，再來工會登記回報。"
+            notes = "未通關無法登記回報。"
+            feedback = { "tone": "warning", "speaker": "莉娜", "text": f"你還沒有走完 {d_data['name']} 呢，通關後我再幫你登記。" }
+            disabled_reason = f"需要完成 {d_data['name']} 探索路線。"
+        elif not reported:
+            status = "ready_to_submit"
+            status_label = "可回報"
+            status_icon_id = "ready"
+            desc = f"你已成功通關 {d_data['name']} 的探索路線！可在工會櫃台登記回報，確認首次通關獎勵的領取狀態。"
+            notes = f"回報將標記為已登記狀態。首次通關獎勵（工會積分 +{d_data['clear_guild']}）已於通關當下直接發放。"
+            feedback = { "tone": "success", "speaker": "莉娜", "text": f"太棒了！已確認你的 {d_data['name']} 探索記錄，可以進行回報登記了。" }
+            disabled_reason = None
+        else:
+            status = "completed"
+            status_label = "已完成"
+            status_icon_id = "completed"
+            desc = f"你已通關並完成 {d_data['name']} 的探索回報。記錄已保存在工會名冊中。"
+            notes = "首次通關獎勵已取得。此回報已結案。"
+            feedback = { "tone": "info", "speaker": "莉娜", "text": f"這份 {d_data['name']} 通關回報已經登記完成了，幹得好！" }
+            disabled_reason = "這個回報已完成"
+
+        task_rows.append({
+            "task_id": d_id,
+            "title": f"{d_data['name']} 探索回報",
+            "giver": "工會",
+            "status": status,
+            "status_label": status_label,
+            "status_icon_id": status_icon_id,
+            "enabled": True,
+            "disabled_reason": None,
+        })
+
+        task_details[d_id] = {
+            "task_id": d_id,
+            "title": f"{d_data['name']} 探索回報",
+            "giver": "工會",
+            "description": desc,
+            "status_label": status_label,
+            "notes": notes,
+            "disabled_reason": disabled_reason,
+            "ready_feedback": feedback if not reported and cleared else None,
+            "missing_feedback": feedback if not cleared else None,
+            "completed_feedback": feedback if reported else None,
+        }
+
+        reward_summaries[d_id] = {
+            "gold": None,
+            "guild_points": d_data["clear_guild"],
+            "items": [],
+            "unlocks": [],
+            "notes": f"首次通關獎勵已取得 (工會積分 +{d_data['clear_guild']})" if (reported or cleared) else f"首次通關獎勵尚未取得 (預期工會積分 +{d_data['clear_guild']})"
+        }
+
+        condition_rows[d_id] = [
+            {
+                "id": f"condition_{d_id}_clear",
+                "condition_type": "dungeon_clear",
+                "label": f"通關 {d_data['name']}",
+                "required_value": "通關",
+                "current_value": "已通關" if cleared else "未通關",
+                "status": "met" if cleared else ("not_applicable" if reported else "missing"),
+                "status_label": "已滿足" if cleared else "未滿足",
+                "status_icon_id": "met" if cleared else "missing",
+                "source": "runtime"
+            }
+        ]
+
+    all_count = len(unlocked_dungeons)
+    ready_count = sum(1 for d_id, _ in unlocked_dungeons if d_id in state.get("cleared_dungeons", []) and not state.get("flags", {}).get(f"guild_reported_{d_id}", False))
+    completed_count = sum(1 for d_id, _ in unlocked_dungeons if state.get("flags", {}).get(f"guild_reported_{d_id}", False))
+
+    task_filters = [
+        { "id": "all", "label": "全部委託", "count": all_count, "enabled": True },
+        { "id": "ready_to_submit", "label": "可回報", "count": ready_count, "enabled": True },
+        { "id": "completed", "label": "已完成", "count": completed_count, "enabled": True }
+    ]
+
+    story_hint_card = {
+        "id": "story_hint_placeholder",
+        "title": "目前沒有主線線索",
+        "description": "暫無主線線索可詢問。",
+        "detail_description": "這不是正式委託，不計入篩選數。",
+        "status": "story_hint",
+        "status_label": "主線線索",
+        "visible": False,
+        "enabled": False,
+        "disabled_reason": "尚未開放。",
+        "primary_action": "unavailable",
+        "action_label": "無法使用",
+        "condition_rows": [],
+        "reward_summary": None
+    }
+
+    feedback_message = {
+        "tone": "info",
+        "speaker": "莉娜",
+        "text": "歡迎來到冒險者工會！如果完成了迷宮探索，請在委託板進行回報登記哦。"
+    }
+
+    secondary_actions = [
+        {
+            "action_id": "back_to_town_hub",
+            "label": "返回城鎮",
+            "description": "離開工會，回到 Town Hub。",
+            "enabled": True,
+            "disabled_reason": None,
+            "payload": {},
+            "visual_role": "secondary"
+        }
+    ]
+
+    selected_task_id = None
+    # default selection: prefer first "ready_to_submit" task, otherwise first task
+    ready_tasks = [t["task_id"] for t in task_rows if t["status"] == "ready_to_submit"]
+    if ready_tasks:
+        selected_task_id = ready_tasks[0]
+    elif task_rows:
+        selected_task_id = task_rows[0]["task_id"]
+
+    return {
+        "screen_id": "facility_guild_screen",
+        "facility_id": "guild",
+        "title": "冒險者工會 / 委託板 (Live)",
+        "subtitle": "登記迷宮探索進度，記錄你的冒險足跡。",
+        "npc": {
+            "id": "guild_receptionist",
+            "name": "莉娜",
+            "role": "工會接待員，負責登記迷宮探索回報。"
+        },
+        "task_filters": task_filters,
+        "selected_filter_id": "all",
+        "selected_task_id": selected_task_id,
+        "task_rows": task_rows,
+        "story_hint_card": story_hint_card,
+        "task_details": task_details,
+        "reward_summaries": reward_summaries,
+        "condition_rows": condition_rows,
+        "feedback_message": feedback_message,
+        "secondary_actions": secondary_actions
     }
 
 
