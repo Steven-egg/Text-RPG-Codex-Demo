@@ -1,3 +1,5 @@
+import { runtimeClient } from "../shared/runtime-client.js";
+
 const fixtureSelect = document.querySelector("#fixture-select");
 const titleEl = document.querySelector("#screen-title");
 const subtitleEl = document.querySelector("#screen-subtitle");
@@ -54,6 +56,10 @@ primaryActionEl.addEventListener("click", () => {
 });
 
 backActionEl.addEventListener("click", () => {
+  if (runtimeClient.isLiveMode()) {
+    handleBackToTown();
+    return;
+  }
   pushActionLog({
     action_id: "back_to_town_hub",
     payload: {},
@@ -71,6 +77,11 @@ clearLogEl.addEventListener("click", () => {
 loadFixture(fixtureSelect.value);
 
 async function loadFixture(path) {
+  if (runtimeClient.isLiveMode()) {
+    await loadLiveScreen();
+    return;
+  }
+
   shellEl.dataset.loadState = "loading";
   try {
     const response = await fetch(path, { cache: "no-store" });
@@ -96,6 +107,102 @@ async function loadFixture(path) {
   } catch (error) {
     renderLoadError(error);
     shellEl.dataset.loadState = "error";
+  }
+}
+
+async function loadLiveScreen() {
+  shellEl.dataset.loadState = "loading";
+  try {
+    const model = await runtimeClient.getScreen("magic_shop_screen");
+    state.model = model;
+    state.selectedCategory = model.selected_category_id ?? "all";
+    state.selectedBookId = model.selected_book_id ?? getFirstVisibleBookId() ?? null;
+    state.actionLog = [];
+    ensureSelectionVisible();
+    render();
+    logSystem("live runtime screen loaded", {
+      actionId: "live_screen_loaded",
+      source: "live_loader",
+      payload: { mode: "live", screen_id: "magic_shop_screen" },
+    });
+    shellEl.dataset.loadState = "ready";
+  } catch (error) {
+    await loadStaticFallback(fixtureSelect.value, error);
+  }
+}
+
+async function loadStaticFallback(path, liveError) {
+  try {
+    const response = await fetch(path, { cache: "no-store" });
+    if (!response.ok) {
+      throw new Error(`Fixture request failed: ${response.status}`);
+    }
+    const model = await response.json();
+    state.model = model;
+    state.selectedCategory = model.selected_category_id ?? "all";
+    state.selectedBookId = model.selected_book_id ?? getFirstVisibleBookId() ?? null;
+    state.actionLog = [];
+    ensureSelectionVisible();
+    render();
+    logSystem(`live unavailable; loaded fixture ${path}`);
+    pushActionLog({
+      action_id: "live_bridge_unavailable",
+      payload: { reason: liveError instanceof Error ? liveError.message : String(liveError) },
+      source: "live_loader",
+      dispatched: false,
+      reason: "fallback_to_fixture",
+    });
+    shellEl.dataset.loadState = "ready";
+  } catch (error) {
+    renderLoadError(error);
+    shellEl.dataset.loadState = "error";
+  }
+}
+
+async function handleBackToTown() {
+  const payload = { from: "magic_shop_screen" };
+  pushActionLog({
+    action_id: "back_to_town_hub",
+    payload,
+    source: "secondary_action",
+    dispatched: true,
+  });
+  try {
+    const result = await runtimeClient.dispatchAction("magic_shop_screen", "back_to_town_hub", payload);
+    shellEl.dataset.runtimeStatus = result.status ?? "success";
+    window.setTimeout(() => {
+      window.location.href = runtimeClient.nextRoute(result, townHubRoute);
+    }, navigationDelayMs);
+  } catch (error) {
+    const reason = runtimeClient.errorMessage(error);
+    shellEl.dataset.runtimeStatus = error?.runtimeStatus ?? "error";
+    renderFeedback(state.model.npc?.name ?? "伊芙", reason);
+    pushActionLog({
+      action_id: "back_to_town_hub",
+      payload,
+      source: "secondary_action",
+      dispatched: false,
+      reason,
+    });
+  }
+}
+
+function getVisibleBookRows() {
+  const rows = state.model?.list_rows ?? [];
+  if (state.selectedCategory === "all") {
+    return rows;
+  }
+  return rows.filter((row) => row.category === state.selectedCategory);
+}
+
+function getFirstVisibleBookId() {
+  return getVisibleBookRows()[0]?.book_id ?? null;
+}
+
+function ensureSelectionVisible() {
+  const rows = getVisibleBookRows();
+  if (!rows.some((row) => row.book_id === state.selectedBookId)) {
+    state.selectedBookId = rows[0]?.book_id ?? null;
   }
 }
 
@@ -410,6 +517,41 @@ function executeLearnAction() {
     });
     
     renderFeedback("伊芙", `「研讀受阻：${disabledReason}。請提升等階或備齊魔石素材後，再嘗試解讀此術式。」`);
+    return;
+  }
+
+  if (runtimeClient.isLiveMode()) {
+    pushActionLog({
+      action_id: "learn_magic_book",
+      payload: { book_id: selectedBookId },
+      source: "primary_action",
+      dispatched: true,
+    });
+    runtimeClient.dispatchAction("magic_shop_screen", "learn_magic_book", { book_id: selectedBookId })
+      .then((result) => {
+        shellEl.dataset.runtimeStatus = result.status ?? "success";
+        if (result.screen_model) {
+          state.model = result.screen_model;
+          ensureSelectionVisible();
+          render();
+        }
+        if (result.message) {
+          const npcMsg = result.screen_model?.feedback_message?.text || result.message;
+          renderFeedback(state.model.npc?.name ?? "伊芙", npcMsg);
+        }
+      })
+      .catch((error) => {
+        const reason = runtimeClient.errorMessage(error);
+        shellEl.dataset.runtimeStatus = error?.runtimeStatus ?? "error";
+        pushActionLog({
+          action_id: "learn_magic_book",
+          payload: { book_id: selectedBookId },
+          source: "primary_action",
+          dispatched: false,
+          reason,
+        });
+        renderFeedback(state.model.npc?.name ?? "伊芙", `「研讀受阻：${reason}。」`);
+      });
     return;
   }
 
