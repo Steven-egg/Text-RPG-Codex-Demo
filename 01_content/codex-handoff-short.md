@@ -5,7 +5,7 @@
 ## 最新穩定狀態
 
 - 專案是 Python CLI 文字冒險 RPG《元素迷宮：邊境冒險者》。
-- 最近 live bridge 基準 commit 是 `ebc1b5e [antig] feat(gui): add shop buy consumable live bridge`。
+- 最近 live bridge 基準 commit 是 `b59fe43 [antig] feat(gui): add magic shop learn book live bridge`。
 - v1 第一幕可通關；第二幕火系 demo 已進 runtime。
 - 灰燼裂谷、灰燼守衛 Boss MVP、補給線升級、燼印深窟、燼印鎮衛 Boss MVP 已完成。
 - `quest_supply_upgrade` 已素材化：需要 `mat_flame_stone_refined x3` 與 `mat_lava_shard x2`，完成後取得 `item_potion_m x2`，並解鎖旅人小鋪販售中藥水。
@@ -21,7 +21,7 @@
 - 「Element Decay 引擎」不是正式專案術語，不納入正式紀錄。
 - GUI HTML static prototype 已進入可互動驗證階段，位置在 `07_gui_prototype/`；目前包含 Start Screen、Town Hub、Guild Screen、Synthesis Screen、World Map、Dungeon Exploration、Combat Screen、Shop Screen、Workshop Screen、Storage Screen、Magic Shop Screen、Inn Screen、Temple Screen、Relic Preview Screen 十四個畫面。
 - static prototype 只使用 fixtures 驗證 render layer、layout、互動與 UIAction logging；不接 Python runtime、不讀寫 `save.json`、不修改 runtime / data / schema / combat formula、不啟動正式 asset pipeline。
-- GUI runtime bridge blessed live slice 已落地並手測通過，範圍目前包含 Start Screen、Town Hub、Inn Screen、World Map、受限 Dungeon / Combat loop、World Map utility preview、Guild Report MVP、Combat Skill Button Live MVP 與 Shop Buy Consumable MVP；其中 `back_to_town_hub` 只保留在城鎮節點 / detail action，不在 World Map 主選單。
+- GUI runtime bridge blessed live slice 已落地並手測通過，範圍目前包含 Start Screen、Town Hub、Inn Screen、World Map、受限 Dungeon / Combat loop、World Map utility preview、Guild Report MVP、Combat Skill Button Live MVP、Shop Buy Consumable MVP 與 Magic Shop Learn Magic Book MVP；其中 `back_to_town_hub` 只保留在城鎮節點 / detail action，不在 World Map 主選單。
 - Combat Loop Completion Slice v0 已完成並提交於 `be6b06c [antig] feat(gui): complete live combat loop feedback`：Combat victory result overlay 會顯示 EXP、Gold、drops、bestiary 與 level up；victory 後可回 Dungeon Exploration；route clear / resolved state 已有最小呈現；終點狀態停用 `advance_step`，並以「離開迷宮」返回 World Map。
 - 本輪 Combat Loop Completion 只修改 `03_engine/engine/gui_actions.py`；未修改 `03_engine/engine/game.py`、`04_data/`、`02_schema/`、`save.json` 或 combat formula。defeat / retreat routing 未回歸。
 - Guild Report / Dungeon Clear Reward MVP 已完成並提交於 `c2052d4 [antig] feat(gui): add guild clear report live bridge`：Live Town Hub 可進入 Guild；Guild Screen live bridge 顯示 runtime 已解鎖迷宮的通關 / 回報狀態；當玩家流程滿足工會任務狀態、解鎖條件與通關條件，且尚未回報時，可執行回報登記。
@@ -33,10 +33,13 @@
 - Shop Buy Consumable Live MVP 已完成並提交於 `ebc1b5e [antig] feat(gui): add shop buy consumable live bridge`：Town Hub live 可進入 Shop Screen；Shop live mode 顯示可購買補給品、HP / MP / Gold resource strip、價格、目前持有數與購買回饋；static fixture fallback 與 UIAction logging 保留。
 - Shop Buy Consumable Live MVP 的 gameplay 判斷在 Python server-side：`buy_item` 只允許 `SHOP_INVENTORY["travel"]` 內既有 `ITEMS.kind == "consumable"` 的品項，並檢查 item 是否存在、是否已解鎖、Gold 是否足夠；Gold 不足回 409 blocked，扣 Gold 與 `inventory` 加 1 也在 server-side。
 - Shop Buy Consumable Live MVP 只修改 `03_engine/engine/gui_actions.py`、`07_gui_prototype/shop_screen/index.html`、`07_gui_prototype/shop_screen/shop-screen.js`；未修改 `03_engine/engine/game.py`、`04_data/`、`02_schema/`、`save.json` 或 combat formula；不新增完整 shop system、equipment、sell、quantity selector、完整 inventory UI、通用 facility framework 或 Shop / Workshop / Magic Shop 共用抽象層。
+- Magic Shop Learn Magic Book Live MVP 已完成並提交於 `b59fe43 [antig] feat(gui): add magic shop learn book live bridge`：Town Hub live 可進入 Magic Shop Screen；Magic Shop live mode 顯示 runtime-shaped 魔法書 catalog、職業 / 等級 / Gold resource strip、學習狀態、條件列與學習回饋；static fixture fallback 與 UIAction logging 保留。
+- Magic Shop Learn Magic Book Live MVP 的 gameplay 判斷在 Python server-side：`learn_magic_book` 只允許既有 `MAGIC_BOOKS` 魔法書，對應技能沿用既有 `SKILLS`；檢查 book / skill 是否存在、job 是否符合、level 是否足夠、Gold / materials 是否足夠、是否 already learned；成功扣 Gold / materials 並加入 `learned_skills`。
+- Magic Shop Learn Magic Book Live MVP 只修改 `03_engine/engine/gui_actions.py`、`06_tools/smoke_test_magic_shop_bridge.py`、`07_gui_prototype/magic_shop_screen/magic-shop-screen.js`；未修改 `03_engine/engine/game.py`、`04_data/`、`02_schema/`、`save.json` 或 combat formula；不代表完整 magic shop system、formal magic / skill framework、target selection、combat formula / skill rebalance、generic facility framework 或 broader inventory / equipment / shop system。
 - `load_demo_seed` 保留為 backend smoke/helper，不再顯示為 live Start Screen 主要入口；live Start Screen copy / no-save / has-save 狀態已對齊 static Start Screen。
 - Town Hub live 不再顯示 `save_game`；World Map 主選單保留 `save_game`，新增 shell-only `open_settings`，移除主選單 `back_to_town_hub`。
 - `start_gui_runtime_bridge_server.bat` 可啟動 local live test server；使用者手測重新開啟 bat 後，新狀態重新開始、在 World Map 主選單存檔、回到標題後繼續遊戲，runtime 狀態可保留，無 traceback 或 fatal error。
-- Blessed live slice 仍以 Python runtime 為 gameplay authority；GUI JavaScript 只 dispatch UIAction 並 render ScreenModel。Guild 目前只完成 clear report MVP；Dungeon / Combat 目前只完成已批准的 traversal / combat loop 小切片與 Combat Skill Button Live MVP；Shop 目前只完成 consumable 買 1 個 MVP，不代表完整 guild system、quest framework、skill system、skill framework、target selection、boss framework、inventory / equipment interaction、完整 shop system、facility family 或完整 dungeon framework 已開放。
+- Blessed live slice 仍以 Python runtime 為 gameplay authority；GUI JavaScript 只 dispatch UIAction 並 render ScreenModel。Guild 目前只完成 clear report MVP；Dungeon / Combat 目前只完成已批准的 traversal / combat loop 小切片與 Combat Skill Button Live MVP；Shop 目前只完成 consumable 買 1 個 MVP；Magic Shop 目前只完成既有魔法書學習 1 本 MVP，不代表完整 guild system、quest framework、formal magic / skill framework、target selection、combat formula / skill rebalance、boss framework、inventory / equipment interaction、完整 shop system、generic facility framework 或完整 dungeon framework 已開放。
 - Live bootstrap log naming cleanup 已完成：Start、Town Hub、Inn、World Map 在 live 成功載入時記錄 `live_screen_loaded` / `live_loader`，payload 帶 `mode: "live"` 與 `screen_id`；static fixture load 與 live fallback 仍保留 `fixture_loaded`，fallback 仍會另外記 `live_bridge_unavailable`。
 - 手測後已完成本輪 live Start Screen copy / entry state 與 Town Hub / World Map 主選單 placement 對齊；本 slice 不再有必做 follow-up。
 - `save.gui-backup-*.json` 是 bridge save 前安全備份產物，已加入 `.gitignore`；不要手動讀寫 `save.json`。
@@ -109,16 +112,18 @@ Cold Zone 不在新 session 啟動時主動大量讀取；需要詳細歷史、�
 
 ## 下一步邊界
 
-- Blessed GUI runtime bridge live slice 已完成 normalization、Start Screen / entry state 對齊、Town Hub / World Map 主選單 placement cleanup、World Map utility read-only preview、Combat Loop Completion Slice v0、Guild Report / Dungeon Clear Reward MVP、Combat Skill Button Live MVP，以及 Shop Buy Consumable MVP；下一步仍需由使用者指定單一小切片，不自動擴張 runtime bridge。
+- Blessed GUI runtime bridge live slice 已完成 normalization、Start Screen / entry state 對齊、Town Hub / World Map 主選單 placement cleanup、World Map utility read-only preview、Combat Loop Completion Slice v0、Guild Report / Dungeon Clear Reward MVP、Combat Skill Button Live MVP、Shop Buy Consumable MVP，以及 Magic Shop Learn Magic Book MVP；下一步仍需由使用者指定單一小切片，不自動擴張 runtime bridge。
 - 教會查閱結果 MVP 已完成，不要再列為待做。
 - 火印熔爐、完整火印、火印守護 Boss、正式聖物、正式轉職、八元素、Act 3 都只能視為未來願景；不是當前下一步。
 - runtime UI 仍以 CLI / Rich 行為語意為準；GUI live mode 若後續施工，應沿用 static UX shell 並透過 Python bridge 注入 ScreenModel，不要重構 `game.py`。
 - Combat Skill Button Live MVP 已完成，不再列為待評估或待施工項；若未來要超出按鈕 live MVP，仍需另開單一小切片與 read-only planning gate。
 - Shop Buy Consumable MVP 已完成，不再列為待評估或待施工項；若未來要超出 consumable 買 1 個，仍需另開單一小切片與 read-only planning gate。
+- Magic Shop Learn Magic Book MVP 已完成，不再列為待評估或待施工項；若未來要超出既有魔法書學習 1 本，仍需另開單一小切片與 read-only planning gate。
 - Combat / Field Item Use MVP 只記錄為下一個候選方向：讓已購買的消耗品在後續 combat / field flow 中以既有 runtime authority 使用並回傳 HP / MP 與持有數更新；目前尚未展開規劃或批准施工。
+- 撤退成功 overlay 的「本趟收益」文案列為後續 UX wording follow-up；不納入本輪 Magic Shop scope。
 - HTML static prototype 只允許在 `07_gui_prototype/` 內用 fixtures 小步調整，不讀寫 save、不接 Python、不複製 gameplay logic 到 JS。
 - Synthesis Screen、Shop Screen、Workshop Screen、Storage Screen、Magic Shop Screen、Inn Screen、Temple Screen、Relic Preview Screen static prototype v1 目前都已完成，不再作為未完成候選；Inn Screen 與 Temple Screen 已完成 JRPG dialogue/menu static prototype 調整。
-- 下一個 UI 任務需由使用者指定單一小切片。不得把 Guild Report MVP 擴張成完整 guild system、正式 quest framework、reputation 或 achievement；不得把 Combat Skill Button MVP 擴張成正式 skill system、skill framework、target selection、技能重平衡或大型 combat 重構；不得把 Shop Buy Consumable MVP 擴張成完整 shop system、equipment、sell、quantity selector、完整 inventory UI 或 Shop / Workshop / Magic Shop 共用抽象層；不得擴張 Workshop、Synthesis、Storage、Magic Shop、Temple、Relic、完整 boss / inventory / equipment / dungeon framework；不讀寫 `save.json`、不修改 data / schema / combat formula、不啟動 formal asset pipeline，也不要把 reference/mockup 圖當 runtime asset。
+- 下一個 UI 任務需由使用者指定單一小切片。不得把 Guild Report MVP 擴張成完整 guild system、正式 quest framework、reputation 或 achievement；不得把 Combat Skill Button MVP 擴張成正式 skill system、skill framework、target selection、技能重平衡或大型 combat 重構；不得把 Shop Buy Consumable MVP 擴張成完整 shop system、equipment、sell、quantity selector、完整 inventory UI 或 Shop / Workshop / Magic Shop 共用抽象層；不得把 Magic Shop Learn Magic Book MVP 擴張成完整 magic shop system、formal magic / skill framework、target selection、combat formula / skill rebalance、generic facility framework 或 broader inventory / equipment / shop system；不得擴張 Workshop、Synthesis、Storage、Temple、Relic、完整 boss / inventory / equipment / dungeon framework；不讀寫 `save.json`、不修改 data / schema / combat formula、不啟動 formal asset pipeline，也不要把 reference/mockup 圖當 runtime asset。
 - `content_inventory_report.py` 只做 read-only 盤點；不要把 report 輸出當成 SSOT 或 gameplay 變更依據。
 - 若未來要繼續 gameplay，仍需先做單一小切片 read-only 邊界確認，再由使用者明確批准施工範圍。
 - 若使用者指定文件同步輪，只改 markdown，不改 runtime / data / schema / save / combat formula。
@@ -181,6 +186,15 @@ Cold Zone 不在新 session 啟動時主動大量讀取；需要詳細歷史、�
 - 使用者手測：法師路線完成 Start -> Town -> Guild -> Shop -> Potion purchase -> World Map -> Dungeon -> Combat 的 owner-side regression smoke，並包含既有 item-use flow；未發現明顯 routing regression
 - 語意確認：`buy_item` gameplay authority 在 Python server-side；只允許 travel shop consumables 買 1 個；未新增完整 shop system、equipment、sell、quantity selector、完整 inventory UI、共用 facility framework，也未修改 `game.py`、data、schema、save 或 combat formula
 
+本輪 Magic Shop Learn Magic Book Live MVP 已確認：
+- `git diff HEAD~1..HEAD --check`：PASS
+- `python 06_tools/smoke_test_magic_shop_bridge.py`：PASS
+- `python 06_tools/validate_data.py`：PASS
+- `python element_maze.py --smoke-test`：PASS
+- 使用者手測：CLI 法師 Lv2 save 可由 GUI live bridge 承接；Town Hub -> 星燈魔法商店 live route 可進入；火花術書可學習，Gold / materials / learned state 正確更新；已學會後按鈕禁用；盜賊可學本職技能書，非本職 / 條件未達技能書不可學
+- 使用者手測：學會火花術後，既有 Combat Skill Button bridge 可讀到並施放火花術；Combat 補充驗證只作為 regression smoke，不代表完整 Magic / Skill / Combat 系統完成
+- 語意確認：`learn_magic_book` gameplay authority 在 Python server-side；沿用既有 `MAGIC_BOOKS` / `SKILLS`，檢查 job / level / Gold / materials / already learned，成功扣 Gold / materials 並加入 `learned_skills`；前端 JavaScript 只 dispatch UIAction 並 render returned ScreenModel，static fixture fallback 保留
+
 本輪 live bootstrap log naming cleanup 已確認：
 - Start / Town Hub / Inn / World Map live 成功載入 log 改為 `live_screen_loaded`：PASS
 - Live 成功路徑不再誤顯示 `fixture_loaded` 或 `live_bridge_unavailable`：PASS
@@ -238,4 +252,4 @@ Cold Zone 不在新 session 啟動時主動大量讀取；需要詳細歷史、�
 - `git diff --check`
 - 額外非互動戰鬥探針：普通攻擊戰可跑完，回合摘要與 Battle Log 正常輸出
 
-建議下一個穩定節點 commit message：`docs(gui): sync shop buy bridge handoff`
+建議下一個穩定節點 commit message：`docs(gui): sync magic shop bridge handoff`

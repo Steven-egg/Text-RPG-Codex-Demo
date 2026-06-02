@@ -387,13 +387,14 @@ Location:
 
 Current behavior:
 
-- Loads static fixtures only.
+- Static mode loads fixtures only; live mode now has a narrow runtime bridge handoff for `learn_magic_book`.
 - Renders Magic Shop title/subtitle, left-side Spellbook list with categories, center Scroll Detail card with item/gold requirements, right-side Eve's NPC Observatory portrait card, bottom feedback atmospheric bar, primary buy/learn action, back action, and UIAction log.
 - Category tabs are aligned with the CLI Magic Shop Catalog MVP: `全部`, `攻擊魔法`, `恢復魔法`, `輔助魔法`, `特殊魔法`.
 - Spellbook rows render status badges dynamically: `已學會` (gold), `可學習` (green), `等級不足` (red/gray), `素材不足` (red/gray).
 - Selecting a spellbook details its spell name, MP cost, job requirements, level conditions, and price.
 - If `quest_magic_crystal` is completed, book spark price drops by 50G (150G -> 100G) and prints custom Eve welcome text.
-- Enabled `learn_magic_book` writes UIAction log and static feedback only; it does not subtract gold/materials or learn active runtime skills.
+- In static fixture mode, enabled `learn_magic_book` writes UIAction log and static feedback only; it does not subtract gold/materials or learn active runtime skills.
+- In live mode, `b59fe43 [antig] feat(gui): add magic shop learn book live bridge` dispatches `learn_magic_book` through the runtime bridge, renders the returned ScreenModel, and preserves static fixture fallback.
 - Bottom feedback bar acts as Eve's communication channel (e.g. `伊芙：「願星辰指引你的靈魂，冒險者。」`).
 - Back action dispatches `back_to_town_hub` and returns to Town Hub.
 
@@ -406,7 +407,7 @@ Accepted Magic Shop decisions:
 
 Deferred Magic Shop items:
 
-- Runtime integration of learned skills into player combat arrays.
+- Complete magic shop system, formal magic / skill framework, target selection, combat formula / skill rebalance, generic facility framework, and broader inventory / equipment / shop system.
 - Real spellbook/magic icons or observatory background animations.
 - Selling magic books, multiple spell slots, or advanced magic schools.
 
@@ -695,6 +696,7 @@ Validated during this session:
 - Storage Screen 10-row capacity bar and visual rendering logic pass browser checks with zero console errors.
 - Magic Shop Screen static prototype v1 exists with default, discount, constrained, and learned fixtures.
 - Magic Shop Screen dispatches `select_category`, `select_book`, `learn_magic_book`, and `back_to_town_hub` as static UIAction events only.
+- Magic Shop Screen live handoff now has a narrow `learn_magic_book` bridge through `b59fe43`; JavaScript dispatches UIAction and renders returned ScreenModel, while static fixtures remain fallback.
 - Town Hub `magic_shop` facility node correctly routes to Magic Shop Screen static prototype.
 - Magic Shop Screen requirements rendering and Eve's portrait card pass layout checks with zero console errors.
 

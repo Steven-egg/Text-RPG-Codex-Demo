@@ -1,8 +1,8 @@
 # 《元素迷宮：邊境冒險者》終端機版
 
-## 最新完成：GUI Runtime Bridge Shop Buy Consumable MVP（local live mode）
+## 最新完成：GUI Runtime Bridge Magic Shop Learn Magic Book Live MVP（local live mode）
 
-最近 GUI live bridge 基準 commit：`ebc1b5e [antig] feat(gui): add shop buy consumable live bridge`。
+最近 GUI live bridge 基準 commit：`b59fe43 [antig] feat(gui): add magic shop learn book live bridge`。
 
 `07_gui_prototype/` 目前仍以 HTML static prototype 為預設模式；另外已落地一條明確受限的 local runtime-connected live slice，用來驗證 browser UIAction → Python bridge → runtime ScreenModel 的最小閉環。
 
@@ -14,6 +14,18 @@ Blessed live slice 已包含：
 - World Map：沿用 static shell 顯示 runtime-backed location / route ScreenModel；主選單保留 `save_game` 與 shell-only `open_settings`，移除主選單 `back_to_town_hub`，返回城鎮只透過城鎮節點 / detail action。
 - Guild Screen：live bridge 會顯示 runtime 已解鎖迷宮的通關 / 回報狀態；當玩家流程滿足工會任務狀態、解鎖條件與通關條件，且尚未回報時，可登記探索回報。
 - Shop Screen：Shop Buy Consumable MVP 只允許在 live 旅人小鋪購買既有 travel shop consumables 1 個，並由 Python server-side 驗證商品、unlock 與 Gold 後扣款 / 加入 inventory。
+- Magic Shop Screen：Magic Shop Learn Magic Book MVP 只允許在 live 星燈魔法商店學習既有魔法書，並由 Python server-side 驗證職業、等級、Gold、素材與已學習狀態後扣款 / 扣素材 / 加入 `learned_skills`。
+
+Magic Shop Learn Magic Book Live MVP 已完成受限 live bridge 收斂：
+
+- Town Hub live 可進入 Magic Shop Screen；Magic Shop live mode 會顯示 runtime-shaped 魔法書 catalog、玩家職業 / 等級 / Gold resource strip、學習狀態、條件列與學習回饋。
+- `learn_magic_book` live action 只限既有 `MAGIC_BOOKS` 魔法書；對應技能沿用既有 `SKILLS`，不新增魔法書、技能、配方、條件、任務、道具或規則。
+- gameplay 判斷在 Python server-side：檢查 `book_id` 是否存在、對應 `skill_id` 是否存在、職業是否允許、等級是否足夠、Gold 是否足夠、素材是否足夠，以及技能是否已學會；失敗回 409 blocked 或 400 invalid。
+- 成功學習會扣除 `game.magic_book_price(...)` 算出的 Gold、透過既有素材扣除流程支付 `MAGIC_BOOKS[book_id]["materials"]`，並把對應 `skill_id` 加入 `state["learned_skills"]`。
+- 前端 JavaScript 只透過 `runtimeClient` dispatch UIAction 並 render 回傳 ScreenModel；static fixture fallback 與 UIAction logging 保留。
+- 使用者手測確認：CLI 法師 Lv2 save 可由 GUI live bridge 承接；Town Hub -> 星燈魔法商店 live route 可進入；火花術書可學習，Gold / materials / learned state 正確更新；已學會後按鈕禁用；盜賊可學本職技能書，非本職 / 條件未達技能書不可學；學會火花術後，既有 Combat Skill Button bridge 可讀到並施放火花術。
+- Combat 補充驗證只作為 regression smoke，不代表完整 Magic / Skill / Combat 系統完成。
+- 本 MVP 不代表完整 magic shop system、formal magic / skill framework、target selection、combat formula / skill rebalance、generic facility framework，或 broader inventory / equipment / shop system；未修改 `03_engine/engine/game.py`、`04_data/`、`02_schema/`、`save.json` 或 combat formula。
 
 Shop Buy Consumable Live MVP 已完成受限 live bridge 收斂：
 
@@ -52,12 +64,13 @@ Guild Report / Dungeon Clear Reward MVP 已完成受限 live bridge 收斂：
 
 Live bootstrap log naming cleanup 已完成：Start、Town Hub、Inn、World Map 在 live 成功載入時會記錄 `live_screen_loaded` / `live_loader`，並帶 `mode: "live"` 與 `screen_id`；static fixture load 與 live fallback 仍保留 `fixture_loaded`，fallback 仍會另外記 `live_bridge_unavailable`。
 
-目前仍不提升 Shop Buy Consumable MVP 之外的完整 Shop、Workshop、Synthesis、Storage、Magic Shop、Temple、Relic Preview 到正式 bridge contract。Guild 只完成受限 clear report 登記；Dungeon / Combat 僅完成已批准的 traversal / combat loop 小切片與 Combat Skill Button Live MVP；Shop 只完成 consumable 買 1 個。這不代表完整 dungeon framework、boss framework、正式 skill system、skill framework、target selection、完整 inventory / equipment interaction、完整 shop system、facility family、完整 guild system 或正式 quest framework 已開放。
+目前仍不提升 Shop Buy Consumable MVP 與 Magic Shop Learn Magic Book MVP 之外的完整 Shop、Workshop、Synthesis、Storage、Magic Shop、Temple、Relic Preview 到正式 bridge contract。Guild 只完成受限 clear report 登記；Dungeon / Combat 僅完成已批准的 traversal / combat loop 小切片與 Combat Skill Button Live MVP；Shop 只完成 consumable 買 1 個；Magic Shop 只完成既有魔法書學習 1 本的 live bridge。這不代表完整 dungeon framework、boss framework、formal magic / skill framework、target selection、combat formula / skill rebalance、完整 inventory / equipment interaction、完整 shop system、generic facility framework、完整 guild system 或正式 quest framework 已開放。
 
 已知後續對齊點：
 
-- Live bridge 已收斂到 Start Screen / Town Hub / Inn / World Map、受限 Dungeon / Combat loop、Guild Report MVP、Combat Skill Button Live MVP 與 Shop Buy Consumable MVP 的最小可測 GUI shell；後續仍需以單一小切片另行批准，不自動擴張其他 live bridge surface。
+- Live bridge 已收斂到 Start Screen / Town Hub / Inn / World Map、受限 Dungeon / Combat loop、Guild Report MVP、Combat Skill Button Live MVP、Shop Buy Consumable MVP 與 Magic Shop Learn Magic Book MVP 的最小可測 GUI shell；後續仍需以單一小切片另行批准，不自動擴張其他 live bridge surface。
 - 下一個候選方向只記錄為 Combat / Field Item Use MVP：讓已購買的消耗品在後續 combat / field flow 中以既有 runtime authority 使用並回傳 HP / MP 與持有數更新；尚未展開規劃或批准施工。
+- 撤退成功 overlay 的「本趟收益」文案列為後續 UX wording follow-up；不納入本輪 Magic Shop scope。
 - 若未來要讓 `open_settings` 變成真正設定面板，需另開單一小切片；目前只是 GUI shell 入口，不 dispatch 到 Python runtime。
 - `save.gui-backup-*.json` 是 bridge save 前安全備份產物，已列入 `.gitignore`；不要手動讀寫 `save.json`。
 
@@ -180,7 +193,7 @@ GUI 升級目前分三層，另有一條受限 local bridge slice：
 
 - Phase UI-1：CLI / Rich playable reference。已完成核心循環與設施 catalog 的顯示層整理。
 - Phase UI-2：HTML static fixture prototype。已建立 Start Screen、Town Hub、Guild、Synthesis、World Map、Dungeon Exploration、Combat、Shop、Workshop、Storage、Magic Shop、Inn、Temple、Relic Preview；預設仍只用 fixture，不接 runtime。
-- Phase UI-2.5：local runtime bridge blessed slice。已驗證 Start / Town Hub / Inn / World Map 的 UIAction dispatch 與 ScreenModel render，並完成受限 Dungeon / Combat loop：戰鬥結算 overlay、返回探索、route clear / resolved state 與離開迷宮回 World Map；Guild 目前只完成 clear report 狀態顯示與回報登記 MVP；Shop 目前只完成 consumable 買 1 個 MVP。其他設施與更完整的 guild / quest / skill / boss / inventory / equipment / shop / dungeon framework 仍需另開 planning gate。
+- Phase UI-2.5：local runtime bridge blessed slice。已驗證 Start / Town Hub / Inn / World Map 的 UIAction dispatch 與 ScreenModel render，並完成受限 Dungeon / Combat loop：戰鬥結算 overlay、返回探索、route clear / resolved state 與離開迷宮回 World Map；Guild 目前只完成 clear report 狀態顯示與回報登記 MVP；Shop 目前只完成 consumable 買 1 個 MVP；Magic Shop 目前只完成既有魔法書學習 1 本 MVP。其他設施與更完整的 guild / quest / formal magic / skill / target selection / boss / inventory / equipment / shop / dungeon framework 仍需另開 planning gate。
 - Phase UI-3：最終 GUI 視覺版本。使用正式背景圖、角色圖、icon、UI skin，並需要 asset request schema、prompt builder、asset registry 與 style bible；此階段尚未開始。
 
 三層應共用同一套 Screen Map、ScreenModel 與 UIAction；CLI 數字輸入、Rich wireframe 選取與未來 GUI 點擊 / 觸控都只應映射到同一批遊戲語意 action。
@@ -259,7 +272,7 @@ GUI 升級目前分三層，另有一條受限 local bridge slice：
 - 怪物圖鑑 MVP：擊敗怪物後 100% 登錄，可從主選單查看已登錄怪物的基礎資訊
 - CLI UI MVP：核心循環已以 Rich `Panel` 薄層整理，涵蓋開始畫面、主選單、角色狀態、城鎮整備、工坊 catalog、旅人小鋪分類商店、星燈魔法商店 catalog、米菈合成屋 catalog、迷宮選擇、迷宮探索、戰鬥指令與結算；戰鬥已完成主畫面 / Battle Log 分流；輸入、資料、存檔與戰鬥規則維持原樣
 - GUI HTML static prototype：`07_gui_prototype/` 目前包含 Start Screen、Town Hub、Guild Screen、Synthesis Screen、World Map、Dungeon Exploration、Combat Screen、Shop Screen、Workshop Screen、Storage Screen、Magic Shop Screen、Inn Screen、Temple Screen、Relic Preview Screen；預設只用 fixtures 驗證 GUI layout / interaction，不是正式 runtime UI
-- GUI runtime bridge live slice：local-only bridge 已可手測 Start / Town Hub / Inn / World Map 的最小 live flow，並完成受限 Dungeon / Combat loop 的勝利結算、返回探索、route clear / resolved state 與離開迷宮回 World Map；Guild Report MVP 只登記 / 顯示已解鎖且符合流程條件的迷宮回報狀態，不重發 clear reward；Combat Skill Button Live MVP 只沿用既有 `SKILLS` / `learned_skills` / runtime combat flow，技能合法性與 MP 扣減由 Python server-side 判斷；Shop Buy Consumable MVP 只允許 travel shop consumables 買 1 個，商品合法性、unlock、Gold 檢查、扣款與 inventory 更新由 Python server-side 判斷；Python runtime 仍是 gameplay authority，其他設施與完整 guild / quest / skill framework / target selection / boss / inventory / equipment / shop / dungeon framework 仍不在正式 bridge contract 內
+- GUI runtime bridge live slice：local-only bridge 已可手測 Start / Town Hub / Inn / World Map 的最小 live flow，並完成受限 Dungeon / Combat loop 的勝利結算、返回探索、route clear / resolved state 與離開迷宮回 World Map；Guild Report MVP 只登記 / 顯示已解鎖且符合流程條件的迷宮回報狀態，不重發 clear reward；Combat Skill Button Live MVP 只沿用既有 `SKILLS` / `learned_skills` / runtime combat flow，技能合法性與 MP 扣減由 Python server-side 判斷；Shop Buy Consumable MVP 只允許 travel shop consumables 買 1 個，商品合法性、unlock、Gold 檢查、扣款與 inventory 更新由 Python server-side 判斷；Magic Shop Learn Magic Book MVP 只允許學習既有 `MAGIC_BOOKS`，職業 / 等級 / Gold / 素材 / 已學狀態驗證、扣款、扣素材與 `learned_skills` 更新由 Python server-side 判斷；Python runtime 仍是 gameplay authority，其他設施與完整 guild / quest / formal magic / skill framework / target selection / combat rebalance / boss / inventory / equipment / shop / dungeon framework 仍不在正式 bridge contract 內
 - 轉職 preview-only MVP：轉職神殿顯示 `PROMOTIONS` 預覽方向與條件，正式轉職尚未開放
 - 聖物 preview-only MVP：城鎮「聖物調查」顯示 `RELICS` 預覽，聖物取得與效果尚未開放
 - 職業特化 preview-only MVP：角色狀態頁顯示 `JOB_SPECIALIZATIONS` 預覽，目前尚未生效
@@ -498,7 +511,7 @@ data validation ok
 - CLI UI 目前只做顯示層包裝；開始畫面、工坊 catalog、旅人小鋪分類商店、星燈魔法商店 catalog、米菈合成屋 catalog 與戰鬥主畫面 / Battle Log 分流已落地。
 - HTML static prototype 預設只允許在 `07_gui_prototype/` 內用 static fixtures 驗證畫面，不接 Python runtime、不讀寫 `save.json`、不啟動正式 asset pipeline；reference/mockup 圖只作設計參考，不作 runtime asset。
 - Synthesis Screen 已完成基礎版面定案；Shop Screen、Workshop Screen、Storage Screen、Magic Shop Screen、Inn Screen、Temple Screen、Relic Preview Screen static prototype v1 目前皆已完成。Inn Screen 與 Temple Screen 已完成 JRPG dialogue/menu static prototype 調整，reference-only mockup 位置為 `05_assets/gui_references/facility_inn_screen/` 與 `05_assets/gui_references/facility_temple_screen/`。
-- 下一步 UI 工作需先 read-only 確認單一小切片。已落地的 runtime bridge 只限 blessed live slice、World Map utility preview、受限 Dungeon / Combat loop、Guild Report MVP、Combat Skill Button Live MVP 與 Shop Buy Consumable MVP；不得把 Guild Report MVP 擴張成完整 guild system、正式 quest framework、reputation 或 achievement，不得把 Combat Skill Button MVP 擴張成正式 skill system、skill framework、target selection、技能重平衡或大型 combat 重構，不得把 Shop Buy Consumable MVP 擴張成完整 shop system、equipment、sell、quantity selector、完整 inventory UI 或 Shop / Workshop / Magic Shop 共用抽象層，也不得擴張 Workshop、Synthesis、Storage、Magic Shop、Temple、Relic、完整 boss / inventory / equipment / dungeon framework，或為 reference/mockup 圖啟動 formal asset pipeline。
+- 下一步 UI 工作需先 read-only 確認單一小切片。已落地的 runtime bridge 只限 blessed live slice、World Map utility preview、受限 Dungeon / Combat loop、Guild Report MVP、Combat Skill Button Live MVP、Shop Buy Consumable MVP 與 Magic Shop Learn Magic Book MVP；不得把 Guild Report MVP 擴張成完整 guild system、正式 quest framework、reputation 或 achievement，不得把 Combat Skill Button MVP 擴張成正式 skill system、skill framework、target selection、技能重平衡或大型 combat 重構，不得把 Shop Buy Consumable MVP 擴張成完整 shop system、equipment、sell、quantity selector、完整 inventory UI 或 Shop / Workshop / Magic Shop 共用抽象層，不得把 Magic Shop Learn Magic Book MVP 擴張成完整 magic shop system、formal magic / skill framework、target selection、combat formula / skill rebalance、generic facility framework 或 broader inventory / equipment / shop system，也不得擴張 Workshop、Synthesis、Storage、Temple、Relic、完整 boss / inventory / equipment / dungeon framework，或為 reference/mockup 圖啟動 formal asset pipeline。
 - 下一輪若要繼續評估灰燼裂谷，優先改測法師、劍士、牧師或不同裝備狀態，不直接施工。
 - 暫不繼續提高灰燼裂谷普通怪 HP，暫不修改 combat formula、EXP/gold、升級全回復或新增怪物技能。
 - 灰燼裂谷目前已具備偵查版與灰燼守衛 Boss MVP；後續測試結論需避免用單次隨機遭遇過度外推。

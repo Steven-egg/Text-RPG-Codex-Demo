@@ -198,6 +198,39 @@ Status note, 2026-06-02:
   Magic Shop abstraction, generic facility framework, data/schema changes, save
   migration, combat formula changes, or any broader facility family bridge.
 
+Status note, 2026-06-02:
+
+- A narrow Magic Shop Learn Magic Book MVP has landed through
+  `b59fe43 [antig] feat(gui): add magic shop learn book live bridge`.
+- Completed coverage is limited to Town Hub -> Magic Shop live routing, a
+  runtime-shaped Magic Shop ScreenModel for existing magic books, and
+  `learn_magic_book` for learning one existing magic book at a time.
+- The action is limited to existing `MAGIC_BOOKS` entries and their existing
+  `SKILLS` references. No new magic books, skills, recipes, conditions, quests,
+  items, or rules are added by this MVP.
+- Python server-side remains gameplay authority: it validates that `book_id`
+  exists, the referenced skill exists in `SKILLS`, the player's job is allowed,
+  level is sufficient, Gold is sufficient, required materials are present, and
+  the skill is not already learned. Blocked job / level / Gold / material /
+  already learned states return blocked responses.
+- On success, the bridge deducts Gold using the existing magic book price helper,
+  pays required materials through existing runtime item payment behavior, and
+  appends the referenced `skill_id` to `state["learned_skills"]`.
+- Browser JavaScript only dispatches UIAction payloads through `runtimeClient`
+  and renders the returned ScreenModel. Static fixture fallback and UIAction
+  logging remain available.
+- Owner-side smoke confirmed a CLI Mage Lv2 save can be picked up by the GUI
+  live bridge; Town Hub -> Magic Shop live route works; book spark can be
+  learned with Gold / materials / learned state updated; learned books disable
+  their action; Rogue can learn an in-class book; out-of-class or unmet
+  condition books are blocked; and the existing Combat Skill Button bridge can
+  read and cast Spark after learning. The combat check is only a regression
+  smoke, not completion of full Magic / Skill / Combat systems.
+- This status note does not approve a complete magic shop system, formal magic
+  or skill framework, target selection, combat formula or skill rebalance,
+  generic facility framework, broader inventory / equipment / shop system,
+  data/schema changes, save migration, or any broader facility family bridge.
+
 ### Phase 4 - Temple And Relic Preview
 
 Temple should avoid changing story flags merely because the screen opens.
