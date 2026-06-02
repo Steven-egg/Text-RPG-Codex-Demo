@@ -173,6 +173,31 @@ Status note, 2026-06-01:
   framework, reputation, achievement, data/schema changes, save migration, combat
   formula changes, or any broader facility family bridge.
 
+Status note, 2026-06-02:
+
+- A narrow Shop Buy Consumable MVP has landed through
+  `ebc1b5e [antig] feat(gui): add shop buy consumable live bridge`.
+- Completed coverage is limited to Town Hub -> Shop live routing, a
+  runtime-shaped Shop ScreenModel for travel shop consumables, and `buy_item`
+  for purchasing exactly 1 consumable at a time.
+- The action is limited to existing `SHOP_INVENTORY["travel"]` entries whose
+  `ITEMS` data has `kind == "consumable"`. Existing unlock / availability rules
+  still apply.
+- Python server-side remains gameplay authority: it validates that `item_id`
+  exists, belongs to the travel shop, is a consumable, is available / unlocked,
+  and that Gold is sufficient. Insufficient Gold returns 409 blocked. Gold
+  deduction and inventory increment happen server-side.
+- Browser JavaScript only dispatches UIAction payloads through `runtimeClient`
+  and renders the returned ScreenModel. Static fixture fallback and UIAction
+  logging remain available.
+- One owner-side Mage-route regression smoke confirmed Start -> Town -> Guild ->
+  Shop -> Potion purchase -> World Map -> Dungeon -> Combat, including the
+  existing item-use flow, without an obvious routing regression.
+- This status note does not approve a complete shop system, equipment purchase,
+  sell, quantity selector, complete inventory UI, shared Shop / Workshop /
+  Magic Shop abstraction, generic facility framework, data/schema changes, save
+  migration, combat formula changes, or any broader facility family bridge.
+
 ### Phase 4 - Temple And Relic Preview
 
 Temple should avoid changing story flags merely because the screen opens.
