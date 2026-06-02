@@ -150,9 +150,28 @@ Map current GUI UIActions to Python runtime helpers:
 - `unlock_storage` -> storage unlock helper.
 - `deposit_item` -> storage deposit helper.
 - `withdraw_item` -> storage withdraw helper.
+- `submit_quest` / `report_dungeon_clear` -> guild clear report registration helper
+  for the narrow Guild Report MVP only.
 
 Where CLI functions currently prompt for input, add small non-interactive helper
 functions instead of simulating CLI input.
+
+Status note, 2026-06-01:
+
+- A narrow Guild Report / Dungeon Clear Reward MVP has landed through
+  `c2052d4 [antig] feat(gui): add guild clear report live bridge`.
+- Completed coverage is limited to Town Hub -> Guild live routing, a runtime-shaped
+  Guild ScreenModel for unlocked dungeon clear / report status, and report
+  registration when the player's current guild task state, unlock conditions, and
+  dungeon clear state make that report available.
+- The report action only sets `state.flags["guild_reported_<dungeon_id>"] = True`
+  to register / display report status. First-clear reward timing remains at route
+  clear; Guild report does not reissue clear reward or move reward timing.
+- Static fixture fallback remains available, and story hint is only a hidden
+  placeholder in this MVP.
+- This status note does not approve a complete guild system, formal quest
+  framework, reputation, achievement, data/schema changes, save migration, combat
+  formula changes, or any broader facility family bridge.
 
 ### Phase 4 - Temple And Relic Preview
 
@@ -205,6 +224,8 @@ Status note, 2026-06-01:
 - Victory result overlay now reports EXP, gold, drops, bestiary status, and
   level-up feedback. Defeat and retreat routing remain aligned with the approved
   traversal semantics.
+- First-clear guild reward timing remains owned by the route clear moment; later
+  Guild report registration only displays / records report status.
 - This status note does not approve a complete skill system, inventory /
   equipment interaction, facility family, generic boss framework, complete
   dungeon event framework, combat formula changes, data/schema changes, or save

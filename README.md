@@ -1,17 +1,18 @@
 # 《元素迷宮：邊境冒險者》終端機版
 
-## 最新完成：GUI Runtime Bridge Combat Loop Completion Slice v0（local live mode）
+## 最新完成：GUI Runtime Bridge Guild Report / Dungeon Clear Reward MVP（local live mode）
 
-最近 GUI live bridge 基準 commit：`be6b06c [antig] feat(gui): complete live combat loop feedback`。
+最近 GUI live bridge 基準 commit：`c2052d4 [antig] feat(gui): add guild clear report live bridge`。
 
 `07_gui_prototype/` 目前仍以 HTML static prototype 為預設模式；另外已落地一條明確受限的 local runtime-connected live slice，用來驗證 browser UIAction → Python bridge → runtime ScreenModel 的最小閉環。
 
 Blessed live slice 已包含：
 
 - Start Screen：`start_new_game`、`restart_game`、`load_game`；live 入口 copy / no-save / has-save 狀態已對齊 static Start Screen，`load_demo_seed` 保留為 backend smoke/helper，不再顯示為 live Start Screen 主要入口。
-- Town Hub：live resource strip、facility nodes、`open_world_map`；Town Hub 不再顯示 `save_game`。
+- Town Hub：live resource strip、facility nodes、`open_world_map`，並可進入 Guild live screen；Town Hub 不再顯示 `save_game`。
 - Inn Screen：`rest_at_inn` 扣 30G 並由 Python runtime 回滿 HP/MP。
 - World Map：沿用 static shell 顯示 runtime-backed location / route ScreenModel；主選單保留 `save_game` 與 shell-only `open_settings`，移除主選單 `back_to_town_hub`，返回城鎮只透過城鎮節點 / detail action。
+- Guild Screen：live bridge 會顯示 runtime 已解鎖迷宮的通關 / 回報狀態；當玩家流程滿足工會任務狀態、解鎖條件與通關條件，且尚未回報時，可登記探索回報。
 
 Combat Loop Completion Slice v0 已完成受限 live loop 收斂：
 
@@ -20,15 +21,23 @@ Combat Loop Completion Slice v0 已完成受限 live loop 收斂：
 - route clear / resolved state 已完成最小呈現；走到 `12 / 12` 這類終點狀態後，`advance_step` 會停用，原撤退 action 改為「離開迷宮」並返回 World Map。
 - 本 slice 只修改 `03_engine/engine/gui_actions.py`；未修改 `03_engine/engine/game.py`、`04_data/`、`02_schema/`、`save.json` 或 combat formula。
 
+Guild Report / Dungeon Clear Reward MVP 已完成受限 live bridge 收斂：
+
+- Guild report 只設定 `state.flags["guild_reported_<dungeon_id>"] = True`，用於登記 / 顯示回報狀態。
+- 首次通關 reward 仍在 route clear 當下發放；Guild report 不重複發放 clear reward，也不搬移 route clear reward 的發放時間點。
+- 手測流程確認：一開始進 Guild 時若任務 / 解鎖條件尚未滿足，不能直接完成回報；打一輪 dungeon 後回 Guild，任務 / 回報狀態解鎖並可成功回報。
+- static fixture fallback 保留；story hint 目前只保留 hidden placeholder，不啟用 fire mark / Noah / story hint active bridge。
+- 本 MVP 不代表完整 guild system、正式 quest framework、reputation、achievement 或正式任務系統完成。
+
 手測已通過：`start_gui_runtime_bridge_server.bat` 可正常啟動；重新開啟 bat 後，使用者確認新狀態重新開始、在 World Map 主選單存檔、回到標題後繼續遊戲，runtime 狀態可保留，且無 traceback 或 fatal error。Python runtime 仍是 gameplay authority；GUI live mode 只 dispatch UIAction 並 render ScreenModel。
 
 Live bootstrap log naming cleanup 已完成：Start、Town Hub、Inn、World Map 在 live 成功載入時會記錄 `live_screen_loaded` / `live_loader`，並帶 `mode: "live"` 與 `screen_id`；static fixture load 與 live fallback 仍保留 `fixture_loaded`，fallback 仍會另外記 `live_bridge_unavailable`。
 
-目前仍不提升 Guild、Shop、Workshop、Synthesis、Storage、Magic Shop、Temple、Relic Preview 到正式 bridge contract。Dungeon / Combat 僅完成已批准的 traversal / combat loop 小切片，不代表完整 dungeon framework、boss framework、skill system、inventory / equipment interaction 或 facility family 已開放。
+目前仍不提升 Guild Report MVP 之外的 Shop、Workshop、Synthesis、Storage、Magic Shop、Temple、Relic Preview 到正式 bridge contract。Guild 只完成受限 clear report 登記；Dungeon / Combat 僅完成已批准的 traversal / combat loop 小切片，不代表完整 dungeon framework、boss framework、skill system、inventory / equipment interaction、facility family、完整 guild system 或正式 quest framework 已開放。
 
 已知後續對齊點：
 
-- Live bridge 已收斂到 Start Screen / Town Hub / Inn / World Map 與受限 Dungeon / Combat loop 的最小可測 GUI shell；後續仍需以單一小切片另行批准，不自動擴張其他 live bridge surface。
+- Live bridge 已收斂到 Start Screen / Town Hub / Inn / World Map、受限 Dungeon / Combat loop 與 Guild Report MVP 的最小可測 GUI shell；後續仍需以單一小切片另行批准，不自動擴張其他 live bridge surface。
 - 若未來要讓 `open_settings` 變成真正設定面板，需另開單一小切片；目前只是 GUI shell 入口，不 dispatch 到 Python runtime。
 - `save.gui-backup-*.json` 是 bridge save 前安全備份產物，已列入 `.gitignore`；不要手動讀寫 `save.json`。
 
@@ -151,7 +160,7 @@ GUI 升級目前分三層，另有一條受限 local bridge slice：
 
 - Phase UI-1：CLI / Rich playable reference。已完成核心循環與設施 catalog 的顯示層整理。
 - Phase UI-2：HTML static fixture prototype。已建立 Start Screen、Town Hub、Guild、Synthesis、World Map、Dungeon Exploration、Combat、Shop、Workshop、Storage、Magic Shop、Inn、Temple、Relic Preview；預設仍只用 fixture，不接 runtime。
-- Phase UI-2.5：local runtime bridge blessed slice。已驗證 Start / Town Hub / Inn / World Map 的 UIAction dispatch 與 ScreenModel render，並完成受限 Dungeon / Combat loop：戰鬥結算 overlay、返回探索、route clear / resolved state 與離開迷宮回 World Map。其他設施與更完整的 skill / boss / inventory / equipment / dungeon framework 仍需另開 planning gate。
+- Phase UI-2.5：local runtime bridge blessed slice。已驗證 Start / Town Hub / Inn / World Map 的 UIAction dispatch 與 ScreenModel render，並完成受限 Dungeon / Combat loop：戰鬥結算 overlay、返回探索、route clear / resolved state 與離開迷宮回 World Map；Guild 目前只完成 clear report 狀態顯示與回報登記 MVP。其他設施與更完整的 guild / quest / skill / boss / inventory / equipment / dungeon framework 仍需另開 planning gate。
 - Phase UI-3：最終 GUI 視覺版本。使用正式背景圖、角色圖、icon、UI skin，並需要 asset request schema、prompt builder、asset registry 與 style bible；此階段尚未開始。
 
 三層應共用同一套 Screen Map、ScreenModel 與 UIAction；CLI 數字輸入、Rich wireframe 選取與未來 GUI 點擊 / 觸控都只應映射到同一批遊戲語意 action。
@@ -230,7 +239,7 @@ GUI 升級目前分三層，另有一條受限 local bridge slice：
 - 怪物圖鑑 MVP：擊敗怪物後 100% 登錄，可從主選單查看已登錄怪物的基礎資訊
 - CLI UI MVP：核心循環已以 Rich `Panel` 薄層整理，涵蓋開始畫面、主選單、角色狀態、城鎮整備、工坊 catalog、旅人小鋪分類商店、星燈魔法商店 catalog、米菈合成屋 catalog、迷宮選擇、迷宮探索、戰鬥指令與結算；戰鬥已完成主畫面 / Battle Log 分流；輸入、資料、存檔與戰鬥規則維持原樣
 - GUI HTML static prototype：`07_gui_prototype/` 目前包含 Start Screen、Town Hub、Guild Screen、Synthesis Screen、World Map、Dungeon Exploration、Combat Screen、Shop Screen、Workshop Screen、Storage Screen、Magic Shop Screen、Inn Screen、Temple Screen、Relic Preview Screen；預設只用 fixtures 驗證 GUI layout / interaction，不是正式 runtime UI
-- GUI runtime bridge live slice：local-only bridge 已可手測 Start / Town Hub / Inn / World Map 的最小 live flow，並完成受限 Dungeon / Combat loop 的勝利結算、返回探索、route clear / resolved state 與離開迷宮回 World Map；Python runtime 仍是 gameplay authority，其他設施與完整 skill / boss / inventory / equipment / dungeon framework 仍不在正式 bridge contract 內
+- GUI runtime bridge live slice：local-only bridge 已可手測 Start / Town Hub / Inn / World Map 的最小 live flow，並完成受限 Dungeon / Combat loop 的勝利結算、返回探索、route clear / resolved state 與離開迷宮回 World Map；Guild Report MVP 只登記 / 顯示已解鎖且符合流程條件的迷宮回報狀態，不重發 clear reward；Python runtime 仍是 gameplay authority，其他設施與完整 guild / quest / skill / boss / inventory / equipment / dungeon framework 仍不在正式 bridge contract 內
 - 轉職 preview-only MVP：轉職神殿顯示 `PROMOTIONS` 預覽方向與條件，正式轉職尚未開放
 - 聖物 preview-only MVP：城鎮「聖物調查」顯示 `RELICS` 預覽，聖物取得與效果尚未開放
 - 職業特化 preview-only MVP：角色狀態頁顯示 `JOB_SPECIALIZATIONS` 預覽，目前尚未生效
@@ -469,7 +478,7 @@ data validation ok
 - CLI UI 目前只做顯示層包裝；開始畫面、工坊 catalog、旅人小鋪分類商店、星燈魔法商店 catalog、米菈合成屋 catalog 與戰鬥主畫面 / Battle Log 分流已落地。
 - HTML static prototype 預設只允許在 `07_gui_prototype/` 內用 static fixtures 驗證畫面，不接 Python runtime、不讀寫 `save.json`、不啟動正式 asset pipeline；reference/mockup 圖只作設計參考，不作 runtime asset。
 - Synthesis Screen 已完成基礎版面定案；Shop Screen、Workshop Screen、Storage Screen、Magic Shop Screen、Inn Screen、Temple Screen、Relic Preview Screen static prototype v1 目前皆已完成。Inn Screen 與 Temple Screen 已完成 JRPG dialogue/menu static prototype 調整，reference-only mockup 位置為 `05_assets/gui_references/facility_inn_screen/` 與 `05_assets/gui_references/facility_temple_screen/`。
-- 下一步 UI 工作需先 read-only 確認單一小切片。已落地的 runtime bridge 只限 blessed live slice、World Map utility preview 與受限 Dungeon / Combat loop；不得擴張 Guild、Shop、Workshop、Synthesis、Storage、Magic Shop、Temple、Relic、完整 skill / boss / inventory / equipment / dungeon framework，也不得為 reference/mockup 圖啟動 formal asset pipeline。
+- 下一步 UI 工作需先 read-only 確認單一小切片。已落地的 runtime bridge 只限 blessed live slice、World Map utility preview、受限 Dungeon / Combat loop 與 Guild Report MVP；不得把 Guild Report MVP 擴張成完整 guild system、正式 quest framework、reputation 或 achievement，也不得擴張 Shop、Workshop、Synthesis、Storage、Magic Shop、Temple、Relic、完整 skill / boss / inventory / equipment / dungeon framework，或為 reference/mockup 圖啟動 formal asset pipeline。
 - 下一輪若要繼續評估灰燼裂谷，優先改測法師、劍士、牧師或不同裝備狀態，不直接施工。
 - 暫不繼續提高灰燼裂谷普通怪 HP，暫不修改 combat formula、EXP/gold、升級全回復或新增怪物技能。
 - 灰燼裂谷目前已具備偵查版與灰燼守衛 Boss MVP；後續測試結論需避免用單次隨機遭遇過度外推。
