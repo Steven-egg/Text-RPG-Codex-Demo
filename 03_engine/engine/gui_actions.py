@@ -6,7 +6,7 @@ from copy import deepcopy
 from datetime import datetime
 from typing import Any
 
-from data import DUNGEONS, EQUIPMENT, ITEMS, JOBS
+from data import DUNGEONS, EQUIPMENT, ITEMS, JOBS, SKILLS
 
 from . import game
 from .formatting import item_name
@@ -348,7 +348,7 @@ class GuiRuntimeSession:
             if screen_id == "combat_screen" or self.combat is not None:
                 return self.combat_retreat()
             return self.retreat_from_exploration()
-        if action_id in {"basic_attack", "defend", "use_item"}:
+        if action_id in {"basic_attack", "defend", "use_item", "use_skill"}:
             return self.dispatch_combat_action(action_id, payload)
         raise GuiActionError(f"Unknown GUI action: {action_id}", status=404)
 
@@ -466,6 +466,41 @@ class GuiRuntimeSession:
             if action_result.outcome == "escaped":
                 return self.resolve_retreat(action_result.summary or action_result.events)
             combat["enemy_hp"] -= action_result.damage
+        elif action_id == "use_skill":
+            skill_id = payload.get("skill_id")
+            if not skill_id or skill_id not in state.get("learned_skills", []):
+                raise GuiActionError("未學會該技能或無效技能。", status=400)
+            skill = SKILLS.get(skill_id)
+            if not skill:
+                raise GuiActionError("技能資料不存在。", status=400)
+            if state.get("current_mp", 0) < skill["mp"]:
+                raise GuiActionError(
+                    "MP 不足，無法使用技能。",
+                    status=409,
+                    result_status="blocked",
+                    blocked_reason="MP 不足，無法使用技能。",
+                )
+            state["current_mp"] -= skill["mp"]
+            stats = game.get_stats(state, player_buffs)
+            if skill["kind"] == "damage":
+                action_result = game.player_attack(state, enemy, combat["enemy_hp"], skill, player_buffs, enemy_buffs)
+                combat["enemy_hp"] -= action_result.damage
+            elif skill["kind"] == "heal":
+                before = state["current_hp"]
+                state["current_hp"] = min(stats["max_hp"], state["current_hp"] + skill["amount"])
+                healed = state["current_hp"] - before
+                line = f"你使用 {skill['name']}，回復 {healed} HP。"
+                action_result = game.CombatActionResult(events=[line], summary=[line])
+            elif skill["kind"] == "buff":
+                player_buffs[skill["buff"]] = skill["duration"]
+                line = f"你使用 {skill['name']}。{skill['desc']}"
+                action_result = game.CombatActionResult(events=[line], summary=[line])
+            elif skill["kind"] == "debuff":
+                enemy_buffs[skill["debuff"]] = skill["duration"]
+                line = f"你使用 {skill['name']}。{skill['desc']}"
+                action_result = game.CombatActionResult(events=[line], summary=[line])
+            else:
+                raise GuiActionError("不支援的技能類型。", status=400)
 
         turn_events = list(action_result.events)
         if combat["enemy_hp"] <= 0:
@@ -872,6 +907,7 @@ class GuiRuntimeSession:
         enemy_hp = max(0, combat["enemy_hp"])
         resolved = combat.get("outcome") is not None
         usable_items = combat_item_rows(state)
+        usable_skills = combat_skill_rows(state, combat, resolved)
         return {
             "screen_id": "combat_screen",
             "title": "戰鬥",
@@ -898,9 +934,9 @@ class GuiRuntimeSession:
             "skill_menu": {
                 "label": "技能選擇",
                 "title": "技能",
-                "summary": "技能系統準備中。",
-                "empty_message": "當前無法使用技能。",
-                "items": [],
+                "summary": f"目前 MP {state['current_mp']}/{stats['max_mp']}。目標：{enemy['name']} / 屬性 {enemy['element']} / 狀態 {game.buff_summary(combat['enemy_buffs'])}。再次按技能可收回。",
+                "empty_message": "尚無可用技能。" if state.get("learned_skills", []) else "沒有學會任何技能。",
+                "items": usable_skills,
             },
             "item_menu": {
                 "label": "道具選擇",
@@ -925,8 +961,12 @@ class GuiRuntimeSession:
                     "action_id": "open_skill_menu",
                     "label": "技能",
                     "description": "職業特殊技能。",
-                    "enabled": False,
-                    "disabled_reason": "此 live slice 尚未開放技能。",
+                    "enabled": not resolved and bool(state.get("learned_skills", [])),
+                    "disabled_reason": (
+                        "戰鬥已結束。" if resolved else (
+                            "你尚未學會任何技能。" if not state.get("learned_skills", []) else None
+                        )
+                    ),
                     "primary": False,
                     "payload": {"source": "combat_screen"},
                 },
@@ -1605,6 +1645,41 @@ def combat_item_rows(state: dict[str, Any]) -> list[dict[str, Any]]:
                 "enabled": True,
                 "disabled_reason": None,
                 "payload": {"item_id": item_id},
+            }
+        )
+    return rows
+
+
+def combat_skill_rows(state: dict[str, Any], combat: dict[str, Any] | None, resolved: bool) -> list[dict[str, Any]]:
+    rows = []
+    learned_skills = state.get("learned_skills", [])
+    for skill_id in learned_skills:
+        skill = SKILLS.get(skill_id)
+        if not skill:
+            continue
+        mp_cost = skill.get("mp", 0)
+        has_enough_mp = state.get("current_mp", 0) >= mp_cost
+        enabled = not resolved and has_enough_mp
+        disabled_reason = None
+        if resolved:
+            disabled_reason = "戰鬥已結束。"
+        elif not has_enough_mp:
+            disabled_reason = "MP 不足。"
+
+        payload = {"skill_id": skill_id}
+        kind = skill.get("kind")
+        if kind in ("damage", "debuff") and combat and "enemy_id" in combat:
+            payload["enemy_id"] = combat["enemy_id"]
+
+        rows.append(
+            {
+                "action_id": "use_skill",
+                "label": skill.get("name", skill_id),
+                "meta": f"MP {mp_cost}",
+                "description": skill.get("desc", ""),
+                "enabled": enabled,
+                "disabled_reason": disabled_reason,
+                "payload": payload,
             }
         )
     return rows
