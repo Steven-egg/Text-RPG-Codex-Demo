@@ -1,6 +1,9 @@
+import { runtimeClient } from "../shared/runtime-client.js";
+
 const fixtureSelect = document.querySelector("#fixture-select");
 const titleEl = document.querySelector("#screen-title");
 const subtitleEl = document.querySelector("#screen-subtitle");
+const resourceStripEl = document.querySelector("#resource-strip");
 const categoryTabsEl = document.querySelector("#category-tabs");
 const itemListEl = document.querySelector("#item-list");
 const itemDetailEl = document.querySelector("#item-detail");
@@ -52,6 +55,10 @@ primaryActionEl.addEventListener("click", () => {
 });
 
 backActionEl.addEventListener("click", () => {
+  if (runtimeClient.isLiveMode()) {
+    handleBackToTown();
+    return;
+  }
   pushActionLog({
     action_id: "back_to_town_hub",
     payload: {},
@@ -69,6 +76,11 @@ clearLogEl.addEventListener("click", () => {
 loadFixture(fixtureSelect.value);
 
 async function loadFixture(path) {
+  if (runtimeClient.isLiveMode()) {
+    await loadLiveScreen();
+    return;
+  }
+
   shellEl.dataset.loadState = "loading";
   try {
     const response = await fetch(path, { cache: "no-store" });
@@ -98,6 +110,13 @@ function render() {
   npcRoleEl.textContent = model.npc?.role ?? "";
   npcPortraitEl.dataset.npcPlaceholder = model.npc?.portrait_placeholder ?? "NPC";
   
+  if (model.resource_strip && resourceStripEl) {
+    resourceStripEl.hidden = false;
+    renderResources(model.resource_strip);
+  } else if (resourceStripEl) {
+    resourceStripEl.hidden = true;
+  }
+
   renderCategories(model.category_tabs ?? []);
   renderItemList(getVisibleItemRows());
   ensureSelectionVisible();
@@ -379,6 +398,41 @@ function activatePrimaryAction() {
     return;
   }
 
+  if (runtimeClient.isLiveMode()) {
+    pushActionLog({
+      action_id: actionId,
+      payload,
+      source: "primary_action",
+      dispatched: true,
+    });
+    runtimeClient.dispatchAction("shop_screen", actionId, payload)
+      .then((result) => {
+        shellEl.dataset.runtimeStatus = result.status ?? "success";
+        if (result.screen_model) {
+          state.model = result.screen_model;
+          ensureSelectionVisible();
+          render();
+        }
+        if (result.message) {
+          const npcMsg = result.screen_model?.feedback_message?.text || result.message;
+          renderFeedback(state.model.npc?.name ?? "特里", npcMsg);
+        }
+      })
+      .catch((error) => {
+        const reason = runtimeClient.errorMessage(error);
+        shellEl.dataset.runtimeStatus = error?.runtimeStatus ?? "error";
+        pushActionLog({
+          action_id: actionId,
+          payload,
+          source: "primary_action",
+          dispatched: false,
+          reason,
+        });
+        renderFeedback(state.model.npc?.name ?? "特里", `「抱歉，購買失敗：${reason}。」`);
+      });
+    return;
+  }
+
   pushActionLog({
     action_id: actionId,
     payload,
@@ -481,4 +535,94 @@ function renderLoadError(error) {
   errorEl.className = "load-error";
   errorEl.textContent = error instanceof Error ? error.message : String(error);
   itemListEl.append(errorEl);
+}
+
+async function loadLiveScreen() {
+  shellEl.dataset.loadState = "loading";
+  try {
+    const model = await runtimeClient.getScreen("shop_screen");
+    state.model = model;
+    state.selectedCategoryId = model.selected_category_id ?? model.category_tabs?.[0]?.id ?? "all";
+    state.selectedItemId = model.selected_item_id ?? getVisibleItemRows()[0]?.item_id ?? null;
+    state.actionLog = [];
+    ensureSelectionVisible();
+    render();
+    logSystem("live runtime screen loaded", {
+      actionId: "live_screen_loaded",
+      source: "live_loader",
+      payload: { mode: "live", screen_id: "shop_screen" },
+    });
+    shellEl.dataset.loadState = "ready";
+  } catch (error) {
+    await loadStaticFallback(fixtureSelect.value, error);
+  }
+}
+
+async function loadStaticFallback(path, liveError) {
+  try {
+    const response = await fetch(path, { cache: "no-store" });
+    if (!response.ok) {
+      throw new Error(`Fixture request failed: ${response.status}`);
+    }
+    const model = await response.json();
+    state.model = model;
+    state.selectedCategoryId = model.selected_category_id ?? model.category_tabs?.[0]?.id ?? "all";
+    state.selectedItemId = model.selected_item_id ?? getVisibleItemRows()[0]?.item_id ?? null;
+    state.actionLog = [];
+    ensureSelectionVisible();
+    render();
+    logSystem(`live unavailable; loaded fixture ${path}`);
+    pushActionLog({
+      action_id: "live_bridge_unavailable",
+      payload: { reason: liveError instanceof Error ? liveError.message : String(liveError) },
+      source: "live_loader",
+      dispatched: false,
+      reason: "fallback_to_fixture",
+    });
+    shellEl.dataset.loadState = "ready";
+  } catch (error) {
+    renderLoadError(error);
+    shellEl.dataset.loadState = "error";
+  }
+}
+
+async function handleBackToTown() {
+  const payload = { from: "shop_screen" };
+  pushActionLog({
+    action_id: "back_to_town_hub",
+    payload,
+    source: "secondary_action",
+    dispatched: true,
+  });
+  try {
+    const result = await runtimeClient.dispatchAction("shop_screen", "back_to_town_hub", payload);
+    shellEl.dataset.runtimeStatus = result.status ?? "success";
+    window.setTimeout(() => {
+      window.location.href = runtimeClient.nextRoute(result, townHubRoute);
+    }, navigationDelayMs);
+  } catch (error) {
+    const reason = runtimeClient.errorMessage(error);
+    shellEl.dataset.runtimeStatus = error?.runtimeStatus ?? "error";
+    renderFeedback(state.model.npc?.name ?? "特里", reason);
+    pushActionLog({
+      action_id: "back_to_town_hub",
+      payload,
+      source: "secondary_action",
+      dispatched: false,
+      reason,
+    });
+  }
+}
+
+function renderResources(items) {
+  if (!resourceStripEl) return;
+  resourceStripEl.replaceChildren(
+    ...items.map((item) => {
+      const el = document.createElement("div");
+      el.className = "resource-item";
+      el.dataset.tone = item.tone ?? "neutral";
+      el.textContent = item.label ?? "";
+      return el;
+    }),
+  );
 }

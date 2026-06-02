@@ -6,7 +6,7 @@ from copy import deepcopy
 from datetime import datetime
 from typing import Any
 
-from data import DUNGEONS, EQUIPMENT, ITEMS, JOBS, SKILLS
+from data import DUNGEONS, EQUIPMENT, ITEMS, JOBS, SKILLS, SHOP_INVENTORY
 
 from . import game
 from .formatting import item_name
@@ -274,6 +274,8 @@ class GuiRuntimeSession:
                 "已開啟魔物圖鑑摘要。",
                 screen_model=model,
             )
+        if action_id == "buy_item":
+            return self.buy_item(payload, screen_id=screen_id)
         if action_id == "rest_at_inn":
             return self.rest_at_inn(payload, screen_id=screen_id)
         if action_id in {"submit_quest", "report_dungeon_clear"}:
@@ -789,6 +791,49 @@ class GuiRuntimeSession:
             response["screen_model"]["feedback_message"] = response["message"]
         return response
 
+    def buy_item(self, payload: dict[str, Any], *, screen_id: str | None = None) -> dict[str, Any]:
+        state = self.require_state()
+        item_id = payload.get("item_id")
+        
+        if not item_id or item_id not in ITEMS:
+            raise GuiActionError("商品不存在。", status=400)
+            
+        if item_id not in SHOP_INVENTORY["travel"]:
+            raise GuiActionError("此商店不販售該商品。", status=400)
+            
+        item = ITEMS[item_id]
+        if item.get("kind") != "consumable":
+            raise GuiActionError("旅人小鋪 MVP 僅允許購買消耗品。", status=400)
+            
+        if not game.is_shop_item_available(state, item_id):
+            raise GuiActionError("商品尚未解鎖或不可購買。", status=409)
+            
+        price = item["price"]
+        if state.get("gold", 0) < price:
+            raise GuiActionError(
+                "金幣不足，無法購買該商品。",
+                status=409,
+                result_status="blocked",
+                blocked_reason="金幣不足，無法購買該商品。",
+            )
+            
+        state["gold"] -= price
+        game.add_item(state, item_id, 1)
+        
+        response = action_response(
+            "buy_item",
+            f"成功購買 {item['name']}！獲得 {item['name']} x1，扣除金幣 {price}G。",
+            state,
+            screen_id="shop_screen",
+        )
+        if response.get("screen_model"):
+            response["screen_model"]["feedback_message"] = {
+                "tone": "success",
+                "speaker": "特里",
+                "text": f"「非常感謝！這是你的 {item['name']}，請拿好！」"
+            }
+        return response
+
     def guild_screen_model(self) -> dict[str, Any]:
         return guild_screen_model(self.require_state())
 
@@ -827,6 +872,8 @@ class GuiRuntimeSession:
             return inn_screen_model(state)
         if screen_id in {"guild_screen", "facility_guild_screen"}:
             return self.guild_screen_model()
+        if screen_id in {"shop_screen", "facility_shop_screen"}:
+            return shop_screen_model(state)
         if screen_id == "dungeon_exploration":
             return self.exploration_screen_model()
         if screen_id == "combat_screen":
@@ -1080,6 +1127,8 @@ def build_screen_model(screen_id: str | None, state: dict[str, Any]) -> dict[str
         return inn_screen_model(state)
     if screen_id in {"guild_screen", "facility_guild_screen"}:
         return guild_screen_model(state)
+    if screen_id in {"shop_screen", "facility_shop_screen"}:
+        return shop_screen_model(state)
     return None
 
 
@@ -1377,7 +1426,17 @@ def facility_nodes(state: dict[str, Any]) -> list[dict[str, Any]]:
             target_screen_id="inn_screen",
             navigation_route="../inn_screen/index.html",
         ),
-        facility("travel_shop", "旅人小鋪", "道具交易功能將在後續版本開放。", "shop", "open_facility", enabled=False),
+        facility(
+            "travel_shop",
+            "旅人小鋪",
+            "前往旅人小鋪購買消耗性補給品。",
+            "shop",
+            "open_facility",
+            payload={"facility_id": "travel_shop", "target_screen_id": "shop_screen"},
+            target_screen_id="shop_screen",
+            navigation_route="../shop_screen/index.html",
+            enabled=True,
+        ),
         facility("workshop", "鐵刃 / 堅甲工坊", "裝備購買與強化功能將在後續版本開放。", "hammer", "open_facility", enabled=False),
         facility("synthesis", "米菈合成屋", "煉金合成配方將在後續版本開放。", "alchemy", "open_facility", enabled=False),
         facility("magic_shop", "星燈魔法商店", "魔法書購買與學習將在後續版本開放。", "magic", "open_facility", enabled=False),
@@ -1455,6 +1514,188 @@ def inn_screen_model(state: dict[str, Any]) -> dict[str, Any]:
                 "payload": {"from": "inn_screen"},
             }
         ],
+    }
+
+
+def get_consumable_description(item_id: str, name: str) -> str:
+    descs = {
+        "item_potion_s": "星燈鎮藥劑師調配的基礎恢復藥水，輕便好攜帶，是初階冒險者的必備補給。",
+        "item_potion_m": "含有更多星燈草提取物的高階恢復藥水，能快速癒合較深的傷口。",
+        "item_herb_antidote": "採集自森林邊緣的天然藥草，能有效中和毒素；在 v1 中也可用於緩解輕微灼傷。",
+        "item_focus_drop": "蒸餾自魔力花露的澄澈液體，能微幅活化精神力與法力迴路。",
+    }
+    return descs.get(item_id, f"旅行所需的{name}。")
+
+
+def get_consumable_effect_summary(item_id: str) -> str:
+    effects = {
+        "item_potion_s": "回復 HP 35 點",
+        "item_potion_m": "回復 HP 70 點",
+        "item_herb_antidote": "解除中毒狀態；v1 中亦可消除灼傷 buff",
+        "item_focus_drop": "回復 MP 12 點",
+    }
+    return effects.get(item_id, "")
+
+
+def shop_screen_model(state: dict[str, Any]) -> dict[str, Any]:
+    gold = state.get("gold", 0)
+    consumable_ids = ["item_potion_s", "item_potion_m", "item_herb_antidote", "item_focus_drop"]
+    
+    list_rows = []
+    item_details = {}
+    requirement_rows = {}
+    primary_actions = {}
+    
+    for item_id in consumable_ids:
+        item = ITEMS[item_id]
+        price = item["price"]
+        owned_count = state.get("inventory", {}).get(item_id, 0)
+        unlocked = game.is_shop_item_available(state, item_id)
+        has_enough_gold = gold >= price
+        
+        if not unlocked:
+            row_enabled = False
+            disabled_reason = "商品已售罄" if item_id == "item_potion_m" else "尚未解鎖"
+            status = "missing"
+            stock_label = "已售罄"
+        elif not has_enough_gold:
+            row_enabled = False
+            disabled_reason = "金幣不足"
+            status = "blocked"
+            stock_label = "無限庫存"
+        else:
+            row_enabled = True
+            disabled_reason = None
+            status = "purchasable"
+            stock_label = "無限庫存"
+            
+        badges = []
+        if item_id == "item_potion_s":
+            badges.append({ "badge_id": "hot", "label": "熱銷", "kind": "info" })
+            
+        list_rows.append({
+            "id": f"row_{item_id.split('_', 1)[1]}",
+            "item_id": item_id,
+            "title": item["name"],
+            "category": "consumables",
+            "summary": f"{item['desc']}旅行最基礎的保障。" if item_id == "item_potion_s" else item["desc"],
+            "price": price,
+            "owned_count": owned_count,
+            "stock_label": stock_label,
+            "status": status,
+            "enabled": row_enabled,
+            "disabled_reason": disabled_reason,
+            "badges": badges
+        })
+        
+        item_details[item_id] = {
+            "item_id": item_id,
+            "title": item["name"],
+            "category_label": "補給品",
+            "description": get_consumable_description(item_id, item["name"]),
+            "effect_summary": get_consumable_effect_summary(item_id),
+            "use_context": "可在戰鬥中或非戰鬥狀態下使用。",
+            "price": price,
+            "owned_count": owned_count,
+            "status": status,
+            "disabled_reason": disabled_reason
+        }
+        
+        req_status = "met" if has_enough_gold else "missing"
+        req_disabled = None if has_enough_gold else "金幣不足"
+        if not unlocked:
+            req_status = "missing"
+            req_disabled = "商品已售罄" if item_id == "item_potion_m" else "尚未解鎖"
+            
+        requirement_rows[item_id] = [
+            {
+                "id": "gold",
+                "label": "金幣需求",
+                "required_value": f"{price}G",
+                "current_value": f"{gold}G",
+                "status": req_status,
+                "disabled_reason": req_disabled
+            }
+        ]
+        
+        action_enabled = unlocked and has_enough_gold
+        action_disabled_reason = None
+        if not unlocked:
+            action_disabled_reason = "商品已售罄" if item_id == "item_potion_m" else "尚未解鎖"
+        elif not has_enough_gold:
+            action_disabled_reason = "金幣不足"
+            
+        result_msg = ""
+        if action_enabled:
+            result_msg = f"成功購買{item['name']}！獲得{item['name']} x1，扣除金幣 {price}G。"
+        else:
+            result_msg = f"無法購買{item['name']}：{action_disabled_reason}。"
+            
+        primary_actions[item_id] = {
+            "action_id": "buy_item",
+            "label": f"購買{item['name']}",
+            "enabled": action_enabled,
+            "disabled_reason": action_disabled_reason,
+            "payload": { "item_id": item_id },
+            "result_message": result_msg
+        }
+
+    category_tabs = [
+        { "id": "all", "label": "全部商品", "count": len(list_rows), "enabled": True },
+        { "id": "consumables", "label": "補給品", "count": len(list_rows), "enabled": True },
+        { "id": "tactical", "label": "戰術道具", "count": 0, "enabled": False },
+        { "id": "accessories", "label": "飾品", "count": 0, "enabled": False }
+    ]
+    
+    if gold >= 30:
+        feedback_text = "「挑選想要的物品，右側會顯示購買所需的條件與持有狀況。」"
+        feedback_tone = "info"
+    else:
+        feedback_text = "「金幣不太夠呢，或者有些高等級物資公會還沒放行。去北邊礦坑賺點金幣再來吧？」"
+        feedback_tone = "warning"
+        
+    feedback_message = {
+        "tone": feedback_tone,
+        "speaker": "特里",
+        "text": feedback_text
+    }
+    
+    return {
+        "screen_id": "facility_shop_screen",
+        "facility_id": "travel_shop",
+        "title": "星燈行商鋪 (Live)",
+        "subtitle": "與遊戲核心同步的商品交易服務，僅限補給品購買。",
+        "npc": {
+            "id": "terry",
+            "name": "特里",
+            "role": "行商特里，常年往返於迷宮城鎮之間，販售各種實用的補給品。",
+            "guidance": "「歡迎光臨！今天的貨色都很齊全喔！特別是生命補給藥水，剛從公會那裡進了一批新鮮的！」",
+            "portrait_placeholder": "TR"
+        },
+        "player_summary": {
+            "name": state.get("name", ""),
+            "level": state.get("level", 1),
+            "job": state.get("job", ""),
+            "gold": gold
+        },
+        "resource_strip": resource_strip(state),
+        "category_tabs": category_tabs,
+        "selected_category_id": "all",
+        "selected_item_id": "item_potion_s",
+        "list_rows": list_rows,
+        "item_details": item_details,
+        "requirement_rows": requirement_rows,
+        "primary_actions": primary_actions,
+        "feedback_message": feedback_message,
+        "navigation_actions": [
+            {
+                "action_id": "back_to_town_hub",
+                "label": "返回城鎮",
+                "description": "離開商鋪返回城鎮廣場。",
+                "enabled": True,
+                "payload": {}
+            }
+        ]
     }
 
 
