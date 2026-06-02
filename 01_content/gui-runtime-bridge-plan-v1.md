@@ -231,6 +231,33 @@ Status note, 2026-06-01:
   dungeon event framework, combat formula changes, data/schema changes, or save
   migration.
 
+Status note, 2026-06-02:
+
+- A narrow Combat Skill Button Live MVP has landed through
+  `4acd04d [antig] feat(gui): add combat skill button live bridge`.
+- Completed coverage is limited to GUI live bridge `use_skill` routing and a
+  Combat ScreenModel `skill_menu` generated from `state["learned_skills"]` and
+  the existing `SKILLS` table.
+- Skill button enabled / disabled state is derived from current MP, learned
+  skill state, and whether combat has ended.
+- Python server-side remains gameplay authority: it validates that `skill_id`
+  is learned, the skill exists in the existing `SKILLS`, and MP is sufficient.
+  Insufficient MP returns 409 blocked, and MP deduction happens server-side.
+- Skill damage / heal / buff / debuff behavior reuses existing runtime behavior
+  and data. Browser JavaScript only dispatches UIAction payloads and renders the
+  returned ScreenModel.
+- One Rogue / Assassin-route E2E manual test pass confirmed live bridge entry,
+  combat entry, Rogue / Assassin skill usage, MP consumption, skill blocking
+  after MP depletion, EXP gain through skill combat, level-up HP/MP refill,
+  return to Dungeon Exploration, and later routing to World Map / Town Hub /
+  Guild / Inn / Save without an obvious routing regression. Warrior, Mage,
+  Priest, and other class skill branches remain pending for follow-up manual
+  tests.
+- This status note does not approve a complete GUI runtime, formal skill system,
+  skill framework, target selection, skill rebalancing, large combat refactor,
+  `game.py` changes, data/schema changes, save migration, or combat formula
+  changes.
+
 ## 6. Action Contract
 
 Each live action should have:
