@@ -697,8 +697,11 @@ Validated during this session:
 - Town Hub `workshop` facility routes to Workshop Screen static prototype.
 - Workshop Screen logic treats buy/upgrade success as simulated feedback only and does not mutate runtime SSOT data.
 - Workshop Buy Weapon Live MVP landed in `2d99d7e [antig] feat(gui): add workshop buy weapon live bridge MVP`.
-- Workshop live route dispatches `buy_equipment` to Python server-side, which validates existing weapon, travel shop weapon availability, job compatibility, and Gold before deducting Gold and adding the item to inventory. It does not auto-equip.
-- Workshop live mode intentionally returns empty armor and upgrade lists for this MVP; armor, upgrade, and equip-management flows remain deferred.
+- Workshop live route dispatches `buy_equipment` to Python server-side, which validates existing weapon, workshop weapon availability, job compatibility, and Gold before deducting Gold and adding the item to inventory. It does not auto-equip.
+- Workshop Weapon Equip Live MVP landed in `6abe303 [antig] feat(gui): add workshop weapon equip bridge & align backpack presentation`.
+- Workshop live "owned equipment" surface can dispatch `equip_weapon` for inventory-held weapon slot items only. Python server-side validates weapon slot, inventory possession, job compatibility, and already-equipped state, then reuses `game.equip_item(...)`. Buying still does not auto-equip.
+- Workshop owned aggregation and World Map backpack / equipment overlay now align around inventory equipment plus currently equipped equipment, with same-item counts merged and equipped items marked.
+- Workshop live mode intentionally returns empty armor and upgrade lists for this MVP; armor, accessory, special-slot, unequip, comparison, upgrade, and full equip-management flows remain deferred.
 - Storage Screen static prototype v1 exists with locked, empty, filled, and blocked fixtures.
 - Storage Screen dispatches `select_category`, `select_inventory_item`, `select_storage_item`, `set_transfer_quantity`, `deposit_item`, `withdraw_item`, `unlock_storage`, and `back_to_town_hub` as static UIAction events.
 - Town Hub `storage` facility node correctly routes to Storage Screen static prototype.
@@ -714,7 +717,7 @@ Validated during this session:
 Recommended next session entry:
 
 ```text
-Treat Synthesis, Shop, and Workshop static prototype v1 as landed. Treat Workshop Buy Weapon Live MVP as landed in commit `2d99d7e`. Start the next session with read-only Hot Zone catch-up, then ask the user to select one small convergence target before implementation.
+Treat Synthesis, Shop, and Workshop static prototype v1 as landed. Treat Workshop Buy Weapon Live MVP as landed in commit `2d99d7e` and Workshop Weapon Equip Live MVP as landed in commit `6abe303`. Start the next session with read-only Hot Zone catch-up, then ask the user to select one small convergence target before implementation.
 ```
 
 Scope suggestion:

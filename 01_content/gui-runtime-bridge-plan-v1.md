@@ -144,6 +144,7 @@ Map current GUI UIActions to Python runtime helpers:
 
 - `buy_item` -> travel shop purchase helper.
 - `buy_equipment` -> workshop equipment purchase helper.
+- `equip_weapon` -> workshop weapon equip helper.
 - `upgrade_equipment` -> recipe craft helper.
 - `craft_recipe` -> recipe craft helper.
 - `learn_magic_book` -> magic shop learn helper.
@@ -230,6 +231,34 @@ Status note, 2026-06-02:
   or skill framework, target selection, combat formula or skill rebalance,
   generic facility framework, broader inventory / equipment / shop system,
   data/schema changes, save migration, or any broader facility family bridge.
+
+Status note, 2026-06-03:
+
+- A narrow Workshop Weapon Equip MVP has landed through
+  `6abe303 [antig] feat(gui): add workshop weapon equip bridge & align backpack presentation`.
+- Completed coverage is limited to Workshop live routing already established by
+  the buy weapon MVP, a runtime-shaped Workshop ScreenModel for weapon catalog
+  and owned weapon display, and `equip_weapon` for equipping an inventory-held
+  weapon into `state["equipment"]["weapon"]`.
+- `buy_equipment` still does not auto-equip. Equipping happens only when the
+  browser dispatches `equip_weapon` from the Workshop "owned equipment" surface.
+- Python server-side remains gameplay authority: it validates that `item_id`
+  exists in `EQUIPMENT`, that the item uses the `weapon` slot, that the player
+  has the weapon in inventory, that the player's job can use it, and that the
+  same weapon is not already equipped. Successful equip reuses
+  `game.equip_item(state, item_id, quiet=True)`.
+- Workshop owned aggregation and the World Map backpack / equipment overlay now
+  display inventory equipment plus currently equipped equipment with same-item
+  counts merged and equipped items marked. This is presentation alignment, not a
+  complete inventory UI.
+- Owner-side smoke confirmed purchase does not auto-equip, equipping does not
+  deduct Gold, the old weapon returns to inventory, the new weapon becomes
+  `equipment.weapon`, and save/load through World Map preserves equipment and
+  backpack state.
+- This status note does not approve armor, accessory, special-slot management,
+  unequip, equipment comparison, upgrade flow expansion, complete inventory /
+  equipment management, data/schema changes, save migration, combat formula
+  changes, stat rebalance, or any broader facility family bridge.
 
 ### Phase 4 - Temple And Relic Preview
 
