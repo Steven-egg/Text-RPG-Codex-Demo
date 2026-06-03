@@ -307,6 +307,7 @@ Accepted Shop decisions:
 Deferred Shop items:
 
 - Runtime adapter for shop inventory, gold, stock, or purchase mutation.
+- Presentation alignment follow-up across CLI / Shop static prototype / Shop live shell: shopkeeper naming / copy may differ, and Shop live may inherit a Town Hub-like summary/status block that creates extra top whitespace and pushes facility content downward. Treat as naming / copy / layout / ScreenModel presentation polish only, not gameplay blocker or Shop redesign scope.
 - Batch buying, selling, final shop economy tuning, item icons, NPC art, or formal asset pipeline.
 - Final keyboard focus graph.
 
@@ -320,12 +321,14 @@ Location:
 
 Current behavior:
 
-- Loads static fixtures only.
-- Renders Workshop title/subtitle, player/equipment summary, buy and upgrade tabs, equipment or recipe list, selected detail, requirement/status rows, feedback, primary action, back action, and UIAction log.
+- Supports static fixture fallback and approved live mode for Workshop Buy Weapon Live MVP.
+- Static mode renders Workshop title/subtitle, player/equipment summary, buy and upgrade tabs, equipment or recipe list, selected detail, requirement/status rows, feedback, primary action, back action, and UIAction log.
+- Live mode loads a runtime-shaped workshop ScreenModel and currently exposes weapon purchase only; `armors` and `upgrades` are intentionally empty for the MVP.
 - Default fixture covers a normal warrior-like state with enough gold/materials for buying or upgrading.
 - Constrained fixture covers low-gold, missing-material, job-restricted, and locked/unavailable states.
 - Selecting a tab dispatches `select_tab`; selecting equipment dispatches `select_item`; selecting an upgrade recipe dispatches `select_recipe`.
-- Enabled `buy_equipment` and `upgrade_equipment` write UIAction log and static feedback only; they do not consume gold/materials, change equipment, or mutate inventory.
+- In static mode, enabled `buy_equipment` and `upgrade_equipment` write UIAction log and static feedback only; they do not consume gold/materials, change equipment, or mutate inventory.
+- In live mode, `buy_equipment` dispatches to Python server-side gameplay authority and renders the returned ScreenModel.
 - Blocked states write `blocked_action` with the intended action and reason.
 - `back_to_town_hub` writes UIAction log before navigating to the Town Hub static prototype.
 - Town Hub `open_facility {"facility_id":"workshop"}` routes to `../workshop_screen/index.html`.
@@ -334,12 +337,15 @@ Accepted Workshop decisions:
 
 - Workshop Screen V1 is a Facility buy/upgrade-detail-requirement-confirm-feedback validation surface.
 - Treat fixture values as GUI display data only, not gameplay SSOT.
-- Keep primary actions as static UIAction logging; do not copy runtime forge/workshop rules into JS.
+- Keep static primary actions as UIAction logging; in live mode, JavaScript dispatches UIAction payloads and renders returned ScreenModels only.
+- Python remains gameplay authority for live weapon purchase validation, Gold deduction, and inventory mutation.
 - Keep the prototype focused on equipment purchase and upgrade readability, not economy or data changes.
 
 Deferred Workshop items:
 
-- Runtime adapter for equipment purchase, upgrade, inventory, material, or gold mutation.
+- Armor sales, upgrade execution, equipment changing / GUI equipment management, and broader inventory-equipment workflows.
+- Workshop stat label localization / presentation polish, such as `accuracy +3`.
+- Any broader workshop / equipment / shop framework work.
 - Real equipment icons, blacksmith/NPC art, animation, or formal asset pipeline.
 - Final keyboard focus graph.
 
@@ -690,6 +696,9 @@ Validated during this session:
 - Workshop Screen dispatches `select_tab`, `select_item`, `select_recipe`, `buy_equipment`, `upgrade_equipment`, `blocked_action`, and `back_to_town_hub` as static UIAction events only.
 - Town Hub `workshop` facility routes to Workshop Screen static prototype.
 - Workshop Screen logic treats buy/upgrade success as simulated feedback only and does not mutate runtime SSOT data.
+- Workshop Buy Weapon Live MVP landed in `2d99d7e [antig] feat(gui): add workshop buy weapon live bridge MVP`.
+- Workshop live route dispatches `buy_equipment` to Python server-side, which validates existing weapon, travel shop weapon availability, job compatibility, and Gold before deducting Gold and adding the item to inventory. It does not auto-equip.
+- Workshop live mode intentionally returns empty armor and upgrade lists for this MVP; armor, upgrade, and equip-management flows remain deferred.
 - Storage Screen static prototype v1 exists with locked, empty, filled, and blocked fixtures.
 - Storage Screen dispatches `select_category`, `select_inventory_item`, `select_storage_item`, `set_transfer_quantity`, `deposit_item`, `withdraw_item`, `unlock_storage`, and `back_to_town_hub` as static UIAction events.
 - Town Hub `storage` facility node correctly routes to Storage Screen static prototype.
@@ -705,7 +714,7 @@ Validated during this session:
 Recommended next session entry:
 
 ```text
-Treat Synthesis, Shop, and Workshop static prototype v1 as landed. Start the next session with read-only Hot Zone catch-up, then ask the user to select one small convergence target before implementation.
+Treat Synthesis, Shop, and Workshop static prototype v1 as landed. Treat Workshop Buy Weapon Live MVP as landed in commit `2d99d7e`. Start the next session with read-only Hot Zone catch-up, then ask the user to select one small convergence target before implementation.
 ```
 
 Scope suggestion:
@@ -714,7 +723,7 @@ Scope suggestion:
 - Do not connect runtime.
 - Do not use mockup/reference images as runtime assets.
 - Keep UIAction logging before navigation.
-- Preserve Start Screen, Town Hub, Guild, Synthesis, World Map, Dungeon Exploration, Combat, Shop, and Workshop as static fixture display only until a runtime adapter is explicitly approved.
+- Preserve Start Screen, Town Hub, Guild, Synthesis, World Map, Dungeon Exploration, Combat, Shop, and Workshop static fixture fallback. Workshop has an approved live weapon-purchase adapter only; do not infer armor, upgrade, equip-management, or broader inventory runtime work from it.
 - Do not add gameplay logic, new combat formulas, runtime adapters, or save reads/writes.
 
 Alternative next steps:
