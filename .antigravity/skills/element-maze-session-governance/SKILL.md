@@ -117,6 +117,28 @@ tasks, commit packaging, handoff/status work, or when the user asks. Never run
 `git add`, `git commit`, `git push`, branch operations, destructive commands, or
 state-changing cleanup unless the user explicitly asks.
 
+## Diagnostic And Verification Routine
+
+Lower the friction for harmless checks, but keep write permissions narrow.
+
+Running diagnostic tools is broadly allowed when it helps the active task and
+does not modify files, runtime state, save data, or Git history. Examples include
+read-only Git checks, syntax checks, validation, smoke tests, and content
+inventory reports.
+
+Modifying tools is narrowly allowed only when the active task directly concerns
+that test or report surface. Small non-destructive coverage, wording, or
+reporting improvements may be made in `smoke_test_*_bridge.py`,
+`validate_data.py`, or `content_inventory_report.py`.
+
+`06_tools/` is not a free modification zone. `gui_runtime_bridge.py` is a live
+bridge server surface; modifying it requires an explicit approval gate.
+
+Any runtime, state, API, data, schema, save, or combat behavior change still
+requires owner approval. Do not create a scratch-zone system, perform large tool
+rewrites, move/delete/archive files, or run `git add`, `git commit`, or
+`git push` unless explicitly approved.
+
 ## Verification Guidance
 
 Verification should fit the task instead of becoming ceremony.
