@@ -55,6 +55,27 @@ implementation surface may include:
 Runtime/data/schema/combat formula changes remain out of scope unless the user
 separately approves that exact work after a read-only planning gate.
 
+## 3.1 Current Landed Live Matrix
+
+This matrix is the Task Zone home for live bridge status that should not bloat
+`README.md` or `01_content/codex-handoff-short.md`.
+
+| Slice | Commit | Landed scope | Not opened |
+|---|---|---|---|
+| Start / load / restart | blessed live bridge cleanup | `start_new_game`, `restart_game`, `load_game`, live entry-state alignment. | Full frontend app shell or save migration. |
+| Inn | blessed live bridge cleanup | `rest_at_inn` through Python runtime state. | Broader facility framework. |
+| World Map | blessed live bridge cleanup | Runtime-backed route model, `save_game`, shell-only `open_settings`. | Real settings panel or arbitrary town return action. |
+| Dungeon / Combat loop | `be6b06c [antig] feat(gui): complete live combat loop feedback` | Travel, exploration step / retreat, combat actions, victory result, route clear / resolved state. | Complete dungeon framework, boss framework, combat formula changes. |
+| Guild report | `c2052d4 [antig] feat(gui): add guild clear report live bridge` | Clear report registration and display for eligible unlocked dungeon clears. | Full guild / quest / reputation / achievement system. |
+| Combat Skill Button | `4acd04d [antig] feat(gui): add combat skill button live bridge` | `use_skill` routing from existing `learned_skills` and `SKILLS`. | Formal skill framework, target selection, rebalance. |
+| Shop Buy Consumable | `ebc1b5e [antig] feat(gui): add shop buy consumable live bridge` | Buy 1 existing travel-shop consumable through server-side validation. | Full shop system, sell, quantity selector, equipment purchase. |
+| Magic Shop Learn Book | `b59fe43 [antig] feat(gui): add magic shop learn book live bridge` | Learn 1 existing magic book through server-side validation. | Full magic / skill framework or combat rebalance. |
+| Workshop Buy Weapon | `2d99d7e [antig] feat(gui): add workshop buy weapon live bridge MVP` | Buy existing weapon-shop weapons; do not auto-equip. | Armor, upgrades, full workshop framework. |
+| Workshop Weapon Equip | `6abe303 [antig] feat(gui): add workshop weapon equip bridge & align backpack presentation` | Equip inventory-held weapon-slot items into `equipment.weapon`; align inventory/equipment presentation. | Full inventory / equipment management, unequip, comparison, stat rebalance. |
+
+Latest docs sync after Workshop Weapon Equip:
+`a20d912 [codex] docs(gui): sync workshop weapon equip bridge handoff`.
+
 ## 4. Bridge Shape
 
 Recommended local-only architecture:
@@ -231,6 +252,28 @@ Status note, 2026-06-02:
   or skill framework, target selection, combat formula or skill rebalance,
   generic facility framework, broader inventory / equipment / shop system,
   data/schema changes, save migration, or any broader facility family bridge.
+
+Status note, 2026-06-03:
+
+- A narrow Workshop Buy Weapon MVP has landed through
+  `2d99d7e [antig] feat(gui): add workshop buy weapon live bridge MVP`.
+- Completed coverage is limited to Town Hub -> Workshop live routing, a
+  runtime-shaped Workshop ScreenModel for existing `SHOP_INVENTORY["weapon"]`
+  entries, and `buy_equipment` for purchasing exactly one existing weapon at a
+  time.
+- The action is limited to existing `EQUIPMENT` entries sold through the weapon
+  shop. Python server-side validates equipment existence, weapon-shop
+  availability, player job compatibility, and sufficient Gold before deducting
+  Gold and adding the weapon to inventory.
+- Buying a weapon intentionally does not auto-equip it. Equipment changes require
+  a separate approved equip action.
+- Browser JavaScript only dispatches UIAction payloads through `runtimeClient`
+  and renders the returned ScreenModel. Static fixture fallback and UIAction
+  logging remain available.
+- This status note does not approve armor purchase, accessory purchase, sell,
+  quantity selection, upgrade flow expansion, full workshop system, full
+  inventory / equipment management, data/schema changes, save migration, combat
+  formula changes, stat rebalance, or any broader facility family bridge.
 
 Status note, 2026-06-03:
 

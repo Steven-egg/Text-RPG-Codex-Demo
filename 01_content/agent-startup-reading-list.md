@@ -1,89 +1,114 @@
-# Agent Startup Reading List - Text-RPG-Codex-Demo
+# Agent Startup Reading List - Element Maze
 
-為了降低新 Session 的 Token 膨脹壓力，防止 Agent 讀入過多歷史文件而導致上下文認知混亂（Drift），特制定此 Agent 啟動讀取清單。
-後續所有在新 Session 中啟動的 Agent，在未獲得使用者特別指示前，**必須嚴格遵循本載入規則，嚴禁進行全專案目錄檔案掃描或主動加載冷區檔案**。
+Purpose: keep new Codex and Antigravity sessions aligned without loading broad
+history. This file defines loading zones only; it is not a project-status log.
 
----
+Default rule: read the Hot Zone, then stop. Task Zone files are opened only when
+the current task explicitly needs them. Cold Zone files are not loaded unless the
+owner names them or the task cannot be handled without that history.
 
-## 1. 文件載入分區規則 (Loading Zones)
+## 1. Hot Zone
 
-### 🔴 Hot Zone (新 Session 啟動必讀 - 核心治理與精簡現況)
-*每次新對話/Session 開始時，Agent 必須主動加載且僅加載以下核心入口，以快速對齊專案現況與治理邊界。長篇 GUI 詳細紀錄不應在每次啟動時全文讀取：*
+New session minimum read order:
 
-1. [AGENTS.md](file:///c:/Users/user/OneDrive/文字冒險遊戲/AGENTS.md)
-   - *用途*：Codex / Antigravity 的共同入口路由，確認本輪應使用哪個 agent-local skill 與哪些檔案不可碰。
-2. [README.md](file:///c:/Users/user/OneDrive/文字冒險遊戲/README.md)
-   - *用途*：確認專案結構、啟動方式、SSOT 規則與最新進度摘要。
-3. [01_content/codex-handoff-short.md](file:///c:/Users/user/OneDrive/文字冒險遊戲/01_content/codex-handoff-short.md)
-   - *用途*：確認最新穩定狀態、已完成的 MVP 項目與下一步清晰的施工邊界。
-4. 專案內目前有效的 `SKILL.md`
-   - Codex：`.codex/skills/element-maze-session-ops/SKILL.md`
-   - Antigravity：`.antigravity/skills/element-maze-session-governance/SKILL.md`
-   - *用途*：依目前 agent 工具環境載入專案本機專屬的協作與治理規範、指令匯報格式與嚴格禁止事項；不要把 Codex / Antigravity skill 混用成同一份狀態來源。
-   - GUI static prototype 任務再讀：`.codex/skills/element-maze-gui-static-prototype/SKILL.md` 或 `.antigravity/skills/element-maze-gui-static-prototype/SKILL.md`
-5. [01_content/agent-startup-reading-list.md](file:///c:/Users/user/OneDrive/文字冒險遊戲/01_content/agent-startup-reading-list.md) *(本檔案)*
-   - *用途*：本載入指南，用於約束載入範圍。
+1. `AGENTS.md`
+   - Shared entry route and cross-agent governance.
+2. `01_content/agent-startup-reading-list.md`
+   - This loading-zone guide.
+3. Current agent skill
+   - Codex: `.codex/skills/element-maze-session-ops/SKILL.md`
+   - Antigravity: `.antigravity/skills/element-maze-session-governance/SKILL.md`
+4. `README.md`
+   - Compact project entry, current stable capsule, run/verify basics, SSOT
+     boundaries.
+5. `01_content/codex-handoff-short.md`
+   - Short new-session handoff: latest stable point, current prohibitions,
+     next-step boundary, and Task Zone routing.
 
----
+For GUI static prototype tasks, also read the current agent's GUI static
+prototype skill:
 
-### 🟡 Task Zone (依任務選讀 - 特定開發任務加載)
-*僅在進行與該主題相關的開發或規劃任務時，才允許依需讀取，平常啟動時不主動讀取：*
+- Codex: `.codex/skills/element-maze-gui-static-prototype/SKILL.md`
+- Antigravity: `.antigravity/skills/element-maze-gui-static-prototype/SKILL.md`
 
-* **GUI 目標與架構關聯任務**：
-  - [gui-html-static-prototype-progress-v1.md](file:///c:/Users/user/OneDrive/文字冒險遊戲/01_content/gui-html-static-prototype-progress-v1.md) (GUI static prototype 詳細 handoff / 驗證紀錄；只讀本次任務需要的 screen 章節或 recommended next step，不在啟動時全文讀取)
-  - [gui-planning-index.md](file:///c:/Users/user/OneDrive/文字冒險遊戲/01_content/gui-planning-index.md) (GUI 規劃總索引)
-  - [ui-flow-blueprint.md](file:///c:/Users/user/OneDrive/文字冒險遊戲/01_content/ui-flow-blueprint.md) (UI 流程藍圖)
-  - [gui-screen-map.md](file:///c:/Users/user/OneDrive/文字冒險遊戲/01_content/gui-screen-map.md) (GUI 畫面地圖)
-  - `gui-planning-index.md` 是 Task Zone 導覽索引；只有 GUI planning、drift audit 或 task routing 需要時才讀，不在每次啟動時全文讀取。
-* **具體畫面實作與調整任務**：
-  - 僅加載對應設施的 HTML/CSS/JS 代碼，例如當前在處理 Workshop 任務時，只讀取 `07_gui_prototype/workshop_screen/` 下的檔案。
+Do not read `01_content/gui-html-static-prototype-progress-v1.md` or
+`01_content/gui-planning-index.md` during ordinary startup unless the task needs
+GUI screen-level detail, GUI planning, drift audit, or task routing.
 
----
+## 2. Task Zone
 
-### 🔵 Cold Zone (降權不讀 - 歷史願景大文件)
-*以下為歷史大文件、系統規劃書、或是已定案的長期願景文件。**除非使用者在對話中特別指名要求讀取，否則啟動時一律降權、不主動加載**以節省 Context 空間：*
+Open these only for matching tasks.
 
-- [act-2-content-plan.md](file:///c:/Users/user/OneDrive/文字冒險遊戲/01_content/act-2-content-plan.md) (第二幕內容規劃)
-- [full-act-structure.md](file:///c:/Users/user/OneDrive/文字冒險遊戲/01_content/full-act-structure.md) (全幕次結構規劃)
-- [game-architecture.md](file:///c:/Users/user/OneDrive/文字冒險遊戲/01_content/game-architecture.md) (遊戲架構)
-- [game-design.md](file:///c:/Users/user/OneDrive/文字冒險遊戲/01_content/game-design.md) (遊戲設計)
-- [combat-growth-layering-plan.md](file:///c:/Users/user/OneDrive/文字冒險遊戲/01_content/combat-growth-layering-plan.md) (戰鬥與成長分層規劃)
-- [codex-session-snapshot.md](file:///c:/Users/user/OneDrive/文字冒險遊戲/01_content/codex-session-snapshot.md) (歷史對話 Snapshot 紀錄)
-- [demo-playtest-notes.md](file:///c:/Users/user/OneDrive/文字冒險遊戲/01_content/demo-playtest-notes.md) (遊玩測試回饋與待優化筆記)
-- [gui-implementation-platform-tradeoff.md](file:///c:/Users/user/OneDrive/文字冒險遊戲/01_content/gui-implementation-platform-tradeoff.md) (GUI 實作平台技術評估取捨)
+### GUI static prototype
 
----
+- `01_content/gui-html-static-prototype-progress-v1.md`
+  - Current static prototype handoff and screen-level verification. Read targeted
+    sections only.
+- `01_content/gui-planning-index.md`
+  - GUI document lifecycle, planning routing, drift audit, and archive candidate
+    index.
+- `01_content/ui-flow-blueprint.md`
+  - CLI thin-layer to GUI flow mapping.
+- `01_content/gui-screen-map.md`
+  - Screen, ScreenModel, and UIAction map.
+- `07_gui_prototype/<screen>/`
+  - Read only the relevant screen's HTML/CSS/render-layer JS/fixtures.
 
-## 2. Archive Candidates (已定案設施的歷史草案歸檔候選)
+### GUI runtime bridge
 
-下列 **23 個檔案** 屬於早期設計、線框圖草案、評審檢核表或 Prompt 草擬文件。由於 Town Hub、Guild、Synthesis 等設施的靜態原型已定案並進入穩定階段，**這些文件均已失去時效性，標記為未來可移入 archive 目錄的歸檔候選**。
+- `01_content/gui-runtime-bridge-plan-v1.md`
+  - Runtime-connected prototype plan, approved surfaces, and landed live-slice
+    status notes.
+- `01_content/gui-runtime-bridge-preflight-v1.md`
+  - Read only when a bridge preflight or runtime-connected planning task requires
+    it.
+- `01_content/gui-bridge-vertical-slice-contract-audit-v1.md`
+  - Read only for bridge contract audits.
 
-> [!NOTE]
-> 治理政策：為了避免檔案遺失或路徑中斷，本階段**嚴禁在硬碟上進行實體搬移或刪除檔案動作**，僅在文件中進行邏輯分類標記，待未來啟動正式文件整理輪時一次性處理。
+Runtime-connected prototype work is not implied by static prototype approval.
+When the owner approves runtime-connected scope, first read the runtime bridge
+plan and stop at a read-only planning gate before implementation.
 
-> [!NOTE]
-> 若 Hot Zone 文件與最新 commit 或現有目錄狀態出現落差，新 Session 應先回報 drift 風險，並以 read-only 方式確認差異；不得直接讀取 Cold Zone 大文件來「補歷史」。
+### Runtime / data / schema / combat
 
-1. [gui-asset-registry-draft.md](file:///c:/Users/user/OneDrive/文字冒險遊戲/01_content/gui-asset-registry-draft.md)
-2. [gui-asset-request-schema.md](file:///c:/Users/user/OneDrive/文字冒險遊戲/01_content/gui-asset-request-schema.md)
-3. [gui-facility-screen-template.md](file:///c:/Users/user/OneDrive/文字冒險遊戲/01_content/gui-facility-screen-template.md)
-4. [gui-facility-synthesis-mockup-request.md](file:///c:/Users/user/OneDrive/文字冒險遊戲/01_content/gui-facility-synthesis-mockup-request.md)
-5. [gui-facility-synthesis-prompt-draft.md](file:///c:/Users/user/OneDrive/文字冒險遊戲/01_content/gui-facility-synthesis-prompt-draft.md)
-6. [gui-facility-synthesis-v2-prompt-draft.md](file:///c:/Users/user/OneDrive/文字冒險遊戲/01_content/gui-facility-synthesis-v2-prompt-draft.md)
-7. [gui-guild-screen-model-draft.md](file:///c:/Users/user/OneDrive/文字冒險遊戲/01_content/gui-guild-screen-model-draft.md)
-8. [gui-guild-screen-review-checklist.md](file:///c:/Users/user/OneDrive/文字冒險遊戲/01_content/gui-guild-screen-review-checklist.md)
-9. [gui-guild-screen-visual-baseline.md](file:///c:/Users/user/OneDrive/文字冒險遊戲/01_content/gui-guild-screen-visual-baseline.md)
-10. [gui-html-town-hub-fixture-spec.md](file:///c:/Users/user/OneDrive/文字冒險遊戲/01_content/gui-html-town-hub-fixture-spec.md)
-11. [gui-html-town-hub-prototype-plan.md](file:///c:/Users/user/OneDrive/文字冒險遊戲/01_content/gui-html-town-hub-prototype-plan.md)
-12. [gui-town-hub-facility-node-mapping-v1.md](file:///c:/Users/user/OneDrive/文字冒險遊戲/01_content/gui-town-hub-facility-node-mapping-v1.md)
-13. [gui-town-hub-mockup-review-v1.md](file:///c:/Users/user/OneDrive/文字冒險遊戲/01_content/gui-town-hub-mockup-review-v1.md)
-14. [gui-town-hub-programmatic-layout-plan-v1.md](file:///c:/Users/user/OneDrive/文字冒險遊戲/01_content/gui-town-hub-programmatic-layout-plan-v1.md)
-15. [gui-town-hub-review-checklist.md](file:///c:/Users/user/OneDrive/文字冒險遊戲/01_content/gui-town-hub-review-checklist.md)
-16. [gui-town-hub-screen-model-draft.md](file:///c:/Users/user/OneDrive/文字冒險遊戲/01_content/gui-town-hub-screen-model-draft.md)
-17. [gui-town-hub-ui2-wireframe-draft.md](file:///c:/Users/user/OneDrive/文字冒險遊戲/01_content/gui-town-hub-ui2-wireframe-draft.md)
-18. [gui-town-hub-ui2-wireframe-review-v1.md](file:///c:/Users/user/OneDrive/文字冒險遊戲/01_content/gui-town-hub-ui2-wireframe-review-v1.md)
-19. [gui-town-hub-visual-mockup-candidate-review-v1.md](file:///c:/Users/user/OneDrive/文字冒險遊戲/01_content/gui-town-hub-visual-mockup-candidate-review-v1.md)
-20. [gui-town-hub-visual-mockup-prompt-draft.md](file:///c:/Users/user/OneDrive/文字冒險遊戲/01_content/gui-town-hub-visual-mockup-prompt-draft.md)
-21. [gui-town-hub-visual-mockup-prompt-review-v1.md](file:///c:/Users/user/OneDrive/文字冒險遊戲/01_content/gui-town-hub-visual-mockup-prompt-review-v1.md)
-22. [gui-town-hub-wireframe-plan.md](file:///c:/Users/user/OneDrive/文字冒險遊戲/01_content/gui-town-hub-wireframe-plan.md)
-23. [gui-ui-direction-brief.md](file:///c:/Users/user/OneDrive/文字冒險遊戲/01_content/gui-ui-direction-brief.md)
+For gameplay, runtime, data, schema, save, combat, economy, inventory, or bridge
+work, start with a read-only planning gate. Do not edit files until the owner
+approves the exact surface.
+
+## 3. Cold Zone
+
+Cold Zone files are historical, long-form, or broad planning documents. Do not
+load them during ordinary startup.
+
+Examples:
+
+- `01_content/game-design.md`
+- `01_content/game-architecture.md`
+- `01_content/full-act-structure.md`
+- `01_content/act-2-content-plan.md`
+- `01_content/combat-growth-layering-plan.md`
+- `01_content/codex-session-snapshot.md`
+- `01_content/demo-playtest-notes.md`
+- `01_content/gui-implementation-platform-tradeoff.md`
+
+If Hot Zone status conflicts with current git or current files, report the drift
+and use targeted read-only checks. Do not load broad Cold Zone history just to
+reconstruct old decisions.
+
+## 4. Archive Candidates
+
+Archive candidates are no longer listed in this Hot Zone startup file. Their
+logical lifecycle and routing live in `01_content/gui-planning-index.md`.
+
+Do not physically move, delete, or archive files unless the owner explicitly
+approves that exact docs surface and operation.
+
+## 5. Change Discipline
+
+- Do not read or write `save.json`.
+- Do not modify runtime, data, schema, save, or combat formulas from a docs or GUI
+  prototype task.
+- Do not treat HTML fixtures as gameplay SSOT.
+- Do not connect Python runtime for static prototype work.
+- Do not stage, commit, push, create branches, or archive files unless explicitly
+  asked.
