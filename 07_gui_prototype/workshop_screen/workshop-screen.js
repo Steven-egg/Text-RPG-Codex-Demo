@@ -2,6 +2,7 @@
  * ELM FORGE - Workshop Screen Prototype Logic
  * Programmatic GUI -> Asset-driven. Built purely on static fixtures.
  */
+import { runtimeClient } from "../shared/runtime-client.js";
 
 // 全域狀態變數
 let currentFixtureData = null;
@@ -35,6 +36,13 @@ const tabButtons = document.querySelectorAll('.tab-btn');
 
 // 初始化載入
 document.addEventListener('DOMContentLoaded', () => {
+  if (runtimeClient.isLiveMode()) {
+    const selectorContainer = document.querySelector('.fixture-selector-container');
+    if (selectorContainer) {
+      selectorContainer.style.display = 'none';
+    }
+  }
+
   // 1. 綁定 Fixture Selector
   fixtureSelect.addEventListener('change', (e) => {
     loadFixture(e.target.value);
@@ -53,9 +61,23 @@ document.addEventListener('DOMContentLoaded', () => {
     logUIAction('back_to_town_hub', {});
     feedbackBar.textContent = '正在返回邊境城鎮艾爾姆...';
     feedbackBar.style.color = 'var(--info-blue)';
-    setTimeout(() => {
-      window.location.href = '../town_hub/index.html';
-    }, 800);
+
+    if (runtimeClient.isLiveMode()) {
+      runtimeClient.dispatchAction("workshop_screen", "back_to_town_hub", {})
+        .then((result) => {
+          setTimeout(() => {
+            window.location.href = runtimeClient.nextRoute(result, '../town_hub/index.html');
+          }, 800);
+        })
+        .catch((err) => {
+          console.error(err);
+          window.location.href = '../town_hub/index.html?mode=live';
+        });
+    } else {
+      setTimeout(() => {
+        window.location.href = '../town_hub/index.html';
+      }, 800);
+    }
   });
 
   // 4. 綁定除錯面板 toggle
@@ -76,6 +98,58 @@ document.addEventListener('DOMContentLoaded', () => {
  * 載入指定 Fixture
  */
 function loadFixture(fileName) {
+  if (runtimeClient.isLiveMode()) {
+    loadLiveScreen();
+    return;
+  }
+  loadStaticFallback(fileName);
+}
+
+async function loadLiveScreen() {
+  try {
+    const model = await runtimeClient.getScreen("workshop_screen");
+    currentFixtureData = model;
+    logUIAction('live_screen_loaded', {
+      actionId: "live_screen_loaded",
+      source: "live_loader",
+      payload: { mode: "live", screen_id: "workshop_screen" }
+    });
+
+    // 更新 Header
+    playerNameEl.textContent = `冒險者: ${model.player.name}`;
+    playerJobEl.textContent = `職業: ${model.player.job} (Lv${model.player.level})`;
+    playerGoldEl.textContent = `${model.player.gold}G`;
+
+    // 更新分類計數
+    updateCounts();
+
+    // 切換並渲染當前 Tab
+    switchTab(currentTab, true);
+
+    if (model.feedback_message) {
+      feedbackBar.textContent = model.feedback_message.text;
+      feedbackBar.style.color = model.feedback_message.tone === 'success' ? 'var(--success-color)' : 'var(--gold-bright)';
+    } else {
+      feedbackBar.textContent = '工坊設備已就緒，請選擇項目。';
+      feedbackBar.style.color = 'var(--gold-bright)';
+    }
+  } catch (error) {
+    console.error(error);
+    const reason = runtimeClient.errorMessage(error);
+    logUIAction('live_bridge_unavailable', {
+      action_id: "live_bridge_unavailable",
+      payload: { reason },
+      source: "live_loader",
+      dispatched: false,
+      reason: "fallback_to_fixture"
+    });
+    feedbackBar.textContent = `Live 連線失敗，載入靜態 Fixture: ${reason}`;
+    feedbackBar.style.color = 'var(--danger-color)';
+    loadStaticFallback('workshop-default.json');
+  }
+}
+
+function loadStaticFallback(fileName) {
   const url = `./fixtures/${fileName}`;
   fetch(url)
     .then(response => {
@@ -723,6 +797,50 @@ function handlePrimaryAction() {
       item_id: selectedItemId,
       disabled_reason: checkRes.disabledReason
     });
+    return;
+  }
+
+  if (runtimeClient.isLiveMode()) {
+    logUIAction('buy_equipment', {
+      item_id: selectedItemId,
+      price: item.price
+    });
+
+    primaryActionBtn.disabled = true;
+
+    runtimeClient.dispatchAction("workshop_screen", "buy_equipment", { item_id: selectedItemId })
+      .then((result) => {
+        if (result.screen_model) {
+          currentFixtureData = result.screen_model;
+          updateCounts();
+
+          // Re-render Header
+          playerNameEl.textContent = `冒險者: ${currentFixtureData.player.name}`;
+          playerJobEl.textContent = `職業: ${currentFixtureData.player.job} (Lv${currentFixtureData.player.level})`;
+          playerGoldEl.textContent = `${currentFixtureData.player.gold}G`;
+
+          switchTab(currentTab, true);
+        }
+
+        if (result.screen_model && result.screen_model.feedback_message) {
+          feedbackBar.textContent = `[交易成功] ` + result.screen_model.feedback_message.text;
+        } else {
+          feedbackBar.textContent = `[交易成功] 葛雷將 ${item.name} 妥善包裝好放入你的背包：「金幣收下了，祝你在焦石礦坑好運！」`;
+        }
+        feedbackBar.style.color = 'var(--success-color)';
+      })
+      .catch((err) => {
+        console.error(err);
+        const reason = runtimeClient.errorMessage(err);
+        feedbackBar.textContent = `交易失敗: ${reason}`;
+        feedbackBar.style.color = 'var(--danger-color)';
+        logUIAction('blocked_action', {
+          action: 'buy_equipment',
+          item_id: selectedItemId,
+          disabled_reason: reason
+        });
+        primaryActionBtn.disabled = false;
+      });
     return;
   }
 

@@ -276,6 +276,8 @@ class GuiRuntimeSession:
             )
         if action_id == "buy_item":
             return self.buy_item(payload, screen_id=screen_id)
+        if action_id == "buy_equipment":
+            return self.buy_equipment(payload, screen_id=screen_id)
         if action_id == "learn_magic_book":
             return self.learn_magic_book(payload, screen_id=screen_id)
         if action_id == "rest_at_inn":
@@ -793,6 +795,51 @@ class GuiRuntimeSession:
             response["screen_model"]["feedback_message"] = response["message"]
         return response
 
+    def buy_equipment(self, payload: dict[str, Any], *, screen_id: str | None = None) -> dict[str, Any]:
+        state = self.require_state()
+        item_id = payload.get("item_id")
+
+        if not item_id or item_id not in EQUIPMENT:
+            raise GuiActionError("裝備不存在。", status=400)
+
+        if item_id not in SHOP_INVENTORY["weapon"]:
+            raise GuiActionError("此商店不販售該裝備（MVP 僅限購買武器）。", status=400)
+
+        eq = EQUIPMENT[item_id]
+        if state.get("job") not in eq["jobs"]:
+            raise GuiActionError(
+                f"{state.get('job')}無法使用這件裝備，先別買比較好。",
+                status=409,
+                result_status="blocked",
+                blocked_reason="職業不合",
+            )
+
+        price = eq["price"]
+        if state.get("gold", 0) < price:
+            raise GuiActionError(
+                "金幣不足，無法購買該裝備。",
+                status=409,
+                result_status="blocked",
+                blocked_reason="金幣不足",
+            )
+
+        state["gold"] -= price
+        game.add_item(state, item_id, 1)
+
+        response = action_response(
+            "buy_equipment",
+            f"成功購買 {eq['name']}！獲得 {eq['name']} x1，扣除金幣 {price}G。",
+            state,
+            screen_id="workshop_screen",
+        )
+        if response.get("screen_model"):
+            response["screen_model"]["feedback_message"] = {
+                "tone": "success",
+                "speaker": "葛雷",
+                "text": f"「金幣收下了，祝你在焦石礦坑好運！這是你的 {eq['name']}。」"
+            }
+        return response
+
     def buy_item(self, payload: dict[str, Any], *, screen_id: str | None = None) -> dict[str, Any]:
         state = self.require_state()
         item_id = payload.get("item_id")
@@ -948,6 +995,8 @@ class GuiRuntimeSession:
             return self.guild_screen_model()
         if screen_id in {"shop_screen", "facility_shop_screen"}:
             return shop_screen_model(state)
+        if screen_id in {"workshop_screen", "facility_workshop_screen"}:
+            return workshop_screen_model(state)
         if screen_id in {"magic_shop_screen", "facility_magic_shop_screen"}:
             return magic_shop_screen_model(state)
         if screen_id == "dungeon_exploration":
@@ -1205,6 +1254,8 @@ def build_screen_model(screen_id: str | None, state: dict[str, Any]) -> dict[str
         return guild_screen_model(state)
     if screen_id in {"shop_screen", "facility_shop_screen"}:
         return shop_screen_model(state)
+    if screen_id in {"workshop_screen", "facility_workshop_screen"}:
+        return workshop_screen_model(state)
     if screen_id in {"magic_shop_screen", "facility_magic_shop_screen"}:
         return magic_shop_screen_model(state)
     return None
@@ -1515,7 +1566,17 @@ def facility_nodes(state: dict[str, Any]) -> list[dict[str, Any]]:
             navigation_route="../shop_screen/index.html",
             enabled=True,
         ),
-        facility("workshop", "鐵刃 / 堅甲工坊", "裝備購買與強化功能將在後續版本開放。", "hammer", "open_facility", enabled=False),
+        facility(
+            "workshop",
+            "鐵刃 / 堅甲工坊",
+            "前往工坊購買武器。（MVP 僅開放武器購買，防具與強化尚不可用）",
+            "hammer",
+            "open_facility",
+            payload={"facility_id": "workshop", "target_screen_id": "workshop_screen"},
+            target_screen_id="workshop_screen",
+            navigation_route="../workshop_screen/index.html",
+            enabled=True,
+        ),
         facility("synthesis", "米菈合成屋", "煉金合成配方將在後續版本開放。", "alchemy", "open_facility", enabled=False),
         facility(
             "magic_shop",
@@ -1824,6 +1885,51 @@ def get_magic_book_description(book_id: str, name: str, skill_desc: str) -> str:
         "book_cinder_mark": "釋放火山微粒覆蓋於敵方目標身上，留下容易被高熱點燃的隱密標記。火花術的絕佳增傷搭配。"
     }
     return descs.get(book_id, f"記載著{name}術式的古老魔法書。")
+
+
+def workshop_screen_model(state: dict[str, Any]) -> dict[str, Any]:
+    gold = state.get("gold", 0)
+    stats = game.get_stats(state)
+
+    player_data = {
+        "name": state.get("name", ""),
+        "job": state.get("job", ""),
+        "level": state.get("level", 1),
+        "current_hp": state.get("current_hp", 0),
+        "max_hp": stats.get("max_hp", 0),
+        "current_mp": state.get("current_mp", 0),
+        "max_mp": stats.get("max_mp", 0),
+        "gold": gold,
+        "completed_quests": state.get("completed_quests", []),
+        "inventory": state.get("inventory", {}),
+        "equipment": state.get("equipment", {})
+    }
+
+    weapons_list = []
+    for item_id in SHOP_INVENTORY["weapon"]:
+        if item_id in EQUIPMENT:
+            eq = EQUIPMENT[item_id]
+            weapons_list.append({
+                "id": item_id,
+                "name": eq["name"],
+                "slot": eq["slot"],
+                "subtype": eq["subtype"],
+                "price": eq["price"],
+                "jobs": eq["jobs"],
+                "stats": eq["stats"],
+                "desc": eq["desc"]
+            })
+
+    return {
+        "screen_id": "facility_workshop_screen",
+        "facility_id": "workshop",
+        "title": "邊境工坊 (Live)",
+        "subtitle": "與遊戲核心同步的裝備交易服務，MVP 僅限武器購買。",
+        "player": player_data,
+        "weapons": weapons_list,
+        "armors": [],
+        "upgrades": []
+    }
 
 
 def magic_shop_screen_model(state: dict[str, Any]) -> dict[str, Any]:
