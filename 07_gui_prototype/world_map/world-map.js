@@ -504,11 +504,15 @@ async function activateAction(action, source) {
     } else if (action.action_id === "open_inventory") {
       mockPreview = {
         type: "inventory",
-        title: "背包唯讀摘要",
+        title: "背包 / 裝備",
         data: [
           { name: "小回復藥水", quantity: 3, category: "補給品", desc: "微風平原產的草藥製成。戰鬥中可用，回復 35 HP。" },
           { name: "集中滴露", quantity: 1, category: "補給品", desc: "晶瑩的露珠。戰鬥中可用，回復 12 MP。" },
-          { name: "微光鐵劍", quantity: 1, category: "裝備", desc: "鐵刃工坊精製的輕型鐵劍。可用職業：劍士、盜賊。" },
+          { name: "微光鐵劍（已裝備）", quantity: 2, category: "裝備", desc: "鐵刃工坊精製的輕型鐵劍。可用職業：劍士、盜賊。" },
+          { name: "皮帽（已裝備）", quantity: 1, category: "裝備", desc: "初級防具，提供微量防禦。" },
+          { name: "硬皮甲（已裝備）", quantity: 1, category: "裝備", desc: "初級防具，提供基礎防禦。" },
+          { name: "溫暖護身符（已裝備）", quantity: 1, category: "裝備", desc: "帶有溫暖氣息的護身符。提供火抗性。" },
+          { name: "見習徽章（已裝備）", quantity: 1, category: "裝備", desc: "見習冒險者的證明。" },
           { name: "青苔纖維", quantity: 5, category: "素材", desc: "青苔洞窟黏附的韌性纖維。可用於合成配方。" },
           { name: "裂石碎片", quantity: 3, category: "素材", desc: "小魔像崩落的岩石碎片。可用於合成強化。" }
         ]
@@ -881,4 +885,14 @@ function renderUtilityPreview(preview) {
 
   utilityContentEl.innerHTML = html;
   setUtilityOpen(true);
+
+  // 隱藏背包/裝備預覽時底部的「返回地圖」按鈕容器，其餘預覽顯示
+  const detailActionsEl = utilityPanelEl.querySelector(".detail-actions");
+  if (detailActionsEl) {
+    if (preview.type === "inventory") {
+      detailActionsEl.style.display = "none";
+    } else {
+      detailActionsEl.style.display = "block";
+    }
+  }
 }

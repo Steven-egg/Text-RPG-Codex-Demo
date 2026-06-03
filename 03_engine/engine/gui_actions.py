@@ -253,12 +253,12 @@ class GuiRuntimeSession:
             model = world_map_model(state)
             model["utility_preview"] = {
                 "type": "inventory",
-                "title": "背包唯讀摘要",
+                "title": "背包 / 裝備",
                 "data": get_inventory_preview_data(state)
             }
             return self._live_response(
                 action_id,
-                "已開啟背包唯讀摘要。",
+                "已開啟背包 / 裝備。",
                 screen_model=model,
             )
         if action_id == "open_bestiary":
@@ -278,6 +278,8 @@ class GuiRuntimeSession:
             return self.buy_item(payload, screen_id=screen_id)
         if action_id == "buy_equipment":
             return self.buy_equipment(payload, screen_id=screen_id)
+        if action_id == "equip_weapon":
+            return self.equip_weapon(payload, screen_id=screen_id)
         if action_id == "learn_magic_book":
             return self.learn_magic_book(payload, screen_id=screen_id)
         if action_id == "rest_at_inn":
@@ -837,6 +839,59 @@ class GuiRuntimeSession:
                 "tone": "success",
                 "speaker": "葛雷",
                 "text": f"「金幣收下了，祝你在焦石礦坑好運！這是你的 {eq['name']}。」"
+            }
+        return response
+
+    def equip_weapon(self, payload: dict[str, Any], *, screen_id: str | None = None) -> dict[str, Any]:
+        state = self.require_state()
+        item_id = payload.get("item_id")
+
+        if not item_id or item_id not in EQUIPMENT:
+            raise GuiActionError("武器不存在。", status=400)
+
+        eq = EQUIPMENT[item_id]
+        if eq["slot"] != "weapon":
+            raise GuiActionError("該裝備不是武器，無法裝備在武器欄位。", status=400)
+
+        if state.get("job") not in eq["jobs"]:
+            raise GuiActionError(
+                f"{state.get('job')}無法裝備此武器。",
+                status=409,
+                result_status="blocked",
+                blocked_reason="職業不符",
+            )
+
+        if state.get("equipment", {}).get("weapon") == item_id:
+            raise GuiActionError(
+                "目前已裝備此武器，無需重複裝備。",
+                status=409,
+                result_status="blocked",
+                blocked_reason="已裝備此武器",
+            )
+
+        if state.get("inventory", {}).get(item_id, 0) <= 0:
+            raise GuiActionError(
+                "背包中沒有這件武器，無法裝備。",
+                status=409,
+                result_status="blocked",
+                blocked_reason="背包中無此武器",
+            )
+
+        success = game.equip_item(state, item_id, quiet=True)
+        if not success:
+            raise GuiActionError("裝備武器失敗。", status=400)
+
+        response = action_response(
+            "equip_weapon",
+            f"已裝備 {eq['name']}。",
+            state,
+            screen_id="workshop_screen",
+        )
+        if response.get("screen_model"):
+            response["screen_model"]["feedback_message"] = {
+                "tone": "success",
+                "speaker": "葛雷",
+                "text": f"「已經為你換上 {eq['name']} 了。舊的裝備幫你收入背包裡。」"
             }
         return response
 
@@ -1920,6 +1975,20 @@ def workshop_screen_model(state: dict[str, Any]) -> dict[str, Any]:
                 "desc": eq["desc"]
             })
 
+    weapons_details = {}
+    for item_id, eq in EQUIPMENT.items():
+        if eq["slot"] == "weapon":
+            weapons_details[item_id] = {
+                "id": item_id,
+                "name": eq["name"],
+                "slot": eq["slot"],
+                "subtype": eq["subtype"],
+                "price": eq["price"],
+                "jobs": eq["jobs"],
+                "stats": eq["stats"],
+                "desc": eq["desc"]
+            }
+
     return {
         "screen_id": "facility_workshop_screen",
         "facility_id": "workshop",
@@ -1927,6 +1996,7 @@ def workshop_screen_model(state: dict[str, Any]) -> dict[str, Any]:
         "subtitle": "與遊戲核心同步的裝備交易服務，MVP 僅限武器購買。",
         "player": player_data,
         "weapons": weapons_list,
+        "weapons_details": weapons_details,
         "armors": [],
         "upgrades": []
     }
@@ -2471,12 +2541,28 @@ def get_status_preview_data(state: dict[str, Any]) -> dict[str, Any]:
 
 
 def get_inventory_preview_data(state: dict[str, Any]) -> list[dict[str, Any]]:
+    counts = {}
+    equipped_set = set()
+
+    for slot, item_id in state.get("equipment", {}).items():
+        if item_id:
+            counts[item_id] = counts.get(item_id, 0) + 1
+            equipped_set.add(item_id)
+
+    for item_id, qty in state.get("inventory", {}).items():
+        if qty > 0:
+            counts[item_id] = counts.get(item_id, 0) + qty
+
     entries = []
-    for item_id, qty in sorted(state.get("inventory", {}).items()):
+    for item_id in sorted(counts.keys()):
+        qty = counts[item_id]
         category = "其他"
         if item_id in EQUIPMENT:
             category = "裝備"
+            is_equipped = item_id in equipped_set
+            name = f"{item_name(item_id)}（已裝備）" if is_equipped else item_name(item_id)
         else:
+            name = item_name(item_id)
             item_data = ITEMS.get(item_id, {})
             kind = item_data.get("kind")
             if kind == "consumable":
@@ -2490,7 +2576,7 @@ def get_inventory_preview_data(state: dict[str, Any]) -> list[dict[str, Any]]:
 
         entries.append({
             "item_id": item_id,
-            "name": item_name(item_id),
+            "name": name,
             "quantity": qty,
             "category": category,
             "desc": game.item_usage_summary(item_id)

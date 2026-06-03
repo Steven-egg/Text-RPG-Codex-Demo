@@ -193,14 +193,11 @@ function updateCounts() {
   const armorCount = currentFixtureData.armors.length;
   const upgradeCount = currentFixtureData.upgrades.length;
   
-  // 計算已擁有/已裝備的數量 (包含 player.equipment 的 key 與 player.inventory 中的武器/防具)
-  let ownedCount = Object.keys(currentFixtureData.player.equipment).length;
-  // 加上背包中裝備的數量 (以 weapon_ 或 armor_ 開頭的項目)
-  const inv = currentFixtureData.player.inventory;
-  Object.keys(inv).forEach(itemId => {
-    if ((itemId.startsWith('weapon_') || itemId.startsWith('armor_') || itemId.startsWith('acc_')) && inv[itemId] > 0) {
-      ownedCount += inv[itemId];
-    }
+  // 計算已擁有/已裝備的數量 (只統計玩家 inventory 內裝備 + 目前 equipped 裝備)
+  const ownedItems = getOwnedItemsList();
+  let ownedCount = 0;
+  ownedItems.forEach(item => {
+    ownedCount += item.count;
   });
 
   document.getElementById('count-weapon').textContent = weaponCount;
@@ -340,7 +337,11 @@ function renderList() {
 
     const name = document.createElement('span');
     name.className = 'item-name';
-    name.textContent = item.name;
+    if (currentTab === 'owned' && item.equippedSlot) {
+      name.textContent = `${item.name}（已裝備）`;
+    } else {
+      name.textContent = item.name;
+    }
     leftZone.appendChild(name);
 
     row.appendChild(leftZone);
@@ -352,7 +353,7 @@ function renderList() {
     if (currentTab === 'owned') {
       const badge = document.createElement('span');
       badge.className = 'item-badge can-deal';
-      badge.textContent = item.equippedSlot ? '裝備中' : '背包持有';
+      badge.textContent = `x${item.count}`;
       rightZone.appendChild(badge);
     } else {
       // 顯示狀態 Badge
@@ -422,32 +423,43 @@ function renderList() {
  * 取得玩家目前擁有的裝備清單
  */
 function getOwnedItemsList() {
-  const list = [];
+  const map = new Map();
   const player = currentFixtureData.player;
 
   // 1. 已裝備項目
   Object.keys(player.equipment).forEach(slot => {
     const itemId = player.equipment[slot];
-    // 從 fixtures 中尋找該裝備的詳細資料
+    if (!itemId) return;
     const itemDetail = findItemInFixtures(itemId);
     if (itemDetail) {
-      list.push({
-        ...itemDetail,
-        equippedSlot: slot
-      });
+      if (map.has(itemId)) {
+        const existing = map.get(itemId);
+        existing.count += 1;
+        existing.equippedSlot = slot;
+      } else {
+        map.set(itemId, {
+          ...itemDetail,
+          count: 1,
+          equippedSlot: slot
+        });
+      }
     }
   });
 
   // 2. 背包中的武器防具飾品
   Object.keys(player.inventory).forEach(itemId => {
-    if (itemId.startsWith('weapon_') || itemId.startsWith('armor_') || itemId.startsWith('acc_')) {
+    if (itemId.startsWith('weapon_') || itemId.startsWith('armor_') || itemId.startsWith('acc_') || itemId.startsWith('special_')) {
       const qty = player.inventory[itemId];
       if (qty > 0) {
         const itemDetail = findItemInFixtures(itemId);
         if (itemDetail) {
-          for (let i = 0; i < qty; i++) {
-            list.push({
+          if (map.has(itemId)) {
+            const existing = map.get(itemId);
+            existing.count += qty;
+          } else {
+            map.set(itemId, {
               ...itemDetail,
+              count: qty,
               equippedSlot: null
             });
           }
@@ -456,13 +468,17 @@ function getOwnedItemsList() {
     }
   });
 
-  return list;
+  return Array.from(map.values());
 }
 
 /**
  * 從 Fixtures 資料中檢索裝備屬性
  */
 function findItemInFixtures(itemId) {
+  if (currentFixtureData && currentFixtureData.weapons_details && currentFixtureData.weapons_details[itemId]) {
+    return currentFixtureData.weapons_details[itemId];
+  }
+
   const inWeapons = currentFixtureData.weapons.find(w => w.id === itemId);
   if (inWeapons) return inWeapons;
 
@@ -643,15 +659,53 @@ function renderRequirementsView(item) {
   let reqsHtml = '';
 
   if (currentTab === 'owned') {
-    // 我的裝備，無需求
-    itemRequirementView.innerHTML = `
-      <div style="text-align: center; margin: auto;">
-        <p style="font-size: 13px; color: var(--success-color); font-weight: bold; margin-bottom: 5px;">你已擁有這件裝備</p>
-        <p style="font-size: 11px; color: var(--text-muted);">${item.equippedSlot ? `目前裝備在 [${item.equippedSlot.toUpperCase()}] 欄位` : '置於背包中，隨時可於裝備面板進行替換。'}</p>
-      </div>
-    `;
-    primaryActionBtn.textContent = item.equippedSlot ? '裝備中' : '已擁有';
-    primaryActionBtn.disabled = true;
+    if (item.slot === 'weapon') {
+      const currentJob = player.job;
+      const jobCompatible = !item.jobs || item.jobs.includes(currentJob);
+
+      if (item.equippedSlot === 'weapon') {
+        itemRequirementView.innerHTML = `
+          <div style="text-align: center; margin: auto;">
+            <p style="font-size: 13px; color: var(--success-color); font-weight: bold; margin-bottom: 5px;">目前已裝備此武器</p>
+            <p style="font-size: 11px; color: var(--text-muted);">正在裝備欄位中發揮效果。</p>
+          </div>
+        `;
+        primaryActionBtn.textContent = '裝備中';
+        primaryActionBtn.disabled = true;
+        primaryActionBtn.removeAttribute('data-disabled-reason');
+      } else if (!jobCompatible) {
+        itemRequirementView.innerHTML = `
+          <div style="text-align: center; margin: auto;">
+            <p style="font-size: 13px; color: var(--danger-color); font-weight: bold; margin-bottom: 5px;">職業限制，無法裝備</p>
+            <p style="font-size: 11px; color: var(--text-muted);">目前職業 [${currentJob}] 無法裝備此武器。</p>
+          </div>
+        `;
+        primaryActionBtn.textContent = '裝備此武器';
+        primaryActionBtn.disabled = true;
+        primaryActionBtn.setAttribute('data-disabled-reason', 'job_incompatible');
+      } else {
+        itemRequirementView.innerHTML = `
+          <div style="text-align: center; margin: auto;">
+            <p style="font-size: 13px; color: var(--info-blue); font-weight: bold; margin-bottom: 5px;">此武器目前未裝備</p>
+            <p style="font-size: 11px; color: var(--text-muted);">點擊按鈕將其替換為冒險者的當前武器。</p>
+          </div>
+        `;
+        primaryActionBtn.textContent = '裝備此武器';
+        primaryActionBtn.disabled = false;
+        primaryActionBtn.removeAttribute('data-disabled-reason');
+      }
+    } else {
+      // 我的裝備，無需求
+      itemRequirementView.innerHTML = `
+        <div style="text-align: center; margin: auto;">
+          <p style="font-size: 13px; color: var(--success-color); font-weight: bold; margin-bottom: 5px;">你已擁有這件裝備</p>
+          <p style="font-size: 11px; color: var(--text-muted);">${item.equippedSlot ? `目前裝備在 [${item.equippedSlot.toUpperCase()}] 欄位` : '置於背包中，隨時可於裝備面板進行替換。'}</p>
+        </div>
+      `;
+      primaryActionBtn.textContent = item.equippedSlot ? '裝備中' : '已擁有';
+      primaryActionBtn.disabled = true;
+      primaryActionBtn.removeAttribute('data-disabled-reason');
+    }
     return;
   }
 
@@ -787,6 +841,64 @@ function handlePrimaryAction() {
 
   const item = findItemOrRecipe(selectedItemId);
   if (!item) return;
+
+  if (currentTab === 'owned') {
+    if (item.slot !== 'weapon' || item.equippedSlot === 'weapon') return; // 防呆
+
+    const player = currentFixtureData.player;
+    const currentJob = player.job;
+    const jobCompatible = !item.jobs || item.jobs.includes(currentJob);
+    if (!jobCompatible) return;
+
+    if (runtimeClient.isLiveMode()) {
+      logUIAction('equip_weapon', {
+        item_id: selectedItemId
+      });
+
+      primaryActionBtn.disabled = true;
+
+      runtimeClient.dispatchAction("workshop_screen", "equip_weapon", { item_id: selectedItemId })
+        .then((result) => {
+          if (result.screen_model) {
+            currentFixtureData = result.screen_model;
+            updateCounts();
+
+            // Re-render Header
+            playerNameEl.textContent = `冒險者: ${currentFixtureData.player.name}`;
+            playerJobEl.textContent = `職業: ${currentFixtureData.player.job} (Lv${currentFixtureData.player.level})`;
+            playerGoldEl.textContent = `${currentFixtureData.player.gold}G`;
+
+            switchTab(currentTab, true);
+          }
+
+          if (result.screen_model && result.screen_model.feedback_message) {
+            feedbackBar.textContent = `[換裝成功] ` + result.screen_model.feedback_message.text;
+          } else {
+            feedbackBar.textContent = `[換裝成功] 成功裝備了 ${item.name}！`;
+          }
+          feedbackBar.style.color = 'var(--success-color)';
+        })
+        .catch((err) => {
+          console.error(err);
+          const reason = runtimeClient.errorMessage(err);
+          feedbackBar.textContent = `換裝失敗: ${reason}`;
+          feedbackBar.style.color = 'var(--danger-color)';
+          logUIAction('blocked_action', {
+            action: 'equip_weapon',
+            item_id: selectedItemId,
+            disabled_reason: reason
+          });
+          primaryActionBtn.disabled = false;
+        });
+    } else {
+      logUIAction('equip_weapon', {
+        item_id: selectedItemId
+      });
+      feedbackBar.textContent = `[靜態反饋] 已模擬裝備武器 ${item.name}。`;
+      feedbackBar.style.color = 'var(--success-color)';
+    }
+    return;
+  }
 
   const checkRes = checkRequirements(item);
   
