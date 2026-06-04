@@ -8,10 +8,10 @@ what the next boundary is. Detailed MVP verification belongs in Task Zone docs.
 
 - Work directory: `C:\Users\user\OneDrive\文字冒險遊戲`
 - Current branch expectation: `main` aligned with `origin/main`.
-- Latest committed docs sync: `2b8e64d [codex] docs(gui): record reusable bridge audit`
-- Latest committed feature commit: `6abe303 [antig] feat(gui): add workshop weapon equip bridge & align backpack presentation`
-- Current working-tree live slice: Town Hub Mira / 米菈合成屋 Entry Unlock
-  Live MVP, pending commit.
+- Latest committed bridge baseline:
+  `b046b1e [antig] feat(gui): add Mira synthesis entry unlock bridge`
+- Current working-tree live slice: Synthesis Single Recipe Craft Live MVP
+  (`recipe_piercing_bundle`), pending commit.
 
 Project state:
 
@@ -34,8 +34,13 @@ Current newest GUI live state:
   `is_unlocked(state, "shop_synthesis_01")` as locked / unlocked.
 - Locked 米菈合成屋 points the player to finish the Guild task `洞窟採集`; unlocked
   米菈合成屋 routes to the existing static synthesis screen.
+- Synthesis Single Recipe Craft Live MVP is complete in the working tree:
+  `synthesis_screen` live mode loads a runtime-shaped ScreenModel and dispatches
+  `craft_recipe` for the single whitelisted recipe `recipe_piercing_bundle`.
+- Crafting reuses Python runtime authority:
+  `game.recipe_available(...)` and `game.craft_recipe_message(...)`.
 - This does not mean full inventory / equipment, synthesis, crafting, guild
-  quest, or facility systems are complete.
+  quest, multi-recipe, base-item upgrade, or facility systems are complete.
 
 ## Hot Zone Startup Order
 
@@ -81,12 +86,12 @@ files during ordinary startup.
 
 No next implementation is pre-approved.
 
-The current recorded follow-up candidate is a Synthesis single existing recipe
-live bridge MVP, or an even smaller read-only gate first. It is not approved for
-implementation yet.
+The current recorded follow-up candidate is a read-only gate for broader
+synthesis coverage, such as deciding whether to iterate more existing Mira
+recipe ids. It is not approved for implementation yet.
 
 Any synthesis follow-up must not open full synthesis, a generic recipe bridge,
-full live loader work, broad `craft_recipe` coverage, recipe / quest / dungeon
+broad `craft_recipe` coverage, base-item upgrades, recipe / quest / dungeon
 changes, schema changes, save changes, or crafting system refactors without a
 new owner-approved exact scope.
 
@@ -106,6 +111,12 @@ Latest stable / working-tree verification noted here:
 - Town Hub Mira / 米菈合成屋 Entry Unlock Antigravity-reported checks:
   `element_maze.py --smoke-test` PASS, `06_tools/validate_data.py` PASS, scratch
   `test_synthesis.py` PASS.
+- Synthesis Single Recipe Craft Antigravity-reported checks:
+  `node --check 07_gui_prototype/synthesis_screen/synthesis-screen.js` PASS,
+  `python 06_tools/smoke_test_synthesis_bridge.py` PASS,
+  `python 06_tools/validate_data.py` PASS, and
+  `python element_maze.py --smoke-test` PASS.
+- Owner manual hand test: not run by request.
 
 For future docs-only cleanup, use markdown diff/status checks. Runtime smoke is
 not required unless runtime files change.

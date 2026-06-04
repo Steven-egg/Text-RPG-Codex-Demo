@@ -1,3 +1,5 @@
+import { runtimeClient } from "../shared/runtime-client.js";
+
 const fixtureSelect = document.querySelector("#fixture-select");
 const titleEl = document.querySelector("#screen-title");
 const subtitleEl = document.querySelector("#screen-subtitle");
@@ -27,6 +29,13 @@ const state = {
 
 const townHubRoute = "../town_hub/index.html";
 const navigationDelayMs = 120;
+
+if (runtimeClient.isLiveMode()) {
+  const switcher = document.querySelector(".fixture-switcher");
+  if (switcher) {
+    switcher.style.display = "none";
+  }
+}
 
 fixtureSelect.addEventListener("change", () => {
   loadFixture(fixtureSelect.value);
@@ -59,7 +68,20 @@ backActionEl.addEventListener("click", () => {
     source: "secondary_action",
     dispatched: true,
   });
-  navigateToPrototype(townHubRoute);
+  if (runtimeClient.isLiveMode()) {
+    runtimeClient.dispatchAction("synthesis_screen", "back_to_town_hub", {})
+      .then((result) => {
+        window.setTimeout(() => {
+          window.location.href = runtimeClient.nextRoute(result, '../town_hub/index.html');
+        }, navigationDelayMs);
+      })
+      .catch((err) => {
+        console.error(err);
+        window.location.href = '../town_hub/index.html?mode=live';
+      });
+  } else {
+    navigateToPrototype(townHubRoute);
+  }
 });
 
 clearLogEl.addEventListener("click", () => {
@@ -70,6 +92,45 @@ clearLogEl.addEventListener("click", () => {
 loadFixture(fixtureSelect.value);
 
 async function loadFixture(path) {
+  if (runtimeClient.isLiveMode()) {
+    await loadLiveScreen();
+    return;
+  }
+  await loadStaticFallback(path);
+}
+
+async function loadLiveScreen() {
+  shellEl.dataset.loadState = "loading";
+  try {
+    const model = await runtimeClient.getScreen("synthesis_screen");
+    state.model = model;
+    state.selectedCategoryId = model.selected_category_id ?? model.category_tabs?.[0]?.id ?? "all";
+    state.selectedRecipeId = model.selected_recipe_id ?? getVisibleRecipeRows()[0]?.recipe_id ?? null;
+    state.actionLog = [];
+    ensureSelectionVisible();
+    render();
+    pushActionLog({
+      action_id: "live_screen_loaded",
+      payload: { mode: "live", screen_id: "synthesis_screen" },
+      source: "live_loader",
+      dispatched: true,
+    });
+    shellEl.dataset.loadState = "ready";
+  } catch (error) {
+    console.error(error);
+    const reason = runtimeClient.errorMessage(error);
+    pushActionLog({
+      action_id: "live_bridge_unavailable",
+      payload: { reason },
+      source: "live_loader",
+      dispatched: false,
+      reason: "fallback_to_fixture",
+    });
+    await loadStaticFallback(fixtureSelect.value);
+  }
+}
+
+async function loadStaticFallback(path) {
   shellEl.dataset.loadState = "loading";
   try {
     const response = await fetch(path, { cache: "no-store" });
@@ -399,10 +460,52 @@ function activatePrimaryAction() {
     source: "primary_action",
     dispatched: true,
   });
+
+  if (runtimeClient.isLiveMode()) {
+    dispatchRuntimeAction(actionId, payload);
+    return;
+  }
+
   renderFeedback({
     speaker: state.model.npc?.name,
     text: resultMessage || "已送出 UIAction；static prototype 不會扣除素材或產出物品。",
   });
+}
+
+async function dispatchRuntimeAction(actionId, payload) {
+  try {
+    const result = await runtimeClient.dispatchAction("synthesis_screen", actionId, payload);
+    if (result.screen_model) {
+      state.model = result.screen_model;
+      state.selectedRecipeId = result.screen_model.selected_recipe_id ?? state.selectedRecipeId;
+      render();
+    }
+    if (result.message) {
+      renderFeedback({
+        speaker: state.model.npc?.name,
+        text: result.message,
+      });
+      pushActionLog({
+        action_id: "runtime_feedback",
+        payload: { message: result.message },
+        source: "primary_action",
+        dispatched: true,
+      });
+    }
+  } catch (error) {
+    const reason = runtimeClient.errorMessage(error);
+    pushActionLog({
+      action_id: actionId,
+      payload,
+      source: "primary_action",
+      dispatched: false,
+      reason: reason,
+    });
+    renderFeedback({
+      speaker: state.model.npc?.name,
+      text: reason || "合成失敗。",
+    });
+  }
 }
 
 function getVisibleRecipeRows() {

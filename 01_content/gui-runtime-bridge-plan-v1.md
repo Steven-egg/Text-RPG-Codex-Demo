@@ -72,10 +72,11 @@ This matrix is the Task Zone home for live bridge status that should not bloat
 | Magic Shop Learn Book | `b59fe43 [antig] feat(gui): add magic shop learn book live bridge` | Learn 1 existing magic book through server-side validation. | Full magic / skill framework or combat rebalance. |
 | Workshop Buy Weapon | `2d99d7e [antig] feat(gui): add workshop buy weapon live bridge MVP` | Buy existing weapon-shop weapons; do not auto-equip. | Armor, upgrades, full workshop framework. |
 | Workshop Weapon Equip | `6abe303 [antig] feat(gui): add workshop weapon equip bridge & align backpack presentation` | Equip inventory-held weapon-slot items into `equipment.weapon`; align inventory/equipment presentation. | Full inventory / equipment management, unequip, comparison, stat rebalance. |
-| Town Hub Mira Entry Unlock | working tree, pending commit | Town Hub synthesis facility node reflects `is_unlocked(state, "shop_synthesis_01")`; locked state points to Guild task `洞窟採集`; unlocked state routes to the existing static synthesis screen. | Full synthesis, recipe bridge, `synthesis_screen_model()`, live loader, `craft_recipe`, recipe / quest / dungeon / schema / save / combat changes. |
+| Town Hub Mira Entry Unlock | `b046b1e [antig] feat(gui): add Mira synthesis entry unlock bridge` | Town Hub synthesis facility node reflects `is_unlocked(state, "shop_synthesis_01")`; locked state points to Guild task `洞窟採集`; unlocked state routes to the existing static synthesis screen. | Full synthesis, recipe bridge, `synthesis_screen_model()`, live loader, `craft_recipe`, recipe / quest / dungeon / schema / save / combat changes. |
+| Synthesis Single Recipe Craft | working tree, pending commit | `synthesis_screen` live mode loads a runtime-shaped ScreenModel and dispatches `craft_recipe` for the single whitelisted recipe `recipe_piercing_bundle`, reusing `game.recipe_available(...)` and `game.craft_recipe_message(...)`. | Full synthesis, generic recipe bridge, multi-recipe coverage, base-item upgrades, recipe / quest / dungeon / schema / save / combat changes. |
 
-Latest committed docs sync before Town Hub Mira:
-`2b8e64d [codex] docs(gui): record reusable bridge audit`.
+Latest committed bridge baseline before Synthesis craft:
+`b046b1e [antig] feat(gui): add Mira synthesis entry unlock bridge`.
 
 ## 3.2 Reusable Bridge Pattern Audit
 
@@ -98,27 +99,33 @@ Read-only audit, 2026-06-04:
 | Magic shop | `learn_magic_book` validates `MAGIC_BOOKS`, `SKILLS`, job, level, gold, materials, and learned state server-side. ScreenModel still uses a fixed book id list. | Low to medium. Mutation action is reusable; presentation list is narrower than CLI data. | Iterate `MAGIC_BOOKS` in the model before adding more books. No one-book-per-MVP pattern is needed. |
 | World map / dungeon / exploration / combat | World Map iterates `DUNGEONS` and runtime unlocks; `confirm_travel`, `advance_step`, combat, retreat, route clear, item rows, and skill rows are shared flow pieces. | Medium. Multiple dungeons can route through the bridge, but complete dungeon events, boss framework, and combat formula changes remain closed. | Treat existing dungeons as coverage follow-up unless the task opens boss / special event behavior. |
 | Guild | Current GUI bridge is dungeon clear report registration from `DUNGEONS`. It does not implement the CLI `QUESTS` turn-in, reward, unlock, or story inquiry system. | High for QUESTS. This is not a generic guild quest bridge yet. | Guild QUESTS coverage needs a separate small MVP gate. Do not bundle it into facility entry or dungeon coverage work. |
+| Synthesis / crafting | Town Hub entry unlock is committed. Current working tree adds one whitelisted `craft_recipe` path for `recipe_piercing_bundle` and reuses `game.recipe_available(...)` plus `game.craft_recipe_message(...)`. ScreenModel and live loader are deliberately single-recipe. | High for full crafting. The bridge proves one action path, but full synthesis, base-item recipes, and broad recipe iteration remain closed. | Next coverage should start with a read-only gate before iterating more existing Mira recipe ids. Base-item upgrades require a separate gate. |
 | Inventory / backpack / equipment | World Map utility preview reads runtime inventory plus currently equipped equipment. Workshop weapon equip is the only current live equip action. | Medium. Display is reusable; equipment mutation remains weapon/workshop-specific. | More item display is coverage; generic equip / unequip / slot management requires its own gate. |
 | Bestiary | Preview reads runtime `state["bestiary"]` and monster data, so more registered monsters naturally display. | Low. Mostly a summary presentation surface. | Add detail / filtering as coverage work, not one-monster MVPs. |
 
 Explicit exceptions that are not yet fully bridged system families:
 
 - Guild `QUESTS` turn-in / reward / unlock flow.
-- Complete crafting / synthesis, including `craft_recipe`.
+- Complete crafting / synthesis beyond the single whitelisted
+  `recipe_piercing_bundle` craft path.
 - Generic equipment management beyond workshop weapon equip.
 
-Town Hub Mira result after this audit:
+Town Hub Mira and Synthesis result after this audit:
 
-- Town Hub Mira / 米菈合成屋 Entry Unlock Live MVP is complete in the working
-  tree and pending commit.
+- Town Hub Mira / 米菈合成屋 Entry Unlock Live MVP has landed in
+  `b046b1e [antig] feat(gui): add Mira synthesis entry unlock bridge`.
 - Scope is only the Town Hub synthesis facility node reflecting
   `is_unlocked(state, "shop_synthesis_01")` as locked / unlocked.
-- This slice is not a complete synthesis shop, not a recipe bridge, not a craft
-  action, and not a `synthesis_screen_model()` or live loader task.
-- It must not add or modify recipes, quests, dungeons, schema, save behavior,
-  combat formulas, or the crafting system.
-- Next synthesis follow-up candidate is a single existing recipe live bridge MVP,
-  or an even smaller read-only gate first; it is not pre-approved.
+- Synthesis Single Recipe Craft Live MVP is complete in the working tree and
+  pending commit.
+- Scope is only `recipe_piercing_bundle` on `synthesis_screen`, with
+  `craft_recipe` whitelisted to that recipe id.
+- Python runtime remains gameplay authority through `game.recipe_available(...)`
+  and `game.craft_recipe_message(...)`.
+- This slice must not add or modify recipes, quests, dungeons, schema, save
+  behavior, combat formulas, or the crafting system.
+- Next synthesis follow-up candidate is a read-only gate for broader synthesis
+  coverage, such as deciding whether to iterate more existing Mira recipe ids.
 
 ## 4. Bridge Shape
 
@@ -346,6 +353,31 @@ Status note, 2026-06-03:
   unequip, equipment comparison, upgrade flow expansion, complete inventory /
   equipment management, data/schema changes, save migration, combat formula
   changes, stat rebalance, or any broader facility family bridge.
+
+Status note, 2026-06-04:
+
+- A narrow Synthesis Single Recipe Craft Live MVP is complete in the working tree
+  and pending commit.
+- Completed coverage is limited to Town Hub -> Synthesis live routing already
+  established by the Mira entry unlock MVP, a runtime-shaped
+  `synthesis_screen_model(state)` for one recipe, and `craft_recipe` for the
+  single whitelisted recipe `recipe_piercing_bundle`.
+- The action rejects non-whitelisted recipes, checks runtime recipe unlock state
+  with `game.recipe_available(...)`, and performs the actual gold / material /
+  output mutation through existing `game.craft_recipe_message(...)`.
+- Browser JavaScript only loads the live ScreenModel, dispatches UIAction payloads
+  through `runtimeClient`, renders returned ScreenModels, and keeps fixture
+  fallback / UIAction logging available.
+- Antigravity-reported verification passed:
+  `node --check 07_gui_prototype/synthesis_screen/synthesis-screen.js`,
+  `python 06_tools/smoke_test_synthesis_bridge.py`,
+  `python 06_tools/validate_data.py`, and
+  `python element_maze.py --smoke-test`.
+- Owner manual hand test was intentionally not run for this slice.
+- This status note does not approve complete synthesis, generic recipe bridge,
+  multi-recipe coverage, base-item upgrades, recipe / quest / dungeon changes,
+  data/schema changes, save migration, combat formula changes, or crafting
+  system refactors.
 
 ### Phase 4 - Temple And Relic Preview
 

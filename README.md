@@ -8,10 +8,10 @@ screen-level verification, and historical MVP notes live in Task Zone files.
 
 Git / working-tree baseline:
 
-- Latest committed docs sync: `2b8e64d [codex] docs(gui): record reusable bridge audit`
-- Latest committed feature commit: `6abe303 [antig] feat(gui): add workshop weapon equip bridge & align backpack presentation`
-- Current working-tree live slice: Town Hub Mira / 米菈合成屋 Entry Unlock
-  Live MVP, pending commit.
+- Latest committed bridge baseline:
+  `b046b1e [antig] feat(gui): add Mira synthesis entry unlock bridge`
+- Current working-tree live slice: Synthesis Single Recipe Craft Live MVP
+  (`recipe_piercing_bundle`), pending commit.
 
 Gameplay/runtime state:
 
@@ -42,6 +42,7 @@ Blessed local live bridge coverage:
 |---|---|
 | Start | `start_new_game`, `restart_game`, `load_game`; live entry copy and no-save / has-save states aligned with static Start Screen. |
 | Town Hub | Live resource strip, facility nodes, synthesis entry unlock state, `open_world_map`, and live routing into approved facilities. Town Hub does not expose `save_game`. |
+| Synthesis | Single existing recipe craft bridge for `recipe_piercing_bundle` through Python runtime validation and `game.craft_recipe_message(...)`. |
 | Inn | `rest_at_inn` deducts 30G and restores HP/MP through Python runtime behavior. |
 | World Map | Runtime-backed location / route ScreenModel; main menu keeps `save_game` and shell-only `open_settings`; town return is via town node / detail action. |
 | Dungeon / Combat | Approved traversal and combat loop slice, victory / retreat / defeat routing, route clear / resolved state, and Combat Skill Button MVP. |
@@ -50,17 +51,16 @@ Blessed local live bridge coverage:
 | Magic Shop | Learn one existing magic book through Python server-side validation and existing skill data. |
 | Workshop | Buy existing weapon without auto-equip; equip inventory-held weapon-slot items into `equipment.weapon` through `game.equip_item(...)`. |
 
-Town Hub Mira / 米菈合成屋 Entry Unlock Live MVP is the current newest live
-bridge state in the working tree:
+Synthesis Single Recipe Craft Live MVP is the current newest live bridge state
+in the working tree:
 
-- The Town Hub synthesis node reflects
-  `game.is_unlocked(state, "shop_synthesis_01")`.
-- Locked state disables 米菈合成屋 and points the player to finish the Guild task
-  `洞窟採集`.
-- Unlocked state routes to the existing static
-  `07_gui_prototype/synthesis_screen/index.html`.
-- This does not open full synthesis, recipe bridge, `synthesis_screen_model()`,
-  live loader work, `craft_recipe`, recipe / quest / dungeon changes, schema
+- `synthesis_screen` live mode loads a runtime-shaped ScreenModel and dispatches
+  `craft_recipe`.
+- The only allowed recipe is `recipe_piercing_bundle`.
+- Python runtime remains gameplay authority through `game.recipe_available(...)`
+  and `game.craft_recipe_message(...)`.
+- This does not open full synthesis, generic recipe bridge, multi-recipe
+  coverage, base-item upgrades, recipe / quest / dungeon changes, schema
   changes, save changes, combat formula changes, or crafting system refactors.
 
 Task Zone routing:
@@ -173,8 +173,8 @@ do not imply gameplay validation.
 ## Next-Step Boundary
 
 The next implementation target is not pre-approved. Candidate follow-up currently
-recorded for future planning is a Synthesis single existing recipe live bridge
-MVP, or an even smaller read-only gate first.
+recorded for future planning is a read-only gate for broader synthesis coverage,
+such as deciding whether to iterate more existing Mira recipe ids.
 
 Before any runtime, data, schema, save, combat, or broader GUI live bridge work,
 start with a single-slice read-only planning gate. For ordinary static prototype

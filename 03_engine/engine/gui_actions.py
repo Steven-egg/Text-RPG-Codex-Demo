@@ -6,7 +6,7 @@ from copy import deepcopy
 from datetime import datetime
 from typing import Any
 
-from data import DUNGEONS, EQUIPMENT, ITEMS, JOBS, SKILLS, SHOP_INVENTORY, MAGIC_BOOKS
+from data import DUNGEONS, EQUIPMENT, ITEMS, JOBS, SKILLS, SHOP_INVENTORY, MAGIC_BOOKS, RECIPES
 
 from . import game
 from .formatting import item_name
@@ -282,6 +282,8 @@ class GuiRuntimeSession:
             return self.equip_weapon(payload, screen_id=screen_id)
         if action_id == "learn_magic_book":
             return self.learn_magic_book(payload, screen_id=screen_id)
+        if action_id == "craft_recipe":
+            return self.craft_recipe(payload, screen_id=screen_id)
         if action_id == "rest_at_inn":
             return self.rest_at_inn(payload, screen_id=screen_id)
         if action_id in {"submit_quest", "report_dungeon_clear"}:
@@ -1010,6 +1012,46 @@ class GuiRuntimeSession:
             }
         return response
 
+    def craft_recipe(self, payload: dict[str, Any], *, screen_id: str | None = None) -> dict[str, Any]:
+        state = self.require_state()
+        recipe_id = payload.get("recipe_id")
+        if recipe_id != "recipe_piercing_bundle":
+            raise GuiActionError("非白名單配方。", status=403)
+        
+        if not game.recipe_available(state, recipe_id):
+            raise GuiActionError(
+                "配方尚未解鎖。",
+                status=403,
+                result_status="blocked",
+                blocked_reason="配方尚未解鎖。",
+            )
+            
+        result = game.craft_recipe_message(state, recipe_id)
+        if result == "金幣不足。":
+            raise GuiActionError(
+                "金幣不足。",
+                status=409,
+                result_status="blocked",
+                blocked_reason="金幣不足。",
+            )
+        elif result == "素材不足。":
+            raise GuiActionError(
+                "素材不足。",
+                status=409,
+                result_status="blocked",
+                blocked_reason="素材不足。",
+            )
+        elif result.startswith("需要"):
+            raise GuiActionError(
+                result,
+                status=409,
+                result_status="blocked",
+                blocked_reason=result,
+            )
+            
+        screen_to_use = screen_id or "synthesis_screen"
+        return action_response("craft_recipe", result, state, screen_id=screen_to_use)
+
     def guild_screen_model(self) -> dict[str, Any]:
         return guild_screen_model(self.require_state())
 
@@ -1054,6 +1096,8 @@ class GuiRuntimeSession:
             return workshop_screen_model(state)
         if screen_id in {"magic_shop_screen", "facility_magic_shop_screen"}:
             return magic_shop_screen_model(state)
+        if screen_id in {"synthesis_screen", "facility_synthesis_screen"}:
+            return synthesis_screen_model(state)
         if screen_id == "dungeon_exploration":
             return self.exploration_screen_model()
         if screen_id == "combat_screen":
@@ -1313,6 +1357,8 @@ def build_screen_model(screen_id: str | None, state: dict[str, Any]) -> dict[str
         return workshop_screen_model(state)
     if screen_id in {"magic_shop_screen", "facility_magic_shop_screen"}:
         return magic_shop_screen_model(state)
+    if screen_id in {"synthesis_screen", "facility_synthesis_screen"}:
+        return synthesis_screen_model(state)
     return None
 
 
@@ -2226,6 +2272,159 @@ def magic_shop_screen_model(state: dict[str, Any]) -> dict[str, Any]:
                 "payload": {}
             }
         ]
+    }
+
+
+def synthesis_screen_model(state: dict[str, Any]) -> dict[str, Any]:
+    gold = state.get("gold", 0)
+    scorched_iron = state.get("inventory", {}).get("mat_scorched_iron", 0)
+    cracked_stone = state.get("inventory", {}).get("mat_cracked_stone", 0)
+    
+    recipe_id = "recipe_piercing_bundle"
+    recipe = RECIPES[recipe_id]
+    
+    unlocked = game.recipe_available(state, recipe_id)
+    has_enough_gold = gold >= recipe["gold"]
+    has_enough_mats = game.can_pay_items(state, recipe["materials"])
+    
+    owned_count = state.get("inventory", {}).get("item_armor_piercer", 0)
+    
+    if not unlocked:
+        status = "missing"
+        status_label = "尚未解鎖"
+        action_enabled = False
+        action_disabled_reason = "配方尚未解鎖。"
+        feedback_text = "這張配方目前在公會還沒登記，暫時無法製作。"
+        feedback_tone = "warning"
+    elif not has_enough_gold:
+        status = "missing"
+        status_label = "金幣不足"
+        action_enabled = False
+        action_disabled_reason = f"需要 {recipe['gold']}G，目前 {gold}G。"
+        feedback_text = "素材齊了，但工錢不夠。"
+        feedback_tone = "warning"
+    elif not has_enough_mats:
+        status = "missing"
+        status_label = "素材不足"
+        action_enabled = False
+        action_disabled_reason = f"需要焦黑鐵礦 x2、破裂石片 x3；目前焦黑鐵礦 x{scorched_iron}、破裂石片 x{cracked_stone}。"
+        feedback_text = "破甲釘不難做，但至少要準備好材料與金幣。"
+        feedback_tone = "warning"
+    else:
+        status = "craftable"
+        status_label = "可製作"
+        action_enabled = True
+        action_disabled_reason = None
+        feedback_text = "切到戰術道具分類時，列表應只剩這類配方。"
+        feedback_tone = "success"
+
+    recipe_rows = [
+        {
+            "recipe_id": recipe_id,
+            "title": recipe["name"],
+            "category": "battle",
+            "category_label": "戰術道具",
+            "status": status,
+            "status_label": status_label,
+            "output_summary": "破甲釘 x3",
+            "owned_summary": f"{owned_count} 個",
+            "max_count": 1,
+            "gold": recipe["gold"]
+        }
+    ]
+
+    recipe_details = {
+        recipe_id: {
+            "title": recipe["name"],
+            "description": recipe.get("desc", "取得破甲釘 x3。"),
+            "effect": "取得破甲釘 x3。",
+            "base_note": "基底：不需要基底裝備。",
+            "notes": "合成會消耗素材與金幣。",
+            "outputs": [
+                { "item_id": "item_armor_piercer", "label": "破甲釘", "quantity": 3 }
+            ],
+            "primary_action": {
+                "action_id": "craft_recipe",
+                "label": "合成破甲釘組",
+                "enabled": action_enabled,
+                "disabled_reason": action_disabled_reason,
+                "payload": { "recipe_id": recipe_id },
+                "result_message": f"成功合成{recipe['name']}！扣除金幣 {recipe['gold']}G，消耗焦黑鐵礦 x2、破裂石片 x3。" if action_enabled else f"無法合成：{action_disabled_reason}"
+            },
+            "ready_feedback": {
+                "tone": feedback_tone,
+                "speaker": "米菈",
+                "text": feedback_text
+            }
+        }
+    }
+
+    requirement_rows = {
+        recipe_id: [
+            {
+                "id": "gold",
+                "icon_label": "G",
+                "label": "金幣",
+                "required_value": f"{recipe['gold']}G",
+                "current_value": f"{gold}G",
+                "status": "met" if has_enough_gold else "missing",
+                "status_label": "已滿足" if has_enough_gold else "不足",
+                "disabled_reason": None if has_enough_gold else f"需要 {recipe['gold']}G，目前 {gold}G。"
+            },
+            {
+                "id": "mat_scorched_iron",
+                "icon_label": "鐵",
+                "label": "焦黑鐵礦",
+                "required_value": "x2",
+                "current_value": f"x{scorched_iron}",
+                "status": "met" if scorched_iron >= 2 else "missing",
+                "status_label": "已滿足" if scorched_iron >= 2 else "不足",
+                "disabled_reason": None if scorched_iron >= 2 else f"需要焦黑鐵礦 x2，目前 x{scorched_iron}。"
+            },
+            {
+                "id": "mat_cracked_stone",
+                "icon_label": "石",
+                "label": "破裂石片",
+                "required_value": "x3",
+                "current_value": f"x{cracked_stone}",
+                "status": "met" if cracked_stone >= 3 else "missing",
+                "status_label": "已滿足" if cracked_stone >= 3 else "不足",
+                "disabled_reason": None if cracked_stone >= 3 else f"需要破裂石片 x3，目前 x{cracked_stone}。"
+            }
+        ]
+    }
+
+    category_tabs = [
+        { "id": "all", "label": "全部", "count": 1, "selected": True, "enabled": True },
+        { "id": "equipment", "label": "裝備", "count": 0, "selected": False, "enabled": False },
+        { "id": "battle", "label": "戰術道具", "count": 1, "selected": False, "enabled": True }
+    ]
+
+    return {
+        "screen_id": "facility_synthesis_screen",
+        "facility_id": "synthesis",
+        "title": "米菈合成屋 (Live)",
+        "subtitle": "角色資源狀態、素材消耗與配方製作皆由 Python 遊戲引擎同步。",
+        "npc": {
+            "id": "mira",
+            "name": "米菈",
+            "role": "合成屋主人，擅長把素材、基底裝備與金幣整理成可執行的配方。"
+        },
+        "resource_strip": resource_strip(state),
+        "category_tabs": category_tabs,
+        "selected_category_id": "all",
+        "selected_recipe_id": recipe_id,
+        "recipe_rows": recipe_rows,
+        "recipe_details": recipe_details,
+        "requirement_rows": requirement_rows,
+        "feedback_message": {
+            "tone": feedback_tone,
+            "speaker": "米菈",
+            "text": feedback_text
+        },
+        "empty_state": {
+            "message": "目前沒有符合分類的可用配方。"
+        }
     }
 
 
