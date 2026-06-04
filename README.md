@@ -9,9 +9,16 @@ screen-level verification, and historical MVP notes live in Task Zone files.
 Git / working-tree baseline:
 
 - Latest committed bridge baseline:
-  `b046b1e [antig] feat(gui): add Mira synthesis entry unlock bridge`
-- Current working-tree live slice: Synthesis Single Recipe Craft Live MVP
-  (`recipe_piercing_bundle`), pending commit.
+  `5dbc742 [antig] feat(gui): add synthesis single recipe craft bridge`
+- Current newest live slice: Synthesis Single Recipe Craft Live MVP
+  (`recipe_piercing_bundle`).
+
+Project posture:
+
+- Element Maze is an expandable playable demo, not a closed demo.
+- Narrow live MVP boundaries are current-slice risk controls. They preserve
+  future extension points, but expansion still requires a new read-only planning
+  gate and owner-approved exact scope.
 
 Gameplay/runtime state:
 
@@ -51,8 +58,8 @@ Blessed local live bridge coverage:
 | Magic Shop | Learn one existing magic book through Python server-side validation and existing skill data. |
 | Workshop | Buy existing weapon without auto-equip; equip inventory-held weapon-slot items into `equipment.weapon` through `game.equip_item(...)`. |
 
-Synthesis Single Recipe Craft Live MVP is the current newest live bridge state
-in the working tree:
+Synthesis Single Recipe Craft Live MVP is the current newest committed live
+bridge state:
 
 - `synthesis_screen` live mode loads a runtime-shaped ScreenModel and dispatches
   `craft_recipe`.
@@ -165,6 +172,8 @@ do not imply gameplay validation.
 - Do not read or write `save.json` manually.
 - Do not modify runtime, data, schema, save, or combat formulas as part of GUI
   prototype or handoff work.
+- Treat `not opened` / narrow MVP language as current-slice risk control, not as
+  a closed-demo statement or permanent ban on future extension points.
 - Do not expand a landed narrow live MVP into a full system without a new
   read-only planning gate and explicit owner approval.
 - Do not start a formal asset pipeline from reference/mockup images.

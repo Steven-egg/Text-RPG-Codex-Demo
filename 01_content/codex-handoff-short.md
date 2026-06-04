@@ -9,9 +9,9 @@ what the next boundary is. Detailed MVP verification belongs in Task Zone docs.
 - Work directory: `C:\Users\user\OneDrive\文字冒險遊戲`
 - Current branch expectation: `main` aligned with `origin/main`.
 - Latest committed bridge baseline:
-  `b046b1e [antig] feat(gui): add Mira synthesis entry unlock bridge`
-- Current working-tree live slice: Synthesis Single Recipe Craft Live MVP
-  (`recipe_piercing_bundle`), pending commit.
+  `5dbc742 [antig] feat(gui): add synthesis single recipe craft bridge`
+- Current newest live slice: Synthesis Single Recipe Craft Live MVP
+  (`recipe_piercing_bundle`).
 
 Project state:
 
@@ -22,6 +22,9 @@ Project state:
   default.
 - A local runtime-connected GUI bridge exists only for explicitly approved
   blessed slices.
+- Element Maze is an expandable playable demo, not a closed demo. Narrow slice /
+  MVP language controls current-round risk; it does not close future extension
+  points.
 
 Current newest GUI live state:
 
@@ -29,12 +32,12 @@ Current newest GUI live state:
   weapons, and buying does not auto-equip.
 - Workshop Weapon Equip Live MVP is complete: Workshop "owned equipment" can equip
   inventory-held weapon-slot items into `equipment.weapon`.
-- Town Hub Mira / 米菈合成屋 Entry Unlock Live MVP is complete in the working
-  tree: the Town Hub synthesis node reflects
+- Town Hub Mira / 米菈合成屋 Entry Unlock Live MVP is complete: the Town Hub
+  synthesis node reflects
   `is_unlocked(state, "shop_synthesis_01")` as locked / unlocked.
 - Locked 米菈合成屋 points the player to finish the Guild task `洞窟採集`; unlocked
   米菈合成屋 routes to the existing static synthesis screen.
-- Synthesis Single Recipe Craft Live MVP is complete in the working tree:
+- Synthesis Single Recipe Craft Live MVP is complete:
   `synthesis_screen` live mode loads a runtime-shaped ScreenModel and dispatches
   `craft_recipe` for the single whitelisted recipe `recipe_piercing_bundle`.
 - Crafting reuses Python runtime authority:
@@ -71,6 +74,10 @@ files during ordinary startup.
   relevant `07_gui_prototype/<screen>/` files only.
 
 ## Explicitly Not Open
+
+Interpretation rule: `Explicitly Not Open` means not approved in the current
+slice. It is not a permanent ban or demo freeze. Future extension points may be
+reopened through a read-only planning gate and owner-approved exact scope.
 
 - Full inventory / equipment management.
 - Armor, accessory, special-slot, unequip, comparison, upgrade expansion, or
