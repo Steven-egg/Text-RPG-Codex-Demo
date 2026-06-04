@@ -8,9 +8,10 @@ what the next boundary is. Detailed MVP verification belongs in Task Zone docs.
 
 - Work directory: `C:\Users\user\OneDrive\文字冒險遊戲`
 - Current branch expectation: `main` aligned with `origin/main`.
-- Latest docs sync: `a20d912 [codex] docs(gui): sync workshop weapon equip bridge handoff`
-- Latest feature commit: `6abe303 [antig] feat(gui): add workshop weapon equip bridge & align backpack presentation`
-- Previous stable docs point: `3792099 docs(gui): sync workshop buy weapon bridge handoff`
+- Latest committed docs sync: `2b8e64d [codex] docs(gui): record reusable bridge audit`
+- Latest committed feature commit: `6abe303 [antig] feat(gui): add workshop weapon equip bridge & align backpack presentation`
+- Current working-tree live slice: Town Hub Mira / 米菈合成屋 Entry Unlock
+  Live MVP, pending commit.
 
 Project state:
 
@@ -28,11 +29,13 @@ Current newest GUI live state:
   weapons, and buying does not auto-equip.
 - Workshop Weapon Equip Live MVP is complete: Workshop "owned equipment" can equip
   inventory-held weapon-slot items into `equipment.weapon`.
-- `equip_weapon` validation and mutation happen Python server-side and reuse
-  `game.equip_item(state, item_id, quiet=True)`.
-- World Map / main inventory overlay presentation is aligned with inventory
-  equipment plus currently equipped equipment.
-- This does not mean the full inventory / equipment system is complete.
+- Town Hub Mira / 米菈合成屋 Entry Unlock Live MVP is complete in the working
+  tree: the Town Hub synthesis node reflects
+  `is_unlocked(state, "shop_synthesis_01")` as locked / unlocked.
+- Locked 米菈合成屋 points the player to finish the Guild task `洞窟採集`; unlocked
+  米菈合成屋 routes to the existing static synthesis screen.
+- This does not mean full inventory / equipment, synthesis, crafting, guild
+  quest, or facility systems are complete.
 
 ## Hot Zone Startup Order
 
@@ -78,20 +81,21 @@ files during ordinary startup.
 
 No next implementation is pre-approved.
 
-The current recorded candidate is Town Hub Mira / 米菈合成屋 Entry Unlock
-Live MVP. Scope is only the Town Hub synthesis node reflecting
-`is_unlocked(state, "shop_synthesis_01")` as locked / unlocked. It does not open
-full synthesis, `synthesis_screen_model()`, live loader work, `craft_recipe`,
-recipe / quest / dungeon changes, schema changes, save changes, or crafting
-system refactors. This is only a candidate and still requires owner approval
-before implementation.
+The current recorded follow-up candidate is a Synthesis single existing recipe
+live bridge MVP, or an even smaller read-only gate first. It is not approved for
+implementation yet.
+
+Any synthesis follow-up must not open full synthesis, a generic recipe bridge,
+full live loader work, broad `craft_recipe` coverage, recipe / quest / dungeon
+changes, schema changes, save changes, or crafting system refactors without a
+new owner-approved exact scope.
 
 For docs-only sync, restrict changes to explicitly approved markdown surfaces and
 do not touch runtime, JavaScript, data, schema, save, or combat formula.
 
 ## Verification Capsule
 
-Latest stable verification before this cleanup included:
+Latest stable / working-tree verification noted here:
 
 - `06_tools/validate_data.py`: PASS
 - `element_maze.py --smoke-test`: PASS
@@ -99,6 +103,9 @@ Latest stable verification before this cleanup included:
 - Workshop Weapon Equip owner-side manual smoke: purchase does not auto-equip,
   equip does not deduct Gold, old weapon returns to inventory, new weapon becomes
   `equipment.weapon`, and World Map save / reload preserves equipment state.
+- Town Hub Mira / 米菈合成屋 Entry Unlock Antigravity-reported checks:
+  `element_maze.py --smoke-test` PASS, `06_tools/validate_data.py` PASS, scratch
+  `test_synthesis.py` PASS.
 
 For future docs-only cleanup, use markdown diff/status checks. Runtime smoke is
 not required unless runtime files change.

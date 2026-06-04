@@ -72,9 +72,10 @@ This matrix is the Task Zone home for live bridge status that should not bloat
 | Magic Shop Learn Book | `b59fe43 [antig] feat(gui): add magic shop learn book live bridge` | Learn 1 existing magic book through server-side validation. | Full magic / skill framework or combat rebalance. |
 | Workshop Buy Weapon | `2d99d7e [antig] feat(gui): add workshop buy weapon live bridge MVP` | Buy existing weapon-shop weapons; do not auto-equip. | Armor, upgrades, full workshop framework. |
 | Workshop Weapon Equip | `6abe303 [antig] feat(gui): add workshop weapon equip bridge & align backpack presentation` | Equip inventory-held weapon-slot items into `equipment.weapon`; align inventory/equipment presentation. | Full inventory / equipment management, unequip, comparison, stat rebalance. |
+| Town Hub Mira Entry Unlock | working tree, pending commit | Town Hub synthesis facility node reflects `is_unlocked(state, "shop_synthesis_01")`; locked state points to Guild task `洞窟採集`; unlocked state routes to the existing static synthesis screen. | Full synthesis, recipe bridge, `synthesis_screen_model()`, live loader, `craft_recipe`, recipe / quest / dungeon / schema / save / combat changes. |
 
-Latest docs sync after Workshop Weapon Equip:
-`a20d912 [codex] docs(gui): sync workshop weapon equip bridge handoff`.
+Latest committed docs sync before Town Hub Mira:
+`2b8e64d [codex] docs(gui): record reusable bridge audit`.
 
 ## 3.2 Reusable Bridge Pattern Audit
 
@@ -106,15 +107,18 @@ Explicit exceptions that are not yet fully bridged system families:
 - Complete crafting / synthesis, including `craft_recipe`.
 - Generic equipment management beyond workshop weapon equip.
 
-Current candidate after this audit:
+Town Hub Mira result after this audit:
 
-- Town Hub Mira / 米菈合成屋 entry unlock live bridge MVP.
+- Town Hub Mira / 米菈合成屋 Entry Unlock Live MVP is complete in the working
+  tree and pending commit.
 - Scope is only the Town Hub synthesis facility node reflecting
   `is_unlocked(state, "shop_synthesis_01")` as locked / unlocked.
-- This candidate is not a complete synthesis shop, not a recipe bridge, not a
-  craft action, and not a `synthesis_screen_model()` or live loader task.
+- This slice is not a complete synthesis shop, not a recipe bridge, not a craft
+  action, and not a `synthesis_screen_model()` or live loader task.
 - It must not add or modify recipes, quests, dungeons, schema, save behavior,
   combat formulas, or the crafting system.
+- Next synthesis follow-up candidate is a single existing recipe live bridge MVP,
+  or an even smaller read-only gate first; it is not pre-approved.
 
 ## 4. Bridge Shape
 

@@ -1632,7 +1632,18 @@ def facility_nodes(state: dict[str, Any]) -> list[dict[str, Any]]:
             navigation_route="../workshop_screen/index.html",
             enabled=True,
         ),
-        facility("synthesis", "米菈合成屋", "煉金合成配方將在後續版本開放。", "alchemy", "open_facility", enabled=False),
+        facility(
+            "synthesis",
+            "米菈合成屋",
+            "前往米菈合成屋，進行物品與裝備的鍊金合成。" if game.is_unlocked(state, "shop_synthesis_01") else "米菈的店門半掩著。先完成工會任務「洞窟採集」吧。",
+            "alchemy",
+            "open_facility",
+            payload={"facility_id": "synthesis", "target_screen_id": "synthesis_screen"},
+            target_screen_id="synthesis_screen",
+            navigation_route="../synthesis_screen/index.html",
+            enabled=game.is_unlocked(state, "shop_synthesis_01"),
+            disabled_reason="米菈的店門半掩著。先完成工會任務「洞窟採集」吧。",
+        ),
         facility(
             "magic_shop",
             "星燈魔法商店",
@@ -1661,8 +1672,10 @@ def facility(
     enabled: bool = True,
     target_screen_id: str | None = None,
     navigation_route: str | None = None,
+    disabled_reason: str | None = None,
 ) -> dict[str, Any]:
     visual = FACILITY_VISUALS.get(facility_id, {})
+    default_reason = "此設施的 Live 模式功能將在後續版本開放。"
     return {
         "facility_id": facility_id,
         "label": label,
@@ -1671,7 +1684,7 @@ def facility(
         "visual_anchor": visual.get("visual_anchor", facility_id),
         "icon_role": icon_role,
         "enabled": enabled,
-        "disabled_reason": None if enabled else "此設施的 Live 模式功能將在後續版本開放。",
+        "disabled_reason": None if enabled else (disabled_reason or default_reason),
         "badges": [],
         "primary_action": action_id,
         "payload": payload or {"facility_id": facility_id},
