@@ -8,10 +8,9 @@ what the next boundary is. Detailed MVP verification belongs in Task Zone docs.
 
 - Work directory: `C:\Users\user\OneDrive\文字冒險遊戲`
 - Current branch expectation: `main` aligned with `origin/main`.
-- Latest committed bridge baseline:
+- Latest committed bridge baseline before the current package:
   `5dbc742 [antig] feat(gui): add synthesis single recipe craft bridge`
-- Current newest live slice: Synthesis Single Recipe Craft Live MVP
-  (`recipe_piercing_bundle`).
+- Current newest live slice: Guild Quest Turn-in for Synthesis Unlock Live MVP.
 
 Project state:
 
@@ -28,6 +27,16 @@ Project state:
 
 Current newest GUI live state:
 
+- Guild Quest Turn-in for Synthesis Unlock Live MVP is complete in the current
+  package: Guild live mode shows unlocked existing `QUESTS`, and `submit_quest`
+  can complete ready quest turn-ins through existing runtime validation and
+  reward / unlock behavior.
+- The validated path is `quest_cave_gathering`: turn in `mat_moss_fiber x3` and
+  `mat_cracked_stone x2`, receive the existing quest reward, and unlock
+  `shop_synthesis_01`.
+- Dungeon clear report semantics remain separate: first-clear rewards still
+  happen at route clear, and later Guild report registration only records /
+  displays report status.
 - Workshop Buy Weapon Live MVP is complete: Workshop can buy existing weapon-shop
   weapons, and buying does not auto-equip.
 - Workshop Weapon Equip Live MVP is complete: Workshop "owned equipment" can equip
@@ -84,6 +93,8 @@ reopened through a read-only planning gate and owner-approved exact scope.
   generic workshop framework.
 - Full shop, magic shop, storage, synthesis, guild, quest, boss, dungeon, magic,
   skill, target-selection, or facility framework.
+- New quest data, schema changes, broad quest framework changes, or story inquiry
+  expansion beyond existing runtime `QUESTS` turn-in coverage.
 - Save migration, data/schema changes, combat formula changes, stat rebalance, or
   manual `save.json` edits.
 - Formal asset pipeline or reference/mockup images as runtime assets.
@@ -123,7 +134,16 @@ Latest stable / working-tree verification noted here:
   `python 06_tools/smoke_test_synthesis_bridge.py` PASS,
   `python 06_tools/validate_data.py` PASS, and
   `python element_maze.py --smoke-test` PASS.
-- Owner manual hand test: not run by request.
+- Guild Quest Turn-in for Synthesis Unlock Antigravity-reported checks:
+  `python 06_tools/smoke_test_guild_quest_bridge.py` PASS,
+  `python 06_tools/validate_data.py` PASS,
+  `python element_maze.py --smoke-test` PASS,
+  `python 06_tools/smoke_test_synthesis_bridge.py` PASS,
+  `python 06_tools/smoke_test_workshop_bridge.py` PASS, and
+  `python 06_tools/smoke_test_magic_shop_bridge.py` PASS.
+- Owner manual hand test: locked synthesis before quest completion, unlocked
+  synthesis after Guild quest turn-in, save/load persistence for unlocked state,
+  new-game locked state, and old completed save unlocked state all PASS.
 
 For future docs-only cleanup, use markdown diff/status checks. Runtime smoke is
 not required unless runtime files change.

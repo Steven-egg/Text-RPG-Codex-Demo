@@ -8,10 +8,9 @@ screen-level verification, and historical MVP notes live in Task Zone files.
 
 Git / working-tree baseline:
 
-- Latest committed bridge baseline:
+- Latest committed bridge baseline before the current package:
   `5dbc742 [antig] feat(gui): add synthesis single recipe craft bridge`
-- Current newest live slice: Synthesis Single Recipe Craft Live MVP
-  (`recipe_piercing_bundle`).
+- Current newest live slice: Guild Quest Turn-in for Synthesis Unlock Live MVP.
 
 Project posture:
 
@@ -53,13 +52,28 @@ Blessed local live bridge coverage:
 | Inn | `rest_at_inn` deducts 30G and restores HP/MP through Python runtime behavior. |
 | World Map | Runtime-backed location / route ScreenModel; main menu keeps `save_game` and shell-only `open_settings`; town return is via town node / detail action. |
 | Dungeon / Combat | Approved traversal and combat loop slice, victory / retreat / defeat routing, route clear / resolved state, and Combat Skill Button MVP. |
-| Guild | Narrow clear report registration only; first-clear rewards remain at route clear. |
+| Guild | Narrow clear report registration plus existing `QUESTS` turn-in bridge; `quest_cave_gathering` can unlock `shop_synthesis_01`. |
 | Shop | Buy exactly one existing travel-shop consumable through Python server-side validation. |
 | Magic Shop | Learn one existing magic book through Python server-side validation and existing skill data. |
 | Workshop | Buy existing weapon without auto-equip; equip inventory-held weapon-slot items into `equipment.weapon` through `game.equip_item(...)`. |
 
-Synthesis Single Recipe Craft Live MVP is the current newest committed live
+Guild Quest Turn-in for Synthesis Unlock Live MVP is the current newest live
 bridge state:
+
+- Guild live mode can show unlocked existing `QUESTS` and submit ready quest
+  turn-ins through Python runtime validation.
+- `quest_cave_gathering` turn-in consumes existing materials, grants existing
+  quest rewards, and unlocks `shop_synthesis_01` through existing runtime unlock
+  behavior.
+- Dungeon clear report semantics remain separate: first-clear rewards still
+  happen at route clear, and Guild report registration only records/display
+  report status.
+- This does not open a full guild / quest framework, new quest data, schema
+  changes, save migration, combat formula changes, full synthesis, generic
+  recipe bridge, multi-recipe synthesis coverage, or base-item upgrades.
+
+Synthesis Single Recipe Craft Live MVP remains the current synthesis craft
+coverage:
 
 - `synthesis_screen` live mode loads a runtime-shaped ScreenModel and dispatches
   `craft_recipe`.

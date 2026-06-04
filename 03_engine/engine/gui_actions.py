@@ -6,7 +6,7 @@ from copy import deepcopy
 from datetime import datetime
 from typing import Any
 
-from data import DUNGEONS, EQUIPMENT, ITEMS, JOBS, SKILLS, SHOP_INVENTORY, MAGIC_BOOKS, RECIPES
+from data import DUNGEONS, EQUIPMENT, ITEMS, JOBS, SKILLS, SHOP_INVENTORY, MAGIC_BOOKS, RECIPES, QUESTS
 
 from . import game
 from .formatting import item_name
@@ -1057,26 +1057,64 @@ class GuiRuntimeSession:
 
     def report_dungeon_clear(self, payload: dict[str, Any], *, screen_id: str | None = None) -> dict[str, Any]:
         state = self.require_state()
-        dungeon_id = payload.get("task_id") or payload.get("dungeon_id")
-        if not dungeon_id or dungeon_id not in DUNGEONS:
-            raise GuiActionError("未指定有效的迷宮 ID。", status=400)
+        task_id = payload.get("task_id") or payload.get("dungeon_id")
+        if not task_id:
+            raise GuiActionError("未指定有效的任務或迷宮 ID。", status=400)
 
-        dungeon = DUNGEONS[dungeon_id]
-        cleared = dungeon_id in state.get("cleared_dungeons", [])
-        reported = state.get("flags", {}).get(f"guild_reported_{dungeon_id}", False)
+        if task_id in QUESTS:
+            quest = QUESTS[task_id]
+            cleared = task_id in state.get("completed_quests", [])
+            ready = game.quest_ready(state, task_id)
 
-        if not cleared:
-            raise GuiActionError(f"尚未通關 {dungeon['name']}，無法登記回報。", status=409)
-        if reported:
-            raise GuiActionError(f"{dungeon['name']} 的探索回報已經登記過了。", status=409)
+            if cleared:
+                raise GuiActionError(f"{quest['title']} 已經完成過了。", status=409)
+            if not ready:
+                raise GuiActionError(f"{quest['title']} 的交付條件尚未滿足。", status=409)
 
-        state.setdefault("flags", {})[f"guild_reported_{dungeon_id}"] = True
+            # Perform actual quest completion
+            game.pay_items(state, quest["turn_in"])
+            reward = quest["reward"]
+            state["gold"] += reward.get("gold", 0)
+            guild_gain = reward.get("guild", 0)
+            if state["equipment"].get("special") == "special_trial_badge":
+                import math
+                guild_gain = math.ceil(guild_gain * 1.05)
+            state["guild_points"] += guild_gain
+            for item_id, qty in reward.get("items", {}).items():
+                game.add_item(state, item_id, qty)
+            for key in quest.get("unlocks", []):
+                game.unlock(state, key)
+            state["completed_quests"].append(task_id)
 
-        return self._live_response(
-            "report_dungeon_clear",
-            f"已成功登記 {dungeon['name']} 的探索回報！首次通關獎勵（工會積分）已於通關當下登記完畢。",
-            screen_model=self.guild_screen_model(),
-        )
+            msg = f"委託「{quest['title']}」完成！獲得 {reward.get('gold', 0)}G，工會積分 +{guild_gain}。"
+            if task_id == "quest_cave_gathering":
+                msg += " 米菈合成屋已開放！"
+
+            return self._live_response(
+                "submit_quest",
+                msg,
+                screen_model=self.guild_screen_model(),
+            )
+
+        elif task_id in DUNGEONS:
+            dungeon = DUNGEONS[task_id]
+            cleared = task_id in state.get("cleared_dungeons", [])
+            reported = state.get("flags", {}).get(f"guild_reported_{task_id}", False)
+
+            if not cleared:
+                raise GuiActionError(f"尚未通關 {dungeon['name']}，無法登記回報。", status=409)
+            if reported:
+                raise GuiActionError(f"{dungeon['name']} 的探索回報已經登記過了。", status=409)
+
+            state.setdefault("flags", {})[f"guild_reported_{task_id}"] = True
+
+            return self._live_response(
+                "report_dungeon_clear",
+                f"已成功登記 {dungeon['name']} 的探索回報！首次通關獎勵（工會積分）已於通關當下登記完畢。",
+                screen_model=self.guild_screen_model(),
+            )
+        else:
+            raise GuiActionError("未指定有效的任務或迷宮 ID。", status=400)
 
     def screen_model(self, screen_id: str) -> dict[str, Any]:
         if screen_id == "start_screen":
@@ -2434,6 +2472,11 @@ def guild_screen_model(state: dict[str, Any]) -> dict[str, Any]:
         if game.is_unlocked(state, d_data.get("unlock")):
             unlocked_dungeons.append((d_id, d_data))
 
+    unlocked_quests = []
+    for q_id, q_data in QUESTS.items():
+        if game.quest_unlocked(state, q_id):
+            unlocked_quests.append((q_id, q_data))
+
     task_rows = []
     task_details = {}
     reward_summaries = {}
@@ -2514,9 +2557,133 @@ def guild_screen_model(state: dict[str, Any]) -> dict[str, Any]:
             }
         ]
 
-    all_count = len(unlocked_dungeons)
-    ready_count = sum(1 for d_id, _ in unlocked_dungeons if d_id in state.get("cleared_dungeons", []) and not state.get("flags", {}).get(f"guild_reported_{d_id}", False))
-    completed_count = sum(1 for d_id, _ in unlocked_dungeons if state.get("flags", {}).get(f"guild_reported_{d_id}", False))
+    for q_id, q_data in unlocked_quests:
+        cleared = q_id in state.get("completed_quests", [])
+        ready = game.quest_ready(state, q_id)
+
+        if cleared:
+            status = "completed"
+            status_label = "已完成"
+            status_icon_id = "completed"
+            desc = q_data.get("desc", "")
+            notes = "此委託已完成。"
+            feedback = { "tone": "info", "speaker": q_data.get("giver", "莉娜"), "text": "這份委託已經完成登記了，謝謝你！" }
+            disabled_reason = "這個委託已完成"
+        elif ready:
+            status = "ready_to_submit"
+            status_label = "可回報"
+            status_icon_id = "ready"
+            desc = q_data.get("desc", "")
+            notes = "交付委託會消耗素材。"
+            feedback = { "tone": "success", "speaker": q_data.get("giver", "莉娜"), "text": "你收集齊委託需求的物件了啊，可以進行回報登記了。" }
+            disabled_reason = None
+        else:
+            status = "requirements_missing"
+            status_label = "條件不足"
+            status_icon_id = "missing"
+            desc = q_data.get("desc", "")
+            notes = "尚未滿足交付條件。"
+            feedback = { "tone": "warning", "speaker": q_data.get("giver", "莉娜"), "text": "這份委託的需求還沒收集齊呢。" }
+            disabled_reason = "尚未滿足交付條件"
+
+        task_rows.append({
+            "task_id": q_id,
+            "title": q_data.get("title", q_id),
+            "giver": q_data.get("giver", "工會"),
+            "status": status,
+            "status_label": status_label,
+            "status_icon_id": status_icon_id,
+            "enabled": True,
+            "disabled_reason": None,
+        })
+
+        task_details[q_id] = {
+            "task_id": q_id,
+            "title": q_data.get("title", q_id),
+            "giver": q_data.get("giver", "工會"),
+            "description": desc,
+            "status_label": status_label,
+            "notes": notes,
+            "disabled_reason": disabled_reason,
+            "ready_feedback": feedback if status == "ready_to_submit" else None,
+            "missing_feedback": feedback if status == "requirements_missing" else None,
+            "completed_feedback": feedback if status == "completed" else None,
+        }
+
+        # Populate rewards
+        reward_items = []
+        for rit_id, rqty in q_data.get("reward", {}).get("items", {}).items():
+            reward_items.append({
+                "item_id": rit_id,
+                "label": item_name(rit_id),
+                "quantity": rqty
+            })
+
+        reward_unlocks = []
+        for u_key in q_data.get("unlocks", []):
+            if u_key == q_id:
+                continue
+            if u_key == "shop_synthesis_01":
+                reward_unlocks.append("米菈合成屋")
+            elif u_key == "item_escape_scroll":
+                reward_unlocks.append("逃脫卷軸")
+            elif u_key in DUNGEONS:
+                reward_unlocks.append(DUNGEONS[u_key]["name"])
+            elif u_key in ITEMS:
+                reward_unlocks.append(ITEMS[u_key]["name"])
+            elif u_key in EQUIPMENT:
+                reward_unlocks.append(EQUIPMENT[u_key]["name"])
+            else:
+                reward_unlocks.append(u_key)
+
+        reward_summaries[q_id] = {
+            "gold": q_data.get("reward", {}).get("gold", 0) or None,
+            "guild_points": q_data.get("reward", {}).get("guild", 0) or None,
+            "items": reward_items,
+            "unlocks": reward_unlocks,
+            "notes": "已完成" if cleared else None
+        }
+
+        # Populate conditions
+        conds = []
+        for req_key, required_qty in q_data.get("turn_in", {}).items():
+            if req_key.startswith("flag:"):
+                flag_key = req_key.split(":", 1)[1]
+                flag_val = state.get("flags", {}).get(flag_key)
+                met = bool(flag_val)
+                label = f"完成事件：{flag_key}"
+                if flag_key == "boss_glen_defeated":
+                    label = "擊敗山寨頭目葛倫"
+                conds.append({
+                    "id": f"condition_{q_id}_{flag_key}",
+                    "condition_type": "flag_set",
+                    "label": label,
+                    "required_value": "達成",
+                    "current_value": "已達成" if met else "未達成",
+                    "status": "met" if met else ("not_applicable" if cleared else "missing"),
+                    "status_label": "已滿足" if met else "未滿足",
+                    "status_icon_id": "met" if met else "missing",
+                    "source": "runtime"
+                })
+            else:
+                owned_qty = state.get("inventory", {}).get(req_key, 0)
+                met = owned_qty >= required_qty
+                conds.append({
+                    "id": f"condition_{q_id}_{req_key}",
+                    "condition_type": "turn_in_item",
+                    "label": f"交付 {item_name(req_key)}",
+                    "required_value": f"x{required_qty}",
+                    "current_value": f"x{owned_qty}",
+                    "status": "met" if met else ("not_applicable" if cleared else "missing"),
+                    "status_label": "已滿足" if met else "未滿足",
+                    "status_icon_id": "met" if met else "missing",
+                    "source": "runtime"
+                })
+        condition_rows[q_id] = conds
+
+    all_count = len(task_rows)
+    ready_count = sum(1 for row in task_rows if row["status"] == "ready_to_submit")
+    completed_count = sum(1 for row in task_rows if row["status"] == "completed")
 
     task_filters = [
         { "id": "all", "label": "全部委託", "count": all_count, "enabled": True },
