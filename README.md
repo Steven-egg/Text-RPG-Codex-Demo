@@ -9,8 +9,8 @@ screen-level verification, and historical MVP notes live in Task Zone files.
 Git / working-tree baseline:
 
 - Latest committed bridge baseline before the current package:
-  `5dbc742 [antig] feat(gui): add synthesis single recipe craft bridge`
-- Current newest live slice: Guild Quest Turn-in for Synthesis Unlock Live MVP.
+  `017fa43 [antig] feat(gui): add guild quest synthesis unlock bridge`
+- Current newest live slice: Storage Unlock & View Live MVP.
 
 Project posture:
 
@@ -56,9 +56,25 @@ Blessed local live bridge coverage:
 | Shop | Buy exactly one existing travel-shop consumable through Python server-side validation. |
 | Magic Shop | Learn one existing magic book through Python server-side validation and existing skill data. |
 | Workshop | Buy existing weapon without auto-equip; equip inventory-held weapon-slot items into `equipment.weapon` through `game.equip_item(...)`. |
+| Storage | Unlock and view the Town Storage live screen through Python runtime state; deposit / withdraw / capacity upgrade remain closed. |
 
-Guild Quest Turn-in for Synthesis Unlock Live MVP is the current newest live
-bridge state:
+Storage Unlock & View Live MVP is the current newest live bridge state:
+
+- Town Hub can route to the Storage live screen, which loads a runtime-shaped
+  `storage_screen_model(state)`.
+- `unlock_storage` checks the existing runtime storage unlock cost, blocks
+  insufficient Gold, deducts Gold on success, and sets
+  `state["storage_unlocked"] = True`.
+- After unlock, the screen displays live inventory, storage status, current
+  storage contents, and capacity.
+- `deposit_item`, `withdraw_item`, and storage capacity upgrades remain disabled
+  with MVP-scope messaging.
+- This does not open full storage, item transfer, capacity upgrades, generic
+  inventory / equipment management, schema changes, save migration, combat
+  formula changes, or manual `save.json` edits.
+
+Guild Quest Turn-in for Synthesis Unlock Live MVP remains the latest guild /
+synthesis unlock bridge coverage:
 
 - Guild live mode can show unlocked existing `QUESTS` and submit ready quest
   turn-ins through Python runtime validation.
@@ -198,6 +214,10 @@ do not imply gameplay validation.
 The next implementation target is not pre-approved. Candidate follow-up currently
 recorded for future planning is a read-only gate for broader synthesis coverage,
 such as deciding whether to iterate more existing Mira recipe ids.
+
+Storage deposit / withdraw, capacity upgrades, and generic inventory management
+are not opened by the Storage Unlock & View MVP; they require a new read-only
+planning gate and owner-approved exact scope.
 
 Before any runtime, data, schema, save, combat, or broader GUI live bridge work,
 start with a single-slice read-only planning gate. For ordinary static prototype

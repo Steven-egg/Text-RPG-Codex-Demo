@@ -16,6 +16,8 @@ JOB_IDS = ["warrior", "mage", "rogue", "cleric"]
 JOB_ID_TO_KEY = dict(zip(JOB_IDS, JOBS.keys()))
 JOB_KEY_TO_ID = {value: key for key, value in JOB_ID_TO_KEY.items()}
 SAVE_BACKUP_PREFIX = "save.gui-backup"
+STORAGE_UNLOCK_COST = game.STORAGE_UNLOCK_COST
+STORAGE_CAPACITY = game.STORAGE_CAPACITY
 FACILITY_VISUALS = {
     "guild": {"visual_group": "guild", "visual_anchor": "top_center_guild_hall"},
     "inn": {"visual_group": "rest", "visual_anchor": "left_inn"},
@@ -286,6 +288,8 @@ class GuiRuntimeSession:
             return self.craft_recipe(payload, screen_id=screen_id)
         if action_id == "rest_at_inn":
             return self.rest_at_inn(payload, screen_id=screen_id)
+        if action_id == "unlock_storage":
+            return self.unlock_storage(payload, screen_id=screen_id)
         if action_id in {"submit_quest", "report_dungeon_clear"}:
             return self.report_dungeon_clear(payload, screen_id=screen_id)
         if action_id == "open_world_map":
@@ -799,6 +803,28 @@ class GuiRuntimeSession:
             response["screen_model"]["feedback_message"] = response["message"]
         return response
 
+    def unlock_storage(self, payload: dict[str, Any], *, screen_id: str | None = None) -> dict[str, Any]:
+        state = self.require_state()
+        if state.get("storage_unlocked", False):
+            raise GuiActionError("保管箱已經解鎖。", status=409)
+        cost = STORAGE_UNLOCK_COST
+        if state.get("gold", 0) < cost:
+            raise GuiActionError(
+                "身上的金幣不足以支付開啟保管箱的會費。",
+                status=409,
+                result_status="blocked",
+                blocked_reason="身上金幣不足以支付解鎖費用",
+            )
+        state["gold"] -= cost
+        state["storage_unlocked"] = True
+
+        response = self._live_response(
+            "unlock_storage",
+            "解鎖成功！這就幫米菈小隊開啟專屬的保管箱空間！",
+            screen_model=self.storage_screen_model(),
+        )
+        return response
+
     def buy_equipment(self, payload: dict[str, Any], *, screen_id: str | None = None) -> dict[str, Any]:
         state = self.require_state()
         item_id = payload.get("item_id")
@@ -900,20 +926,20 @@ class GuiRuntimeSession:
     def buy_item(self, payload: dict[str, Any], *, screen_id: str | None = None) -> dict[str, Any]:
         state = self.require_state()
         item_id = payload.get("item_id")
-        
+
         if not item_id or item_id not in ITEMS:
             raise GuiActionError("商品不存在。", status=400)
-            
+
         if item_id not in SHOP_INVENTORY["travel"]:
             raise GuiActionError("此商店不販售該商品。", status=400)
-            
+
         item = ITEMS[item_id]
         if item.get("kind") != "consumable":
             raise GuiActionError("旅人小鋪 MVP 僅允許購買消耗品。", status=400)
-            
+
         if not game.is_shop_item_available(state, item_id):
             raise GuiActionError("商品尚未解鎖或不可購買。", status=409)
-            
+
         price = item["price"]
         if state.get("gold", 0) < price:
             raise GuiActionError(
@@ -922,10 +948,10 @@ class GuiRuntimeSession:
                 result_status="blocked",
                 blocked_reason="金幣不足，無法購買該商品。",
             )
-            
+
         state["gold"] -= price
         game.add_item(state, item_id, 1)
-        
+
         response = action_response(
             "buy_item",
             f"成功購買 {item['name']}！獲得 {item['name']} x1，扣除金幣 {price}G。",
@@ -1017,7 +1043,7 @@ class GuiRuntimeSession:
         recipe_id = payload.get("recipe_id")
         if recipe_id != "recipe_piercing_bundle":
             raise GuiActionError("非白名單配方。", status=403)
-        
+
         if not game.recipe_available(state, recipe_id):
             raise GuiActionError(
                 "配方尚未解鎖。",
@@ -1025,7 +1051,7 @@ class GuiRuntimeSession:
                 result_status="blocked",
                 blocked_reason="配方尚未解鎖。",
             )
-            
+
         result = game.craft_recipe_message(state, recipe_id)
         if result == "金幣不足。":
             raise GuiActionError(
@@ -1048,12 +1074,15 @@ class GuiRuntimeSession:
                 result_status="blocked",
                 blocked_reason=result,
             )
-            
+
         screen_to_use = screen_id or "synthesis_screen"
         return action_response("craft_recipe", result, state, screen_id=screen_to_use)
 
     def guild_screen_model(self) -> dict[str, Any]:
         return guild_screen_model(self.require_state())
+
+    def storage_screen_model(self) -> dict[str, Any]:
+        return storage_screen_model(self.require_state())
 
     def report_dungeon_clear(self, payload: dict[str, Any], *, screen_id: str | None = None) -> dict[str, Any]:
         state = self.require_state()
@@ -1136,6 +1165,8 @@ class GuiRuntimeSession:
             return magic_shop_screen_model(state)
         if screen_id in {"synthesis_screen", "facility_synthesis_screen"}:
             return synthesis_screen_model(state)
+        if screen_id in {"storage_screen", "facility_storage_screen"}:
+            return self.storage_screen_model()
         if screen_id == "dungeon_exploration":
             return self.exploration_screen_model()
         if screen_id == "combat_screen":
@@ -1741,7 +1772,17 @@ def facility_nodes(state: dict[str, Any]) -> list[dict[str, Any]]:
         ),
         facility("temple", "轉職神殿", "神殿目前僅供預覽；轉職與故事線索解鎖需特定條件。", "temple", "open_facility", enabled=False),
         facility("relic_preview", "聖物調查", "聖物調查目前僅供預覽。", "relic", "open_facility", enabled=False),
-        facility("storage", "城鎮倉庫", "倉庫轉移與物件存放功能將在後續版本開放。", "storage", "open_facility", enabled=False),
+        facility(
+            "storage",
+            "城鎮倉庫",
+            "前往城鎮倉庫，解鎖並檢視保管箱狀態；寄存與取出尚未開放。",
+            "storage",
+            "open_facility",
+            payload={"facility_id": "storage", "target_screen_id": "storage_screen"},
+            target_screen_id="storage_screen",
+            navigation_route="../storage_screen/index.html",
+            enabled=True,
+        ),
     ]
 
 
@@ -1841,19 +1882,19 @@ def get_consumable_effect_summary(item_id: str) -> str:
 def shop_screen_model(state: dict[str, Any]) -> dict[str, Any]:
     gold = state.get("gold", 0)
     consumable_ids = ["item_potion_s", "item_potion_m", "item_herb_antidote", "item_focus_drop"]
-    
+
     list_rows = []
     item_details = {}
     requirement_rows = {}
     primary_actions = {}
-    
+
     for item_id in consumable_ids:
         item = ITEMS[item_id]
         price = item["price"]
         owned_count = state.get("inventory", {}).get(item_id, 0)
         unlocked = game.is_shop_item_available(state, item_id)
         has_enough_gold = gold >= price
-        
+
         if not unlocked:
             row_enabled = False
             disabled_reason = "商品已售罄" if item_id == "item_potion_m" else "尚未解鎖"
@@ -1869,11 +1910,11 @@ def shop_screen_model(state: dict[str, Any]) -> dict[str, Any]:
             disabled_reason = None
             status = "purchasable"
             stock_label = "無限庫存"
-            
+
         badges = []
         if item_id == "item_potion_s":
             badges.append({ "badge_id": "hot", "label": "熱銷", "kind": "info" })
-            
+
         list_rows.append({
             "id": f"row_{item_id.split('_', 1)[1]}",
             "item_id": item_id,
@@ -1888,7 +1929,7 @@ def shop_screen_model(state: dict[str, Any]) -> dict[str, Any]:
             "disabled_reason": disabled_reason,
             "badges": badges
         })
-        
+
         item_details[item_id] = {
             "item_id": item_id,
             "title": item["name"],
@@ -1901,13 +1942,13 @@ def shop_screen_model(state: dict[str, Any]) -> dict[str, Any]:
             "status": status,
             "disabled_reason": disabled_reason
         }
-        
+
         req_status = "met" if has_enough_gold else "missing"
         req_disabled = None if has_enough_gold else "金幣不足"
         if not unlocked:
             req_status = "missing"
             req_disabled = "商品已售罄" if item_id == "item_potion_m" else "尚未解鎖"
-            
+
         requirement_rows[item_id] = [
             {
                 "id": "gold",
@@ -1918,20 +1959,20 @@ def shop_screen_model(state: dict[str, Any]) -> dict[str, Any]:
                 "disabled_reason": req_disabled
             }
         ]
-        
+
         action_enabled = unlocked and has_enough_gold
         action_disabled_reason = None
         if not unlocked:
             action_disabled_reason = "商品已售罄" if item_id == "item_potion_m" else "尚未解鎖"
         elif not has_enough_gold:
             action_disabled_reason = "金幣不足"
-            
+
         result_msg = ""
         if action_enabled:
             result_msg = f"成功購買{item['name']}！獲得{item['name']} x1，扣除金幣 {price}G。"
         else:
             result_msg = f"無法購買{item['name']}：{action_disabled_reason}。"
-            
+
         primary_actions[item_id] = {
             "action_id": "buy_item",
             "label": f"購買{item['name']}",
@@ -1947,20 +1988,20 @@ def shop_screen_model(state: dict[str, Any]) -> dict[str, Any]:
         { "id": "tactical", "label": "戰術道具", "count": 0, "enabled": False },
         { "id": "accessories", "label": "飾品", "count": 0, "enabled": False }
     ]
-    
+
     if gold >= 30:
         feedback_text = "「挑選想要的物品，右側會顯示購買所需的條件與持有狀況。」"
         feedback_tone = "info"
     else:
         feedback_text = "「金幣不太夠呢，或者有些高等級物資公會還沒放行。去北邊礦坑賺點金幣再來吧？」"
         feedback_tone = "warning"
-        
+
     feedback_message = {
         "tone": feedback_tone,
         "speaker": "特里",
         "text": feedback_text
     }
-    
+
     return {
         "screen_id": "facility_shop_screen",
         "facility_id": "travel_shop",
@@ -2317,16 +2358,16 @@ def synthesis_screen_model(state: dict[str, Any]) -> dict[str, Any]:
     gold = state.get("gold", 0)
     scorched_iron = state.get("inventory", {}).get("mat_scorched_iron", 0)
     cracked_stone = state.get("inventory", {}).get("mat_cracked_stone", 0)
-    
+
     recipe_id = "recipe_piercing_bundle"
     recipe = RECIPES[recipe_id]
-    
+
     unlocked = game.recipe_available(state, recipe_id)
     has_enough_gold = gold >= recipe["gold"]
     has_enough_mats = game.can_pay_items(state, recipe["materials"])
-    
+
     owned_count = state.get("inventory", {}).get("item_armor_piercer", 0)
-    
+
     if not unlocked:
         status = "missing"
         status_label = "尚未解鎖"
@@ -2462,6 +2503,240 @@ def synthesis_screen_model(state: dict[str, Any]) -> dict[str, Any]:
         },
         "empty_state": {
             "message": "目前沒有符合分類的可用配方。"
+        }
+    }
+
+
+def get_storage_item_category(item_id: str) -> str:
+    if item_id in EQUIPMENT:
+        return "equipment"
+    if item_id.startswith("key_") or item_id == "special_trial_badge":
+        return "valuables"
+    if item_id.startswith("mat_"):
+        return "materials"
+    if item_id in ITEMS:
+        kind = ITEMS[item_id].get("kind")
+        if kind == "consumable":
+            return "consumables"
+        if kind in {"battle", "special"}:
+            return "valuables"
+    return "materials"
+
+
+def get_item_category_label(item_id: str, is_storage: bool = False) -> str:
+    suffix = " (倉庫)" if is_storage else " (背包)"
+    if item_id in EQUIPMENT:
+        slot = EQUIPMENT[item_id].get("slot", "")
+        slot_labels = {"weapon": "武器", "head": "頭部防具", "body": "身體防具", "accessory": "飾品", "special": "特殊裝備"}
+        return slot_labels.get(slot, "裝備") + suffix
+    if item_id.startswith("key_"):
+        return "關鍵道具" + suffix
+    if item_id.startswith("mat_"):
+        return "普通素材" + suffix
+    if item_id in ITEMS:
+        kind = ITEMS[item_id].get("kind")
+        if kind == "consumable":
+            return "消耗性道具" + suffix
+        if kind == "battle":
+            return "戰術道具" + suffix
+    return "道具" + suffix
+
+
+def storage_screen_model(state: dict[str, Any]) -> dict[str, Any]:
+    unlocked = state.get("storage_unlocked", False)
+    gold = state.get("gold", 0)
+
+    resource_strip = [
+        { "id": "player_name", "label": f"{state.get('name', '米菈')}的小隊", "tone": "neutral" },
+        { "id": "player_gold", "label": f"金幣：{gold}G", "tone": "warning" if (gold < STORAGE_UNLOCK_COST and not unlocked) else "neutral" },
+        { "id": "storage_status", "label": "倉庫狀態：已解鎖" if unlocked else "倉庫狀態：未開啟", "tone": "success" if unlocked else "danger" },
+        { "id": "storage_capacity", "label": f"容量：{len(state.get('storage', {}))} / {STORAGE_CAPACITY} 種物品", "tone": "success" if unlocked else "neutral" }
+    ]
+
+    inventory_rows = []
+    item_details = {}
+
+    for item_id, qty in state.get("inventory", {}).items():
+        if qty <= 0:
+            continue
+
+        category = get_storage_item_category(item_id)
+        name = item_name(item_id)
+
+        enabled = False
+        disabled_reason = "倉庫未開啟"
+        if unlocked:
+            if item_id.startswith("key_"):
+                disabled_reason = "貴重物無法存入倉庫"
+            else:
+                disabled_reason = "本輪 MVP 僅提供倉庫開啟與檢視功能。"
+
+        inventory_rows.append({
+            "item_id": item_id,
+            "title": name,
+            "category": category,
+            "short_title": name[:3] if len(name) > 3 else name,
+            "summary": f"普通素材 / 持有：{qty}" if category == "materials" else f"消耗品 / 持有：{qty}",
+            "owned_count": qty,
+            "enabled": enabled,
+            "disabled_reason": disabled_reason
+        })
+
+    storage_rows = []
+    if unlocked:
+        for item_id, qty in state.get("storage", {}).items():
+            if qty <= 0:
+                continue
+
+            category = get_storage_item_category(item_id)
+            name = item_name(item_id)
+
+            storage_rows.append({
+                "item_id": item_id,
+                "title": name,
+                "category": category,
+                "short_title": name[:3] if len(name) > 3 else name,
+                "summary": f"普通素材 / 倉庫：{qty}" if category == "materials" else f"消耗品 / 倉庫：{qty}",
+                "owned_count": qty,
+                "enabled": False,
+                "disabled_reason": "本輪 MVP 僅提供倉庫開啟與檢視功能。"
+            })
+
+    all_item_ids = set(state.get("inventory", {}).keys()) | set(state.get("storage", {}).keys())
+    for item_id in all_item_ids:
+        in_inv = state.get("inventory", {}).get(item_id, 0) > 0
+        in_st = state.get("storage", {}).get(item_id, 0) > 0
+        if not (in_inv or in_st):
+            continue
+
+        name = item_name(item_id)
+        cat_label = get_item_category_label(item_id, is_storage=in_st and not in_inv)
+
+        desc = ""
+        effect = ""
+        use_context = ""
+
+        if item_id in EQUIPMENT:
+            eq = EQUIPMENT[item_id]
+            desc = eq.get("desc", "")
+            effect = f"提供屬性加成：攻擊+{eq.get('stats', {}).get('attack', 0)}" if eq.get('stats') else "提供裝備屬性"
+            use_context = f"可裝備於：{eq.get('slot')}"
+        elif item_id in ITEMS:
+            it = ITEMS[item_id]
+            desc = it.get("desc", "")
+            effect = "戰鬥中或探索中回復生命值" if it.get("kind") == "consumable" else "無直接效果"
+            use_context = "生存與恢復" if it.get("kind") == "consumable" else "工坊強化、合成材料"
+
+        item_details[item_id] = {
+            "item_id": item_id,
+            "title": name,
+            "category_label": cat_label,
+            "description": desc,
+            "effect_summary": effect,
+            "use_context": use_context
+        }
+
+    category_counts = {"all": 0, "materials": 0, "consumables": 0, "equipment": 0, "valuables": 0}
+    for row in inventory_rows:
+        category_counts["all"] += 1
+        cat = row["category"]
+        if cat in category_counts:
+            category_counts[cat] += 1
+
+    category_tabs = [
+        { "id": "all", "label": "全部", "count": category_counts["all"], "enabled": True },
+        { "id": "materials", "label": "材料", "count": category_counts["materials"], "enabled": True },
+        { "id": "consumables", "label": "消耗品", "count": category_counts["consumables"], "enabled": True },
+        { "id": "equipment", "label": "裝備", "count": category_counts["equipment"], "enabled": True },
+        { "id": "valuables", "label": "貴重物", "count": category_counts["valuables"], "enabled": True }
+    ]
+
+    primary_actions = {}
+    requirement_rows = {}
+
+    if not unlocked:
+        can_unlock = gold >= STORAGE_UNLOCK_COST
+        disabled_reason = "" if can_unlock else f"金幣不足，需要 {STORAGE_UNLOCK_COST}G"
+        primary_actions["unlock_storage"] = {
+            "action_id": "unlock_storage",
+            "label": f"解鎖倉庫 ({STORAGE_UNLOCK_COST}G)",
+            "enabled": can_unlock,
+            "disabled_reason": disabled_reason,
+            "payload": { "cost": STORAGE_UNLOCK_COST }
+        }
+        requirement_rows["unlock_storage"] = [
+            {
+                "id": "req_gold",
+                "label": "金幣需求",
+                "required_value": f"{STORAGE_UNLOCK_COST}G",
+                "current_value": f"{gold}G",
+                "status": "met" if can_unlock else "unmet",
+                "disabled_reason": None if can_unlock else "金幣不足"
+            }
+        ]
+    else:
+        primary_actions["upgrade_storage"] = {
+            "action_id": "upgrade_storage",
+            "label": "升級倉庫容量 (未開放)",
+            "enabled": False,
+            "disabled_reason": "工會目前尚未開放更高級別的擴充服務",
+            "payload": {}
+        }
+
+        for row in inventory_rows:
+            primary_actions[row["item_id"]] = {
+                "action_id": "deposit_item",
+                "label": "確認存入 (未開放)",
+                "enabled": False,
+                "disabled_reason": "本輪 MVP 僅提供倉庫開啟與檢視功能。",
+                "payload": { "item_id": row["item_id"], "quantity": 1 }
+            }
+            requirement_rows[row["item_id"]] = [
+                { "id": "req_mvp_disabled", "label": "轉移服務限制", "required_value": "未開放", "current_value": "暫未開放", "status": "unmet", "disabled_reason": "本輪 MVP 僅提供倉庫開啟與檢視功能。" }
+            ]
+        for row in storage_rows:
+            primary_actions[row["item_id"]] = {
+                "action_id": "withdraw_item",
+                "label": "確認取出 (未開放)",
+                "enabled": False,
+                "disabled_reason": "本輪 MVP 僅提供倉庫開啟與檢視功能。",
+                "payload": { "item_id": row["item_id"], "quantity": 1 }
+            }
+            requirement_rows[row["item_id"]] = [
+                { "id": "req_mvp_disabled", "label": "轉移服務限制", "required_value": "未開放", "current_value": "暫未開放", "status": "unmet", "disabled_reason": "本輪 MVP 僅提供倉庫開啟與檢視功能。" }
+            ]
+
+    return {
+        "screen_id": "storage_screen",
+        "facility_id": "storage",
+        "title": "工會倉庫 (Live)",
+        "subtitle": "本輪 Live MVP 僅提供倉庫解鎖與檢視，寄存與取出尚未開放",
+        "selected_mode": "deposit",
+        "selected_item_id": None,
+        "storage_state": {
+            "unlocked": unlocked,
+            "unlock_cost": 0 if unlocked else STORAGE_UNLOCK_COST,
+            "can_unlock": (gold >= STORAGE_UNLOCK_COST) if not unlocked else False,
+            "disabled_reason": "" if (unlocked or gold >= STORAGE_UNLOCK_COST) else "金幣不足以支付開啟費用"
+        },
+        "resource_strip": resource_strip,
+        "npc": {
+            "name": "諾亞",
+            "role": "冒險者工會會長",
+            "portrait_placeholder": "Noah",
+            "avatar_text": "「目前先幫你開啟與檢視保管箱；寄存與取出服務還在準備中。」",
+            "dialog_locked": "本輪 Live MVP 僅提供倉庫解鎖與檢視；寄存與取出尚未開放。" if unlocked else f"花費 {STORAGE_UNLOCK_COST}G 金幣可為米菈小隊解鎖工會專屬的無限期保管箱。"
+        },
+        "category_tabs": category_tabs,
+        "inventory_rows": inventory_rows,
+        "storage_rows": storage_rows,
+        "item_details": item_details,
+        "primary_actions": primary_actions,
+        "requirement_rows": requirement_rows,
+        "empty_state": {
+            "title": "沒有物品",
+            "message": "目前沒有符合篩選條件的物品。",
+            "suggested_action": "切換其他篩選。"
         }
     }
 

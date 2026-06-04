@@ -1,3 +1,5 @@
+import { runtimeClient } from "../shared/runtime-client.js";
+
 const fixtureSelect = document.querySelector("#fixture-select");
 const titleEl = document.querySelector("#screen-title");
 const subtitleEl = document.querySelector("#screen-subtitle");
@@ -86,6 +88,10 @@ primaryActionEl.addEventListener("click", () => {
 });
 
 backActionEl.addEventListener("click", () => {
+  if (runtimeClient.isLiveMode()) {
+    handleBackToTown();
+    return;
+  }
   pushActionLog({
     action_id: "back_to_town_hub",
     payload: {},
@@ -95,6 +101,34 @@ backActionEl.addEventListener("click", () => {
   navigateToPrototype(townHubRoute);
 });
 
+async function handleBackToTown() {
+  const payload = { from: "storage_screen" };
+  pushActionLog({
+    action_id: "back_to_town_hub",
+    payload,
+    source: "secondary_action",
+    dispatched: true,
+  });
+  try {
+    const result = await runtimeClient.dispatchAction("storage_screen", "back_to_town_hub", payload);
+    shellEl.dataset.runtimeStatus = result.status ?? "success";
+    window.setTimeout(() => {
+      window.location.href = runtimeClient.nextRoute(result, townHubRoute);
+    }, navigationDelayMs);
+  } catch (error) {
+    const reason = runtimeClient.errorMessage(error);
+    shellEl.dataset.runtimeStatus = error?.runtimeStatus ?? "error";
+    renderFeedback("諾亞", reason);
+    pushActionLog({
+      action_id: "back_to_town_hub",
+      payload,
+      source: "secondary_action",
+      dispatched: false,
+      reason,
+    });
+  }
+}
+
 clearLogEl.addEventListener("click", () => {
   state.actionLog = [];
   renderActionLog();
@@ -103,6 +137,11 @@ clearLogEl.addEventListener("click", () => {
 loadFixture(fixtureSelect.value);
 
 async function loadFixture(path) {
+  if (runtimeClient.isLiveMode()) {
+    await loadLiveScreen();
+    return;
+  }
+
   shellEl.dataset.loadState = "loading";
   try {
     const response = await fetch(path, { cache: "no-store" });
@@ -111,22 +150,85 @@ async function loadFixture(path) {
     }
     const model = await response.json();
     state.model = model;
-    
+
     state.selectedCategory = "all";
     state.selectedItemId = null;
     state.selectedListType = null;
     state.quantityValue = 1;
     state.actionLog = [];
-    
+
     closeTransferControls();
     render();
     logSystem(`loaded ${path}`);
-    
+
     // Set initial JRPG NPC welcome guidance into bottom bar
     const speaker = model.npc?.name ?? "諾亞";
     const welcome = model.npc?.avatar_text ?? "選擇左側背包物品 (存入) 或右側倉庫物品 (取出) 來進行轉移整理。";
     renderFeedback(speaker, welcome);
-    
+
+    shellEl.dataset.loadState = "ready";
+  } catch (error) {
+    renderLoadError(error);
+    shellEl.dataset.loadState = "error";
+  }
+}
+
+async function loadLiveScreen() {
+  shellEl.dataset.loadState = "loading";
+  try {
+    const model = await runtimeClient.getScreen("storage_screen");
+    state.model = model;
+
+    state.selectedCategory = "all";
+    state.selectedItemId = null;
+    state.selectedListType = null;
+    state.quantityValue = 1;
+    state.actionLog = [];
+
+    closeTransferControls();
+    render();
+    logSystem("live runtime screen loaded");
+
+    const speaker = model.npc?.name ?? "諾亞";
+    const welcome = model.npc?.avatar_text ?? "選擇左側背包物品 (存入) 或右側倉庫物品 (取出) 來進行轉移整理。";
+    renderFeedback(speaker, welcome);
+
+    shellEl.dataset.loadState = "ready";
+  } catch (error) {
+    await loadStaticFallback(fixtureSelect.value, error);
+  }
+}
+
+async function loadStaticFallback(path, liveError) {
+  try {
+    const response = await fetch(path, { cache: "no-store" });
+    if (!response.ok) {
+      throw new Error(`Fixture request failed: ${response.status}`);
+    }
+    const model = await response.json();
+    state.model = model;
+
+    state.selectedCategory = "all";
+    state.selectedItemId = null;
+    state.selectedListType = null;
+    state.quantityValue = 1;
+    state.actionLog = [];
+
+    closeTransferControls();
+    render();
+    logSystem(`live unavailable; loaded fixture ${path}`);
+    pushActionLog({
+      action_id: "live_bridge_unavailable",
+      payload: { reason: liveError instanceof Error ? liveError.message : String(liveError) },
+      source: "live_loader",
+      dispatched: false,
+      reason: "fallback_to_fixture",
+    });
+
+    const speaker = model.npc?.name ?? "諾亞";
+    const welcome = model.npc?.avatar_text ?? "選擇左側背包物品 (存入) 或右側倉庫物品 (取出) 來進行轉移整理。";
+    renderFeedback(speaker, welcome);
+
     shellEl.dataset.loadState = "ready";
   } catch (error) {
     renderLoadError(error);
@@ -142,11 +244,11 @@ function render() {
   renderResources(model.resource_strip ?? []);
   renderBackpackCategoryTabs(model.category_tabs ?? []);
   renderCapacityCard();
-  
+
   // Long Lists
   renderBackpackList();
   renderStorageList();
-  
+
   // Details & Action panel
   updateTransferPanel();
   renderFooterActions();
@@ -187,16 +289,16 @@ function renderBackpackCategoryTabs(categories) {
 function renderCapacityCard() {
   const { model } = state;
   const locked = model.storage_state && !model.storage_state.unlocked;
-  
+
   capacityStatusEl.dataset.status = locked ? "locked" : "unlocked";
   capacityStatusEl.textContent = locked ? "保管箱未解鎖" : "保管箱正常開放";
-  
+
   if (locked) {
     capacityBarFillEl.style.width = "0%";
     capacityTextEl.textContent = "容量: 0 / 10";
     return;
   }
-  
+
   const capacityUsed = model.storage_rows ? model.storage_rows.length : 0;
   const percentage = Math.min((capacityUsed / warehouseCapacityLimit) * 100, 100);
   capacityBarFillEl.style.width = `${percentage}%`;
@@ -209,7 +311,7 @@ function renderBackpackList() {
 
   const rows = model.inventory_rows ?? [];
   const filtered = selectedCategory === "all" ? rows : rows.filter(row => row.category === selectedCategory);
-  
+
   if (filtered.length === 0) {
     inventoryListEl.appendChild(createEmptyState("背包內沒有此類物品"));
     return;
@@ -219,7 +321,7 @@ function renderBackpackList() {
     const button = document.createElement("button");
     button.type = "button";
     button.className = "item-row";
-    
+
     const isSelected = row.item_id === state.selectedItemId && state.selectedListType === "deposit";
     button.classList.toggle("is-selected", isSelected);
     button.setAttribute("aria-pressed", String(isSelected));
@@ -272,7 +374,7 @@ function renderBackpackList() {
 
     button.append(leftPart, rightPart);
     button.addEventListener("click", () => handleRowClick(row, "deposit"));
-    
+
     inventoryListEl.appendChild(button);
   });
 }
@@ -283,65 +385,65 @@ function renderStorageList() {
 
   const locked = model.storage_state && !model.storage_state.unlocked;
   const rows = locked ? [] : (model.storage_rows ?? []);
-  
+
   // JRPG standard visual limit: Always render exactly 10 rows
   for (let i = 0; i < warehouseCapacityLimit; i++) {
     const row = rows[i];
-    
+
     if (locked) {
       // Locked warehouse slot placeholder row
       const el = document.createElement("div");
       el.className = "item-row is-locked";
-      
+
       const leftPart = document.createElement("div");
       leftPart.className = "item-row-left";
-      
+
       const icon = document.createElement("span");
       icon.className = "item-row-icon";
       icon.textContent = "🔒";
-      
+
       const textPart = document.createElement("div");
       textPart.className = "item-row-text";
-      
+
       const name = document.createElement("span");
       name.className = "item-row-name";
       name.textContent = "保管欄位鎖定";
-      
+
       const summary = document.createElement("span");
       summary.className = "item-row-summary";
       summary.textContent = "尚未支付工會解鎖會費";
-      
+
       textPart.append(name, summary);
       leftPart.append(icon, textPart);
       el.append(leftPart);
       storageListEl.appendChild(el);
-      
+
     } else if (!row) {
       // Empty placeholder row
       const el = document.createElement("div");
       el.className = "item-row is-empty";
-      
+
       const leftPart = document.createElement("div");
       leftPart.className = "item-row-left";
-      
+
       const icon = document.createElement("span");
       icon.className = "item-row-icon";
       icon.textContent = "➖";
-      
+
       const emptyText = document.createElement("span");
       emptyText.className = "item-row-empty-text";
       emptyText.textContent = "[ 空置保管欄位 ]";
-      
+
       leftPart.append(icon, emptyText);
       el.append(leftPart);
       storageListEl.appendChild(el);
-      
+
     } else {
       // Occupied storage row
       const button = document.createElement("button");
       button.type = "button";
       button.className = "item-row";
-      
+
       const isSelected = row.item_id === state.selectedItemId && state.selectedListType === "withdraw";
       button.classList.toggle("is-selected", isSelected);
       button.setAttribute("aria-pressed", String(isSelected));
@@ -381,7 +483,7 @@ function renderStorageList() {
 
       button.append(leftPart, rightPart);
       button.addEventListener("click", () => handleRowClick(row, "withdraw"));
-      
+
       storageListEl.appendChild(button);
     }
   }
@@ -389,28 +491,28 @@ function renderStorageList() {
 
 function updateTransferPanel() {
   const { model } = state;
-  
+
   // If warehouse is locked, keep inline panel showing the guide
   if (model.storage_state && !model.storage_state.unlocked) {
     transferEmptyStateEl.style.display = "flex";
     transferControlContentEl.style.display = "none";
-    
+
     transferEmptyStateEl.replaceChildren();
     const h3 = document.createElement("h3");
     h3.textContent = "倉庫保管服務未啟用";
     h3.style.color = "var(--accent-gold)";
     h3.style.fontSize = "0.95rem";
-    
+
     const p1 = document.createElement("p");
     p1.textContent = "請點選右下角「解鎖倉庫」";
     p1.style.fontSize = "0.82rem";
     p1.style.marginTop = "0.5rem";
-    
+
     const p2 = document.createElement("p");
     p2.textContent = "支付諾亞 500G 保管金開啟服務。";
     p2.style.fontSize = "0.75rem";
     p2.className = "empty-sub";
-    
+
     transferEmptyStateEl.append(h3, p1, p2);
     return;
   }
@@ -420,7 +522,7 @@ function updateTransferPanel() {
     // Show default instruction empty state
     transferEmptyStateEl.style.display = "flex";
     transferControlContentEl.style.display = "none";
-    
+
     transferEmptyStateEl.replaceChildren();
     const p1 = document.createElement("p");
     p1.textContent = "選擇左側背包物品 (存入)";
@@ -429,7 +531,7 @@ function updateTransferPanel() {
     const p3 = document.createElement("p");
     p3.className = "empty-sub";
     p3.textContent = "即可進行物品整理";
-    
+
     transferEmptyStateEl.append(p1, p2, p3);
     return;
   }
@@ -439,17 +541,17 @@ function updateTransferPanel() {
   transferControlContentEl.style.display = "block";
 
   const detail = model.item_details?.[item.item_id] ?? {};
-  
+
   transferItemNameEl.textContent = item.title ?? "";
-  
+
   const isDeposit = state.selectedListType === "deposit";
   transferModeBadgeEl.textContent = isDeposit ? "存入倉庫 ➔" : "🠔 取出背包";
-  
+
   // Badge styling
   transferModeBadgeEl.style.borderColor = isDeposit ? "var(--accent-gold)" : "var(--accent-green)";
   transferModeBadgeEl.style.color = isDeposit ? "var(--accent-gold)" : "var(--accent-green)";
   transferModeBadgeEl.style.background = isDeposit ? "rgba(212, 175, 55, 0.05)" : "rgba(141, 163, 130, 0.05)";
-  
+
   transferItemUsageEl.textContent = detail.category_label ?? "物品";
   transferItemDescEl.textContent = `${detail.description ?? ""} (${detail.use_context ?? ""})`;
 
@@ -459,7 +561,7 @@ function updateTransferPanel() {
   transferCountInfoEl.textContent = `我的背包：${backpackCount} 個 | 工會倉庫：${storageCount} 個`;
 
   updateStepperDisplay();
-  
+
   // Render inline requirements
   renderPopoverRequirements(model.requirement_rows?.[item.item_id] ?? []);
 
@@ -468,7 +570,7 @@ function updateTransferPanel() {
   popoverConfirmEl.textContent = isDeposit ? "確認存入" : "確認取出";
   popoverConfirmEl.dataset.actionId = action.action_id ?? "blocked_action";
   popoverConfirmEl.dataset.disabledReason = action.disabled_reason ?? "";
-  
+
   const canConfirm = action.enabled && item.enabled;
   popoverConfirmEl.setAttribute("aria-disabled", String(!canConfirm));
 }
@@ -511,7 +613,7 @@ function handleRowClick(row, listType) {
   const { model } = state;
   state.selectedItemId = row.item_id;
   state.selectedListType = listType;
-  
+
   // 1. Log select action
   const actionId = listType === "deposit" ? "select_inventory_item" : "select_storage_item";
   pushActionLog({
@@ -530,7 +632,7 @@ function handleRowClick(row, listType) {
     render();
     return;
   }
-  
+
   const directionText = listType === "deposit" ? "存入" : "取出";
   renderFeedback(speaker, `「好的，想把 ${row.title} ${directionText} 嗎？請在面板中選擇你要轉移的數量。」`);
 
@@ -548,7 +650,7 @@ function closeTransferControls() {
 function adjustQuantity(delta) {
   const max = getMaxAllowedQuantity();
   if (max === 0) return;
-  
+
   let next = state.quantityValue + delta;
   next = Math.max(next, 1);
   next = Math.min(next, max);
@@ -627,13 +729,13 @@ function executeTransferAction() {
       dispatched: false,
       reason: disabledReason,
     });
-    
+
     renderFeedback("諾亞", `「無法存取：${disabledReason}，請重新選取。」`);
     return;
   }
 
   const direction = state.selectedListType === "deposit" ? "deposit_item" : "withdraw_item";
-  
+
   pushActionLog({
     action_id: direction,
     payload: { item_id: state.selectedItemId, quantity: state.quantityValue },
@@ -643,9 +745,9 @@ function executeTransferAction() {
 
   const transferName = getSelectedItemRow()?.title ?? "物品";
   const feedbackWord = state.selectedListType === "deposit" ? "存入" : "取出";
-  
+
   renderFeedback("諾亞", `「妥當了！${state.quantityValue} 個 ${transferName} 已順利${feedbackWord}完畢，保管箱容量已即時更新。」`);
-  
+
   closeTransferControls();
   render();
 }
@@ -665,14 +767,14 @@ function activatePrimaryAction() {
       dispatched: false,
       reason: disabledReason || "disabled",
     });
-    
+
     let warning = "「此功能目前無法使用。」";
     if (actionId === "unlock_storage") {
       warning = "「抱歉，米菈小隊攜帶的金幣不夠支付 500G 保管金喔。」";
     } else {
       warning = "「升級保管箱需要更高等級的工會許可證，目前第二幕 demo 暫未開放。」";
     }
-    
+
     renderFeedback("諾亞", warning);
     return;
   }
@@ -684,8 +786,38 @@ function activatePrimaryAction() {
     dispatched: true,
   });
 
+  if (runtimeClient.isLiveMode()) {
+    handleLivePrimaryAction(actionId, payload);
+    return;
+  }
+
   if (actionId === "unlock_storage") {
     renderFeedback("諾亞", "「解鎖成功！這就幫米菈小隊開啟專屬的保管箱空間！（請切換上方測試狀態以觀看開啟後畫面）」");
+  }
+}
+
+async function handleLivePrimaryAction(actionId, payload) {
+  try {
+    const result = await runtimeClient.dispatchAction("storage_screen", actionId, payload);
+    shellEl.dataset.runtimeStatus = result.status ?? "success";
+    if (result.screen_model) {
+      state.model = result.screen_model;
+      render();
+    }
+    if (result.message) {
+      renderFeedback("諾亞", result.message);
+    }
+  } catch (error) {
+    const reason = runtimeClient.errorMessage(error);
+    shellEl.dataset.runtimeStatus = error?.runtimeStatus ?? "error";
+    renderFeedback("諾亞", reason);
+    pushActionLog({
+      action_id: actionId,
+      payload,
+      source: "primary_action",
+      dispatched: false,
+      reason,
+    });
   }
 }
 

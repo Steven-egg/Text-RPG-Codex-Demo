@@ -76,17 +76,18 @@ existing runtime-authoritative adapter / ScreenModel pattern where appropriate.
 | World Map | blessed live bridge cleanup | Runtime-backed route model, `save_game`, shell-only `open_settings`. | Real settings panel or arbitrary town return action. |
 | Dungeon / Combat loop | `be6b06c [antig] feat(gui): complete live combat loop feedback` | Travel, exploration step / retreat, combat actions, victory result, route clear / resolved state. | Complete dungeon framework, boss framework, combat formula changes. |
 | Guild report | `c2052d4 [antig] feat(gui): add guild clear report live bridge` | Clear report registration and display for eligible unlocked dungeon clears. | Full guild / quest / reputation / achievement system. |
-| Guild Quest Turn-in for Synthesis Unlock | current package | Guild live mode shows unlocked existing `QUESTS`; `submit_quest` completes ready turn-ins through existing runtime validation, reward, and unlock behavior. `quest_cave_gathering` unlocks `shop_synthesis_01`. | Full guild / quest framework, new quest data, story inquiry expansion, save/schema/combat changes, full synthesis, generic recipe bridge. |
+| Guild Quest Turn-in for Synthesis Unlock | `017fa43 [antig] feat(gui): add guild quest synthesis unlock bridge` | Guild live mode shows unlocked existing `QUESTS`; `submit_quest` completes ready turn-ins through existing runtime validation, reward, and unlock behavior. `quest_cave_gathering` unlocks `shop_synthesis_01`. | Full guild / quest framework, new quest data, story inquiry expansion, save/schema/combat changes, full synthesis, generic recipe bridge. |
 | Combat Skill Button | `4acd04d [antig] feat(gui): add combat skill button live bridge` | `use_skill` routing from existing `learned_skills` and `SKILLS`. | Formal skill framework, target selection, rebalance. |
 | Shop Buy Consumable | `ebc1b5e [antig] feat(gui): add shop buy consumable live bridge` | Buy 1 existing travel-shop consumable through server-side validation. | Full shop system, sell, quantity selector, equipment purchase. |
 | Magic Shop Learn Book | `b59fe43 [antig] feat(gui): add magic shop learn book live bridge` | Learn 1 existing magic book through server-side validation. | Full magic / skill framework or combat rebalance. |
 | Workshop Buy Weapon | `2d99d7e [antig] feat(gui): add workshop buy weapon live bridge MVP` | Buy existing weapon-shop weapons; do not auto-equip. | Armor, upgrades, full workshop framework. |
 | Workshop Weapon Equip | `6abe303 [antig] feat(gui): add workshop weapon equip bridge & align backpack presentation` | Equip inventory-held weapon-slot items into `equipment.weapon`; align inventory/equipment presentation. | Full inventory / equipment management, unequip, comparison, stat rebalance. |
+| Storage Unlock & View | current package | Town Hub routes to Storage live screen; `storage_screen_model(state)` renders live inventory / storage status / storage contents / capacity; `unlock_storage` blocks low Gold, deducts the existing runtime unlock cost, and sets `state["storage_unlocked"] = True`. | `deposit_item`, `withdraw_item`, storage capacity upgrade, full storage system, generic inventory / equipment management, schema/save/combat changes. |
 | Town Hub Mira Entry Unlock | `b046b1e [antig] feat(gui): add Mira synthesis entry unlock bridge` | Town Hub synthesis facility node reflects `is_unlocked(state, "shop_synthesis_01")`; locked state points to Guild task `洞窟採集`; unlocked state routes to the existing static synthesis screen. | Full synthesis, recipe bridge, `synthesis_screen_model()`, live loader, `craft_recipe`, recipe / quest / dungeon / schema / save / combat changes. |
 | Synthesis Single Recipe Craft | `5dbc742 [antig] feat(gui): add synthesis single recipe craft bridge` | `synthesis_screen` live mode loads a runtime-shaped ScreenModel and dispatches `craft_recipe` for the single whitelisted recipe `recipe_piercing_bundle`, reusing `game.recipe_available(...)` and `game.craft_recipe_message(...)`. | Full synthesis, generic recipe bridge, multi-recipe coverage, base-item upgrades, recipe / quest / dungeon / schema / save / combat changes. |
 
 Latest committed bridge baseline before the current package:
-`5dbc742 [antig] feat(gui): add synthesis single recipe craft bridge`.
+`017fa43 [antig] feat(gui): add guild quest synthesis unlock bridge`.
 
 ## 3.2 Reusable Bridge Pattern Audit
 
@@ -108,8 +109,9 @@ Read-only audit, 2026-06-04:
 | Workshop | Weapon buy reads `SHOP_INVENTORY["weapon"]`; `equip_weapon` reuses `game.equip_item(...)` and runtime equipment state. Armor, upgrades, comparison, unequip, and generic slots remain closed. | Medium. Weapon path is reusable; broader equipment and crafting-upgrade paths are still MVP-scoped gaps. | Add armor buy or upgrade display as separate small gates. Generic equipment management needs its own planning gate. |
 | Magic shop | `learn_magic_book` validates `MAGIC_BOOKS`, `SKILLS`, job, level, gold, materials, and learned state server-side. ScreenModel still uses a fixed book id list. | Low to medium. Mutation action is reusable; presentation list is narrower than CLI data. | Iterate `MAGIC_BOOKS` in the model before adding more books. No one-book-per-MVP pattern is needed. |
 | World map / dungeon / exploration / combat | World Map iterates `DUNGEONS` and runtime unlocks; `confirm_travel`, `advance_step`, combat, retreat, route clear, item rows, and skill rows are shared flow pieces. | Medium. Multiple dungeons can route through the bridge, but complete dungeon events, boss framework, and combat formula changes remain closed. | Treat existing dungeons as coverage follow-up unless the task opens boss / special event behavior. |
-| Guild | Current GUI bridge includes dungeon clear report registration from `DUNGEONS`; the current package adds existing `QUESTS` turn-in / reward / unlock coverage for ready quests, validated by `quest_cave_gathering` unlocking `shop_synthesis_01`. | Medium. The turn-in adapter reuses runtime helpers, but this is not a generic guild framework, reputation system, achievement system, or story inquiry bridge. | Treat additional existing `QUESTS` turn-in coverage as same-family coverage follow-up only after an owner-approved exact scope. New quest data, story inquiry, reputation, or broad framework work still needs its own gate. |
+| Guild | Current GUI bridge includes dungeon clear report registration from `DUNGEONS`; `017fa43` adds existing `QUESTS` turn-in / reward / unlock coverage for ready quests, validated by `quest_cave_gathering` unlocking `shop_synthesis_01`. | Medium. The turn-in adapter reuses runtime helpers, but this is not a generic guild framework, reputation system, achievement system, or story inquiry bridge. | Treat additional existing `QUESTS` turn-in coverage as same-family coverage follow-up only after an owner-approved exact scope. New quest data, story inquiry, reputation, or broad framework work still needs its own gate. |
 | Synthesis / crafting | Town Hub entry unlock is committed. `5dbc742` adds one whitelisted `craft_recipe` path for `recipe_piercing_bundle` and reuses `game.recipe_available(...)` plus `game.craft_recipe_message(...)`. ScreenModel and live loader are deliberately single-recipe. | High for full crafting. The bridge proves one action path, but full synthesis, base-item recipes, and broad recipe iteration remain closed. | Next coverage should start with a read-only gate before iterating more existing Mira recipe ids. Base-item upgrades require a separate gate. |
+| Storage | Current package opens Town Hub routing, a live Storage ScreenModel, and `unlock_storage` against existing runtime storage state / unlock cost. Deposit, withdraw, and capacity upgrade actions remain disabled in the ScreenModel. | Medium. Unlock/view is now bridged, but transfer mutation and capacity behavior remain intentionally closed. | Treat deposit / withdraw and capacity upgrade as separate read-only gates. Do not let unlock/view imply full inventory or storage management. |
 | Inventory / backpack / equipment | World Map utility preview reads runtime inventory plus currently equipped equipment. Workshop weapon equip is the only current live equip action. | Medium. Display is reusable; equipment mutation remains weapon/workshop-specific. | More item display is coverage; generic equip / unequip / slot management requires its own gate. |
 | Bestiary | Preview reads runtime `state["bestiary"]` and monster data, so more registered monsters naturally display. | Low. Mostly a summary presentation surface. | Add detail / filtering as coverage work, not one-monster MVPs. |
 
@@ -118,6 +120,8 @@ Explicit exceptions that are not yet fully bridged system families:
 - Guild features beyond existing `QUESTS` turn-in / reward / unlock coverage.
 - Complete crafting / synthesis beyond the single whitelisted
   `recipe_piercing_bundle` craft path.
+- Complete storage beyond unlock/view, including deposit, withdraw, and capacity
+  upgrade behavior.
 - Generic equipment management beyond workshop weapon equip.
 
 Town Hub Mira and Synthesis result after this audit:
@@ -260,8 +264,8 @@ Status note, 2026-06-01:
 
 Status note, 2026-06-04:
 
-- A narrow Guild Quest Turn-in for Synthesis Unlock MVP is included in the
-  current package.
+- A narrow Guild Quest Turn-in for Synthesis Unlock MVP has landed through
+  `017fa43 [antig] feat(gui): add guild quest synthesis unlock bridge`.
 - Completed coverage is limited to Guild live routing already established by the
   Guild Report MVP, a runtime-shaped Guild ScreenModel for unlocked existing
   `QUESTS`, and `submit_quest` for ready quest turn-ins.
@@ -286,11 +290,45 @@ Status note, 2026-06-04:
 - Owner manual hand test passed: locked synthesis before quest completion,
   unlocked synthesis after Guild quest turn-in, save/load persistence for
   unlocked state, new-game locked state, and old completed save unlocked state.
+- Owner exploratory bridge-loop hand test later confirmed that runtime can
+  progress to 焦石礦坑, 焦石礦坑 exploration report can complete and appear in
+  Guild as completed, Mira synthesis unlock works, `recipe_piercing_bundle` can
+  be crafted, and the crafted battle item can be used in combat. This is only
+  supplementary verification for the Guild / Synthesis unlock loop.
 - This status note does not approve a full guild / quest framework, new quest
   data, story inquiry expansion, reputation / achievement systems, schema
   changes, save migration, combat formula changes, full synthesis, generic
-  recipe bridge, multi-recipe synthesis coverage, base-item upgrades, or crafting
-  system refactors.
+  recipe bridge, multi-recipe synthesis coverage, base-item upgrades, boss /
+  血跡地圖 progression, more quests, a combat item system, or crafting system
+  refactors.
+
+Status note, 2026-06-04:
+
+- A narrow Storage Unlock & View Live MVP is included in the current package.
+- Completed coverage is limited to Town Hub -> Storage live routing, a
+  runtime-shaped `storage_screen_model(state)` for live inventory / storage
+  status / storage contents / capacity display, and `unlock_storage` for opening
+  the storage flag.
+- Python runtime remains gameplay authority: the bridge uses the existing runtime
+  storage unlock cost, blocks low Gold, deducts Gold on success, and sets
+  `state["storage_unlocked"] = True`. Browser JavaScript dispatches UIAction
+  payloads and renders returned ScreenModels.
+- `deposit_item`, `withdraw_item`, and storage capacity upgrades remain disabled
+  in this MVP with explicit scope messaging.
+- Antigravity-reported verification passed:
+  `python 06_tools/smoke_test_storage_bridge.py`,
+  `python 06_tools/validate_data.py`,
+  `python element_maze.py --smoke-test`,
+  `python 06_tools/smoke_test_guild_quest_bridge.py`,
+  `python 06_tools/smoke_test_synthesis_bridge.py`,
+  `python 06_tools/smoke_test_workshop_bridge.py`, and
+  `python 06_tools/smoke_test_magic_shop_bridge.py`.
+- Owner manual hand test passed: Storage screen opens in live mode, 500G unlock
+  flow works, and after unlock the screen shows live inventory, storage status,
+  and capacity. Item deposit is intentionally unavailable in this MVP.
+- This status note does not approve deposit / withdraw, capacity upgrade, a full
+  storage system, generic inventory / equipment management, schema changes, save
+  migration, combat formula changes, or manual `save.json` edits.
 
 Status note, 2026-06-02:
 

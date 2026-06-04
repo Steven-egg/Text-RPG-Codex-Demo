@@ -9,8 +9,8 @@ what the next boundary is. Detailed MVP verification belongs in Task Zone docs.
 - Work directory: `C:\Users\user\OneDrive\文字冒險遊戲`
 - Current branch expectation: `main` aligned with `origin/main`.
 - Latest committed bridge baseline before the current package:
-  `5dbc742 [antig] feat(gui): add synthesis single recipe craft bridge`
-- Current newest live slice: Guild Quest Turn-in for Synthesis Unlock Live MVP.
+  `017fa43 [antig] feat(gui): add guild quest synthesis unlock bridge`
+- Current newest live slice: Storage Unlock & View Live MVP.
 
 Project state:
 
@@ -27,10 +27,20 @@ Project state:
 
 Current newest GUI live state:
 
-- Guild Quest Turn-in for Synthesis Unlock Live MVP is complete in the current
-  package: Guild live mode shows unlocked existing `QUESTS`, and `submit_quest`
-  can complete ready quest turn-ins through existing runtime validation and
-  reward / unlock behavior.
+- Storage Unlock & View Live MVP is complete in the current package: Town Hub can
+  route to the Storage live screen, `storage_screen_model(state)` renders live
+  storage state, and `unlock_storage` can unlock the storage through Python
+  runtime state.
+- The validated path is: low Gold blocks unlock, sufficient Gold deducts the
+  existing runtime storage unlock cost, sets `state["storage_unlocked"] = True`,
+  and returns an updated Storage ScreenModel showing inventory, storage status,
+  storage contents, and capacity.
+- Storage transfer remains intentionally closed in this slice:
+  `deposit_item`, `withdraw_item`, and capacity upgrade actions stay disabled
+  with MVP-scope messaging.
+- Guild Quest Turn-in for Synthesis Unlock Live MVP is complete: Guild live mode
+  shows unlocked existing `QUESTS`, and `submit_quest` can complete ready quest
+  turn-ins through existing runtime validation and reward / unlock behavior.
 - The validated path is `quest_cave_gathering`: turn in `mat_moss_fiber x3` and
   `mat_cracked_stone x2`, receive the existing quest reward, and unlock
   `shop_synthesis_01`.
@@ -51,8 +61,9 @@ Current newest GUI live state:
   `craft_recipe` for the single whitelisted recipe `recipe_piercing_bundle`.
 - Crafting reuses Python runtime authority:
   `game.recipe_available(...)` and `game.craft_recipe_message(...)`.
-- This does not mean full inventory / equipment, synthesis, crafting, guild
-  quest, multi-recipe, base-item upgrade, or facility systems are complete.
+- This does not mean full inventory / equipment, storage transfer, storage
+  upgrade, synthesis, crafting, guild quest, multi-recipe, base-item upgrade, or
+  facility systems are complete.
 
 ## Hot Zone Startup Order
 
@@ -91,8 +102,8 @@ reopened through a read-only planning gate and owner-approved exact scope.
 - Full inventory / equipment management.
 - Armor, accessory, special-slot, unequip, comparison, upgrade expansion, or
   generic workshop framework.
-- Full shop, magic shop, storage, synthesis, guild, quest, boss, dungeon, magic,
-  skill, target-selection, or facility framework.
+- Full shop, magic shop, storage transfer / capacity upgrade, synthesis, guild,
+  quest, boss, dungeon, magic, skill, target-selection, or facility framework.
 - New quest data, schema changes, broad quest framework changes, or story inquiry
   expansion beyond existing runtime `QUESTS` turn-in coverage.
 - Save migration, data/schema changes, combat formula changes, stat rebalance, or
@@ -112,6 +123,11 @@ Any synthesis follow-up must not open full synthesis, a generic recipe bridge,
 broad `craft_recipe` coverage, base-item upgrades, recipe / quest / dungeon
 changes, schema changes, save changes, or crafting system refactors without a
 new owner-approved exact scope.
+
+Any Storage follow-up must start with a new read-only gate and explicit owner
+approval. Do not open `deposit_item`, `withdraw_item`, capacity upgrades, generic
+inventory / equipment management, schema changes, save migration, combat formula
+changes, or manual `save.json` work from the unlock/view MVP.
 
 For docs-only sync, restrict changes to explicitly approved markdown surfaces and
 do not touch runtime, JavaScript, data, schema, save, or combat formula.
@@ -144,6 +160,23 @@ Latest stable / working-tree verification noted here:
 - Owner manual hand test: locked synthesis before quest completion, unlocked
   synthesis after Guild quest turn-in, save/load persistence for unlocked state,
   new-game locked state, and old completed save unlocked state all PASS.
+- Storage Unlock & View Antigravity-reported checks:
+  `python 06_tools/smoke_test_storage_bridge.py` PASS,
+  `python 06_tools/validate_data.py` PASS,
+  `python element_maze.py --smoke-test` PASS,
+  `python 06_tools/smoke_test_guild_quest_bridge.py` PASS,
+  `python 06_tools/smoke_test_synthesis_bridge.py` PASS,
+  `python 06_tools/smoke_test_workshop_bridge.py` PASS, and
+  `python 06_tools/smoke_test_magic_shop_bridge.py` PASS.
+- Storage Owner manual hand test: Storage screen opens in live mode, 500G unlock
+  flow works, and after unlock the screen shows live inventory, storage status,
+  and capacity. Item deposit is intentionally unavailable in this MVP.
+- Owner exploratory bridge-loop hand test: runtime can progress to 焦石礦坑,
+  焦石礦坑 exploration report can complete and appears in Guild as completed,
+  Mira synthesis unlock works, `recipe_piercing_bundle` can be crafted, and the
+  crafted battle item can be used in combat. This is only supplementary
+  verification for the Guild / Synthesis unlock loop; it does not open Boss,
+  血跡地圖, more quests, more recipes, full synthesis, or a combat item system.
 
 For future docs-only cleanup, use markdown diff/status checks. Runtime smoke is
 not required unless runtime files change.
