@@ -76,6 +76,46 @@ This matrix is the Task Zone home for live bridge status that should not bloat
 Latest docs sync after Workshop Weapon Equip:
 `a20d912 [codex] docs(gui): sync workshop weapon equip bridge handoff`.
 
+## 3.2 Reusable Bridge Pattern Audit
+
+Read-only audit, 2026-06-04:
+
+- Governance rule: each facility / system should first use a narrow MVP to prove
+  the runtime bridge shape. After that bridge exists, same-family CLI content
+  should usually be described as CLI coverage / bridge coverage follow-up, not as
+  a fresh MVP for every item, quest, recipe, dungeon, or monster.
+- Browser JavaScript remains a UIAction dispatcher and ScreenModel renderer.
+  Python runtime / data / save behavior remains gameplay authority.
+- A same-family coverage follow-up still needs an owner-approved exact scope, but
+  it should prefer extending the existing adapter / ScreenModel pattern over
+  creating a parallel gameplay rule.
+
+| System | Current reusable state | Hardcoded risk | Coverage direction |
+|---|---|---|---|
+| Shop / travel shop | `buy_item` validates against existing `SHOP_INVENTORY["travel"]` and item data, but the current live ScreenModel lists a fixed consumable subset and `buy_item` still rejects non-consumables. | Medium. Bridge exists for travel consumable purchase, but battle items / accessories are not yet natural GUI coverage. | Extend the ScreenModel to iterate travel inventory and explicitly decide which existing item kinds are in scope. Do not make one MVP per item. |
+| Workshop | Weapon buy reads `SHOP_INVENTORY["weapon"]`; `equip_weapon` reuses `game.equip_item(...)` and runtime equipment state. Armor, upgrades, comparison, unequip, and generic slots remain closed. | Medium. Weapon path is reusable; broader equipment and crafting-upgrade paths are still MVP-scoped gaps. | Add armor buy or upgrade display as separate small gates. Generic equipment management needs its own planning gate. |
+| Magic shop | `learn_magic_book` validates `MAGIC_BOOKS`, `SKILLS`, job, level, gold, materials, and learned state server-side. ScreenModel still uses a fixed book id list. | Low to medium. Mutation action is reusable; presentation list is narrower than CLI data. | Iterate `MAGIC_BOOKS` in the model before adding more books. No one-book-per-MVP pattern is needed. |
+| World map / dungeon / exploration / combat | World Map iterates `DUNGEONS` and runtime unlocks; `confirm_travel`, `advance_step`, combat, retreat, route clear, item rows, and skill rows are shared flow pieces. | Medium. Multiple dungeons can route through the bridge, but complete dungeon events, boss framework, and combat formula changes remain closed. | Treat existing dungeons as coverage follow-up unless the task opens boss / special event behavior. |
+| Guild | Current GUI bridge is dungeon clear report registration from `DUNGEONS`. It does not implement the CLI `QUESTS` turn-in, reward, unlock, or story inquiry system. | High for QUESTS. This is not a generic guild quest bridge yet. | Guild QUESTS coverage needs a separate small MVP gate. Do not bundle it into facility entry or dungeon coverage work. |
+| Inventory / backpack / equipment | World Map utility preview reads runtime inventory plus currently equipped equipment. Workshop weapon equip is the only current live equip action. | Medium. Display is reusable; equipment mutation remains weapon/workshop-specific. | More item display is coverage; generic equip / unequip / slot management requires its own gate. |
+| Bestiary | Preview reads runtime `state["bestiary"]` and monster data, so more registered monsters naturally display. | Low. Mostly a summary presentation surface. | Add detail / filtering as coverage work, not one-monster MVPs. |
+
+Explicit exceptions that are not yet fully bridged system families:
+
+- Guild `QUESTS` turn-in / reward / unlock flow.
+- Complete crafting / synthesis, including `craft_recipe`.
+- Generic equipment management beyond workshop weapon equip.
+
+Current candidate after this audit:
+
+- Town Hub Mira / 米菈合成屋 entry unlock live bridge MVP.
+- Scope is only the Town Hub synthesis facility node reflecting
+  `is_unlocked(state, "shop_synthesis_01")` as locked / unlocked.
+- This candidate is not a complete synthesis shop, not a recipe bridge, not a
+  craft action, and not a `synthesis_screen_model()` or live loader task.
+- It must not add or modify recipes, quests, dungeons, schema, save behavior,
+  combat formulas, or the crafting system.
+
 ## 4. Bridge Shape
 
 Recommended local-only architecture:

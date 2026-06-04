@@ -186,10 +186,13 @@ Docs cleanup:
 
 ## 6. Recommended Next Step
 
-After this Hot Zone cleanup, the next safest convergence item is a read-only gate
-for one small owner-selected task.
+After the reusable bridge audit, the next safest convergence item is a read-only
+gate for one small owner-selected task.
 
-Current recorded live-bridge candidate: Combat / Field Item Use MVP. It is only a
-candidate. It should start with a single-slice read-only plan that identifies
-affected runtime helpers, GUI live surfaces, validation, and explicitly forbidden
-adjacent systems.
+Current recorded live-bridge candidate: Town Hub Mira / 米菈合成屋 Entry
+Unlock Live MVP. It is only a candidate. Scope should stay limited to the Town
+Hub synthesis facility node reflecting `is_unlocked(state, "shop_synthesis_01")`
+as locked / unlocked. It should not add `synthesis_screen_model()`, a synthesis
+live loader, `craft_recipe`, recipe / quest / dungeon changes, schema changes,
+save changes, or crafting-system refactors unless the owner approves a separate
+gate.

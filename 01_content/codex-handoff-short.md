@@ -78,10 +78,13 @@ files during ordinary startup.
 
 No next implementation is pre-approved.
 
-The current recorded candidate is Combat / Field Item Use MVP: let already owned
-consumables be used through existing runtime authority and return HP / MP /
-inventory updates to the GUI live ScreenModel. This is only a candidate and still
-requires a single-slice read-only planning gate.
+The current recorded candidate is Town Hub Mira / 米菈合成屋 Entry Unlock
+Live MVP. Scope is only the Town Hub synthesis node reflecting
+`is_unlocked(state, "shop_synthesis_01")` as locked / unlocked. It does not open
+full synthesis, `synthesis_screen_model()`, live loader work, `craft_recipe`,
+recipe / quest / dungeon changes, schema changes, save changes, or crafting
+system refactors. This is only a candidate and still requires owner approval
+before implementation.
 
 For docs-only sync, restrict changes to explicitly approved markdown surfaces and
 do not touch runtime, JavaScript, data, schema, save, or combat formula.
