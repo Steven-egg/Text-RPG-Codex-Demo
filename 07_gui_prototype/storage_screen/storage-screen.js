@@ -735,13 +735,19 @@ function executeTransferAction() {
   }
 
   const direction = state.selectedListType === "deposit" ? "deposit_item" : "withdraw_item";
+  const payload = { item_id: state.selectedItemId, quantity: state.quantityValue };
 
   pushActionLog({
     action_id: direction,
-    payload: { item_id: state.selectedItemId, quantity: state.quantityValue },
+    payload,
     source: "inline_confirm",
     dispatched: true,
   });
+
+  if (runtimeClient.isLiveMode()) {
+    handleLiveTransferAction(direction, payload);
+    return;
+  }
 
   const transferName = getSelectedItemRow()?.title ?? "物品";
   const feedbackWord = state.selectedListType === "deposit" ? "存入" : "取出";
@@ -750,6 +756,32 @@ function executeTransferAction() {
 
   closeTransferControls();
   render();
+}
+
+async function handleLiveTransferAction(actionId, payload) {
+  try {
+    const result = await runtimeClient.dispatchAction("storage_screen", actionId, payload);
+    shellEl.dataset.runtimeStatus = result.status ?? "success";
+    if (result.screen_model) {
+      state.model = result.screen_model;
+      closeTransferControls();
+      render();
+    }
+    if (result.message) {
+      renderFeedback("諾亞", result.message);
+    }
+  } catch (error) {
+    const reason = runtimeClient.errorMessage(error);
+    shellEl.dataset.runtimeStatus = error?.runtimeStatus ?? "error";
+    renderFeedback("諾亞", reason);
+    pushActionLog({
+      action_id: actionId,
+      payload,
+      source: "inline_confirm",
+      dispatched: false,
+      reason,
+    });
+  }
 }
 
 // Unlock storage bottom button trigger

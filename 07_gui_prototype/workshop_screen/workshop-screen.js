@@ -659,51 +659,38 @@ function renderRequirementsView(item) {
   let reqsHtml = '';
 
   if (currentTab === 'owned') {
-    if (item.slot === 'weapon') {
-      const currentJob = player.job;
-      const jobCompatible = !item.jobs || item.jobs.includes(currentJob);
+    const currentJob = player.job;
+    const jobCompatible = !item.jobs || item.jobs.includes(currentJob);
 
-      if (item.equippedSlot === 'weapon') {
-        itemRequirementView.innerHTML = `
-          <div style="text-align: center; margin: auto;">
-            <p style="font-size: 13px; color: var(--success-color); font-weight: bold; margin-bottom: 5px;">目前已裝備此武器</p>
-            <p style="font-size: 11px; color: var(--text-muted);">正在裝備欄位中發揮效果。</p>
-          </div>
-        `;
-        primaryActionBtn.textContent = '裝備中';
-        primaryActionBtn.disabled = true;
-        primaryActionBtn.removeAttribute('data-disabled-reason');
-      } else if (!jobCompatible) {
-        itemRequirementView.innerHTML = `
-          <div style="text-align: center; margin: auto;">
-            <p style="font-size: 13px; color: var(--danger-color); font-weight: bold; margin-bottom: 5px;">職業限制，無法裝備</p>
-            <p style="font-size: 11px; color: var(--text-muted);">目前職業 [${currentJob}] 無法裝備此武器。</p>
-          </div>
-        `;
-        primaryActionBtn.textContent = '裝備此武器';
-        primaryActionBtn.disabled = true;
-        primaryActionBtn.setAttribute('data-disabled-reason', 'job_incompatible');
-      } else {
-        itemRequirementView.innerHTML = `
-          <div style="text-align: center; margin: auto;">
-            <p style="font-size: 13px; color: var(--info-blue); font-weight: bold; margin-bottom: 5px;">此武器目前未裝備</p>
-            <p style="font-size: 11px; color: var(--text-muted);">點擊按鈕將其替換為冒險者的當前武器。</p>
-          </div>
-        `;
-        primaryActionBtn.textContent = '裝備此武器';
-        primaryActionBtn.disabled = false;
-        primaryActionBtn.removeAttribute('data-disabled-reason');
-      }
-    } else {
-      // 我的裝備，無需求
+    if (item.equippedSlot) {
       itemRequirementView.innerHTML = `
         <div style="text-align: center; margin: auto;">
-          <p style="font-size: 13px; color: var(--success-color); font-weight: bold; margin-bottom: 5px;">你已擁有這件裝備</p>
-          <p style="font-size: 11px; color: var(--text-muted);">${item.equippedSlot ? `目前裝備在 [${item.equippedSlot.toUpperCase()}] 欄位` : '置於背包中，隨時可於裝備面板進行替換。'}</p>
+          <p style="font-size: 13px; color: var(--success-color); font-weight: bold; margin-bottom: 5px;">目前已裝備此裝備</p>
+          <p style="font-size: 11px; color: var(--text-muted);">正在裝備欄位 [${item.equippedSlot.toUpperCase()}] 中發揮效果。</p>
         </div>
       `;
-      primaryActionBtn.textContent = item.equippedSlot ? '裝備中' : '已擁有';
+      primaryActionBtn.textContent = '裝備中';
       primaryActionBtn.disabled = true;
+      primaryActionBtn.removeAttribute('data-disabled-reason');
+    } else if (!jobCompatible) {
+      itemRequirementView.innerHTML = `
+        <div style="text-align: center; margin: auto;">
+          <p style="font-size: 13px; color: var(--danger-color); font-weight: bold; margin-bottom: 5px;">職業限制，無法裝備</p>
+          <p style="font-size: 11px; color: var(--text-muted);">目前職業 [${currentJob}] 無法裝備此裝備。</p>
+        </div>
+      `;
+      primaryActionBtn.textContent = '裝備此裝備';
+      primaryActionBtn.disabled = true;
+      primaryActionBtn.setAttribute('data-disabled-reason', 'job_incompatible');
+    } else {
+      itemRequirementView.innerHTML = `
+        <div style="text-align: center; margin: auto;">
+          <p style="font-size: 13px; color: var(--info-blue); font-weight: bold; margin-bottom: 5px;">此裝備目前未裝備</p>
+          <p style="font-size: 11px; color: var(--text-muted);">點擊按鈕將其裝備至冒險者的對應插槽。</p>
+        </div>
+      `;
+      primaryActionBtn.textContent = '裝備此裝備';
+      primaryActionBtn.disabled = false;
       primaryActionBtn.removeAttribute('data-disabled-reason');
     }
     return;
@@ -843,7 +830,7 @@ function handlePrimaryAction() {
   if (!item) return;
 
   if (currentTab === 'owned') {
-    if (item.slot !== 'weapon' || item.equippedSlot === 'weapon') return; // 防呆
+    if (item.equippedSlot) return;
 
     const player = currentFixtureData.player;
     const currentJob = player.job;
@@ -851,13 +838,15 @@ function handlePrimaryAction() {
     if (!jobCompatible) return;
 
     if (runtimeClient.isLiveMode()) {
-      logUIAction('equip_weapon', {
+      const actionToDispatch = item.slot === 'weapon' ? 'equip_weapon' : 'equip_equipment';
+
+      logUIAction(actionToDispatch, {
         item_id: selectedItemId
       });
 
       primaryActionBtn.disabled = true;
 
-      runtimeClient.dispatchAction("workshop_screen", "equip_weapon", { item_id: selectedItemId })
+      runtimeClient.dispatchAction("workshop_screen", actionToDispatch, { item_id: selectedItemId })
         .then((result) => {
           if (result.screen_model) {
             currentFixtureData = result.screen_model;
@@ -884,17 +873,18 @@ function handlePrimaryAction() {
           feedbackBar.textContent = `換裝失敗: ${reason}`;
           feedbackBar.style.color = 'var(--danger-color)';
           logUIAction('blocked_action', {
-            action: 'equip_weapon',
+            action: actionToDispatch,
             item_id: selectedItemId,
             disabled_reason: reason
           });
           primaryActionBtn.disabled = false;
         });
     } else {
-      logUIAction('equip_weapon', {
+      const actionToDispatch = item.slot === 'weapon' ? 'equip_weapon' : 'equip_equipment';
+      logUIAction(actionToDispatch, {
         item_id: selectedItemId
       });
-      feedbackBar.textContent = `[靜態反饋] 已模擬裝備武器 ${item.name}。`;
+      feedbackBar.textContent = `[靜態反饋] 已模擬裝備 ${item.name}。`;
       feedbackBar.style.color = 'var(--success-color)';
     }
     return;
@@ -913,14 +903,18 @@ function handlePrimaryAction() {
   }
 
   if (runtimeClient.isLiveMode()) {
-    logUIAction('buy_equipment', {
-      item_id: selectedItemId,
-      price: item.price
+    const isUpgrade = currentTab === 'upgrade';
+    const actionToDispatch = isUpgrade ? 'upgrade_equipment' : 'buy_equipment';
+    const payload = isUpgrade ? { recipe_id: selectedItemId } : { item_id: selectedItemId };
+
+    logUIAction(actionToDispatch, {
+      ...payload,
+      price: item.price || item.gold
     });
 
     primaryActionBtn.disabled = true;
 
-    runtimeClient.dispatchAction("workshop_screen", "buy_equipment", { item_id: selectedItemId })
+    runtimeClient.dispatchAction("workshop_screen", actionToDispatch, payload)
       .then((result) => {
         if (result.screen_model) {
           currentFixtureData = result.screen_model;
@@ -937,7 +931,7 @@ function handlePrimaryAction() {
         if (result.screen_model && result.screen_model.feedback_message) {
           feedbackBar.textContent = `[交易成功] ` + result.screen_model.feedback_message.text;
         } else {
-          feedbackBar.textContent = `[交易成功] 葛雷將 ${item.name} 妥善包裝好放入你的背包：「金幣收下了，祝你在焦石礦坑好運！」`;
+          feedbackBar.textContent = `[交易成功] 成功處理了 ${item.name}。`;
         }
         feedbackBar.style.color = 'var(--success-color)';
       })
@@ -947,8 +941,8 @@ function handlePrimaryAction() {
         feedbackBar.textContent = `交易失敗: ${reason}`;
         feedbackBar.style.color = 'var(--danger-color)';
         logUIAction('blocked_action', {
-          action: 'buy_equipment',
-          item_id: selectedItemId,
+          action: actionToDispatch,
+          ...payload,
           disabled_reason: reason
         });
         primaryActionBtn.disabled = false;

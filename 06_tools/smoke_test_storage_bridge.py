@@ -78,30 +78,116 @@ def run_smoke_test():
     capacity_item = next(r for r in unlocked_model["resource_strip"] if r["id"] == "storage_capacity")
     assert "0 / 10" in capacity_item["label"]
 
-    # Verify inventory_rows lists the items and has them disabled
+    # Verify inventory_rows lists the items and has them enabled
     inv_rows = unlocked_model["inventory_rows"]
     iron_row = next(r for r in inv_rows if r["item_id"] == "mat_iron_ore")
     assert iron_row["owned_count"] == 5
-    assert iron_row["enabled"] is False  # MVP deposit is disabled
-    assert "僅提供倉庫開啟" in iron_row["disabled_reason"]
+    assert iron_row["enabled"] is True
+    assert iron_row["disabled_reason"] is None
 
     key_row = next(r for r in inv_rows if r["item_id"] == "key_fire_mark_shard")
     assert key_row["enabled"] is False
     assert "貴重物" in key_row["disabled_reason"]
 
-    # Fill storage manually and verify display
-    state["storage"]["mat_copper_powder"] = 12
-    unlocked_model2 = session.screen_model("storage_screen")
-    storage_rows = unlocked_model2["storage_rows"]
-    copper_row = next(r for r in storage_rows if r["item_id"] == "mat_copper_powder")
-    assert copper_row["owned_count"] == 12
-    assert copper_row["enabled"] is False  # MVP withdraw is disabled
-    assert "僅提供倉庫開啟" in copper_row["disabled_reason"]
+    # 8. Test deposit_item action (mat_iron_ore x1)
+    dep_res = session.dispatch("deposit_item", {"item_id": "mat_iron_ore", "quantity": 1}, screen_id="storage_screen")
+    assert dep_res["ok"] is True
+    assert state["inventory"]["mat_iron_ore"] == 4
+    assert state["storage"]["mat_iron_ore"] == 1
+    print("Verified: deposit_item successfully transfers item from inventory to storage.")
 
-    capacity_item2 = next(r for r in unlocked_model2["resource_strip"] if r["id"] == "storage_capacity")
-    assert "1 / 10" in capacity_item2["label"]
+    # 9. Test withdraw_item action (mat_iron_ore x1)
+    with_res = session.dispatch("withdraw_item", {"item_id": "mat_iron_ore", "quantity": 1}, screen_id="storage_screen")
+    assert with_res["ok"] is True
+    assert state["inventory"]["mat_iron_ore"] == 5
+    assert "mat_iron_ore" not in state["storage"]
+    print("Verified: withdraw_item successfully transfers item from storage back to inventory.")
 
-    print("Storage Unlock & View Live MVP bridge smoke test passed successfully!")
+    # 10. Check capacity limit blocking
+    # Fill storage with 10 dummy items to trigger capacity limit
+    state["storage"] = {f"mat_dummy_{i}": 1 for i in range(10)}
+    model_full = session.screen_model("storage_screen")
+    inv_rows_full = model_full["inventory_rows"]
+    iron_row_full = next(r for r in inv_rows_full if r["item_id"] == "mat_iron_ore")
+
+    # Iron ore is not in storage, and capacity is 10/10, so it should be blocked
+    assert iron_row_full["enabled"] is False
+    assert "倉庫容量已滿" in iron_row_full["disabled_reason"]
+
+    # Try deposit when full -> should fail
+    try:
+        session.dispatch("deposit_item", {"item_id": "mat_iron_ore", "quantity": 1}, screen_id="storage_screen")
+        raise AssertionError("Expected deposit to fail when storage is full, but it succeeded.")
+    except GuiActionError as err:
+        assert err.status == 409
+        assert "倉庫容量已達上限" in err.blocked_reason
+        print("Verified: Capacity limits are correctly enforced and block deposit actions.")
+
+    # 測試異常數量阻擋
+    # 10.1 存入數量為 0 -> 400
+    try:
+        session.dispatch("deposit_item", {"item_id": "mat_iron_ore", "quantity": 0}, screen_id="storage_screen")
+        raise AssertionError("Expected deposit quantity 0 to fail, but it succeeded.")
+    except GuiActionError as err:
+        assert err.status == 400
+        assert "轉移數量" in str(err)
+
+    # 10.2 存入數量為負數 -> 400
+    try:
+        session.dispatch("deposit_item", {"item_id": "mat_iron_ore", "quantity": -5}, screen_id="storage_screen")
+        raise AssertionError("Expected deposit negative quantity to fail, but it succeeded.")
+    except GuiActionError as err:
+        assert err.status == 400
+        assert "轉移數量" in str(err)
+
+    # 10.3 存入數量為非整數 (float) -> 400
+    try:
+        session.dispatch("deposit_item", {"item_id": "mat_iron_ore", "quantity": 1.5}, screen_id="storage_screen")
+        raise AssertionError("Expected deposit float quantity to fail, but it succeeded.")
+    except GuiActionError as err:
+        assert err.status == 400
+        assert "轉移數量" in str(err)
+
+    # 10.4 存入數量為布林值 (bool) -> 400
+    try:
+        session.dispatch("deposit_item", {"item_id": "mat_iron_ore", "quantity": True}, screen_id="storage_screen")
+        raise AssertionError("Expected deposit bool quantity to fail, but it succeeded.")
+    except GuiActionError as err:
+        assert err.status == 400
+        assert "轉移數量" in str(err)
+
+    # 10.5 取出數量為 0 -> 400
+    # 先在倉庫放入一個以進行取出測試
+    state["storage"]["mat_iron_ore"] = 5
+    try:
+        session.dispatch("withdraw_item", {"item_id": "mat_iron_ore", "quantity": 0}, screen_id="storage_screen")
+        raise AssertionError("Expected withdraw quantity 0 to fail, but it succeeded.")
+    except GuiActionError as err:
+        assert err.status == 400
+        assert "轉移數量" in str(err)
+
+    # 10.6 取出數量為負數 -> 400
+    try:
+        session.dispatch("withdraw_item", {"item_id": "mat_iron_ore", "quantity": -3}, screen_id="storage_screen")
+        raise AssertionError("Expected withdraw negative quantity to fail, but it succeeded.")
+    except GuiActionError as err:
+        assert err.status == 400
+        assert "轉移數量" in str(err)
+
+    # 10.7 取出數量為非整數 -> 400
+    try:
+        session.dispatch("withdraw_item", {"item_id": "mat_iron_ore", "quantity": 2.5}, screen_id="storage_screen")
+        raise AssertionError("Expected withdraw float quantity to fail, but it succeeded.")
+    except GuiActionError as err:
+        assert err.status == 400
+        assert "轉移數量" in str(err)
+
+    print("Verified: Quantity type and value validations correctly enforced for deposit/withdraw.")
+
+    # Clean up dummy storage to leave it clean
+    state["storage"] = {}
+
+    print("Storage Live MVP bridge smoke test passed successfully with deposit/withdraw coverage!")
 
 
 if __name__ == "__main__":

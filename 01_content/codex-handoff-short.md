@@ -9,8 +9,8 @@ what the next boundary is. Detailed MVP verification belongs in Task Zone docs.
 - Work directory: `C:\Users\user\OneDrive\文字冒險遊戲`
 - Current branch expectation: `main` aligned with `origin/main`.
 - Latest committed bridge baseline before the current package:
-  `017fa43 [antig] feat(gui): add guild quest synthesis unlock bridge`
-- Current newest live slice: Storage Unlock & View Live MVP.
+  `75a013e [codex] feat(gui): add storage unlock and view live bridge`
+- Current newest live slice: Storage Deposit & Withdraw / Workshop Armor & Upgrade Live MVP.
 
 Project state:
 
@@ -27,17 +27,10 @@ Project state:
 
 Current newest GUI live state:
 
-- Storage Unlock & View Live MVP is complete in the current package: Town Hub can
-  route to the Storage live screen, `storage_screen_model(state)` renders live
-  storage state, and `unlock_storage` can unlock the storage through Python
-  runtime state.
-- The validated path is: low Gold blocks unlock, sufficient Gold deducts the
-  existing runtime storage unlock cost, sets `state["storage_unlocked"] = True`,
-  and returns an updated Storage ScreenModel showing inventory, storage status,
-  storage contents, and capacity.
-- Storage transfer remains intentionally closed in this slice:
-  `deposit_item`, `withdraw_item`, and capacity upgrade actions stay disabled
-  with MVP-scope messaging.
+- Storage Deposit & Withdraw Live MVP is complete in the current package: Town Hub can route to the Storage live screen, `storage_screen_model(state)` renders live storage state, `unlock_storage` can unlock the storage through Python runtime state, and `deposit_item` / `withdraw_item` allow transferring items.
+- The validated path is: low Gold blocks unlock, sufficient Gold deducts the existing runtime storage unlock cost, sets `state["storage_unlocked"] = True`, and returns an updated Storage ScreenModel showing inventory, storage status, storage contents, and capacity.
+- `deposit_item` and `withdraw_item` successfully transfer items between player inventory and storage while enforcing capacity limits.
+- Storage capacity upgrades remain disabled in this slice with MVP-scope messaging.
 - Guild Quest Turn-in for Synthesis Unlock Live MVP is complete: Guild live mode
   shows unlocked existing `QUESTS`, and `submit_quest` can complete ready quest
   turn-ins through existing runtime validation and reward / unlock behavior.
@@ -47,10 +40,7 @@ Current newest GUI live state:
 - Dungeon clear report semantics remain separate: first-clear rewards still
   happen at route clear, and later Guild report registration only records /
   displays report status.
-- Workshop Buy Weapon Live MVP is complete: Workshop can buy existing weapon-shop
-  weapons, and buying does not auto-equip.
-- Workshop Weapon Equip Live MVP is complete: Workshop "owned equipment" can equip
-  inventory-held weapon-slot items into `equipment.weapon`.
+- Workshop Armor Buy, Equip & Limited Upgrade Live MVP is complete: Workshop can buy existing weapon-shop weapons and armor-shop armor, equip weapons and owned non-weapon equipment through approved bridge actions, and upgrade whitelisted recipes (`recipe_iron_sword_plus_1`, `recipe_leather_armor_plus_1`). Buying does not auto-equip.
 - Town Hub Mira / 米菈合成屋 Entry Unlock Live MVP is complete: the Town Hub
   synthesis node reflects
   `is_unlocked(state, "shop_synthesis_01")` as locked / unlocked.
@@ -61,7 +51,7 @@ Current newest GUI live state:
   `craft_recipe` for the single whitelisted recipe `recipe_piercing_bundle`.
 - Crafting reuses Python runtime authority:
   `game.recipe_available(...)` and `game.craft_recipe_message(...)`.
-- This does not mean full inventory / equipment, storage transfer, storage
+- This does not mean full inventory / equipment, storage capacity
   upgrade, synthesis, crafting, guild quest, multi-recipe, base-item upgrade, or
   facility systems are complete.
 
@@ -100,9 +90,9 @@ slice. It is not a permanent ban or demo freeze. Future extension points may be
 reopened through a read-only planning gate and owner-approved exact scope.
 
 - Full inventory / equipment management.
-- Armor, accessory, special-slot, unequip, comparison, upgrade expansion, or
-  generic workshop framework.
-- Full shop, magic shop, storage transfer / capacity upgrade, synthesis, guild,
+- Accessory purchase, sell, generic unequip, comparison, non-whitelisted upgrade
+  expansion, or generic workshop framework.
+- Full shop, magic shop, storage capacity upgrade, synthesis, guild,
   quest, boss, dungeon, magic, skill, target-selection, or facility framework.
 - New quest data, schema changes, broad quest framework changes, or story inquiry
   expansion beyond existing runtime `QUESTS` turn-in coverage.
@@ -124,10 +114,10 @@ broad `craft_recipe` coverage, base-item upgrades, recipe / quest / dungeon
 changes, schema changes, save changes, or crafting system refactors without a
 new owner-approved exact scope.
 
-Any Storage follow-up must start with a new read-only gate and explicit owner
-approval. Do not open `deposit_item`, `withdraw_item`, capacity upgrades, generic
-inventory / equipment management, schema changes, save migration, combat formula
-changes, or manual `save.json` work from the unlock/view MVP.
+Any Storage / Workshop follow-up must start with a new read-only gate and
+explicit owner approval. Do not open storage capacity upgrades, generic inventory
+/ equipment management, non-whitelisted upgrades, full workshop, schema changes,
+save migration, combat formula changes, or manual `save.json` work.
 
 For docs-only sync, restrict changes to explicitly approved markdown surfaces and
 do not touch runtime, JavaScript, data, schema, save, or combat formula.
@@ -160,17 +150,14 @@ Latest stable / working-tree verification noted here:
 - Owner manual hand test: locked synthesis before quest completion, unlocked
   synthesis after Guild quest turn-in, save/load persistence for unlocked state,
   new-game locked state, and old completed save unlocked state all PASS.
-- Storage Unlock & View Antigravity-reported checks:
+- Storage Deposit & Withdraw / Workshop Armor & Upgrade Antigravity-reported
+  checks: `git diff --check` PASS,
   `python 06_tools/smoke_test_storage_bridge.py` PASS,
+  `python 06_tools/smoke_test_workshop_bridge.py` PASS,
   `python 06_tools/validate_data.py` PASS,
   `python element_maze.py --smoke-test` PASS,
-  `python 06_tools/smoke_test_guild_quest_bridge.py` PASS,
-  `python 06_tools/smoke_test_synthesis_bridge.py` PASS,
-  `python 06_tools/smoke_test_workshop_bridge.py` PASS, and
-  `python 06_tools/smoke_test_magic_shop_bridge.py` PASS.
-- Storage Owner manual hand test: Storage screen opens in live mode, 500G unlock
-  flow works, and after unlock the screen shows live inventory, storage status,
-  and capacity. Item deposit is intentionally unavailable in this MVP.
+  `node --check 07_gui_prototype/storage_screen/storage-screen.js` PASS, and
+  `node --check 07_gui_prototype/workshop_screen/workshop-screen.js` PASS.
 - Owner exploratory bridge-loop hand test: runtime can progress to 焦石礦坑,
   焦石礦坑 exploration report can complete and appears in Guild as completed,
   Mira synthesis unlock works, `recipe_piercing_bundle` can be crafted, and the

@@ -9,8 +9,8 @@ screen-level verification, and historical MVP notes live in Task Zone files.
 Git / working-tree baseline:
 
 - Latest committed bridge baseline before the current package:
-  `017fa43 [antig] feat(gui): add guild quest synthesis unlock bridge`
-- Current newest live slice: Storage Unlock & View Live MVP.
+  `75a013e [codex] feat(gui): add storage unlock and view live bridge`
+- Current newest live slice: Storage Deposit & Withdraw / Workshop Armor & Upgrade Live MVP.
 
 Project posture:
 
@@ -55,23 +55,31 @@ Blessed local live bridge coverage:
 | Guild | Narrow clear report registration plus existing `QUESTS` turn-in bridge; `quest_cave_gathering` can unlock `shop_synthesis_01`. |
 | Shop | Buy exactly one existing travel-shop consumable through Python server-side validation. |
 | Magic Shop | Learn one existing magic book through Python server-side validation and existing skill data. |
-| Workshop | Buy existing weapon without auto-equip; equip inventory-held weapon-slot items into `equipment.weapon` through `game.equip_item(...)`. |
-| Storage | Unlock and view the Town Storage live screen through Python runtime state; deposit / withdraw / capacity upgrade remain closed. |
+| Workshop | Buy weapon & armor without auto-equip; equip weapons and owned non-weapon equipment; upgrade whitelisted recipes (`recipe_iron_sword_plus_1`, `recipe_leather_armor_plus_1`). |
+| Storage | Unlock, view, and deposit / withdraw items through Python runtime state; storage capacity upgrades remain closed. |
 
-Storage Unlock & View Live MVP is the current newest live bridge state:
+Storage Deposit & Withdraw Live MVP is the current newest live bridge state:
 
-- Town Hub can route to the Storage live screen, which loads a runtime-shaped
-  `storage_screen_model(state)`.
-- `unlock_storage` checks the existing runtime storage unlock cost, blocks
-  insufficient Gold, deducts Gold on success, and sets
-  `state["storage_unlocked"] = True`.
-- After unlock, the screen displays live inventory, storage status, current
-  storage contents, and capacity.
-- `deposit_item`, `withdraw_item`, and storage capacity upgrades remain disabled
-  with MVP-scope messaging.
-- This does not open full storage, item transfer, capacity upgrades, generic
-  inventory / equipment management, schema changes, save migration, combat
-  formula changes, or manual `save.json` edits.
+- Town Hub can route to the Storage live screen, which loads a runtime-shaped `storage_screen_model(state)`.
+- `unlock_storage` checks the existing runtime storage unlock cost, blocks insufficient Gold, deducts Gold on success, and sets `state["storage_unlocked"] = True`.
+- After unlock, the screen displays live inventory, storage status, storage contents, and capacity.
+- `deposit_item` and `withdraw_item` allow transferring items between player inventory and storage, enforcing runtime constraints and capacity limits.
+- Storage capacity upgrades remain disabled with MVP-scope messaging.
+- This does not open full storage system, capacity upgrades, generic inventory / equipment management, schema changes, save migration, combat formula changes, or manual `save.json` edits.
+
+Workshop Armor Buy, Equip & Limited Upgrade Live MVP is included in the current
+package:
+
+- Workshop can buy existing weapon-shop weapons and armor-shop armor through
+  `buy_equipment`; buying still does not auto-equip.
+- Workshop can equip weapons and owned non-weapon equipment through approved
+  bridge actions that reuse `game.equip_item(...)` and runtime slot data.
+- `upgrade_equipment` is limited to existing whitelisted workshop recipes:
+  `recipe_iron_sword_plus_1` and `recipe_leather_armor_plus_1`.
+- This does not open accessory purchase, sell, generic unequip / comparison,
+  non-whitelisted upgrades, full workshop, full synthesis, new equipment data,
+  schema changes, save migration, combat formula changes, or manual `save.json`
+  edits.
 
 Guild Quest Turn-in for Synthesis Unlock Live MVP remains the latest guild /
 synthesis unlock bridge coverage:
@@ -215,8 +223,9 @@ The next implementation target is not pre-approved. Candidate follow-up currentl
 recorded for future planning is a read-only gate for broader synthesis coverage,
 such as deciding whether to iterate more existing Mira recipe ids.
 
-Storage deposit / withdraw, capacity upgrades, and generic inventory management
-are not opened by the Storage Unlock & View MVP; they require a new read-only
+Storage capacity upgrades, generic inventory management, generic equipment
+management, non-whitelisted workshop upgrades, and full workshop expansion are
+not opened by the current Storage / Workshop MVP; they require a new read-only
 planning gate and owner-approved exact scope.
 
 Before any runtime, data, schema, save, combat, or broader GUI live bridge work,

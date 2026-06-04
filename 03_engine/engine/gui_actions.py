@@ -6,7 +6,7 @@ from copy import deepcopy
 from datetime import datetime
 from typing import Any
 
-from data import DUNGEONS, EQUIPMENT, ITEMS, JOBS, SKILLS, SHOP_INVENTORY, MAGIC_BOOKS, RECIPES, QUESTS
+from data import DUNGEONS, EQUIPMENT, ITEMS, JOBS, SKILLS, SHOP_INVENTORY, MAGIC_BOOKS, RECIPES, QUESTS, MATERIALS
 
 from . import game
 from .formatting import item_name
@@ -290,6 +290,14 @@ class GuiRuntimeSession:
             return self.rest_at_inn(payload, screen_id=screen_id)
         if action_id == "unlock_storage":
             return self.unlock_storage(payload, screen_id=screen_id)
+        if action_id == "deposit_item":
+            return self.deposit_item(payload, screen_id=screen_id)
+        if action_id == "withdraw_item":
+            return self.withdraw_item(payload, screen_id=screen_id)
+        if action_id == "equip_equipment":
+            return self.equip_equipment(payload, screen_id=screen_id)
+        if action_id == "upgrade_equipment":
+            return self.upgrade_equipment(payload, screen_id=screen_id)
         if action_id in {"submit_quest", "report_dungeon_clear"}:
             return self.report_dungeon_clear(payload, screen_id=screen_id)
         if action_id == "open_world_map":
@@ -825,6 +833,76 @@ class GuiRuntimeSession:
         )
         return response
 
+    def deposit_item(self, payload: dict[str, Any], *, screen_id: str | None = None) -> dict[str, Any]:
+        state = self.require_state()
+        if not state.get("storage_unlocked", False):
+            raise GuiActionError("倉庫尚未開啟。", status=409)
+
+        item_id = payload.get("item_id")
+        quantity = payload.get("quantity", 1)
+
+        if type(quantity) is not int or isinstance(quantity, bool):
+            raise GuiActionError("轉移數量必須為整數。", status=400)
+        if quantity <= 0:
+            raise GuiActionError("轉移數量必須大於 0。", status=400)
+
+        if not item_id:
+            raise GuiActionError("未指定要存入的物品。", status=400)
+
+        if item_id.startswith("key_"):
+            raise GuiActionError("貴重道具無法存入倉庫。", status=409)
+
+        owned = state.get("inventory", {}).get(item_id, 0)
+        if owned < quantity:
+            raise GuiActionError("背包中的物品數量不足。", status=409)
+
+        if not game.storage_has_room_for(state, item_id):
+            raise GuiActionError("倉庫容量已達上限，無法新增其他種類物品。", status=409)
+
+        if game.remove_item(state, item_id, quantity):
+            game.add_storage_item(state, item_id, quantity)
+        else:
+            raise GuiActionError("物品轉移失敗，背包內物品數量異常。", status=409)
+
+        response = self._live_response(
+            "deposit_item",
+            f"成功將 {game.item_name(item_id)} x{quantity} 放入保管箱。",
+            screen_model=self.storage_screen_model(),
+        )
+        return response
+
+    def withdraw_item(self, payload: dict[str, Any], *, screen_id: str | None = None) -> dict[str, Any]:
+        state = self.require_state()
+        if not state.get("storage_unlocked", False):
+            raise GuiActionError("倉庫尚未開啟。", status=409)
+
+        item_id = payload.get("item_id")
+        quantity = payload.get("quantity", 1)
+
+        if type(quantity) is not int or isinstance(quantity, bool):
+            raise GuiActionError("轉移數量必須為整數。", status=400)
+        if quantity <= 0:
+            raise GuiActionError("轉移數量必須大於 0。", status=400)
+
+        if not item_id:
+            raise GuiActionError("未指定要取出的物品。", status=400)
+
+        in_storage = state.get("storage", {}).get(item_id, 0)
+        if in_storage < quantity:
+            raise GuiActionError("倉庫中的物品數量不足。", status=409)
+
+        if game.remove_storage_item(state, item_id, quantity):
+            game.add_item(state, item_id, quantity)
+        else:
+            raise GuiActionError("物品轉移失敗，倉庫內物品數量異常。", status=409)
+
+        response = self._live_response(
+            "withdraw_item",
+            f"成功從保管箱取出 {game.item_name(item_id)} x{quantity} 到背包。",
+            screen_model=self.storage_screen_model(),
+        )
+        return response
+
     def buy_equipment(self, payload: dict[str, Any], *, screen_id: str | None = None) -> dict[str, Any]:
         state = self.require_state()
         item_id = payload.get("item_id")
@@ -832,8 +910,8 @@ class GuiRuntimeSession:
         if not item_id or item_id not in EQUIPMENT:
             raise GuiActionError("裝備不存在。", status=400)
 
-        if item_id not in SHOP_INVENTORY["weapon"]:
-            raise GuiActionError("此商店不販售該裝備（MVP 僅限購買武器）。", status=400)
+        if item_id not in SHOP_INVENTORY["weapon"] and item_id not in SHOP_INVENTORY["armor"]:
+            raise GuiActionError("此商店不販售該裝備。", status=400)
 
         eq = EQUIPMENT[item_id]
         if state.get("job") not in eq["jobs"]:
@@ -863,10 +941,17 @@ class GuiRuntimeSession:
             screen_id="workshop_screen",
         )
         if response.get("screen_model"):
+            is_weapon = eq["slot"] == "weapon"
+            speaker = "葛雷" if is_weapon else "布琳"
+            text = (
+                f"「金幣收下了，祝你在焦石礦坑好運！這是你的 {eq['name']}。」"
+                if is_weapon
+                else f"「耐用、實惠，這是你的 {eq['name']}。穿戴後再去冒險吧。」"
+            )
             response["screen_model"]["feedback_message"] = {
                 "tone": "success",
-                "speaker": "葛雷",
-                "text": f"「金幣收下了，祝你在焦石礦坑好運！這是你的 {eq['name']}。」"
+                "speaker": speaker,
+                "text": text
             }
         return response
 
@@ -920,6 +1005,123 @@ class GuiRuntimeSession:
                 "tone": "success",
                 "speaker": "葛雷",
                 "text": f"「已經為你換上 {eq['name']} 了。舊的裝備幫你收入背包裡。」"
+            }
+        return response
+
+    def equip_equipment(self, payload: dict[str, Any], *, screen_id: str | None = None) -> dict[str, Any]:
+        state = self.require_state()
+        item_id = payload.get("item_id")
+
+        if not item_id or item_id not in EQUIPMENT:
+            raise GuiActionError("裝備不存在。", status=400)
+
+        eq = EQUIPMENT[item_id]
+        slot = eq["slot"]
+
+        if state.get("job") not in eq["jobs"]:
+            raise GuiActionError(
+                f"{state.get('job')}無法裝備此裝備。",
+                status=409,
+                result_status="blocked",
+                blocked_reason="職業不符",
+            )
+
+        if state.get("equipment", {}).get(slot) == item_id:
+            raise GuiActionError(
+                "目前已裝備此物品，無需重複裝備。",
+                status=409,
+                result_status="blocked",
+                blocked_reason="已裝備此裝備",
+            )
+
+        if state.get("inventory", {}).get(item_id, 0) <= 0:
+            raise GuiActionError(
+                "背包中沒有這件裝備，無法裝備。",
+                status=409,
+                result_status="blocked",
+                blocked_reason="背包中無此裝備",
+            )
+
+        success = game.equip_item(state, item_id, quiet=True)
+        if not success:
+            raise GuiActionError("裝備穿戴失敗。", status=400)
+
+        response = action_response(
+            "equip_equipment",
+            f"已裝備 {eq['name']}。",
+            state,
+            screen_id="workshop_screen",
+        )
+        if response.get("screen_model"):
+            speaker = "葛雷" if slot == "weapon" else "布琳"
+            response["screen_model"]["feedback_message"] = {
+                "tone": "success",
+                "speaker": speaker,
+                "text": f"「已經為你換上 {eq['name']}。舊的裝備幫你收入背包裡。」"
+            }
+        return response
+
+    def upgrade_equipment(self, payload: dict[str, Any], *, screen_id: str | None = None) -> dict[str, Any]:
+        state = self.require_state()
+        recipe_id = payload.get("recipe_id")
+
+        whitelisted_recipes = {"recipe_iron_sword_plus_1", "recipe_leather_armor_plus_1"}
+        if recipe_id not in whitelisted_recipes:
+            raise GuiActionError("非白名單配方。", status=400)
+
+        if not recipe_id or recipe_id not in RECIPES:
+            raise GuiActionError("配方不存在。", status=400)
+
+        recipe = RECIPES[recipe_id]
+
+        if not game.recipe_available(state, recipe_id):
+            raise GuiActionError(
+                "配方尚未解鎖，無法進行強化。",
+                status=409,
+                result_status="blocked",
+                blocked_reason="配方未解鎖",
+            )
+
+        if state.get("gold", 0) < recipe["gold"]:
+            raise GuiActionError(
+                "金幣不足，無法進行強化。",
+                status=409,
+                result_status="blocked",
+                blocked_reason="金幣不足",
+            )
+
+        if not game.can_pay_items(state, recipe["materials"]):
+            raise GuiActionError(
+                "材料不足，無法進行強化。",
+                status=409,
+                result_status="blocked",
+                blocked_reason="材料不足",
+            )
+
+        base_item = recipe.get("base_item")
+        if base_item and not game.owns_item_or_equipped(state, base_item):
+            raise GuiActionError(
+                "缺少基底裝備，無法進行強化。",
+                status=409,
+                result_status="blocked",
+                blocked_reason="缺少基底裝備",
+            )
+
+        result = game.craft_recipe_message(state, recipe_id)
+        if not result.startswith("完成："):
+            raise GuiActionError(result, status=400)
+
+        response = action_response(
+            "upgrade_equipment",
+            f"成功強化 {recipe['name']}！",
+            state,
+            screen_id="workshop_screen",
+        )
+        if response.get("screen_model"):
+            response["screen_model"]["feedback_message"] = {
+                "tone": "success",
+                "speaker": "布琳",
+                "text": f"「太棒了！你的 {recipe['name']} 已經強化完成囉！」"
             }
         return response
 
@@ -2113,10 +2315,11 @@ def workshop_screen_model(state: dict[str, Any]) -> dict[str, Any]:
                 "desc": eq["desc"]
             })
 
-    weapons_details = {}
-    for item_id, eq in EQUIPMENT.items():
-        if eq["slot"] == "weapon":
-            weapons_details[item_id] = {
+    armors_list = []
+    for item_id in SHOP_INVENTORY["armor"]:
+        if item_id in EQUIPMENT:
+            eq = EQUIPMENT[item_id]
+            armors_list.append({
                 "id": item_id,
                 "name": eq["name"],
                 "slot": eq["slot"],
@@ -2125,18 +2328,65 @@ def workshop_screen_model(state: dict[str, Any]) -> dict[str, Any]:
                 "jobs": eq["jobs"],
                 "stats": eq["stats"],
                 "desc": eq["desc"]
-            }
+            })
+
+    weapons_details = {}
+    for item_id, eq in EQUIPMENT.items():
+        weapons_details[item_id] = {
+            "id": item_id,
+            "name": eq["name"],
+            "slot": eq["slot"],
+            "subtype": eq["subtype"],
+            "price": eq["price"],
+            "jobs": eq["jobs"],
+            "stats": eq["stats"],
+            "desc": eq["desc"]
+        }
+
+    upgrades_list = []
+    whitelisted_recipes = ["recipe_iron_sword_plus_1", "recipe_leather_armor_plus_1"]
+    for recipe_id in whitelisted_recipes:
+        if recipe_id in RECIPES:
+            r = RECIPES[recipe_id]
+            output_id = list(r["output"].keys())[0]
+            output_name = EQUIPMENT[output_id]["name"] if output_id in EQUIPMENT else r["name"]
+            base_item = r.get("base_item")
+            base_name = EQUIPMENT[base_item]["name"] if (base_item and base_item in EQUIPMENT) else ""
+
+            materials_formatted = {}
+            for mat_id, count in r.get("materials", {}).items():
+                mat_name = MATERIALS.get(mat_id, mat_id)
+                materials_formatted[mat_id] = {
+                    "name": mat_name,
+                    "required": count
+                }
+
+            output_stats = EQUIPMENT[output_id]["stats"] if output_id in EQUIPMENT else {}
+
+            upgrades_list.append({
+                "id": recipe_id,
+                "name": r["name"],
+                "output_id": output_id,
+                "output_name": output_name,
+                "base_item": base_item,
+                "base_name": base_name,
+                "materials": materials_formatted,
+                "gold": r.get("gold", 0),
+                "stats": output_stats,
+                "desc": r.get("desc", ""),
+                "unlock_quest": r.get("unlock", "")
+            })
 
     return {
         "screen_id": "facility_workshop_screen",
         "facility_id": "workshop",
         "title": "邊境工坊 (Live)",
-        "subtitle": "與遊戲核心同步的裝備交易服務，MVP 僅限武器購買。",
+        "subtitle": "與遊戲核心同步的裝備交易服務，已開放武器與防具購買。",
         "player": player_data,
         "weapons": weapons_list,
         "weapons_details": weapons_details,
-        "armors": [],
-        "upgrades": []
+        "armors": armors_list,
+        "upgrades": upgrades_list
     }
 
 
@@ -2568,8 +2818,11 @@ def storage_screen_model(state: dict[str, Any]) -> dict[str, Any]:
         if unlocked:
             if item_id.startswith("key_"):
                 disabled_reason = "貴重物無法存入倉庫"
+            elif not game.storage_has_room_for(state, item_id):
+                disabled_reason = "倉庫容量已滿，無法新增種類"
             else:
-                disabled_reason = "本輪 MVP 僅提供倉庫開啟與檢視功能。"
+                enabled = True
+                disabled_reason = None
 
         inventory_rows.append({
             "item_id": item_id,
@@ -2598,8 +2851,8 @@ def storage_screen_model(state: dict[str, Any]) -> dict[str, Any]:
                 "short_title": name[:3] if len(name) > 3 else name,
                 "summary": f"普通素材 / 倉庫：{qty}" if category == "materials" else f"消耗品 / 倉庫：{qty}",
                 "owned_count": qty,
-                "enabled": False,
-                "disabled_reason": "本輪 MVP 僅提供倉庫開啟與檢視功能。"
+                "enabled": True,
+                "disabled_reason": None
             })
 
     all_item_ids = set(state.get("inventory", {}).keys()) | set(state.get("storage", {}).keys())
@@ -2686,31 +2939,36 @@ def storage_screen_model(state: dict[str, Any]) -> dict[str, Any]:
         for row in inventory_rows:
             primary_actions[row["item_id"]] = {
                 "action_id": "deposit_item",
-                "label": "確認存入 (未開放)",
-                "enabled": False,
-                "disabled_reason": "本輪 MVP 僅提供倉庫開啟與檢視功能。",
+                "label": "確認存入",
+                "enabled": row["enabled"],
+                "disabled_reason": row["disabled_reason"],
                 "payload": { "item_id": row["item_id"], "quantity": 1 }
             }
-            requirement_rows[row["item_id"]] = [
-                { "id": "req_mvp_disabled", "label": "轉移服務限制", "required_value": "未開放", "current_value": "暫未開放", "status": "unmet", "disabled_reason": "本輪 MVP 僅提供倉庫開啟與檢視功能。" }
-            ]
+            requirement_rows[row["item_id"]] = []
+            if not row["enabled"]:
+                requirement_rows[row["item_id"]].append({
+                    "id": "req_mvp_disabled",
+                    "label": "轉移服務限制",
+                    "required_value": "可存入",
+                    "current_value": "限制中",
+                    "status": "unmet",
+                    "disabled_reason": row["disabled_reason"]
+                })
         for row in storage_rows:
             primary_actions[row["item_id"]] = {
                 "action_id": "withdraw_item",
-                "label": "確認取出 (未開放)",
-                "enabled": False,
-                "disabled_reason": "本輪 MVP 僅提供倉庫開啟與檢視功能。",
+                "label": "確認取出",
+                "enabled": True,
+                "disabled_reason": None,
                 "payload": { "item_id": row["item_id"], "quantity": 1 }
             }
-            requirement_rows[row["item_id"]] = [
-                { "id": "req_mvp_disabled", "label": "轉移服務限制", "required_value": "未開放", "current_value": "暫未開放", "status": "unmet", "disabled_reason": "本輪 MVP 僅提供倉庫開啟與檢視功能。" }
-            ]
+            requirement_rows[row["item_id"]] = []
 
     return {
         "screen_id": "storage_screen",
         "facility_id": "storage",
         "title": "工會倉庫 (Live)",
-        "subtitle": "本輪 Live MVP 僅提供倉庫解鎖與檢視，寄存與取出尚未開放",
+        "subtitle": "與遊戲核心同步的保管箱存取服務。",
         "selected_mode": "deposit",
         "selected_item_id": None,
         "storage_state": {

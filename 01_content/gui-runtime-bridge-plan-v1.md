@@ -80,14 +80,14 @@ existing runtime-authoritative adapter / ScreenModel pattern where appropriate.
 | Combat Skill Button | `4acd04d [antig] feat(gui): add combat skill button live bridge` | `use_skill` routing from existing `learned_skills` and `SKILLS`. | Formal skill framework, target selection, rebalance. |
 | Shop Buy Consumable | `ebc1b5e [antig] feat(gui): add shop buy consumable live bridge` | Buy 1 existing travel-shop consumable through server-side validation. | Full shop system, sell, quantity selector, equipment purchase. |
 | Magic Shop Learn Book | `b59fe43 [antig] feat(gui): add magic shop learn book live bridge` | Learn 1 existing magic book through server-side validation. | Full magic / skill framework or combat rebalance. |
-| Workshop Buy Weapon | `2d99d7e [antig] feat(gui): add workshop buy weapon live bridge MVP` | Buy existing weapon-shop weapons; do not auto-equip. | Armor, upgrades, full workshop framework. |
-| Workshop Weapon Equip | `6abe303 [antig] feat(gui): add workshop weapon equip bridge & align backpack presentation` | Equip inventory-held weapon-slot items into `equipment.weapon`; align inventory/equipment presentation. | Full inventory / equipment management, unequip, comparison, stat rebalance. |
-| Storage Unlock & View | current package | Town Hub routes to Storage live screen; `storage_screen_model(state)` renders live inventory / storage status / storage contents / capacity; `unlock_storage` blocks low Gold, deducts the existing runtime unlock cost, and sets `state["storage_unlocked"] = True`. | `deposit_item`, `withdraw_item`, storage capacity upgrade, full storage system, generic inventory / equipment management, schema/save/combat changes. |
+| Workshop Buy Weapon & Armor | current package | Buy existing weapon & armor; do not auto-equip. | Accessory purchase, sell, quantity selector, full workshop framework. |
+| Workshop Equip & Limited Upgrade | current package | Equip weapons and owned non-weapon equipment; upgrade whitelisted recipes (`recipe_iron_sword_plus_1`, `recipe_leather_armor_plus_1`). | Generic equipment management (unequip, comparison), non-whitelisted recipes. |
+| Storage Deposit & Withdraw | current package | Town Hub routes to Storage live screen; `storage_screen_model(state)` renders live inventory / storage status / storage contents / capacity; `unlock_storage` checks cost & unlocks; `deposit_item` & `withdraw_item` allow transferring items. | Storage capacity upgrade, full storage system, generic inventory / equipment management, schema/save/combat changes. |
 | Town Hub Mira Entry Unlock | `b046b1e [antig] feat(gui): add Mira synthesis entry unlock bridge` | Town Hub synthesis facility node reflects `is_unlocked(state, "shop_synthesis_01")`; locked state points to Guild task `洞窟採集`; unlocked state routes to the existing static synthesis screen. | Full synthesis, recipe bridge, `synthesis_screen_model()`, live loader, `craft_recipe`, recipe / quest / dungeon / schema / save / combat changes. |
 | Synthesis Single Recipe Craft | `5dbc742 [antig] feat(gui): add synthesis single recipe craft bridge` | `synthesis_screen` live mode loads a runtime-shaped ScreenModel and dispatches `craft_recipe` for the single whitelisted recipe `recipe_piercing_bundle`, reusing `game.recipe_available(...)` and `game.craft_recipe_message(...)`. | Full synthesis, generic recipe bridge, multi-recipe coverage, base-item upgrades, recipe / quest / dungeon / schema / save / combat changes. |
 
 Latest committed bridge baseline before the current package:
-`017fa43 [antig] feat(gui): add guild quest synthesis unlock bridge`.
+`75a013e [codex] feat(gui): add storage unlock and view live bridge`.
 
 ## 3.2 Reusable Bridge Pattern Audit
 
@@ -106,13 +106,13 @@ Read-only audit, 2026-06-04:
 | System | Current reusable state | Hardcoded risk | Coverage direction |
 |---|---|---|---|
 | Shop / travel shop | `buy_item` validates against existing `SHOP_INVENTORY["travel"]` and item data, but the current live ScreenModel lists a fixed consumable subset and `buy_item` still rejects non-consumables. | Medium. Bridge exists for travel consumable purchase, but battle items / accessories are not yet natural GUI coverage. | Extend the ScreenModel to iterate travel inventory and explicitly decide which existing item kinds are in scope. Do not make one MVP per item. |
-| Workshop | Weapon buy reads `SHOP_INVENTORY["weapon"]`; `equip_weapon` reuses `game.equip_item(...)` and runtime equipment state. Armor, upgrades, comparison, unequip, and generic slots remain closed. | Medium. Weapon path is reusable; broader equipment and crafting-upgrade paths are still MVP-scoped gaps. | Add armor buy or upgrade display as separate small gates. Generic equipment management needs its own planning gate. |
+| Workshop | Weapon & armor buy reads `SHOP_INVENTORY`; `equip_equipment` and `equip_weapon` reuse `game.equip_item(...)`; upgrades support whitelisted recipes. | Low to medium. Weapon, armor, and whitelisted upgrades are reusable; comparison, unequip, and non-whitelisted upgrades remain closed. | Add more recipe ids as coverage. Generic equipment management (unequip, comparison) needs its own planning gate. |
 | Magic shop | `learn_magic_book` validates `MAGIC_BOOKS`, `SKILLS`, job, level, gold, materials, and learned state server-side. ScreenModel still uses a fixed book id list. | Low to medium. Mutation action is reusable; presentation list is narrower than CLI data. | Iterate `MAGIC_BOOKS` in the model before adding more books. No one-book-per-MVP pattern is needed. |
 | World map / dungeon / exploration / combat | World Map iterates `DUNGEONS` and runtime unlocks; `confirm_travel`, `advance_step`, combat, retreat, route clear, item rows, and skill rows are shared flow pieces. | Medium. Multiple dungeons can route through the bridge, but complete dungeon events, boss framework, and combat formula changes remain closed. | Treat existing dungeons as coverage follow-up unless the task opens boss / special event behavior. |
 | Guild | Current GUI bridge includes dungeon clear report registration from `DUNGEONS`; `017fa43` adds existing `QUESTS` turn-in / reward / unlock coverage for ready quests, validated by `quest_cave_gathering` unlocking `shop_synthesis_01`. | Medium. The turn-in adapter reuses runtime helpers, but this is not a generic guild framework, reputation system, achievement system, or story inquiry bridge. | Treat additional existing `QUESTS` turn-in coverage as same-family coverage follow-up only after an owner-approved exact scope. New quest data, story inquiry, reputation, or broad framework work still needs its own gate. |
 | Synthesis / crafting | Town Hub entry unlock is committed. `5dbc742` adds one whitelisted `craft_recipe` path for `recipe_piercing_bundle` and reuses `game.recipe_available(...)` plus `game.craft_recipe_message(...)`. ScreenModel and live loader are deliberately single-recipe. | High for full crafting. The bridge proves one action path, but full synthesis, base-item recipes, and broad recipe iteration remain closed. | Next coverage should start with a read-only gate before iterating more existing Mira recipe ids. Base-item upgrades require a separate gate. |
-| Storage | Current package opens Town Hub routing, a live Storage ScreenModel, and `unlock_storage` against existing runtime storage state / unlock cost. Deposit, withdraw, and capacity upgrade actions remain disabled in the ScreenModel. | Medium. Unlock/view is now bridged, but transfer mutation and capacity behavior remain intentionally closed. | Treat deposit / withdraw and capacity upgrade as separate read-only gates. Do not let unlock/view imply full inventory or storage management. |
-| Inventory / backpack / equipment | World Map utility preview reads runtime inventory plus currently equipped equipment. Workshop weapon equip is the only current live equip action. | Medium. Display is reusable; equipment mutation remains weapon/workshop-specific. | More item display is coverage; generic equip / unequip / slot management requires its own gate. |
+| Storage | Opens Town Hub routing, live Storage ScreenModel, `unlock_storage`, `deposit_item`, and `withdraw_item` against existing runtime storage state. Capacity upgrades remain disabled. | Low to medium. Storage unlock, view, and deposit / withdraw transfer are now bridged; capacity upgrade behavior remains closed. | Treat capacity upgrade as a separate read-only gate. Do not let deposit / withdraw imply generic inventory or slot management. |
+| Inventory / backpack / equipment | World Map utility preview reads runtime inventory plus currently equipped equipment. Workshop can equip weapons and owned non-weapon equipment through approved bridge actions. | Medium. Display is reusable; equipment mutation remains workshop-scoped and does not include unequip / comparison / generic management. | More item display is coverage; generic unequip / comparison / slot management requires its own gate. |
 | Bestiary | Preview reads runtime `state["bestiary"]` and monster data, so more registered monsters naturally display. | Low. Mostly a summary presentation surface. | Add detail / filtering as coverage work, not one-monster MVPs. |
 
 Explicit exceptions that are not yet fully bridged system families:
@@ -120,9 +120,8 @@ Explicit exceptions that are not yet fully bridged system families:
 - Guild features beyond existing `QUESTS` turn-in / reward / unlock coverage.
 - Complete crafting / synthesis beyond the single whitelisted
   `recipe_piercing_bundle` craft path.
-- Complete storage beyond unlock/view, including deposit, withdraw, and capacity
-  upgrade behavior.
-- Generic equipment management beyond workshop weapon equip.
+- Complete storage beyond deposit/withdraw, including capacity upgrade behavior.
+- Generic equipment management beyond approved workshop equip actions.
 
 Town Hub Mira and Synthesis result after this audit:
 
@@ -304,17 +303,10 @@ Status note, 2026-06-04:
 
 Status note, 2026-06-04:
 
-- A narrow Storage Unlock & View Live MVP is included in the current package.
-- Completed coverage is limited to Town Hub -> Storage live routing, a
-  runtime-shaped `storage_screen_model(state)` for live inventory / storage
-  status / storage contents / capacity display, and `unlock_storage` for opening
-  the storage flag.
-- Python runtime remains gameplay authority: the bridge uses the existing runtime
-  storage unlock cost, blocks low Gold, deducts Gold on success, and sets
-  `state["storage_unlocked"] = True`. Browser JavaScript dispatches UIAction
-  payloads and renders returned ScreenModels.
-- `deposit_item`, `withdraw_item`, and storage capacity upgrades remain disabled
-  in this MVP with explicit scope messaging.
+- A narrow Storage Deposit & Withdraw Live MVP is included in the current package.
+- Completed coverage includes Town Hub -> Storage live routing, a runtime-shaped `storage_screen_model(state)` for live inventory / storage status / storage contents / capacity display, `unlock_storage` for opening the storage, and `deposit_item` / `withdraw_item` for transferring items between inventory and storage.
+- Python runtime remains gameplay authority: the bridge uses the existing runtime storage unlock cost, blocks low Gold, deducts Gold on success, sets `state["storage_unlocked"] = True`, and validates deposit / withdraw requests against capacity limits and inventory quantities. Browser JavaScript dispatches UIAction payloads and renders returned ScreenModels.
+- Storage capacity upgrades remain disabled in this MVP with explicit scope messaging.
 - Antigravity-reported verification passed:
   `python 06_tools/smoke_test_storage_bridge.py`,
   `python 06_tools/validate_data.py`,
@@ -323,12 +315,17 @@ Status note, 2026-06-04:
   `python 06_tools/smoke_test_synthesis_bridge.py`,
   `python 06_tools/smoke_test_workshop_bridge.py`, and
   `python 06_tools/smoke_test_magic_shop_bridge.py`.
-- Owner manual hand test passed: Storage screen opens in live mode, 500G unlock
-  flow works, and after unlock the screen shows live inventory, storage status,
-  and capacity. Item deposit is intentionally unavailable in this MVP.
-- This status note does not approve deposit / withdraw, capacity upgrade, a full
-  storage system, generic inventory / equipment management, schema changes, save
-  migration, combat formula changes, or manual `save.json` edits.
+- Owner manual hand test passed: Storage screen opens in live mode, 500G unlock flow works, and after unlock the screen shows live inventory, storage status, and capacity. Item deposit and withdraw transfer work correctly.
+- This status note does not approve capacity upgrade, a full storage system, generic inventory / equipment management, schema changes, save migration, combat formula changes, or manual `save.json` edits.
+
+Status note, 2026-06-04:
+
+- A narrow Workshop Armor Buy, Equip & Limited Upgrade Live MVP is included in the current package.
+- Completed coverage is built on the previous weapon buy/equip bridge. It allows buying armor from `SHOP_INVENTORY["armor"]` via `buy_equipment` (without auto-equip), equipping owned non-weapon equipment via `equip_equipment` (reusing `game.equip_item(state, item_id, quiet=True)` and runtime slot data), and upgrading whitelisted recipes (`recipe_iron_sword_plus_1`, `recipe_leather_armor_plus_1`) via `upgrade_equipment`.
+- Python server-side remains gameplay authority. Buying, equipping, and upgrading actions are validated against inventory, gold, job, and recipe unlock states.
+- Upgrading consumes base equipment and required materials, deducts gold, and inserts the upgraded equipment into the player's inventory.
+- This status note does not approve accessory buy, sell, generic equipment unequip, comparison, non-whitelisted upgrades, new recipes, new equipment data, save migration, schema changes, or manual `save.json` edits.
+
 
 Status note, 2026-06-02:
 
