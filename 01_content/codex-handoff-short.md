@@ -8,9 +8,8 @@ what the next boundary is. Detailed MVP verification belongs in Task Zone docs.
 
 - Work directory: `C:\Users\user\OneDrive\文字冒險遊戲`
 - Current branch expectation: `main` aligned with `origin/main`.
-- Latest committed bridge baseline before the current working-tree package:
-  `9ae502b [antig] fix(gui): repair Boss Glen progression bridge`
-- Current working-tree live slice: Glen Boss flow UX cleanup and dungeon text presentation.
+- Latest committed bridge baseline:
+  `709dc6c [antig] fix(gui): improve dungeon event scrolling and guild story progression hints`
 
 Project state:
 
@@ -27,8 +26,8 @@ Project state:
 
 Current newest GUI live state:
 
-- Scorched Mine Boss Glen Progression Deadlock Fix is complete in the current
-  working tree: Scorched Mine 18/18 sets `boss_glen_sighted`; Guild can accept
+- Scorched Mine Boss Glen Progression Deadlock Fix is complete:
+  Scorched Mine 18/18 sets `boss_glen_sighted`; Guild can accept
   the investigation through `accept_boss_glen_investigation`, setting
   `boss_glen_investigation_accepted`; returning to Scorched Mine 18/18 then
   enables `challenge_boss` for Boss Glen.
@@ -38,12 +37,12 @@ Current newest GUI live state:
 - Owner manual hand test confirmed the Boss challenge deadlock is removed, Blood
   Map can be reported after defeating Glen, Ash Ravine can unlock and clear, and
   later CLI fire-demo progression can surface through the live bridge.
-- Known follow-up observations are player-facing UX / wording cleanup only:
-  after accepting the investigation the Guild main-story area says no current
-  clue, quest rewards expose internal keys such as `second_act_preview`,
-  `unlock_act_2`, and `unlock_ash_ravine`, Dungeon Exploration bottom button
-  layout should be checked if more Boss challenge buttons appear, and Ash Ravine
-  / later fire-shard prompts may need less open-ended wording.
+- Glen Boss flow UX cleanup is landed in `709dc6c`: the Guild story hint remains
+  reviewable after accepting the investigation and after Glen is defeated, Blood
+  Map reward unlock keys are mapped to player-facing labels, Dungeon Exploration
+  keeps HP/MP in the resource strip while run Gold remains in current-run
+  rewards, dungeon events scroll and auto-scroll to the newest event, and the
+  action row supports stable Boss / leave button placement.
 - Treat Ash Ravine and later cave / fire-shard visibility as coverage
   observation from existing CLI runtime progression, not as scope drift or an
   approval for full Act 2 cleanup.
@@ -125,10 +124,10 @@ reopened through a read-only planning gate and owner-approved exact scope.
 
 No next implementation is pre-approved.
 
-The current recorded Boss Glen follow-ups are coverage-oriented UX observations,
-not approved implementation: post-investigation Guild guidance, player-facing
-reward wording for unlock keys, Dungeon Exploration bottom button layout for
-future Boss actions, and later Ash Ravine / fire-shard prompt wording.
+The immediate Glen UX cleanup is complete. Remaining Boss / Act 2 observations
+are coverage-oriented only: later Ash Ravine / fire-shard prompt wording may need
+review, but this does not approve Ash Guardian, Cinder Seal Sentinel, generic
+Boss handling, full story hints, or full Act 2 cleanup.
 
 Broader synthesis coverage remains a possible future read-only gate, such as
 deciding whether to iterate more existing Mira recipe ids. It is not approved
@@ -149,7 +148,7 @@ do not touch runtime, JavaScript, data, schema, save, or combat formula.
 
 ## Verification Capsule
 
-Latest stable / working-tree verification noted here:
+Latest stable verification noted here:
 
 - `06_tools/validate_data.py`: PASS
 - `element_maze.py --smoke-test`: PASS
@@ -196,6 +195,10 @@ Latest stable / working-tree verification noted here:
   victory, Ash Ravine unlocks and can clear, later Ash Ravine Boss / fire-shard
   visibility follows existing CLI runtime progression, and supply-line upgrade
   turn-in / medium potion unlock still works.
+- Glen Boss flow UX cleanup Antigravity-reported checks:
+  `python 06_tools/smoke_test_progression_bridge.py` PASS,
+  `python element_maze.py --smoke-test` PASS, and
+  `python 06_tools/validate_data.py` PASS.
 
 For future docs-only cleanup, use markdown diff/status checks. Runtime smoke is
 not required unless runtime files change.

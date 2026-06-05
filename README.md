@@ -6,11 +6,10 @@ screen-level verification, and historical MVP notes live in Task Zone files.
 
 ## Current Stable Capsule
 
-Git / working-tree baseline:
+Git baseline:
 
-- Latest committed bridge baseline before the current working-tree package:
-  `9ae502b [antig] fix(gui): repair Boss Glen progression bridge`
-- Current working-tree live slice: Glen Boss flow UX cleanup and dungeon text presentation.
+- Latest committed bridge baseline:
+  `709dc6c [antig] fix(gui): improve dungeon event scrolling and guild story progression hints`
 
 Project posture:
 
@@ -53,14 +52,13 @@ Blessed local live bridge coverage:
 | World Map | Runtime-backed location / route ScreenModel; main menu keeps `save_game` and shell-only `open_settings`; town return is via town node / detail action. |
 | Dungeon / Combat | Approved traversal and combat loop slice, victory / retreat / defeat routing, route clear / resolved state, and Combat Skill Button MVP. |
 | Guild | Narrow clear report registration plus existing `QUESTS` turn-in bridge; `quest_cave_gathering` can unlock `shop_synthesis_01`. |
-| Guild x Dungeon Boss Glen | Working-tree special gating bridge: Scorched Mine 18/18 records `boss_glen_sighted`, Guild accepts `boss_glen_investigation_accepted`, Boss Glen challenge opens only after investigation acceptance, and `quest_boss_glen` / Blood Map turn-in unlocks Ash Ravine through existing runtime progression. |
+| Guild x Dungeon Boss Glen | Special gating bridge plus UX cleanup: Scorched Mine 18/18 records `boss_glen_sighted`, Guild accepts `boss_glen_investigation_accepted`, Boss Glen challenge opens only after investigation acceptance, persistent Guild story hint cards guide Glen / Act 2 steps, and `quest_boss_glen` / Blood Map turn-in unlocks Ash Ravine through existing runtime progression. |
 | Shop | Buy exactly one existing travel-shop consumable through Python server-side validation. |
 | Magic Shop | Learn one existing magic book through Python server-side validation and existing skill data. |
 | Workshop | Buy weapon & armor without auto-equip; equip weapons and owned non-weapon equipment; upgrade whitelisted recipes (`recipe_iron_sword_plus_1`, `recipe_leather_armor_plus_1`). |
 | Storage | Unlock, view, and deposit / withdraw items through Python runtime state; storage capacity upgrades remain closed. |
 
-Scorched Mine Boss Glen Progression Deadlock Fix is the current working-tree
-live bridge state:
+Guild x Dungeon Boss Glen live bridge state:
 
 - The bridge uses two narrow runtime flags: `boss_glen_sighted` when Scorched
   Mine 18/18 reveals the strong presence, and
@@ -72,9 +70,12 @@ live bridge state:
   accept the investigation, returning to 18/18 opens Boss Glen combat, Blood Map
   can be reported after victory, and Ash Ravine / later CLI progression appears
   through the existing runtime bridge.
-- Known follow-ups are player-facing wording / layout cleanup only: post-accept
-  Guild guidance, internal reward keys in quest reward display, dungeon bottom
-  button placement, and later Ash Ravine / fire-shard wording observations.
+- `709dc6c` landed the player-facing UX cleanup: Guild story hints remain
+  reviewable across Glen / Act 2 guidance states, Blood Map reward unlock keys
+  render as player-facing labels, Dungeon Exploration keeps HP/MP in the resource
+  strip while run Gold stays in current-run rewards, the dungeon event list can
+  scroll and auto-scrolls to the newest event, and the action bar supports stable
+  Boss / leave button placement.
 - This does not open a full quest framework, story hint framework, generic boss
   framework, full Act 2 progression cleanup, schema changes, save migration,
   combat formula changes, or manual `save.json` work.

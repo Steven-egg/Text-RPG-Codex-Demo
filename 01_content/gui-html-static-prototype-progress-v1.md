@@ -646,6 +646,19 @@ Validated during this session:
 - Dungeon Exploration `retreat` action browser check confirmed navigation to `../world_map/index.html` from both Default Exploration and Fixed Encounter Preview fixtures.
 - Dungeon Exploration visual tune-up confirmed the fixture selector labels the combat-transition fixture as `Fixed Encounter Preview`.
 - Dungeon Exploration screenshot capture in the in-app browser timed out after layout and interaction checks; DOM and console checks were still completed.
+- Glen Boss flow UX cleanup landed in `709dc6c`: Dungeon Exploration live mode
+  keeps HP/MP-only resource-strip presentation, renders the full event preview
+  list with vertical scrolling and auto-scroll-to-bottom behavior, and supports a
+  three-column action row so Boss challenge and leave/retreat actions keep stable
+  placement.
+- Guild story hint live presentation now keeps Glen / Blood Map / Act 2 guidance
+  reviewable across the accepted, Glen-defeated, and follow-on progression
+  states; this is ScreenModel presentation coverage, not a full story hint
+  framework.
+- Glen Boss flow UX cleanup Antigravity-reported checks:
+  `python 06_tools/smoke_test_progression_bridge.py` PASS,
+  `python element_maze.py --smoke-test` PASS, and
+  `python 06_tools/validate_data.py` PASS.
 - Combat Screen fixtures parse as UTF-8 JSON.
 - Combat Screen JS and Dungeon Exploration JS pass syntax check with the bundled Node.js runtime.
 - Combat Screen default fixture renders 5 command buttons, top enemy HUD, lower-left player HUD, right-side Battle Log, and UIAction log.
