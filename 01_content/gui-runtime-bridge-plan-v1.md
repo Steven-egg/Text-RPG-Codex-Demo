@@ -88,6 +88,9 @@ existing runtime-authoritative adapter / ScreenModel pattern where appropriate.
 | Storage Deposit & Withdraw | current package | Town Hub routes to Storage live screen; `storage_screen_model(state)` renders live inventory / storage status / storage contents / capacity; `unlock_storage` checks cost & unlocks; `deposit_item` & `withdraw_item` allow transferring items. | Storage capacity upgrade, full storage system, generic inventory / equipment management, schema/save/combat changes. |
 | Town Hub Mira Entry Unlock | `b046b1e [antig] feat(gui): add Mira synthesis entry unlock bridge` | Town Hub synthesis facility node reflects `is_unlocked(state, "shop_synthesis_01")`; locked state points to Guild task `洞窟採集`; unlocked state routes to the existing static synthesis screen. | Full synthesis, recipe bridge, `synthesis_screen_model()`, live loader, `craft_recipe`, recipe / quest / dungeon / schema / save / combat changes. |
 | Synthesis Single Recipe Craft | `5dbc742 [antig] feat(gui): add synthesis single recipe craft bridge` | `synthesis_screen` live mode loads a runtime-shaped ScreenModel and dispatches `craft_recipe` for the single whitelisted recipe `recipe_piercing_bundle`, reusing `game.recipe_available(...)` and `game.craft_recipe_message(...)`. | Full synthesis, generic recipe bridge, multi-recipe coverage, base-item upgrades, recipe / quest / dungeon / schema / save / combat changes. |
+| Temple / Church lookup bridge | current package | Live-mode loading, promotion requirement preview, moon well pray, fire-mark church bridge and lookup inquiry actions using Python runtime helpers. | Formal class transfer, class specialization gameplay, manual save.json edits. |
+| Relic Preview live opening | current package | Altar screen live-mode loading, previewing registered relics (e.g., ash charm) and requirements, attune action placeholder. | Formal relic effects, equipping/obtaining relics, manual save.json edits. |
+
 
 Latest committed bridge baseline:
 `709dc6c [antig] fix(gui): improve dungeon event scrolling and guild story progression hints`.
@@ -134,6 +137,32 @@ Explicit exceptions that are not yet fully bridged system families:
   `recipe_piercing_bundle` craft path.
 - Complete storage beyond deposit/withdraw, including capacity upgrade behavior.
 - Generic equipment management beyond approved workshop equip actions.
+
+Future coverage queue after Phase A close:
+
+Phase B is the second-priority facility coverage track, not an approved
+implementation batch:
+
+1. Synthesis existing Mira recipes coverage.
+2. Shop travel inventory coverage.
+3. Magic Shop `MAGIC_BOOKS` coverage.
+4. Workshop upgrade coverage.
+
+For Phase B, owner manual testing may be batched after 2-3 small slices, but each
+slice still needs a read-only planning gate, a narrow exact scope, and the
+runtime-authoritative ScreenModel / UIAction pattern. Do not turn the batch plan
+into a generic facility framework or broad data/schema/save/combat change.
+
+Phase C convenience work is deferred and remains closed for now:
+
+1. Guild material sell.
+2. Inventory / equipment management.
+3. Storage capacity upgrade.
+4. Bestiary detail / filtering.
+5. Settings panel.
+
+Phase C items require their own later read-only gate and owner-approved exact
+scope. They are not opened by Phase B facility coverage notes.
 
 Town Hub Mira and Synthesis result after this audit:
 
@@ -557,6 +586,19 @@ Status note, 2026-06-04:
   multi-recipe coverage, base-item upgrades, recipe / quest / dungeon changes,
   data/schema changes, save migration, combat formula changes, or crafting
   system refactors.
+
+Status note, 2026-06-05:
+
+- A narrow Temple & Relic Altar Live MVP is included in the current package.
+- Completed coverage includes live routing from Town Hub, live screen model generation for Temple and Relic Altar, and action dispatches for `temple_pray`, `fire_mark_church_bridge`, `fire_mark_church_lookup`, and `attune_relic`.
+- Python gameplay rules remain the authority. `fire_mark_church_bridge` and `fire_mark_church_lookup` calls existing game helpers to mutate story flags on the backend and return story text to the client. Promotion previews check database conditions against live player state.
+- Relic Altar previews `relic_ash_charm` and requirements, displaying it as unlocked when `unlock_ash_ravine` is unlocked in state. Attuning dispatches a preview-only action.
+- Antigravity-reported verification passed:
+  `python 06_tools/smoke_test_temple_bridge.py`,
+  `python 06_tools/validate_data.py`, and
+  `python element_maze.py --smoke-test`.
+- This status note does not approve formal class transfer, class specialization gameplay, formal relic system, relic effects, equipping/obtaining relics, or manual `save.json` edits.
+
 
 ### Phase 4 - Temple And Relic Preview
 

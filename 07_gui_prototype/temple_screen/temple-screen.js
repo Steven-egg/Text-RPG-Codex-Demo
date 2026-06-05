@@ -78,6 +78,10 @@ promotionsModalEl.addEventListener("click", (e) => {
 });
 
 backToTownBtnEl.addEventListener("click", () => {
+  if (runtimeClient.isLiveMode()) {
+    handleBackToTown();
+    return;
+  }
   window.setTimeout(() => {
     window.location.href = runtimeClient.withLiveMode("../town_hub/index.html");
   }, navigationDelayMs);
@@ -86,9 +90,9 @@ backToTownBtnEl.addEventListener("click", () => {
 loadFixture(fixtureSelect.value);
 
 async function loadFixture(path) {
-  // 教堂/神殿畫面目前在 bridge 端尚未正式實作 Live endpoint，採 Static 優先 fallback 模式
   if (runtimeClient.isLiveMode()) {
-    logSystem("live 模式已啟用，本畫面目前僅做為 static preview/display 展示。");
+    await loadLiveScreen();
+    return;
   }
 
   shellEl.dataset.loadState = "loading";
@@ -106,6 +110,76 @@ async function loadFixture(path) {
   } catch (error) {
     renderLoadError(error);
     shellEl.dataset.loadState = "error";
+  }
+}
+
+async function loadLiveScreen() {
+  shellEl.dataset.loadState = "loading";
+  try {
+    const model = await runtimeClient.getScreen("temple_screen");
+    state.model = model;
+    state.actionLog = [];
+    render();
+    logSystem("live runtime screen loaded", {
+      actionId: "live_screen_loaded",
+      source: "live_loader",
+      payload: { mode: "live", screen_id: "temple_screen" },
+    });
+    shellEl.dataset.loadState = "ready";
+  } catch (error) {
+    await loadStaticFallback(fixtureSelect.value, error);
+  }
+}
+
+async function loadStaticFallback(path, liveError) {
+  try {
+    const response = await fetch(path, { cache: "no-store" });
+    if (!response.ok) {
+      throw new Error(`Fixture request failed: ${response.status}`);
+    }
+    const model = await response.json();
+    state.model = model;
+    state.actionLog = [];
+    render();
+    logSystem(`live unavailable; loaded fixture ${path}`);
+    pushActionLog({
+      action_id: "live_bridge_unavailable",
+      payload: { reason: liveError instanceof Error ? liveError.message : String(liveError) },
+      source: "live_loader",
+      dispatched: false,
+      reason: "fallback_to_fixture",
+    });
+    shellEl.dataset.loadState = "ready";
+  } catch (error) {
+    renderLoadError(error);
+    shellEl.dataset.loadState = "error";
+  }
+}
+
+async function handleBackToTown() {
+  const payload = { from: "temple_screen" };
+  pushActionLog({
+    action_id: "back_to_town_hub",
+    payload,
+    source: "back_to_town",
+    dispatched: true,
+  });
+  try {
+    const result = await runtimeClient.dispatchAction("temple_screen", "back_to_town_hub", payload);
+    shellEl.dataset.runtimeStatus = result.status ?? "success";
+    window.setTimeout(() => {
+      window.location.href = runtimeClient.nextRoute(result, "../town_hub/index.html");
+    }, navigationDelayMs);
+  } catch (error) {
+    const reason = runtimeClient.errorMessage(error);
+    shellEl.dataset.runtimeStatus = error?.runtimeStatus ?? "error";
+    pushActionLog({
+      action_id: "back_to_town_hub",
+      payload,
+      source: "back_to_town",
+      dispatched: false,
+      reason,
+    });
   }
 }
 
@@ -224,9 +298,46 @@ function renderActionLog() {
   );
 }
 
-function handlePray() {
+async function handlePray() {
   const well = state.model?.moon_well ?? { cost: 30, payload: {} };
   
+  if (runtimeClient.isLiveMode()) {
+    pushActionLog({
+      action_id: "temple_pray",
+      payload: well.payload ?? {},
+      source: "draw_wellwater_btn",
+      dispatched: true,
+    });
+    
+    try {
+      const result = await runtimeClient.dispatchAction("temple_screen", "temple_pray", well.payload ?? {});
+      shellEl.dataset.runtimeStatus = result.status ?? "success";
+      if (result.screen_model) {
+        state.model = result.screen_model;
+        render();
+      }
+      if (result.message) {
+        if (wellFeedbackEl) {
+          wellFeedbackEl.textContent = result.message;
+        }
+      }
+    } catch (error) {
+      const reason = runtimeClient.errorMessage(error);
+      shellEl.dataset.runtimeStatus = error?.runtimeStatus ?? "error";
+      pushActionLog({
+        action_id: "temple_pray",
+        payload: well.payload ?? {},
+        source: "draw_wellwater_btn",
+        dispatched: false,
+        reason,
+      });
+      if (wellFeedbackEl) {
+        wellFeedbackEl.textContent = reason;
+      }
+    }
+    return;
+  }
+
   pushActionLog({
     action_id: "temple_pray",
     payload: well.payload ?? {},
@@ -249,9 +360,49 @@ function handlePromotion(promo) {
   });
 }
 
-function handleInquiry(inq) {
+async function handleInquiry(inq) {
+  const actionId = inq.action_id || "fire_mark_inquiry";
+  
+  if (runtimeClient.isLiveMode()) {
+    pushActionLog({
+      action_id: actionId,
+      payload: inq.payload ?? {},
+      source: "inquiry_panel",
+      dispatched: true,
+    });
+    
+    try {
+      const result = await runtimeClient.dispatchAction("temple_screen", actionId, inq.payload ?? {});
+      shellEl.dataset.runtimeStatus = result.status ?? "success";
+      if (result.screen_model) {
+        state.model = result.screen_model;
+        render();
+      }
+      if (result.message) {
+        npcBubbleEl.textContent = `大祭司賽恩：「${result.message}」`;
+        if (inquiryFeedbackEl) {
+          inquiryFeedbackEl.textContent = result.message;
+        }
+      }
+    } catch (error) {
+      const reason = runtimeClient.errorMessage(error);
+      shellEl.dataset.runtimeStatus = error?.runtimeStatus ?? "error";
+      pushActionLog({
+        action_id: actionId,
+        payload: inq.payload ?? {},
+        source: "inquiry_panel",
+        dispatched: false,
+        reason,
+      });
+      if (inquiryFeedbackEl) {
+        inquiryFeedbackEl.textContent = reason;
+      }
+    }
+    return;
+  }
+
   pushActionLog({
-    action_id: "fire_mark_inquiry",
+    action_id: actionId,
     payload: inq.payload ?? {},
     source: "inquiry_panel",
     dispatched: true,

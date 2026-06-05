@@ -58,6 +58,9 @@ Blessed local live bridge coverage:
 | Magic Shop | Learn one existing magic book through Python server-side validation and existing skill data. |
 | Workshop | Buy weapon & armor without auto-equip; equip weapons and owned non-weapon equipment; upgrade whitelisted recipes (`recipe_iron_sword_plus_1`, `recipe_leather_armor_plus_1`). |
 | Storage | Unlock, view, and deposit / withdraw items through Python runtime state; storage capacity upgrades remain closed. |
+| Temple | Live-mode loading, promotion requirement preview, moon well pray, fire-mark church bridge and lookup inquiry actions using Python runtime helpers. |
+| Relic Preview | Altar screen live-mode loading, previewing registered relics (e.g., ash charm) and requirements, attune action placeholder. Formal relic effects remain closed. |
+
 
 Guild x Dungeon Boss Glen live bridge state:
 
@@ -141,6 +144,14 @@ coverage:
 - This does not open full synthesis, generic recipe bridge, multi-recipe
   coverage, base-item upgrades, recipe / quest / dungeon changes, schema
   changes, save changes, combat formula changes, or crafting system refactors.
+
+Temple and Relic Altar Live MVP is included in the current package:
+
+- Town Hub can route to Temple and Relic Altar live screens.
+- Temple live screen loads a runtime-shaped `temple_screen_model(state)`. It previews job promotion requirements based on the database and checks if they are satisfied. Moon well pray deducts 30G and returns live state/message feedback.
+- `fire_mark_church_bridge` and `fire_mark_church_lookup` actions are triggered by inquiry buttons when their respective runtime prerequisites (`should_show_fire_mark_church_bridge(state)` and `should_show_fire_mark_church_lookup(state)`) are met. They directly call Python gameplay helpers to modify story flags.
+- Relic Altar live screen loads a runtime-shaped `relic_preview_screen_model(state)`. It previews registered relics (like the ash charm) and lists their unlock requirements. Attuning a relic dispatches `attune_relic` action returning preview-only messages.
+- This does not open formal class transfer, class specialization gameplay, formal relic system, relic effects, equipping/obtaining relics, or manual `save.json` edits.
 
 Task Zone routing:
 
@@ -253,14 +264,31 @@ do not imply gameplay validation.
 
 ## Next-Step Boundary
 
-The next implementation target is not pre-approved. Candidate follow-up currently
-recorded for future planning is a read-only gate for broader synthesis coverage,
-such as deciding whether to iterate more existing Mira recipe ids.
+The next implementation target is not pre-approved.
 
-Storage capacity upgrades, generic inventory management, generic equipment
-management, non-whitelisted workshop upgrades, and full workshop expansion are
-not opened by the current Storage / Workshop MVP; they require a new read-only
-planning gate and owner-approved exact scope.
+Future Phase B candidate queue, second priority after the Phase A mainline close:
+
+1. Synthesis existing Mira recipes coverage.
+2. Shop travel inventory coverage.
+3. Magic Shop `MAGIC_BOOKS` coverage.
+4. Workshop upgrade coverage.
+
+Phase B work may be owner-tested in small batches after 2-3 narrow slices, but
+each implementation slice still needs its own read-only planning gate and
+owner-approved exact scope.
+
+Future Phase C convenience queue is deferred:
+
+1. Guild material sell.
+2. Inventory / equipment management.
+3. Storage capacity upgrade.
+4. Bestiary detail / filtering.
+5. Settings panel.
+
+Phase C is not current work. Storage capacity upgrades, generic inventory
+management, generic equipment management, non-whitelisted workshop upgrades, and
+full workshop expansion remain closed until a later read-only planning gate and
+owner-approved exact scope.
 
 Before any runtime, data, schema, save, combat, or broader GUI live bridge work,
 start with a single-slice read-only planning gate. For ordinary static prototype

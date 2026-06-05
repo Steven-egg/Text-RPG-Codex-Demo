@@ -302,6 +302,14 @@ class GuiRuntimeSession:
             return self.accept_boss_glen_investigation(payload, screen_id=screen_id)
         if action_id in {"submit_quest", "report_dungeon_clear"}:
             return self.report_dungeon_clear(payload, screen_id=screen_id)
+        if action_id == "fire_mark_church_bridge":
+            return self.fire_mark_church_bridge(payload, screen_id=screen_id)
+        if action_id == "fire_mark_church_lookup":
+            return self.fire_mark_church_lookup(payload, screen_id=screen_id)
+        if action_id == "temple_pray":
+            return self.temple_pray(payload, screen_id=screen_id)
+        if action_id == "attune_relic":
+            return self.attune_relic(payload, screen_id=screen_id)
         if action_id == "open_world_map":
             state = self.require_state()
             return action_response(
@@ -1421,6 +1429,72 @@ class GuiRuntimeSession:
         else:
             raise GuiActionError("未指定有效的任務或迷宮 ID。", status=400)
 
+    def temple_screen_model(self) -> dict[str, Any]:
+        return temple_screen_model(self.require_state())
+
+    def relic_preview_screen_model(self) -> dict[str, Any]:
+        return relic_preview_screen_model(self.require_state())
+
+    def fire_mark_church_bridge(self, payload: dict[str, Any], screen_id: str | None = None) -> dict[str, Any]:
+        state = self.require_state()
+        if not game.should_show_fire_mark_church_bridge(state):
+            raise GuiActionError("不符合向賽恩展示印記碎片的條件。", status=409)
+        game.fire_mark_church_bridge(state)
+        msg = (
+            "賽恩聽完諾亞的轉介，視線落在三枚火之印記碎片上。\n"
+            "碎片的紅光在神殿石階間一明一滅，像是在尋找尚未打開的門。\n"
+            "「工會看不懂它，是因為這不是委託紀錄裡的東西。」賽恩低聲說。\n"
+            "「它不普通，但我還不能斷言它是什麼。我要花點時間查閱舊文獻。」\n"
+            "「先將碎片收好。等我整理出線索，再回神殿找我。」\n\n"
+            "已確認：保管碎片，稍後再回神殿詢問大祭司查閱結果。"
+        )
+        return self._live_response(
+            "fire_mark_church_bridge",
+            msg,
+            screen_model=self.temple_screen_model()
+        )
+
+    def fire_mark_church_lookup(self, payload: dict[str, Any], screen_id: str | None = None) -> dict[str, Any]:
+        state = self.require_state()
+        if not game.should_show_fire_mark_church_lookup(state):
+            raise GuiActionError("不符合詢問火之印記核心的條件。", status=409)
+        game.fire_mark_church_lookup(state)
+        msg = (
+            "賽恩把翻開的舊文獻推到石桌中央，頁面上畫著三道分裂的火印。\n"
+            "「查到了。這三枚碎片不是完整的火之印記，而是它尚未完成的核心。」\n"
+            "「它記錄了火的資格，卻還沒有承載力量。現在啟用，只會把印記燒毀。」\n"
+            "賽恩用封蠟與灰白布帶暫時封住碎片的共鳴，又把它們交還給你。\n"
+            "「先保管好。等找到真正的熔印之地，再談合成與承載。」\n\n"
+            "已確認：未完成的火之印記核心。正式火之印記合成、啟用與聖物效果尚未開放。"
+        )
+        return self._live_response(
+            "fire_mark_church_lookup",
+            msg,
+            screen_model=self.temple_screen_model()
+        )
+
+    def temple_pray(self, payload: dict[str, Any], screen_id: str | None = None) -> dict[str, Any]:
+        state = self.require_state()
+        cost = 30
+        if state.get("gold", 0) < cost:
+            raise GuiActionError("身上金幣不足以進行祈福。", status=409)
+        state["gold"] = max(0, state["gold"] - cost)
+        msg = "你汲取了微光閃爍的泉水進行祈福！獲得了 [月華庇護] (抗性 +10%，探索裝扮預覽，效果依後續版本開放為準)。"
+        return self._live_response(
+            "temple_pray",
+            msg,
+            screen_model=self.temple_screen_model()
+        )
+
+    def attune_relic(self, payload: dict[str, Any], screen_id: str | None = None) -> dict[str, Any]:
+        state = self.require_state()
+        msg = "聖物共鳴與正式玩法尚未開放（目前僅供預覽）。"
+        return self._live_response(
+            "attune_relic",
+            msg,
+            screen_model=self.relic_preview_screen_model()
+        )
+
     def screen_model(self, screen_id: str) -> dict[str, Any]:
         if screen_id == "start_screen":
             return start_screen_model(save_exists())
@@ -1443,6 +1517,10 @@ class GuiRuntimeSession:
             return synthesis_screen_model(state)
         if screen_id in {"storage_screen", "facility_storage_screen"}:
             return self.storage_screen_model()
+        if screen_id in {"temple_screen", "facility_temple_screen"}:
+            return self.temple_screen_model()
+        if screen_id in {"relic_preview_screen", "facility_relic_preview_screen"}:
+            return self.relic_preview_screen_model()
         if screen_id == "dungeon_exploration":
             return self.exploration_screen_model()
         if screen_id == "combat_screen":
@@ -1839,6 +1917,10 @@ def build_screen_model(screen_id: str | None, state: dict[str, Any]) -> dict[str
         return magic_shop_screen_model(state)
     if screen_id in {"synthesis_screen", "facility_synthesis_screen"}:
         return synthesis_screen_model(state)
+    if screen_id in {"temple_screen", "facility_temple_screen"}:
+        return temple_screen_model(state)
+    if screen_id in {"relic_preview_screen", "facility_relic_preview_screen"}:
+        return relic_preview_screen_model(state)
     return None
 
 
@@ -2181,8 +2263,28 @@ def facility_nodes(state: dict[str, Any]) -> list[dict[str, Any]]:
             navigation_route="../magic_shop_screen/index.html",
             enabled=True,
         ),
-        facility("temple", "轉職神殿", "神殿目前僅供預覽；轉職與故事線索解鎖需特定條件。", "temple", "open_facility", enabled=False),
-        facility("relic_preview", "聖物調查", "聖物調查目前僅供預覽。", "relic", "open_facility", enabled=False),
+        facility(
+            "temple",
+            "轉職神殿",
+            "前往轉職神殿，進行職業晉升預覽與印記諮詢。",
+            "temple",
+            "open_facility",
+            payload={"facility_id": "temple", "target_screen_id": "temple_screen"},
+            target_screen_id="temple_screen",
+            navigation_route="../temple_screen/index.html",
+            enabled=True,
+        ),
+        facility(
+            "relic_preview",
+            "聖物調查",
+            "前往神殿後側的遺跡調查，預覽未開啟的正式聖物玩法。",
+            "relic",
+            "open_facility",
+            payload={"facility_id": "relic_preview", "target_screen_id": "relic_preview_screen"},
+            target_screen_id="relic_preview_screen",
+            navigation_route="../relic_preview_screen/index.html",
+            enabled=True,
+        ),
         facility(
             "storage",
             "城鎮倉庫",
@@ -3898,3 +4000,163 @@ def get_bestiary_preview_data(state: dict[str, Any]) -> list[dict[str, Any]]:
                 "drops": drops_str
             })
     return entries
+
+
+def temple_screen_model(state: dict[str, Any]) -> dict[str, Any]:
+    from .previews import get_preview_promotions_for_job
+    game.ensure_state_defaults(state)
+    
+    strip = resource_strip(state)
+    
+    # Check if player has at least 30G
+    has_gold = state.get("gold", 0) >= 30
+    moon_well = {
+        "label": "月神之井",
+        "description": "汲取蘊藏魔力的露水進行祈福，可隨機獲得全隊屬性微幅抗性加成。",
+        "cost": 30,
+        "enabled": has_gold,
+        "payload": { "altar_action": "pray", "cost": 30 }
+    }
+    
+    previews = get_preview_promotions_for_job(state.get("job", ""))
+    promotions = []
+    for promo in previews:
+        reqs = []
+        for req in promo.get("requirements", []):
+            satisfied = game.promotion_requirement_met(state, req)
+            kind = req.get("kind")
+            if kind == "level":
+                current_str = f"目前 Lv{state.get('level', 1)} / 達 Lv{req.get('value', 12)}"
+            elif kind == "unlock":
+                unlocked = game.is_unlocked(state, req.get("key"))
+                current_str = "已探索" if unlocked else "未探索"
+            elif kind == "quest":
+                completed = req.get("key") in state.get("completed_quests", [])
+                current_str = "已完成" if completed else "未完成"
+            elif kind == "item":
+                owned = state.get("inventory", {}).get(req.get("key"), 0)
+                current_str = "已取得" if owned > 0 else "未持有"
+            else:
+                current_str = "已達成" if satisfied else "未達成"
+                
+            reqs.append({
+                "name": req.get("label", ""),
+                "current": current_str,
+                "satisfied": satisfied
+            })
+            
+        promotions.append({
+            "class_id": promo.get("name", ""),
+            "label": f"{promo.get('name', '')} (預覽)",
+            "description": f"二階{state.get('job','')}特化。{promo.get('summary', '')}",
+            "requirements": reqs,
+            "enabled": False,
+            "disabled_reason": "正式轉職功能尚未開放（目前僅供預覽）。"
+        })
+        
+    inquiries = []
+    if game.should_show_fire_mark_church_bridge(state):
+        inquiries.append({
+            "inquiry_id": "fire_mark_church_bridge",
+            "action_id": "fire_mark_church_bridge",
+            "label": "向賽恩展示印記碎片",
+            "description": "向賽恩大祭司展示獲得的三枚火焰碎片，以尋求線索。",
+            "enabled": True,
+            "payload": {},
+            "response_text": "賽恩凝視著碎片，輕聲說道：『工會看不懂它，是因為這不是委託紀錄裡的東西。它不普通，但我還不能斷言它是什麼。我要花點時間查閱舊文獻。先把碎片收好。等我整理出線索，再回神殿找我。』"
+        })
+    elif game.should_show_fire_mark_church_lookup(state):
+        inquiries.append({
+            "inquiry_id": "fire_mark_church_lookup",
+            "action_id": "fire_mark_church_lookup",
+            "label": "詢問火之印記核心",
+            "description": "向賽恩大祭司詢問古代文獻查閱結果與火之印記核心的事。",
+            "enabled": True,
+            "payload": {},
+            "response_text": "賽恩指著舊文獻，輕聲說道：『查到了。這三枚碎片不是完整的火之印記，而是它尚未完成的核心。它記錄了火的資格，卻還沒有承載力量。現在啟用，只會把印記燒毀。先保管好。等找到真正的熔印之地，再談合成與承載。』"
+        })
+    elif state.get("flags", {}).get("boss_glen_defeated"):
+        inquiries.append({
+            "inquiry_id": "fire_mark_sayn_comment",
+            "action_id": "fire_mark_sayn_comment",
+            "label": "詢問火之印記",
+            "description": "向賽恩大祭司詢問關於火之印記與碎片的來歷。",
+            "enabled": False,
+            "payload": {},
+            "response_text": "賽恩看著你手中的火之印記碎片：『這還不是完整的印記。但神殿記得它的溫度。若你找到更多線索，再回來找我。』"
+        })
+        
+    return {
+        "screen_id": "temple_screen",
+        "title": "轉職神殿 (Live)",
+        "subtitle": "在此沐浴月神光華，進行職業晉升宣誓或查閱古代碑文。",
+        "resource_strip": strip,
+        "moon_well": moon_well,
+        "promotions": promotions,
+        "inquiries": inquiries
+    }
+
+
+def relic_preview_screen_model(state: dict[str, Any]) -> dict[str, Any]:
+    from .previews import get_preview_relics
+    game.ensure_state_defaults(state)
+    
+    strip = resource_strip(state)
+    
+    relics = get_preview_relics()
+    slots = []
+    
+    ash_relic = next((r for r in relics if r.get("source") == "灰燼裂谷調查線索" or r.get("name") == "灰燼護符"), None)
+    
+    if ash_relic:
+        unlocked = game.relic_unlock_met(state, ash_relic.get("unlock"))
+        slots.append({
+            "element_id": "fire",
+            "label": "🔥 火之印記碎片",
+            "relic_name": ash_relic["name"],
+            "collected": 3 if unlocked else 0,
+            "required": 3,
+            "unlocked": unlocked,
+            "active": unlocked,
+            "ancient_text": f"「當三碎聚首，薪火重燃，深谷之衛方可安息...」三個散落的火焰碎片在此相聚，流動著溫熱的餘溫魔能。被動效果（預期）：{ash_relic['effect_preview']}"
+        })
+    else:
+        slots.append({
+            "element_id": "fire",
+            "label": "🔥 火之印記碎片",
+            "relic_name": "未完成的火印核心",
+            "collected": 3 if state.get("inventory", {}).get("key_fire_mark_shard", 0) >= 3 else state.get("inventory", {}).get("key_fire_mark_shard", 0),
+            "required": 3,
+            "unlocked": state.get("inventory", {}).get("key_fire_mark_shard", 0) >= 3,
+            "active": state.get("inventory", {}).get("key_fire_mark_shard", 0) >= 3,
+            "ancient_text": "「當三碎聚首，薪火重燃...」三個散落的火焰碎片在此相聚，流動著溫熱 Genes / 餘溫魔能。被動效果（預估）：火屬性抗性 +15% (實際套用依 CLI runtime 為準)。"
+        })
+        
+    slots.append({
+        "element_id": "water",
+        "label": "💧 潮汐之淚",
+        "relic_name": "海神淚滴",
+        "collected": 0,
+        "required": 1,
+        "unlocked": False,
+        "active": False,
+        "ancient_text": "「深海之瞳，凝視深淵...」尚未解鎖。碎片可能掉落於沉沒遺跡或海岸巢穴中。正式聖物玩法尚未開放。"
+    })
+    slots.append({
+        "element_id": "wind",
+        "label": "🌪️ 風暴之羽",
+        "relic_name": "天羽核心",
+        "collected": 0,
+        "required": 1,
+        "unlocked": False,
+        "active": False,
+        "ancient_text": "「狂嵐不息，撕裂天穹...」尚未解鎖。需要在北方高原的峭壁鳥巢中尋得風羽線索。正式聖物玩法尚未開放。"
+    })
+    
+    return {
+        "screen_id": "relic_preview_screen",
+        "title": "古代遺物展示台 (Relic Altar)",
+        "subtitle": "檢視與解讀冒險中取得的古代元素聖物與碎片印記。",
+        "resource_strip": strip,
+        "slots": slots
+    }

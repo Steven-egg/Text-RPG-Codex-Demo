@@ -80,6 +80,8 @@ Current newest GUI live state:
 - This does not mean full inventory / equipment, storage capacity upgrade,
   synthesis, crafting, guild quest, story hint, generic boss, full Act 2,
   multi-recipe, base-item upgrade, or facility systems are complete.
+- Temple and Relic Altar Live MVP is complete: Town Hub supports live routing to Temple and Relic Altar screens, which load runtime-shaped ScreenModels. Temple dispatches `temple_pray` (paying 30G for temporary blessing), `fire_mark_church_bridge` and `fire_mark_church_lookup` (inquiries updating runtime flags via game helpers when prerequisites are met), and previews promotions. Relic Altar previews registered relics (like ash charm) and requirements, allowing the `attune_relic` placeholder action.
+- This does not open formal class transfer, class specialization gameplay, formal relic system, relic effects, equipping/obtaining relics, or manual `save.json` edits.
 
 ## Hot Zone Startup Order
 
@@ -137,19 +139,41 @@ coverage-oriented only; this does not approve Ash Guardian, Cinder Seal
 Sentinel, generic Boss handling, full story hints, Temple / Relic gameplay, or
 full Act 2 cleanup beyond the existing bridge presentation work.
 
-Broader synthesis coverage remains a possible future read-only gate, such as
-deciding whether to iterate more existing Mira recipe ids. It is not approved
-for implementation yet.
+Future Phase B candidate queue, second priority after the Phase A mainline
+close:
 
-Any synthesis follow-up must not open full synthesis, a generic recipe bridge,
-broad `craft_recipe` coverage, base-item upgrades, recipe / quest / dungeon
-changes, schema changes, save changes, or crafting system refactors without a
-new owner-approved exact scope.
+1. Synthesis existing Mira recipes coverage.
+2. Shop travel inventory coverage.
+3. Magic Shop `MAGIC_BOOKS` coverage.
+4. Workshop upgrade coverage.
 
-Any Storage / Workshop follow-up must start with a new read-only gate and
-explicit owner approval. Do not open storage capacity upgrades, generic inventory
-/ equipment management, non-whitelisted upgrades, full workshop, schema changes,
-save migration, combat formula changes, or manual `save.json` work.
+Phase B work may be owner-tested in small batches after 2-3 narrow slices, but
+each implementation slice still needs its own read-only planning gate and
+owner-approved exact scope.
+
+Future Phase C convenience queue is deferred:
+
+1. Guild material sell.
+2. Inventory / equipment management.
+3. Storage capacity upgrade.
+4. Bestiary detail / filtering.
+5. Settings panel.
+
+Any synthesis follow-up must not open full synthesis, base-item upgrades, recipe
+/ quest / dungeon changes, schema changes, save changes, or crafting system
+refactors without a new owner-approved exact scope.
+
+Any Shop / Magic Shop / Workshop follow-up must stay within the approved
+single-slice coverage target. Do not open full shop, full magic shop, generic
+facility framework, generic equipment management, non-whitelisted upgrades, full
+workshop, schema changes, save migration, combat formula changes, or manual
+`save.json` work.
+
+Any Phase C convenience follow-up must start with a later read-only gate and
+explicit owner approval. Do not open storage capacity upgrades, generic
+inventory / equipment management, settings, sell systems, bestiary detail
+framework, schema changes, save migration, combat formula changes, or manual
+`save.json` work from the current Phase B planning notes.
 
 For docs-only sync, restrict changes to explicitly approved markdown surfaces and
 do not touch runtime, JavaScript, data, schema, save, or combat formula.
