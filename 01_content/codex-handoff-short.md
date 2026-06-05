@@ -9,9 +9,8 @@ what the next boundary is. Detailed MVP verification belongs in Task Zone docs.
 - Work directory: `C:\Users\user\OneDrive\文字冒險遊戲`
 - Current branch expectation: `main` aligned with `origin/main`.
 - Latest committed bridge baseline before the current working-tree package:
-  `44f435b [antig] feat(gui): expand storage and workshop live bridge`
-- Current working-tree live slice: Scorched Mine Boss Glen Progression Deadlock
-  Fix, pending commit.
+  `9ae502b [antig] fix(gui): repair Boss Glen progression bridge`
+- Current working-tree live slice: Glen Boss flow UX cleanup and dungeon text presentation.
 
 Project state:
 

@@ -333,6 +333,24 @@ class GuiRuntimeSession:
             current_step = exploration["current_step"]
 
             if current_step >= total_steps:
+                # Check if the boss was defeated to record the defeat event log
+                boss_id = dungeon.get("boss")
+                boss_defeated = False
+                if boss_id:
+                    if boss_id == "boss_glen":
+                        boss_defeated = bool(state.get("flags", {}).get("boss_glen_defeated"))
+                    elif boss_id == "boss_ash_guardian":
+                        boss_defeated = bool(state.get("flags", {}).get("ash_guardian_defeated"))
+                    elif boss_id == "boss_cinder_seal_sentinel":
+                        boss_defeated = bool(state.get("flags", {}).get("cinder_seal_sentinel_defeated"))
+
+                if boss_defeated and not exploration.get("boss_defeat_logged"):
+                    exploration["boss_defeat_logged"] = True
+                    boss_name = game.MONSTERS[boss_id]["name"]
+                    defeat_msg = f"你成功擊敗了守護者 {boss_name}！取得戰利品。請使用「離開迷宮」返回地圖回報工會。"
+                    exploration["last_message"] = defeat_msg
+                    exploration.setdefault("events", []).append(defeat_msg)
+
                 if not exploration.get("cleared_marked"):
                     exploration["cleared_marked"] = True
                     first_clear = dungeon_id not in state.get("cleared_dungeons", [])
@@ -344,7 +362,6 @@ class GuiRuntimeSession:
                         msg = f"你走完了 {dungeon['name']} 的探索路線！"
 
                     # 終點守護者提示
-                    boss_id = dungeon.get("boss")
                     if boss_id:
                         boss_name = game.MONSTERS[boss_id]["name"]
                         if game.boss_available_at_dungeon_end(state, dungeon_id, boss_id):
@@ -353,7 +370,7 @@ class GuiRuntimeSession:
                             else:
                                 msg += f" 終點傳來強烈的氣息……可挑戰守護者 {boss_name}。出發前請確認 HP、藥水與火抗。"
                         else:
-                            if state.get("flags", {}).get(f"{boss_id}_defeated") or (boss_id == "boss_glen" and state.get("flags", {}).get("boss_glen_defeated")) or (boss_id == "boss_ash_guardian" and state.get("flags", {}).get("ash_guardian_defeated")) or (boss_id == "boss_cinder_seal_sentinel" and state.get("flags", {}).get("cinder_seal_sentinel_defeated")):
+                            if boss_defeated:
                                 msg += f" 守護者 {boss_name} 已被擊敗。"
                             else:
                                 msg += f" {boss_name} 尚未滿足挑戰條件，先處理工會委託線索。"
@@ -1497,6 +1514,49 @@ class GuiRuntimeSession:
             "payload": {"dungeon_id": exploration["dungeon_id"]},
         })
 
+        # Generate narrative guidance message
+        glen_sighted = state.get("flags", {}).get("boss_glen_sighted")
+        glen_accepted = state.get("flags", {}).get("boss_glen_investigation_accepted")
+        glen_defeated = state.get("flags", {}).get("boss_glen_defeated")
+
+        if exploration["dungeon_id"] == "dungeon_scorched_mine":
+            if current_step >= total_steps:
+                if glen_defeated:
+                    narrative_msg = "山寨頭目葛倫已被擊敗。焦石礦坑深處的熱度逐漸退去，你可以隨時離開迷宮返回城鎮。"
+                elif glen_accepted:
+                    narrative_msg = "已確認焦石礦坑最深處葛倫的藏身處。準備好迎接激烈的首領戰了嗎？"
+                else:
+                    narrative_msg = "你感覺到一股強大的敵意就在前方！但似乎需要先回工會回報，以了解如何開啟挑戰。"
+            else:
+                if glen_accepted:
+                    narrative_msg = "你正在前往焦石礦坑最深處。葛倫的嘍囉們在四處游蕩，請保持警惕，準備決戰。"
+                elif glen_sighted:
+                    narrative_msg = "已確認焦石礦坑深處異常氣息，請先撤退回到工會接受葛倫的調查委託。"
+                else:
+                    narrative_msg = "焦石礦坑內部瀰漫著焦油的氣息，山賊嘍囉隱蔽在礦道陰影中。小心前進。"
+        else:
+            if current_step >= total_steps:
+                narrative_msg = f"你已抵達 {dungeon['name']} 的最深處。前方沒有路了，整理收穫後即可離開迷宮。"
+            else:
+                narrative_msg = f"你正在探索 {dungeon['name']}。注意維持小隊的 HP 與 MP，小心前方的未知遭遇。"
+
+        boss_defeated = False
+        if boss_id:
+            if boss_id == "boss_glen":
+                boss_defeated = bool(state.get("flags", {}).get("boss_glen_defeated"))
+            elif boss_id == "boss_ash_guardian":
+                boss_defeated = bool(state.get("flags", {}).get("ash_guardian_defeated"))
+            elif boss_id == "boss_cinder_seal_sentinel":
+                boss_defeated = bool(state.get("flags", {}).get("cinder_seal_sentinel_defeated"))
+
+        hp_ratio = state["current_hp"] / stats["max_hp"] if stats["max_hp"] > 0 else 1.0
+        if hp_ratio > 0.6:
+            squad_status = "良好"
+        elif hp_ratio > 0.25:
+            squad_status = "警告"
+        else:
+            squad_status = "危急"
+
         return {
             "screen_id": "dungeon_exploration",
             "title": "迷宮探索",
@@ -1504,7 +1564,6 @@ class GuiRuntimeSession:
             "resource_strip": [
                 {"id": "hp", "label": f"HP {state['current_hp']}/{stats['max_hp']}", "tone": "hp" if state["current_hp"] > stats["max_hp"] * 0.35 else "warning"},
                 {"id": "mp", "label": f"MP {state['current_mp']}/{stats['max_mp']}", "tone": "mp"},
-                {"id": "gold", "label": f"{state.get('gold', 0)}G", "tone": "gold"},
             ],
             "dungeon": {
                 "dungeon_id": exploration["dungeon_id"],
@@ -1521,14 +1580,14 @@ class GuiRuntimeSession:
                 "current_step": current_step,
                 "total_steps": total_steps,
                 "step_note": exploration.get("last_message", "已抵達入口，準備前進。"),
-                "status_label": "戰鬥中" if status == "combat" else "探索中",
-                "risk_label": "普通",
-                "supply_label": f"HP {state['current_hp']}/{stats['max_hp']}",
+                "status_label": "已通關" if boss_defeated else ("戰鬥中" if status == "combat" else "探索中"),
+                "risk_label": "無" if boss_defeated else ("極高 (首領)" if current_step >= total_steps else "中等"),
+                "supply_label": squad_status,
                 "next_node": "下一步",
             },
             "run_rewards": run_reward_rows(exploration.get("run_log", {})),
             "event_preview": exploration.get("events", [])[-5:],
-            "narrative_message": exploration.get("last_message", ""),
+            "narrative_message": narrative_msg,
             "actions": actions,
         }
 
@@ -3254,6 +3313,12 @@ def guild_screen_model(state: dict[str, Any]) -> dict[str, Any]:
                 reward_unlocks.append("米菈合成屋")
             elif u_key == "item_escape_scroll":
                 reward_unlocks.append("逃脫卷軸")
+            elif u_key == "second_act_preview":
+                reward_unlocks.append("第二幕預告")
+            elif u_key == "unlock_act_2":
+                reward_unlocks.append("第二幕入口")
+            elif u_key == "unlock_ash_ravine":
+                reward_unlocks.append("灰燼裂谷")
             elif u_key in DUNGEONS:
                 reward_unlocks.append(DUNGEONS[u_key]["name"])
             elif u_key in ITEMS:
@@ -3318,44 +3383,184 @@ def guild_screen_model(state: dict[str, Any]) -> dict[str, Any]:
         { "id": "completed", "label": "已完成", "count": completed_count, "enabled": True }
     ]
 
-    glen_hint_active = (
-        state.get("flags", {}).get("boss_glen_sighted")
-        and not state.get("flags", {}).get("boss_glen_investigation_accepted")
-        and not state.get("flags", {}).get("boss_glen_defeated")
-    )
-    if glen_hint_active:
-        story_hint_card = {
-            "id": "story_hint_boss_glen",
-            "title": "焦石礦坑深處的氣息",
-            "description": "你在焦石礦坑深處感受到一股強烈的氣息。回報工會以調查此事。",
-            "detail_description": "工會接到報告，焦石礦坑深處傳來異樣的震動與粗暴的笑聲，疑似山寨頭目葛倫的蹤跡。接下調查以獲得進一步的作戰地圖指示。",
-            "status": "story_hint",
-            "status_label": "主線線索",
-            "visible": True,
-            "enabled": True,
-            "disabled_reason": None,
-            "primary_action": "accept_boss_glen_investigation",
-            "action_label": "接下調查",
-            "condition_rows": [],
-            "reward_summary": None,
-            "notes": "接下調查後將會開啟正式 Boss 討伐任務。"
-        }
+    completed_quests = state.get("completed_quests", [])
+
+    if "quest_boss_glen" not in completed_quests:
+        glen_sighted = state.get("flags", {}).get("boss_glen_sighted")
+        glen_accepted = state.get("flags", {}).get("boss_glen_investigation_accepted")
+        glen_defeated = state.get("flags", {}).get("boss_glen_defeated")
+
+        if glen_sighted:
+            if not glen_accepted:
+                story_hint_card = {
+                    "id": "story_hint_boss_glen",
+                    "title": "焦石礦坑深處的氣息",
+                    "description": "你在焦石礦坑深處感受到一股強烈的氣息。回報工會以調查此事。",
+                    "detail_description": "工會接到報告，焦石礦坑深處傳來異樣的震動與粗暴的笑聲，疑似山寨頭目葛倫的蹤跡。接下調查以獲得進一步的作戰地圖指示。",
+                    "status": "story_hint",
+                    "status_label": "主線線索",
+                    "visible": True,
+                    "enabled": True,
+                    "disabled_reason": None,
+                    "primary_action": "accept_boss_glen_investigation",
+                    "action_label": "接下調查",
+                    "condition_rows": [],
+                    "reward_summary": None,
+                    "notes": "接下調查後將會開啟正式 Boss 討伐任務。"
+                }
+            elif not glen_defeated:
+                story_hint_card = {
+                    "id": "story_hint_boss_glen_accepted",
+                    "title": "焦石礦坑深處的氣息 (已接受)",
+                    "description": "已確認焦石礦坑深處異常氣息。請回到焦石礦坑最深處挑戰山寨頭目葛倫，奪回被他搶走的「血跡地圖」並帶回工會回報。",
+                    "detail_description": "已確認焦石礦坑深處異常氣息。請回到焦石礦坑最深處挑戰山寨頭目葛倫，奪回被他搶走的「血跡地圖」並帶回工會回報，以開啟前往灰燼裂谷的通道。",
+                    "status": "story_hint",
+                    "status_label": "主線線索",
+                    "visible": True,
+                    "enabled": False,
+                    "disabled_reason": "已確認焦石礦坑深處異常氣息，請回到焦石礦坑最深處挑戰山寨頭目葛倫以取得「血跡地圖」。",
+                    "primary_action": "unavailable",
+                    "action_label": "調查中",
+                    "condition_rows": [],
+                    "reward_summary": None,
+                    "notes": "請回到焦石礦坑最深處挑戰山寨頭目葛倫以取得「血跡地圖」。"
+                }
+            else:
+                story_hint_card = {
+                    "id": "story_hint_boss_glen_defeated",
+                    "title": "山寨頭目葛倫已被擊敗",
+                    "description": "你已成功擊敗山寨頭目葛倫並取得「血跡地圖」。請向工會提交以完成委託。",
+                    "detail_description": "山寨頭目葛倫已被擊敗！請在右側的委託板上選擇「血跡地圖」任務並點擊「回報委託」，交回血跡地圖以解鎖前往灰燼裂谷的通道。",
+                    "status": "story_hint",
+                    "status_label": "主線線索",
+                    "visible": True,
+                    "enabled": False,
+                    "disabled_reason": "請在委託清單中選擇「血跡地圖」任務進行回報。",
+                    "primary_action": "unavailable",
+                    "action_label": "請回報委託",
+                    "condition_rows": [],
+                    "reward_summary": None,
+                    "notes": "提交「血跡地圖」任務後將會開啟前往灰燼裂谷的道路。"
+                }
+        else:
+            story_hint_card = {
+                "id": "story_hint_placeholder",
+                "title": "目前沒有主線線索",
+                "description": "暫無主線線索可詢問。",
+                "detail_description": "這不是正式委託，不計入篩選數。",
+                "status": "story_hint",
+                "status_label": "主線線索",
+                "visible": False,
+                "enabled": False,
+                "disabled_reason": "尚未開放。",
+                "primary_action": "unavailable",
+                "action_label": "無法使用",
+                "condition_rows": [],
+                "reward_summary": None
+            }
     else:
-        story_hint_card = {
-            "id": "story_hint_placeholder",
-            "title": "目前沒有主線線索",
-            "description": "暫無主線線索可詢問。",
-            "detail_description": "這不是正式委託，不計入篩選數。",
-            "status": "story_hint",
-            "status_label": "主線線索",
-            "visible": False,
-            "enabled": False,
-            "disabled_reason": "尚未開放。",
-            "primary_action": "unavailable",
-            "action_label": "無法使用",
-            "condition_rows": [],
-            "reward_summary": None
-        }
+        if "quest_ash_ravine_scout" not in completed_quests:
+            story_hint_card = {
+                "id": "story_hint_ash_ravine_unlocked",
+                "title": "已解鎖灰燼裂谷通道",
+                "description": "已解鎖前往灰燼裂谷的通道。請前往灰燼裂谷進行偵查並帶回素材以向工會回報。",
+                "detail_description": "已確認血跡地圖的指引，前往灰燼裂谷的通道已開放。請在世界地圖選擇「灰燼裂谷」進行偵查，帶回裂谷灰 x2、焦黑鐵片 x1，並回報「灰燼裂谷偵查」委託。",
+                "status": "story_hint",
+                "status_label": "主線進度",
+                "visible": True,
+                "enabled": False,
+                "disabled_reason": "請在世界地圖挑戰灰燼裂谷以進行偵查。",
+                "primary_action": "unavailable",
+                "action_label": "進行中",
+                "condition_rows": [],
+                "reward_summary": None,
+                "notes": "灰燼裂谷中溫度極高，遇到危險時請適時撤退。"
+            }
+        elif not state.get("flags", {}).get("ash_guardian_defeated"):
+            story_hint_card = {
+                "id": "story_hint_ash_guardian",
+                "title": "灰燼裂谷終點的巨影",
+                "description": "灰燼裂谷偵查已完成。強烈的震動表明守衛已醒來，準備挑戰灰燼守衛。",
+                "detail_description": "灰燼裂谷終點的熱流正在凝聚，形成了古老的守衛。準備好後請再次進入灰燼裂谷最深處，發起對「灰燼守衛」的決戰！",
+                "status": "story_hint",
+                "status_label": "主線進度",
+                "visible": True,
+                "enabled": False,
+                "disabled_reason": "請前往灰燼裂谷終點挑戰灰燼守衛。",
+                "primary_action": "unavailable",
+                "action_label": "進行中",
+                "condition_rows": [],
+                "reward_summary": None,
+                "notes": "擊敗灰燼守衛後，工會將開放補給線升級委託。"
+            }
+        elif "quest_supply_upgrade" not in completed_quests:
+            story_hint_card = {
+                "id": "story_hint_supply_upgrade",
+                "title": "開放補給線升級委託",
+                "description": "灰燼守衛已擊敗。請向工會回報「補給線升級」委託以提升小隊補給上限。",
+                "detail_description": "灰燼守衛已被討伐！工會正在著手升級補給路線。請在右側委託板選擇「補給線升級」，交付精煉火石 x3、熔岩碎片 x2 以完成升級並解鎖「中藥水」與「燼印深窟」。",
+                "status": "story_hint",
+                "status_label": "主線進度",
+                "visible": True,
+                "enabled": False,
+                "disabled_reason": "請在委託清單中選擇「補給線升級」任務進行回報。",
+                "primary_action": "unavailable",
+                "action_label": "請回報委託",
+                "condition_rows": [],
+                "reward_summary": None,
+                "notes": "完成此升級後，小隊將獲得更強大的補給支援。"
+            }
+        elif "quest_cinder_depths_scout" not in completed_quests:
+            story_hint_card = {
+                "id": "story_hint_cinder_depths",
+                "title": "已解鎖燼印深窟通道",
+                "description": "補給線已完成升級。請前往燼印深窟進行偵查並回報「燼印深窟偵查」委託。",
+                "detail_description": "補給線穩定後，通往燼印深窟的通道已開放。請前往該處進行偵查，帶回精煉火石 x2、熔岩碎片 x1，並回報「燼印深窟偵查」委託。",
+                "status": "story_hint",
+                "status_label": "主線進度",
+                "visible": True,
+                "enabled": False,
+                "disabled_reason": "請前往世界地圖挑戰燼印深窟以進行偵查。",
+                "primary_action": "unavailable",
+                "action_label": "進行中",
+                "condition_rows": [],
+                "reward_summary": None,
+                "notes": "這是第一幕的最後一個偵查委託。"
+            }
+        elif not state.get("flags", {}).get("cinder_seal_sentinel_defeated"):
+            story_hint_card = {
+                "id": "story_hint_cinder_sentinel",
+                "title": "燼印深窟終點的震動",
+                "description": "已確認深窟終點的異動。請前往挑戰防禦守衛「燼印鎮衛」。",
+                "detail_description": "已記錄深窟的印記反應，結界核心傳來古老巨兵的甦醒震動。請做好萬全準備，前往挑戰「燼印鎮衛」以解除最後的核心封印！",
+                "status": "story_hint",
+                "status_label": "主線進度",
+                "visible": True,
+                "enabled": False,
+                "disabled_reason": "請前往燼印深窟終點挑戰防禦守衛。",
+                "primary_action": "unavailable",
+                "action_label": "進行中",
+                "condition_rows": [],
+                "reward_summary": None,
+                "notes": "這是此區域的最終守護者。"
+            }
+        else:
+            story_hint_card = {
+                "id": "story_hint_cinder_seal_completed",
+                "title": "第一幕主線全數通關",
+                "description": "你已擊敗第一幕所有守護者！前往大教堂報告以完成所有印記調查。",
+                "detail_description": "你已成功討伐焦石與深窟的核心守衛！請前往教堂進行最後的調查報告，見證第一幕的冒險終結。",
+                "status": "story_hint",
+                "status_label": "主線進度",
+                "visible": True,
+                "enabled": False,
+                "disabled_reason": "主線第一幕已全部通關。",
+                "primary_action": "unavailable",
+                "action_label": "已完成",
+                "condition_rows": [],
+                "reward_summary": None,
+                "notes": "冒險者工會在此向你的勇敢致敬！"
+            }
 
     feedback_message = {
         "tone": "info",

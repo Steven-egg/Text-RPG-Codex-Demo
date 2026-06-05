@@ -156,8 +156,8 @@ function renderRun(runStatus) {
 
   const rows = [
     ["狀態", runStatus.status_label ?? ""],
-    ["危險", runStatus.risk_label ?? ""],
-    ["補給", runStatus.supply_label ?? ""],
+    ["危險度", runStatus.risk_label ?? ""],
+    ["小隊狀態", runStatus.supply_label ?? ""],
   ];
   runStatsEl.replaceChildren(...rows.map(([label, value]) => createInfoRow("run-stat", label, value)));
 }
@@ -181,14 +181,27 @@ function renderEvents(lines) {
     return;
   }
 
-  const p = document.createElement("p");
-  p.textContent = lines[lines.length - 1] ?? "";
-  eventPreviewEl.replaceChildren(p);
+  eventPreviewEl.replaceChildren(
+    ...lines.map((line) => {
+      const p = document.createElement("p");
+      p.textContent = line ?? "";
+      return p;
+    }),
+  );
+
+  eventPreviewEl.scrollTop = eventPreviewEl.scrollHeight;
 }
 
 function renderActions(actions) {
   const visibleActionIds = new Set(["advance_step", "retreat", "challenge_boss"]);
   const visibleActions = actions.filter((action) => visibleActionIds.has(action.action_id));
+
+  const hasBoss = visibleActions.some((a) => a.action_id === "challenge_boss");
+  if (hasBoss) {
+    actionRowEl.classList.add("has-three-cols");
+  } else {
+    actionRowEl.classList.remove("has-three-cols");
+  }
 
   actionRowEl.replaceChildren(
     ...visibleActions.map((action) => {

@@ -439,14 +439,22 @@ select:focus-visible {
   overflow: hidden;
 }
 
-.reward-list,
-.event-preview {
+.reward-list {
   min-height: 0;
   overflow: hidden;
   display: grid;
   align-content: start;
   gap: 0;
   padding-right: 0;
+}
+
+.event-preview {
+  min-height: 0;
+  overflow-y: auto;
+  display: grid;
+  align-content: start;
+  gap: 0;
+  padding-right: 4px;
 }
 
 .event-preview p {
@@ -525,6 +533,10 @@ select:focus-visible {
   gap: 10px;
 }
 
+.action-row.has-three-cols {
+  grid-template-columns: repeat(3, minmax(120px, 1fr));
+}
+
 .action-button,
 .quiet-button {
   border: 1px solid var(--line-strong);
@@ -563,6 +575,22 @@ select:focus-visible {
   cursor: not-allowed;
   border-color: rgba(217, 102, 93, 0.45);
   background: rgba(217, 102, 93, 0.12);
+}
+
+.action-button[data-action-id="advance_step"] {
+  grid-column: 1;
+}
+
+.action-button[data-action-id="challenge_boss"] {
+  grid-column: 2;
+}
+
+.action-button[data-action-id="retreat"] {
+  grid-column: 2;
+}
+
+.action-row.has-three-cols .action-button[data-action-id="retreat"] {
+  grid-column: 3;
 }
 
 .action-button:hover,

@@ -92,9 +92,11 @@ def run_progression_smoke_test():
     session.dispatch("accept_boss_glen_investigation", screen_id="guild_screen")
     assert state["flags"].get("boss_glen_investigation_accepted") is True
 
-    # Verify story hint card is now hidden, and boss quest is visible but status is requirements_missing
+    # Verify story hint card is still visible but accepted/disabled, and boss quest is visible but status is requirements_missing
     guild_model_accepted = session.screen_model("guild_screen")
-    assert guild_model_accepted["story_hint_card"]["visible"] is False
+    assert guild_model_accepted["story_hint_card"]["visible"] is True
+    assert guild_model_accepted["story_hint_card"]["enabled"] is False
+    assert guild_model_accepted["story_hint_card"]["primary_action"] == "unavailable"
 
     boss_quest_row = next(r for r in guild_model_accepted["task_rows"] if r["task_id"] == "quest_boss_glen")
     assert boss_quest_row["status"] == "requirements_missing"
@@ -134,13 +136,14 @@ def run_progression_smoke_test():
     assert session.exploration is None
 
     guild_model_post = session.screen_model("guild_screen")
-    # Verify story hint is hidden
-    assert guild_model_post["story_hint_card"]["visible"] is False
+    # Verify story hint shows turn-in guidance
+    assert guild_model_post["story_hint_card"]["visible"] is True
+    assert guild_model_post["story_hint_card"]["id"] == "story_hint_boss_glen_defeated"
 
     boss_quest_row_post = next(r for r in guild_model_post["task_rows"] if r["task_id"] == "quest_boss_glen")
     assert boss_quest_row_post["status"] == "ready_to_submit"
     assert boss_quest_row_post["status_label"] == "可回報"
-    print("[Pass] Boss quest displays as 'ready_to_submit' in Guild, and story hint is hidden.")
+    print("[Pass] Boss quest displays as 'ready_to_submit' in Guild, and story hint shows turn-in guidance.")
 
     # 12. Submit Boss Quest
     session.dispatch("submit_quest", {"task_id": "quest_boss_glen"}, screen_id="guild_screen")
