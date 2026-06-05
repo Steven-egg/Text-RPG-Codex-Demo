@@ -298,6 +298,8 @@ class GuiRuntimeSession:
             return self.equip_equipment(payload, screen_id=screen_id)
         if action_id == "upgrade_equipment":
             return self.upgrade_equipment(payload, screen_id=screen_id)
+        if action_id == "accept_boss_glen_investigation":
+            return self.accept_boss_glen_investigation(payload, screen_id=screen_id)
         if action_id in {"submit_quest", "report_dungeon_clear"}:
             return self.report_dungeon_clear(payload, screen_id=screen_id)
         if action_id == "open_world_map":
@@ -346,7 +348,10 @@ class GuiRuntimeSession:
                     if boss_id:
                         boss_name = game.MONSTERS[boss_id]["name"]
                         if game.boss_available_at_dungeon_end(state, dungeon_id, boss_id):
-                            msg += f" 終點傳來強烈的氣息……可挑戰守護者 {boss_name}。出發前請確認 HP、藥水與火抗。"
+                            if boss_id == "boss_glen" and not state.get("flags", {}).get("boss_glen_investigation_accepted"):
+                                msg += " 你在焦石礦坑深處感受到一股強烈的氣息。"
+                            else:
+                                msg += f" 終點傳來強烈的氣息……可挑戰守護者 {boss_name}。出發前請確認 HP、藥水與火抗。"
                         else:
                             if state.get("flags", {}).get(f"{boss_id}_defeated") or (boss_id == "boss_glen" and state.get("flags", {}).get("boss_glen_defeated")) or (boss_id == "boss_ash_guardian" and state.get("flags", {}).get("ash_guardian_defeated")) or (boss_id == "boss_cinder_seal_sentinel" and state.get("flags", {}).get("cinder_seal_sentinel_defeated")):
                                 msg += f" 守護者 {boss_name} 已被擊敗。"
@@ -366,6 +371,8 @@ class GuiRuntimeSession:
             return self.confirm_travel(payload)
         if action_id == "advance_step":
             return self.advance_step(payload)
+        if action_id == "challenge_boss":
+            return self.challenge_boss(payload)
         if action_id == "retreat":
             if screen_id == "combat_screen" or self.combat is not None:
                 return self.combat_retreat()
@@ -426,6 +433,34 @@ class GuiRuntimeSession:
             next_route="../combat_screen/index.html?mode=live",
         )
 
+    def challenge_boss(self, payload: dict[str, Any]) -> dict[str, Any]:
+        state = self.require_state()
+        exploration = self.require_exploration()
+        if self.combat is not None:
+            raise GuiActionError("A combat encounter is already active.", status=409)
+        dungeon_id = exploration["dungeon_id"]
+        dungeon = DUNGEONS[dungeon_id]
+        boss_id = dungeon.get("boss")
+        if not boss_id:
+            raise GuiActionError("This dungeon does not have a boss.", status=400)
+        if not game.boss_available_at_dungeon_end(state, dungeon_id, boss_id):
+            raise GuiActionError("Boss challenge conditions are not met.", status=403)
+        if boss_id == "boss_glen" and not state.get("flags", {}).get("boss_glen_investigation_accepted"):
+            raise GuiActionError("先回工會確認這股氣息。", status=403)
+        if state.get("current_hp", 0) <= 0:
+            return self.resolve_defeat("You collapsed before challenging the boss.")
+        
+        self.start_combat(boss_id, boss=True)
+        exploration["status"] = "combat"
+        exploration["last_message"] = f"決戰：開始挑戰守護者 {game.MONSTERS[boss_id]['name']}！"
+        exploration.setdefault("events", []).append(exploration["last_message"])
+        return self._live_response(
+            "challenge_boss",
+            f"決戰開始：{game.MONSTERS[boss_id]['name']}！",
+            screen_model=self.combat_screen_model(),
+            next_route="../combat_screen/index.html?mode=live",
+        )
+
     def retreat_from_exploration(self) -> dict[str, Any]:
         state = self.require_state()
         exploration = self.require_exploration()
@@ -440,7 +475,7 @@ class GuiRuntimeSession:
             next_route="../world_map/index.html?mode=live",
         )
 
-    def start_combat(self, monster_id: str) -> None:
+    def start_combat(self, monster_id: str, boss: bool = False) -> None:
         if monster_id not in game.MONSTERS:
             raise GuiActionError("Unknown monster.", status=400)
         enemy = deepcopy(game.MONSTERS[monster_id])
@@ -451,7 +486,7 @@ class GuiRuntimeSession:
             "player_buffs": {},
             "enemy_buffs": {},
             "turn": 1,
-            "boss": False,
+            "boss": boss,
             "battle_log": [f"遭遇 {enemy['name']}。敵人屬性：{enemy['element']} / HP {enemy['hp']}/{enemy['hp']}。"],
             "last_action_summary": "尚未行動。",
             "outcome": None,
@@ -669,6 +704,14 @@ class GuiRuntimeSession:
         if enemy_id == "mon_lava_imp":
             game.unlock(state, "recipe_heat_charm")
             reward_lines.append("🔑 解鎖配方：[暖石墜]。")
+
+        # 處理 Boss 擊敗與劇情物品掉落
+        if combat.get("boss"):
+            game.clear_dungeon_boss(state, enemy_id, run_log)
+            if enemy_id == "boss_glen":
+                reward_lines.append("🔑 取得戰利品：血跡地圖 x1、火之印記碎片 x1、熔岩碎片 x2。")
+            elif enemy_id in {"boss_ash_guardian", "boss_cinder_seal_sentinel"}:
+                reward_lines.append("🔑 取得戰利品：火之印記碎片 x1。")
 
         combat["outcome"] = "victory"
         combat["last_action_summary"] = " / ".join(summary_lines[:2]) if summary_lines else f"擊敗 {enemy['name']}。"
@@ -1286,6 +1329,20 @@ class GuiRuntimeSession:
     def storage_screen_model(self) -> dict[str, Any]:
         return storage_screen_model(self.require_state())
 
+    def accept_boss_glen_investigation(self, payload: dict[str, Any], screen_id: str | None = None) -> dict[str, Any]:
+        state = self.require_state()
+        state.setdefault("flags", {})
+        if not state["flags"].get("boss_glen_sighted"):
+            raise GuiActionError("尚未在焦石礦坑深處感受到強烈氣息。", status=409)
+        if state["flags"].get("boss_glen_investigation_accepted"):
+            raise GuiActionError("已接下調查。", status=409)
+        state["flags"]["boss_glen_investigation_accepted"] = True
+        return self._live_response(
+            "accept_boss_glen_investigation",
+            "你接下了焦石礦坑深處強烈氣息的調查任務。",
+            screen_model=self.guild_screen_model(),
+        )
+
     def report_dungeon_clear(self, payload: dict[str, Any], *, screen_id: str | None = None) -> dict[str, Any]:
         state = self.require_state()
         task_id = payload.get("task_id") or payload.get("dungeon_id")
@@ -1383,6 +1440,63 @@ class GuiRuntimeSession:
         current_step = exploration.get("current_step", 0)
         total_steps = dungeon["steps"]
         status = exploration.get("status", "exploring")
+
+        if exploration["dungeon_id"] == "dungeon_scorched_mine" and current_step >= total_steps:
+            state.setdefault("flags", {})
+            if not state["flags"].get("boss_glen_defeated"):
+                state["flags"]["boss_glen_sighted"] = True
+
+        boss_id = dungeon.get("boss")
+        boss_action = None
+        if boss_id and current_step >= total_steps and game.boss_available_at_dungeon_end(state, exploration["dungeon_id"], boss_id):
+            boss_name = game.MONSTERS[boss_id]["name"]
+            is_enabled = status in ("exploring", "resolved") and current_step >= total_steps
+            disabled_reason = None
+            if status == "combat":
+                is_enabled = False
+                disabled_reason = "戰鬥中無法執行此動作。"
+            elif boss_id == "boss_glen":
+                if not state.get("flags", {}).get("boss_glen_investigation_accepted"):
+                    is_enabled = False
+                    disabled_reason = "先回工會確認這股氣息。"
+
+            boss_action = {
+                "action_id": "challenge_boss",
+                "label": f"挑戰 {boss_name}",
+                "description": f"決戰迷宮守護者 {boss_name}。",
+                "enabled": is_enabled,
+                "disabled_reason": disabled_reason,
+                "primary": is_enabled,
+                "payload": {"dungeon_id": exploration["dungeon_id"], "boss_id": boss_id},
+            }
+
+        actions = [
+            {
+                "action_id": "advance_step",
+                "label": "前進一步",
+                "description": "前進探索下一步。",
+                "enabled": status == "exploring" and current_step < total_steps,
+                "disabled_reason": (
+                    "戰鬥中無法執行此動作。" if status == "combat" else (
+                        "已抵達終點，請挑戰守護者或離開返回地圖。" if current_step >= total_steps else None
+                    )
+                ),
+                "primary": not (boss_action and boss_action["enabled"]),
+                "payload": {"dungeon_id": exploration["dungeon_id"], "current_step": current_step},
+            }
+        ]
+        if boss_action:
+            actions.append(boss_action)
+        actions.append({
+            "action_id": "retreat",
+            "label": "離開迷宮" if current_step >= total_steps else "撤退",
+            "description": "返回世界地圖。" if current_step >= total_steps else "撤離當前迷宮並返回地圖。",
+            "enabled": status != "combat",
+            "disabled_reason": None if status != "combat" else "請先結束戰鬥。",
+            "primary": not (boss_action and boss_action["enabled"]),
+            "payload": {"dungeon_id": exploration["dungeon_id"]},
+        })
+
         return {
             "screen_id": "dungeon_exploration",
             "title": "迷宮探索",
@@ -1415,30 +1529,7 @@ class GuiRuntimeSession:
             "run_rewards": run_reward_rows(exploration.get("run_log", {})),
             "event_preview": exploration.get("events", [])[-5:],
             "narrative_message": exploration.get("last_message", ""),
-            "actions": [
-                {
-                    "action_id": "advance_step",
-                    "label": "前進一步",
-                    "description": "前進探索下一步。",
-                    "enabled": status == "exploring" and current_step < total_steps,
-                    "disabled_reason": (
-                        "戰鬥中無法執行此動作。" if status == "combat" else (
-                            "已抵達終點，請點擊離開返回地圖。" if current_step >= total_steps else None
-                        )
-                    ),
-                    "primary": True,
-                    "payload": {"dungeon_id": exploration["dungeon_id"], "current_step": current_step},
-                },
-                {
-                    "action_id": "retreat",
-                    "label": "離開迷宮" if current_step >= total_steps else "撤退",
-                    "description": "返回世界地圖。" if current_step >= total_steps else "撤離當前迷宮並返回地圖。",
-                    "enabled": status != "combat",
-                    "disabled_reason": None if status != "combat" else "請先結束戰鬥。",
-                    "primary": False,
-                    "payload": {"dungeon_id": exploration["dungeon_id"]},
-                },
-            ],
+            "actions": actions,
         }
 
     def combat_screen_model(self) -> dict[str, Any]:
@@ -3008,6 +3099,9 @@ def guild_screen_model(state: dict[str, Any]) -> dict[str, Any]:
     unlocked_quests = []
     for q_id, q_data in QUESTS.items():
         if game.quest_unlocked(state, q_id):
+            if q_id == "quest_boss_glen":
+                if not state.get("flags", {}).get("boss_glen_investigation_accepted"):
+                    continue
             unlocked_quests.append((q_id, q_data))
 
     task_rows = []
@@ -3224,21 +3318,44 @@ def guild_screen_model(state: dict[str, Any]) -> dict[str, Any]:
         { "id": "completed", "label": "已完成", "count": completed_count, "enabled": True }
     ]
 
-    story_hint_card = {
-        "id": "story_hint_placeholder",
-        "title": "目前沒有主線線索",
-        "description": "暫無主線線索可詢問。",
-        "detail_description": "這不是正式委託，不計入篩選數。",
-        "status": "story_hint",
-        "status_label": "主線線索",
-        "visible": False,
-        "enabled": False,
-        "disabled_reason": "尚未開放。",
-        "primary_action": "unavailable",
-        "action_label": "無法使用",
-        "condition_rows": [],
-        "reward_summary": None
-    }
+    glen_hint_active = (
+        state.get("flags", {}).get("boss_glen_sighted")
+        and not state.get("flags", {}).get("boss_glen_investigation_accepted")
+        and not state.get("flags", {}).get("boss_glen_defeated")
+    )
+    if glen_hint_active:
+        story_hint_card = {
+            "id": "story_hint_boss_glen",
+            "title": "焦石礦坑深處的氣息",
+            "description": "你在焦石礦坑深處感受到一股強烈的氣息。回報工會以調查此事。",
+            "detail_description": "工會接到報告，焦石礦坑深處傳來異樣的震動與粗暴的笑聲，疑似山寨頭目葛倫的蹤跡。接下調查以獲得進一步的作戰地圖指示。",
+            "status": "story_hint",
+            "status_label": "主線線索",
+            "visible": True,
+            "enabled": True,
+            "disabled_reason": None,
+            "primary_action": "accept_boss_glen_investigation",
+            "action_label": "接下調查",
+            "condition_rows": [],
+            "reward_summary": None,
+            "notes": "接下調查後將會開啟正式 Boss 討伐任務。"
+        }
+    else:
+        story_hint_card = {
+            "id": "story_hint_placeholder",
+            "title": "目前沒有主線線索",
+            "description": "暫無主線線索可詢問。",
+            "detail_description": "這不是正式委託，不計入篩選數。",
+            "status": "story_hint",
+            "status_label": "主線線索",
+            "visible": False,
+            "enabled": False,
+            "disabled_reason": "尚未開放。",
+            "primary_action": "unavailable",
+            "action_label": "無法使用",
+            "condition_rows": [],
+            "reward_summary": None
+        }
 
     feedback_message = {
         "tone": "info",

@@ -77,6 +77,7 @@ existing runtime-authoritative adapter / ScreenModel pattern where appropriate.
 | Dungeon / Combat loop | `be6b06c [antig] feat(gui): complete live combat loop feedback` | Travel, exploration step / retreat, combat actions, victory result, route clear / resolved state. | Complete dungeon framework, boss framework, combat formula changes. |
 | Guild report | `c2052d4 [antig] feat(gui): add guild clear report live bridge` | Clear report registration and display for eligible unlocked dungeon clears. | Full guild / quest / reputation / achievement system. |
 | Guild Quest Turn-in for Synthesis Unlock | `017fa43 [antig] feat(gui): add guild quest synthesis unlock bridge` | Guild live mode shows unlocked existing `QUESTS`; `submit_quest` completes ready turn-ins through existing runtime validation, reward, and unlock behavior. `quest_cave_gathering` unlocks `shop_synthesis_01`. | Full guild / quest framework, new quest data, story inquiry expansion, save/schema/combat changes, full synthesis, generic recipe bridge. |
+| Guild x Dungeon Boss Glen Gating | working tree / pending commit | Special Scorched Mine Boss Glen gate: 18/18 clue sets `boss_glen_sighted`, Guild `accept_boss_glen_investigation` sets `boss_glen_investigation_accepted`, `challenge_boss` opens after acceptance, and `quest_boss_glen` / Blood Map turn-in unlocks Ash Ravine through existing runtime progression. | Full quest framework, story hint framework, generic boss framework, full Act 2 cleanup, data/schema/save/combat changes. |
 | Combat Skill Button | `4acd04d [antig] feat(gui): add combat skill button live bridge` | `use_skill` routing from existing `learned_skills` and `SKILLS`. | Formal skill framework, target selection, rebalance. |
 | Shop Buy Consumable | `ebc1b5e [antig] feat(gui): add shop buy consumable live bridge` | Buy 1 existing travel-shop consumable through server-side validation. | Full shop system, sell, quantity selector, equipment purchase. |
 | Magic Shop Learn Book | `b59fe43 [antig] feat(gui): add magic shop learn book live bridge` | Learn 1 existing magic book through server-side validation. | Full magic / skill framework or combat rebalance. |
@@ -86,8 +87,8 @@ existing runtime-authoritative adapter / ScreenModel pattern where appropriate.
 | Town Hub Mira Entry Unlock | `b046b1e [antig] feat(gui): add Mira synthesis entry unlock bridge` | Town Hub synthesis facility node reflects `is_unlocked(state, "shop_synthesis_01")`; locked state points to Guild task `洞窟採集`; unlocked state routes to the existing static synthesis screen. | Full synthesis, recipe bridge, `synthesis_screen_model()`, live loader, `craft_recipe`, recipe / quest / dungeon / schema / save / combat changes. |
 | Synthesis Single Recipe Craft | `5dbc742 [antig] feat(gui): add synthesis single recipe craft bridge` | `synthesis_screen` live mode loads a runtime-shaped ScreenModel and dispatches `craft_recipe` for the single whitelisted recipe `recipe_piercing_bundle`, reusing `game.recipe_available(...)` and `game.craft_recipe_message(...)`. | Full synthesis, generic recipe bridge, multi-recipe coverage, base-item upgrades, recipe / quest / dungeon / schema / save / combat changes. |
 
-Latest committed bridge baseline before the current package:
-`75a013e [codex] feat(gui): add storage unlock and view live bridge`.
+Latest committed bridge baseline before the current working-tree package:
+`44f435b [antig] feat(gui): expand storage and workshop live bridge`.
 
 ## 3.2 Reusable Bridge Pattern Audit
 
@@ -102,6 +103,10 @@ Read-only audit, 2026-06-04:
 - A same-family coverage follow-up still needs an owner-approved exact scope, but
   it should prefer extending the existing adapter / ScreenModel pattern over
   creating a parallel gameplay rule.
+- Boss Glen clarified the split between same-family bridge coverage and special
+  gating MVPs: already bridged dungeon / combat / guild families may surface CLI
+  runtime progression naturally, but special clue-to-Guild-to-Boss gates still
+  need a small owner-approved gate instead of a generic boss framework.
 
 | System | Current reusable state | Hardcoded risk | Coverage direction |
 |---|---|---|---|
@@ -117,7 +122,12 @@ Read-only audit, 2026-06-04:
 
 Explicit exceptions that are not yet fully bridged system families:
 
-- Guild features beyond existing `QUESTS` turn-in / reward / unlock coverage.
+- Guild features beyond existing `QUESTS` turn-in / reward / unlock coverage
+  and the current Boss Glen investigation gate.
+- Generic boss / story-hint progression beyond the narrow Boss Glen special
+  gating bridge.
+- Full Act 2 progression cleanup beyond Ash Ravine / fire-demo content naturally
+  surfaced through existing CLI runtime progression.
 - Complete crafting / synthesis beyond the single whitelisted
   `recipe_piercing_bundle` craft path.
 - Complete storage beyond deposit/withdraw, including capacity upgrade behavior.
@@ -240,6 +250,11 @@ Map current GUI UIActions to Python runtime helpers:
   narrow Guild Report MVP only.
 - `submit_quest` -> existing `QUESTS` turn-in adapter for the narrow Guild Quest
   Turn-in for Synthesis Unlock MVP.
+- `accept_boss_glen_investigation` -> narrow Boss Glen story-hint action that
+  records Guild acceptance of the Scorched Mine clue and opens the formal Blood
+  Map / Boss challenge gate.
+- `challenge_boss` -> narrow dungeon-end Boss entry action for approved Boss
+  gates; Boss combat and victory resolution remain Python runtime owned.
 
 Where CLI functions currently prompt for input, add small non-interactive helper
 functions instead of simulating CLI input.
@@ -300,6 +315,36 @@ Status note, 2026-06-04:
   recipe bridge, multi-recipe synthesis coverage, base-item upgrades, boss /
   血跡地圖 progression, more quests, a combat item system, or crafting system
   refactors.
+
+Status note, 2026-06-05:
+
+- A narrow Scorched Mine Boss Glen Progression Deadlock Fix is complete in the
+  current working tree, pending commit.
+- Completed coverage is limited to the Guild x Dungeon special gate for
+  `boss_glen`: Scorched Mine 18/18 records `boss_glen_sighted`, Guild
+  `accept_boss_glen_investigation` records
+  `boss_glen_investigation_accepted`, `challenge_boss` becomes available only
+  after Guild acceptance, Boss victory records existing defeat / loot state, and
+  `quest_boss_glen` / Blood Map turn-in unlocks Ash Ravine / Act 2 entry through
+  existing runtime progression.
+- Python runtime remains gameplay authority. The bridge uses existing state,
+  flags, quest validation, combat start / victory resolution, item rewards, and
+  unlock behavior; Browser JavaScript continues to dispatch UIAction payloads
+  and render returned ScreenModels.
+- Owner manual hand test confirmed: first Scorched Mine 18/18 cannot directly
+  challenge Glen and points back to Guild, Guild accepts the investigation,
+  returning to 18/18 opens Boss Glen combat, Blood Map can be reported after
+  victory, Ash Ravine unlocks and can clear, later Ash Ravine Boss / fire-shard
+  visibility follows existing CLI runtime progression, and supply-line upgrade
+  turn-in / medium potion unlock still works.
+- Recorded follow-up observations are player-facing UX / wording coverage only:
+  post-investigation Guild guidance, internal unlock keys in quest rewards,
+  Dungeon Exploration bottom button layout when Boss challenge actions appear,
+  and Ash Ravine / later fire-demo prompt wording.
+- This status note does not approve a full quest framework, full story hint
+  framework, generic boss framework, full Act 2 progression cleanup, new quest
+  data, data/schema/save migration, combat formula changes, Temple / Relic /
+  class transfer work, full storage, full workshop, or manual `save.json` edits.
 
 Status note, 2026-06-04:
 

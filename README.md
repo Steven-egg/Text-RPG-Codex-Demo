@@ -8,9 +8,10 @@ screen-level verification, and historical MVP notes live in Task Zone files.
 
 Git / working-tree baseline:
 
-- Latest committed bridge baseline before the current package:
-  `75a013e [codex] feat(gui): add storage unlock and view live bridge`
-- Current newest live slice: Storage Deposit & Withdraw / Workshop Armor & Upgrade Live MVP.
+- Latest committed bridge baseline before the current working-tree package:
+  `44f435b [antig] feat(gui): expand storage and workshop live bridge`
+- Current working-tree live slice: Scorched Mine Boss Glen Progression Deadlock
+  Fix, pending commit.
 
 Project posture:
 
@@ -53,12 +54,34 @@ Blessed local live bridge coverage:
 | World Map | Runtime-backed location / route ScreenModel; main menu keeps `save_game` and shell-only `open_settings`; town return is via town node / detail action. |
 | Dungeon / Combat | Approved traversal and combat loop slice, victory / retreat / defeat routing, route clear / resolved state, and Combat Skill Button MVP. |
 | Guild | Narrow clear report registration plus existing `QUESTS` turn-in bridge; `quest_cave_gathering` can unlock `shop_synthesis_01`. |
+| Guild x Dungeon Boss Glen | Working-tree special gating bridge: Scorched Mine 18/18 records `boss_glen_sighted`, Guild accepts `boss_glen_investigation_accepted`, Boss Glen challenge opens only after investigation acceptance, and `quest_boss_glen` / Blood Map turn-in unlocks Ash Ravine through existing runtime progression. |
 | Shop | Buy exactly one existing travel-shop consumable through Python server-side validation. |
 | Magic Shop | Learn one existing magic book through Python server-side validation and existing skill data. |
 | Workshop | Buy weapon & armor without auto-equip; equip weapons and owned non-weapon equipment; upgrade whitelisted recipes (`recipe_iron_sword_plus_1`, `recipe_leather_armor_plus_1`). |
 | Storage | Unlock, view, and deposit / withdraw items through Python runtime state; storage capacity upgrades remain closed. |
 
-Storage Deposit & Withdraw Live MVP is the current newest live bridge state:
+Scorched Mine Boss Glen Progression Deadlock Fix is the current working-tree
+live bridge state:
+
+- The bridge uses two narrow runtime flags: `boss_glen_sighted` when Scorched
+  Mine 18/18 reveals the strong presence, and
+  `boss_glen_investigation_accepted` when the Guild accepts the investigation.
+- Dungeon Exploration only discovers the clue; Guild turns that clue into the
+  formal `quest_boss_glen` / Blood Map task and unlocks Boss Glen challenge.
+- Owner manual hand test confirmed the deadlock is removed: the first Scorched
+  Mine clear blocks direct Boss challenge with a Guild-facing hint, Guild can
+  accept the investigation, returning to 18/18 opens Boss Glen combat, Blood Map
+  can be reported after victory, and Ash Ravine / later CLI progression appears
+  through the existing runtime bridge.
+- Known follow-ups are player-facing wording / layout cleanup only: post-accept
+  Guild guidance, internal reward keys in quest reward display, dungeon bottom
+  button placement, and later Ash Ravine / fire-shard wording observations.
+- This does not open a full quest framework, story hint framework, generic boss
+  framework, full Act 2 progression cleanup, schema changes, save migration,
+  combat formula changes, or manual `save.json` work.
+
+Storage Deposit & Withdraw Live MVP remains part of the current live bridge
+package:
 
 - Town Hub can route to the Storage live screen, which loads a runtime-shaped `storage_screen_model(state)`.
 - `unlock_storage` checks the existing runtime storage unlock cost, blocks insufficient Gold, deducts Gold on success, and sets `state["storage_unlocked"] = True`.

@@ -27,6 +27,7 @@ const state = {
 const staticActionRoutes = {
   enter_combat_preview: "../combat_screen/index.html",
   retreat: "../world_map/index.html",
+  challenge_boss: "../combat_screen/index.html",
 };
 const navigationDelayMs = 120;
 
@@ -186,7 +187,7 @@ function renderEvents(lines) {
 }
 
 function renderActions(actions) {
-  const visibleActionIds = new Set(["advance_step", "retreat"]);
+  const visibleActionIds = new Set(["advance_step", "retreat", "challenge_boss"]);
   const visibleActions = actions.filter((action) => visibleActionIds.has(action.action_id));
 
   actionRowEl.replaceChildren(
