@@ -1534,6 +1534,36 @@ class GuiRuntimeSession:
                     narrative_msg = "已確認焦石礦坑深處異常氣息，請先撤退回到工會接受葛倫的調查委託。"
                 else:
                     narrative_msg = "焦石礦坑內部瀰漫著焦油的氣息，山賊嘍囉隱蔽在礦道陰影中。小心前進。"
+        elif exploration["dungeon_id"] == "dungeon_ash_ravine":
+            ash_defeated = state.get("flags", {}).get("ash_guardian_defeated")
+            ash_scouted = "quest_ash_ravine_scout" in state.get("completed_quests", [])
+            if current_step >= total_steps:
+                if ash_defeated:
+                    narrative_msg = "灰燼裂谷終點的熱度逐漸退去，古老守護者已歸於灰燼。你可以安全離開迷宮。"
+                elif ash_scouted:
+                    narrative_msg = "已確認灰燼裂谷最深處的熱能波動。古老的巨影在熱風中蠢蠢欲動，準備好迎接決戰了嗎？"
+                else:
+                    narrative_msg = "裂谷深處熱浪滾滾，你隱約感受到強烈的震動與不尋常的熱源。請收集好裂谷素材，先撤退回工會登記偵查回報。"
+            else:
+                if ash_scouted:
+                    narrative_msg = "你再次深入灰燼裂谷。周圍的溫度比上次更高，元素守衛的甦醒震動愈加強烈。"
+                else:
+                    narrative_msg = "灰燼裂谷中熱浪襲人，四周散落著焦黑的鐵片。小心前進，收集工會所需的偵查素材。"
+        elif exploration["dungeon_id"] == "dungeon_cinder_seal_depths":
+            cinder_defeated = state.get("flags", {}).get("cinder_seal_sentinel_defeated")
+            cinder_scouted = "quest_cinder_depths_scout" in state.get("completed_quests", [])
+            if current_step >= total_steps:
+                if cinder_defeated:
+                    narrative_msg = "結界核心已解除封印，古老的鎮衛碎裂為塵土。第一幕的主線探索已告一段落。"
+                elif cinder_scouted:
+                    narrative_msg = "燼印深窟的最底層，結界核心傳來沉重的機械甦醒聲。做好萬全準備發起挑戰！"
+                else:
+                    narrative_msg = "深窟底層的火印微弱共鳴，前方氣流異常混亂。似乎需要先回工會，將此處的偵查結果報告給諾亞。"
+            else:
+                if cinder_scouted:
+                    narrative_msg = "你正在深入封印的核心地帶。空氣中的火元素粒子異常活躍，準備迎擊最終的守護者。"
+                else:
+                    narrative_msg = "深窟內部分佈著交錯的紅石礦脈，古老結界的氣息若隱若現。小心前進，收集深窟偵查素材。"
         else:
             if current_step >= total_steps:
                 narrative_msg = f"你已抵達 {dungeon['name']} 的最深處。前方沒有路了，整理收穫後即可離開迷宮。"
@@ -1557,6 +1587,35 @@ class GuiRuntimeSession:
         else:
             squad_status = "危急"
 
+        # Determine dynamic boss label and availability wording
+        boss_state_label = "-"
+        if boss_id:
+            if boss_id == "boss_glen":
+                if state.get("flags", {}).get("boss_glen_defeated"):
+                    boss_state_label = "山寨頭目葛倫 (已擊敗)"
+                elif state.get("flags", {}).get("boss_glen_investigation_accepted"):
+                    boss_state_label = "山寨頭目葛倫 (可挑戰)"
+                elif state.get("flags", {}).get("boss_glen_sighted"):
+                    boss_state_label = "山寨頭目葛倫 (未接受調查)"
+                else:
+                    boss_state_label = "深處有異動 (需要完成偵查)"
+            elif boss_id == "boss_ash_guardian":
+                if state.get("flags", {}).get("ash_guardian_defeated"):
+                    boss_state_label = "灰燼守衛 (已擊敗)"
+                elif "quest_ash_ravine_scout" in state.get("completed_quests", []):
+                    boss_state_label = "灰燼守衛 (可挑戰)"
+                else:
+                    boss_state_label = "深處有異動 (需要完成偵查)"
+            elif boss_id == "boss_cinder_seal_sentinel":
+                if state.get("flags", {}).get("cinder_seal_sentinel_defeated"):
+                    boss_state_label = "燼印鎮衛 (已擊敗)"
+                elif "quest_cinder_depths_scout" in state.get("completed_quests", []):
+                    boss_state_label = "燼印鎮衛 (可挑戰)"
+                else:
+                    boss_state_label = "深處有異動 (需要完成偵查)"
+            else:
+                boss_state_label = boss_label(boss_id)
+
         return {
             "screen_id": "dungeon_exploration",
             "title": "迷宮探索",
@@ -1574,7 +1633,7 @@ class GuiRuntimeSession:
                 "attribute": dungeon["element"],
                 "route_length": f"{total_steps} 步",
                 "clear_state": "已通關" if exploration["dungeon_id"] in state.get("cleared_dungeons", []) else "未通關",
-                "boss_state": boss_label(dungeon.get("boss")),
+                "boss_state": boss_state_label,
             },
             "run_status": {
                 "current_step": current_step,
@@ -3463,13 +3522,13 @@ def guild_screen_model(state: dict[str, Any]) -> dict[str, Any]:
             story_hint_card = {
                 "id": "story_hint_ash_ravine_unlocked",
                 "title": "已解鎖灰燼裂谷通道",
-                "description": "已解鎖前往灰燼裂谷的通道。請前往灰燼裂谷進行偵查並帶回素材以向工會回報。",
-                "detail_description": "已確認血跡地圖的指引，前往灰燼裂谷的通道已開放。請在世界地圖選擇「灰燼裂谷」進行偵查，帶回裂谷灰 x2、焦黑鐵片 x1，並回報「灰燼裂谷偵查」委託。",
+                "description": "已解鎖前往灰燼裂谷的通道。請深入探索並收集特有素材以向工會回報。",
+                "detail_description": "已確認血跡地圖的指引，前往灰燼裂谷的通道已開放。請前往世界地圖並探索「灰燼裂谷」進行偵查，收集委託所需的裂谷素材以向工會回報。",
                 "status": "story_hint",
                 "status_label": "主線進度",
                 "visible": True,
                 "enabled": False,
-                "disabled_reason": "請在世界地圖挑戰灰燼裂谷以進行偵查。",
+                "disabled_reason": "請前往世界地圖並探索灰燼裂谷以進行偵查。",
                 "primary_action": "unavailable",
                 "action_label": "進行中",
                 "condition_rows": [],
@@ -3479,26 +3538,26 @@ def guild_screen_model(state: dict[str, Any]) -> dict[str, Any]:
         elif not state.get("flags", {}).get("ash_guardian_defeated"):
             story_hint_card = {
                 "id": "story_hint_ash_guardian",
-                "title": "灰燼裂谷終點的巨影",
-                "description": "灰燼裂谷偵查已完成。強烈的震動表明守衛已醒來，準備挑戰灰燼守衛。",
-                "detail_description": "灰燼裂谷終點的熱流正在凝聚，形成了古老的守衛。準備好後請再次進入灰燼裂谷最深處，發起對「灰燼守衛」的決戰！",
+                "title": "灰燼裂谷終點的異動",
+                "description": "灰燼裂谷偵查已登記。最深處傳來強烈震動，似乎有什麼東西甦醒了。",
+                "detail_description": "根據你帶回的裂谷灰回報，工會推測裂谷終點的熱流深處有強大的守護者活動。請小隊整頓後再次前往「灰燼裂谷」終點調查並排除威脅，以開啟後續深入的補給路線。",
                 "status": "story_hint",
                 "status_label": "主線進度",
                 "visible": True,
                 "enabled": False,
-                "disabled_reason": "請前往灰燼裂谷終點挑戰灰燼守衛。",
+                "disabled_reason": "請前往灰燼裂谷終點調查威脅反應。",
                 "primary_action": "unavailable",
                 "action_label": "進行中",
                 "condition_rows": [],
                 "reward_summary": None,
-                "notes": "擊敗灰燼守衛後，工會將開放補給線升級委託。"
+                "notes": "終點存在極具威脅的熱源反應，進入決戰前請準備充足的藥水。"
             }
         elif "quest_supply_upgrade" not in completed_quests:
             story_hint_card = {
                 "id": "story_hint_supply_upgrade",
-                "title": "開放補給線升級委託",
-                "description": "灰燼守衛已擊敗。請向工會回報「補給線升級」委託以提升小隊補給上限。",
-                "detail_description": "灰燼守衛已被討伐！工會正在著手升級補給路線。請在右側委託板選擇「補給線升級」，交付精煉火石 x3、熔岩碎片 x2 以完成升級並解鎖「中藥水」與「燼印深窟」。",
+                "title": "工會補給路線升級",
+                "description": "裂谷守護者已被討伐。工會正準備升級小隊的物資補給線。",
+                "detail_description": "裂谷深處的威脅已清除，工會的補給隊伍現在可以著手擴展路線。請在右側的委託板選擇「補給線升級」，提交所需的工程素材，以開啟前往更深處「燼印深窟」的安全補給。",
                 "status": "story_hint",
                 "status_label": "主線進度",
                 "visible": True,
@@ -3508,48 +3567,48 @@ def guild_screen_model(state: dict[str, Any]) -> dict[str, Any]:
                 "action_label": "請回報委託",
                 "condition_rows": [],
                 "reward_summary": None,
-                "notes": "完成此升級後，小隊將獲得更強大的補給支援。"
+                "notes": "升級補給線能提升後續在極高溫地帶的生存保障。"
             }
         elif "quest_cinder_depths_scout" not in completed_quests:
             story_hint_card = {
                 "id": "story_hint_cinder_depths",
-                "title": "已解鎖燼印深窟通道",
-                "description": "補給線已完成升級。請前往燼印深窟進行偵查並回報「燼印深窟偵查」委託。",
-                "detail_description": "補給線穩定後，通往燼印深窟的通道已開放。請前往該處進行偵查，帶回精煉火石 x2、熔岩碎片 x1，並回報「燼印深窟偵查」委託。",
+                "title": "前往封印深處的偵查",
+                "description": "前往燼印深窟的通道已開放。請深入該地帶進行初步偵查。",
+                "detail_description": "隨著補給線延伸，工會已標記出通往「燼印深窟」的路徑。請在世界地圖前往該處偵查，帶回當地的礦石標本與結晶碎片以完成工會的深度評估。",
                 "status": "story_hint",
                 "status_label": "主線進度",
                 "visible": True,
                 "enabled": False,
-                "disabled_reason": "請前往世界地圖挑戰燼印深窟以進行偵查。",
+                "disabled_reason": "請前往世界地圖並探索燼印深窟以進行偵查。",
                 "primary_action": "unavailable",
                 "action_label": "進行中",
                 "condition_rows": [],
                 "reward_summary": None,
-                "notes": "這是第一幕的最後一個偵查委託。"
+                "notes": "該處屬於核心封印區域，請謹慎應對隨時可能發生的暴動。"
             }
         elif not state.get("flags", {}).get("cinder_seal_sentinel_defeated"):
             story_hint_card = {
                 "id": "story_hint_cinder_sentinel",
-                "title": "燼印深窟終點的震動",
-                "description": "已確認深窟終點的異動。請前往挑戰防禦守衛「燼印鎮衛」。",
-                "detail_description": "已記錄深窟的印記反應，結界核心傳來古老巨兵的甦醒震動。請做好萬全準備，前往挑戰「燼印鎮衛」以解除最後的核心封印！",
+                "title": "深窟封印核心的震動",
+                "description": "已登記深窟的偵查報告。封印核心似乎有巨大物體正在甦醒。",
+                "detail_description": "工會分析了你帶回的深窟岩石標本，確認底部結界核心的防禦機制已被觸發。請整理裝備，再次前往「燼印深窟」最深處挑戰核心的守護者，以解除當地的火之印記封印。",
                 "status": "story_hint",
                 "status_label": "主線進度",
                 "visible": True,
                 "enabled": False,
-                "disabled_reason": "請前往燼印深窟終點挑戰防禦守衛。",
+                "disabled_reason": "請前往燼印深窟終點挑戰核心守護者。",
                 "primary_action": "unavailable",
                 "action_label": "進行中",
                 "condition_rows": [],
                 "reward_summary": None,
-                "notes": "這是此區域的最終守護者。"
+                "notes": "這是解除該區域核心封印的最後一戰，請準備最精良的裝備。"
             }
         else:
             story_hint_card = {
                 "id": "story_hint_cinder_seal_completed",
-                "title": "第一幕主線全數通關",
-                "description": "你已擊敗第一幕所有守護者！前往大教堂報告以完成所有印記調查。",
-                "detail_description": "你已成功討伐焦石與深窟的核心守衛！請前往教堂進行最後的調查報告，見證第一幕的冒險終結。",
+                "title": "火之印記核心的凝聚",
+                "description": "已擊敗深窟守護者並取得碎片。請前往大教堂報告調查結果。",
+                "detail_description": "你已取得所有共鳴的火之印記碎片！這項重大進展需要神職人員的文獻知識。請小隊前往城鎮的「轉職神殿」向賽恩祭司回報，確認印記的核心狀態。",
                 "status": "story_hint",
                 "status_label": "主線進度",
                 "visible": True,
@@ -3559,7 +3618,7 @@ def guild_screen_model(state: dict[str, Any]) -> dict[str, Any]:
                 "action_label": "已完成",
                 "condition_rows": [],
                 "reward_summary": None,
-                "notes": "冒險者工會在此向你的勇敢致敬！"
+                "notes": "工會會長諾亞在此向米菈小隊的卓越冒險致以敬意！"
             }
 
     feedback_message = {

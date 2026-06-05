@@ -79,6 +79,7 @@ existing runtime-authoritative adapter / ScreenModel pattern where appropriate.
 | Guild Quest Turn-in for Synthesis Unlock | `017fa43 [antig] feat(gui): add guild quest synthesis unlock bridge` | Guild live mode shows unlocked existing `QUESTS`; `submit_quest` completes ready turn-ins through existing runtime validation, reward, and unlock behavior. `quest_cave_gathering` unlocks `shop_synthesis_01`. | Full guild / quest framework, new quest data, story inquiry expansion, save/schema/combat changes, full synthesis, generic recipe bridge. |
 | Guild x Dungeon Boss Glen Gating | `9ae502b [antig] fix(gui): repair Boss Glen progression bridge` | Special Scorched Mine Boss Glen gate: 18/18 clue sets `boss_glen_sighted`, Guild `accept_boss_glen_investigation` sets `boss_glen_investigation_accepted`, `challenge_boss` opens after acceptance, and `quest_boss_glen` / Blood Map turn-in unlocks Ash Ravine through existing runtime progression. | Full quest framework, story hint framework, generic boss framework, full Act 2 cleanup, data/schema/save/combat changes. |
 | Glen Boss flow UX cleanup | `709dc6c [antig] fix(gui): improve dungeon event scrolling and guild story progression hints` | Persistent Guild story hint review cards across Glen / Act 2 guidance states, Blood Map reward key mapping, HP/MP-only dungeon resource strip, semantic dungeon metrics, scrollable auto-bottom event preview, dynamic 3-column action-bar layout, and boss victory exploration events. | Full quest / story / dungeon / storage / workshop frameworks. |
+| Ash / Cinder presentation cleanup | current package | Existing Ash Ravine and Cinder Seal Depths progression remains runtime-owned; Guild story hints and Dungeon Exploration boss / narrative labels avoid premature Boss, reward, and follow-on unlock spoilers before the relevant scout reports. Temple static fixture lore copy is softened. | Generic boss / story / dungeon framework, Act 2 cleanup, Temple / Relic gameplay, data/schema/save/combat changes. |
 | Combat Skill Button | `4acd04d [antig] feat(gui): add combat skill button live bridge` | `use_skill` routing from existing `learned_skills` and `SKILLS`. | Formal skill framework, target selection, rebalance. |
 | Shop Buy Consumable | `ebc1b5e [antig] feat(gui): add shop buy consumable live bridge` | Buy 1 existing travel-shop consumable through server-side validation. | Full shop system, sell, quantity selector, equipment purchase. |
 | Magic Shop Learn Book | `b59fe43 [antig] feat(gui): add magic shop learn book live bridge` | Learn 1 existing magic book through server-side validation. | Full magic / skill framework or combat rebalance. |
@@ -370,6 +371,33 @@ Status note, 2026-06-05:
   progression cleanup, data/schema/save migration, combat formula changes,
   Temple / Relic / class transfer work, equipment / workshop expansion, full
   storage, or manual `save.json` edits.
+
+Status note, 2026-06-05:
+
+- Ash Ravine / Cinder Seal Depths GUI presentation cleanup is implemented in the
+  current package. Completed coverage is limited to player-facing wording in
+  `gui_actions.py`: Dungeon Exploration now uses progression-aware Boss /
+  narrative labels, and Guild story hint cards avoid premature Boss, reward, and
+  follow-on unlock spoilers before the relevant scout reports. The Temple static
+  fixture fire-mark lore copy is also softened.
+- Python runtime remains gameplay authority for quest completion, Boss
+  availability, flags, rewards, unlocks, inventory, combat results, and route
+  clear state. Browser JavaScript continues to render returned ScreenModels and
+  dispatch UIActions only.
+- Owner manual hand test confirmed: Ash Ravine first clear reaches a non-Boss
+  terminal state, Guild scout turn-in updates the guidance and opens the Ash
+  Boss path, Ash Boss victory unlocks follow-on supply-line guidance,
+  supply-line turn-in unlocks Cinder Seal Depths, the Cinder scout / Boss path
+  completes, and the flow reaches the Temple / Church handoff.
+- Known MVP observation: Ash Ravine and Cinder Seal Depths currently share some
+  fire-demo materials, so later scout turn-ins can be ready immediately. This is
+  existing CLI MVP content/data reuse, not a regression in this presentation
+  cleanup.
+- This status note does not approve a generic boss framework, full quest
+  framework, full story hint framework, full dungeon framework, full Act 2
+  progression cleanup, data/schema/save migration, combat formula changes,
+  Temple / Relic / class transfer gameplay, formal relic work, or manual
+  `save.json` edits.
 
 Status note, 2026-06-04:
 

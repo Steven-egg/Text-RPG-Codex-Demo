@@ -53,6 +53,7 @@ Blessed local live bridge coverage:
 | Dungeon / Combat | Approved traversal and combat loop slice, victory / retreat / defeat routing, route clear / resolved state, and Combat Skill Button MVP. |
 | Guild | Narrow clear report registration plus existing `QUESTS` turn-in bridge; `quest_cave_gathering` can unlock `shop_synthesis_01`. |
 | Guild x Dungeon Boss Glen | Special gating bridge plus UX cleanup: Scorched Mine 18/18 records `boss_glen_sighted`, Guild accepts `boss_glen_investigation_accepted`, Boss Glen challenge opens only after investigation acceptance, persistent Guild story hint cards guide Glen / Act 2 steps, and `quest_boss_glen` / Blood Map turn-in unlocks Ash Ravine through existing runtime progression. |
+| Ash / Cinder presentation cleanup | Ash Ravine and Cinder Seal Depths use existing runtime progression while GUI copy avoids premature Boss / reward / unlock spoilers before the matching scout reports; owner hand test confirmed the progression flow reaches the Temple / Church handoff. |
 | Shop | Buy exactly one existing travel-shop consumable through Python server-side validation. |
 | Magic Shop | Learn one existing magic book through Python server-side validation and existing skill data. |
 | Workshop | Buy weapon & armor without auto-equip; equip weapons and owned non-weapon equipment; upgrade whitelisted recipes (`recipe_iron_sword_plus_1`, `recipe_leather_armor_plus_1`). |
@@ -76,6 +77,16 @@ Guild x Dungeon Boss Glen live bridge state:
   strip while run Gold stays in current-run rewards, the dungeon event list can
   scroll and auto-scrolls to the newest event, and the action bar supports stable
   Boss / leave button placement.
+- The Ash Ravine / Cinder Seal Depths presentation cleanup keeps the existing
+  CLI runtime progression intact while making Guild and Dungeon Exploration
+  wording less spoiler-like before scout reports are complete. Owner manual hand
+  test confirmed Ash Ravine first clear, scout turn-in, Ash Boss, supply-line
+  upgrade, Cinder Depths unlock, Cinder scout / Boss path, and Temple / Church
+  handoff all progress through the bridge.
+- Known MVP observation: Ash Ravine and Cinder Seal Depths currently share some
+  fire-demo materials, so later scout turn-ins can be ready immediately. This is
+  existing CLI MVP content/data reuse, not a regression in the presentation
+  cleanup.
 - This does not open a full quest framework, story hint framework, generic boss
   framework, full Act 2 progression cleanup, schema changes, save migration,
   combat formula changes, or manual `save.json` work.

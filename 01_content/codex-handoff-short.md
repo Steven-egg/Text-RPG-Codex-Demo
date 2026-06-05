@@ -43,9 +43,16 @@ Current newest GUI live state:
   keeps HP/MP in the resource strip while run Gold remains in current-run
   rewards, dungeon events scroll and auto-scroll to the newest event, and the
   action row supports stable Boss / leave button placement.
-- Treat Ash Ravine and later cave / fire-shard visibility as coverage
-  observation from existing CLI runtime progression, not as scope drift or an
-  approval for full Act 2 cleanup.
+- Ash Ravine / Cinder Seal Depths GUI presentation cleanup is implemented in the
+  current package: Guild story hints and Dungeon Exploration boss / narrative
+  copy now lean on existing scout-report progression and avoid premature Boss /
+  reward / unlock spoilers. Temple static fixture lore copy is also softened.
+- Owner manual hand test confirmed the progression flow works through Ash Ravine
+  first clear, scout turn-in, Ash Boss, supply-line upgrade, Cinder Depths
+  unlock, Cinder scout / Boss path, and Temple / Church handoff.
+- Known MVP observation: Ash Ravine and Cinder Seal Depths currently share some
+  fire-demo materials, so a later scout turn-in can be ready immediately. Treat
+  this as existing CLI MVP content/data reuse, not as presentation-cleanup drift.
 - Storage Deposit & Withdraw Live MVP is complete in the current package: Town Hub can route to the Storage live screen, `storage_screen_model(state)` renders live storage state, `unlock_storage` can unlock the storage through Python runtime state, and `deposit_item` / `withdraw_item` allow transferring items.
 - The validated path is: low Gold blocks unlock, sufficient Gold deducts the existing runtime storage unlock cost, sets `state["storage_unlocked"] = True`, and returns an updated Storage ScreenModel showing inventory, storage status, storage contents, and capacity.
 - `deposit_item` and `withdraw_item` successfully transfer items between player inventory and storage while enforcing capacity limits.
@@ -124,10 +131,11 @@ reopened through a read-only planning gate and owner-approved exact scope.
 
 No next implementation is pre-approved.
 
-The immediate Glen UX cleanup is complete. Remaining Boss / Act 2 observations
-are coverage-oriented only: later Ash Ravine / fire-shard prompt wording may need
-review, but this does not approve Ash Guardian, Cinder Seal Sentinel, generic
-Boss handling, full story hints, or full Act 2 cleanup.
+The Glen UX cleanup and the narrow Ash / Cinder GUI presentation cleanup are
+complete in the current package. Remaining Boss / Act 2 observations are
+coverage-oriented only; this does not approve Ash Guardian, Cinder Seal
+Sentinel, generic Boss handling, full story hints, Temple / Relic gameplay, or
+full Act 2 cleanup beyond the existing bridge presentation work.
 
 Broader synthesis coverage remains a possible future read-only gate, such as
 deciding whether to iterate more existing Mira recipe ids. It is not approved
@@ -199,6 +207,13 @@ Latest stable verification noted here:
   `python 06_tools/smoke_test_progression_bridge.py` PASS,
   `python element_maze.py --smoke-test` PASS, and
   `python 06_tools/validate_data.py` PASS.
+- Ash / Cinder presentation cleanup owner manual hand test: Ash Ravine first
+  clear shows a non-Boss terminal state, Guild scout turn-in updates guidance,
+  Ash Boss opens and can be defeated, supply-line guidance appears, supply-line
+  turn-in unlocks Cinder Depths, Cinder scout / Boss path completes, and the flow
+  reaches the Temple / Church handoff. Existing shared fire-demo materials can
+  make the next scout turn-in ready immediately; this is a known CLI MVP content
+  reuse observation.
 
 For future docs-only cleanup, use markdown diff/status checks. Runtime smoke is
 not required unless runtime files change.
