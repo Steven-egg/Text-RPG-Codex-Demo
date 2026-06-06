@@ -79,22 +79,23 @@ existing runtime-authoritative adapter / ScreenModel pattern where appropriate.
 | Guild Quest Turn-in for Synthesis Unlock | `017fa43 [antig] feat(gui): add guild quest synthesis unlock bridge` | Guild live mode shows unlocked existing `QUESTS`; `submit_quest` completes ready turn-ins through existing runtime validation, reward, and unlock behavior. `quest_cave_gathering` unlocks `shop_synthesis_01`. | Full guild / quest framework, new quest data, story inquiry expansion, save/schema/combat changes, full synthesis, generic recipe bridge. |
 | Guild x Dungeon Boss Glen Gating | `9ae502b [antig] fix(gui): repair Boss Glen progression bridge` | Special Scorched Mine Boss Glen gate: 18/18 clue sets `boss_glen_sighted`, Guild `accept_boss_glen_investigation` sets `boss_glen_investigation_accepted`, `challenge_boss` opens after acceptance, and `quest_boss_glen` / Blood Map turn-in unlocks Ash Ravine through existing runtime progression. | Full quest framework, story hint framework, generic boss framework, full Act 2 cleanup, data/schema/save/combat changes. |
 | Glen Boss flow UX cleanup | `709dc6c [antig] fix(gui): improve dungeon event scrolling and guild story progression hints` | Persistent Guild story hint review cards across Glen / Act 2 guidance states, Blood Map reward key mapping, HP/MP-only dungeon resource strip, semantic dungeon metrics, scrollable auto-bottom event preview, dynamic 3-column action-bar layout, and boss victory exploration events. | Full quest / story / dungeon / storage / workshop frameworks. |
-| Ash / Cinder presentation cleanup | current package | Existing Ash Ravine and Cinder Seal Depths progression remains runtime-owned; Guild story hints and Dungeon Exploration boss / narrative labels avoid premature Boss, reward, and follow-on unlock spoilers before the relevant scout reports. Temple static fixture lore copy is softened. | Generic boss / story / dungeon framework, Act 2 cleanup, Temple / Relic gameplay, data/schema/save/combat changes. |
+| Ash / Cinder presentation cleanup | `3190ac0 [codex] fix(gui): soften Ash and Cinder progression hints` | Existing Ash Ravine and Cinder Seal Depths progression remains runtime-owned; Guild story hints and Dungeon Exploration boss / narrative labels avoid premature Boss, reward, and follow-on unlock spoilers before the relevant scout reports. Temple static fixture lore copy is softened. | Generic boss / story / dungeon framework, Act 2 cleanup, Temple / Relic gameplay, data/schema/save/combat changes. |
 | Combat Skill Button | `4acd04d [antig] feat(gui): add combat skill button live bridge` | `use_skill` routing from existing `learned_skills` and `SKILLS`. | Formal skill framework, target selection, rebalance. |
-| Shop Travel Inventory Coverage | current uncommitted package, based on `ebc1b5e` | Data-driven ScreenModel and quantity-one purchase coverage for all nine existing `SHOP_INVENTORY["travel"]` entries. Accessories go to the backpack without auto-equip. | Sell, quantity selector, generic inventory / equipment management, new shop data. |
-| Magic Shop Data-Driven Coverage | current uncommitted package, based on `b59fe43` | ScreenModel iterates all existing `MAGIC_BOOKS`; `learn_magic_book` remains server-validated, and debuff books follow the CLI special-magic category. | New magic books / skills, full magic framework, target selection, combat rebalance. |
-| Workshop Buy Weapon & Armor | current package | Buy existing weapon & armor; do not auto-equip. | Accessory purchase, sell, quantity selector, full workshop framework. |
-| Workshop Equip & Limited Upgrade | current package | Equip weapons and owned non-weapon equipment; upgrade whitelisted recipes (`recipe_iron_sword_plus_1`, `recipe_leather_armor_plus_1`). | Generic equipment management (unequip, comparison), non-whitelisted recipes. |
-| Storage Deposit & Withdraw | current package | Town Hub routes to Storage live screen; `storage_screen_model(state)` renders live inventory / storage status / storage contents / capacity; `unlock_storage` checks cost & unlocks; `deposit_item` & `withdraw_item` allow transferring items. | Storage capacity upgrade, full storage system, generic inventory / equipment management, schema/save/combat changes. |
+| Shop Travel Inventory Coverage | `eed7b4b [antig] feat(gui): complete Phase B bridge coverage` | Data-driven ScreenModel and quantity-one purchase coverage for all nine existing `SHOP_INVENTORY["travel"]` entries. Accessories go to the backpack without auto-equip. | Shop sell, generic quantity selector, generic inventory / equipment management, new shop data. |
+| Magic Shop Data-Driven Coverage | `eed7b4b [antig] feat(gui): complete Phase B bridge coverage` | ScreenModel iterates all existing `MAGIC_BOOKS`; `learn_magic_book` remains server-validated, and debuff books follow the CLI special-magic category. | New magic books / skills, full magic framework, target selection, combat rebalance. |
+| Workshop Buy Weapon & Armor | `44f435b [antig] feat(gui): expand storage and workshop live bridge` | Buy existing weapon & armor; do not auto-equip. | Accessory purchase, sell, quantity selector, full workshop framework. |
+| Workshop Equip & Limited Upgrade | `44f435b [antig] feat(gui): expand storage and workshop live bridge` | Equip weapons and owned non-weapon equipment; upgrade whitelisted recipes (`recipe_iron_sword_plus_1`, `recipe_leather_armor_plus_1`). | Generic equipment management (unequip, comparison), non-whitelisted recipes. |
+| Storage Deposit & Withdraw | `44f435b [antig] feat(gui): expand storage and workshop live bridge` | Town Hub routes to Storage live screen; `storage_screen_model(state)` renders live inventory / storage status / storage contents / capacity; `unlock_storage` checks cost & unlocks; `deposit_item` & `withdraw_item` allow transferring items. | Storage capacity upgrade, full storage system, generic inventory / equipment management, schema/save/combat changes. |
 | Town Hub Mira Entry Unlock | `b046b1e [antig] feat(gui): add Mira synthesis entry unlock bridge` | Town Hub synthesis facility node reflects `is_unlocked(state, "shop_synthesis_01")`; locked state points to Guild task `洞窟採集`; unlocked state routes to the existing static synthesis screen. | Full synthesis, recipe bridge, `synthesis_screen_model()`, live loader, `craft_recipe`, recipe / quest / dungeon / schema / save / combat changes. |
-| Synthesis Existing Mira Recipe Coverage | current uncommitted package, based on `5dbc742` | `synthesis_screen` covers the four existing Mira recipes and dispatches `craft_recipe`, reusing `game.recipe_available(...)` and `game.craft_recipe_message(...)`, including the existing warm-stone base-item recipe. | Arbitrary recipes, new recipe data, generic crafting framework, recipe / quest / dungeon / schema / save / combat changes. |
-| Fire-Mark Guild Inquiry Closure | current uncommitted package | Guild story hint dispatches `fire_mark_guild_inquiry` through existing CLI prerequisite and mutation helpers; three shards remain held, and Temple church bridge prerequisites arise naturally. | Generic story inquiry framework, new story data, formal fire-mark / relic gameplay. |
-| Temple / Church lookup bridge | current package | Live-mode loading, promotion requirement preview, moon well pray, fire-mark church bridge and lookup inquiry actions using Python runtime helpers. | Formal class transfer, class specialization gameplay, manual save.json edits. |
-| Relic Preview live opening | current package | Altar screen live-mode loading, previewing registered relics (e.g., ash charm) and requirements, attune action placeholder. | Formal relic effects, equipping/obtaining relics, manual save.json edits. |
+| Synthesis Existing Mira Recipe Coverage | `eed7b4b [antig] feat(gui): complete Phase B bridge coverage` | `synthesis_screen` covers the four existing Mira recipes and dispatches `craft_recipe`, reusing `game.recipe_available(...)` and `game.craft_recipe_message(...)`, including the existing warm-stone base-item recipe. | Arbitrary recipes, new recipe data, generic crafting framework, recipe / quest / dungeon / schema / save / combat changes. |
+| Fire-Mark Guild Inquiry Closure | `eed7b4b [antig] feat(gui): complete Phase B bridge coverage` | Guild story hint dispatches `fire_mark_guild_inquiry` through existing CLI prerequisite and mutation helpers; three shards remain held, and Temple church bridge prerequisites arise naturally. | Generic story inquiry framework, new story data, formal fire-mark / relic gameplay. |
+| Guild Material Sell | `2ecca91 [antig] feat(gui): add Guild material sell bridge and fix Shop layout` | Guild task / sell modes, owned registered material rows, quantity selection, confirmation, and `sell_guild_material` through Python validation and existing CLI buyback prices. | Shop sell, equipment sell, key/story-item sell, generic sell, economy rebalance. |
+| Temple / Church lookup bridge | `7080b56 [antig] feat(gui): add Temple and Relic live bridge closure` | Live-mode loading, promotion requirement preview, moon well pray, fire-mark church bridge and lookup inquiry actions using Python runtime helpers. | Formal class transfer, class specialization gameplay, manual save.json edits. |
+| Relic Preview live opening | `7080b56 [antig] feat(gui): add Temple and Relic live bridge closure` | Altar screen live-mode loading, previewing registered relics (e.g., ash charm) and requirements, attune action placeholder. | Formal relic effects, equipping/obtaining relics, manual save.json edits. |
 
 
 Latest committed bridge baseline:
-`7080b56 [antig] feat(gui): add Temple and Relic live bridge closure`.
+`2ecca91 [antig] feat(gui): add Guild material sell bridge and fix Shop layout`.
 
 ## 3.2 Reusable Bridge Pattern Audit
 
@@ -116,11 +117,11 @@ Read-only audit, updated 2026-06-06:
 
 | System | Current reusable state | Hardcoded risk | Coverage direction |
 |---|---|---|---|
-| Shop / travel shop | `buy_item` and the live ScreenModel cover all existing `SHOP_INVENTORY["travel"]` entries through runtime availability, price, job, and owned-count behavior. | Low. Existing travel data is covered; sell and quantity selection remain separate behavior. | Treat new travel-shop entries as existing-data coverage checks. Guild material sell remains a separate Guild slice. |
+| Shop / travel shop | `buy_item` and the live ScreenModel cover all existing `SHOP_INVENTORY["travel"]` entries through runtime availability, price, job, and owned-count behavior. | Low. Existing travel data is covered; Shop sell and generic quantity selection remain separate behavior. | Treat new travel-shop entries as existing-data coverage checks. |
 | Workshop | Weapon & armor buy reads `SHOP_INVENTORY`; `equip_equipment` and `equip_weapon` reuse `game.equip_item(...)`; upgrades support whitelisted recipes. | Low to medium. Weapon, armor, and whitelisted upgrades are reusable; comparison, unequip, and non-whitelisted upgrades remain closed. | Add more recipe ids as coverage. Generic equipment management (unequip, comparison) needs its own planning gate. |
 | Magic shop | `learn_magic_book` validates `MAGIC_BOOKS`, `SKILLS`, job, level, gold, materials, and learned state server-side; ScreenModel iterates existing `MAGIC_BOOKS` and aligns categories with CLI behavior. | Low. Existing magic-book data is covered. | Treat new existing-data books as coverage checks; new skills or rules still require their own gate. |
 | World map / dungeon / exploration / combat | World Map iterates `DUNGEONS` and runtime unlocks; `confirm_travel`, `advance_step`, combat, retreat, route clear, item rows, and skill rows are shared flow pieces. | Medium. Multiple dungeons can route through the bridge, but complete dungeon events, boss framework, and combat formula changes remain closed. | Treat existing dungeons as coverage follow-up unless the task opens boss / special event behavior. |
-| Guild | Current GUI bridge includes dungeon clear reports, existing `QUESTS` turn-ins, Boss Glen investigation, and the existing fire-mark Guild inquiry that naturally opens the Temple prerequisite. | Medium. Existing mainline Guild mutations are covered, but material sell and broad Guild frameworks remain closed. | The smallest next CLI-parity slice is existing Guild material sell after a read-only gate. |
+| Guild | Current GUI bridge includes dungeon clear reports, existing `QUESTS` turn-ins, Boss Glen investigation, fire-mark inquiry, and material sell through existing `GUILD_MATERIAL_BUY_PRICES`. | Low to medium. Existing CLI Guild behaviors are covered; broad Guild, reputation, achievement, and generic sell frameworks remain closed. | Treat new registered Guild buyback materials as existing-data coverage checks; new Guild behavior needs its own gate. |
 | Synthesis / crafting | Town Hub entry unlock and the existing `craft_recipe` adapter now cover the four existing Mira recipes through runtime helpers, including the warm-stone base-item recipe. | Medium for arbitrary crafting. Existing Mira data is covered; generic recipe iteration and new recipes remain closed. | Treat new Mira data as a coverage check; arbitrary recipes or crafting frameworks require their own gate. |
 | Storage | Opens Town Hub routing, live Storage ScreenModel, `unlock_storage`, `deposit_item`, and `withdraw_item` against existing runtime storage state. Capacity upgrades remain disabled. | Low to medium. Storage unlock, view, and deposit / withdraw transfer are now bridged; capacity upgrade behavior remains closed. | Treat capacity upgrade as a separate read-only gate. Do not let deposit / withdraw imply generic inventory or slot management. |
 | Inventory / backpack / equipment | World Map utility preview reads runtime inventory plus currently equipped equipment. Workshop can equip weapons and owned non-weapon equipment through approved bridge actions. | Medium. Display is reusable; equipment mutation remains workshop-scoped and does not include unequip / comparison / generic management. | More item display is coverage; generic unequip / comparison / slot management requires its own gate. |
@@ -128,8 +129,8 @@ Read-only audit, updated 2026-06-06:
 
 Explicit exceptions that are not yet fully bridged system families:
 
-- Guild material sell and Guild features beyond existing clear reports,
-  `QUESTS` turn-ins, Boss Glen investigation, and fire-mark inquiry coverage.
+- Guild features beyond existing clear reports, `QUESTS` turn-ins, Boss Glen
+  investigation, fire-mark inquiry, and registered material-buyback coverage.
 - Generic boss / story-hint progression beyond the narrow Boss Glen special
   gating bridge.
 - Full Act 2 progression cleanup beyond Ash Ravine / fire-demo content naturally
@@ -138,14 +139,10 @@ Explicit exceptions that are not yet fully bridged system families:
 - Complete storage beyond deposit/withdraw, including capacity upgrade behavior.
 - Generic equipment management beyond approved workshop equip actions.
 
-Phase B facility coverage is complete in the current uncommitted package:
-existing Mira recipes, travel-shop inventory, `MAGIC_BOOKS`, and current
-Workshop upgrade coverage are represented through runtime-authoritative
-ScreenModels and UIActions.
-
-The smallest next CLI-parity candidate is:
-
-1. Guild material sell.
+Basic facility CLI-parity bridge coverage is complete: existing Mira recipes,
+travel-shop inventory, `MAGIC_BOOKS`, current Workshop upgrade coverage,
+Storage transfers, Temple / Relic previews, and existing Guild material buyback
+are represented through runtime-authoritative ScreenModels and UIActions.
 
 Remaining Phase C convenience work is deferred:
 
@@ -163,8 +160,8 @@ Town Hub Mira and Synthesis result after this audit:
   `b046b1e [antig] feat(gui): add Mira synthesis entry unlock bridge`.
 - Scope is only the Town Hub synthesis facility node reflecting
   `is_unlocked(state, "shop_synthesis_01")` as locked / unlocked.
-- The current uncommitted package extends `5dbc742` to the four existing Mira
-  recipes on `synthesis_screen`.
+- `eed7b4b` extends `5dbc742` to the four existing Mira recipes on
+  `synthesis_screen`.
 - Python runtime remains gameplay authority through `game.recipe_available(...)`
   and `game.craft_recipe_message(...)`.
 - This coverage does not add or modify recipes, quests, dungeons, schema, save
@@ -172,7 +169,7 @@ Town Hub Mira and Synthesis result after this audit:
 
 Status note, 2026-06-06:
 
-- The current uncommitted package completes Phase B facility coverage:
+- `eed7b4b` completes Phase B facility coverage:
   Synthesis covers the four existing Mira recipes, Shop covers all nine existing
   travel inventory entries, and Magic Shop iterates all existing `MAGIC_BOOKS`
   with CLI-aligned categories.
@@ -186,9 +183,30 @@ Status note, 2026-06-06:
   `smoke_test_synthesis_bridge.py`, `smoke_test_progression_bridge.py`,
   `validate_data.py`, `element_maze.py --smoke-test`, and JavaScript syntax
   checks for Guild, Shop, and Magic Shop.
-- This status does not approve Guild material sell, generic sell, quantity
-  selection, generic inventory / equipment management, new data, schema/save
-  changes, combat formula changes, or manual `save.json` work.
+- This status does not approve Shop sell, equipment sell, generic sell, generic
+  quantity selection, generic inventory / equipment management, new data,
+  schema/save changes, combat formula changes, or manual `save.json` work.
+
+Status note, 2026-06-06:
+
+- `2ecca91` adds the existing CLI Guild material-buyback bridge. Guild live mode
+  provides task / sell modes, lists only owned entries registered in
+  `GUILD_MATERIAL_BUY_PRICES`, and dispatches `sell_guild_material`.
+- Python validates registered item id, positive integer quantity, owned quantity,
+  and confirmation before removing materials and adding the existing buyback
+  total to Gold. JavaScript renders the returned ScreenModel and dispatches the
+  selected quantity / confirmation only.
+- The same commit restores Guild task-list scrolling and removes the unused Shop
+  live `resource_strip` that caused extra top spacing.
+- Codex recheck passed:
+  `smoke_test_guild_material_sell_bridge.py`,
+  `smoke_test_guild_quest_bridge.py`, `smoke_test_progression_bridge.py`,
+  `smoke_test_fire_mark_guild_bridge.py`, `smoke_test_shop_bridge.py`,
+  `validate_data.py`, `element_maze.py --smoke-test`, and Guild JavaScript
+  syntax check.
+- This does not approve Shop sell, equipment sell, key/story-item sell, generic
+  sell, economy rebalance, generic inventory / equipment management, data/schema
+  changes, save migration, combat formula changes, or manual `save.json` work.
 
 ## 4. Bridge Shape
 

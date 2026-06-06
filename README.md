@@ -9,9 +9,9 @@ screen-level verification, and historical MVP notes live in Task Zone files.
 Git baseline:
 
 - Latest committed bridge baseline:
-  `7080b56 [antig] feat(gui): add Temple and Relic live bridge closure`
-- Current uncommitted bridge package completes Phase B facility coverage and the
-  fire-mark Guild inquiry closure. See `git status --short` before editing.
+  `2ecca91 [antig] feat(gui): add Guild material sell bridge and fix Shop layout`
+- Basic facility CLI-parity bridge coverage is complete through the existing
+  Guild material-buyback behavior. See `git status --short` before editing.
 
 Project posture:
 
@@ -53,7 +53,7 @@ Blessed local live bridge coverage:
 | Inn | `rest_at_inn` deducts 30G and restores HP/MP through Python runtime behavior. |
 | World Map | Runtime-backed location / route ScreenModel; main menu keeps `save_game` and shell-only `open_settings`; town return is via town node / detail action. |
 | Dungeon / Combat | Approved traversal and combat loop slice, victory / retreat / defeat routing, route clear / resolved state, and Combat Skill Button MVP. |
-| Guild | Narrow clear report registration, existing `QUESTS` turn-in bridge, Boss Glen investigation, and the existing three-shard fire-mark inquiry that routes naturally into Temple. Guild material sell remains closed. |
+| Guild | Clear report registration, existing `QUESTS` turn-ins, Boss Glen investigation, three-shard fire-mark inquiry, and existing `GUILD_MATERIAL_BUY_PRICES` material sell coverage with Python-side quantity / eligibility / transaction validation. |
 | Guild x Dungeon Boss Glen | Special gating bridge plus UX cleanup: Scorched Mine 18/18 records `boss_glen_sighted`, Guild accepts `boss_glen_investigation_accepted`, Boss Glen challenge opens only after investigation acceptance, persistent Guild story hint cards guide Glen / Act 2 steps, and `quest_boss_glen` / Blood Map turn-in unlocks Ash Ravine through existing runtime progression. |
 | Ash / Cinder presentation cleanup | Ash Ravine and Cinder Seal Depths use existing runtime progression while GUI copy avoids premature Boss / reward / unlock spoilers before the matching scout reports; owner hand test confirmed the progression flow reaches the Temple / Church handoff. |
 | Shop | Data-driven coverage for all nine existing `SHOP_INVENTORY["travel"]` entries; purchases remain quantity-one, and accessories go to the backpack without auto-equip. |
@@ -138,9 +138,9 @@ package:
   the prerequisite flag.
 - This does not open a full guild / quest framework, new quest data, schema
   changes, save migration, combat formula changes, generic story inquiries, or
-  Guild material sell.
+  generic sell beyond the existing Guild material-buyback behavior.
 
-Phase B facility coverage is complete in the current uncommitted package:
+Phase B facility coverage landed in `eed7b4b`:
 
 - `synthesis_screen` live mode loads a runtime-shaped ScreenModel and dispatches
   `craft_recipe` for the four existing Mira recipes:
@@ -150,9 +150,22 @@ Phase B facility coverage is complete in the current uncommitted package:
   and `game.craft_recipe_message(...)`.
 - Shop iterates the existing travel inventory, and Magic Shop iterates existing
   `MAGIC_BOOKS`; neither adds new data or a generic facility framework.
-- This does not open arbitrary recipes, new items or magic books, sell, quantity
-  selection, generic inventory / equipment management, schema changes, save
-  changes, combat formula changes, or crafting system refactors.
+- This does not open arbitrary recipes, new items or magic books, Shop sell,
+  equipment sell, generic quantity selectors, generic inventory / equipment
+  management, schema changes, save changes, combat formula changes, or crafting
+  system refactors.
+
+Guild Material Sell bridge landed in `2ecca91`:
+
+- Guild live mode provides task / material-sell modes and lists only owned
+  materials registered in the existing CLI `GUILD_MATERIAL_BUY_PRICES`.
+- `sell_guild_material` validates item eligibility, positive integer quantity,
+  owned quantity, and confirmation in Python before removing materials and
+  adding the existing buyback total to Gold.
+- The Guild ScreenModel refreshes material rows and resources after each sale.
+  Shop live layout spacing and Guild task-list scrolling were also corrected.
+- This does not open Shop sell, equipment sell, key/story-item sell, generic
+  sell, economy rebalance, or generic inventory / equipment management.
 
 Temple and Relic Altar Live MVP is included in the current package:
 
@@ -275,12 +288,9 @@ do not imply gameplay validation.
 
 ## Next-Step Boundary
 
-The next implementation target is not pre-approved. Phase B facility coverage
-is complete in the current uncommitted package.
-
-The smallest next CLI-parity candidate is:
-
-1. Guild material sell.
+The next implementation target is not pre-approved. Basic facility CLI-parity
+bridge coverage is complete through the existing Guild material-buyback
+behavior.
 
 Remaining Phase C convenience candidates are deferred:
 

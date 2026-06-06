@@ -201,10 +201,17 @@ http://127.0.0.1:8766/
 
 Current behavior:
 
-- Loads static fixtures only.
-- Renders Guild title/subtitle, receptionist area, task filters, task list, story hint card, task detail, reward summary, condition rows, feedback bar, primary action, back action, and UIAction log.
+- Loads static fixtures by default and supports the approved local live bridge mode.
+- Renders Guild title/subtitle, receptionist area, resource strip, task /
+  material-sell mode tabs, task filters, task list, story hint card, sellable
+  material list, task or material detail, reward / expected-Gold summary,
+  conditions / confirmation, feedback bar, primary action, back action, and
+  UIAction log.
 - Task filters are UI-only: `all`, `ready_to_submit`, `completed`.
 - Selecting a task renders its detail, reward, conditions, feedback, and primary action state.
+- Material-sell mode lists existing owned Guild-buyback materials, supports
+  quantity controls and explicit confirmation, and dispatches
+  `sell_guild_material` in live mode.
 - Ready tasks dispatch `submit_quest`.
 - Missing or completed tasks block the primary action and show/log the unavailable reason.
 - Story hint dispatches `open_story_hint`.
@@ -225,10 +232,10 @@ Accepted Guild decisions:
 
 Deferred Guild items:
 
-- Runtime adapter.
-- Real task data adapter.
 - Real image or formal NPC asset.
 - Final keyboard navigation graph.
+- Guild features beyond the existing report, quest turn-in, Boss Glen,
+  fire-mark inquiry, and material-buyback bridge coverage.
 
 ## Synthesis Screen Prototype
 
@@ -306,9 +313,11 @@ Accepted Shop decisions:
 
 Deferred Shop items:
 
-- Runtime adapter for shop inventory, gold, stock, or purchase mutation.
-- Presentation alignment follow-up across CLI / Shop static prototype / Shop live shell: shopkeeper naming / copy may differ, and Shop live may inherit a Town Hub-like summary/status block that creates extra top whitespace and pushes facility content downward. Treat as naming / copy / layout / ScreenModel presentation polish only, not gameplay blocker or Shop redesign scope.
-- Batch buying, selling, final shop economy tuning, item icons, NPC art, or formal asset pipeline.
+- Shop sell, generic quantity selection, economy tuning, or broader Shop runtime
+  behavior beyond the landed travel-inventory purchase coverage.
+- Shop live extra top spacing from the unused `resource_strip` was corrected in
+  `2ecca91`. Shopkeeper naming / copy alignment remains presentation polish only.
+- Batch buying, final shop economy tuning, item icons, NPC art, or formal asset pipeline.
 - Final keyboard focus graph.
 
 ## Workshop Screen Prototype
@@ -620,6 +629,10 @@ Validated during this session:
 - Guild ready tasks dispatch `submit_quest`.
 - Guild unavailable states block primary action with a reason.
 - Guild right-side receptionist layout and 55/45 detail split were accepted by the user.
+- Guild material-sell mode landed in `2ecca91`: task / sell tabs, registered
+  material rows, quantity controls, expected Gold, explicit confirmation, live
+  `sell_guild_material` dispatch, and refreshed ScreenModel rendering.
+- Guild task-list internal scrolling was restored in `2ecca91`.
 - Town Hub `open_facility {"facility_id":"guild"}` logs before navigating to Guild Screen.
 - Guild `back_to_town_hub` logs before navigating to Town Hub.
 - World Map renders 9 location nodes from static fixtures.
@@ -730,17 +743,20 @@ Validated during this session:
 Recommended next session entry:
 
 ```text
-Treat Synthesis, Shop, and Workshop static prototype v1 as landed. Treat Workshop Buy Weapon Live MVP as landed in commit `2d99d7e` and Workshop Weapon Equip Live MVP as landed in commit `6abe303`. Start the next session with read-only Hot Zone catch-up, then ask the user to select one small convergence target before implementation.
+Treat the current static prototypes and basic facility CLI-parity bridge coverage as landed through `2ecca91`. Start the next session with read-only Hot Zone catch-up, then ask the user to select one small convergence target before implementation.
 ```
 
 Scope suggestion:
 
-- Keep all prototypes static.
-- Do not connect runtime.
+- Keep static fixture fallback intact while respecting already-landed approved
+  live bridge slices.
 - Do not use mockup/reference images as runtime assets.
 - Keep UIAction logging before navigation.
-- Preserve Start Screen, Town Hub, Guild, Synthesis, World Map, Dungeon Exploration, Combat, Shop, and Workshop static fixture fallback. Workshop has an approved live weapon-purchase adapter only; do not infer armor, upgrade, equip-management, or broader inventory runtime work from it.
-- Do not add gameplay logic, new combat formulas, runtime adapters, or save reads/writes.
+- Preserve static fixture fallback across the existing prototype screens. Do not
+  infer generic sell, inventory / equipment management, storage capacity
+  upgrade, settings, or broader runtime work from landed bridge coverage.
+- Do not add gameplay logic, new combat formulas, new runtime adapters, or save
+  reads/writes without a new approved exact scope.
 
 Alternative next steps:
 

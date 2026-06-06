@@ -9,9 +9,9 @@ what the next boundary is. Detailed MVP verification belongs in Task Zone docs.
 - Work directory: `C:\Users\user\OneDrive\文字冒險遊戲`
 - Current branch expectation: `main` aligned with `origin/main`.
 - Latest committed bridge baseline:
-  `7080b56 [antig] feat(gui): add Temple and Relic live bridge closure`
-- Current working tree contains an uncommitted, verified package for Phase B
-  facility coverage plus the fire-mark Guild inquiry closure.
+  `2ecca91 [antig] feat(gui): add Guild material sell bridge and fix Shop layout`
+- Basic facility CLI-parity bridge coverage is complete through the existing
+  Guild material-buyback behavior.
 
 Project state:
 
@@ -28,7 +28,7 @@ Project state:
 
 Current newest GUI live state:
 
-- Phase B facility coverage is complete in the current uncommitted package:
+- Phase B facility coverage landed in `eed7b4b`:
   Synthesis supports the four existing Mira recipes; Shop iterates all nine
   existing travel-shop entries; Magic Shop iterates all existing `MAGIC_BOOKS`
   and aligns debuff books with the CLI special-magic category.
@@ -39,6 +39,12 @@ Current newest GUI live state:
   `fire_mark_guild_inquiry` reuses the CLI prerequisite and mutation helpers,
   keeps all three shards, sets `fire_mark_guild_inquiry_done`, and lets the
   Temple bridge appear naturally without manually setting the flag.
+- Guild material sell landed in `2ecca91`: Guild live mode provides task /
+  material-sell modes, lists only owned entries registered in
+  `GUILD_MATERIAL_BUY_PRICES`, and dispatches `sell_guild_material`. Python
+  validates eligibility, positive integer quantity, owned quantity, and
+  confirmation before removing materials and adding the existing buyback total
+  to Gold. This does not open Shop sell, equipment sell, or generic sell.
 - Scorched Mine Boss Glen Progression Deadlock Fix is complete:
   Scorched Mine 18/18 sets `boss_glen_sighted`; Guild can accept
   the investigation through `accept_boss_glen_investigation`, setting
@@ -132,8 +138,8 @@ slice. It is not a permanent ban or demo freeze. Future extension points may be
 reopened through a read-only planning gate and owner-approved exact scope.
 
 - Full inventory / equipment management.
-- Sell, generic unequip, comparison, non-whitelisted upgrade expansion, or
-  generic workshop framework.
+- Shop sell, equipment sell, generic sell, generic unequip, comparison,
+  non-whitelisted upgrade expansion, or generic workshop framework.
 - Full shop, magic shop, storage capacity upgrade, synthesis, guild,
   quest, boss, dungeon, magic, skill, target-selection, or facility framework.
 - New quest data, schema changes, broad quest framework changes, or story inquiry
@@ -145,18 +151,14 @@ reopened through a read-only planning gate and owner-approved exact scope.
 
 ## Next-Step Boundary
 
-No next implementation is pre-approved. Phase B facility coverage and the
-fire-mark Guild inquiry closure are complete in the current uncommitted package.
+No next implementation is pre-approved. Basic facility CLI-parity bridge
+coverage is complete through the existing Guild material-buyback behavior.
 
 The Glen UX cleanup and the narrow Ash / Cinder GUI presentation cleanup are
 complete in the current package. Remaining Boss / Act 2 observations are
 coverage-oriented only; this does not approve Ash Guardian, Cinder Seal
 Sentinel, generic Boss handling, full story hints, Temple / Relic gameplay, or
 full Act 2 cleanup beyond the existing bridge presentation work.
-
-The smallest next CLI-parity candidate is:
-
-1. Guild material sell.
 
 Remaining Phase C convenience candidates are deferred:
 
@@ -165,16 +167,11 @@ Remaining Phase C convenience candidates are deferred:
 3. Bestiary detail / filtering.
 4. Settings panel.
 
-Guild material sell must begin with a read-only planning gate and remain limited
-to the existing CLI material-buyback behavior. It must not open generic sell,
-shop sell, equipment sell, economy rebalance, data/schema/save changes, or manual
-`save.json` work.
-
 Any Phase C convenience follow-up must start with a later read-only gate and
 explicit owner approval. Do not open storage capacity upgrades, generic
-inventory / equipment management, settings, sell systems, bestiary detail
-framework, schema changes, save migration, combat formula changes, or manual
-`save.json` work from the current Phase B planning notes.
+inventory / equipment management, settings, Shop or equipment sell, generic
+sell, bestiary detail framework, schema changes, save migration, combat formula
+changes, or manual `save.json` work from the current bridge coverage.
 
 For docs-only sync, restrict changes to explicitly approved markdown surfaces and
 do not touch runtime, JavaScript, data, schema, save, or combat formula.
@@ -183,6 +180,12 @@ do not touch runtime, JavaScript, data, schema, save, or combat formula.
 
 Latest stable verification noted here:
 
+- Guild material sell bridge Codex recheck after `2ecca91`:
+  `smoke_test_guild_material_sell_bridge.py`,
+  `smoke_test_guild_quest_bridge.py`, `smoke_test_progression_bridge.py`,
+  `smoke_test_fire_mark_guild_bridge.py`, `smoke_test_shop_bridge.py`,
+  `validate_data.py`, `element_maze.py --smoke-test`, and Guild JavaScript
+  syntax check all PASS.
 - Current Phase B + fire-mark inquiry package Codex recheck:
   `smoke_test_fire_mark_guild_bridge.py`, `smoke_test_temple_bridge.py`,
   `smoke_test_shop_bridge.py`, `smoke_test_magic_shop_bridge.py`,
