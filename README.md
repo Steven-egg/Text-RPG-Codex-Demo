@@ -8,10 +8,19 @@ screen-level verification, and historical MVP notes live in Task Zone files.
 
 Git baseline:
 
+- Latest stable checkpoint:
+  `7c23bad [antig] fix(gui): restore guild screen model extraction parity`
 - Latest committed bridge baseline:
   `2ecca91 [antig] feat(gui): add Guild material sell bridge and fix Shop layout`
 - Basic facility CLI-parity bridge coverage is complete through the existing
   Guild material-buyback behavior. See `git status --short` before editing.
+
+Maintainability Checkpoint:
+- Shared `resource_strip` has been moved to `gui_presentation.py`.
+- The following facility ScreenModels have been extracted from `gui_actions.py`:
+  - Shop, Magic Shop, Workshop, Storage, Synthesis, Temple, Relic Preview, Guild.
+- Action dispatching, validation, and mutation are retained in `gui_actions.py`.
+- Exploration/Combat, World Map/Town Hub, and Inn are temporarily not subject to further micro-extraction to avoid complexity.
 
 Project posture:
 
@@ -287,6 +296,13 @@ do not imply gameplay validation.
 - Do not let README, handoff, schema, and runtime data drift out of sync.
 
 ## Next-Step Boundary
+
+- God File / Maintainability Checkpoint is sufficiently converged.
+- Endless ScreenModel micro-extraction is not recommended.
+- The next recommended phase is GUI Layout Normalization V0.5.
+- The first recommended bounded candidate is: Shop + Magic Shop facility-family layout normalization.
+- This candidate has NOT been granted implementation approval by this docs sync.
+- Phase C convenience candidates, runtime/data/schema/save/combat remain deferred.
 
 The next implementation target is not pre-approved. Basic facility CLI-parity
 bridge coverage is complete through the existing Guild material-buyback
