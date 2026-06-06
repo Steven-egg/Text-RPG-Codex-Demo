@@ -14,6 +14,7 @@ from .gui_shop_model import shop_screen_model
 from .gui_magic_shop_model import magic_shop_screen_model
 from .gui_workshop_model import workshop_screen_model
 from .gui_storage_model import storage_screen_model
+from .gui_presentation import resource_strip
 
 
 JOB_IDS = ["warrior", "mage", "rogue", "cleric"]
@@ -2104,17 +2105,7 @@ def player_model(state: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-def resource_strip(state: dict[str, Any]) -> list[dict[str, str]]:
-    summary = state_summary(state) or {}
-    hp = summary["hp"]
-    mp = summary["mp"]
-    return [
-        {"id": "hero", "label": f"{summary['name']} / {summary['job_label']} Lv{summary['level']}", "tone": "primary"},
-        {"id": "hp", "label": f"HP {hp['current']}/{hp['max']}", "tone": "healthy"},
-        {"id": "mp", "label": f"MP {mp['current']}/{mp['max']}", "tone": "mana"},
-        {"id": "gold", "label": f"{summary['gold']}G", "tone": "gold"},
-        {"id": "guild_points", "label": f"Guild {summary['guild_points']}", "tone": "neutral"},
-    ]
+
 
 
 def world_map_model(state: dict[str, Any]) -> dict[str, Any]:
