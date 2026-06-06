@@ -53,7 +53,7 @@ button {
   min-height: calc(100vh - 32px);
   margin: 16px auto;
   display: grid;
-  grid-template-rows: auto minmax(560px, 1fr) auto minmax(96px, auto);
+  grid-template-rows: auto auto minmax(560px, 1fr) auto minmax(96px, auto);
   gap: 12px;
 }
 
@@ -218,11 +218,20 @@ select:focus-visible {
   min-height: 0;
   padding: 14px;
   display: grid;
-  grid-template-rows: auto auto minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr);
   gap: 12px;
   background:
     linear-gradient(180deg, rgba(183, 131, 77, 0.11), transparent 38%),
     var(--panel);
+}
+
+.tasks-view-container,
+.sell-view-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  height: 100%;
+  gap: 12px;
 }
 
 .filter-row {
@@ -301,6 +310,7 @@ select:focus-visible {
   align-content: start;
   gap: 10px;
   padding-right: 3px;
+  flex: 1;
 }
 
 .task-row {
@@ -606,6 +616,145 @@ select:focus-visible {
 
 .load-error {
   color: var(--danger);
+}
+
+/* Resource Strip Styles */
+.resource-strip {
+  min-height: 0;
+  padding: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.resource-item {
+  min-height: 36px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 8px 12px;
+  display: inline-flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.055);
+  color: var(--paper);
+  font-weight: 800;
+}
+
+.resource-item[data-tone="primary"] {
+  border-color: rgba(242, 201, 93, 0.55);
+  background: rgba(242, 201, 93, 0.13);
+}
+
+.resource-item[data-tone="gold"] {
+  border-color: rgba(208, 168, 76, 0.55);
+  background: rgba(208, 168, 76, 0.13);
+}
+
+.resource-item[data-tone="healthy"] {
+  border-color: rgba(127, 146, 80, 0.55);
+  background: rgba(127, 146, 80, 0.13);
+}
+
+.resource-item[data-tone="mana"] {
+  border-color: rgba(66, 111, 141, 0.55);
+  background: rgba(66, 111, 141, 0.13);
+}
+
+/* Mode Tabs Styles */
+.mode-tabs {
+  display: flex;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 8px;
+  gap: 4px;
+}
+
+.mode-tab-button {
+  flex: 1;
+  padding: 8px 12px;
+  border: none;
+  background: none;
+  color: var(--paper-muted);
+  font-weight: bold;
+  font-size: 0.9rem;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s ease;
+  text-align: center;
+}
+
+.mode-tab-button:hover {
+  color: var(--paper);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.mode-tab-button.is-active {
+  color: var(--gold);
+  border-bottom-color: var(--gold);
+  background: rgba(208, 168, 76, 0.08);
+}
+
+/* Quantity Selector Styles */
+.quantity-selector-container {
+  margin-top: 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.quantity-selector-container label {
+  font-weight: 800;
+  color: var(--paper-muted);
+}
+
+.qty-controls {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.qty-btn {
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--line-strong);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.05);
+  font-weight: bold;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  transition: all 0.2s;
+}
+
+.qty-btn:hover {
+  background: rgba(208, 168, 76, 0.15);
+  border-color: var(--focus);
+}
+
+.qty-btn.max-btn {
+  width: 54px;
+  font-size: 0.8rem;
+}
+
+.qty-controls input {
+  width: 60px;
+  height: 36px;
+  text-align: center;
+  border: 1px solid var(--line-strong);
+  border-radius: 6px;
+  background: var(--ink-soft);
+  color: var(--paper);
+  font-weight: bold;
+  font-size: 1.1rem;
+}
+
+.qty-controls input::-webkit-outer-spin-button,
+.qty-controls input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.qty-controls input[type=number] {
+  -moz-appearance: textfield;
 }
 
 @media (max-width: 1220px) {

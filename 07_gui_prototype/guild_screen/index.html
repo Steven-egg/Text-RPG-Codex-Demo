@@ -23,6 +23,8 @@
         </div>
       </header>
 
+      <section class="resource-strip" id="resource-strip" aria-label="Resource Strip"></section>
+
       <main class="guild-layout">
         <section class="npc-region" aria-label="Guild receptionist">
           <div class="npc-portrait" id="npc-portrait" aria-hidden="true"></div>
@@ -34,27 +36,57 @@
         </section>
 
         <section class="task-board" aria-label="Quest board">
-          <div class="filter-row" id="task-filters"></div>
-          <div class="story-hint-slot" id="story-hint-slot"></div>
-          <div class="task-list" id="task-list"></div>
+          <div class="mode-tabs" id="guild-mode-tabs">
+            <button id="mode-tasks-btn" class="mode-tab-button is-active" type="button">委託任務</button>
+            <button id="mode-sell-btn" class="mode-tab-button" type="button">素材收購</button>
+          </div>
+          <div class="tasks-view-container" id="tasks-view-container">
+            <div class="filter-row" id="task-filters"></div>
+            <div class="story-hint-slot" id="story-hint-slot"></div>
+            <div class="task-list" id="task-list"></div>
+          </div>
+          <div class="sell-view-container" id="sell-view-container" style="display: none;">
+            <div class="task-list material-list" id="material-sell-list"></div>
+          </div>
         </section>
 
         <section class="task-detail-area" aria-live="polite">
-          <div class="detail-card task-detail-card">
-            <p class="panel-label">委託詳情</p>
-            <div id="task-detail"></div>
+          <div id="tasks-detail-container" style="display: contents;">
+            <div class="detail-card task-detail-card">
+              <p class="panel-label">委託詳情</p>
+              <div id="task-detail"></div>
+            </div>
+
+            <div class="detail-grid">
+              <section class="detail-card rewards-card">
+                <p class="panel-label">任務報酬</p>
+                <div id="reward-summary"></div>
+              </section>
+
+              <section class="detail-card conditions-card">
+                <p class="panel-label">回報條件</p>
+                <div id="condition-list"></div>
+              </section>
+            </div>
           </div>
 
-          <div class="detail-grid">
-            <section class="detail-card rewards-card">
-              <p class="panel-label">任務報酬</p>
-              <div id="reward-summary"></div>
-            </section>
+          <div id="sell-detail-container" style="display: none;">
+            <div class="detail-card task-detail-card">
+              <p class="panel-label">素材詳情</p>
+              <div id="sell-material-detail"></div>
+            </div>
 
-            <section class="detail-card conditions-card">
-              <p class="panel-label">回報條件</p>
-              <div id="condition-list"></div>
-            </section>
+            <div class="detail-grid">
+              <section class="detail-card rewards-card">
+                <p class="panel-label">預計獲得</p>
+                <div id="sell-reward-summary"></div>
+              </section>
+
+              <section class="detail-card conditions-card">
+                <p class="panel-label">出售確認</p>
+                <div id="sell-confirm-container"></div>
+              </section>
+            </div>
           </div>
         </section>
       </main>

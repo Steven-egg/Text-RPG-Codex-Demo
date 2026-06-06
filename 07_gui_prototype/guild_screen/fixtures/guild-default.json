@@ -185,6 +185,18 @@
     "message": "目前沒有符合篩選條件的已解鎖委託。",
     "suggested_action": "切換其他篩選。"
   },
+  "resource_strip": [
+    { "id": "hero", "label": "測試冒險者 / 戰士 Lv1", "tone": "primary" },
+    { "id": "hp", "label": "HP 45/45", "tone": "healthy" },
+    { "id": "mp", "label": "MP 10/10", "tone": "mana" },
+    { "id": "gold", "label": "150G", "tone": "gold" },
+    { "id": "guild_points", "label": "Guild 5", "tone": "neutral" }
+  ],
+  "sellable_materials": [
+    { "item_id": "mat_moss_fiber", "title": "青苔纖維", "owned_count": 8, "unit_price": 6 },
+    { "item_id": "mat_cracked_stone", "title": "破裂石片", "owned_count": 5, "unit_price": 6 },
+    { "item_id": "mat_small_crystal", "title": "小魔晶", "owned_count": 2, "unit_price": 14 }
+  ],
   "debug_notes": [
     "Default Guild fixture is static display data only.",
     "Guild Screen V1 does not include a quest acceptance flow.",

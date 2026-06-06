@@ -302,6 +302,8 @@ class GuiRuntimeSession:
             return self.accept_boss_glen_investigation(payload, screen_id=screen_id)
         if action_id == "fire_mark_guild_inquiry":
             return self.fire_mark_guild_inquiry(payload, screen_id=screen_id)
+        if action_id == "sell_guild_material":
+            return self.sell_guild_material(payload, screen_id=screen_id)
         if action_id in {"submit_quest", "report_dungeon_clear"}:
             return self.report_dungeon_clear(payload, screen_id=screen_id)
         if action_id == "fire_mark_church_bridge":
@@ -1392,6 +1394,42 @@ class GuiRuntimeSession:
         return self._live_response(
             "fire_mark_guild_inquiry",
             "已向工會會長詢問關於三枚火之印記碎片的事。會長建議前往大教堂詢問賽恩祭司。",
+            screen_model=self.guild_screen_model(),
+        )
+
+    def sell_guild_material(self, payload: dict[str, Any], screen_id: str | None = None) -> dict[str, Any]:
+        state = self.require_state()
+        item_id = payload.get("item_id")
+        quantity = payload.get("quantity")
+        confirm = payload.get("confirm", False)
+
+        if not item_id or item_id not in game.GUILD_MATERIAL_BUY_PRICES:
+            raise GuiActionError("此物品非登記收購素材。", status=400)
+
+        # Validate positive integer
+        if isinstance(quantity, bool) or not isinstance(quantity, int) or quantity <= 0:
+            raise GuiActionError("數量必須為正整數。", status=400)
+
+        owned = state.get("inventory", {}).get(item_id, 0)
+        if quantity > owned:
+            raise GuiActionError("持有素材數量不足。", status=409)
+
+        if not confirm:
+            raise GuiActionError("出售已取消。", status=400)
+
+        # Perform transaction
+        unit_price = game.GUILD_MATERIAL_BUY_PRICES[item_id]
+        total_gold = quantity * unit_price
+
+        game.remove_item(state, item_id, quantity)
+        state["gold"] = state.get("gold", 0) + total_gold
+
+        material_name = game.item_name(item_id)
+        msg = f"成功出售 {material_name} x{quantity}，獲得 {total_gold}G。"
+
+        return self._live_response(
+            "sell_guild_material",
+            msg,
             screen_model=self.guild_screen_model(),
         )
 
@@ -2611,7 +2649,6 @@ def shop_screen_model(state: dict[str, Any]) -> dict[str, Any]:
             "job": state.get("job", ""),
             "gold": gold
         },
-        "resource_strip": resource_strip(state),
         "category_tabs": category_tabs,
         "selected_category_id": "all",
         "selected_item_id": "item_potion_s",
@@ -3952,6 +3989,18 @@ def guild_screen_model(state: dict[str, Any]) -> dict[str, Any]:
     elif task_rows:
         selected_task_id = task_rows[0]["task_id"]
 
+    # Calculate sellable materials
+    sellable_materials = []
+    for m_id, unit_price in game.GUILD_MATERIAL_BUY_PRICES.items():
+        qty = state.get("inventory", {}).get(m_id, 0)
+        if qty > 0:
+            sellable_materials.append({
+                "item_id": m_id,
+                "title": game.item_name(m_id),
+                "owned_count": qty,
+                "unit_price": unit_price
+            })
+
     return {
         "screen_id": "facility_guild_screen",
         "facility_id": "guild",
@@ -3962,6 +4011,7 @@ def guild_screen_model(state: dict[str, Any]) -> dict[str, Any]:
             "name": "莉娜",
             "role": "工會接待員，負責登記迷宮探索回報。"
         },
+        "resource_strip": resource_strip(state),
         "task_filters": task_filters,
         "selected_filter_id": "all",
         "selected_task_id": selected_task_id,
@@ -3971,7 +4021,8 @@ def guild_screen_model(state: dict[str, Any]) -> dict[str, Any]:
         "reward_summaries": reward_summaries,
         "condition_rows": condition_rows,
         "feedback_message": feedback_message,
-        "secondary_actions": secondary_actions
+        "secondary_actions": secondary_actions,
+        "sellable_materials": sellable_materials
     }
 
 

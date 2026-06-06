@@ -19,16 +19,74 @@ const actionLogEl = document.querySelector("#action-log");
 const clearLogEl = document.querySelector("#clear-log");
 const shellEl = document.querySelector(".guild-shell");
 
+// New DOM element selections for Material Sell mode
+const tasksViewContainerEl = document.querySelector("#tasks-view-container");
+const sellViewContainerEl = document.querySelector("#sell-view-container");
+const tasksDetailContainerEl = document.querySelector("#tasks-detail-container");
+const sellDetailContainerEl = document.querySelector("#sell-detail-container");
+const materialSellListEl = document.querySelector("#material-sell-list");
+const sellMaterialDetailEl = document.querySelector("#sell-material-detail");
+const sellRewardSummaryEl = document.querySelector("#sell-reward-summary");
+const sellConfirmContainerEl = document.querySelector("#sell-confirm-container");
+const modeTasksBtn = document.querySelector("#mode-tasks-btn");
+const modeSellBtn = document.querySelector("#mode-sell-btn");
+
 const state = {
   model: null,
   selectedFilterId: null,
   selectedTaskId: null,
   selectedStoryHint: false,
   actionLog: [],
+  // Material Sell state tracking
+  mode: "tasks",
+  selectedMaterialId: null,
+  sellQuantity: 1,
 };
 
 const townHubRoute = "../town_hub/index.html";
 const navigationDelayMs = 120;
+
+modeTasksBtn.addEventListener("click", () => {
+  switchMode("tasks");
+});
+
+modeSellBtn.addEventListener("click", () => {
+  switchMode("sell");
+});
+
+function switchMode(mode) {
+  state.mode = mode;
+  modeTasksBtn.classList.toggle("is-active", mode === "tasks");
+  modeSellBtn.classList.toggle("is-active", mode === "sell");
+
+  if (mode === "tasks") {
+    tasksViewContainerEl.style.display = "flex";
+    sellViewContainerEl.style.display = "none";
+    tasksDetailContainerEl.style.display = "contents";
+    sellDetailContainerEl.style.display = "none";
+  } else {
+    tasksViewContainerEl.style.display = "none";
+    sellViewContainerEl.style.display = "flex";
+    tasksDetailContainerEl.style.display = "none";
+    sellDetailContainerEl.style.display = "contents";
+
+    // Default select first material if any
+    const mList = state.model?.sellable_materials ?? [];
+    if (mList.length > 0 && !mList.some(m => m.item_id === state.selectedMaterialId)) {
+      state.selectedMaterialId = mList[0].item_id;
+      state.sellQuantity = 1;
+    }
+  }
+
+  pushActionLog({
+    action_id: "switch_mode",
+    payload: { mode },
+    source: "mode_tabs",
+    dispatched: true,
+  });
+
+  render();
+}
 
 fixtureSelect.addEventListener("change", () => {
   loadFixture(fixtureSelect.value);
@@ -103,6 +161,24 @@ clearLogEl.addEventListener("click", () => {
 
 loadFixture(fixtureSelect.value);
 
+function initializeSelectionDefaults(model) {
+  state.selectedFilterId = model.selected_filter_id ?? model.task_filters?.[0]?.id ?? "all";
+  state.selectedTaskId = model.selected_task_id ?? model.task_rows?.[0]?.task_id ?? null;
+  state.selectedStoryHint = false;
+
+  // Default to first material if none selected or if previously selected is missing
+  const mList = model.sellable_materials ?? [];
+  if (mList.length > 0) {
+    if (!mList.some(m => m.item_id === state.selectedMaterialId)) {
+      state.selectedMaterialId = mList[0].item_id;
+      state.sellQuantity = 1;
+    }
+  } else {
+    state.selectedMaterialId = null;
+    state.sellQuantity = 1;
+  }
+}
+
 async function loadFixture(path) {
   if (runtimeClient.isLiveMode()) {
     await loadLiveScreen();
@@ -117,9 +193,7 @@ async function loadFixture(path) {
     }
     const model = await response.json();
     state.model = model;
-    state.selectedFilterId = model.selected_filter_id ?? model.task_filters?.[0]?.id ?? "all";
-    state.selectedTaskId = model.selected_task_id ?? model.task_rows?.[0]?.task_id ?? null;
-    state.selectedStoryHint = false;
+    initializeSelectionDefaults(model);
     state.actionLog = [];
     render();
     logSystem(`loaded ${path}`);
@@ -135,9 +209,7 @@ async function loadLiveScreen() {
   try {
     const model = await runtimeClient.getScreen("guild_screen");
     state.model = model;
-    state.selectedFilterId = model.selected_filter_id ?? model.task_filters?.[0]?.id ?? "all";
-    state.selectedTaskId = model.selected_task_id ?? model.task_rows?.[0]?.task_id ?? null;
-    state.selectedStoryHint = false;
+    initializeSelectionDefaults(model);
     state.actionLog = [];
     render();
     logSystem("live runtime screen loaded", {
@@ -159,9 +231,7 @@ async function loadStaticFallback(path, liveError) {
     }
     const model = await response.json();
     state.model = model;
-    state.selectedFilterId = model.selected_filter_id ?? model.task_filters?.[0]?.id ?? "all";
-    state.selectedTaskId = model.selected_task_id ?? model.task_rows?.[0]?.task_id ?? null;
-    state.selectedStoryHint = false;
+    initializeSelectionDefaults(model);
     state.actionLog = [];
     render();
     logSystem(`live unavailable; loaded fixture ${path}`);
@@ -179,6 +249,25 @@ async function loadStaticFallback(path, liveError) {
   }
 }
 
+function renderResourceStrip(strip) {
+  const el = document.querySelector("#resource-strip");
+  if (!el) return;
+  if (!strip || strip.length === 0) {
+    el.style.display = "none";
+    return;
+  }
+  el.style.display = "flex";
+  el.replaceChildren(
+    ...strip.map((item) => {
+      const itemEl = document.createElement("div");
+      itemEl.className = "resource-item";
+      itemEl.dataset.tone = item.tone ?? "neutral";
+      itemEl.textContent = item.label ?? "";
+      return itemEl;
+    })
+  );
+}
+
 function render() {
   const { model } = state;
   titleEl.textContent = model.title ?? "";
@@ -186,11 +275,19 @@ function render() {
   npcNameEl.textContent = model.npc?.name ?? "";
   npcRoleEl.textContent = model.npc?.role ?? "";
   npcPortraitEl.dataset.npcId = model.npc?.id ?? "";
-  renderFilters(model.task_filters ?? []);
-  renderStoryHint(model.story_hint_card);
-  renderTaskList(getVisibleTaskRows());
-  ensureSelectionVisible();
-  renderSelectedContent();
+
+  renderResourceStrip(model.resource_strip);
+
+  if (state.mode === "tasks") {
+    renderFilters(model.task_filters ?? []);
+    renderStoryHint(model.story_hint_card);
+    renderTaskList(getVisibleTaskRows());
+    ensureSelectionVisible();
+    renderSelectedContent();
+  } else {
+    renderMaterialList(model.sellable_materials ?? []);
+    renderSelectedMaterialContent();
+  }
   renderActionLog();
 }
 
@@ -581,9 +678,17 @@ async function handleLivePrimaryAction(actionId, payload) {
     shellEl.dataset.runtimeStatus = result.status ?? "success";
     if (result.screen_model) {
       state.model = result.screen_model;
-      const visibleRows = getVisibleTaskRows();
-      if (!visibleRows.some(row => row.task_id === state.selectedTaskId)) {
-        state.selectedTaskId = visibleRows[0]?.task_id ?? null;
+      if (state.mode === "tasks") {
+        const visibleRows = getVisibleTaskRows();
+        if (!visibleRows.some(row => row.task_id === state.selectedTaskId)) {
+          state.selectedTaskId = visibleRows[0]?.task_id ?? null;
+        }
+      } else {
+        const mList = state.model?.sellable_materials ?? [];
+        if (!mList.some(m => m.item_id === state.selectedMaterialId)) {
+          state.selectedMaterialId = mList[0]?.item_id ?? null;
+          state.sellQuantity = 1;
+        }
       }
       render();
     }
@@ -742,4 +847,232 @@ function renderLoadError(error) {
   feedbackMessageEl.textContent = "";
   primaryActionEl.textContent = "不可用";
   primaryActionEl.setAttribute("aria-disabled", "true");
+}
+
+function renderMaterialList(materials) {
+  if (materials.length === 0) {
+    const empty = document.createElement("div");
+    empty.className = "empty-state";
+    empty.textContent = "目前沒有符合工會收購登記的素材。";
+    materialSellListEl.replaceChildren(empty);
+    return;
+  }
+
+  materialSellListEl.replaceChildren(
+    ...materials.map((m) => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "task-row material-row";
+      button.dataset.itemId = m.item_id;
+      button.classList.toggle("is-selected", m.item_id === state.selectedMaterialId);
+      button.setAttribute("aria-pressed", String(m.item_id === state.selectedMaterialId));
+
+      const copy = document.createElement("span");
+      const title = document.createElement("span");
+      title.className = "task-title";
+      title.textContent = m.title ?? m.item_id;
+
+      const giver = document.createElement("span");
+      giver.className = "task-giver";
+      giver.textContent = `單價：${m.unit_price}G`;
+
+      copy.append(title, giver);
+
+      const status = document.createElement("span");
+      status.className = "status-badge";
+      status.dataset.status = "ready_to_submit";
+      status.textContent = `x${m.owned_count}`;
+
+      button.append(copy, status);
+      button.addEventListener("click", () => {
+        state.selectedMaterialId = m.item_id;
+        state.sellQuantity = 1;
+        pushActionLog({
+          action_id: "select_material",
+          payload: { item_id: m.item_id },
+          source: "material_row",
+          dispatched: true,
+        });
+        render();
+      });
+      return button;
+    })
+  );
+}
+
+function renderSelectedMaterialContent() {
+  const materials = state.model?.sellable_materials ?? [];
+  const m = materials.find(x => x.item_id === state.selectedMaterialId);
+
+  if (!m) {
+    sellMaterialDetailEl.replaceChildren(createEmptyState("請選擇要出售的素材。"));
+    sellRewardSummaryEl.replaceChildren(createEmptyState("沒有金額資料。"));
+    sellConfirmContainerEl.replaceChildren(createEmptyState("沒有確認條件。"));
+    renderPrimaryAction({
+      action_id: "unavailable",
+      label: "條件不足",
+      enabled: false,
+      disabled_reason: "請選擇要出售的素材",
+      payload: {},
+    });
+    return;
+  }
+
+  // Ensure quantity is bounded
+  if (state.sellQuantity > m.owned_count) {
+    state.sellQuantity = m.owned_count;
+  }
+  if (state.sellQuantity < 1) {
+    state.sellQuantity = 1;
+  }
+
+  // 1. Material Info & Quantity Selector
+  const titleRow = document.createElement("div");
+  titleRow.className = "detail-title-row";
+  const titleCopy = document.createElement("div");
+  const title = document.createElement("h2");
+  title.textContent = m.title ?? m.item_id;
+  const subtitle = document.createElement("p");
+  subtitle.className = "detail-subtitle";
+  subtitle.textContent = `單價：${m.unit_price}G / 背包持有：${m.owned_count} 個`;
+  titleCopy.append(title, subtitle);
+
+  const status = document.createElement("span");
+  status.className = "status-badge";
+  status.dataset.status = "ready_to_submit";
+  status.textContent = "收購中";
+  titleRow.append(titleCopy, status);
+
+  const desc = document.createElement("p");
+  desc.className = "detail-description";
+  desc.textContent = "由艾爾姆冒險者工會登記收購的探險素材。可用於兌換金幣。";
+
+  const selector = document.createElement("div");
+  selector.className = "quantity-selector-container";
+  const qLabel = document.createElement("label");
+  qLabel.textContent = "出售數量：";
+
+  const controls = document.createElement("div");
+  controls.className = "qty-controls";
+
+  const decBtn = document.createElement("button");
+  decBtn.type = "button";
+  decBtn.className = "qty-btn";
+  decBtn.textContent = "-";
+  decBtn.addEventListener("click", () => {
+    if (state.sellQuantity > 1) {
+      state.sellQuantity--;
+      render();
+    }
+  });
+
+  const qtyInput = document.createElement("input");
+  qtyInput.type = "number";
+  qtyInput.value = state.sellQuantity;
+  qtyInput.readOnly = true;
+
+  const incBtn = document.createElement("button");
+  incBtn.type = "button";
+  incBtn.className = "qty-btn";
+  incBtn.textContent = "+";
+  incBtn.addEventListener("click", () => {
+    if (state.sellQuantity < m.owned_count) {
+      state.sellQuantity++;
+      render();
+    }
+  });
+
+  const maxBtn = document.createElement("button");
+  maxBtn.type = "button";
+  maxBtn.className = "qty-btn max-btn";
+  maxBtn.textContent = "MAX";
+  maxBtn.addEventListener("click", () => {
+    if (state.sellQuantity < m.owned_count) {
+      state.sellQuantity = m.owned_count;
+      render();
+    }
+  });
+
+  controls.append(decBtn, qtyInput, incBtn, maxBtn);
+  selector.append(qLabel, controls);
+
+  sellMaterialDetailEl.replaceChildren(titleRow, desc, selector);
+
+  // 2. Rewards (Total Gold)
+  const totalGold = state.sellQuantity * m.unit_price;
+  const rewardList = document.createElement("div");
+  rewardList.className = "reward-list";
+  const rewardItem = document.createElement("div");
+  rewardItem.className = "reward-item";
+  const rLabel = document.createElement("strong");
+  rLabel.textContent = "預計獲得金幣";
+  const rValue = document.createElement("span");
+  rValue.style.fontSize = "1.25rem";
+  rValue.style.color = "var(--gold)";
+  rValue.style.fontWeight = "bold";
+  rValue.textContent = `${totalGold}G`;
+  rewardItem.append(rLabel, rValue);
+  rewardList.append(rewardItem);
+  sellRewardSummaryEl.replaceChildren(rewardList);
+
+  // 3. Confirmation Checkbox
+  const condList = document.createElement("div");
+  condList.className = "condition-list";
+  const condRow = document.createElement("div");
+  condRow.className = "condition-row";
+  condRow.style.gridTemplateColumns = "1fr";
+
+  const cMsg = document.createElement("p");
+  cMsg.style.margin = "0 0 8px 0";
+  cMsg.style.color = "var(--paper-muted)";
+  cMsg.style.fontSize = "0.9rem";
+  cMsg.style.lineHeight = "1.45";
+  cMsg.textContent = "請確認出售數量與總金額。出售後物資將被工會收購，且該操作無法復原。";
+
+  const cLabel = document.createElement("label");
+  cLabel.style.display = "flex";
+  cLabel.style.alignItems = "center";
+  cLabel.style.gap = "8px";
+  cLabel.style.cursor = "pointer";
+  cLabel.style.color = "var(--paper)";
+  cLabel.style.fontWeight = "bold";
+
+  const cCheckbox = document.createElement("input");
+  cCheckbox.type = "checkbox";
+  cCheckbox.id = "sell-confirm-checkbox";
+  cCheckbox.style.width = "18px";
+  cCheckbox.style.height = "18px";
+  cCheckbox.style.cursor = "pointer";
+
+  cLabel.append(cCheckbox, document.createTextNode("我已確認出售數量與金額"));
+  condRow.append(cMsg, cLabel);
+  condList.append(condRow);
+  sellConfirmContainerEl.replaceChildren(condList);
+
+  // Checkbox listener to toggle primary button state without a full redraw
+  cCheckbox.addEventListener("change", () => {
+    updateSellPrimaryButtonState(cCheckbox.checked, m.item_id, state.sellQuantity);
+  });
+
+  // Initialize button state
+  updateSellPrimaryButtonState(false, m.item_id, state.sellQuantity);
+}
+
+function updateSellPrimaryButtonState(confirmed, itemId, qty) {
+  if (confirmed) {
+    renderPrimaryAction({
+      action_id: "sell_guild_material",
+      label: "確認出售",
+      enabled: true,
+      payload: { item_id: itemId, quantity: qty, confirm: true },
+    });
+  } else {
+    renderPrimaryAction({
+      action_id: "sell_guild_material",
+      label: "確認出售",
+      enabled: false,
+      disabled_reason: "請勾選確認框以出售素材",
+      payload: { item_id: itemId, quantity: qty, confirm: false },
+    });
+  }
 }
