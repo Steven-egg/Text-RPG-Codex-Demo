@@ -78,6 +78,41 @@ def run_smoke_test():
         assert "等級不足" in err.blocked_reason
         print("Blocked Path (Level restricted) verified.")
 
+    # 5. Screen Model Coverage Verification
+    model = session.screen_model("magic_shop_screen")
+    assert model["screen_id"] == "facility_magic_shop_screen"
+
+    # Verify we cover all MAGIC_BOOKS
+    rows = model["list_rows"]
+    row_book_ids = {row["book_id"] for row in rows}
+    assert row_book_ids == set(MAGIC_BOOKS.keys())
+    assert len(row_book_ids) == 6
+    print("All MAGIC_BOOKS covered in model rows.")
+
+    # Verify category counts (Damage=2, Heal=1, Buff=2, Special=1, All=6)
+    category_tabs = {tab["id"]: tab for tab in model["category_tabs"]}
+    assert category_tabs["all"]["count"] == 6
+    assert category_tabs["damage"]["count"] == 2
+    assert category_tabs["heal"]["count"] == 1
+    assert category_tabs["buff"]["count"] == 2
+    assert category_tabs["special"]["count"] == 1
+    print("Category counts verified.")
+
+    # Verify book_cinder_mark is debuff/特殊魔法
+    cinder_mark_row = next(row for row in rows if row["book_id"] == "book_cinder_mark")
+    assert cinder_mark_row["category"] == "special"
+
+    cinder_mark_details = model["book_details"]["book_cinder_mark"]
+    assert cinder_mark_details["category_label"] == "特殊魔法"
+    print("book_cinder_mark special/特殊魔法 category verified.")
+
+    # Verify details, actions and requirements are present for all books
+    for b_id in MAGIC_BOOKS:
+        assert b_id in model["book_details"]
+        assert b_id in model["requirement_rows"]
+        assert b_id in model["primary_actions"]
+    print("All books details, requirements, actions verified.")
+
     print("Magic Shop bridge smoke test ok")
 
 

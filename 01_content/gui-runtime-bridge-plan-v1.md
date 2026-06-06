@@ -81,23 +81,24 @@ existing runtime-authoritative adapter / ScreenModel pattern where appropriate.
 | Glen Boss flow UX cleanup | `709dc6c [antig] fix(gui): improve dungeon event scrolling and guild story progression hints` | Persistent Guild story hint review cards across Glen / Act 2 guidance states, Blood Map reward key mapping, HP/MP-only dungeon resource strip, semantic dungeon metrics, scrollable auto-bottom event preview, dynamic 3-column action-bar layout, and boss victory exploration events. | Full quest / story / dungeon / storage / workshop frameworks. |
 | Ash / Cinder presentation cleanup | current package | Existing Ash Ravine and Cinder Seal Depths progression remains runtime-owned; Guild story hints and Dungeon Exploration boss / narrative labels avoid premature Boss, reward, and follow-on unlock spoilers before the relevant scout reports. Temple static fixture lore copy is softened. | Generic boss / story / dungeon framework, Act 2 cleanup, Temple / Relic gameplay, data/schema/save/combat changes. |
 | Combat Skill Button | `4acd04d [antig] feat(gui): add combat skill button live bridge` | `use_skill` routing from existing `learned_skills` and `SKILLS`. | Formal skill framework, target selection, rebalance. |
-| Shop Buy Consumable | `ebc1b5e [antig] feat(gui): add shop buy consumable live bridge` | Buy 1 existing travel-shop consumable through server-side validation. | Full shop system, sell, quantity selector, equipment purchase. |
-| Magic Shop Learn Book | `b59fe43 [antig] feat(gui): add magic shop learn book live bridge` | Learn 1 existing magic book through server-side validation. | Full magic / skill framework or combat rebalance. |
+| Shop Travel Inventory Coverage | current uncommitted package, based on `ebc1b5e` | Data-driven ScreenModel and quantity-one purchase coverage for all nine existing `SHOP_INVENTORY["travel"]` entries. Accessories go to the backpack without auto-equip. | Sell, quantity selector, generic inventory / equipment management, new shop data. |
+| Magic Shop Data-Driven Coverage | current uncommitted package, based on `b59fe43` | ScreenModel iterates all existing `MAGIC_BOOKS`; `learn_magic_book` remains server-validated, and debuff books follow the CLI special-magic category. | New magic books / skills, full magic framework, target selection, combat rebalance. |
 | Workshop Buy Weapon & Armor | current package | Buy existing weapon & armor; do not auto-equip. | Accessory purchase, sell, quantity selector, full workshop framework. |
 | Workshop Equip & Limited Upgrade | current package | Equip weapons and owned non-weapon equipment; upgrade whitelisted recipes (`recipe_iron_sword_plus_1`, `recipe_leather_armor_plus_1`). | Generic equipment management (unequip, comparison), non-whitelisted recipes. |
 | Storage Deposit & Withdraw | current package | Town Hub routes to Storage live screen; `storage_screen_model(state)` renders live inventory / storage status / storage contents / capacity; `unlock_storage` checks cost & unlocks; `deposit_item` & `withdraw_item` allow transferring items. | Storage capacity upgrade, full storage system, generic inventory / equipment management, schema/save/combat changes. |
 | Town Hub Mira Entry Unlock | `b046b1e [antig] feat(gui): add Mira synthesis entry unlock bridge` | Town Hub synthesis facility node reflects `is_unlocked(state, "shop_synthesis_01")`; locked state points to Guild task `洞窟採集`; unlocked state routes to the existing static synthesis screen. | Full synthesis, recipe bridge, `synthesis_screen_model()`, live loader, `craft_recipe`, recipe / quest / dungeon / schema / save / combat changes. |
-| Synthesis Single Recipe Craft | `5dbc742 [antig] feat(gui): add synthesis single recipe craft bridge` | `synthesis_screen` live mode loads a runtime-shaped ScreenModel and dispatches `craft_recipe` for the single whitelisted recipe `recipe_piercing_bundle`, reusing `game.recipe_available(...)` and `game.craft_recipe_message(...)`. | Full synthesis, generic recipe bridge, multi-recipe coverage, base-item upgrades, recipe / quest / dungeon / schema / save / combat changes. |
+| Synthesis Existing Mira Recipe Coverage | current uncommitted package, based on `5dbc742` | `synthesis_screen` covers the four existing Mira recipes and dispatches `craft_recipe`, reusing `game.recipe_available(...)` and `game.craft_recipe_message(...)`, including the existing warm-stone base-item recipe. | Arbitrary recipes, new recipe data, generic crafting framework, recipe / quest / dungeon / schema / save / combat changes. |
+| Fire-Mark Guild Inquiry Closure | current uncommitted package | Guild story hint dispatches `fire_mark_guild_inquiry` through existing CLI prerequisite and mutation helpers; three shards remain held, and Temple church bridge prerequisites arise naturally. | Generic story inquiry framework, new story data, formal fire-mark / relic gameplay. |
 | Temple / Church lookup bridge | current package | Live-mode loading, promotion requirement preview, moon well pray, fire-mark church bridge and lookup inquiry actions using Python runtime helpers. | Formal class transfer, class specialization gameplay, manual save.json edits. |
 | Relic Preview live opening | current package | Altar screen live-mode loading, previewing registered relics (e.g., ash charm) and requirements, attune action placeholder. | Formal relic effects, equipping/obtaining relics, manual save.json edits. |
 
 
 Latest committed bridge baseline:
-`709dc6c [antig] fix(gui): improve dungeon event scrolling and guild story progression hints`.
+`7080b56 [antig] feat(gui): add Temple and Relic live bridge closure`.
 
 ## 3.2 Reusable Bridge Pattern Audit
 
-Read-only audit, 2026-06-04:
+Read-only audit, updated 2026-06-06:
 
 - Governance rule: each facility / system should first use a narrow MVP to prove
   the runtime bridge shape. After that bridge exists, same-family CLI content
@@ -115,51 +116,43 @@ Read-only audit, 2026-06-04:
 
 | System | Current reusable state | Hardcoded risk | Coverage direction |
 |---|---|---|---|
-| Shop / travel shop | `buy_item` validates against existing `SHOP_INVENTORY["travel"]` and item data, but the current live ScreenModel lists a fixed consumable subset and `buy_item` still rejects non-consumables. | Medium. Bridge exists for travel consumable purchase, but battle items / accessories are not yet natural GUI coverage. | Extend the ScreenModel to iterate travel inventory and explicitly decide which existing item kinds are in scope. Do not make one MVP per item. |
+| Shop / travel shop | `buy_item` and the live ScreenModel cover all existing `SHOP_INVENTORY["travel"]` entries through runtime availability, price, job, and owned-count behavior. | Low. Existing travel data is covered; sell and quantity selection remain separate behavior. | Treat new travel-shop entries as existing-data coverage checks. Guild material sell remains a separate Guild slice. |
 | Workshop | Weapon & armor buy reads `SHOP_INVENTORY`; `equip_equipment` and `equip_weapon` reuse `game.equip_item(...)`; upgrades support whitelisted recipes. | Low to medium. Weapon, armor, and whitelisted upgrades are reusable; comparison, unequip, and non-whitelisted upgrades remain closed. | Add more recipe ids as coverage. Generic equipment management (unequip, comparison) needs its own planning gate. |
-| Magic shop | `learn_magic_book` validates `MAGIC_BOOKS`, `SKILLS`, job, level, gold, materials, and learned state server-side. ScreenModel still uses a fixed book id list. | Low to medium. Mutation action is reusable; presentation list is narrower than CLI data. | Iterate `MAGIC_BOOKS` in the model before adding more books. No one-book-per-MVP pattern is needed. |
+| Magic shop | `learn_magic_book` validates `MAGIC_BOOKS`, `SKILLS`, job, level, gold, materials, and learned state server-side; ScreenModel iterates existing `MAGIC_BOOKS` and aligns categories with CLI behavior. | Low. Existing magic-book data is covered. | Treat new existing-data books as coverage checks; new skills or rules still require their own gate. |
 | World map / dungeon / exploration / combat | World Map iterates `DUNGEONS` and runtime unlocks; `confirm_travel`, `advance_step`, combat, retreat, route clear, item rows, and skill rows are shared flow pieces. | Medium. Multiple dungeons can route through the bridge, but complete dungeon events, boss framework, and combat formula changes remain closed. | Treat existing dungeons as coverage follow-up unless the task opens boss / special event behavior. |
-| Guild | Current GUI bridge includes dungeon clear report registration from `DUNGEONS`; `017fa43` adds existing `QUESTS` turn-in / reward / unlock coverage for ready quests, validated by `quest_cave_gathering` unlocking `shop_synthesis_01`. | Medium. The turn-in adapter reuses runtime helpers, but this is not a generic guild framework, reputation system, achievement system, or story inquiry bridge. | Treat additional existing `QUESTS` turn-in coverage as same-family coverage follow-up only after an owner-approved exact scope. New quest data, story inquiry, reputation, or broad framework work still needs its own gate. |
-| Synthesis / crafting | Town Hub entry unlock is committed. `5dbc742` adds one whitelisted `craft_recipe` path for `recipe_piercing_bundle` and reuses `game.recipe_available(...)` plus `game.craft_recipe_message(...)`. ScreenModel and live loader are deliberately single-recipe. | High for full crafting. The bridge proves one action path, but full synthesis, base-item recipes, and broad recipe iteration remain closed. | Next coverage should start with a read-only gate before iterating more existing Mira recipe ids. Base-item upgrades require a separate gate. |
+| Guild | Current GUI bridge includes dungeon clear reports, existing `QUESTS` turn-ins, Boss Glen investigation, and the existing fire-mark Guild inquiry that naturally opens the Temple prerequisite. | Medium. Existing mainline Guild mutations are covered, but material sell and broad Guild frameworks remain closed. | The smallest next CLI-parity slice is existing Guild material sell after a read-only gate. |
+| Synthesis / crafting | Town Hub entry unlock and the existing `craft_recipe` adapter now cover the four existing Mira recipes through runtime helpers, including the warm-stone base-item recipe. | Medium for arbitrary crafting. Existing Mira data is covered; generic recipe iteration and new recipes remain closed. | Treat new Mira data as a coverage check; arbitrary recipes or crafting frameworks require their own gate. |
 | Storage | Opens Town Hub routing, live Storage ScreenModel, `unlock_storage`, `deposit_item`, and `withdraw_item` against existing runtime storage state. Capacity upgrades remain disabled. | Low to medium. Storage unlock, view, and deposit / withdraw transfer are now bridged; capacity upgrade behavior remains closed. | Treat capacity upgrade as a separate read-only gate. Do not let deposit / withdraw imply generic inventory or slot management. |
 | Inventory / backpack / equipment | World Map utility preview reads runtime inventory plus currently equipped equipment. Workshop can equip weapons and owned non-weapon equipment through approved bridge actions. | Medium. Display is reusable; equipment mutation remains workshop-scoped and does not include unequip / comparison / generic management. | More item display is coverage; generic unequip / comparison / slot management requires its own gate. |
 | Bestiary | Preview reads runtime `state["bestiary"]` and monster data, so more registered monsters naturally display. | Low. Mostly a summary presentation surface. | Add detail / filtering as coverage work, not one-monster MVPs. |
 
 Explicit exceptions that are not yet fully bridged system families:
 
-- Guild features beyond existing `QUESTS` turn-in / reward / unlock coverage
-  and the current Boss Glen investigation gate.
+- Guild material sell and Guild features beyond existing clear reports,
+  `QUESTS` turn-ins, Boss Glen investigation, and fire-mark inquiry coverage.
 - Generic boss / story-hint progression beyond the narrow Boss Glen special
   gating bridge.
 - Full Act 2 progression cleanup beyond Ash Ravine / fire-demo content naturally
   surfaced through existing CLI runtime progression.
-- Complete crafting / synthesis beyond the single whitelisted
-  `recipe_piercing_bundle` craft path.
+- Complete crafting / synthesis beyond the four existing Mira recipe paths.
 - Complete storage beyond deposit/withdraw, including capacity upgrade behavior.
 - Generic equipment management beyond approved workshop equip actions.
 
-Future coverage queue after Phase A close:
+Phase B facility coverage is complete in the current uncommitted package:
+existing Mira recipes, travel-shop inventory, `MAGIC_BOOKS`, and current
+Workshop upgrade coverage are represented through runtime-authoritative
+ScreenModels and UIActions.
 
-Phase B is the second-priority facility coverage track, not an approved
-implementation batch:
-
-1. Synthesis existing Mira recipes coverage.
-2. Shop travel inventory coverage.
-3. Magic Shop `MAGIC_BOOKS` coverage.
-4. Workshop upgrade coverage.
-
-For Phase B, owner manual testing may be batched after 2-3 small slices, but each
-slice still needs a read-only planning gate, a narrow exact scope, and the
-runtime-authoritative ScreenModel / UIAction pattern. Do not turn the batch plan
-into a generic facility framework or broad data/schema/save/combat change.
-
-Phase C convenience work is deferred and remains closed for now:
+The smallest next CLI-parity candidate is:
 
 1. Guild material sell.
-2. Inventory / equipment management.
-3. Storage capacity upgrade.
-4. Bestiary detail / filtering.
-5. Settings panel.
+
+Remaining Phase C convenience work is deferred:
+
+1. Inventory / equipment management.
+2. Storage capacity upgrade.
+3. Bestiary detail / filtering.
+4. Settings panel.
 
 Phase C items require their own later read-only gate and owner-approved exact
 scope. They are not opened by Phase B facility coverage notes.
@@ -170,16 +163,32 @@ Town Hub Mira and Synthesis result after this audit:
   `b046b1e [antig] feat(gui): add Mira synthesis entry unlock bridge`.
 - Scope is only the Town Hub synthesis facility node reflecting
   `is_unlocked(state, "shop_synthesis_01")` as locked / unlocked.
-- Synthesis Single Recipe Craft Live MVP has landed in
-  `5dbc742 [antig] feat(gui): add synthesis single recipe craft bridge`.
-- Scope is only `recipe_piercing_bundle` on `synthesis_screen`, with
-  `craft_recipe` whitelisted to that recipe id.
+- The current uncommitted package extends `5dbc742` to the four existing Mira
+  recipes on `synthesis_screen`.
 - Python runtime remains gameplay authority through `game.recipe_available(...)`
   and `game.craft_recipe_message(...)`.
-- This slice must not add or modify recipes, quests, dungeons, schema, save
+- This coverage does not add or modify recipes, quests, dungeons, schema, save
   behavior, combat formulas, or the crafting system.
-- Next synthesis follow-up candidate is a read-only gate for broader synthesis
-  coverage, such as deciding whether to iterate more existing Mira recipe ids.
+
+Status note, 2026-06-06:
+
+- The current uncommitted package completes Phase B facility coverage:
+  Synthesis covers the four existing Mira recipes, Shop covers all nine existing
+  travel inventory entries, and Magic Shop iterates all existing `MAGIC_BOOKS`
+  with CLI-aligned categories.
+- `fire_mark_guild_inquiry` closes the missing Guild-side fire-mark prerequisite
+  by reusing `game.can_ask_fire_mark_guild_inquiry(...)` and
+  `game.fire_mark_guild_inquiry(...)`. The three shards are not consumed, and
+  the Temple church bridge now appears naturally.
+- Codex recheck passed:
+  `smoke_test_fire_mark_guild_bridge.py`, `smoke_test_temple_bridge.py`,
+  `smoke_test_shop_bridge.py`, `smoke_test_magic_shop_bridge.py`,
+  `smoke_test_synthesis_bridge.py`, `smoke_test_progression_bridge.py`,
+  `validate_data.py`, `element_maze.py --smoke-test`, and JavaScript syntax
+  checks for Guild, Shop, and Magic Shop.
+- This status does not approve Guild material sell, generic sell, quantity
+  selection, generic inventory / equipment management, new data, schema/save
+  changes, combat formula changes, or manual `save.json` work.
 
 ## 4. Bridge Shape
 

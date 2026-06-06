@@ -300,6 +300,8 @@ class GuiRuntimeSession:
             return self.upgrade_equipment(payload, screen_id=screen_id)
         if action_id == "accept_boss_glen_investigation":
             return self.accept_boss_glen_investigation(payload, screen_id=screen_id)
+        if action_id == "fire_mark_guild_inquiry":
+            return self.fire_mark_guild_inquiry(payload, screen_id=screen_id)
         if action_id in {"submit_quest", "report_dungeon_clear"}:
             return self.report_dungeon_clear(payload, screen_id=screen_id)
         if action_id == "fire_mark_church_bridge":
@@ -1197,18 +1199,25 @@ class GuiRuntimeSession:
         state = self.require_state()
         item_id = payload.get("item_id")
 
-        if not item_id or item_id not in ITEMS:
+        if not item_id or (item_id not in ITEMS and item_id not in EQUIPMENT):
             raise GuiActionError("商品不存在。", status=400)
 
         if item_id not in SHOP_INVENTORY["travel"]:
             raise GuiActionError("此商店不販售該商品。", status=400)
 
-        item = ITEMS[item_id]
-        if item.get("kind") != "consumable":
-            raise GuiActionError("旅人小鋪 MVP 僅允許購買消耗品。", status=400)
+        item = ITEMS.get(item_id) or EQUIPMENT.get(item_id)
 
         if not game.is_shop_item_available(state, item_id):
             raise GuiActionError("商品尚未解鎖或不可購買。", status=409)
+
+        if item_id in EQUIPMENT:
+            if state.get("job") not in item["jobs"]:
+                raise GuiActionError(
+                    "職業不符，無法購買該裝備。",
+                    status=409,
+                    result_status="blocked",
+                    blocked_reason="職業不符",
+                )
 
         price = item["price"]
         if state.get("gold", 0) < price:
@@ -1311,7 +1320,8 @@ class GuiRuntimeSession:
     def craft_recipe(self, payload: dict[str, Any], *, screen_id: str | None = None) -> dict[str, Any]:
         state = self.require_state()
         recipe_id = payload.get("recipe_id")
-        if recipe_id != "recipe_piercing_bundle":
+        mira_recipes = {"recipe_fire_cloak", "recipe_focus_pouch", "recipe_heat_charm", "recipe_piercing_bundle"}
+        if recipe_id not in mira_recipes:
             raise GuiActionError("非白名單配方。", status=403)
 
         if not game.recipe_available(state, recipe_id):
@@ -1365,6 +1375,23 @@ class GuiRuntimeSession:
         return self._live_response(
             "accept_boss_glen_investigation",
             "你接下了焦石礦坑深處強烈氣息的調查任務。",
+            screen_model=self.guild_screen_model(),
+        )
+
+    def fire_mark_guild_inquiry(self, payload: dict[str, Any], screen_id: str | None = None) -> dict[str, Any]:
+        state = self.require_state()
+        state.setdefault("flags", {})
+        if not game.can_ask_fire_mark_guild_inquiry(state):
+            raise GuiActionError(
+                "不符合詢問條件或已詢問過關於印記碎片的事。",
+                status=409,
+                result_status="blocked",
+                blocked_reason="不符合詢問條件或已詢問過",
+            )
+        game.fire_mark_guild_inquiry(state)
+        return self._live_response(
+            "fire_mark_guild_inquiry",
+            "已向工會會長詢問關於三枚火之印記碎片的事。會長建議前往大教堂詢問賽恩祭司。",
             screen_model=self.guild_screen_model(),
         )
 
@@ -2394,25 +2421,60 @@ def get_consumable_effect_summary(item_id: str) -> str:
 
 def shop_screen_model(state: dict[str, Any]) -> dict[str, Any]:
     gold = state.get("gold", 0)
-    consumable_ids = ["item_potion_s", "item_potion_m", "item_herb_antidote", "item_focus_drop"]
+    travel_items = SHOP_INVENTORY["travel"]
 
     list_rows = []
     item_details = {}
     requirement_rows = {}
     primary_actions = {}
 
-    for item_id in consumable_ids:
-        item = ITEMS[item_id]
+    category_counts = {
+        "all": 0,
+        "consumables": 0,
+        "tactical": 0,
+        "accessories": 0
+    }
+
+    for item_id in travel_items:
+        item = ITEMS.get(item_id) or EQUIPMENT.get(item_id)
+        if not item:
+            continue
         price = item["price"]
-        owned_count = state.get("inventory", {}).get(item_id, 0)
+        owned_count = game.travel_shop_owned_count(state, item_id)
         unlocked = game.is_shop_item_available(state, item_id)
         has_enough_gold = gold >= price
 
+        category_name = game.travel_shop_category(item_id)
+        if category_name == "補給品":
+            category = "consumables"
+            category_label = "補給品"
+        elif category_name == "戰術道具":
+            category = "tactical"
+            category_label = "戰術道具"
+        elif category_name == "飾品":
+            category = "accessories"
+            category_label = "飾品"
+        else:
+            category = "consumables"
+            category_label = "補給品"
+
+        category_counts["all"] += 1
+        category_counts[category] += 1
+
+        job_ok = True
+        if item_id in EQUIPMENT:
+            job_ok = state.get("job") in item["jobs"]
+
         if not unlocked:
             row_enabled = False
-            disabled_reason = "商品已售罄" if item_id == "item_potion_m" else "尚未解鎖"
+            disabled_reason = "尚未解鎖"
             status = "missing"
-            stock_label = "已售罄"
+            stock_label = "尚未解鎖"
+        elif not job_ok:
+            row_enabled = False
+            disabled_reason = "職業不符"
+            status = "blocked"
+            stock_label = "無限庫存"
         elif not has_enough_gold:
             row_enabled = False
             disabled_reason = "金幣不足"
@@ -2432,8 +2494,8 @@ def shop_screen_model(state: dict[str, Any]) -> dict[str, Any]:
             "id": f"row_{item_id.split('_', 1)[1]}",
             "item_id": item_id,
             "title": item["name"],
-            "category": "consumables",
-            "summary": f"{item['desc']}旅行最基礎的保障。" if item_id == "item_potion_s" else item["desc"],
+            "category": category,
+            "summary": game.travel_shop_item_detail(item_id),
             "price": price,
             "owned_count": owned_count,
             "stock_label": stock_label,
@@ -2446,49 +2508,65 @@ def shop_screen_model(state: dict[str, Any]) -> dict[str, Any]:
         item_details[item_id] = {
             "item_id": item_id,
             "title": item["name"],
-            "category_label": "補給品",
-            "description": get_consumable_description(item_id, item["name"]),
-            "effect_summary": get_consumable_effect_summary(item_id),
-            "use_context": "可在戰鬥中或非戰鬥狀態下使用。",
+            "category_label": category_label,
+            "description": get_consumable_description(item_id, item["name"]) if category == "consumables" else item.get("desc", ""),
+            "effect_summary": get_consumable_effect_summary(item_id) if category == "consumables" else game.travel_shop_item_detail(item_id),
+            "use_context": "購買後放入背包；需另行裝備。" if item_id in EQUIPMENT else "可在戰鬥中或非戰鬥狀態下使用。",
             "price": price,
             "owned_count": owned_count,
             "status": status,
             "disabled_reason": disabled_reason
         }
 
-        req_status = "met" if has_enough_gold else "missing"
-        req_disabled = None if has_enough_gold else "金幣不足"
+        reqs = []
+        # Gold requirement
+        gold_status = "met" if has_enough_gold else "missing"
+        gold_disabled = None if has_enough_gold else "金幣不足"
         if not unlocked:
-            req_status = "missing"
-            req_disabled = "商品已售罄" if item_id == "item_potion_m" else "尚未解鎖"
+            gold_status = "missing"
+            gold_disabled = "尚未解鎖"
+        reqs.append({
+            "id": "gold",
+            "label": "金幣需求",
+            "required_value": f"{price}G",
+            "current_value": f"{gold}G",
+            "status": gold_status,
+            "disabled_reason": gold_disabled
+        })
 
-        requirement_rows[item_id] = [
-            {
-                "id": "gold",
-                "label": "金幣需求",
-                "required_value": f"{price}G",
-                "current_value": f"{gold}G",
-                "status": req_status,
-                "disabled_reason": req_disabled
-            }
-        ]
+        # Job restriction if equipment
+        if item_id in EQUIPMENT:
+            job_status = "met" if job_ok else "missing"
+            job_disabled = None if job_ok else "職業不符"
+            reqs.append({
+                "id": "job",
+                "label": "職業限制",
+                "required_value": ",".join(item["jobs"]),
+                "current_value": state.get("job", ""),
+                "status": job_status,
+                "disabled_reason": job_disabled
+            })
 
-        action_enabled = unlocked and has_enough_gold
+        requirement_rows[item_id] = reqs
+
+        action_enabled = unlocked and has_enough_gold and job_ok
         action_disabled_reason = None
         if not unlocked:
-            action_disabled_reason = "商品已售罄" if item_id == "item_potion_m" else "尚未解鎖"
+            action_disabled_reason = "尚未解鎖"
+        elif not job_ok:
+            action_disabled_reason = "職業不符"
         elif not has_enough_gold:
             action_disabled_reason = "金幣不足"
 
         result_msg = ""
         if action_enabled:
-            result_msg = f"成功購買{item['name']}！獲得{item['name']} x1，扣除金幣 {price}G。"
+            result_msg = f"成功購買 {item['name']}！獲得 {item['name']} x1，扣除金幣 {price}G。"
         else:
-            result_msg = f"無法購買{item['name']}：{action_disabled_reason}。"
+            result_msg = f"無法購買 {item['name']}：{action_disabled_reason}。"
 
         primary_actions[item_id] = {
             "action_id": "buy_item",
-            "label": f"購買{item['name']}",
+            "label": f"購買 {item['name']}",
             "enabled": action_enabled,
             "disabled_reason": action_disabled_reason,
             "payload": { "item_id": item_id },
@@ -2496,10 +2574,10 @@ def shop_screen_model(state: dict[str, Any]) -> dict[str, Any]:
         }
 
     category_tabs = [
-        { "id": "all", "label": "全部商品", "count": len(list_rows), "enabled": True },
-        { "id": "consumables", "label": "補給品", "count": len(list_rows), "enabled": True },
-        { "id": "tactical", "label": "戰術道具", "count": 0, "enabled": False },
-        { "id": "accessories", "label": "飾品", "count": 0, "enabled": False }
+        { "id": "all", "label": "全部商品", "count": category_counts["all"], "enabled": True },
+        { "id": "consumables", "label": "補給品", "count": category_counts["consumables"], "enabled": True },
+        { "id": "tactical", "label": "戰術道具", "count": category_counts["tactical"], "enabled": True },
+        { "id": "accessories", "label": "飾品", "count": category_counts["accessories"], "enabled": True }
     ]
 
     if gold >= 30:
@@ -2519,11 +2597,11 @@ def shop_screen_model(state: dict[str, Any]) -> dict[str, Any]:
         "screen_id": "facility_shop_screen",
         "facility_id": "travel_shop",
         "title": "星燈行商鋪 (Live)",
-        "subtitle": "與遊戲核心同步的商品交易服務，僅限補給品購買。",
+        "subtitle": "與遊戲核心同步的商品交易服務，僅限補給品與旅行裝備購買。",
         "npc": {
             "id": "terry",
             "name": "特里",
-            "role": "行商特里，常年往返於迷宮城鎮之間，販售各種實用的補給品。",
+            "role": "行商特里，常年往返於迷宮城鎮之間，販售各種實用的補給品與旅行裝備。",
             "guidance": "「歡迎光臨！今天的貨色都很齊全喔！特別是生命補給藥水，剛從公會那裡進了一批新鮮的！」",
             "portrait_placeholder": "TR"
         },
@@ -2555,18 +2633,14 @@ def shop_screen_model(state: dict[str, Any]) -> dict[str, Any]:
 
 
 def get_magic_book_category(book_id: str) -> tuple[str, str]:
-    book = MAGIC_BOOKS[book_id]
-    skill = SKILLS[book["skill"]]
-    kind = skill["kind"]
-    if kind == "damage":
+    cli_cat = game.magic_shop_category(book_id)
+    if cli_cat == "攻擊魔法":
         return "damage", "攻擊魔法"
-    if kind == "heal":
+    if cli_cat == "恢復魔法":
         return "heal", "恢復魔法"
-    if kind == "buff":
+    if cli_cat == "輔助魔法":
         return "buff", "輔助魔法"
-    if kind == "debuff":
-        return "damage", "攻擊魔法"
-    return "buff", "輔助魔法"
+    return "special", "特殊魔法"
 
 
 def get_magic_book_status_key(state: dict, book_id: str) -> str:
@@ -2706,7 +2780,7 @@ def magic_shop_screen_model(state: dict[str, Any]) -> dict[str, Any]:
     level = state.get("level", 1)
     job = state.get("job", "")
 
-    categories_counts = {"all": 0, "damage": 0, "heal": 0, "buff": 0}
+    categories_counts = {"all": 0, "damage": 0, "heal": 0, "buff": 0, "special": 0}
     for b_id in MAGIC_BOOKS:
         categories_counts["all"] += 1
         cat_id, _ = get_magic_book_category(b_id)
@@ -2717,7 +2791,8 @@ def magic_shop_screen_model(state: dict[str, Any]) -> dict[str, Any]:
         { "id": "all", "label": "全部魔法", "count": categories_counts["all"], "enabled": True },
         { "id": "damage", "label": "攻擊魔法", "count": categories_counts["damage"], "enabled": True },
         { "id": "heal", "label": "恢復魔法", "count": categories_counts["heal"], "enabled": True },
-        { "id": "buff", "label": "輔助魔法", "count": categories_counts["buff"], "enabled": True }
+        { "id": "buff", "label": "輔助魔法", "count": categories_counts["buff"], "enabled": True },
+        { "id": "special", "label": "特殊魔法", "count": categories_counts["special"], "enabled": True }
     ]
 
     list_rows = []
@@ -2725,7 +2800,7 @@ def magic_shop_screen_model(state: dict[str, Any]) -> dict[str, Any]:
     requirement_rows = {}
     primary_actions = {}
 
-    book_ids = ["book_spark", "book_ice_needle", "book_minor_heal", "book_guardian_rune", "book_quickstep", "book_cinder_mark"]
+    book_ids = list(MAGIC_BOOKS.keys())
     for b_id in book_ids:
         if b_id not in MAGIC_BOOKS:
             continue
@@ -2917,79 +2992,146 @@ def magic_shop_screen_model(state: dict[str, Any]) -> dict[str, Any]:
 
 def synthesis_screen_model(state: dict[str, Any]) -> dict[str, Any]:
     gold = state.get("gold", 0)
-    scorched_iron = state.get("inventory", {}).get("mat_scorched_iron", 0)
-    cracked_stone = state.get("inventory", {}).get("mat_cracked_stone", 0)
+    mira_recipes = ["recipe_fire_cloak", "recipe_focus_pouch", "recipe_heat_charm", "recipe_piercing_bundle"]
 
-    recipe_id = "recipe_piercing_bundle"
-    recipe = RECIPES[recipe_id]
+    recipe_rows = []
+    recipe_details = {}
+    requirement_rows = {}
 
-    unlocked = game.recipe_available(state, recipe_id)
-    has_enough_gold = gold >= recipe["gold"]
-    has_enough_mats = game.can_pay_items(state, recipe["materials"])
+    equipment_count = 0
+    battle_count = 0
 
-    owned_count = state.get("inventory", {}).get("item_armor_piercer", 0)
+    icon_labels = {
+        "gold": "G",
+        "mat_scorched_iron": "鐵",
+        "mat_cracked_stone": "石",
+        "mat_moss_fiber": "纖",
+        "mat_small_crystal": "晶",
+        "mat_fire_stone": "火",
+        "mat_lava_shard": "岩",
+    }
 
-    if not unlocked:
-        status = "missing"
-        status_label = "尚未解鎖"
-        action_enabled = False
-        action_disabled_reason = "配方尚未解鎖。"
-        feedback_text = "這張配方目前在公會還沒登記，暫時無法製作。"
-        feedback_tone = "warning"
-    elif not has_enough_gold:
-        status = "missing"
-        status_label = "金幣不足"
-        action_enabled = False
-        action_disabled_reason = f"需要 {recipe['gold']}G，目前 {gold}G。"
-        feedback_text = "素材齊了，但工錢不夠。"
-        feedback_tone = "warning"
-    elif not has_enough_mats:
-        status = "missing"
-        status_label = "素材不足"
-        action_enabled = False
-        action_disabled_reason = f"需要焦黑鐵礦 x2、破裂石片 x3；目前焦黑鐵礦 x{scorched_iron}、破裂石片 x{cracked_stone}。"
-        feedback_text = "破甲釘不難做，但至少要準備好材料與金幣。"
-        feedback_tone = "warning"
-    else:
-        status = "craftable"
-        status_label = "可製作"
-        action_enabled = True
-        action_disabled_reason = None
-        feedback_text = "切到戰術道具分類時，列表應只剩這類配方。"
-        feedback_tone = "success"
+    # First, scan recipes to get counts
+    for r_id in mira_recipes:
+        cat_str = game.synthesis_recipe_category(r_id)
+        if cat_str == "裝備":
+            equipment_count += 1
+        else:
+            battle_count += 1
 
-    recipe_rows = [
-        {
-            "recipe_id": recipe_id,
+    # Default selection to the first whitelisted recipe
+    default_recipe_id = mira_recipes[0]
+
+    for r_id in mira_recipes:
+        recipe = RECIPES[r_id]
+        unlocked = game.recipe_available(state, r_id)
+        has_enough_gold = gold >= recipe["gold"]
+        has_enough_mats = game.can_pay_items(state, recipe["materials"])
+
+        base_item = recipe.get("base_item")
+        has_base_item = True
+        if base_item:
+            has_base_item = game.owns_item_or_equipped(state, base_item)
+
+        # Categorize
+        cat_str = game.synthesis_recipe_category(r_id)
+        category = "equipment" if cat_str == "裝備" else "battle"
+        category_label = cat_str
+
+        # Get output item info
+        out_item_id, out_qty = list(recipe["output"].items())[0]
+        out_name = game.item_name(out_item_id)
+        output_summary = f"{out_name} x{out_qty}"
+
+        if out_item_id in EQUIPMENT:
+            owned_count = game.equipment_owned_count(state, out_item_id)
+            owned_summary = f"{owned_count} 件"
+        else:
+            owned_count = state.get("inventory", {}).get(out_item_id, 0)
+            owned_summary = f"{owned_count} 個"
+
+        # Determine craft limit count
+        craft_limit = game.max_synthesis_count(state, r_id)
+
+        # Determine status
+        if not unlocked:
+            status = "missing"
+            status_label = "尚未解鎖"
+            action_enabled = False
+            action_disabled_reason = "配方尚未解鎖。"
+            feedback_text = "這張配方目前在公會還沒登記，暫時無法製作。"
+            feedback_tone = "warning"
+        elif not has_enough_gold:
+            status = "missing"
+            status_label = "金幣不足"
+            action_enabled = False
+            action_disabled_reason = f"需要 {recipe['gold']}G，目前 {gold}G。"
+            feedback_text = "素材與基底齊了，但工錢不夠。"
+            feedback_tone = "warning"
+        elif not has_base_item:
+            status = "missing"
+            status_label = "缺少基底"
+            action_enabled = False
+            action_disabled_reason = f"需要基底 {game.item_name(base_item)}。"
+            feedback_text = f"缺少必要的基底裝備 {game.item_name(base_item)}。"
+            feedback_tone = "warning"
+        elif not has_enough_mats:
+            status = "missing"
+            status_label = "素材不足"
+            action_enabled = False
+            mats_desc_list = []
+            for m_id, m_qty in recipe["materials"].items():
+                mats_desc_list.append(f"{game.item_name(m_id)} x{m_qty} (目前 x{state.get('inventory', {}).get(m_id, 0)})")
+            action_disabled_reason = "需要 " + "、".join(mats_desc_list) + "。"
+            feedback_text = "製作材料還不夠，先去迷宮搜集一下吧。"
+            feedback_tone = "warning"
+        else:
+            # For base_item recipes, status can be 'limited' if base item has limited count
+            if base_item:
+                status = "limited"
+                status_label = "基底有限"
+            else:
+                status = "craftable"
+                status_label = "可製作"
+            action_enabled = True
+            action_disabled_reason = None
+            feedback_text = f"米菈微笑道：「看來你的材料與基底都齊了，隨時可以製作 {recipe['name']}。」"
+            feedback_tone = "success"
+
+        recipe_rows.append({
+            "recipe_id": r_id,
             "title": recipe["name"],
-            "category": "battle",
-            "category_label": "戰術道具",
+            "category": category,
+            "category_label": category_label,
             "status": status,
             "status_label": status_label,
-            "output_summary": "破甲釘 x3",
-            "owned_summary": f"{owned_count} 個",
-            "max_count": 1,
+            "output_summary": output_summary,
+            "owned_summary": owned_summary,
+            "max_count": craft_limit,
             "gold": recipe["gold"]
-        }
-    ]
+        })
 
-    recipe_details = {
-        recipe_id: {
+        # Build detailed result message for synthesis confirmation
+        mats_used = "、".join([f"{game.item_name(m_id)} x{m_qty}" for m_id, m_qty in recipe["materials"].items()])
+        base_used = f"與{game.item_name(base_item)}" if base_item else ""
+        result_msg = f"成功合成{recipe['name']}！扣除金幣 {recipe['gold']}G，消耗{mats_used}{base_used}。"
+
+        recipe_details[r_id] = {
             "title": recipe["name"],
-            "description": recipe.get("desc", "取得破甲釘 x3。"),
-            "effect": "取得破甲釘 x3。",
-            "base_note": "基底：不需要基底裝備。",
+            "description": recipe.get("desc", f"取得 {output_summary}。"),
+            "effect": recipe.get("desc", f"取得 {output_summary}。"),
+            "base_note": f"基底：需要 {game.item_name(base_item)} x1，可消耗背包或已裝備物。" if base_item else "基底：不需要基底裝備。",
             "notes": "合成會消耗素材與金幣。",
             "outputs": [
-                { "item_id": "item_armor_piercer", "label": "破甲釘", "quantity": 3 }
+                { "item_id": out_item_id, "label": out_name, "quantity": out_qty }
             ],
             "primary_action": {
                 "action_id": "craft_recipe",
-                "label": "合成破甲釘組",
+                "label": f"合成{recipe['name']}",
                 "enabled": action_enabled,
                 "disabled_reason": action_disabled_reason,
-                "payload": { "recipe_id": recipe_id },
-                "result_message": f"成功合成{recipe['name']}！扣除金幣 {recipe['gold']}G，消耗焦黑鐵礦 x2、破裂石片 x3。" if action_enabled else f"無法合成：{action_disabled_reason}"
+                "payload": { "recipe_id": r_id },
+                "result_message": result_msg if action_enabled else f"無法合成：{action_disabled_reason}"
             },
             "ready_feedback": {
                 "tone": feedback_tone,
@@ -2997,10 +3139,9 @@ def synthesis_screen_model(state: dict[str, Any]) -> dict[str, Any]:
                 "text": feedback_text
             }
         }
-    }
 
-    requirement_rows = {
-        recipe_id: [
+        # Build requirement rows
+        r_rows = [
             {
                 "id": "gold",
                 "icon_label": "G",
@@ -3010,34 +3151,49 @@ def synthesis_screen_model(state: dict[str, Any]) -> dict[str, Any]:
                 "status": "met" if has_enough_gold else "missing",
                 "status_label": "已滿足" if has_enough_gold else "不足",
                 "disabled_reason": None if has_enough_gold else f"需要 {recipe['gold']}G，目前 {gold}G。"
-            },
-            {
-                "id": "mat_scorched_iron",
-                "icon_label": "鐵",
-                "label": "焦黑鐵礦",
-                "required_value": "x2",
-                "current_value": f"x{scorched_iron}",
-                "status": "met" if scorched_iron >= 2 else "missing",
-                "status_label": "已滿足" if scorched_iron >= 2 else "不足",
-                "disabled_reason": None if scorched_iron >= 2 else f"需要焦黑鐵礦 x2，目前 x{scorched_iron}。"
-            },
-            {
-                "id": "mat_cracked_stone",
-                "icon_label": "石",
-                "label": "破裂石片",
-                "required_value": "x3",
-                "current_value": f"x{cracked_stone}",
-                "status": "met" if cracked_stone >= 3 else "missing",
-                "status_label": "已滿足" if cracked_stone >= 3 else "不足",
-                "disabled_reason": None if cracked_stone >= 3 else f"需要破裂石片 x3，目前 x{cracked_stone}。"
             }
         ]
-    }
+
+        if base_item:
+            owned_base_qty = state.get("inventory", {}).get(base_item, 0)
+            is_equipped = base_item in state.get("equipment", {}).values()
+            if is_equipped:
+                owned_base_qty += 1
+                curr_val_str = f"x{owned_base_qty}（已裝備）"
+            else:
+                curr_val_str = f"x{owned_base_qty}"
+
+            r_rows.append({
+                "id": f"base_{base_item}",
+                "icon_label": "基",
+                "label": f"基底裝備：{game.item_name(base_item)}",
+                "required_value": "x1",
+                "current_value": curr_val_str,
+                "status": "limited" if has_base_item else "missing",
+                "status_label": "可消耗" if has_base_item else "不足",
+                "disabled_reason": None if has_base_item else f"需要基底 {game.item_name(base_item)}。"
+            })
+
+        for m_id, m_qty in recipe["materials"].items():
+            owned_qty = state.get("inventory", {}).get(m_id, 0)
+            met = owned_qty >= m_qty
+            r_rows.append({
+                "id": m_id,
+                "icon_label": icon_labels.get(m_id, game.item_name(m_id)[0] if m_id in ITEMS or m_id in EQUIPMENT or m_id in MATERIALS else "物"),
+                "label": game.item_name(m_id),
+                "required_value": f"x{m_qty}",
+                "current_value": f"x{owned_qty}",
+                "status": "met" if met else "missing",
+                "status_label": "已滿足" if met else "不足",
+                "disabled_reason": None if met else f"需要 {game.item_name(m_id)} x{m_qty}，目前 x{owned_qty}。"
+            })
+
+        requirement_rows[r_id] = r_rows
 
     category_tabs = [
-        { "id": "all", "label": "全部", "count": 1, "selected": True, "enabled": True },
-        { "id": "equipment", "label": "裝備", "count": 0, "selected": False, "enabled": False },
-        { "id": "battle", "label": "戰術道具", "count": 1, "selected": False, "enabled": True }
+        { "id": "all", "label": "全部", "count": len(mira_recipes), "selected": True, "enabled": True },
+        { "id": "equipment", "label": "裝備", "count": equipment_count, "selected": False, "enabled": equipment_count > 0 },
+        { "id": "battle", "label": "戰術道具", "count": battle_count, "selected": False, "enabled": battle_count > 0 }
     ]
 
     return {
@@ -3053,14 +3209,14 @@ def synthesis_screen_model(state: dict[str, Any]) -> dict[str, Any]:
         "resource_strip": resource_strip(state),
         "category_tabs": category_tabs,
         "selected_category_id": "all",
-        "selected_recipe_id": recipe_id,
+        "selected_recipe_id": default_recipe_id,
         "recipe_rows": recipe_rows,
         "recipe_details": recipe_details,
         "requirement_rows": requirement_rows,
         "feedback_message": {
-            "tone": feedback_tone,
+            "tone": "info",
             "speaker": "米菈",
-            "text": feedback_text
+            "text": "選一張配方，右側會顯示金幣、素材與基底裝備狀態。"
         },
         "empty_state": {
             "message": "目前沒有符合分類的可用配方。"
@@ -3706,22 +3862,69 @@ def guild_screen_model(state: dict[str, Any]) -> dict[str, Any]:
                 "notes": "這是解除該區域核心封印的最後一戰，請準備最精良的裝備。"
             }
         else:
-            story_hint_card = {
-                "id": "story_hint_cinder_seal_completed",
-                "title": "火之印記核心的凝聚",
-                "description": "已擊敗深窟守護者並取得碎片。請前往大教堂報告調查結果。",
-                "detail_description": "你已取得所有共鳴的火之印記碎片！這項重大進展需要神職人員的文獻知識。請小隊前往城鎮的「轉職神殿」向賽恩祭司回報，確認印記的核心狀態。",
-                "status": "story_hint",
-                "status_label": "主線進度",
-                "visible": True,
-                "enabled": False,
-                "disabled_reason": "主線第一幕已全部通關。",
-                "primary_action": "unavailable",
-                "action_label": "已完成",
-                "condition_rows": [],
-                "reward_summary": None,
-                "notes": "工會會長諾亞在此向米菈小隊的卓越冒險致以敬意！"
-            }
+            if game.can_ask_fire_mark_guild_inquiry(state):
+                story_hint_card = {
+                    "id": "story_hint_fire_mark_guild_inquiry",
+                    "title": "火印碎片的疑問",
+                    "description": "已收集三枚火之印記碎片。請向工會會長諾亞詢問關於印記碎片的奧秘。",
+                    "detail_description": "你收集到了三枚共鳴的火之印記碎片。工會可能有相關的古代記錄，請向會長諾亞詢問這些碎片的來歷。",
+                    "status": "story_hint",
+                    "status_label": "主線線索",
+                    "visible": True,
+                    "enabled": True,
+                    "disabled_reason": None,
+                    "primary_action": "fire_mark_guild_inquiry",
+                    "action_label": "詢問諾亞",
+                    "condition_rows": [
+                        {
+                            "id": "cond_fire_mark_shards",
+                            "condition_type": "item_requirement",
+                            "label": "持有三枚火之印記碎片",
+                            "required_value": "3 個",
+                            "current_value": f"{state.get('inventory', {}).get('key_fire_mark_shard', 0)} 個",
+                            "status": "met",
+                            "status_label": "已滿足",
+                            "status_icon_id": "met",
+                            "source": "runtime"
+                        }
+                    ],
+                    "reward_summary": None,
+                    "notes": "詢問完成後將會獲得下一步前往神殿的指引。"
+                }
+            elif state.get("flags", {}).get("fire_mark_guild_inquiry_done"):
+                story_hint_card = {
+                    "id": "story_hint_fire_mark_guild_inquiry_done",
+                    "title": "前往轉職神殿詢問賽恩",
+                    "description": "諾亞建議前往大教堂。請至轉職神殿向賽恩祭司回報與詢問。",
+                    "detail_description": "諾亞會長表示工會舊紀錄不足以判讀碎片的真正用途，建議前往神殿。請前往城鎮的「轉職神殿」向賽恩祭司回報，確認印記碎片的奧秘。",
+                    "status": "story_hint",
+                    "status_label": "主線進度",
+                    "visible": True,
+                    "enabled": False,
+                    "disabled_reason": "請前往轉職神殿向賽恩祭司詢問。",
+                    "primary_action": "unavailable",
+                    "action_label": "請前往神殿",
+                    "condition_rows": [],
+                    "reward_summary": None,
+                    "notes": "主線進展：詢問大教堂。"
+                }
+            else:
+                story_hint_card = {
+                    "id": "story_hint_cinder_seal_completed",
+                    "title": "火之印記核心的凝聚",
+                    "description": "已擊敗深窟守護者並取得碎片。請前往大教堂報告調查結果。",
+                    "detail_description": "你已取得所有共鳴的火之印記碎片！這項重大進展需要神職人員的文獻知識。請小隊前往城鎮的「轉職神殿」向賽恩祭司回報，確認印記的核心狀態。",
+                    "status": "story_hint",
+                    "status_label": "主線進度",
+                    "visible": True,
+                    "enabled": False,
+                    "disabled_reason": "主線第一幕已全部通關。",
+                    "primary_action": "unavailable",
+                    "action_label": "已完成",
+                    "condition_rows": [],
+                    "reward_summary": None,
+                    "notes": "工會會長諾亞在此向米菈小隊的卓越冒險致以敬意！"
+                }
 
     feedback_message = {
         "tone": "info",

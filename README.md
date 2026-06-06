@@ -9,7 +9,9 @@ screen-level verification, and historical MVP notes live in Task Zone files.
 Git baseline:
 
 - Latest committed bridge baseline:
-  `709dc6c [antig] fix(gui): improve dungeon event scrolling and guild story progression hints`
+  `7080b56 [antig] feat(gui): add Temple and Relic live bridge closure`
+- Current uncommitted bridge package completes Phase B facility coverage and the
+  fire-mark Guild inquiry closure. See `git status --short` before editing.
 
 Project posture:
 
@@ -47,15 +49,15 @@ Blessed local live bridge coverage:
 |---|---|
 | Start | `start_new_game`, `restart_game`, `load_game`; live entry copy and no-save / has-save states aligned with static Start Screen. |
 | Town Hub | Live resource strip, facility nodes, synthesis entry unlock state, `open_world_map`, and live routing into approved facilities. Town Hub does not expose `save_game`. |
-| Synthesis | Single existing recipe craft bridge for `recipe_piercing_bundle` through Python runtime validation and `game.craft_recipe_message(...)`. |
+| Synthesis | Craft coverage for the four existing Mira recipes through Python runtime validation and `game.craft_recipe_message(...)`. |
 | Inn | `rest_at_inn` deducts 30G and restores HP/MP through Python runtime behavior. |
 | World Map | Runtime-backed location / route ScreenModel; main menu keeps `save_game` and shell-only `open_settings`; town return is via town node / detail action. |
 | Dungeon / Combat | Approved traversal and combat loop slice, victory / retreat / defeat routing, route clear / resolved state, and Combat Skill Button MVP. |
-| Guild | Narrow clear report registration plus existing `QUESTS` turn-in bridge; `quest_cave_gathering` can unlock `shop_synthesis_01`. |
+| Guild | Narrow clear report registration, existing `QUESTS` turn-in bridge, Boss Glen investigation, and the existing three-shard fire-mark inquiry that routes naturally into Temple. Guild material sell remains closed. |
 | Guild x Dungeon Boss Glen | Special gating bridge plus UX cleanup: Scorched Mine 18/18 records `boss_glen_sighted`, Guild accepts `boss_glen_investigation_accepted`, Boss Glen challenge opens only after investigation acceptance, persistent Guild story hint cards guide Glen / Act 2 steps, and `quest_boss_glen` / Blood Map turn-in unlocks Ash Ravine through existing runtime progression. |
 | Ash / Cinder presentation cleanup | Ash Ravine and Cinder Seal Depths use existing runtime progression while GUI copy avoids premature Boss / reward / unlock spoilers before the matching scout reports; owner hand test confirmed the progression flow reaches the Temple / Church handoff. |
-| Shop | Buy exactly one existing travel-shop consumable through Python server-side validation. |
-| Magic Shop | Learn one existing magic book through Python server-side validation and existing skill data. |
+| Shop | Data-driven coverage for all nine existing `SHOP_INVENTORY["travel"]` entries; purchases remain quantity-one, and accessories go to the backpack without auto-equip. |
+| Magic Shop | Data-driven coverage for all existing `MAGIC_BOOKS`; learning remains server-validated, and debuff books follow the CLI special-magic category. |
 | Workshop | Buy weapon & armor without auto-equip; equip weapons and owned non-weapon equipment; upgrade whitelisted recipes (`recipe_iron_sword_plus_1`, `recipe_leather_armor_plus_1`). |
 | Storage | Unlock, view, and deposit / withdraw items through Python runtime state; storage capacity upgrades remain closed. |
 | Temple | Live-mode loading, promotion requirement preview, moon well pray, fire-mark church bridge and lookup inquiry actions using Python runtime helpers. |
@@ -118,8 +120,8 @@ package:
   schema changes, save migration, combat formula changes, or manual `save.json`
   edits.
 
-Guild Quest Turn-in for Synthesis Unlock Live MVP remains the latest guild /
-synthesis unlock bridge coverage:
+Guild Quest Turn-in and fire-mark inquiry coverage are included in the current
+package:
 
 - Guild live mode can show unlocked existing `QUESTS` and submit ready quest
   turn-ins through Python runtime validation.
@@ -129,27 +131,36 @@ synthesis unlock bridge coverage:
 - Dungeon clear report semantics remain separate: first-clear rewards still
   happen at route clear, and Guild report registration only records/display
   report status.
+- `fire_mark_guild_inquiry` reuses
+  `game.can_ask_fire_mark_guild_inquiry(...)` and
+  `game.fire_mark_guild_inquiry(...)`; it keeps the three shards and enables the
+  existing Guild -> Temple -> Church lookup progression without manually setting
+  the prerequisite flag.
 - This does not open a full guild / quest framework, new quest data, schema
-  changes, save migration, combat formula changes, full synthesis, generic
-  recipe bridge, multi-recipe synthesis coverage, or base-item upgrades.
+  changes, save migration, combat formula changes, generic story inquiries, or
+  Guild material sell.
 
-Synthesis Single Recipe Craft Live MVP remains the current synthesis craft
-coverage:
+Phase B facility coverage is complete in the current uncommitted package:
 
 - `synthesis_screen` live mode loads a runtime-shaped ScreenModel and dispatches
-  `craft_recipe`.
-- The only allowed recipe is `recipe_piercing_bundle`.
+  `craft_recipe` for the four existing Mira recipes:
+  `recipe_fire_cloak`, `recipe_focus_pouch`, `recipe_heat_charm`, and
+  `recipe_piercing_bundle`.
 - Python runtime remains gameplay authority through `game.recipe_available(...)`
   and `game.craft_recipe_message(...)`.
-- This does not open full synthesis, generic recipe bridge, multi-recipe
-  coverage, base-item upgrades, recipe / quest / dungeon changes, schema
-  changes, save changes, combat formula changes, or crafting system refactors.
+- Shop iterates the existing travel inventory, and Magic Shop iterates existing
+  `MAGIC_BOOKS`; neither adds new data or a generic facility framework.
+- This does not open arbitrary recipes, new items or magic books, sell, quantity
+  selection, generic inventory / equipment management, schema changes, save
+  changes, combat formula changes, or crafting system refactors.
 
 Temple and Relic Altar Live MVP is included in the current package:
 
 - Town Hub can route to Temple and Relic Altar live screens.
 - Temple live screen loads a runtime-shaped `temple_screen_model(state)`. It previews job promotion requirements based on the database and checks if they are satisfied. Moon well pray deducts 30G and returns live state/message feedback.
 - `fire_mark_church_bridge` and `fire_mark_church_lookup` actions are triggered by inquiry buttons when their respective runtime prerequisites (`should_show_fire_mark_church_bridge(state)` and `should_show_fire_mark_church_lookup(state)`) are met. They directly call Python gameplay helpers to modify story flags.
+- The current package supplies the missing Guild-side prerequisite through
+  `fire_mark_guild_inquiry`, so the live progression reaches Temple naturally.
 - Relic Altar live screen loads a runtime-shaped `relic_preview_screen_model(state)`. It previews registered relics (like the ash charm) and lists their unlock requirements. Attuning a relic dispatches `attune_relic` action returning preview-only messages.
 - This does not open formal class transfer, class specialization gameplay, formal relic system, relic effects, equipping/obtaining relics, or manual `save.json` edits.
 
@@ -264,26 +275,19 @@ do not imply gameplay validation.
 
 ## Next-Step Boundary
 
-The next implementation target is not pre-approved.
+The next implementation target is not pre-approved. Phase B facility coverage
+is complete in the current uncommitted package.
 
-Future Phase B candidate queue, second priority after the Phase A mainline close:
-
-1. Synthesis existing Mira recipes coverage.
-2. Shop travel inventory coverage.
-3. Magic Shop `MAGIC_BOOKS` coverage.
-4. Workshop upgrade coverage.
-
-Phase B work may be owner-tested in small batches after 2-3 narrow slices, but
-each implementation slice still needs its own read-only planning gate and
-owner-approved exact scope.
-
-Future Phase C convenience queue is deferred:
+The smallest next CLI-parity candidate is:
 
 1. Guild material sell.
-2. Inventory / equipment management.
-3. Storage capacity upgrade.
-4. Bestiary detail / filtering.
-5. Settings panel.
+
+Remaining Phase C convenience candidates are deferred:
+
+1. Inventory / equipment management.
+2. Storage capacity upgrade.
+3. Bestiary detail / filtering.
+4. Settings panel.
 
 Phase C is not current work. Storage capacity upgrades, generic inventory
 management, generic equipment management, non-whitelisted workshop upgrades, and

@@ -9,7 +9,9 @@ what the next boundary is. Detailed MVP verification belongs in Task Zone docs.
 - Work directory: `C:\Users\user\OneDrive\文字冒險遊戲`
 - Current branch expectation: `main` aligned with `origin/main`.
 - Latest committed bridge baseline:
-  `709dc6c [antig] fix(gui): improve dungeon event scrolling and guild story progression hints`
+  `7080b56 [antig] feat(gui): add Temple and Relic live bridge closure`
+- Current working tree contains an uncommitted, verified package for Phase B
+  facility coverage plus the fire-mark Guild inquiry closure.
 
 Project state:
 
@@ -26,6 +28,17 @@ Project state:
 
 Current newest GUI live state:
 
+- Phase B facility coverage is complete in the current uncommitted package:
+  Synthesis supports the four existing Mira recipes; Shop iterates all nine
+  existing travel-shop entries; Magic Shop iterates all existing `MAGIC_BOOKS`
+  and aligns debuff books with the CLI special-magic category.
+- Shop accessory purchases go to the backpack without auto-equip. Shop,
+  Synthesis, and Magic Shop remain existing-data coverage, not generic facility
+  frameworks.
+- The missing fire-mark Guild inquiry bridge is closed:
+  `fire_mark_guild_inquiry` reuses the CLI prerequisite and mutation helpers,
+  keeps all three shards, sets `fire_mark_guild_inquiry_done`, and lets the
+  Temple bridge appear naturally without manually setting the flag.
 - Scorched Mine Boss Glen Progression Deadlock Fix is complete:
   Scorched Mine 18/18 sets `boss_glen_sighted`; Guild can accept
   the investigation through `accept_boss_glen_investigation`, setting
@@ -72,14 +85,15 @@ Current newest GUI live state:
   `is_unlocked(state, "shop_synthesis_01")` as locked / unlocked.
 - Locked 米菈合成屋 points the player to finish the Guild task `洞窟採集`; unlocked
   米菈合成屋 routes to the existing static synthesis screen.
-- Synthesis Single Recipe Craft Live MVP is complete:
+- Synthesis existing Mira recipe coverage is complete:
   `synthesis_screen` live mode loads a runtime-shaped ScreenModel and dispatches
-  `craft_recipe` for the single whitelisted recipe `recipe_piercing_bundle`.
+  `craft_recipe` for `recipe_fire_cloak`, `recipe_focus_pouch`,
+  `recipe_heat_charm`, and `recipe_piercing_bundle`.
 - Crafting reuses Python runtime authority:
   `game.recipe_available(...)` and `game.craft_recipe_message(...)`.
 - This does not mean full inventory / equipment, storage capacity upgrade,
-  synthesis, crafting, guild quest, story hint, generic boss, full Act 2,
-  multi-recipe, base-item upgrade, or facility systems are complete.
+  arbitrary synthesis, crafting, guild quest, story hint, generic boss, full
+  Act 2, sell, or facility systems are complete.
 - Temple and Relic Altar Live MVP is complete: Town Hub supports live routing to Temple and Relic Altar screens, which load runtime-shaped ScreenModels. Temple dispatches `temple_pray` (paying 30G for temporary blessing), `fire_mark_church_bridge` and `fire_mark_church_lookup` (inquiries updating runtime flags via game helpers when prerequisites are met), and previews promotions. Relic Altar previews registered relics (like ash charm) and requirements, allowing the `attune_relic` placeholder action.
 - This does not open formal class transfer, class specialization gameplay, formal relic system, relic effects, equipping/obtaining relics, or manual `save.json` edits.
 
@@ -118,12 +132,12 @@ slice. It is not a permanent ban or demo freeze. Future extension points may be
 reopened through a read-only planning gate and owner-approved exact scope.
 
 - Full inventory / equipment management.
-- Accessory purchase, sell, generic unequip, comparison, non-whitelisted upgrade
-  expansion, or generic workshop framework.
+- Sell, generic unequip, comparison, non-whitelisted upgrade expansion, or
+  generic workshop framework.
 - Full shop, magic shop, storage capacity upgrade, synthesis, guild,
   quest, boss, dungeon, magic, skill, target-selection, or facility framework.
 - New quest data, schema changes, broad quest framework changes, or story inquiry
-  expansion beyond existing runtime `QUESTS` turn-in coverage.
+  expansion beyond the existing fire-mark and Boss Glen closures.
 - Save migration, data/schema changes, combat formula changes, stat rebalance, or
   manual `save.json` edits.
 - Formal asset pipeline or reference/mockup images as runtime assets.
@@ -131,7 +145,8 @@ reopened through a read-only planning gate and owner-approved exact scope.
 
 ## Next-Step Boundary
 
-No next implementation is pre-approved.
+No next implementation is pre-approved. Phase B facility coverage and the
+fire-mark Guild inquiry closure are complete in the current uncommitted package.
 
 The Glen UX cleanup and the narrow Ash / Cinder GUI presentation cleanup are
 complete in the current package. Remaining Boss / Act 2 observations are
@@ -139,34 +154,20 @@ coverage-oriented only; this does not approve Ash Guardian, Cinder Seal
 Sentinel, generic Boss handling, full story hints, Temple / Relic gameplay, or
 full Act 2 cleanup beyond the existing bridge presentation work.
 
-Future Phase B candidate queue, second priority after the Phase A mainline
-close:
-
-1. Synthesis existing Mira recipes coverage.
-2. Shop travel inventory coverage.
-3. Magic Shop `MAGIC_BOOKS` coverage.
-4. Workshop upgrade coverage.
-
-Phase B work may be owner-tested in small batches after 2-3 narrow slices, but
-each implementation slice still needs its own read-only planning gate and
-owner-approved exact scope.
-
-Future Phase C convenience queue is deferred:
+The smallest next CLI-parity candidate is:
 
 1. Guild material sell.
-2. Inventory / equipment management.
-3. Storage capacity upgrade.
-4. Bestiary detail / filtering.
-5. Settings panel.
 
-Any synthesis follow-up must not open full synthesis, base-item upgrades, recipe
-/ quest / dungeon changes, schema changes, save changes, or crafting system
-refactors without a new owner-approved exact scope.
+Remaining Phase C convenience candidates are deferred:
 
-Any Shop / Magic Shop / Workshop follow-up must stay within the approved
-single-slice coverage target. Do not open full shop, full magic shop, generic
-facility framework, generic equipment management, non-whitelisted upgrades, full
-workshop, schema changes, save migration, combat formula changes, or manual
+1. Inventory / equipment management.
+2. Storage capacity upgrade.
+3. Bestiary detail / filtering.
+4. Settings panel.
+
+Guild material sell must begin with a read-only planning gate and remain limited
+to the existing CLI material-buyback behavior. It must not open generic sell,
+shop sell, equipment sell, economy rebalance, data/schema/save changes, or manual
 `save.json` work.
 
 Any Phase C convenience follow-up must start with a later read-only gate and
@@ -182,6 +183,12 @@ do not touch runtime, JavaScript, data, schema, save, or combat formula.
 
 Latest stable verification noted here:
 
+- Current Phase B + fire-mark inquiry package Codex recheck:
+  `smoke_test_fire_mark_guild_bridge.py`, `smoke_test_temple_bridge.py`,
+  `smoke_test_shop_bridge.py`, `smoke_test_magic_shop_bridge.py`,
+  `smoke_test_synthesis_bridge.py`, `smoke_test_progression_bridge.py`,
+  `validate_data.py`, `element_maze.py --smoke-test`, and JavaScript syntax
+  checks for Guild, Shop, and Magic Shop all PASS.
 - `06_tools/validate_data.py`: PASS
 - `element_maze.py --smoke-test`: PASS
 - Workshop bridge smoke: PASS
@@ -191,7 +198,7 @@ Latest stable verification noted here:
 - Town Hub Mira / 米菈合成屋 Entry Unlock Antigravity-reported checks:
   `element_maze.py --smoke-test` PASS, `06_tools/validate_data.py` PASS, scratch
   `test_synthesis.py` PASS.
-- Synthesis Single Recipe Craft Antigravity-reported checks:
+- Historical Synthesis single-recipe baseline Antigravity-reported checks:
   `node --check 07_gui_prototype/synthesis_screen/synthesis-screen.js` PASS,
   `python 06_tools/smoke_test_synthesis_bridge.py` PASS,
   `python 06_tools/validate_data.py` PASS, and

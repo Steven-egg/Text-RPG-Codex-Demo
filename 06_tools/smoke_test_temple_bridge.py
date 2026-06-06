@@ -51,10 +51,10 @@ def run_smoke_test():
 
     # 4. Test fire_mark_church_bridge and lookup progression
     # Set the prerequisites:
-    # state["flags"]["fire_mark_guild_inquiry_done"] = True (from fire_mark_guild_inquiry)
-    # state["inventory"]["key_fire_mark_shard"] = 3
-    state["flags"]["fire_mark_guild_inquiry_done"] = True
     state["inventory"]["key_fire_mark_shard"] = 3
+    res_inq = session.dispatch("fire_mark_guild_inquiry", {}, screen_id="guild_screen")
+    assert res_inq["ok"] is True
+    assert state["flags"].get("fire_mark_guild_inquiry_done") is True
 
     # Check that temple model now has the bridge inquiry
     model_temple = session.screen_model("temple_screen")
