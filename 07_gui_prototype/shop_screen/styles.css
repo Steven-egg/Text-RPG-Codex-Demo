@@ -191,7 +191,7 @@ select:focus-visible {
   min-height: 0;
   height: clamp(570px, calc(100vh - 330px), 720px);
   display: grid;
-  grid-template-columns: minmax(340px, 0.8fr) minmax(460px, 1fr) minmax(320px, 0.75fr);
+  grid-template-columns: minmax(360px, 0.85fr) minmax(460px, 1fr) minmax(320px, 0.75fr);
   gap: 12px;
 }
 

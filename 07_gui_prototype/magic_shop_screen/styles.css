@@ -718,7 +718,7 @@ select:focus-visible {
 @media (max-width: 1220px) {
   .magic-shop-shell {
     width: min(100vw - 20px, 980px);
-    grid-template-rows: auto auto auto auto;
+    grid-template-rows: auto auto auto auto auto;
   }
 
   .magic-shop-layout {
