@@ -242,7 +242,6 @@ def guild_screen_model(state: dict[str, Any]) -> dict[str, Any]:
     ]
 
     completed_quests = state.get("completed_quests", [])
-    story_hint_card = None
 
     if "quest_boss_glen" not in completed_quests:
         glen_sighted = state.get("flags", {}).get("boss_glen_sighted")
@@ -391,7 +390,7 @@ def guild_screen_model(state: dict[str, Any]) -> dict[str, Any]:
                 "id": "story_hint_cinder_sentinel",
                 "title": "深窟封印核心的震動",
                 "description": "已登記深窟的偵查報告。封印核心似乎有巨大物體正在甦醒。",
-                "detail_description": "工會分析了你帶回的深窟岩石標本，確認結界核心的防禦機制已被觸發。請整理裝備，再次前往「燼印深窟」最深處挑戰核心的守護者，以解除當地的火之印記封印。",
+                "detail_description": "工會分析了你帶回的深窟岩石標本，確認底部結界核心的防禦機制已被觸發。請整理裝備，再次前往「燼印深窟」最深處挑戰核心的守護者，以解除當地的火之印記封印。",
                 "status": "story_hint",
                 "status_label": "主線進度",
                 "visible": True,
