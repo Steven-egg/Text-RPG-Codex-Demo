@@ -15,6 +15,7 @@ For GUI Task Zone work, start with the smallest matching route:
 | Static prototype screen work | Current agent GUI static prototype skill, then only the relevant `07_gui_prototype/<screen>/` files. |
 | Static prototype handoff / screen verification | Targeted sections of `01_content/gui-html-static-prototype-progress-v1.md`. |
 | GUI planning / drift audit / document routing | This file. |
+| Facility-family Mockup-to-HTML shell planning | `01_content/gui-facility-shell-baseline-v0.1.md`; use approved references under `08_experiments/mockup_to_html/` only when the task needs them. |
 | Screen flow / UIAction / ScreenModel mapping | `01_content/gui-screen-map.md`, `01_content/ui-flow-blueprint.md`. |
 | Runtime-connected GUI planning | `01_content/gui-runtime-bridge-plan-v1.md`, then stop at a read-only planning gate. |
 | Runtime bridge contract audit | `01_content/gui-bridge-vertical-slice-contract-audit-v1.md`. |
@@ -37,6 +38,12 @@ Default GUI mode remains HTML static prototype:
   interaction, and UIAction logging only.
 - Static fixtures are not gameplay SSOT and must not copy gameplay rules into
   JavaScript.
+- Shop + Magic Shop GUI Layout Normalization V0.5 first CSS-only checkpoint is
+  complete through `c7729df`.
+- Current facility planning is family-level Mockup-to-HTML responsibility
+  mapping. AI facility hero images provide scene / NPC / atmosphere;
+  HTML/CSS/JS provides UI and interaction; runtime remains gameplay authority.
+- Shop single-screen skinning readiness and mockup brief work is paused.
 
 Local runtime-connected live bridge exists only for explicit blessed slices:
 
@@ -68,6 +75,7 @@ Lifecycle labels:
 - `entry`: short routing / startup docs.
 - `core`: current Task Zone docs that remain active.
 - `conditional`: read only for the named task.
+- `paused`: owner-paused route; read or resume only when explicitly reopened.
 - `historical`: old planning or decision trace.
 - `archive candidate`: logically stale candidate / prompt / draft docs; do not
   move physically without explicit approval.
@@ -86,6 +94,7 @@ Lifecycle labels:
 | File | Lifecycle | Role |
 |---|---|---|
 | `01_content/gui-planning-index.md` | core | This GUI routing and lifecycle index. |
+| `01_content/gui-facility-shell-baseline-v0.1.md` | core | Facility-family Mockup-to-HTML four-layer responsibility and configuration baseline. |
 | `01_content/gui-html-static-prototype-progress-v1.md` | core | Static prototype handoff, built screens, and targeted verification notes. |
 | `01_content/gui-runtime-bridge-plan-v1.md` | core | Runtime bridge plan, approved surfaces, and landed live-slice status notes. |
 | `01_content/gui-screen-map.md` | core | Screen, flow, UIAction, and ScreenModel map. |
@@ -106,6 +115,8 @@ Lifecycle labels:
 | `01_content/gui-town-hub-review-checklist.md` | conditional | Town Hub review checklist. |
 | `01_content/gui-town-hub-facility-node-mapping-v1.md` | conditional | Town Hub facility node mapping. |
 | `01_content/gui-town-hub-programmatic-layout-plan-v1.md` | conditional | Town Hub programmatic layout plan. |
+| `01_content/gui-shop-skinning-lab-readiness-checklist-v0.1.md` | paused | Paused Shop single-screen skinning readiness route; not the active next phase. |
+| `01_content/gui-shop-mockup-brief-v0.1.md` | paused | Paused Shop single-screen mockup route; do not generate or implement from it without explicit approval. |
 
 ### Historical / Optional Background
 
@@ -179,6 +190,9 @@ Docs cleanup:
 - Reference images and generated mockups are design references, not runtime
   assets.
 - `05_assets/gui_references/` is reference storage, not a formal asset pipeline.
+- `08_experiments/mockup_to_html/` contains owner-approved Mockup-to-HTML
+  responsibility references. It is not a runtime surface or formal asset
+  pipeline.
 - GUI planning must not imply that HTML, pygame, Unity, or another platform is
   the final app unless that choice is separately approved.
 - GUI planning must not bundle runtime, data, schema, save, or combat formula
@@ -186,13 +200,12 @@ Docs cleanup:
 
 ## 6. Recommended Next Step
 
-After the reusable bridge audit, the next safest convergence item is a read-only
-gate for one small owner-selected task.
+The next smallest candidate is a markdown-only Facility Family Overlay Zone Map
+V0.1 based on `01_content/gui-facility-shell-baseline-v0.1.md`.
 
-Current recorded live-bridge candidate: Town Hub Mira / 米菈合成屋 Entry
-Unlock Live MVP. It is only a candidate. Scope should stay limited to the Town
-Hub synthesis facility node reflecting `is_unlocked(state, "shop_synthesis_01")`
-as locked / unlocked. It should not add `synthesis_screen_model()`, a synthesis
-live loader, `craft_recipe`, recipe / quest / dungeon changes, schema changes,
-save changes, or crafting-system refactors unless the owner approves a separate
-gate.
+It should define family-level text-safe overlay zones, hero-image detail zones,
+runtime-backed state categories, excluded lab-only markers, and responsive
+cropping / stacking constraints.
+
+It must not select one facility for skinning, generate an image or image brief,
+modify HTML/CSS/JavaScript, open runtime work, or start an asset pipeline.

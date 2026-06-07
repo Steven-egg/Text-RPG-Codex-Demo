@@ -9,7 +9,7 @@ what the next boundary is. Detailed MVP verification belongs in Task Zone docs.
 - Work directory: `C:\Users\user\OneDrive\文字冒險遊戲`
 - Current branch expectation: `main` aligned with `origin/main`.
 - Latest stable checkpoint:
-  `7c23bad [antig] fix(gui): restore guild screen model extraction parity`
+  `c7729df [antig] fix(gui): normalize shop family layout`
 - Latest committed bridge baseline:
   `2ecca91 [antig] feat(gui): add Guild material sell bridge and fix Shop layout`
 - Basic facility CLI-parity bridge coverage is complete through the existing
@@ -34,6 +34,24 @@ Project state:
 - Element Maze is an expandable playable demo, not a closed demo. Narrow slice /
   MVP language controls current-round risk; it does not close future extension
   points.
+
+Current facility-family planning state:
+
+- Shop + Magic Shop GUI Layout Normalization V0.5 first CSS-only checkpoint is
+  complete through `c7729df`.
+- The active Mockup-to-HTML model is family-level:
+  AI facility hero image supplies scene / NPC / lighting / atmosphere;
+  HTML/CSS/JS supplies panels / text / lists / controls / interaction;
+  Python runtime supplies gameplay state, validation, and results.
+- `08_experiments/mockup_to_html/bg-npc.png` and
+  `08_experiments/mockup_to_html/code_artifact.html` are approved reference
+  examples for that responsibility split. They are not runtime assets or a
+  formal asset pipeline.
+- `01_content/gui-facility-shell-baseline-v0.1.md` is the current facility-family
+  planning baseline.
+- The Shop single-screen readiness checklist and mockup brief are paused. Do not
+  resume Shop skinning or generate another Shop candidate without explicit owner
+  approval.
 
 Current newest GUI live state:
 
@@ -127,6 +145,12 @@ files during ordinary startup.
 
 ## Task Zone Routing
 
+- Facility-family Mockup-to-HTML responsibility and configuration baseline:
+  `01_content/gui-facility-shell-baseline-v0.1.md`
+- Paused Shop single-screen planning:
+  `01_content/gui-shop-skinning-lab-readiness-checklist-v0.1.md` and
+  `01_content/gui-shop-mockup-brief-v0.1.md`; read only when the owner explicitly
+  reopens that route.
 - GUI live bridge details and landed MVP status notes:
   `01_content/gui-runtime-bridge-plan-v1.md`
 - GUI static prototype screen-level progress and verification:
@@ -162,9 +186,13 @@ reopened through a read-only planning gate and owner-approved exact scope.
 
 - God File / Maintainability Checkpoint is sufficiently converged.
 - Endless ScreenModel micro-extraction is not recommended.
-- The next recommended phase is GUI Layout Normalization V0.5.
-- The first recommended bounded candidate is: Shop + Magic Shop facility-family layout normalization.
-- This candidate has NOT been granted implementation approval by this docs sync.
+- Shop + Magic Shop GUI Layout Normalization V0.5 first CSS-only checkpoint is
+  complete through `c7729df`.
+- Current work has returned to the facility-family Mockup-to-HTML shell baseline.
+- The next smallest candidate is a markdown-only Facility Family Overlay Zone
+  Map V0.1.
+- Do not select one facility for skinning, generate an image brief, generate a
+  candidate, or implement HTML/CSS without new explicit owner approval.
 - Phase C convenience candidates, runtime/data/schema/save/combat remain deferred.
 
 No next implementation is pre-approved. Basic facility CLI-parity bridge

@@ -1,0 +1,300 @@
+html_content = """<!DOCTYPE html>
+<html lang="zh-Hant" class="h-full m-0 p-0">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>聖光教會 - 登入聖所</title>
+    <!-- 引入 Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        jrpggold: '#5c4d37', // 金銅色邊框
+                        jrpglightgold: '#c2a673', // 亮金文字/點綴
+                        jrpgblue: '#1a56db', // 基礎魔法藍
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- 引入古風古典字體 -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Serif TC', serif;
+            background-color: #07080a;
+        }
+        /* JRPG 切角效果 */
+        .jrpg-box {
+            position: relative;
+            clip-path: polygon(
+                0 12px, 12px 0, 
+                calc(100% - 12px) 0, 100% 12px, 
+                100% calc(100% - 12px), calc(100% - 12px) 100%, 
+                12px 100%, 0 calc(100% - 12px)
+            );
+        }
+        /* 精確切割遮罩：只在螢幕左側 40% 有深色與模糊，右側完全清晰 */
+        .split-overlay {
+            background: linear-gradient(to right, rgba(0, 0, 0, 0.55) 0%, rgba(0, 0, 0, 0.4) 35%, rgba(0, 0, 0, 0) 45%);
+        }
+        @media (min-width: 768px) {
+            .split-blur {
+                mask-image: linear-gradient(to right, black 35%, transparent 45%);
+                -webkit-mask-image: linear-gradient(to right, black 35%, transparent 45%);
+            }
+        }
+        
+        /* 純網頁打造的極致 JRPG 文字 Logo 質感 */
+        .jrpg-logo-text {
+            font-size: 3.5rem;
+            font-weight: 700;
+            letter-spacing: 0.5rem;
+            color: #ebd19b;
+            background: linear-gradient(to bottom, #fff5df 0%, #ebd19b 45%, #b38946 55%, #f5dfb3 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 2px rgba(92, 77, 55, 0.9)) 
+                    drop-shadow(0 0 12px rgba(147, 51, 234, 0.75))
+                    drop-shadow(0 0 25px rgba(30, 64, 175, 0.6));
+            animation: logo-shimmer 4s ease-in-out infinite alternate;
+        }
+        
+        @keyframes logo-shimmer {
+            0% {
+                filter: drop-shadow(0 0 2px rgba(92, 77, 55, 0.9)) 
+                        drop-shadow(0 0 12px rgba(147, 51, 234, 0.6))
+                        drop-shadow(0 0 20px rgba(30, 64, 175, 0.5));
+            }
+            100% {
+                filter: drop-shadow(0 0 3px rgba(92, 77, 55, 1)) 
+                        drop-shadow(0 0 18px rgba(147, 51, 234, 0.9))
+                        drop-shadow(0 0 35px rgba(59, 130, 246, 0.8));
+            }
+        }
+    </style>
+</head>
+<body class="h-full w-full m-0 p-0 overflow-hidden flex items-center justify-start pl-12 md:pl-20 lg:pl-28 relative selection:bg-blue-900 selection:text-white">
+
+    <!-- 全螢幕網頁背景 -->
+    <div class="absolute inset-0 w-full h-full bg-cover bg-right md:bg-center bg-no-repeat z-0" 
+         style="background-image: url('bg-npc.png');">
+        
+        <!-- 左側動態模糊層（透過 mask 只讓左側模糊，保持右側 NPC 清晰美感） -->
+        <div class="absolute inset-0 backdrop-blur-[3px] split-blur hidden md:block"></div>
+        
+        <!-- 左側暗化遮罩（精準控制在綠線左側） -->
+        <div class="absolute inset-0 split-overlay"></div>
+    </div>
+
+    <!-- 登入/註冊主卡片 (高強度半透明黑曜石，位置向右靠、釋放壓迫感) -->
+    <div class="jrpg-box max-w-md w-full bg-[#0d0f12]/90 backdrop-blur-md p-8 rounded-none border border-jrpggold shadow-[0_0_40px_rgba(0,0,0,0.9)] z-10 transition-all duration-300">
+        
+        <!-- 內層極細防護副線框 -->
+        <div class="absolute inset-1.5 border border-jrpggold/30 pointer-events-none jrpg-box"></div>
+        
+        <!-- 卡片四周的金色星芒「✦」裝飾點綴 -->
+        <span class="absolute top-2 left-2 text-jrpglightgold/60 text-xs pointer-events-none">✦</span>
+        <span class="absolute top-2 right-2 text-jrpglightgold/60 text-xs pointer-events-none">✦</span>
+        <span class="absolute bottom-2 left-2 text-jrpglightgold/60 text-xs pointer-events-none">✦</span>
+        <span class="absolute bottom-2 right-2 text-jrpglightgold/60 text-xs pointer-events-none">✦</span>
+
+        <!-- 頂部標題區域 -->
+        <div class="text-center relative mb-6">
+            <h2 id="form-title" class="text-2xl font-bold text-slate-100 tracking-widest border-b border-jrpggold/40 pb-3">
+                ✦ 登入聖所 ✦
+            </h2>
+            <p id="form-subtitle" class="mt-2 text-xs text-slate-400 tracking-wider">
+                願聖光指引你的道路，旅人。
+            </p>
+        </div>
+
+        <!-- 模式切換 Tabs -->
+        <div class="flex gap-2 p-1 bg-black/40 border border-jrpggold/40 mb-6 relative">
+            <button id="tab-login" onclick="switchMode('login')" class="flex-1 py-2 text-xs tracking-widest font-semibold transition-all duration-300 bg-gradient-to-r from-blue-950 to-indigo-950 text-blue-400 border border-blue-500/50 shadow-[0_0_10px_rgba(30,64,175,0.5)]">
+                ✦ 帳號登入
+            </button>
+            <button id="tab-register" onclick="switchMode('register')" class="flex-1 py-2 text-xs tracking-widest font-semibold transition-all duration-300 text-slate-400 hover:text-slate-200 border border-transparent">
+                締結誓約
+            </button>
+        </div>
+
+        <!-- 登入表單 -->
+        <form id="login-form" class="space-y-5 relative" onsubmit="handleFormSubmit(event, 'login')">
+            <div class="space-y-4">
+                <div>
+                    <label for="login-email" class="block text-xs font-semibold text-jrpglightgold tracking-wider mb-1">【 信使電子郵件 】</label>
+                    <input id="login-email" name="email" type="email" required class="appearance-none block w-full bg-black/70 pl-4 pr-3 py-2.5 border border-jrpggold/60 text-slate-200 placeholder-slate-600 focus:outline-none focus:border-jrpglightgold focus:ring-1 focus:ring-jrpglightgold transition-all text-sm" placeholder="your@email.com">
+                </div>
+                <div>
+                    <div class="flex justify-between items-center mb-1">
+                        <label for="login-password" class="block text-xs font-semibold text-jrpglightgold tracking-wider">【 靈魂契約密碼 】</label>
+                        <a href="#" onclick="showNotification('已透過聖光信使發送重設秘鑰！', 'success')" class="text-[10px] text-blue-400 hover:text-blue-300 transition-colors">遺忘秘鑰？</a>
+                    </div>
+                    <div class="relative">
+                        <input id="login-password" name="password" type="password" required class="appearance-none block w-full bg-black/70 pl-4 pr-10 py-2.5 border border-jrpggold/60 text-slate-200 placeholder-slate-600 focus:outline-none focus:border-jrpglightgold focus:ring-1 focus:ring-jrpglightgold transition-all text-sm" placeholder="••••••••">
+                        <button type="button" onclick="togglePasswordVisibility('login-password', this)" class="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-500 hover:text-slate-300">
+                            <svg class="h-4 w-4 eye-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="flex items-center">
+                <input id="remember-me" name="remember-me" type="checkbox" class="h-3.5 w-3.5 bg-black text-blue-600 focus:ring-0 border-jrpggold/60 rounded-none">
+                <label for="remember-me" class="ml-2 block text-xs text-slate-400 tracking-wide">於此世保持登入狀態</label>
+            </div>
+            <div>
+                <button type="submit" class="w-full flex justify-center py-3 border border-blue-500/80 text-xs font-bold tracking-widest text-blue-200 bg-gradient-to-r from-blue-950/80 to-indigo-950/80 hover:from-blue-900 hover:to-indigo-900 transition-all shadow-[0_0_15px_rgba(30,64,175,0.6)] hover:shadow-[0_0_25px_rgba(59,130,246,0.8)] active:scale-[0.99]">
+                    ✦ 執行登入驗證 ✦
+                </button>
+            </div>
+        </form>
+
+        <!-- 註冊表單 -->
+        <form id="register-form" class="space-y-5 hidden relative" onsubmit="handleFormSubmit(event, 'register')">
+            <div class="space-y-4">
+                <div>
+                    <label for="register-name" class="block text-xs font-semibold text-jrpglightgold tracking-wider mb-1">【 冒險者稱號 】</label>
+                    <input id="register-name" name="name" type="text" required class="appearance-none block w-full bg-black/70 pl-4 pr-3 py-2.5 border border-jrpggold/60 text-slate-200 placeholder-slate-600 focus:outline-none focus:border-jrpglightgold focus:ring-1 focus:ring-jrpglightgold transition-all text-sm" placeholder="輸入您的名字或稱號">
+                </div>
+                <div>
+                    <label for="register-email" class="block text-xs font-semibold text-jrpglightgold tracking-wider mb-1">【 綁定電子郵件 】</label>
+                    <input id="register-email" name="email" type="email" required class="appearance-none block w-full bg-black/70 pl-4 pr-3 py-2.5 border border-jrpggold/60 text-slate-200 placeholder-slate-600 focus:outline-none focus:border-jrpglightgold focus:ring-1 focus:ring-jrpglightgold transition-all text-sm" placeholder="your@email.com">
+                </div>
+                <div>
+                    <label for="register-password" class="block text-xs font-semibold text-jrpglightgold tracking-wider mb-1">【 設定契約秘鑰 】</label>
+                    <div class="relative">
+                        <input id="register-password" name="password" type="password" required class="appearance-none block w-full bg-black/70 pl-4 pr-10 py-2.5 border border-jrpggold/60 text-slate-200 placeholder-slate-600 focus:outline-none focus:border-jrpglightgold focus:ring-1 focus:ring-jrpglightgold transition-all text-sm" placeholder="至少包含 6 位字符">
+                        <button type="button" onclick="togglePasswordVisibility('register-password', this)" class="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-500 hover:text-slate-300">
+                            <svg class="h-4 w-4 eye-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="flex items-start">
+                <input id="agree-terms" name="agree-terms" type="checkbox" required class="mt-0.5 h-3.5 w-3.5 bg-black text-blue-600 focus:ring-0 border-jrpggold/60 rounded-none">
+                <label for="agree-terms" class="ml-2 block text-xs text-slate-400 leading-tight">
+                    我已靈魂立誓同意 <a href="#" class="text-blue-400 hover:underline">教會規範</a> 與 <a href="#" class="text-blue-400 hover:underline">遠征隱私權協定</a>
+                </label>
+            </div>
+            <div>
+                <button type="submit" class="w-full flex justify-center py-3 border border-blue-500/80 text-xs font-bold tracking-widest text-blue-200 bg-gradient-to-r from-blue-950/80 to-indigo-950/80 hover:from-blue-900 hover:to-indigo-900 transition-all shadow-[0_0_15px_rgba(30,64,175,0.6)] hover:shadow-[0_0_25px_rgba(59,130,246,0.8)] active:scale-[0.99]">
+                    ✦ 簽署契約並誕生 ✦
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- 重新打造的右下角純網頁藝術文字 Logo：完美融合背景與動態幽紫藍光外發光效果 -->
+    <div class="absolute bottom-12 right-12 md:right-24 lg:right-36 z-20 flex flex-col items-center justify-center pointer-events-none select-none">
+        <h1 class="jrpg-logo-text m-0 p-0">神蹟</h1>
+        <div class="w-24 h-[1px] bg-gradient-to-r from-transparent via-jrpglightgold/70 to-transparent mt-1"></div>
+        <span class="text-[9px] tracking-[0.3rem] text-jrpglightgold/60 uppercase font-sans mt-1">Miracle</span>
+    </div>
+
+    <!-- 浮動通知容器 (Toast) -->
+    <div id="toast-container" class="fixed top-5 right-5 z-50 flex flex-col gap-3 pointer-events-none"></div>
+
+    <script>
+        // Web Audio API 提示音效系統
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playRpgSound(type) {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            
+            if (type === 'select') {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(880, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(1320, audioCtx.currentTime + 0.08);
+                gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.08);
+                osc.start(); osc.stop(audioCtx.currentTime + 0.08);
+            } else if (type === 'confirm') {
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(587.33, audioCtx.currentTime);
+                osc.frequency.setValueAtTime(1174.66, audioCtx.currentTime + 0.06);
+                gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.25);
+                osc.start(); osc.stop(audioCtx.currentTime + 0.25);
+            }
+        }
+
+        function switchMode(mode) {
+            playRpgSound('select');
+            const formTitle = document.getElementById('form-title');
+            const loginForm = document.getElementById('login-form');
+            const registerForm = document.getElementById('register-form');
+            const tabLogin = document.getElementById('tab-login');
+            const tabRegister = document.getElementById('tab-register');
+
+            tabLogin.className = "flex-1 py-2 text-xs tracking-widest font-semibold transition-all duration-300 border border-transparent text-slate-400";
+            tabRegister.className = "flex-1 py-2 text-xs tracking-widest font-semibold transition-all duration-300 border border-transparent text-slate-400";
+
+            if (mode === 'login') {
+                formTitle.innerHTML = "✦ 登入聖所 ✦";
+                loginForm.classList.remove('hidden');
+                registerForm.classList.add('hidden');
+                tabLogin.className = "flex-1 py-2 text-xs tracking-widest font-semibold transition-all duration-300 bg-gradient-to-r from-blue-950 to-indigo-950 text-blue-400 border border-blue-500/50 shadow-[0_0_10px_rgba(30,64,175,0.5)]";
+            } else {
+                formTitle.innerHTML = "✦ 締結誓約 ✦";
+                loginForm.classList.add('hidden');
+                registerForm.classList.remove('hidden');
+                tabRegister.className = "flex-1 py-2 text-xs tracking-widest font-semibold transition-all duration-300 bg-gradient-to-r from-blue-950 to-indigo-950 text-blue-400 border border-blue-500/50 shadow-[0_0_10px_rgba(30,64,175,0.5)]";
+            }
+        }
+
+        function togglePasswordVisibility(inputId, btn) {
+            playRpgSound('select');
+            const passwordInput = document.getElementById(inputId);
+            const eyeIcon = btn.querySelector('.eye-icon');
+
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                eyeIcon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18"></path>`;
+            } else {
+                passwordInput.type = 'password';
+                eyeIcon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>`;
+            }
+        }
+
+        function handleFormSubmit(event, mode) {
+            event.preventDefault();
+            playRpgSound('confirm');
+            if (mode === 'login') {
+                showNotification(`聖所門扉已開啟。歡迎回來，信使。`, 'success');
+            } else {
+                const name = document.getElementById('register-name').value;
+                showNotification(`契約已立，靈魂名冊已更新。歡迎新信徒【${name}】。`, 'success');
+            }
+        }
+
+        function showNotification(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = 'flex items-center p-4 min-w-[280px] bg-[#0d0f12]/95 border border-jrpggold text-slate-200 text-xs tracking-wider rounded-none shadow-2xl transition-all duration-300 transform translate-y-2 opacity-0 pointer-events-auto';
+            let typeColor = 'border-l-4 border-l-blue-500';
+            if (type === 'success') typeColor = 'border-l-4 border-l-emerald-500';
+
+            toast.className += ` ${typeColor}`;
+            toast.innerHTML = `
+                <div class="font-medium mr-4">${message}</div>
+                <button onclick="this.parentElement.remove()" class="ml-auto text-slate-500 hover:text-slate-300">✦</button>
+            `;
+            container.appendChild(toast);
+            setTimeout(() => toast.classList.remove('translate-y-2', 'opacity-0'), 10);
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-2');
+                setTimeout(() => toast.remove(), 300);
+            }, 4500);
+        }
+    </script>
+</body>
+</html>"""
+
+with open("login-v2.html", "w", encoding="utf-8") as f:
+    f.write(html_content)
+print("File successfully generated.")
