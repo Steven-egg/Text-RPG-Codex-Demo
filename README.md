@@ -57,13 +57,18 @@ GUI state:
   Mockup-to-HTML shell baseline. AI facility hero images provide scene, NPC,
   lighting, and atmosphere; HTML/CSS/JS provides all UI and interaction; Python
   runtime remains gameplay authority.
-- The Shop single-screen skinning readiness / mockup brief route is paused.
+- The old Shop single-screen readiness / mockup brief route is superseded for
+  current work by the isolated Shop Skinning Lab route and its merge playbook.
 - Owner-approved isolated Shop Skinning Lab v0.2.2 exists at
   `08_experiments/mockup_to_html/shop_skinning_lab/` as a fixture-only visual
-  baseline for lab-only skinning. It is not runtime source, not a formal asset
-  pipeline, and not a replacement for `07_gui_prototype/shop_screen/`. Future
-  lab-only skinning should start from the lab README, process note, and local
-  lab files instead of broad GUI/runtime docs.
+  baseline for lab-only skinning. Its first merge-back vertical slice into
+  `07_gui_prototype/shop_screen/` has been validated: extract Shop prototype
+  elements into `08_experiments`, iterate locally in the lab, then merge back
+  only the approved HTML/CSS/fixture/image/render-layer pieces while preserving
+  the formal Shop `shop-screen.js` live bridge. Use
+  `shop-skinning-merge-playbook-v0.1.md` for repeatable steps. This remains a
+  prototype workflow, not runtime source, gameplay authority, or a formal asset
+  pipeline.
 
 Blessed local live bridge coverage:
 
@@ -319,14 +324,17 @@ do not imply gameplay validation.
 - Shop + Magic Shop GUI Layout Normalization V0.5 first CSS-only checkpoint is
   complete through `c7729df`.
 - The current active planning baseline is facility-family Mockup-to-HTML
-  composition, not Shop single-screen skinning.
-- Isolated Shop Skinning Lab v0.2.2 may be used only for owner-approved
-  lab-local skinning under `08_experiments/mockup_to_html/shop_skinning_lab/`;
-  the formal Shop single-screen route remains paused.
-- The next smallest candidate is a markdown-only Facility Family Overlay Zone
-  Map V0.1.
-- No image generation, HTML/CSS implementation, runtime work, or asset pipeline
-  is pre-approved by this docs sync.
+  composition plus the validated Shop Skinning Lab merge-back workflow.
+- Isolated Shop Skinning Lab v0.2.2 has completed one owner-approved vertical
+  slice from `08_experiments/mockup_to_html/shop_skinning_lab/` back into
+  `07_gui_prototype/shop_screen/`. Future repeats should use the playbook path:
+  read-only rehearsal, clean git check, test branch, lab extraction / iteration,
+  merge-back, syntax / bridge smoke checks, and browser visual QA.
+- The next smallest candidates are Shop post-merge browser / responsive QA, a
+  read-only Magic Shop or Workshop mapping rehearsal, or a markdown-only Facility
+  Family Overlay Zone Map V0.1.
+- No additional image generation, HTML/CSS implementation, runtime work, or
+  asset pipeline is pre-approved by this docs sync.
 - Phase C convenience candidates, runtime/data/schema/save/combat remain deferred.
 
 The next implementation target is not pre-approved. Basic facility CLI-parity

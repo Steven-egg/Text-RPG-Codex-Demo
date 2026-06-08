@@ -3,13 +3,14 @@
 Purpose: define the minimum readiness gate for using the current Shop Screen as
 the first representative GUI Mockup-to-HTML Skinning Lab.
 
-Status: `paused_by_owner`.
+Status: `superseded_by_shop_skinning_merge_playbook_v0_1`.
 
-This Shop single-screen route is paused. The active planning baseline has
-returned to facility-family Mockup-to-HTML responsibility mapping in
-`01_content/gui-facility-shell-baseline-v0.1.md`. Do not resume this checklist,
-generate another Shop candidate, or implement Shop skinning without new explicit
-owner approval.
+This early Shop single-screen readiness route has been superseded for current
+work by the isolated Shop Skinning Lab and
+`08_experiments/mockup_to_html/shop_skinning_lab/shop-skinning-merge-playbook-v0.1.md`.
+Do not resume this checklist as the active route. Future Shop skinning or
+merge-back work should use the lab docs, playbook, read-only rehearsal, and an
+owner-approved implementation slice.
 
 This checklist is documentation-only. It does not approve mockup generation,
 image generation, asset import, HTML/CSS/JavaScript edits, runtime bridge work,

@@ -3,12 +3,13 @@
 Purpose: define one bounded visual mockup candidate for the Shop
 Mockup-to-HTML Skinning Lab while preserving the current Shop prototype shell.
 
-Status: `paused_by_owner`.
+Status: `superseded_by_shop_skinning_merge_playbook_v0_1`.
 
-This Shop single-screen route is paused. The active planning baseline has
-returned to facility-family Mockup-to-HTML responsibility mapping in
-`01_content/gui-facility-shell-baseline-v0.1.md`. Do not generate another Shop
-candidate or implement this brief without new explicit owner approval.
+This early Shop single-screen mockup route has been superseded for current work
+by the isolated Shop Skinning Lab and
+`08_experiments/mockup_to_html/shop_skinning_lab/shop-skinning-merge-playbook-v0.1.md`.
+Do not generate another Shop candidate or implement this brief as the active
+route without new explicit owner approval.
 
 This document is a markdown-only brief. It does not generate an image, approve
 image generation, create a runtime asset, start an asset pipeline, or authorize
@@ -21,10 +22,10 @@ brief_id: gui_shop_mockup_brief_v0_1
 screen_id: facility_shop_screen
 prototype_path: 07_gui_prototype/shop_screen/
 shell_family: transaction_list_detail_npc
-status: paused_by_owner
+status: superseded_by_shop_skinning_merge_playbook_v0_1
 candidate_count: 1
 generation_status: one_preview_candidate_generated_outside_repository
-implementation_status: not_started
+implementation_status: superseded_by_lab_merge_slice
 runtime_usage_allowed: false
 asset_pipeline_status: not_started
 ```

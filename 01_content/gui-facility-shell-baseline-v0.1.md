@@ -30,6 +30,7 @@ Approved read-only references for this correction:
 
 - `08_experiments/mockup_to_html/bg-npc.png`
 - `08_experiments/mockup_to_html/code_artifact.html`
+- `08_experiments/mockup_to_html/shop_skinning_lab/shop-skinning-merge-playbook-v0.1.md`
 
 Interpretation:
 
@@ -41,6 +42,11 @@ Interpretation:
   panels, translucent materials, masks, blur, gradients, typography, form or
   list controls, hover states, buttons, toast messages, and interactive feedback
   can all be rendered above a background image.
+- `shop-skinning-merge-playbook-v0.1.md` records the first validated Shop
+  lab-to-formal-prototype merge-back vertical slice. It proves the process can
+  work when formal Shop prototype elements are extracted into `08_experiments`,
+  iterated locally as a fixture-only lab, then merged back into
+  `07_gui_prototype/shop_screen/` while preserving the formal live bridge.
 - The Tailwind, login-form, audio, and toast implementation details inside
   `code_artifact.html` are reference examples, not required facility
   architecture or dependencies.
@@ -49,6 +55,28 @@ Interpretation:
 - A facility hero image may support the full screen, not only a current NPC
   placeholder rectangle. Its composition must still preserve overlay-safe
   reading and interaction zones.
+
+## 0.1 Validated Lab Merge-Back Flow
+
+The Shop vertical slice validated this repeatable sequence:
+
+1. Extract the current formal prototype's visual and fixture ingredients into an
+   isolated `08_experiments/mockup_to_html/<facility>_skinning_lab/` folder.
+2. Keep the lab fixture-only: no runtime client, no Python API calls, no gameplay
+   authority, and no formal asset pipeline.
+3. Iterate the visual shell, NPC / hero composition, panel layout, and interaction
+   feel inside the lab.
+4. Before merge-back, run a read-only source-to-target rehearsal and identify
+   HTML structure, CSS layout, fixture format, image, and render-layer conflicts.
+5. Use a clean git check and a test branch for the merge-back attempt.
+6. Merge back only approved static prototype surfaces. Preserve formal ESM /
+   `runtimeClient` / live bridge behavior instead of copying lab JavaScript.
+7. Verify with syntax checks, bridge smoke checks when live bridge is present,
+   and browser visual QA for the touched screen.
+
+This flow may guide future Magic Shop / Workshop / Synthesis experiments, but
+each facility still needs its own rehearsal. Shop success does not prove another
+screen can skip mapping or validation.
 
 ## 1. Scope And Boundaries
 
@@ -329,13 +357,17 @@ Static fixtures must not:
 - `code_artifact.html` demonstrates overlay capability, but does not establish
   Tailwind, login UI, audio, toast, or its exact visual style as project
   requirements.
-- The paused Shop readiness checklist and Shop mockup brief must not be treated
-  as the active next phase.
+- The superseded Shop readiness checklist and Shop mockup brief must not be
+  treated as the active route. Use the isolated lab docs and merge playbook for
+  current Shop skinning / merge-back work.
 
 ## 10. Recommended Next Gate
 
-The next smallest markdown-only step is a **Facility Family Overlay Zone Map
-V0.1**.
+The next smallest same-phase candidates are:
+
+- Shop post-merge browser / responsive QA.
+- Read-only Magic Shop or Workshop source-to-target mapping rehearsal.
+- A markdown-only **Facility Family Overlay Zone Map V0.1**.
 
 It should stay at family level and define:
 

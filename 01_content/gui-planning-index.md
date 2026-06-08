@@ -16,7 +16,7 @@ For GUI Task Zone work, start with the smallest matching route:
 | Static prototype handoff / screen verification | Targeted sections of `01_content/gui-html-static-prototype-progress-v1.md`. |
 | GUI planning / drift audit / document routing | This file. |
 | Facility-family Mockup-to-HTML shell planning | `01_content/gui-facility-shell-baseline-v0.1.md`; use approved references under `08_experiments/mockup_to_html/` only when the task needs them. |
-| Isolated Shop Skinning Lab iteration | `08_experiments/mockup_to_html/shop_skinning_lab/README.md`, `08_experiments/mockup_to_html/shop_skinning_lab/shop-skinning-process-note-v1.md`, then local lab files only. Formal Shop single-screen skinning remains paused. |
+| Isolated Shop Skinning Lab / merge-back route | `08_experiments/mockup_to_html/shop_skinning_lab/README.md`, `08_experiments/mockup_to_html/shop_skinning_lab/shop-skinning-process-note-v1.md`, `08_experiments/mockup_to_html/shop_skinning_lab/shop-skinning-merge-playbook-v0.1.md`, then local lab files only. The old Shop checklist / brief route is superseded. |
 | Screen flow / UIAction / ScreenModel mapping | `01_content/gui-screen-map.md`, `01_content/ui-flow-blueprint.md`. |
 | Runtime-connected GUI planning | `01_content/gui-runtime-bridge-plan-v1.md`, then stop at a read-only planning gate. |
 | Runtime bridge contract audit | `01_content/gui-bridge-vertical-slice-contract-audit-v1.md`. |
@@ -44,11 +44,15 @@ Default GUI mode remains HTML static prototype:
 - Current facility planning is family-level Mockup-to-HTML responsibility
   mapping. AI facility hero images provide scene / NPC / atmosphere;
   HTML/CSS/JS provides UI and interaction; runtime remains gameplay authority.
-- Shop single-screen skinning readiness and mockup brief work is paused.
-- Isolated Shop Skinning Lab v0.2.2 is available only as an owner-approved
-  fixture-only lab capsule under `08_experiments/mockup_to_html/shop_skinning_lab/`.
-  It does not replace `07_gui_prototype/shop_screen/`, reopen formal Shop
-  single-screen skinning, or authorize runtime / asset pipeline work.
+- The old Shop single-screen skinning readiness and mockup brief route is
+  superseded for current work by the isolated Shop Skinning Lab route.
+- Isolated Shop Skinning Lab v0.2.2 is available as an owner-approved fixture-only
+  lab capsule under `08_experiments/mockup_to_html/shop_skinning_lab/`. One
+  merge-back vertical slice has validated the workflow: extract formal Shop
+  prototype elements into `08_experiments`, iterate in the lab, then merge back
+  approved static prototype pieces into `07_gui_prototype/shop_screen/` while
+  preserving live bridge behavior. It does not authorize runtime / asset pipeline
+  work.
 
 Local runtime-connected live bridge exists only for explicit blessed slices:
 
@@ -81,6 +85,8 @@ Lifecycle labels:
 - `core`: current Task Zone docs that remain active.
 - `conditional`: read only for the named task.
 - `paused`: owner-paused route; read or resume only when explicitly reopened.
+- `superseded`: replaced by a newer active route; read only for historical
+  context or comparison.
 - `historical`: old planning or decision trace.
 - `archive candidate`: logically stale candidate / prompt / draft docs; do not
   move physically without explicit approval.
@@ -120,8 +126,9 @@ Lifecycle labels:
 | `01_content/gui-town-hub-review-checklist.md` | conditional | Town Hub review checklist. |
 | `01_content/gui-town-hub-facility-node-mapping-v1.md` | conditional | Town Hub facility node mapping. |
 | `01_content/gui-town-hub-programmatic-layout-plan-v1.md` | conditional | Town Hub programmatic layout plan. |
-| `01_content/gui-shop-skinning-lab-readiness-checklist-v0.1.md` | paused | Paused Shop single-screen skinning readiness route; not the active next phase. |
-| `01_content/gui-shop-mockup-brief-v0.1.md` | paused | Paused Shop single-screen mockup route; do not generate or implement from it without explicit approval. |
+| `01_content/gui-shop-skinning-lab-readiness-checklist-v0.1.md` | superseded | Old Shop single-screen readiness route; replaced by the isolated lab and merge playbook flow. |
+| `01_content/gui-shop-mockup-brief-v0.1.md` | superseded | Old Shop single-screen mockup route; do not generate or implement from it without explicit approval. |
+| `08_experiments/mockup_to_html/shop_skinning_lab/shop-skinning-merge-playbook-v0.1.md` | conditional | Shop lab-to-formal-prototype merge-back playbook; use for later merge rehearsals and vertical slices. |
 
 ### Historical / Optional Background
 

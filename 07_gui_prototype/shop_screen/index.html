@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Shop Screen Static Prototype</title>
     <link rel="stylesheet" href="./styles.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;600;700;900&family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
   </head>
   <body>
     <div class="shop-shell" data-load-state="loading">
@@ -45,18 +48,18 @@
             <div id="requirement-list" class="requirement-list"></div>
           </section>
         </section>
-
-        <aside class="shopkeeper-side" aria-label="Shopkeeper">
-          <section class="npc-region">
-            <div class="npc-portrait" id="npc-portrait" aria-hidden="true"></div>
-            <div class="npc-copy">
-              <p class="panel-label">行商</p>
-              <h2 id="npc-name"></h2>
-              <p id="npc-role" class="npc-role"></p>
-            </div>
-          </section>
-        </aside>
       </main>
+
+      <aside class="shopkeeper-side" aria-label="Shopkeeper">
+        <section class="npc-region">
+          <div class="npc-portrait" id="npc-portrait" aria-hidden="true"></div>
+          <div class="npc-copy">
+            <p class="panel-label">行商</p>
+            <h2 id="npc-name"></h2>
+            <p id="npc-role" class="npc-role"></p>
+          </div>
+        </section>
+      </aside>
 
       <footer class="shop-footer">
         <button id="back-action" class="secondary-action" type="button">返回城鎮</button>

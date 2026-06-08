@@ -49,17 +49,20 @@ Current facility-family planning state:
   formal asset pipeline.
 - `01_content/gui-facility-shell-baseline-v0.1.md` is the current facility-family
   planning baseline.
-- The Shop single-screen readiness checklist and mockup brief are paused. Do not
-  resume Shop skinning or generate another Shop candidate without explicit owner
-  approval.
+- The old Shop single-screen readiness checklist and mockup brief are superseded
+  for current work by the isolated Shop Skinning Lab route and merge playbook.
 - Owner-approved isolated Shop Skinning Lab v0.2.2 exists under
   `08_experiments/mockup_to_html/shop_skinning_lab/` as a fixture-only,
-  player-facing visual baseline. It is not runtime source, not a formal
-  `07_gui_prototype/shop_screen/` replacement, and not a formal asset pipeline.
-- Future lab-only skinning should read the lab `README.md`,
-  `shop-skinning-process-note-v1.md`, and local lab files first. Do not reload
-  broad GUI/runtime docs unless the task explicitly asks for resync,
-  merge-back, runtime bridge, or formal prototype work.
+  player-facing visual baseline. One merge-back vertical slice has succeeded:
+  formal Shop prototype elements were extracted into `08_experiments`, iterated
+  in the lab, then merged back into `07_gui_prototype/shop_screen/` while
+  preserving the Shop ESM `shop-screen.js` live bridge. The local playbook is
+  `shop-skinning-merge-playbook-v0.1.md`.
+- Future lab-only skinning or merge-back should read the lab `README.md`,
+  `shop-skinning-process-note-v1.md`, `shop-skinning-merge-playbook-v0.1.md`,
+  and local lab files first. Use a clean git check and a test branch for the
+  next merge attempt. This remains prototype work, not runtime source, a formal
+  asset pipeline, or gameplay authority.
 
 Current newest GUI live state:
 
@@ -155,15 +158,16 @@ files during ordinary startup.
 
 - Facility-family Mockup-to-HTML responsibility and configuration baseline:
   `01_content/gui-facility-shell-baseline-v0.1.md`
-- Paused Shop single-screen planning:
+- Superseded Shop single-screen planning:
   `01_content/gui-shop-skinning-lab-readiness-checklist-v0.1.md` and
-  `01_content/gui-shop-mockup-brief-v0.1.md`; read only when the owner explicitly
-  reopens that route.
+  `01_content/gui-shop-mockup-brief-v0.1.md`; these are no longer the active
+  route for current Shop skinning work.
 - Isolated Shop Skinning Lab capsule:
   `08_experiments/mockup_to_html/shop_skinning_lab/README.md` and
-  `08_experiments/mockup_to_html/shop_skinning_lab/shop-skinning-process-note-v1.md`;
-  read these plus local lab files for owner-approved lab-only skinning. This does
-  not reopen formal Shop single-screen skinning or runtime work.
+  `08_experiments/mockup_to_html/shop_skinning_lab/shop-skinning-process-note-v1.md`,
+  plus `08_experiments/mockup_to_html/shop_skinning_lab/shop-skinning-merge-playbook-v0.1.md`;
+  read these plus local lab files for owner-approved lab-only skinning or
+  merge-back. This does not reopen runtime work or a formal asset pipeline.
 - GUI live bridge details and landed MVP status notes:
   `01_content/gui-runtime-bridge-plan-v1.md`
 - GUI static prototype screen-level progress and verification:
@@ -201,11 +205,14 @@ reopened through a read-only planning gate and owner-approved exact scope.
 - Endless ScreenModel micro-extraction is not recommended.
 - Shop + Magic Shop GUI Layout Normalization V0.5 first CSS-only checkpoint is
   complete through `c7729df`.
-- Current work has returned to the facility-family Mockup-to-HTML shell baseline.
-- The next smallest candidate is a markdown-only Facility Family Overlay Zone
-  Map V0.1.
-- Do not select one facility for skinning, generate an image brief, generate a
-  candidate, or implement HTML/CSS without new explicit owner approval.
+- Current work has validated the first Shop Skinning Lab merge-back vertical
+  slice while keeping the broader facility-family Mockup-to-HTML shell baseline.
+- The next smallest candidates are Shop post-merge browser / responsive QA, a
+  read-only Magic Shop or Workshop mapping rehearsal, or a markdown-only
+  Facility Family Overlay Zone Map V0.1.
+- Do not select another facility for skinning, generate an image brief, generate
+  a candidate, or implement additional HTML/CSS without new explicit owner
+  approval.
 - Phase C convenience candidates, runtime/data/schema/save/combat remain deferred.
 
 No next implementation is pre-approved. Basic facility CLI-parity bridge

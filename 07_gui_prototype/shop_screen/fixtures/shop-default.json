@@ -17,10 +17,30 @@
     "gold": 420
   },
   "category_tabs": [
-    { "id": "all", "label": "全部商品", "count": 9, "enabled": true },
-    { "id": "consumables", "label": "補給品", "count": 4, "enabled": true },
-    { "id": "tactical", "label": "戰術道具", "count": 2, "enabled": true },
-    { "id": "accessories", "label": "飾品", "count": 3, "enabled": true }
+    {
+      "id": "all",
+      "label": "全部商品",
+      "count": 9,
+      "enabled": true
+    },
+    {
+      "id": "consumables",
+      "label": "補給品",
+      "count": 4,
+      "enabled": true
+    },
+    {
+      "id": "tactical",
+      "label": "戰術道具",
+      "count": 2,
+      "enabled": true
+    },
+    {
+      "id": "accessories",
+      "label": "飾品",
+      "count": 3,
+      "enabled": true
+    }
   ],
   "selected_category_id": "all",
   "selected_item_id": "item_potion_s",
@@ -38,7 +58,11 @@
       "enabled": true,
       "disabled_reason": null,
       "badges": [
-        { "badge_id": "hot", "label": "熱銷", "kind": "info" }
+        {
+          "badge_id": "hot",
+          "label": "熱銷",
+          "kind": "info"
+        }
       ]
     },
     {
@@ -152,7 +176,11 @@
       "enabled": true,
       "disabled_reason": null,
       "badges": [
-        { "badge_id": "rare", "label": "防禦飾品", "kind": "warning" }
+        {
+          "badge_id": "rare",
+          "label": "防禦飾品",
+          "kind": "warning"
+        }
       ]
     }
   ],
@@ -364,7 +392,10 @@
       "label": "購買小藥水",
       "enabled": true,
       "disabled_reason": null,
-      "payload": { "item_id": "item_potion_s", "price": 30 },
+      "payload": {
+        "item_id": "item_potion_s",
+        "price": 30
+      },
       "result_message": "成功購買小藥水！獲得小藥水 x1，扣除金幣 30G (此為 Static Prototype，實際數值不變)。"
     },
     "item_potion_m": {
@@ -372,7 +403,10 @@
       "label": "購買中藥水",
       "enabled": true,
       "disabled_reason": null,
-      "payload": { "item_id": "item_potion_m", "price": 80 },
+      "payload": {
+        "item_id": "item_potion_m",
+        "price": 80
+      },
       "result_message": "成功購買中藥水！獲得中藥水 x1，扣除金幣 80G (此為 Static Prototype，實際數值不變)。"
     },
     "item_herb_antidote": {
@@ -380,7 +414,10 @@
       "label": "購買解毒草",
       "enabled": true,
       "disabled_reason": null,
-      "payload": { "item_id": "item_herb_antidote", "price": 25 },
+      "payload": {
+        "item_id": "item_herb_antidote",
+        "price": 25
+      },
       "result_message": "成功購買解毒草！獲得解毒草 x1，扣除金幣 25G (此為 Static Prototype，實際數值不變)。"
     },
     "item_focus_drop": {
@@ -388,7 +425,10 @@
       "label": "購買集中滴露",
       "enabled": true,
       "disabled_reason": null,
-      "payload": { "item_id": "item_focus_drop", "price": 45 },
+      "payload": {
+        "item_id": "item_focus_drop",
+        "price": 45
+      },
       "result_message": "成功購買集中滴露！獲得集中滴露 x1，扣除金幣 45G (此為 Static Prototype，實際數值不變)。"
     },
     "item_escape_scroll": {
@@ -396,7 +436,10 @@
       "label": "購買逃脫卷軸",
       "enabled": true,
       "disabled_reason": null,
-      "payload": { "item_id": "item_escape_scroll", "price": 120 },
+      "payload": {
+        "item_id": "item_escape_scroll",
+        "price": 120
+      },
       "result_message": "成功購買逃脫卷軸！獲得逃脫卷軸 x1，扣除金幣 120G (此為 Static Prototype，實際數值不變)。"
     },
     "item_armor_piercer": {
@@ -404,7 +447,10 @@
       "label": "購買破甲釘",
       "enabled": true,
       "disabled_reason": null,
-      "payload": { "item_id": "item_armor_piercer", "price": 150 },
+      "payload": {
+        "item_id": "item_armor_piercer",
+        "price": 150
+      },
       "result_message": "成功購買破甲釘！獲得破甲釘 x1，扣除金幣 150G (此為 Static Prototype，實際數值不變)。"
     },
     "acc_lucky_charm": {
@@ -412,7 +458,10 @@
       "label": "購買幸運小符",
       "enabled": true,
       "disabled_reason": null,
-      "payload": { "item_id": "acc_lucky_charm", "price": 160 },
+      "payload": {
+        "item_id": "acc_lucky_charm",
+        "price": 160
+      },
       "result_message": "成功購買幸運小符！獲得幸運小符 x1，扣除金幣 160G (此為 Static Prototype，實際數值不變)。"
     },
     "acc_scout_ring": {
@@ -420,7 +469,10 @@
       "label": "購買斥候戒指",
       "enabled": true,
       "disabled_reason": null,
-      "payload": { "item_id": "acc_scout_ring", "price": 180 },
+      "payload": {
+        "item_id": "acc_scout_ring",
+        "price": 180
+      },
       "result_message": "成功購買斥候戒指！獲得斥候戒指 x1，扣除金幣 180G (此為 Static Prototype，實際數值不變)。"
     },
     "acc_warm_stone": {
@@ -428,7 +480,10 @@
       "label": "購買暖石墜",
       "enabled": true,
       "disabled_reason": null,
-      "payload": { "item_id": "acc_warm_stone", "price": 260 },
+      "payload": {
+        "item_id": "acc_warm_stone",
+        "price": 260
+      },
       "result_message": "成功購買暖石墜！獲得暖石墜 x1，扣除金幣 260G (此為 Static Prototype，實際數值不變)。"
     }
   },

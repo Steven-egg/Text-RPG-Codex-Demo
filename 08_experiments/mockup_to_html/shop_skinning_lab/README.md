@@ -8,7 +8,8 @@
 - **來源階段**：v0.1.1 為 extraction repair 起點；v0.2.2 是在該基礎上完成欄寬、Footer、debug panel 隱藏、NPC visual stage 與 zoom clipping 修正後的目前基線。
 - **無 runtime／API 依賴**：本 lab 不涉及任何 runtime-client、API calls、fetch 或 live mode。
 - **禁止直接合併**：不可直接將此處的 fixtures、fake behaviors 或 lab-only 測試控制項 merge 回正式 Shop。
-- **雙向同步限制**：無論是從正式 Shop 進行 resync 或是將本 lab merge-back，都必須通過新的 owner-approved read-only planning gate。
+- **雙向同步限制**：無論是從正式 Shop 進行 resync 或是將本 lab merge-back，都必須通過新的 owner-approved read-only planning gate，並優先依
+  `shop-skinning-merge-playbook-v0.1.md` 執行 source-to-target mapping、測試分支、merge-back 與驗證。
 
 ---
 
@@ -20,6 +21,7 @@
 1. Repository-required Hot Zone startup reads (依專案治理規則，如 `AGENTS.md` 等)。
 2. 本 `README.md`。
 3. 本資料夾內的檔案 (`index.html`、`shop_skinning_lab.css`、`shop_skinning_lab.js`、`fixtures.js`)。
+4. 若任務涉及 resync 或 merge-back，另讀 `shop-skinning-merge-playbook-v0.1.md`。
 
 未來一般 lab-only skinning **絕對不應**重新閱讀：
 - 正式 Shop prototype 原始碼。
@@ -69,7 +71,8 @@
 
 若在未來的 lab-only skinning 遇到以下狀況，請**立即停止**工作，並取得新的 read-only planning gate：
 - 需要從正式 Shop 檔案進行 resync。
-- 需要評估或執行 merge-back 回正式 prototype。
+- 需要評估或執行 merge-back 回正式 prototype；此時改走
+  `shop-skinning-merge-playbook-v0.1.md`，並建議先建立測試分支。
 - 需要修改 ScreenModel 或 UIAction contract 假設。
 - 企圖連接 Python runtime、實體 API 或 live bridge。
 - 需要修改本 lab 資料夾以外的任何檔案。
