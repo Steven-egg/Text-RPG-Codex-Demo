@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>《元素迷宮：邊境冒險者》旅店</title>
+    <link rel="stylesheet" href="./inn_skinning_lab.css" />
+  </head>
+  <body>
+    <div class="inn-shell" data-load-state="loading">
+
+      <!-- 頂部 JRPG HUD Bar -->
+      <header class="hud-bar">
+        <div class="hud-title-area">
+          <span class="insignia-icon">🛡️</span>
+          <div>
+            <h1 id="screen-title" class="hud-location-name">Loading...</h1>
+            <p id="screen-subtitle" class="hud-subtitle"></p>
+          </div>
+        </div>
+
+        <!-- HP, MP, Gold Resource Strip -->
+        <div id="resource-strip" class="hud-resources" aria-label="Player Stats">
+          <!-- Renders dynamically from JS: HP, MP, Gold -->
+        </div>
+
+        <div class="fixture-switcher-container">
+          <div class="fixture-switcher" aria-label="Fixture state">
+            <label for="fixture-select">測試狀態</label>
+            <select id="fixture-select">
+              <option value="default">預設旅店狀態</option>
+            </select>
+          </div>
+        </div>
+      </header>
+
+      <!-- 中間 JRPG 大舞台 (Main Stage) -->
+      <main class="main-stage">
+        <!-- 旅店溫暖光影 -->
+        <div class="fireplace-glow"></div>
+        <div class="ambient-light"></div>
+
+        <!-- NPC 莉莉形象展示區 -->
+        <div class="npc-stage-presence">
+          <div class="npc-portrait-container">
+            <div id="npc-avatar" class="npc-avatar-plate">LY</div>
+            <div class="npc-silhouette">💁‍♀️</div>
+            <div class="npc-glow"></div>
+          </div>
+        </div>
+      </main>
+
+      <!-- 底部 JRPG 對話與行動面板 -->
+      <footer class="jrpg-footer-bar">
+        <!-- 左側：對話框 (Dialogue Box) -->
+        <section class="dialogue-box">
+          <div class="speaker-name" id="npc-name">莉莉</div>
+          <div class="dialogue-content-area">
+            <p id="npc-bubble" class="speech-bubble">Loading...</p>
+            <p id="feedback-message" class="feedback-message"></p>
+
+            <!-- 對話確認選項 (經典 JRPG 綠色邊框樣式) -->
+            <div id="dialogue-choices" class="dialogue-choices" style="display: none;">
+              <button id="choice-yes" class="choice-btn" type="button">是 (y)</button>
+              <button id="choice-no" class="choice-btn" type="button">否 (n)</button>
+            </div>
+
+            <!-- 隱藏的舊 DOM 佔位符以防 JS 报错 -->
+            <div style="display:none;" id="service-name"></div>
+            <div style="display:none;" id="service-description"></div>
+            <div style="display:none;" id="service-cost"></div>
+            <div style="display:none;" id="npc-description"></div>
+            <div style="display:none;" id="rumors-container"></div>
+          </div>
+          <div class="speech-arrow">▼</div>
+        </section>
+
+        <!-- 右側：行動選單 (Action Menu) -->
+        <section class="action-menu">
+          <button id="confirm-rest-btn" class="action-btn active" type="button">
+            <span class="btn-icon">🛏️</span>
+            <span class="btn-text">休息</span>
+          </button>
+          <button id="back-to-town" class="action-btn" type="button">
+            <span class="btn-icon">🏰</span>
+            <span class="btn-text">返回城鎮</span>
+          </button>
+        </section>
+      </footer>
+
+      <!-- Collapsible UIAction Log Panel for Verification -->
+      <section class="action-log-panel">
+        <details>
+          <summary class="action-log-heading">
+            <span class="panel-label">UIAction 事件日誌 (Debug)</span>
+            <button id="clear-log" class="quiet-button" type="button" aria-label="Clear log">清除</button>
+          </summary>
+          <ol id="action-log" class="action-log"></ol>
+        </details>
+      </section>
+    </div>
+
+    <script src="./fixtures.js"></script>
+    <script src="./inn_skinning_lab.js"></script>
+  </body>
+</html>

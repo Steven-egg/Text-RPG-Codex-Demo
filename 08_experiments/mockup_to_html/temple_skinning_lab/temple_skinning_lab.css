@@ -1,0 +1,606 @@
+:root {
+  --bg-color: #06060a;
+  --panel-bg: rgba(12, 12, 18, 0.85);
+  --border-color: rgba(255, 255, 255, 0.08);
+  --border-active: rgba(255, 215, 0, 0.35);
+  --text-primary: #f0f0f5;
+  --text-secondary: #9a9ab0;
+  --gold-color: #ffd700;
+  --warning-color: #ff9f43;
+  --hp-color: #ff4757;
+  --mp-color: #2ed573;
+  --accent-color: #ffd700; /* Sacred Gold */
+  --glow-radius: 12px;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--bg-color);
+  color: var(--text-primary);
+  font-family: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+
+.temple-shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  box-sizing: border-box;
+  background:
+    linear-gradient(180deg, rgba(6, 6, 10, 0.7) 0%, rgba(10, 12, 22, 0.95) 100%),
+    radial-gradient(circle at 50% 30%, rgba(155, 89, 182, 0.1) 0%, transparent 60%),
+    radial-gradient(circle at 10% 80%, rgba(41, 128, 185, 0.08) 0%, transparent 50%),
+    #06060a;
+}
+
+/* JRPG Top HUD Bar */
+.hud-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 30px;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.6) 0%, rgba(0, 0, 0, 0) 100%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  box-sizing: border-box;
+  z-index: 10;
+}
+
+.hud-title-area {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.insignia-icon {
+  font-size: 24px;
+  filter: drop-shadow(0 0 6px var(--gold-color));
+}
+
+.hud-location-name {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  color: #fff;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.hud-subtitle {
+  margin: 2px 0 0 0;
+  font-size: 11px;
+  color: var(--text-secondary);
+  letter-spacing: 0.5px;
+}
+
+.hud-resources {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+}
+
+.resource-item {
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid var(--border-color);
+  padding: 6px 14px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: bold;
+  letter-spacing: 0.5px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.resource-item[data-tone="primary"] { border-color: rgba(255, 71, 87, 0.3); color: var(--hp-color); }
+.resource-item[data-tone="mp"] { border-color: rgba(46, 213, 115, 0.3); color: var(--mp-color); }
+.resource-item[data-tone="gold"] { border-color: rgba(255, 215, 0, 0.3); color: var(--gold-color); }
+
+.fixture-switcher-container {
+  display: flex;
+  align-items: center;
+}
+
+.fixture-switcher {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(20, 20, 25, 0.6);
+  padding: 4px 10px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  font-size: 11px;
+}
+
+.fixture-switcher select {
+  background: #15151c;
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  padding: 2px 6px;
+  border-radius: 3px;
+  outline: none;
+  font-size: 11px;
+}
+
+/* JRPG Main Stage (Church interior / Sanctuary) */
+.main-stage {
+  flex: 1;
+  position: relative;
+  display: flex;
+  justify-content: flex-end;
+  align-items: flex-end;
+  padding: 0 80px 10px 0;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.church-glow {
+  position: absolute;
+  left: 30%;
+  top: 10%;
+  width: 500px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(142, 68, 173, 0.08) 0%, transparent 70%);
+  filter: blur(25px);
+  pointer-events: none;
+}
+
+.stained-glass-light {
+  position: absolute;
+  left: 20%;
+  top: 0;
+  width: 150px;
+  height: 100%;
+  background: linear-gradient(135deg, rgba(52, 152, 219, 0.08) 0%, rgba(155, 89, 182, 0.08) 50%, transparent 100%);
+  transform: skewX(-20deg);
+  filter: blur(8px);
+  pointer-events: none;
+}
+
+/* NPC Presence Sizing & Placement (Larger and shifted elegantly to left overlapping center-right) */
+.npc-stage-presence {
+  z-index: 2;
+  margin-bottom: -15px;
+  position: absolute;
+  right: 120px; /* Shifted leftwards so it is more prominent and less pushed into the right edge */
+}
+
+.npc-portrait-container {
+  position: relative;
+  width: 320px; /* Enlarged box */
+  height: 420px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+}
+
+.npc-avatar-plate {
+  position: absolute;
+  top: 30px;
+  left: 30px;
+  background: rgba(0, 0, 0, 0.6);
+  border: 1px solid var(--gold-color);
+  color: var(--gold-color);
+  font-size: 11px;
+  font-weight: 800;
+  padding: 3px 8px;
+  border-radius: 3px;
+  letter-spacing: 1px;
+  z-index: 5;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+}
+
+.npc-silhouette {
+  font-size: 260px; /* Bolder and much larger NPC display, acting as high-fidelity visual anchor */
+  opacity: 0.9;
+  filter: drop-shadow(0 0 25px rgba(155, 89, 182, 0.25));
+  animation: breathe 3.5s ease-in-out infinite alternate;
+  user-select: none;
+}
+
+.npc-glow {
+  position: absolute;
+  width: 200px;
+  height: 300px;
+  background: radial-gradient(circle, rgba(155, 89, 182, 0.12) 0%, transparent 70%);
+  bottom: 20px;
+  z-index: -1;
+  border-radius: 50%;
+  filter: blur(15px);
+}
+
+/* JRPG Bottom dialogue & action board */
+.jrpg-footer-bar {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 20px;
+  padding: 0 30px 30px 30px;
+  box-sizing: border-box;
+  z-index: 10;
+}
+
+/* Dialogue Box (Glassmorphic) */
+.dialogue-box {
+  background: var(--panel-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 20px 25px;
+  box-sizing: border-box;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 120px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition: border-color 0.3s;
+}
+
+.dialogue-box:hover {
+  border-color: rgba(255, 215, 0, 0.15);
+}
+
+.speaker-name {
+  position: absolute;
+  top: -12px;
+  left: 20px;
+  background: #0b0b10;
+  border: 1px solid var(--gold-color);
+  color: var(--gold-color);
+  font-size: 13px;
+  font-weight: 800;
+  padding: 3px 14px;
+  border-radius: 4px;
+  letter-spacing: 0.5px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+}
+
+.dialogue-content-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.speech-bubble {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--text-primary);
+  letter-spacing: 0.5px;
+}
+
+.feedback-message {
+  margin: 6px 0 0 0;
+  font-size: 13px;
+  color: #2ed573;
+  font-weight: bold;
+}
+
+.speech-arrow {
+  position: absolute;
+  right: 18px;
+  bottom: 12px;
+  color: var(--gold-color);
+  font-size: 10px;
+  animation: bounce 0.8s infinite alternate;
+  opacity: 0.8;
+  cursor: default;
+}
+
+/* Action Menu (Right side buttons) */
+.action-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-sizing: border-box;
+}
+
+.action-btn {
+  background: var(--panel-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 14px 20px;
+  color: var(--text-primary);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  transition: all 0.25s ease;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  text-align: left;
+  outline: none;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.action-btn .btn-icon {
+  font-size: 18px;
+  transition: transform 0.25s ease;
+}
+
+.action-btn .btn-text {
+  letter-spacing: 0.5px;
+}
+
+/* Active / Select states */
+.action-btn:hover, .action-btn.active:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: var(--gold-color);
+  box-shadow: 0 0 12px rgba(255, 215, 0, 0.2);
+  color: #fff;
+}
+
+.action-btn:hover .btn-icon {
+  transform: scale(1.15);
+}
+
+.action-btn.active {
+  border-color: var(--border-active);
+  background: rgba(255, 215, 0, 0.03);
+}
+
+/* JRPG Modal Overlays */
+.jrpg-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(4, 4, 6, 0.85);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 100;
+}
+
+.jrpg-modal-content {
+  background: rgba(18, 18, 26, 0.95);
+  border: 1px solid var(--gold-color);
+  border-radius: 8px;
+  width: 90%;
+  max-width: 580px;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.8), 0 0 24px rgba(255, 215, 0, 0.1);
+  animation: modalSlideUp 0.3s ease-out;
+  box-sizing: border-box;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--border-color);
+  padding: 15px 25px;
+}
+
+.modal-header h2 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--gold-color);
+  letter-spacing: 1px;
+}
+
+.close-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 28px;
+  cursor: pointer;
+  line-height: 1;
+  padding: 0;
+}
+
+.close-btn:hover {
+  color: #fff;
+}
+
+.modal-body {
+  padding: 20px 25px 25px 25px;
+  max-height: 70vh;
+  overflow-y: auto;
+  box-sizing: border-box;
+}
+
+.modal-instruction {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin: 0 0 20px 0;
+  line-height: 1.5;
+}
+
+/* Promotions List inside Modal */
+.promotions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.promo-item {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 18px;
+  box-sizing: border-box;
+}
+
+.promo-header {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  padding-bottom: 8px;
+  margin-bottom: 12px;
+}
+
+.promo-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--gold-color);
+}
+
+.promo-description {
+  margin: 0 0 14px 0;
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.promo-reqs-label {
+  margin: 0 0 6px 0;
+  font-size: 11px;
+  font-weight: bold;
+  color: var(--text-primary);
+}
+
+.promo-reqs {
+  margin: 0 0 16px 0;
+  padding-left: 15px;
+  font-size: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.req-satisfied {
+  color: var(--mp-color);
+}
+
+.req-unsatisfied {
+  color: var(--hp-color);
+}
+
+.promo-action-btn {
+  background: rgba(20, 20, 25, 0.6);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  color: var(--text-secondary);
+  padding: 8px 16px;
+  font-size: 12px;
+  font-weight: bold;
+  cursor: not-allowed;
+  width: 100%;
+}
+
+.promo-action-btn:disabled {
+  opacity: 0.7;
+}
+
+/* Collapsible Action Log Panel */
+.action-log-panel {
+  margin: 0 30px 20px 30px;
+  background: rgba(12, 12, 16, 0.5);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 8px 15px;
+  box-sizing: border-box;
+}
+
+.action-log-panel details summary {
+  cursor: pointer;
+  outline: none;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 11px;
+  color: var(--text-secondary);
+  user-select: none;
+}
+
+.action-log-panel details[open] summary {
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 6px;
+  margin-bottom: 6px;
+}
+
+.panel-label {
+  font-weight: bold;
+  letter-spacing: 0.5px;
+}
+
+.quiet-button {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: 10px;
+}
+
+.quiet-button:hover {
+  color: var(--text-primary);
+}
+
+.action-log {
+  margin: 0;
+  padding-left: 15px;
+  font-family: Consolas, monospace;
+  font-size: 10px;
+  max-height: 80px;
+  overflow-y: auto;
+}
+
+.action-log li {
+  margin-bottom: 3px;
+  line-height: 1.3;
+}
+
+.log-dispatched {
+  color: #2ed573;
+}
+
+.log-blocked {
+  color: #ff4757;
+}
+
+/* Keyframes */
+@keyframes breathe {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(-4px); }
+}
+
+@keyframes bounce {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(4px); }
+}
+
+@keyframes modalSlideUp {
+  0% { transform: translateY(20px); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+
+/* Responsive Viewports */
+@media (max-width: 900px) {
+  .hud-bar {
+    padding: 10px 15px;
+    flex-direction: column;
+    gap: 10px;
+    align-items: stretch;
+  }
+  .hud-resources {
+    justify-content: space-between;
+  }
+  .main-stage {
+    padding: 0 30px 10px 0;
+  }
+  .npc-portrait-container {
+    width: 220px;
+    height: 300px;
+  }
+  .npc-silhouette {
+    font-size: 180px;
+  }
+  .jrpg-footer-bar {
+    grid-template-columns: 1fr;
+    padding: 0 15px 15px 15px;
+    gap: 12px;
+  }
+  .action-log-panel {
+    margin: 0 15px 15px 15px;
+  }
+  .npc-stage-presence {
+    right: 30px;
+  }
+}

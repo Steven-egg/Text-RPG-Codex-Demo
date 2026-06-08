@@ -1,0 +1,911 @@
+/* 
+  ELM FORGE - Workshop Screen Design System
+  Theme: Dark JRPG / Vintage Brass / Glassmorphism
+*/
+
+/* 基礎變數與重設 */
+:root {
+  --bg-color: #0b0c10;
+  --panel-bg: rgba(22, 26, 35, 0.85);
+  --gold-primary: #c5a880;
+  --gold-bright: #ebd6b7;
+  --text-primary: #e6ebf5;
+  --text-muted: #9aa0a6;
+  --border-gold: rgba(197, 168, 128, 0.4);
+  --border-gold-hover: rgba(197, 168, 128, 0.8);
+  --success-color: #4caf50;
+  --danger-color: #f44336;
+  --info-blue: #2196f3;
+  --font-family: 'Outfit', 'Noto Sans TC', sans-serif;
+  --glow-shadow: 0 0 15px rgba(197, 168, 128, 0.15);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--bg-color);
+  background-image: 
+    radial-gradient(at 0% 0%, rgba(35, 39, 47, 0.5) 0px, transparent 50%),
+    radial-gradient(at 100% 100%, rgba(197, 168, 128, 0.05) 0px, transparent 50%),
+    linear-gradient(180deg, #090a0f 0%, #0d0f14 100%);
+  color: var(--text-primary);
+  font-family: var(--font-family);
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+}
+
+.game-container {
+  width: 100%;
+  max-width: 1280px;
+  height: 720px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  position: relative;
+}
+
+/* JRPG 邊框通用樣式 */
+.panel-border {
+  background: var(--panel-bg);
+  border: 2px solid var(--border-gold);
+  border-radius: 6px;
+  box-shadow: var(--glow-shadow), inset 0 0 20px rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(10px);
+  position: relative;
+}
+
+.panel-border::before {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  right: 2px;
+  bottom: 2px;
+  border: 1px dashed rgba(197, 168, 128, 0.15);
+  border-radius: 4px;
+  pointer-events: none;
+}
+
+/* 頂部標頭 - 緊湊精緻型地點名稱列，預留 JRPG Viewport 高度 */
+.game-header {
+  height: 52px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 2px solid var(--border-gold);
+  padding-bottom: 6px;
+  margin-bottom: 2px;
+}
+
+.title-zone .main-title {
+  font-size: 20px;
+  font-weight: 900;
+  letter-spacing: 1.5px;
+  background: linear-gradient(135deg, var(--gold-bright) 0%, var(--gold-primary) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 0 10px rgba(197, 168, 128, 0.2);
+}
+
+.title-zone .subtitle {
+  font-size: 11px;
+  color: var(--text-muted);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.meta-zone {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.player-info {
+  display: flex;
+  gap: 8px;
+}
+
+.info-chip {
+  background: rgba(197, 168, 128, 0.1);
+  border: 1px solid var(--border-gold);
+  color: var(--gold-bright);
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 1px;
+}
+
+#player-gold {
+  color: #ffc107;
+  border-color: rgba(255, 193, 7, 0.3);
+  background: rgba(255, 193, 7, 0.05);
+  box-shadow: 0 0 8px rgba(255, 193, 7, 0.1);
+}
+
+.fixture-selector-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.fixture-selector-container select {
+  background: #121620;
+  border: 1px solid var(--border-gold);
+  color: var(--text-primary);
+  padding: 4px 8px;
+  border-radius: 4px;
+  outline: none;
+  cursor: pointer;
+  font-family: var(--font-family);
+  transition: all 0.2s ease;
+}
+
+.fixture-selector-container select:hover {
+  border-color: var(--gold-bright);
+}
+
+/* 主操作區：三欄式 */
+.main-stage {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 350px 1fr 280px;
+  gap: 15px;
+  min-height: 0; /* 強制 Grid 內部高度收縮，防止溢出 */
+}
+
+/* 左欄：Tabs & List */
+.left-column {
+  display: flex;
+  flex-direction: column;
+  padding: 10px;
+  min-height: 0;
+}
+
+.tabs-deck {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.tab-btn {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(197, 168, 128, 0.2);
+  border-radius: 4px;
+  color: var(--text-muted);
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  outline: none;
+  font-family: var(--font-family);
+  font-size: 13px;
+  text-align: left;
+}
+
+.tab-btn:hover {
+  background: rgba(197, 168, 128, 0.08);
+  border-color: var(--border-gold);
+  color: var(--text-primary);
+}
+
+.tab-btn.active {
+  background: rgba(197, 168, 128, 0.15);
+  border-color: var(--gold-primary);
+  color: var(--gold-bright);
+  box-shadow: inset 0 0 8px rgba(197, 168, 128, 0.2), 0 0 8px rgba(197, 168, 128, 0.1);
+  font-weight: 600;
+}
+
+.tab-icon {
+  font-size: 16px;
+  margin-right: 8px;
+  display: inline-block;
+  width: 20px;
+  text-align: center;
+}
+
+.tab-label {
+  flex: 1;
+}
+
+.tab-count {
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(197, 168, 128, 0.2);
+  padding: 1px 6px;
+  border-radius: 10px;
+  font-size: 11px;
+  color: var(--gold-primary);
+}
+
+.tab-btn.active .tab-count {
+  border-color: var(--gold-primary);
+  color: var(--gold-bright);
+}
+
+/* 列表滾動區 */
+.scrollable {
+  overflow-y: auto;
+  flex: 1;
+}
+
+/* 自訂精美滾動條 */
+.scrollable::-webkit-scrollbar {
+  width: 6px;
+}
+.scrollable::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.2);
+}
+.scrollable::-webkit-scrollbar-thumb {
+  background: var(--border-gold);
+  border-radius: 3px;
+}
+.scrollable::-webkit-scrollbar-thumb:hover {
+  background: var(--gold-primary);
+}
+
+.list-deck {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-right: 4px;
+}
+
+/* 品項單列 */
+.list-item-row {
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(197, 168, 128, 0.15);
+  border-radius: 4px;
+  padding: 8px 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.list-item-row:hover {
+  background: rgba(197, 168, 128, 0.05);
+  border-color: var(--border-gold-hover);
+  box-shadow: 0 0 8px rgba(197, 168, 128, 0.1);
+}
+
+.list-item-row.selected {
+  background: rgba(197, 168, 128, 0.08);
+  border-color: var(--gold-primary);
+  box-shadow: inset 0 0 5px rgba(197, 168, 128, 0.15);
+}
+
+.item-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.item-visual-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--text-muted);
+}
+
+.item-visual-indicator.weapon-dot { background: #ff5722; }
+.item-visual-indicator.armor-dot { background: #4caf50; }
+.item-visual-indicator.upgrade-dot { background: #ffeb3b; }
+.item-visual-indicator.owned-dot { background: #2196f3; }
+
+.item-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.list-item-row.selected .item-name {
+  color: var(--gold-bright);
+}
+
+.item-right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.item-badge {
+  font-size: 10px;
+  padding: 1px 5px;
+  border-radius: 3px;
+  font-weight: bold;
+}
+
+.item-badge.can-deal {
+  background: rgba(76, 175, 80, 0.15);
+  color: var(--success-color);
+  border: 1px solid rgba(76, 175, 80, 0.3);
+}
+
+.item-badge.blocked {
+  background: rgba(244, 67, 54, 0.15);
+  color: var(--danger-color);
+  border: 1px solid rgba(244, 67, 54, 0.3);
+}
+
+.item-badge.locked {
+  background: rgba(255, 152, 0, 0.15);
+  color: #ff9800;
+  border: 1px solid rgba(255, 152, 0, 0.3);
+}
+
+.item-price-label {
+  font-size: 12px;
+  color: #ffc107;
+  font-weight: 600;
+}
+
+/* 中欄：品項詳情與需求消耗（雙面板組合） */
+.center-column {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  min-height: 0;
+}
+
+.detail-panel {
+  flex: 1.3;
+  display: flex;
+  flex-direction: column;
+  padding: 12px 15px;
+  min-height: 0;
+}
+
+.requirement-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 12px 15px;
+  min-height: 0;
+}
+
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid rgba(197, 168, 128, 0.2);
+  padding-bottom: 6px;
+  margin-bottom: 10px;
+}
+
+.panel-title {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--gold-bright);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.category-tag {
+  background: rgba(197, 168, 128, 0.15);
+  border: 1px solid var(--border-gold);
+  color: var(--gold-primary);
+  font-size: 10px;
+  padding: 1px 6px;
+  border-radius: 3px;
+  font-weight: 600;
+  letter-spacing: 1px;
+}
+
+/* 詳情內文 */
+.placeholder-text {
+  font-size: 13px;
+  color: var(--text-muted);
+  text-align: center;
+  margin: auto;
+  letter-spacing: 1px;
+}
+
+.detail-content, .requirement-content {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.detail-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.detail-row-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.detail-main-name {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--gold-bright);
+}
+
+.detail-subtitle-type {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.detail-desc-card {
+  background: rgba(0, 0, 0, 0.2);
+  border-left: 3px solid var(--gold-primary);
+  padding: 8px 12px;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--text-primary);
+  border-radius: 0 4px 4px 0;
+  margin: 4px 0;
+}
+
+.detail-stats-deck {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 4px 0;
+}
+
+.stat-tag {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(197, 168, 128, 0.15);
+  border-radius: 4px;
+  padding: 4px 10px;
+  font-size: 12px;
+  display: flex;
+  gap: 6px;
+  font-weight: 600;
+}
+
+.stat-label {
+  color: var(--text-muted);
+}
+
+.stat-value {
+  color: var(--success-color);
+}
+
+.job-compatibility-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  background: rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(197, 168, 128, 0.1);
+  padding: 8px 10px;
+  border-radius: 4px;
+}
+
+.job-compatibility-title {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.job-badges-deck {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 2px;
+}
+
+.job-tag {
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-weight: bold;
+  border: 1px solid transparent;
+}
+
+.job-tag.compatible {
+  background: rgba(76, 175, 80, 0.12);
+  color: var(--success-color);
+  border-color: rgba(76, 175, 80, 0.25);
+}
+
+.job-tag.incompatible {
+  background: rgba(255, 255, 255, 0.02);
+  color: var(--text-muted);
+  border-color: rgba(255, 255, 255, 0.05);
+}
+
+.job-tag.current-active {
+  background: rgba(33, 150, 243, 0.15);
+  color: var(--info-blue);
+  border-color: rgba(33, 150, 243, 0.3);
+  box-shadow: 0 0 6px rgba(33, 150, 243, 0.15);
+}
+
+/* 需求與消耗下部面板 */
+.req-item-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+/* 單條條狀需求 */
+.req-strip-row {
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(197, 168, 128, 0.1);
+  border-radius: 4px;
+  padding: 6px 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.req-name-zone {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12.5px;
+}
+
+.req-icon-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--gold-primary);
+}
+
+.req-icon-dot.gold-dot { background: #ffc107; }
+.req-icon-dot.base-dot { background: #ff9800; }
+.req-icon-dot.material-dot { background: #9c27b0; }
+
+.req-label {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.req-val-zone {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12.5px;
+}
+
+.req-fraction {
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.req-fraction.satisfied {
+  color: var(--success-color);
+}
+
+.req-fraction.deficient {
+  color: var(--danger-color);
+}
+
+.req-status-icon {
+  font-size: 12px;
+}
+
+.req-status-icon.satisfied { color: var(--success-color); }
+.req-status-icon.deficient { color: var(--danger-color); }
+
+/* 右欄：NPC 形象與台詞區 */
+.right-column {
+  display: flex;
+  flex-direction: column;
+  padding: 15px;
+  min-height: 0;
+  transition: all 0.4s ease;
+}
+
+/* 雙工坊主題化右欄邊框發光 */
+.right-column.grey-forge {
+  border-color: rgba(235, 140, 52, 0.4);
+  box-shadow: 0 0 15px rgba(235, 140, 52, 0.1), inset 0 0 20px rgba(0, 0, 0, 0.6);
+}
+
+.right-column.brin-armor {
+  border-color: rgba(76, 175, 80, 0.4);
+  box-shadow: 0 0 15px rgba(76, 175, 80, 0.1), inset 0 0 20px rgba(0, 0, 0, 0.6);
+}
+
+.npc-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid rgba(197, 168, 128, 0.2);
+  padding-bottom: 6px;
+  margin-bottom: 15px;
+}
+
+.npc-badge {
+  background: rgba(197, 168, 128, 0.12);
+  border: 1px solid rgba(197, 168, 128, 0.25);
+  color: var(--gold-primary);
+  font-size: 10px;
+  padding: 1px 5px;
+  border-radius: 3px;
+  font-weight: 700;
+}
+
+.npc-name {
+  font-size: 14px;
+  font-weight: 900;
+  color: var(--gold-bright);
+}
+
+/* NPC 剪影 Programmatic Design */
+.npc-silhouette-area {
+  flex: 1;
+  background: radial-gradient(circle at center, rgba(35, 42, 57, 0.6) 0%, rgba(13, 16, 23, 0.8) 100%);
+  border: 1px solid rgba(197, 168, 128, 0.15);
+  border-radius: 4px;
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 15px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.npc-silhouette {
+  width: 130px;
+  height: 200px;
+  background: linear-gradient(180deg, rgba(197, 168, 128, 0.4) 0%, rgba(22, 26, 35, 0.95) 100%);
+  border-radius: 60px 60px 0 0;
+  position: relative;
+  box-shadow: 0 -4px 15px rgba(197, 168, 128, 0.15);
+}
+
+/* 葛雷：武器工匠 */
+.npc-silhouette-area.grey-forge {
+  background: radial-gradient(circle at center, rgba(78, 48, 23, 0.5) 0%, rgba(13, 10, 8, 0.95) 100%);
+}
+
+.npc-silhouette-area.grey-forge .npc-silhouette {
+  background: linear-gradient(180deg, rgba(235, 140, 52, 0.4) 0%, rgba(35, 20, 10, 0.95) 100%);
+  box-shadow: 0 -4px 20px rgba(235, 140, 52, 0.2);
+}
+
+/* 布琳：防具工匠 */
+.npc-silhouette-area.brin-armor {
+  background: radial-gradient(circle at center, rgba(28, 59, 39, 0.5) 0%, rgba(8, 15, 11, 0.95) 100%);
+}
+
+.npc-silhouette-area.brin-armor .npc-silhouette {
+  background: linear-gradient(180deg, rgba(76, 175, 80, 0.4) 0%, rgba(15, 30, 20, 0.95) 100%);
+  box-shadow: 0 -4px 20px rgba(76, 175, 80, 0.2);
+}
+
+.dialog-bubble {
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(197, 168, 128, 0.2);
+  border-radius: 4px;
+  padding: 8px 12px;
+  position: relative;
+  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
+}
+
+.dialog-bubble::before {
+  content: '';
+  position: absolute;
+  top: -6px;
+  left: 30px;
+  border-width: 0 6px 6px 6px;
+  border-style: solid;
+  border-color: transparent transparent rgba(197, 168, 128, 0.2) transparent;
+}
+
+.dialog-text {
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--text-primary);
+  font-style: italic;
+}
+
+/* 底部動作列 */
+.action-footer {
+  height: 60px;
+  display: grid;
+  grid-template-columns: 150px 1fr 180px;
+  gap: 15px;
+  align-items: center;
+}
+
+.action-btn {
+  height: 44px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: var(--font-family);
+  font-weight: 700;
+  font-size: 13.5px;
+  letter-spacing: 1px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.btn-icon {
+  font-size: 15px;
+}
+
+.back-btn {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(197, 168, 128, 0.3);
+  color: var(--text-muted);
+}
+
+.back-btn:hover {
+  background: rgba(244, 67, 54, 0.1);
+  border-color: var(--danger-color);
+  color: var(--text-primary);
+}
+
+.footer-center {
+  height: 44px;
+  display: flex;
+  align-items: center;
+  padding: 0 15px;
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.feedback-msg {
+  font-size: 12px;
+  color: var(--gold-bright);
+  letter-spacing: 0.5px;
+  font-weight: 600;
+}
+
+.primary-btn {
+  background: linear-gradient(135deg, var(--gold-primary) 0%, #b29367 100%);
+  border: 1px solid #ebd6b7;
+  color: #12100e;
+  box-shadow: 0 0 10px rgba(197, 168, 128, 0.2);
+}
+
+.primary-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, var(--gold-bright) 0%, var(--gold-primary) 100%);
+  box-shadow: 0 0 15px rgba(197, 168, 128, 0.4);
+}
+
+.primary-btn:disabled {
+  background: #252830;
+  border-color: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.2);
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* 除錯面板 */
+.debug-container {
+  border-color: rgba(197, 168, 128, 0.2);
+  box-shadow: none;
+  background: rgba(9, 10, 15, 0.95);
+  position: absolute;
+  bottom: 0px;
+  right: 20px;
+  width: 320px;
+  z-index: 100;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.debug-header {
+  padding: 8px 12px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(197, 168, 128, 0.05);
+  border-radius: 4px 4px 0 0;
+}
+
+.debug-title {
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--gold-primary);
+  letter-spacing: 0.5px;
+}
+
+.debug-indicator {
+  font-size: 10px;
+  color: var(--text-muted);
+  transition: transform 0.3s ease;
+}
+
+.debug-content {
+  height: 0px;
+  overflow-y: auto;
+  padding: 0 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-family: monospace;
+  font-size: 10px;
+  color: #8bc34a;
+  transition: all 0.3s ease;
+}
+
+.debug-container.expanded .debug-content {
+  height: 180px;
+  padding: 10px 12px;
+  border-top: 1px solid rgba(197, 168, 128, 0.15);
+}
+
+.debug-container.expanded .debug-indicator {
+  transform: rotate(180deg);
+}
+
+.debug-row {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  padding-bottom: 4px;
+  line-height: 1.3;
+}
+
+.debug-row.blocked-action {
+  color: #ff5722;
+}
+
+.debug-timestamp {
+  color: #888;
+  margin-right: 4px;
+}
+
+/* 需求條件警告框 */
+.req-warning-box {
+  margin-top: 10px;
+  background: rgba(244, 67, 54, 0.08);
+  border: 1px dashed rgba(244, 67, 54, 0.4);
+  color: var(--danger-color);
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: 11.5px;
+  font-weight: 700;
+  text-align: center;
+  letter-spacing: 0.5px;
+}
+
+/* 響應式佈局微調 */
+@media (max-width: 1024px) {
+  .main-stage {
+    grid-template-columns: 280px 1fr;
+  }
+  .right-column {
+    display: none; /* 平板與窄螢幕隱藏右側 NPC 區，保護中欄可讀性 */
+  }
+}
+
+@media (max-width: 768px) {
+  body {
+    overflow-y: auto;
+  }
+  .game-container {
+    height: auto;
+    overflow: visible;
+  }
+  .main-stage {
+    grid-template-columns: 1fr;
+    height: auto;
+  }
+  .left-column {
+    height: 300px;
+  }
+  .action-footer {
+    grid-template-columns: 1fr;
+    height: auto;
+    gap: 10px;
+  }
+}

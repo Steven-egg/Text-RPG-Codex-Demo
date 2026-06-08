@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Synthesis Screen Static Prototype</title>
+    <link rel="stylesheet" href="./synthesis_skinning_lab.css" />
+  </head>
+  <body>
+    <div class="synthesis-shell" data-load-state="loading">
+      <header class="synthesis-header">
+        <div class="title-copy">
+          <p class="screen-label">設施畫面</p>
+          <h1 id="screen-title">Loading</h1>
+          <p id="screen-subtitle" class="subtitle"></p>
+        </div>
+        <div class="fixture-switcher" aria-label="Prototype fixture">
+          <label for="fixture-select">測試狀態</label>
+          <select id="fixture-select">
+            <option value="default">Default Craftable</option>
+            <option value="constrained">Constrained / Missing</option>
+          </select>
+        </div>
+      </header>
+
+      <section class="resource-strip" id="resource-strip" aria-label="Resources" hidden></section>
+
+      <main class="synthesis-layout">
+        <section class="recipe-browser" aria-label="Recipe list">
+          <div class="category-tabs" id="category-tabs"></div>
+          <div class="recipe-list" id="recipe-list"></div>
+        </section>
+
+        <section class="recipe-detail-area" aria-live="polite">
+          <section class="recipe-detail-card">
+            <div class="detail-heading">
+              <p class="panel-label">配方詳情</p>
+              <span id="detail-status" class="status-badge"></span>
+            </div>
+            <div id="recipe-detail" class="recipe-detail"></div>
+            <div id="output-summary" class="output-summary"></div>
+          </section>
+
+          <section class="requirement-panel">
+            <p class="panel-label">需求與缺口</p>
+            <div id="requirement-list" class="requirement-list"></div>
+          </section>
+        </section>
+
+        <aside class="workshop-side" aria-label="Workshop character">
+          <section class="npc-region">
+            <div class="npc-portrait" id="npc-portrait" aria-hidden="true"></div>
+            <div class="npc-copy">
+              <p class="panel-label">工房主人</p>
+              <h2 id="npc-name"></h2>
+              <p id="npc-role" class="npc-role"></p>
+            </div>
+          </section>
+        </aside>
+      </main>
+
+      <footer class="synthesis-footer">
+        <button id="back-action" class="secondary-action" type="button">返回城鎮</button>
+        <section class="feedback-bar" aria-live="polite">
+          <p class="panel-label">米菈提示</p>
+          <p id="feedback-message"></p>
+        </section>
+        <button id="primary-action" class="primary-action" type="button"></button>
+      </footer>
+
+      <details class="action-log-panel">
+        <summary class="panel-label">UIAction Log</summary>
+        <div class="action-log-heading">
+          <button id="clear-log" class="quiet-button" type="button" aria-label="Clear log">清除</button>
+        </div>
+        <ol id="action-log" class="action-log"></ol>
+      </details>
+    </div>
+
+    <script src="./fixtures.js"></script>
+    <script src="./synthesis_skinning_lab.js"></script>
+  </body>
+</html>
