@@ -16,6 +16,7 @@ For GUI Task Zone work, start with the smallest matching route:
 | Static prototype handoff / screen verification | Targeted sections of `01_content/gui-html-static-prototype-progress-v1.md`. |
 | GUI planning / drift audit / document routing | This file. |
 | Facility-family Mockup-to-HTML shell planning | `01_content/gui-facility-shell-baseline-v0.1.md`; use approved references under `08_experiments/mockup_to_html/` only when the task needs them. |
+| Isolated Shop Skinning Lab iteration | `08_experiments/mockup_to_html/shop_skinning_lab/README.md`, `08_experiments/mockup_to_html/shop_skinning_lab/shop-skinning-process-note-v1.md`, then local lab files only. Formal Shop single-screen skinning remains paused. |
 | Screen flow / UIAction / ScreenModel mapping | `01_content/gui-screen-map.md`, `01_content/ui-flow-blueprint.md`. |
 | Runtime-connected GUI planning | `01_content/gui-runtime-bridge-plan-v1.md`, then stop at a read-only planning gate. |
 | Runtime bridge contract audit | `01_content/gui-bridge-vertical-slice-contract-audit-v1.md`. |
@@ -44,6 +45,10 @@ Default GUI mode remains HTML static prototype:
   mapping. AI facility hero images provide scene / NPC / atmosphere;
   HTML/CSS/JS provides UI and interaction; runtime remains gameplay authority.
 - Shop single-screen skinning readiness and mockup brief work is paused.
+- Isolated Shop Skinning Lab v0.2.2 is available only as an owner-approved
+  fixture-only lab capsule under `08_experiments/mockup_to_html/shop_skinning_lab/`.
+  It does not replace `07_gui_prototype/shop_screen/`, reopen formal Shop
+  single-screen skinning, or authorize runtime / asset pipeline work.
 
 Local runtime-connected live bridge exists only for explicit blessed slices:
 

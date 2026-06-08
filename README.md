@@ -58,6 +58,12 @@ GUI state:
   lighting, and atmosphere; HTML/CSS/JS provides all UI and interaction; Python
   runtime remains gameplay authority.
 - The Shop single-screen skinning readiness / mockup brief route is paused.
+- Owner-approved isolated Shop Skinning Lab v0.2.2 exists at
+  `08_experiments/mockup_to_html/shop_skinning_lab/` as a fixture-only visual
+  baseline for lab-only skinning. It is not runtime source, not a formal asset
+  pipeline, and not a replacement for `07_gui_prototype/shop_screen/`. Future
+  lab-only skinning should start from the lab README, process note, and local
+  lab files instead of broad GUI/runtime docs.
 
 Blessed local live bridge coverage:
 
@@ -314,6 +320,9 @@ do not imply gameplay validation.
   complete through `c7729df`.
 - The current active planning baseline is facility-family Mockup-to-HTML
   composition, not Shop single-screen skinning.
+- Isolated Shop Skinning Lab v0.2.2 may be used only for owner-approved
+  lab-local skinning under `08_experiments/mockup_to_html/shop_skinning_lab/`;
+  the formal Shop single-screen route remains paused.
 - The next smallest candidate is a markdown-only Facility Family Overlay Zone
   Map V0.1.
 - No image generation, HTML/CSS implementation, runtime work, or asset pipeline

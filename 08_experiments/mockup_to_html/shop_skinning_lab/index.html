@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Shop Skinning Lab v0.1.1 — extraction repair</title>
+    <link rel="stylesheet" href="./shop_skinning_lab.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;600;700;900&family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
+  </head>
+  <body>
+    <div class="shop-shell" data-load-state="ready">
+      <header class="shop-header">
+        <div class="title-copy">
+          <p class="screen-label">商鋪</p>
+          <h1 id="screen-title">星燈行商鋪</h1>
+          <p id="screen-subtitle" class="subtitle"></p>
+        </div>
+        <div class="fixture-switcher" aria-label="Prototype fixture">
+          <label for="fixture-select">測試狀態</label>
+          <select id="fixture-select">
+            <option value="default" selected>Default Shop (正常購買)</option>
+            <option value="constrained">Constrained Shop (受限狀態)</option>
+          </select>
+        </div>
+      </header>
+
+      <div id="resource-strip" class="resource-strip" aria-label="Player Stats"></div>
+
+      <main class="shop-layout">
+        <section class="item-browser" aria-label="Item list">
+          <div class="category-tabs" id="category-tabs"></div>
+          <div class="item-list" id="item-list"></div>
+        </section>
+
+        <section class="item-detail-area" aria-live="polite">
+          <section class="item-detail-card">
+            <div class="detail-heading">
+              <p class="panel-label">商品詳情</p>
+              <span id="detail-status" class="status-badge"></span>
+            </div>
+            <div id="item-detail" class="item-detail"></div>
+          </section>
+
+          <section class="requirement-panel">
+            <p class="panel-label">購買要求與限制</p>
+            <div id="requirement-list" class="requirement-list"></div>
+          </section>
+        </section>
+      </main>
+
+      <aside class="shopkeeper-side" aria-label="Shopkeeper">
+        <section class="npc-region">
+          <div class="npc-portrait" id="npc-portrait" aria-hidden="true"></div>
+          <div class="npc-copy">
+            <p class="panel-label">行商</p>
+            <h2 id="npc-name"></h2>
+            <p id="npc-role" class="npc-role"></p>
+          </div>
+        </section>
+      </aside>
+
+      <footer class="shop-footer">
+        <button id="back-action" class="secondary-action" type="button">返回城鎮</button>
+        <section class="feedback-bar" aria-live="polite">
+          <p class="panel-label" id="feedback-speaker">提示</p>
+          <p id="feedback-message"></p>
+        </section>
+        <button id="primary-action" class="primary-action" type="button"></button>
+      </footer>
+
+      <details class="action-log-panel">
+        <summary class="panel-label">UIAction Log</summary>
+        <div class="action-log-heading">
+          <button id="clear-log" class="quiet-button" type="button" aria-label="Clear log">清除</button>
+        </div>
+        <ol id="action-log" class="action-log"></ol>
+      </details>
+    </div>
+
+    <script src="./fixtures.js"></script>
+    <script src="./shop_skinning_lab.js"></script>
+  </body>
+</html>

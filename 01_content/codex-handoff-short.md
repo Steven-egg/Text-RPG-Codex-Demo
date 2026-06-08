@@ -52,6 +52,14 @@ Current facility-family planning state:
 - The Shop single-screen readiness checklist and mockup brief are paused. Do not
   resume Shop skinning or generate another Shop candidate without explicit owner
   approval.
+- Owner-approved isolated Shop Skinning Lab v0.2.2 exists under
+  `08_experiments/mockup_to_html/shop_skinning_lab/` as a fixture-only,
+  player-facing visual baseline. It is not runtime source, not a formal
+  `07_gui_prototype/shop_screen/` replacement, and not a formal asset pipeline.
+- Future lab-only skinning should read the lab `README.md`,
+  `shop-skinning-process-note-v1.md`, and local lab files first. Do not reload
+  broad GUI/runtime docs unless the task explicitly asks for resync,
+  merge-back, runtime bridge, or formal prototype work.
 
 Current newest GUI live state:
 
@@ -151,6 +159,11 @@ files during ordinary startup.
   `01_content/gui-shop-skinning-lab-readiness-checklist-v0.1.md` and
   `01_content/gui-shop-mockup-brief-v0.1.md`; read only when the owner explicitly
   reopens that route.
+- Isolated Shop Skinning Lab capsule:
+  `08_experiments/mockup_to_html/shop_skinning_lab/README.md` and
+  `08_experiments/mockup_to_html/shop_skinning_lab/shop-skinning-process-note-v1.md`;
+  read these plus local lab files for owner-approved lab-only skinning. This does
+  not reopen formal Shop single-screen skinning or runtime work.
 - GUI live bridge details and landed MVP status notes:
   `01_content/gui-runtime-bridge-plan-v1.md`
 - GUI static prototype screen-level progress and verification:
