@@ -119,7 +119,7 @@ backActionEl.addEventListener("click", () => {
     dispatched: true,
   });
   renderFeedback("工會提示", "「返回城鎮已記錄（Lab 模式不執行真實導航與頁面跳轉）。」");
-}););
+});
 
 
 

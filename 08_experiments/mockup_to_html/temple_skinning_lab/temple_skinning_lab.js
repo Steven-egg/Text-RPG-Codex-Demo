@@ -84,7 +84,7 @@ backToTownBtnEl.addEventListener("click", () => {
     dispatched: true,
   });
   npcBubbleEl.textContent = "大祭司賽恩：「返回城鎮已記錄（Lab 模式不執行真實導航與頁面跳轉）。」";
-}););
+});
 
 loadFixture(fixtureSelect.value);
 

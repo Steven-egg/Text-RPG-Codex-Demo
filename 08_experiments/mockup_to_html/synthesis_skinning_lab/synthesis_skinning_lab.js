@@ -63,7 +63,7 @@ backActionEl.addEventListener("click", () => {
     dispatched: true,
   });
   renderFeedback("米菈：「返回城鎮已記錄（Lab 模式不執行真實導航與頁面跳轉）。」");
-}););
+});
 
 clearLogEl.addEventListener("click", () => {
   state.actionLog = [];

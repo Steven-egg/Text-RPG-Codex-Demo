@@ -55,7 +55,7 @@ document.addEventListener('DOMContentLoaded', () => {
     logUIAction('back_to_town_hub', {});
     feedbackBar.textContent = '返回城鎮已記錄（Lab 模式不執行真實導航與頁面跳轉）。';
     feedbackBar.style.color = 'var(--info-blue)';
-  }););
+  });
 
   // 4. 綁定除錯面板 toggle
   debugToggle.addEventListener('click', () => {

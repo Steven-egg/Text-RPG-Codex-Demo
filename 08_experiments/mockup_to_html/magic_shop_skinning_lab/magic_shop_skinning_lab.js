@@ -62,7 +62,7 @@ backActionEl.addEventListener("click", () => {
     dispatched: true,
   });
   renderFeedback(state.model.npc?.name ?? "伊芙", "「返回城鎮已記錄（Lab 模式不執行真實導航與頁面跳轉）。」");
-}););
+});
 
 clearLogEl.addEventListener("click", () => {
   state.actionLog = [];

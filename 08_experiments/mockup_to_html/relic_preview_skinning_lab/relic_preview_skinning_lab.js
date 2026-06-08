@@ -44,7 +44,7 @@ backToTownBtnEl.addEventListener("click", () => {
     dispatched: true,
   });
   focusFeedbackEl.textContent = "返回城鎮已記錄（Lab 模式不執行真實導航與頁面跳轉）。";
-}););
+});
 
 loadFixture(fixtureSelect.value);
 
