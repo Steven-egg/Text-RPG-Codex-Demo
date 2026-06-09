@@ -4,7 +4,17 @@
 */
 
 /* 基礎變數與重設 */
+/* ==========================================
+   Facility Background Interface
+   ========================================== */
 :root {
+  --facility-background-image: url('./assets/workshop-background.jpg');
+  --facility-background-image-2: url('./assets/workshop-background-02.jpg');
+  --facility-background-position: center;
+  --facility-background-size: cover;
+  --facility-background-overlay: rgba(0, 0, 0, 0.45);
+  --facility-shell-wash: rgba(11, 12, 16, 0.5);
+
   --bg-color: #0b0c10;
   --panel-bg: rgba(22, 26, 35, 0.85);
   --gold-primary: #c5a880;
@@ -18,6 +28,42 @@
   --info-blue: #2196f3;
   --font-family: 'Outfit', 'Noto Sans TC', sans-serif;
   --glow-shadow: 0 0 15px rgba(197, 168, 128, 0.15);
+}
+
+body.facility-body {
+  position: relative;
+}
+
+body.facility-body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -2;
+  background-image: var(--facility-background-image);
+  background-position: var(--facility-background-position);
+  background-size: var(--facility-background-size);
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  pointer-events: none;
+}
+
+body.facility-body::after {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  background: var(--facility-background-overlay);
+  pointer-events: none;
+}
+
+body.facility-body:has(.brin-armor)::before {
+  background-image: var(--facility-background-image-2);
 }
 
 * {
@@ -50,6 +96,8 @@ body {
   flex-direction: column;
   gap: 15px;
   position: relative;
+  background: var(--facility-shell-wash);
+  border-radius: 8px;
 }
 
 /* JRPG 邊框通用樣式 */

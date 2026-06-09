@@ -1,4 +1,13 @@
+/* ==========================================
+   Facility Background Interface
+   ========================================== */
 :root {
+  --facility-background-image: url('./assets/guild-background.jpg');
+  --facility-background-position: center;
+  --facility-background-size: cover;
+  --facility-background-overlay: rgba(0, 0, 0, 0.45);
+  --facility-shell-wash: rgba(19, 21, 16, 0.6);
+  
   color-scheme: dark;
   --ink: #161713;
   --ink-soft: #22241d;
@@ -17,6 +26,38 @@
   --danger: #d9665d;
   --focus: #f2c95d;
   --shadow: 0 18px 48px rgba(0, 0, 0, 0.34);
+}
+
+body.facility-body {
+  position: relative;
+}
+
+body.facility-body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -2;
+  background-image: var(--facility-background-image);
+  background-position: var(--facility-background-position);
+  background-size: var(--facility-background-size);
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  pointer-events: none;
+}
+
+body.facility-body::after {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  background: var(--facility-background-overlay);
+  pointer-events: none;
 }
 
 * {
@@ -55,6 +96,7 @@ button {
   display: grid;
   grid-template-rows: auto auto minmax(560px, 1fr) auto minmax(96px, auto);
   gap: 12px;
+  background: var(--facility-shell-wash);
 }
 
 .guild-header,
