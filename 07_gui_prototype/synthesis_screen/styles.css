@@ -1,10 +1,19 @@
+/* ==========================================
+   Facility Background Interface
+   ========================================== */
 :root {
+  --facility-background-image: url('./assets/synthesis-background.jpg');
+  --facility-background-position: right 10% center;
+  --facility-background-size: cover;
+  --facility-background-overlay: rgba(0, 0, 0, 0.45);
+  --facility-shell-wash: transparent;
+
   color-scheme: dark;
   --ink: #151611;
   --ink-soft: #22241d;
   --paper: #efe7d5;
   --paper-muted: #bdb29e;
-  --panel: rgba(25, 27, 20, 0.9);
+  --panel: rgba(25, 27, 20, 0.88);
   --panel-strong: rgba(17, 18, 14, 0.96);
   --line: rgba(239, 231, 213, 0.2);
   --line-strong: rgba(239, 231, 213, 0.36);
@@ -18,6 +27,38 @@
   --shadow: 0 18px 48px rgba(0, 0, 0, 0.35);
 }
 
+body.facility-body {
+  position: relative;
+}
+
+body.facility-body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -2;
+  background-image: var(--facility-background-image);
+  background-position: var(--facility-background-position);
+  background-size: var(--facility-background-size);
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  pointer-events: none;
+}
+
+body.facility-body::after {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  background: linear-gradient(90deg, rgba(19, 21, 15, 0.88) 0%, rgba(19, 21, 15, 0.5) 45%, rgba(19, 21, 15, 0) 80%);
+  pointer-events: none;
+}
+
 * {
   box-sizing: border-box;
 }
@@ -29,8 +70,7 @@ body {
 
 body {
   margin: 0;
-  font-family:
-    Inter, "Noto Sans TC", "Microsoft JhengHei", "PingFang TC", Arial, sans-serif;
+  font-family: 'Outfit', 'Noto Serif TC', serif;
   background:
     radial-gradient(circle at 18% 12%, rgba(69, 151, 141, 0.15), transparent 24%),
     linear-gradient(135deg, rgba(183, 127, 67, 0.2), transparent 34%),
@@ -50,21 +90,20 @@ button {
 
 .synthesis-shell {
   width: min(1540px, calc(100vw - 32px));
-  min-height: calc(100vh - 32px);
+  height: calc(100vh - 32px);
   margin: 16px auto;
   display: grid;
   grid-template-rows: auto minmax(570px, 1fr) auto auto;
   gap: 12px;
+  overflow: hidden;
+  background: var(--facility-shell-wash);
 }
 
-.synthesis-header,
 .resource-strip,
 .recipe-browser,
 .recipe-detail-area,
-.npc-region,
 .requirement-panel,
-.synthesis-footer,
-.action-log-panel {
+.synthesis-footer {
   border: 1px solid var(--line);
   border-radius: 8px;
   background: var(--panel);
@@ -72,16 +111,64 @@ button {
   backdrop-filter: blur(14px);
 }
 
+.recipe-browser,
+.recipe-detail-card,
+.requirement-panel,
+.synthesis-footer {
+  position: relative;
+  box-shadow:
+    inset 0 0 0 1px rgba(239, 231, 213, 0.08),
+    var(--shadow);
+}
+
+.recipe-browser::before,
+.recipe-detail-card::before,
+.requirement-panel::before,
+.synthesis-footer::before {
+  content: '✦';
+  position: absolute;
+  top: 4px;
+  left: 5px;
+  font-size: 8px;
+  color: rgba(211, 170, 78, 0.6);
+  pointer-events: none;
+}
+
 .synthesis-header {
-  min-height: 126px;
-  padding: 18px 20px;
+  min-height: 80px;
+  padding: 12px 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 20px;
+  border: none;
+  background: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
+  position: relative;
+}
+
+.title-copy {
+  display: inline-flex;
+  flex-direction: column;
+  justify-content: center;
+  background: linear-gradient(90deg, rgba(19, 21, 15, 0.92) 0%, rgba(25, 27, 20, 0.8) 60%, rgba(25, 27, 20, 0) 100%);
+  padding: 8px 60px 8px 16px;
+  border-left: 3px solid var(--gold);
+  border-top: 1px solid rgba(239, 231, 213, 0.2);
+  border-bottom: 1px solid rgba(239, 231, 213, 0.2);
+  border-radius: 4px 0 0 4px;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
 
 .screen-label,
+#screen-subtitle,
+.subtitle,
+.fixture-switcher {
+  display: none !important;
+}
+
 .panel-label {
   margin: 0 0 8px;
   color: var(--gold);
@@ -104,7 +191,12 @@ h1 {
   margin: 0;
   font-size: clamp(2.2rem, 4.1vw, 4.65rem);
   line-height: 0.95;
-  letter-spacing: 0;
+  letter-spacing: 0.05em;
+  font-family: 'Noto Serif TC', serif;
+  font-weight: 900;
+  text-shadow:
+    0 2px 4px rgba(0, 0, 0, 0.95),
+    0 0 12px rgba(211, 170, 78, 0.35);
 }
 
 .subtitle {
@@ -184,9 +276,9 @@ select:focus-visible {
 
 .synthesis-layout {
   min-height: 0;
-  height: clamp(570px, calc(100vh - 330px), 720px);
+  height: 100%;
   display: grid;
-  grid-template-columns: minmax(330px, 0.76fr) minmax(520px, 1.2fr) minmax(300px, 0.62fr);
+  grid-template-columns: 460px minmax(460px, 1.1fr) minmax(450px, 1.2fr);
   gap: 12px;
 }
 
@@ -214,13 +306,12 @@ select:focus-visible {
 
 .category-tab,
 .recipe-row,
-.primary-action,
-.secondary-action,
 .quiet-button {
   border: 1px solid var(--line);
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.055);
+  border-radius: 4px;
+  background: rgba(20, 22, 17, 0.6);
   cursor: pointer;
+  transition: all 0.2s ease;
 }
 
 .category-tab {
@@ -243,8 +334,11 @@ select:focus-visible {
 .category-tab.is-selected,
 .recipe-row.is-selected {
   border-color: var(--focus);
-  background: rgba(211, 170, 78, 0.14);
-  box-shadow: 0 0 0 2px rgba(241, 202, 100, 0.13);
+  background: linear-gradient(135deg, rgba(211, 170, 78, 0.22) 0%, rgba(183, 127, 67, 0.16) 100%);
+  box-shadow:
+    0 0 12px rgba(241, 202, 100, 0.18),
+    inset 0 0 0 1px rgba(241, 202, 100, 0.18);
+  color: var(--paper);
 }
 
 .recipe-list {
@@ -259,20 +353,20 @@ select:focus-visible {
 .recipe-row {
   width: 100%;
   min-height: 112px;
-  padding: 12px;
+  padding: 14px 16px;
   display: grid;
   grid-template-columns: 1fr auto;
-  gap: 10px;
+  gap: 12px;
   text-align: left;
+  background: linear-gradient(135deg, rgba(25, 27, 20, 0.95), rgba(17, 18, 14, 0.98));
+  box-shadow: inset 0 0 0 1px rgba(239, 231, 213, 0.05);
 }
 
 .recipe-row:hover,
 .category-tab:hover,
-.primary-action:hover,
-.secondary-action:hover,
 .quiet-button:hover {
-  border-color: rgba(241, 202, 100, 0.58);
-  background: rgba(211, 170, 78, 0.11);
+  border-color: rgba(241, 202, 100, 0.5);
+  background: rgba(211, 170, 78, 0.08);
 }
 
 .recipe-row-copy {
@@ -285,6 +379,7 @@ select:focus-visible {
   color: var(--paper);
   font-weight: 900;
   line-height: 1.16;
+  font-family: 'Noto Serif TC', serif;
 }
 
 .recipe-summary,
@@ -438,12 +533,16 @@ select:focus-visible {
 .npc-region {
   height: 100%;
   min-height: 0;
-  padding: 14px;
+  padding: 0;
   display: grid;
   grid-template-columns: 1fr;
-  grid-template-rows: minmax(0, 1fr) auto;
-  gap: 14px;
+  grid-template-rows: 1fr;
+  gap: 0;
   overflow: hidden;
+  border: none;
+  background: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
 }
 
 .npc-portrait {
@@ -451,43 +550,19 @@ select:focus-visible {
   height: 100%;
   min-height: 420px;
   align-self: stretch;
-  border: 1px solid rgba(239, 231, 213, 0.22);
-  border-radius: 8px;
-  background:
-    radial-gradient(circle at 52% 28%, rgba(239, 231, 213, 0.18), transparent 12%),
-    linear-gradient(145deg, rgba(69, 151, 141, 0.26), transparent 46%),
-    linear-gradient(180deg, rgba(183, 127, 67, 0.28), rgba(21, 22, 17, 0.96));
+  border: none;
+  background: radial-gradient(circle at 50% 30%, rgba(211, 170, 78, 0.05), transparent 60%);
   position: relative;
   overflow: hidden;
 }
 
 .npc-portrait::before,
 .npc-portrait::after {
-  content: "";
-  position: absolute;
-  border: 1px solid rgba(239, 231, 213, 0.18);
-  background: rgba(17, 18, 14, 0.42);
-}
-
-.npc-portrait::before {
-  width: 42%;
-  height: 36%;
-  left: 29%;
-  top: 18%;
-  border-radius: 48% 48% 42% 42%;
-}
-
-.npc-portrait::after {
-  width: 70%;
-  height: 48%;
-  left: 15%;
-  bottom: 8%;
-  border-radius: 38% 38% 8px 8px;
+  display: none;
 }
 
 .npc-copy {
-  min-height: 58px;
-  overflow: hidden;
+  display: none;
 }
 
 .npc-copy h2 {
@@ -594,44 +669,92 @@ select:focus-visible {
 .feedback-bar {
   min-height: 0;
   border: 1px solid var(--line);
-  border-radius: 8px;
-  padding: 12px 14px;
-  background: rgba(255, 255, 255, 0.052);
+  border-radius: 4px;
+  padding: 12px 18px;
+  background: linear-gradient(180deg, rgba(34, 36, 29, 0.96) 0%, rgba(21, 22, 17, 0.98) 100%);
   overflow: auto;
+  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.8);
+}
+
+.feedback-bar .panel-label {
+  color: var(--gold);
+  font-size: 0.76rem;
+  margin-bottom: 6px;
+  font-family: 'Noto Serif TC', serif;
+  letter-spacing: 0.08em;
+  font-weight: 700;
+}
+
+.feedback-bar .panel-label::before {
+  content: '【 ';
+}
+
+.feedback-bar .panel-label::after {
+  content: ' 】';
 }
 
 .feedback-bar p:last-child {
   margin: 0;
   color: var(--paper);
-  line-height: 1.45;
+  font-size: 0.88rem;
+  line-height: 1.5;
+  font-family: 'Noto Serif TC', serif;
+  white-space: normal;
 }
 
 .primary-action,
 .secondary-action {
   min-height: 58px;
-  border-color: var(--line-strong);
+  border: 1px solid var(--line-strong);
   padding: 11px 14px;
   font-weight: 900;
+  font-family: 'Noto Serif TC', serif;
+  font-size: 0.92rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
 .primary-action {
-  border-color: rgba(241, 202, 100, 0.5);
-  background: linear-gradient(135deg, rgba(211, 170, 78, 0.28), rgba(183, 127, 67, 0.25));
+  border-color: rgba(241, 202, 100, 0.65);
+  background: linear-gradient(180deg, #383427 0%, #1e1d17 100%);
+  color: var(--gold);
+  text-shadow: 0 0 4px rgba(241, 202, 100, 0.5);
+  box-shadow:
+    0 0 8px rgba(211, 170, 78, 0.12),
+    inset 0 0 0 1px rgba(211, 170, 78, 0.1);
+}
+
+.primary-action:hover:not([aria-disabled="true"]) {
+  border-color: var(--focus);
+  background: linear-gradient(180deg, #524b35 0%, #29281f 100%);
+  box-shadow:
+    0 0 16px rgba(241, 202, 100, 0.28),
+    inset 0 0 0 1px rgba(241, 202, 100, 0.2);
 }
 
 .primary-action[aria-disabled="true"] {
   border-color: rgba(214, 107, 95, 0.45);
-  background: rgba(214, 107, 95, 0.12);
+  background: rgba(30, 20, 20, 0.6);
+  color: var(--paper-muted);
+  opacity: 0.45;
   cursor: not-allowed;
+  text-shadow: none;
+  box-shadow: none;
 }
 
 .secondary-action {
-  background: rgba(255, 255, 255, 0.055);
+  background: rgba(34, 36, 29, 0.6);
+  border: 1px solid var(--line);
+}
+
+.secondary-action:hover {
+  border-color: rgba(211, 170, 78, 0.5);
+  background: rgba(211, 170, 78, 0.06);
 }
 
 .action-log-panel {
-  min-height: 0;
-  padding: 12px 14px;
+  display: none !important;
 }
 
 .action-log-heading {
