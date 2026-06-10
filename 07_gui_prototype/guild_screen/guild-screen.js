@@ -1015,7 +1015,7 @@ function renderSelectedMaterialContent() {
   rewardList.append(rewardItem);
   sellRewardSummaryEl.replaceChildren(rewardList);
 
-  // 3. Confirmation Checkbox
+  // 3. Confirmation Message
   const condList = document.createElement("div");
   condList.className = "condition-list";
   const condRow = document.createElement("div");
@@ -1023,39 +1023,18 @@ function renderSelectedMaterialContent() {
   condRow.style.gridTemplateColumns = "1fr";
 
   const cMsg = document.createElement("p");
-  cMsg.style.margin = "0 0 8px 0";
+  cMsg.style.margin = "0";
   cMsg.style.color = "var(--paper-muted)";
   cMsg.style.fontSize = "0.9rem";
   cMsg.style.lineHeight = "1.45";
   cMsg.textContent = "請確認出售數量與總金額。出售後物資將被工會收購，且該操作無法復原。";
 
-  const cLabel = document.createElement("label");
-  cLabel.style.display = "flex";
-  cLabel.style.alignItems = "center";
-  cLabel.style.gap = "8px";
-  cLabel.style.cursor = "pointer";
-  cLabel.style.color = "var(--paper)";
-  cLabel.style.fontWeight = "bold";
-
-  const cCheckbox = document.createElement("input");
-  cCheckbox.type = "checkbox";
-  cCheckbox.id = "sell-confirm-checkbox";
-  cCheckbox.style.width = "18px";
-  cCheckbox.style.height = "18px";
-  cCheckbox.style.cursor = "pointer";
-
-  cLabel.append(cCheckbox, document.createTextNode("我已確認出售數量與金額"));
-  condRow.append(cMsg, cLabel);
+  condRow.append(cMsg);
   condList.append(condRow);
   sellConfirmContainerEl.replaceChildren(condList);
 
-  // Checkbox listener to toggle primary button state without a full redraw
-  cCheckbox.addEventListener("change", () => {
-    updateSellPrimaryButtonState(cCheckbox.checked, m.item_id, state.sellQuantity);
-  });
-
-  // Initialize button state
-  updateSellPrimaryButtonState(false, m.item_id, state.sellQuantity);
+  // Directly initialize button as confirmed (no checkbox needed in GUI prototype)
+  updateSellPrimaryButtonState(true, m.item_id, state.sellQuantity);
 }
 
 function updateSellPrimaryButtonState(confirmed, itemId, qty) {

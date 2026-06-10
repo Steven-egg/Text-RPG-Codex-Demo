@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Guild Screen Static Prototype</title>
     <link rel="stylesheet" href="./guild_skinning_lab.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;600;700;900&family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
   </head>
   <body class="facility-body">
     <div class="guild-shell" data-load-state="loading">
@@ -100,13 +103,13 @@
         <button id="primary-action" class="primary-action" type="button"></button>
       </footer>
 
-      <section class="action-log-panel">
+      <details class="action-log-panel">
+        <summary class="panel-label">UIAction Log</summary>
         <div class="action-log-heading">
-          <p class="panel-label">UIAction Log</p>
           <button id="clear-log" class="quiet-button" type="button" aria-label="Clear log">清除</button>
         </div>
         <ol id="action-log" class="action-log"></ol>
-      </section>
+      </details>
     </div>
 
     <script src="./fixtures.js"></script>
