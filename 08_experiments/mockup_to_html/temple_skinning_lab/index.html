@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Temple Static JRPG Prototype</title>
+    <title>《元素迷宮：邊境冒險者》轉職神殿</title>
     <link rel="stylesheet" href="./temple_skinning_lab.css" />
   </head>
   <body class="facility-body">
@@ -12,17 +12,19 @@
       <!-- 頂部 JRPG HUD Bar -->
       <header class="hud-bar">
         <div class="hud-title-area">
-          <span class="insignia-icon">⛪</span>
-          <div>
-            <h1 id="screen-title" class="hud-location-name">Loading...</h1>
-            <p id="screen-subtitle" class="hud-subtitle"></p>
+          <div class="title-copy">
+            <span class="panel-label">城鎮設施</span>
+            <h1 id="screen-title" class="hud-location-name">轉職神殿 (Temple & Church)</h1>
+            <p id="screen-subtitle" class="hud-subtitle" style="display: none;"></p>
           </div>
         </div>
 
-        <!-- 隱藏的舊 HP, MP, Gold Resource Strip，保持 JS 向下相容 -->
-        <div id="resource-strip" style="display: none;" aria-hidden="true"></div>
+        <!-- HP, MP, Gold Resource Strip (Released for visual parity) -->
+        <div id="resource-strip" class="hud-resources" aria-label="Player Stats">
+          <!-- Renders dynamically from JS: HP, MP, Gold -->
+        </div>
 
-        <div class="fixture-switcher-container">
+        <div class="fixture-switcher-container" style="display: none;">
           <div class="fixture-switcher" aria-label="Fixture state">
             <label for="fixture-select">測試狀態</label>
             <select id="fixture-select">
@@ -38,54 +40,73 @@
         <div class="church-glow"></div>
         <div class="stained-glass-light"></div>
 
-        <!-- NPC 艾莉希亞形象展示區 (NPC Presence Anchor) -->
-        <div class="npc-stage-presence">
-          <div class="npc-portrait-container">
-            <div class="npc-avatar-plate">EL</div>
-            <div class="npc-silhouette">🧎‍♀️</div>
-            <div class="npc-glow"></div>
+        <!-- 教堂紅框內容隱藏以防 JS 報錯 -->
+        <div style="display: none;">
+          <!-- 左側欄：聖痕與線索詢問面板 (Inquiries Panel) -->
+          <section class="inquiries-panel">
+            <div id="inquiries-container" class="inquiries-list"></div>
+            <div id="inquiry-feedback"></div>
+          </section>
+
+          <!-- 中間欄：月神之井祭壇 (Moon Well Card) -->
+          <section class="moon-well-card">
+            <h3 id="well-name">月神之井</h3>
+            <p id="well-description"></p>
+            <button id="draw-wellwater-btn" type="button"></button>
+            <div id="well-feedback"></div>
+          </section>
+
+          <!-- NPC 艾莉希亞形象展示區 -->
+          <div class="npc-stage-presence">
+            <div class="npc-portrait-container">
+              <div class="npc-avatar-plate">EL</div>
+            </div>
           </div>
         </div>
       </main>
 
       <!-- 底部 JRPG 對話與行動面板 -->
       <footer class="jrpg-footer-bar">
-        <!-- 左側：對話框 (Dialogue Box) -->
+        <!-- 左側：次要行動按鈕區 -->
+        <div class="footer-left-action">
+          <button onclick="document.getElementById('back-to-town').click()" class="action-btn secondary-action" type="button">
+            <svg class="btn-icon-svg" viewBox="0 0 24 24"><path d="M2 22h20v-2h-2v-4h-2v4h-4v-6h-4v6H6v-4H4v4H2v2zm3-8h2v-2H5v2zm12 0h2v-2h-2v2zM11 4.5l-5 5V12h10V9.5l-5-5z" fill="currentColor"/></svg>
+            <span class="btn-text">返回城鎮</span>
+          </button>
+          <button id="back-to-town" style="display: none;" type="button"></button>
+        </div>
+
+        <!-- 中間：對話框 (Dialogue Box) -->
         <section class="dialogue-box">
           <div class="speaker-name" id="npc-name">艾莉希亞</div>
           <div class="dialogue-content-area">
             <p id="npc-bubble" class="speech-bubble">願聖光指引你的道路，旅人。需要教會的協助嗎？</p>
             <p id="feedback-message" class="feedback-message"></p>
 
-            <!-- 隱藏的舊 DOM 佔位符以防 JS 报错 -->
-            <div style="display:none;" id="well-name"></div>
-            <div style="display:none;" id="well-description"></div>
-            <div style="display:none;" id="well-feedback"></div>
-            <div style="display:none;" id="inquiries-container"></div>
-            <div style="display:none;" id="inquiry-feedback"></div>
-            <button style="display:none;" id="draw-wellwater-btn" type="button"></button>
+            <!-- 隱藏的舊詢問按鈕與轉職按鈕，保持 JS 相容性 -->
+            <button id="open-inquiries-btn" style="display: none;" type="button"></button>
+            <button id="open-promotions-btn" style="display: none;" type="button"></button>
           </div>
           <div class="speech-arrow">▼</div>
         </section>
 
-        <!-- 右側：行動選單 (Action Menu) -->
-        <section class="action-menu">
-          <button id="open-inquiries-btn" class="action-btn active" type="button">
-            <span class="btn-icon">📜</span>
-            <span class="btn-text">詢問關於主線與聖痕</span>
+        <!-- 神殿指引選項選單 (垂直排列之黃金按鈕，置於右側按鈕上方) -->
+        <div id="temple-guide-menu" class="dialogue-choices" style="display: none;">
+          <button class="choice-btn" type="button" onclick="document.getElementById('open-promotions-btn').click(); document.getElementById('temple-guide-menu').style.display = 'none';">職業晉升</button>
+          <button class="choice-btn" type="button" onclick="document.getElementById('open-inquiries-btn').click(); document.getElementById('temple-guide-menu').style.display = 'none';">聖痕諮詢</button>
+          <button class="choice-btn" type="button" onclick="document.getElementById('temple-guide-menu').style.display = 'none';">取消</button>
+        </div>
+
+        <!-- 右側：主要行動按鈕區 -->
+        <div class="footer-right-action">
+          <button onclick="const m = document.getElementById('temple-guide-menu'); m.style.display = (m.style.display === 'none' ? 'flex' : 'none');" class="action-btn primary-action active" type="button">
+            <svg class="btn-icon-svg" viewBox="0 0 24 24"><path d="M12 2L2 22h20L12 2zm0 3.99L19.53 19H4.47L12 5.99zM13 16h-2v2h2v-2zm0-6h-2v4h2v-4z" fill="currentColor"/></svg>
+            <span class="btn-text">尋求指引</span>
           </button>
-          <button id="open-promotions-btn" class="action-btn" type="button">
-            <span class="btn-icon">⚔️</span>
-            <span class="btn-text">轉職預覽與引導</span>
-          </button>
-          <button id="back-to-town" class="action-btn" type="button">
-            <span class="btn-icon">🏰</span>
-            <span class="btn-text">返回城鎮</span>
-          </button>
-        </section>
+        </div>
       </footer>
 
-      <!-- 彈窗對話框 2：轉職祭壇預覽 (Promotions Modal) - 保留並維護 -->
+      <!-- 彈窗對話框 2：轉職祭壇預覽 (Promotions Modal) -->
       <div id="promotions-modal" class="jrpg-modal-overlay" style="display: none;">
         <div class="jrpg-modal-content">
           <header class="modal-header">
@@ -101,8 +122,8 @@
         </div>
       </div>
 
-      <!-- Collapsible UIAction Log Panel for Verification -->
-      <section class="action-log-panel">
+      <!-- Collapsible UIAction Log Panel for Verification (Hidden in production styling) -->
+      <section class="action-log-panel" style="display: none;">
         <details>
           <summary class="action-log-heading">
             <span class="panel-label">UIAction Log (Debug)</span>

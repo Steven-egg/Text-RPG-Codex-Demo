@@ -1,28 +1,40 @@
-/* ==========================================
-   Facility Background Interface
-   ========================================== */
-:root {
-  --facility-background-image: url('./assets/inn-background.jpg');
-  --facility-background-position: center;
-  --facility-background-size: cover;
-  --facility-background-overlay: rgba(0, 0, 0, 0.45);
-  --facility-shell-wash: linear-gradient(180deg, rgba(8, 8, 10, 0.5) 0%, rgba(18, 14, 10, 0.8) 100%),
-    radial-gradient(circle at 20% 70%, rgba(230, 126, 34, 0.1) 0%, transparent 60%),
-    radial-gradient(circle at 80% 30%, rgba(41, 128, 185, 0.05) 0%, transparent 50%),
-    rgba(8, 8, 10, 0.5);
+/* ==========================================================================
+   Inn Skinning Lab CSS - JRPG Dark Obsidian Styling (Refined V5)
+   ========================================================================== */
 
-  --bg-color: #08080a;
-  --panel-bg: rgba(15, 15, 20, 0.85);
-  --border-color: rgba(255, 255, 255, 0.08);
-  --border-active: rgba(255, 215, 0, 0.35);
-  --text-primary: #f0f0f5;
-  --text-secondary: #9a9ab0;
+:root {
+  color-scheme: dark;
+  --ink: #08090b;
+  --ink-soft: #121419;
+  --paper: #ebd19b;             /* Antique Gold */
+  --paper-body: #e2d9c5;        /* Rice Paper / Off-white */
+  --paper-muted: #a39782;       /* Muted Gold-grey */
+  --panel: rgba(18, 14, 10, 0.75); /* Translucent dark obsidian board */
+  --line: rgba(241, 196, 15, 0.22); /* Gold border line */
+  --line-strong: rgba(241, 196, 15, 0.45);
   --gold-color: #ffd700;
   --warning-color: #ff9f43;
   --hp-color: #ff4757;
   --mp-color: #2ed573;
-  --accent-color: #ffd700; /* Warm JRPG Gold */
-  --glow-radius: 12px;
+  --green: #8fa874;             /* Sage green for selection/yes */
+  --shadow: 0 16px 40px rgba(0, 0, 0, 0.85);
+
+  /* Precise JRPG column setup */
+  --catalog-col: clamp(360px, 24vw, 430px);
+  --detail-col: 460px;
+  --npc-col: minmax(420px, 1fr);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  min-height: 100%;
+  overflow: hidden;
 }
 
 body.facility-body {
@@ -37,477 +49,452 @@ body.facility-body::before {
   width: 100%;
   height: 100%;
   z-index: -2;
-  background-image: var(--facility-background-image);
-  background-position: var(--facility-background-position);
-  background-size: var(--facility-background-size);
+  background-image: url('./assets/inn-background.jpg');
+  background-position: center center;
+  background-size: cover;
   background-repeat: no-repeat;
   background-attachment: fixed;
   pointer-events: none;
 }
 
+/* Background overlay restricted to the bottom to highlight the footer dialogue box */
 body.facility-body::after {
   content: "";
   position: fixed;
-  top: 0;
   left: 0;
+  bottom: 0;
   width: 100%;
-  height: 100%;
+  height: 220px;
   z-index: -1;
-  background: var(--facility-background-overlay);
+  background: linear-gradient(to top, rgba(8, 9, 11, 0.95) 0%, rgba(8, 9, 11, 0.65) 55%, rgba(8, 9, 11, 0) 100%);
   pointer-events: none;
 }
 
 body {
   margin: 0;
   padding: 0;
-  background-color: var(--bg-color);
-  color: var(--text-primary);
-  font-family: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  overflow-x: hidden;
-  min-height: 100vh;
+  color: var(--paper-body);
+  font-family: 'Outfit', 'Noto Serif TC', serif;
+  overflow: hidden;
+}
+
+button,
+select {
+  font: inherit;
+}
+
+button {
+  color: inherit;
+}
+
+button:focus-visible {
+  outline: 2px solid var(--gold-color);
+  outline-offset: 2px;
 }
 
 .inn-shell {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-  box-sizing: border-box;
-  background: var(--facility-shell-wash);
+  width: min(1880px, calc(100vw - 24px));
+  height: calc(100dvh - 24px);
+  margin: 12px auto;
+  display: grid;
+  grid-template-columns: var(--catalog-col) var(--detail-col) var(--npc-col);
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  gap: 12px;
+  overflow: hidden;
+  background: transparent;
 }
 
-/* JRPG Top HUD Bar */
+/* Base Panel - Obsidian JRPG Panel with Inset Gold Frame */
+.jrpg-footer-bar {
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: var(--panel);
+  box-shadow:
+    inset 0 0 0 1px rgba(241, 196, 15, 0.08),
+    var(--shadow);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  position: relative;
+}
+
+/* Gold Corner Ornaments */
+.jrpg-footer-bar::before {
+  content: '✦';
+  position: absolute;
+  top: 4px;
+  left: 5px;
+  font-size: 8px;
+  color: rgba(241, 196, 15, 0.5);
+  pointer-events: none;
+}
+
+/* Header styling */
 .hud-bar {
+  grid-column: 1 / 4;
+  grid-row: 1;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 15px 30px;
-  background: linear-gradient(180deg, rgba(0, 0, 0, 0.6) 0%, rgba(0, 0, 0, 0) 100%);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-  box-sizing: border-box;
-  z-index: 10;
+  padding: 12px 0;
+  background: transparent;
+  border: none;
+  min-height: 80px;
 }
 
-.hud-title-area {
-  display: flex;
-  align-items: center;
-  gap: 12px;
+.title-copy {
+  display: inline-flex;
+  flex-direction: column;
+  justify-content: center;
+  background: linear-gradient(90deg, rgba(8, 9, 11, 0.95) 0%, rgba(18, 14, 10, 0.8) 60%, rgba(18, 14, 10, 0) 100%);
+  padding: 8px 60px 8px 16px;
+  border-left: 3px solid var(--gold-color);
+  border-top: 1px solid rgba(241, 196, 15, 0.2);
+  border-bottom: 1px solid rgba(241, 196, 15, 0.2);
+  border-radius: 4px 0 0 4px;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
 
-.insignia-icon {
-  font-size: 24px;
-  filter: drop-shadow(0 0 6px var(--gold-color));
+.panel-label {
+  margin: 0 0 4px;
+  color: var(--paper);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  font-family: 'Noto Serif TC', serif;
 }
 
 .hud-location-name {
   margin: 0;
-  font-size: 20px;
-  font-weight: 800;
-  letter-spacing: 1px;
-  color: #fff;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  font-size: clamp(1.8rem, 2.8vw, 2.5rem);
+  line-height: 1.1;
+  letter-spacing: 0.08em;
+  color: var(--paper);
+  font-family: 'Noto Serif TC', serif;
+  font-weight: 900;
+  text-shadow:
+    0 2px 4px rgba(0, 0, 0, 0.95),
+    0 0 12px rgba(241, 196, 15, 0.3);
 }
 
-.hud-subtitle {
-  margin: 2px 0 0 0;
-  font-size: 11px;
-  color: var(--text-secondary);
-  letter-spacing: 0.5px;
-}
-
+/* Resource Strip - Scaled by 1.5x and aligned to top right */
 .hud-resources {
   display: flex;
-  gap: 15px;
+  gap: 8px;
   align-items: center;
+  transform: scale(1.5);
+  transform-origin: right center;
 }
 
 .resource-item {
-  background: rgba(0, 0, 0, 0.4);
-  border: 1px solid var(--border-color);
-  padding: 6px 14px;
+  min-height: 36px;
+  border: 1px solid var(--line);
   border-radius: 4px;
-  font-size: 12px;
-  font-weight: bold;
+  padding: 8px 14px;
+  display: inline-flex;
+  align-items: center;
+  background: rgba(241, 196, 15, 0.04);
+  color: var(--paper-body);
+  font-weight: 800;
+  font-size: 0.76rem;
   letter-spacing: 0.5px;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
 }
 
-.resource-item[data-tone="hp"] { border-color: rgba(255, 71, 87, 0.3); color: var(--hp-color); }
-.resource-item[data-tone="mp"] { border-color: rgba(46, 213, 115, 0.3); color: var(--mp-color); }
-.resource-item[data-tone="warning"] { border-color: rgba(255, 159, 67, 0.3); color: var(--warning-color); }
-.resource-item[data-tone="gold"] { border-color: rgba(255, 215, 0, 0.3); color: var(--gold-color); }
-
-.fixture-switcher-container {
-  display: flex;
-  align-items: center;
+.resource-item[data-tone="hp"] {
+  border-color: rgba(255, 71, 87, 0.4);
+  background: rgba(255, 71, 87, 0.08);
+  color: var(--hp-color);
 }
 
-.fixture-switcher {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: rgba(20, 20, 25, 0.6);
-  padding: 4px 10px;
-  border: 1px solid var(--border-color);
-  border-radius: 4px;
-  font-size: 11px;
+.resource-item[data-tone="mp"] {
+  border-color: rgba(46, 213, 115, 0.4);
+  background: rgba(46, 213, 115, 0.08);
+  color: var(--mp-color);
 }
 
-.fixture-switcher select {
-  background: #15151c;
-  color: var(--text-primary);
-  border: 1px solid var(--border-color);
-  padding: 2px 6px;
-  border-radius: 3px;
-  outline: none;
-  font-size: 11px;
+.resource-item[data-tone="gold"] {
+  border-color: rgba(241, 196, 15, 0.4);
+  background: rgba(241, 196, 15, 0.08);
+  color: var(--paper);
 }
 
-/* JRPG Main Stage (Room view / Fireplace) */
+.resource-item[data-tone="warning"] {
+  border-color: rgba(255, 159, 67, 0.4);
+  background: rgba(255, 159, 67, 0.08);
+  color: var(--warning-color);
+}
+
+/* Main Stage - Transparent for maximum background reveal */
 .main-stage {
-  flex: 1;
+  grid-column: 1 / 4;
+  grid-row: 2;
+  display: block;
   position: relative;
-  display: flex;
-  justify-content: flex-end;
-  align-items: flex-end;
-  padding: 0 80px 10px 0;
-  box-sizing: border-box;
   overflow: hidden;
 }
 
+/* Warm Fireplace effects */
 .fireplace-glow {
   position: absolute;
-  left: 10%;
+  left: 20%;
   bottom: 0;
-  width: 400px;
-  height: 300px;
+  width: 500px;
+  height: 400px;
   background: radial-gradient(circle, rgba(230, 126, 34, 0.12) 0%, transparent 70%);
-  filter: blur(20px);
+  filter: blur(25px);
   animation: flicker 4s infinite alternate;
   pointer-events: none;
+  z-index: 0;
 }
 
 .ambient-light {
   position: absolute;
-  right: 15%;
+  right: 25%;
   top: 10%;
-  width: 300px;
-  height: 300px;
-  background: radial-gradient(circle, rgba(241, 196, 15, 0.05) 0%, transparent 60%);
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(241, 196, 15, 0.04) 0%, transparent 60%);
   filter: blur(30px);
   pointer-events: none;
+  z-index: 0;
 }
 
-/* NPC Presence Sizing & Placement (Larger and shifted elegantly to left overlapping center-right) */
-.npc-stage-presence {
-  z-index: 2;
-  margin-bottom: -15px;
-  position: absolute;
-  right: 120px; /* Shifted leftwards so it is more prominent and less pushed into the right edge */
-}
-
-.npc-portrait-container {
-  position: relative;
-  width: 320px; /* Enlarged box */
-  height: 420px;
-  display: flex;
-  justify-content: center;
-  align-items: flex-end;
-}
-
-.npc-avatar-plate {
-  position: absolute;
-  top: 30px;
-  left: 30px;
-  background: rgba(0, 0, 0, 0.6);
-  border: 1px solid var(--gold-color);
-  color: var(--gold-color);
-  font-size: 11px;
-  font-weight: 800;
-  padding: 3px 8px;
-  border-radius: 3px;
-  letter-spacing: 1px;
-  z-index: 5;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
-}
-
-.npc-silhouette {
-  font-size: 240px; /* Bolder and much larger NPC display, acting as high-fidelity visual anchor */
-  opacity: 0.85;
-  filter: drop-shadow(0 0 20px rgba(255, 215, 0, 0.15));
-  animation: breathe 3s ease-in-out infinite alternate;
-  user-select: none;
-}
-
-.npc-glow {
-  position: absolute;
-  width: 200px;
-  height: 300px;
-  background: radial-gradient(circle, rgba(255, 215, 0, 0.08) 0%, transparent 70%);
-  bottom: 20px;
-  z-index: -1;
-  border-radius: 50%;
-  filter: blur(15px);
-}
-
-/* JRPG Bottom dialogue & action board */
+/* Footer structure - Fixed height and overflow visible to prevent clipping */
 .jrpg-footer-bar {
+  grid-column: 1 / 4;
+  grid-row: 3;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  height: 135px;
+  min-height: 135px;
+  max-height: 135px;
+  padding: 12px 16px;
   display: grid;
-  grid-template-columns: 1fr 320px;
-  gap: 20px;
-  padding: 0 30px 30px 30px;
-  box-sizing: border-box;
-  z-index: 10;
+  grid-template-columns: clamp(260px, 20vw, 320px) minmax(0, 1fr) clamp(260px, 20vw, 320px);
+  gap: 12px;
+  align-items: stretch;
+  overflow: visible; /* Prevent NPC name clipping */
+  margin-bottom: 4px;
 }
 
-/* Dialogue Box (Glassmorphic) */
+.footer-left-action,
+.footer-right-action {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-width: 0;
+}
+
+.action-btn {
+  height: 70px;
+  width: 100%;
+  min-width: 0;
+  padding: 11px 14px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-weight: 700;
+  font-family: 'Noto Serif TC', serif;
+  font-size: 0.95rem;
+  letter-spacing: 0.05em;
+  border-radius: 4px;
+  border: 1px solid var(--line);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* Monochrome theme SVGs */
+.btn-icon-svg {
+  width: 20px;
+  height: 20px;
+  fill: currentColor;
+  flex-shrink: 0;
+}
+
+.primary-action {
+  border-color: rgba(241, 196, 15, 0.65);
+  background: linear-gradient(180deg, #3a2e1c 0%, #1f160a 100%);
+  color: var(--paper);
+  text-shadow: 0 0 4px rgba(255, 215, 0, 0.6);
+}
+
+.primary-action:hover:not(:disabled),
+.primary-action.active:hover:not(:disabled) {
+  border-color: var(--gold-color);
+  background: linear-gradient(180deg, #4d3d25 0%, #2e200e 100%);
+  box-shadow: 0 0 16px rgba(255, 215, 0, 0.28);
+}
+
+.primary-action.active {
+  border-color: var(--gold-color);
+  box-shadow: inset 0 0 8px rgba(255, 215, 0, 0.15);
+}
+
+.secondary-action {
+  border-color: var(--line);
+  background: rgba(30, 34, 42, 0.6);
+  color: var(--paper-body);
+}
+
+.secondary-action:hover:not(:disabled) {
+  border-color: rgba(241, 196, 15, 0.5);
+  background: rgba(45, 50, 60, 0.8);
+  color: #fff;
+}
+
+.action-btn:disabled {
+  border-color: rgba(163, 151, 130, 0.18);
+  background: rgba(20, 20, 20, 0.6);
+  color: var(--paper-muted);
+  opacity: 0.45;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.action-btn .btn-text {
+  letter-spacing: 0.5px;
+}
+
+/* Dialogue Box styling with overflow visible */
 .dialogue-box {
-  background: var(--panel-bg);
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  padding: 20px 25px;
+  background: linear-gradient(180deg, rgba(15, 17, 21, 0.95) 0%, rgba(8, 9, 11, 0.98) 100%);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 14px 22px;
   box-sizing: border-box;
   position: relative;
   display: flex;
   flex-direction: column;
-  min-height: 120px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  transition: border-color 0.3s;
+  justify-content: center;
+  min-height: 0;
+  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.8);
+  min-width: 0;
+  overflow: visible; /* Essential for speaker-name display */
 }
 
-.dialogue-box:hover {
-  border-color: rgba(255, 215, 0, 0.15);
-}
-
+/* 1.5x Font for Speaker name, adjusted top alignment to avoid border clipping */
 .speaker-name {
   position: absolute;
-  top: -12px;
+  top: -18px; /* Slightly higher for visual spacing */
   left: 20px;
-  background: #111115;
+  background: #0d0f12;
   border: 1px solid var(--gold-color);
   color: var(--gold-color);
-  font-size: 13px;
+  font-size: 1.14rem; /* 0.76rem * 1.5 */
   font-weight: 800;
-  padding: 3px 14px;
+  padding: 4px 16px;
   border-radius: 4px;
-  letter-spacing: 0.5px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+  letter-spacing: 0.08em;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.6);
+  font-family: 'Noto Serif TC', serif;
+  z-index: 100;
 }
 
 .dialogue-content-area {
-  flex: 1;
   display: flex;
   flex-direction: column;
   justify-content: center;
+  min-width: 0;
 }
 
+/* 1.5x Font for Dialogue bubble */
 .speech-bubble {
   margin: 0;
-  font-size: 15px;
-  line-height: 1.6;
-  color: var(--text-primary);
-  letter-spacing: 0.5px;
+  font-size: 1.32rem; /* 0.88rem * 1.5 */
+  line-height: 1.5;
+  color: var(--paper-body);
+  font-family: 'Noto Serif TC', serif;
 }
 
+/* 1.5x Font for Feedback Message */
 .feedback-message {
-  margin: 6px 0 0 0;
-  font-size: 13px;
-  color: #2ed573;
-  font-weight: bold;
+  margin: 8px 0 0 0;
+  font-size: 1.23rem; /* 0.82rem * 1.5 */
+  color: var(--green);
+  font-weight: 700;
+  font-family: 'Noto Serif TC', serif;
 }
 
 .speech-arrow {
   position: absolute;
-  right: 18px;
-  bottom: 12px;
+  right: 14px;
+  bottom: 8px;
   color: var(--gold-color);
-  font-size: 10px;
+  font-size: 12px;
   animation: bounce 0.8s infinite alternate;
   opacity: 0.8;
   cursor: default;
 }
 
-/* JRPG Dialogue Choices Container */
+/* JRPG Dialogue Choices - Vertical stack of green buttons (no background panels) */
 .dialogue-choices {
-  display: flex;
-  gap: 15px;
-  justify-content: flex-end;
-  margin-top: 10px;
-  animation: modalSlideUp 0.2s ease-out;
+  position: absolute;
+  right: 40px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex; /* DO NOT USE !important, so JS style.display="none" can hide it */
+  flex-direction: column;
+  gap: 6px;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  padding: 0;
+  z-index: 10000;
 }
 
 .choice-btn {
-  background: rgba(12, 12, 16, 0.9);
-  border: 2px solid #2ed573; /* Green JRPG confirmation border */
+  background: rgba(8, 9, 11, 0.9);
+  border: 1.5px solid var(--green);
   border-radius: 4px;
-  color: #2ed573;
-  font-size: 14px;
-  font-weight: bold;
-  padding: 6px 20px;
+  color: var(--green);
+  font-size: 1.2rem; /* 0.8rem * 1.5 */
+  font-weight: 700;
+  padding: 6px 16px; /* Optimized padding for horizontal layout */
   cursor: pointer;
   transition: all 0.2s ease;
-  outline: none;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
-  letter-spacing: 1px;
+  font-family: 'Noto Serif TC', serif;
+  text-align: center;
+  width: auto; /* Width auto-adapts to text length */
+  min-width: 110px; /* Ensures spacious feel */
+  white-space: nowrap; /* Horizontal layout: never breaks */
 }
 
 .choice-btn:hover {
-  background: rgba(46, 213, 115, 0.15);
-  box-shadow: 0 0 10px rgba(46, 213, 115, 0.3);
-  transform: translateY(-1px);
+  background: rgba(143, 168, 116, 0.15);
+  box-shadow: 0 0 8px rgba(143, 168, 116, 0.3);
 }
 
-.choice-btn:active {
-  transform: translateY(1px);
+/* Invisible full-screen overlays to bypass rest continue clicks instantly without manual text */
+.continue-hint {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  background: transparent !important;
+  z-index: 99999 !important;
+  cursor: pointer !important;
+  font-size: 0 !important;
+  color: transparent !important;
+  margin: 0 !important;
 }
 
-/* Action Menu (Right side buttons) */
-.action-menu {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  box-sizing: border-box;
-}
-
-.action-btn {
-  background: var(--panel-bg);
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  padding: 14px 20px;
-  color: var(--text-primary);
-  font-size: 15px;
-  font-weight: 700;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  transition: all 0.25s ease;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  text-align: left;
-  outline: none;
-  width: 100%;
-  box-sizing: border-box;
-}
-
-.action-btn .btn-icon {
-  font-size: 18px;
-  transition: transform 0.25s ease;
-  filter: grayscale(20%);
-}
-
-.action-btn .btn-text {
-  letter-spacing: 1px;
-}
-
-/* Active / Select states */
-.action-btn:hover, .action-btn.active:hover {
-  background: rgba(255, 255, 255, 0.05);
-  border-color: var(--gold-color);
-  box-shadow: 0 0 12px rgba(255, 215, 0, 0.2);
-  color: #fff;
-}
-
-.action-btn:hover .btn-icon {
-  transform: scale(1.15);
-}
-
-.action-btn.active {
-  border-color: var(--border-active);
-  background: rgba(255, 215, 0, 0.03);
-}
-
-.action-btn:disabled {
-  background: rgba(20, 20, 25, 0.4);
-  color: var(--text-secondary);
-  border-color: var(--border-color);
-  cursor: not-allowed;
-  opacity: 0.5;
-  box-shadow: none;
-}
-
-.action-btn:disabled .btn-icon {
-  filter: grayscale(100%);
-}
-
-/* Collapsible Action Log Panel */
+/* UIAction Log styling (kept hidden) */
 .action-log-panel {
-  margin: 0 30px 20px 30px;
-  background: rgba(12, 12, 16, 0.5);
-  border: 1px solid var(--border-color);
-  border-radius: 6px;
-  padding: 8px 15px;
-  box-sizing: border-box;
+  display: none !important;
 }
 
-.action-log-panel details summary {
-  cursor: pointer;
-  outline: none;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 11px;
-  color: var(--text-secondary);
-  user-select: none;
-}
-
-.action-log-panel details[open] summary {
-  border-bottom: 1px solid var(--border-color);
-  padding-bottom: 6px;
-  margin-bottom: 6px;
-}
-
-.panel-label {
-  font-weight: bold;
-  letter-spacing: 0.5px;
-}
-
-.quiet-button {
-  background: transparent;
-  border: none;
-  color: var(--text-secondary);
-  cursor: pointer;
-  font-size: 10px;
-}
-
-.quiet-button:hover {
-  color: var(--text-primary);
-}
-
-.action-log {
-  margin: 0;
-  padding-left: 15px;
-  font-family: Consolas, monospace;
-  font-size: 10px;
-  max-height: 80px;
-  overflow-y: auto;
-}
-
-.action-log li {
-  margin-bottom: 3px;
-  line-height: 1.3;
-}
-
-.log-dispatched {
-  color: #2ed573;
-}
-
-.log-blocked {
-  color: #ff4757;
-}
-
-/* Keyframe Animations */
+/* Animations */
 @keyframes flicker {
-  0% { opacity: 0.9; transform: scale(1); }
-  50% { opacity: 1; transform: scale(1.03); }
-  100% { opacity: 0.85; transform: scale(0.98); }
-}
-
-@keyframes breathe {
-  0% { transform: translateY(0); }
-  100% { transform: translateY(-4px); }
+  0% { opacity: 0.85; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.02); }
+  100% { opacity: 0.8; transform: scale(0.97); }
 }
 
 @keyframes bounce {
@@ -515,41 +502,53 @@ body {
   100% { transform: translateY(4px); }
 }
 
-@keyframes modalSlideUp {
-  0% { transform: translateY(10px); opacity: 0; }
-  100% { transform: translateY(0); opacity: 1; }
-}
-
 /* Responsive Viewports */
 @media (max-width: 900px) {
+  .inn-shell {
+    width: 100vw;
+    height: 100vh;
+    margin: 0;
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr auto;
+    padding: 8px;
+  }
   .hud-bar {
-    padding: 10px 15px;
+    grid-column: 1;
     flex-direction: column;
-    gap: 10px;
+    gap: 8px;
     align-items: stretch;
   }
   .hud-resources {
+    transform: none;
     justify-content: space-between;
   }
   .main-stage {
-    padding: 0 30px 10px 0;
-  }
-  .npc-portrait-container {
-    width: 220px;
-    height: 300px;
-  }
-  .npc-silhouette {
-    font-size: 180px;
+    grid-column: 1;
+    overflow-y: auto;
   }
   .jrpg-footer-bar {
+    grid-column: 1;
     grid-template-columns: 1fr;
-    padding: 0 15px 15px 15px;
-    gap: 12px;
+    gap: 8px;
+    height: auto;
+    min-height: auto;
+    max-height: none;
   }
-  .action-log-panel {
-    margin: 0 15px 15px 15px;
+  .footer-left-action,
+  .footer-right-action {
+    height: auto;
   }
-  .npc-stage-presence {
-    right: 30px;
+  .action-btn {
+    height: 50px;
+  }
+  .dialogue-choices {
+    position: static !important;
+    transform: none !important;
+    margin-top: 10px;
+    padding: 8px !important;
+    flex-direction: row;
+    justify-content: center;
+    box-shadow: none !important;
+    width: auto;
   }
 }
