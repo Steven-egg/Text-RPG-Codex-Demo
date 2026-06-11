@@ -10,16 +10,12 @@
     <div class="town-hub-shell" data-load-state="loading">
       <header class="title-area">
         <div class="title-copy">
-          <p class="screen-label">城鎮中樞</p>
+          <div class="title-row">
+            <p class="screen-label">城鎮中樞</p>
+            <span id="live-status-badge" class="live-status-badge" style="display: none;">● LIVE</span>
+          </div>
           <h1 id="screen-title">Loading</h1>
           <p id="screen-subtitle" class="subtitle"></p>
-        </div>
-        <div class="fixture-switcher" aria-label="Fixture state">
-          <label for="fixture-select">狀態</label>
-          <select id="fixture-select">
-            <option value="./fixtures/town-hub-default.json">預設城鎮狀態</option>
-            <option value="./fixtures/town-hub-alerts.json">鎖定與提示狀態</option>
-          </select>
         </div>
       </header>
 
@@ -41,17 +37,44 @@
         </section>
 
         <section class="world-map-nav-area">
-          <p class="panel-label">移動</p>
           <div id="navigation-actions" class="action-row"></div>
         </section>
       </footer>
 
-      <section class="action-log-panel">
-        <div class="action-log-heading">
-          <p class="panel-label">UIAction Log</p>
-          <button id="clear-log" class="quiet-button" type="button" aria-label="Clear log">清除</button>
+      <!-- 偵錯主控台容器：只在 ?debug=1 時顯示 -->
+      <section id="debug-container" class="debug-container" style="display: none;">
+        <div class="debug-header">
+          <div class="debug-header-title-row">
+            <span class="debug-title">⚙️ 偵錯主控台</span>
+            <span id="debug-mode-badge" class="debug-badge">讀取中...</span>
+          </div>
+          <button id="toggle-debug-collapse" class="quiet-button" type="button">收合</button>
         </div>
-        <ol id="action-log" class="action-log"></ol>
+        <div class="debug-body" id="debug-body">
+          <div class="debug-control-group">
+            <div class="debug-control-item">
+              <label for="fixture-select">測試數據 (Fixture)</label>
+              <select id="fixture-select">
+                <option value="./fixtures/town-hub-default.json">預設城鎮狀態</option>
+                <option value="./fixtures/town-hub-alerts.json">鎖定與提示狀態</option>
+              </select>
+            </div>
+            <div class="debug-control-item">
+              <span class="debug-label">備忘筆記 (Debug Notes)：</span>
+              <ul id="debug-notes" class="debug-notes-list"></ul>
+            </div>
+          </div>
+          <div class="action-log-panel">
+            <div class="action-log-heading">
+              <p class="panel-label">UIAction Log</p>
+              <div class="action-log-controls">
+                <button id="toggle-log-visible" class="quiet-button" type="button">隱藏 Log</button>
+                <button id="clear-log" class="quiet-button" type="button" aria-label="Clear log">清除</button>
+              </div>
+            </div>
+            <ol id="action-log" class="action-log"></ol>
+          </div>
+        </div>
       </section>
     </div>
 

@@ -8,7 +8,7 @@ what the next boundary is. Detailed MVP verification belongs in Task Zone docs.
 
 - Work directory: `C:\Users\user\OneDrive\文字冒險遊戲`
 - Current branch expectation: `main` aligned with `origin/main`.
-- Latest stable checkpoint:
+- Latest accepted facility visual checkpoint:
   `ad42c0e [owner] feat(gui): merge storage and workshop facility skins`
 - Latest committed bridge baseline:
   `2ecca91 [antig] feat(gui): add Guild material sell bridge and fix Shop layout`
@@ -57,6 +57,10 @@ Current facility-family planning state:
 
 Current newest GUI live state:
 
+- World Map Settings Panel Reduced Motion MVP is complete as shell-only GUI
+  polish. Static and live mode share the same current-page reduced-motion
+  preference and UIAction logging; opening or changing it does not dispatch
+  Python runtime actions, persist to save, or create a formal settings model.
 - Phase B facility coverage landed in `eed7b4b`:
   Synthesis supports the four existing Mira recipes; Shop iterates all nine
   existing travel-shop entries; Magic Shop iterates all existing `MAGIC_BOOKS`
@@ -184,6 +188,7 @@ reopened through a read-only planning gate and owner-approved exact scope.
   expansion beyond the existing fire-mark and Boss Glen closures.
 - Save migration, data/schema changes, combat formula changes, stat rebalance, or
   manual `save.json` edits.
+- Formal settings system, persistent preferences, or cross-screen settings.
 - Formal asset pipeline or reference/mockup images as runtime assets.
 - Runtime or GUI feature implementation without a new owner-approved exact scope.
 
@@ -200,6 +205,8 @@ reopened through a read-only planning gate and owner-approved exact scope.
 - Do not select another facility for skinning, generate an image brief, generate
   a candidate, or implement additional HTML/CSS without new explicit owner
   approval.
+- World Map Settings Panel Reduced Motion MVP is complete as current-page,
+  shell-only GUI polish. Formal settings and persistence remain closed.
 - Phase C convenience candidates, runtime/data/schema/save/combat remain deferred.
 
 No next implementation is pre-approved. Basic facility CLI-parity bridge
@@ -216,13 +223,13 @@ Remaining Phase C convenience candidates are deferred:
 1. Inventory / equipment management.
 2. Storage capacity upgrade.
 3. Bestiary detail / filtering.
-4. Settings panel.
 
 Any Phase C convenience follow-up must start with a later read-only gate and
 explicit owner approval. Do not open storage capacity upgrades, generic
-inventory / equipment management, settings, Shop or equipment sell, generic
-sell, bestiary detail framework, schema changes, save migration, combat formula
-changes, or manual `save.json` work from the current bridge coverage.
+inventory / equipment management, formal settings or persistence, Shop or
+equipment sell, generic sell, bestiary detail framework, schema changes, save
+migration, combat formula changes, or manual `save.json` work from the current
+bridge coverage.
 
 For docs-only sync, restrict changes to explicitly approved markdown surfaces and
 do not touch runtime, JavaScript, data, schema, save, or combat formula.

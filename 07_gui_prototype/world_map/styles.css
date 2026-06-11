@@ -1024,7 +1024,7 @@ select:focus-visible {
   }
 }
 
-/* --- World Map Utility Read-Only Preview Panel Styles --- */
+/* --- World Map Utility Panel Styles --- */
 .utility-preview-panel {
   position: absolute;
   z-index: 12;
@@ -1169,4 +1169,100 @@ select:focus-visible {
   font-size: 0.84rem;
   padding: 32px 12px;
   line-height: 1.5;
+}
+
+.settings-section {
+  gap: 10px;
+}
+
+.settings-toggle-row {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 16px;
+  align-items: center;
+  padding: 12px;
+  border: 1px solid rgba(239, 231, 211, 0.16);
+  border-radius: 7px;
+  background: rgba(255, 255, 255, 0.025);
+  cursor: pointer;
+}
+
+.settings-toggle-row:hover {
+  border-color: rgba(208, 168, 76, 0.42);
+  background: rgba(255, 255, 255, 0.045);
+}
+
+.settings-toggle-copy {
+  display: grid;
+  gap: 4px;
+}
+
+.settings-toggle-copy strong {
+  color: var(--paper);
+  font-size: 0.9rem;
+}
+
+.settings-toggle-copy span,
+.settings-scope-note {
+  color: var(--paper-muted);
+  font-size: 0.76rem;
+  line-height: 1.45;
+}
+
+.settings-scope-note {
+  margin: 0;
+  padding: 0 4px;
+}
+
+.settings-switch-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.settings-switch-track {
+  width: 44px;
+  height: 24px;
+  padding: 3px;
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  background: rgba(8, 11, 11, 0.72);
+}
+
+.settings-switch-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--paper-muted);
+  transform: translateX(0);
+  transition: transform 150ms ease, background 150ms ease;
+}
+
+.settings-switch-input:checked + .settings-switch-track {
+  border-color: var(--gold);
+  background: rgba(208, 168, 76, 0.24);
+}
+
+.settings-switch-input:checked + .settings-switch-track .settings-switch-thumb {
+  background: var(--focus);
+  transform: translateX(18px);
+}
+
+.settings-switch-input:focus-visible + .settings-switch-track {
+  outline: 2px solid var(--focus);
+  outline-offset: 3px;
+}
+
+.world-map-shell[data-reduced-motion="true"] *,
+.world-map-shell[data-reduced-motion="true"] *::before,
+.world-map-shell[data-reduced-motion="true"] *::after {
+  scroll-behavior: auto !important;
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
 }

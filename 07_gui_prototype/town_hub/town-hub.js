@@ -11,6 +11,38 @@ const navigationActionsEl = document.querySelector("#navigation-actions");
 const actionLogEl = document.querySelector("#action-log");
 const clearLogEl = document.querySelector("#clear-log");
 const shellEl = document.querySelector(".town-hub-shell");
+const liveStatusBadgeEl = document.querySelector("#live-status-badge");
+
+// 偵錯主控台 DOM 節點
+const debugContainer = document.querySelector("#debug-container");
+const debugModeBadge = document.querySelector("#debug-mode-badge");
+const debugNotesEl = document.querySelector("#debug-notes");
+const toggleDebugCollapseEl = document.querySelector("#toggle-debug-collapse");
+const debugBodyEl = document.querySelector("#debug-body");
+const toggleLogVisibleEl = document.querySelector("#toggle-log-visible");
+
+const isDebugMode = new URLSearchParams(window.location.search).get("debug") === "1";
+
+if (isDebugMode) {
+  debugContainer.style.display = "block";
+  document.body.dataset.debug = "1";
+} else {
+  debugContainer.style.display = "none";
+}
+
+let debugCollapsed = false;
+toggleDebugCollapseEl.addEventListener("click", () => {
+  debugCollapsed = !debugCollapsed;
+  debugBodyEl.style.display = debugCollapsed ? "none" : "block";
+  toggleDebugCollapseEl.textContent = debugCollapsed ? "展開" : "收合";
+});
+
+let logVisible = true;
+toggleLogVisibleEl.addEventListener("click", () => {
+  logVisible = !logVisible;
+  actionLogEl.style.display = logVisible ? "block" : "none";
+  toggleLogVisibleEl.textContent = logVisible ? "隱藏 Log" : "顯示 Log";
+});
 
 const state = {
   model: null,
@@ -156,13 +188,58 @@ async function loadStaticFallback(path, liveError) {
 
 function render() {
   const { model } = state;
-  titleEl.textContent = model.title ?? "";
-  subtitleEl.textContent = model.subtitle ?? "";
+
+  // 動態處理並剝離 (Live) 大字標題，改成精緻的小徽章
+  let displayTitle = model.title ?? "";
+  let isLive = false;
+  if (displayTitle.includes("(Live)")) {
+    displayTitle = displayTitle.replace("(Live)", "").trim();
+    isLive = true;
+  }
+  titleEl.textContent = displayTitle;
+
+  if (liveStatusBadgeEl) {
+    liveStatusBadgeEl.style.display = isLive ? "inline-block" : "none";
+  }
+
+  // 動態過濾並替換工程用語
+  let displaySubtitle = model.subtitle ?? "";
+  if (
+    displaySubtitle.includes("Python") ||
+    displaySubtitle.includes("遊戲引擎") ||
+    displaySubtitle.includes("同步") ||
+    displaySubtitle.includes("engine")
+  ) {
+    displaySubtitle = "薄霧散去，街道重新亮起微光。旅人們在廣場邊低聲交談。";
+  }
+  subtitleEl.textContent = displaySubtitle;
+
   renderResources(model.resource_strip ?? []);
   renderFacilities(model.facility_nodes ?? []);
   renderGuidance(model.town_guidance ?? []);
   renderActionButtons(navigationActionsEl, model.navigation_actions ?? [], "navigation");
   renderActionLog();
+
+  if (isDebugMode) {
+    debugModeBadge.textContent = runtimeClient.isLiveMode() ? "Live Mode" : "Fixture Mode";
+    renderDebugNotes(model.debug_notes ?? []);
+  }
+}
+
+function renderDebugNotes(notes) {
+  if (notes.length === 0) {
+    const empty = document.createElement("li");
+    empty.textContent = "無備忘筆記。";
+    debugNotesEl.replaceChildren(empty);
+    return;
+  }
+  debugNotesEl.replaceChildren(
+    ...notes.map((note) => {
+      const li = document.createElement("li");
+      li.textContent = note;
+      return li;
+    }),
+  );
 }
 
 function renderResources(items) {
@@ -197,7 +274,11 @@ function renderFacilities(nodes) {
       const icon = document.createElement("span");
       icon.className = "node-icon";
       icon.setAttribute("aria-hidden", "true");
-      icon.textContent = roleTokens[node.icon_role] ?? makeRoleToken(node.icon_role);
+
+      const iconInner = document.createElement("span");
+      iconInner.className = "node-icon-inner";
+      iconInner.textContent = roleTokens[node.icon_role] ?? makeRoleToken(node.icon_role);
+      icon.appendChild(iconInner);
 
       const copy = document.createElement("span");
       copy.className = "node-copy";
@@ -237,8 +318,21 @@ function renderFacilities(nodes) {
 }
 
 function renderGuidance(lines) {
+  const cleanedLines = lines.map((line) => {
+    if (
+      line.includes("Live 模式") ||
+      line.includes("Python") ||
+      line.includes("核心驗證") ||
+      line.includes("引擎同步") ||
+      line.includes("動態更新")
+    ) {
+      return "選擇設施進行整備，或前往世界地圖繼續冒險。";
+    }
+    return line;
+  });
+
   guidanceEl.replaceChildren(
-    ...lines.map((line) => {
+    ...cleanedLines.map((line) => {
       const p = document.createElement("p");
       p.className = "guidance-line";
       p.textContent = line;
@@ -254,15 +348,20 @@ function renderActionButtons(container, actions, source) {
       button.type = "button";
       button.className = "action-button";
       button.setAttribute("aria-disabled", String(!action.enabled));
-      button.title = action.enabled ? action.description ?? "" : action.disabled_reason ?? "";
 
-      const label = document.createElement("strong");
-      label.textContent = action.label ?? action.action_id;
+      const desc = action.description ?? "";
+      button.title = action.enabled ? desc : (action.disabled_reason ?? "未開啟");
 
-      const description = document.createElement("span");
-      description.textContent = action.description ?? "";
+      const label = document.createElement("span");
+      label.className = "action-button-label";
 
-      button.append(label, description);
+      let text = action.label ?? action.action_id;
+      if (action.action_id === "open_world_map") {
+        text = "前往世界地圖 →";
+      }
+      label.textContent = text;
+
+      button.append(label);
       button.addEventListener("click", () => activateAction(action, source));
       return button;
     }),

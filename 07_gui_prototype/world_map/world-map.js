@@ -29,6 +29,9 @@ const state = {
   model: null,
   selectedLocationId: null,
   actionLog: [],
+  settings: {
+    reducedMotion: window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false,
+  },
 };
 
 const staticActionRoutes = {
@@ -36,7 +39,6 @@ const staticActionRoutes = {
   back_to_start_screen: "../start_screen/index.html",
   confirm_travel: "../dungeon_exploration/index.html",
 };
-const liveShellOnlyActions = new Set(["open_settings"]);
 const navigationDelayMs = 120;
 
 let utilityPanelEl = null;
@@ -96,6 +98,7 @@ clearLogEl.addEventListener("click", () => {
 });
 
 initUtilityPanel();
+applyReducedMotionPreference(state.settings.reducedMotion, false);
 loadFixture(fixtureSelect.value);
 
 async function loadFixture(path) {
@@ -458,8 +461,9 @@ async function activateAction(action, source) {
     dispatched: true,
   });
 
-  if (runtimeClient.isLiveMode() && liveShellOnlyActions.has(action.action_id)) {
-    feedbackMessageEl.textContent = "設定功能尚未開放。";
+  if (action.action_id === "open_settings") {
+    renderSettingsPanel();
+    feedbackMessageEl.textContent = "已開啟畫面設定。此偏好僅套用於目前的世界地圖頁面。";
     return;
   }
 
@@ -760,6 +764,35 @@ function setUtilityOpen(open) {
   }
 }
 
+function renderSettingsPanel() {
+  renderUtilityPreview({
+    type: "settings",
+    title: "畫面設定",
+    data: {
+      reduced_motion: state.settings.reducedMotion,
+    },
+  });
+}
+
+function applyReducedMotionPreference(enabled, shouldLog) {
+  state.settings.reducedMotion = Boolean(enabled);
+  shellEl.dataset.reducedMotion = String(state.settings.reducedMotion);
+
+  if (!shouldLog) {
+    return;
+  }
+
+  pushActionLog({
+    action_id: "set_reduced_motion",
+    payload: { enabled: state.settings.reducedMotion },
+    source: "settings_panel",
+    dispatched: true,
+  });
+  feedbackMessageEl.textContent = state.settings.reducedMotion
+    ? "已減少目前世界地圖頁面的動態效果。"
+    : "已恢復目前世界地圖頁面的動態效果。";
+}
+
 function renderUtilityPreview(preview) {
   if (!preview) {
     return;
@@ -767,8 +800,10 @@ function renderUtilityPreview(preview) {
 
   utilityPanelLabelEl.textContent = preview.type === "status" ? "角色狀態" :
                                     preview.type === "inventory" ? "背包 / 裝備" :
-                                    preview.type === "bestiary" ? "怪物圖鑑" : "工具預覽";
+                                    preview.type === "bestiary" ? "怪物圖鑑" :
+                                    preview.type === "settings" ? "畫面偏好" : "工具預覽";
   utilityTitleEl.textContent = preview.title ?? "預覽摘要";
+  closeUtilityEl.setAttribute("aria-label", preview.type === "settings" ? "關閉畫面設定" : "關閉預覽");
 
   let html = "";
   if (preview.type === "status") {
@@ -881,10 +916,43 @@ function renderUtilityPreview(preview) {
         </div>
       `;
     }
+  } else if (preview.type === "settings") {
+    html = `
+      <div class="utility-section settings-section">
+        <p class="utility-section-title">可及性</p>
+        <label class="settings-toggle-row" for="settings-reduced-motion">
+          <span class="settings-toggle-copy">
+            <strong>減少動態效果</strong>
+            <span id="settings-reduced-motion-description">縮短世界地圖的面板、節點與按鈕轉場。</span>
+          </span>
+          <input
+            id="settings-reduced-motion"
+            class="settings-switch-input"
+            type="checkbox"
+            role="switch"
+            aria-describedby="settings-reduced-motion-description settings-scope-note"
+            ${preview.data.reduced_motion ? "checked" : ""}
+          >
+          <span class="settings-switch-track" aria-hidden="true">
+            <span class="settings-switch-thumb"></span>
+          </span>
+        </label>
+        <p id="settings-scope-note" class="settings-scope-note">
+          此偏好僅套用於目前的世界地圖頁面，重新載入後會回到裝置的預設動態偏好。
+        </p>
+      </div>
+    `;
   }
 
   utilityContentEl.innerHTML = html;
   setUtilityOpen(true);
+
+  if (preview.type === "settings") {
+    const reducedMotionEl = utilityPanelEl.querySelector("#settings-reduced-motion");
+    reducedMotionEl?.addEventListener("change", () => {
+      applyReducedMotionPreference(reducedMotionEl.checked, true);
+    });
+  }
 
   // 隱藏背包/裝備預覽時底部的「返回地圖」按鈕容器，其餘預覽顯示
   const detailActionsEl = utilityPanelEl.querySelector(".detail-actions");

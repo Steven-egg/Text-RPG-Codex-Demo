@@ -8,7 +8,7 @@ screen-level verification, and historical MVP notes live in Task Zone files.
 
 Git baseline:
 
-- Latest stable checkpoint:
+- Latest accepted facility visual checkpoint:
   `ad42c0e [owner] feat(gui): merge storage and workshop facility skins`
 - Latest committed bridge baseline:
   `2ecca91 [antig] feat(gui): add Guild material sell bridge and fix Shop layout`
@@ -51,6 +51,9 @@ GUI state:
   navigation, interaction, and UIAction logging only.
 - Runtime-connected GUI work is opt-in and limited to the already approved local
   live bridge slices listed below.
+- World Map Settings Panel Reduced Motion MVP is shell-only GUI polish: static
+  and live mode share a current-page reduced-motion preference and UIAction
+  logging without Python dispatch, save persistence, or a formal settings model.
 - Shop + Magic Shop GUI Layout Normalization V0.5 first CSS-only checkpoint is
   complete through `c7729df`.
 - Current facility planning has returned to a family-level
@@ -76,7 +79,7 @@ Blessed local live bridge coverage:
 | Town Hub | Live resource strip, facility nodes, synthesis entry unlock state, `open_world_map`, and live routing into approved facilities. Town Hub does not expose `save_game`. |
 | Synthesis | Craft coverage for the four existing Mira recipes through Python runtime validation and `game.craft_recipe_message(...)`. |
 | Inn | `rest_at_inn` deducts 30G and restores HP/MP through Python runtime behavior. |
-| World Map | Runtime-backed location / route ScreenModel; main menu keeps `save_game` and shell-only `open_settings`; town return is via town node / detail action. |
+| World Map | Runtime-backed location / route ScreenModel; main menu keeps `save_game` and a shell-only Settings Panel Reduced Motion MVP; town return is via town node / detail action. |
 | Dungeon / Combat | Approved traversal and combat loop slice, victory / retreat / defeat routing, route clear / resolved state, and Combat Skill Button MVP. |
 | Guild | Clear report registration, existing `QUESTS` turn-ins, Boss Glen investigation, three-shard fire-mark inquiry, and existing `GUILD_MATERIAL_BUY_PRICES` material sell coverage with Python-side quantity / eligibility / transaction validation. |
 | Guild x Dungeon Boss Glen | Special gating bridge plus UX cleanup: Scorched Mine 18/18 records `boss_glen_sighted`, Guild accepts `boss_glen_investigation_accepted`, Boss Glen challenge opens only after investigation acceptance, persistent Guild story hint cards guide Glen / Act 2 steps, and `quest_boss_glen` / Blood Map turn-in unlocks Ash Ravine through existing runtime progression. |
@@ -324,6 +327,9 @@ do not imply gameplay validation.
 - Facilities visual integration review is paused at
   `01_content/facilities-visual-integration-spec-v0.1.md`; no comparison
   candidate or CSS adjustment is currently approved.
+- World Map Settings Panel Reduced Motion MVP is complete as current-page,
+  shell-only GUI polish. Formal settings, persistence, and cross-screen
+  preferences remain closed.
 - No additional image generation, HTML/CSS implementation, runtime work, or
   asset pipeline is pre-approved by this docs sync.
 - Phase C convenience candidates, runtime/data/schema/save/combat remain deferred.
@@ -337,12 +343,12 @@ Remaining Phase C convenience candidates are deferred:
 1. Inventory / equipment management.
 2. Storage capacity upgrade.
 3. Bestiary detail / filtering.
-4. Settings panel.
 
 Phase C is not current work. Storage capacity upgrades, generic inventory
 management, generic equipment management, non-whitelisted workshop upgrades, and
 full workshop expansion remain closed until a later read-only planning gate and
-owner-approved exact scope.
+owner-approved exact scope. Formal settings and persistent or cross-screen
+preferences also remain closed.
 
 Before any runtime, data, schema, save, combat, or broader GUI live bridge work,
 start with a single-slice read-only planning gate. For ordinary static prototype

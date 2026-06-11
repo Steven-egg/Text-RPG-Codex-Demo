@@ -544,10 +544,23 @@ body:has(.brin-armor) .list-item-row.selected {
   letter-spacing: 1px;
 }
 
-.detail-content, .requirement-content {
+.detail-content {
   display: flex;
   flex-direction: column;
   height: 100%;
+}
+
+.requirement-content {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow-y: auto;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE/Edge */
+}
+
+.requirement-content::-webkit-scrollbar {
+  display: none; /* Chrome/Safari/Opera */
 }
 
 .detail-grid {
@@ -1110,6 +1123,7 @@ body.facility-body::after {
 .requirement-panel {
   flex: 0.74;
   padding: 14px 18px;
+  overflow: hidden;
 }
 
 .panel-header {
