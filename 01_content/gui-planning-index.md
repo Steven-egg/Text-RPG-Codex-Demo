@@ -15,8 +15,8 @@ For GUI Task Zone work, start with the smallest matching route:
 | Static prototype screen work | Current agent GUI static prototype skill, then only the relevant `07_gui_prototype/<screen>/` files. |
 | Static prototype handoff / screen verification | Targeted sections of `01_content/gui-html-static-prototype-progress-v1.md`. |
 | GUI planning / drift audit / document routing | This file. |
-| Facility-family Mockup-to-HTML shell planning | `01_content/gui-facility-shell-baseline-v0.1.md`; use approved references under `08_experiments/mockup_to_html/` only when the task needs them. |
-| Isolated Shop Skinning Lab / merge-back route | `08_experiments/mockup_to_html/shop_skinning_lab/README.md`, `08_experiments/mockup_to_html/shop_skinning_lab/shop-skinning-process-note-v1.md`, `08_experiments/mockup_to_html/shop_skinning_lab/shop-skinning-merge-playbook-v0.1.md`, then local lab files only. The old Shop checklist / brief route is superseded. |
+| Facility-family responsibility planning | `01_content/gui-facility-shell-baseline-v0.1.md`. |
+| Facility visual comparison | `01_content/facilities-visual-integration-spec-v0.1.md`; currently paused and not implementation approval. |
 | Screen flow / UIAction / ScreenModel mapping | `01_content/gui-screen-map.md`, `01_content/ui-flow-blueprint.md`. |
 | Runtime-connected GUI planning | `01_content/gui-runtime-bridge-plan-v1.md`, then stop at a read-only planning gate. |
 | Runtime bridge contract audit | `01_content/gui-bridge-vertical-slice-contract-audit-v1.md`. |
@@ -44,15 +44,14 @@ Default GUI mode remains HTML static prototype:
 - Current facility planning is family-level Mockup-to-HTML responsibility
   mapping. AI facility hero images provide scene / NPC / atmosphere;
   HTML/CSS/JS provides UI and interaction; runtime remains gameplay authority.
-- The old Shop single-screen skinning readiness and mockup brief route is
-  superseded for current work by the isolated Shop Skinning Lab route.
-- Isolated Shop Skinning Lab v0.2.2 is available as an owner-approved fixture-only
-  lab capsule under `08_experiments/mockup_to_html/shop_skinning_lab/`. One
-  merge-back vertical slice has validated the workflow: extract formal Shop
-  prototype elements into `08_experiments`, iterate in the lab, then merge back
-  approved static prototype pieces into `07_gui_prototype/shop_screen/` while
-  preserving live bridge behavior. It does not authorize runtime / asset pipeline
-  work.
+- Facility skinning exploration is complete. The owner retired and removed
+  `08_experiments/`; accepted visual results now live in the formal
+  `07_gui_prototype/` screens.
+- Future minor visual changes should target formal prototype files directly
+  after exact-scope approval. Use a short-lived feature branch for uncertain or
+  multi-file changes rather than recreating a parallel experiment copy.
+- Facilities visual integration review is paused at
+  `01_content/facilities-visual-integration-spec-v0.1.md`.
 
 Local runtime-connected live bridge exists only for explicit blessed slices:
 
@@ -106,6 +105,7 @@ Lifecycle labels:
 |---|---|---|
 | `01_content/gui-planning-index.md` | core | This GUI routing and lifecycle index. |
 | `01_content/gui-facility-shell-baseline-v0.1.md` | core | Facility-family Mockup-to-HTML four-layer responsibility and configuration baseline. |
+| `01_content/facilities-visual-integration-spec-v0.1.md` | conditional | Paused Draft facility CSS and visual comparison reference; not implementation approval. |
 | `01_content/gui-html-static-prototype-progress-v1.md` | core | Static prototype handoff, built screens, and targeted verification notes. |
 | `01_content/gui-runtime-bridge-plan-v1.md` | core | Runtime bridge plan, approved surfaces, and landed live-slice status notes. |
 | `01_content/gui-screen-map.md` | core | Screen, flow, UIAction, and ScreenModel map. |
@@ -126,9 +126,8 @@ Lifecycle labels:
 | `01_content/gui-town-hub-review-checklist.md` | conditional | Town Hub review checklist. |
 | `01_content/gui-town-hub-facility-node-mapping-v1.md` | conditional | Town Hub facility node mapping. |
 | `01_content/gui-town-hub-programmatic-layout-plan-v1.md` | conditional | Town Hub programmatic layout plan. |
-| `01_content/gui-shop-skinning-lab-readiness-checklist-v0.1.md` | superseded | Old Shop single-screen readiness route; replaced by the isolated lab and merge playbook flow. |
-| `01_content/gui-shop-mockup-brief-v0.1.md` | superseded | Old Shop single-screen mockup route; do not generate or implement from it without explicit approval. |
-| `08_experiments/mockup_to_html/shop_skinning_lab/shop-skinning-merge-playbook-v0.1.md` | conditional | Shop lab-to-formal-prototype merge-back playbook; use for later merge rehearsals and vertical slices. |
+| `01_content/gui-shop-skinning-lab-readiness-checklist-v0.1.md` | historical | Retired Shop lab readiness record; do not use as a current route. |
+| `01_content/gui-shop-mockup-brief-v0.1.md` | historical | Retired Shop mockup brief; do not generate or implement from it. |
 
 ### Historical / Optional Background
 
@@ -202,9 +201,8 @@ Docs cleanup:
 - Reference images and generated mockups are design references, not runtime
   assets.
 - `05_assets/gui_references/` is reference storage, not a formal asset pipeline.
-- `08_experiments/mockup_to_html/` contains owner-approved Mockup-to-HTML
-  responsibility references. It is not a runtime surface or formal asset
-  pipeline.
+- `08_experiments/` was retired and removed by the owner after facility
+  skinning exploration completed. Do not recreate it as a default work route.
 - GUI planning must not imply that HTML, pygame, Unity, or another platform is
   the final app unless that choice is separately approved.
 - GUI planning must not bundle runtime, data, schema, save, or combat formula
@@ -212,12 +210,6 @@ Docs cleanup:
 
 ## 6. Recommended Next Step
 
-The next smallest candidate is a markdown-only Facility Family Overlay Zone Map
-V0.1 based on `01_content/gui-facility-shell-baseline-v0.1.md`.
-
-It should define family-level text-safe overlay zones, hero-image detail zones,
-runtime-backed state categories, excluded lab-only markers, and responsive
-cropping / stacking constraints.
-
-It must not select one facility for skinning, generate an image or image brief,
-modify HTML/CSS/JavaScript, open runtime work, or start an asset pipeline.
+No GUI visual implementation or additional planning candidate is currently
+approved. Facilities visual integration review remains paused at
+`01_content/facilities-visual-integration-spec-v0.1.md`.

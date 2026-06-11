@@ -3,14 +3,11 @@
 Purpose: define the minimum readiness gate for using the current Shop Screen as
 the first representative GUI Mockup-to-HTML Skinning Lab.
 
-Status: `superseded_by_shop_skinning_merge_playbook_v0_1`.
+Status: `retired_historical_after_experiment_completion`.
 
-This early Shop single-screen readiness route has been superseded for current
-work by the isolated Shop Skinning Lab and
-`08_experiments/mockup_to_html/shop_skinning_lab/shop-skinning-merge-playbook-v0.1.md`.
-Do not resume this checklist as the active route. Future Shop skinning or
-merge-back work should use the lab docs, playbook, read-only rehearsal, and an
-owner-approved implementation slice.
+This early Shop single-screen readiness route is retained as a historical
+record. The owner retired and removed `08_experiments/` after facility skinning
+exploration completed. Do not resume this checklist as the active route.
 
 This checklist is documentation-only. It does not approve mockup generation,
 image generation, asset import, HTML/CSS/JavaScript edits, runtime bridge work,
@@ -306,13 +303,5 @@ Stop the lab and return to a read-only review if a proposed direction requires:
 
 ## 10. Approval Gate
 
-This checklist establishes readiness criteria only.
-
-Before any next action, obtain separate owner approval for exactly one of:
-
-1. A markdown-only Shop mockup brief.
-2. One Shop visual mockup candidate.
-3. One bounded Shop HTML/CSS skinning lab.
-
-Approval for one option does not imply approval for the others, and does not
-approve propagation to the broader facility family.
+This checklist is retained for historical context only. It does not define a
+next action or authorize renewed Shop lab, mockup, or implementation work.

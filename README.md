@@ -9,7 +9,7 @@ screen-level verification, and historical MVP notes live in Task Zone files.
 Git baseline:
 
 - Latest stable checkpoint:
-  `c7729df [antig] fix(gui): normalize shop family layout`
+  `ad42c0e [owner] feat(gui): merge storage and workshop facility skins`
 - Latest committed bridge baseline:
   `2ecca91 [antig] feat(gui): add Guild material sell bridge and fix Shop layout`
 - Basic facility CLI-parity bridge coverage is complete through the existing
@@ -57,18 +57,16 @@ GUI state:
   Mockup-to-HTML shell baseline. AI facility hero images provide scene, NPC,
   lighting, and atmosphere; HTML/CSS/JS provides all UI and interaction; Python
   runtime remains gameplay authority.
-- The old Shop single-screen readiness / mockup brief route is superseded for
-  current work by the isolated Shop Skinning Lab route and its merge playbook.
-- Owner-approved isolated Shop Skinning Lab v0.2.2 exists at
-  `08_experiments/mockup_to_html/shop_skinning_lab/` as a fixture-only visual
-  baseline for lab-only skinning. Its first merge-back vertical slice into
-  `07_gui_prototype/shop_screen/` has been validated: extract Shop prototype
-  elements into `08_experiments`, iterate locally in the lab, then merge back
-  only the approved HTML/CSS/fixture/image/render-layer pieces while preserving
-  the formal Shop `shop-screen.js` live bridge. Use
-  `shop-skinning-merge-playbook-v0.1.md` for repeatable steps. This remains a
-  prototype workflow, not runtime source, gameplay authority, or a formal asset
-  pipeline.
+- The owner has retired and removed `08_experiments/` after the facility
+  skinning exploration completed. Its accepted results now live in the formal
+  `07_gui_prototype/` screens; the old lab and merge-back route is historical,
+  not a current work path.
+- Future minor facility visual adjustments should target the formal prototype
+  path directly after exact-scope approval. Use a short-lived feature branch for
+  uncertain or multi-file work; do not recreate an experiment copy unless an
+  explicit isolation need cannot be served by a branch.
+- `01_content/facilities-visual-integration-spec-v0.1.md` is a paused Draft
+  comparison reference. It does not authorize visual implementation.
 
 Blessed local live bridge coverage:
 
@@ -284,8 +282,6 @@ do not imply gameplay validation.
 - `06_tools/`: validation, smoke, bridge helper, and read-only inventory tools.
 - `07_gui_prototype/`: HTML static prototype and limited local live bridge render
   surfaces.
-- `08_experiments/`: owner-approved design experiments and references; not
-  runtime assets or a formal asset pipeline.
 
 ## SSOT Rules
 
@@ -323,16 +319,11 @@ do not imply gameplay validation.
 - Endless ScreenModel micro-extraction is not recommended.
 - Shop + Magic Shop GUI Layout Normalization V0.5 first CSS-only checkpoint is
   complete through `c7729df`.
-- The current active planning baseline is facility-family Mockup-to-HTML
-  composition plus the validated Shop Skinning Lab merge-back workflow.
-- Isolated Shop Skinning Lab v0.2.2 has completed one owner-approved vertical
-  slice from `08_experiments/mockup_to_html/shop_skinning_lab/` back into
-  `07_gui_prototype/shop_screen/`. Future repeats should use the playbook path:
-  read-only rehearsal, clean git check, test branch, lab extraction / iteration,
-  merge-back, syntax / bridge smoke checks, and browser visual QA.
-- The next smallest candidates are Shop post-merge browser / responsive QA, a
-  read-only Magic Shop or Workshop mapping rehearsal, or a markdown-only Facility
-  Family Overlay Zone Map V0.1.
+- Facility skinning exploration is complete through the accepted formal
+  prototype state. `08_experiments/` has been retired and removed by the owner.
+- Facilities visual integration review is paused at
+  `01_content/facilities-visual-integration-spec-v0.1.md`; no comparison
+  candidate or CSS adjustment is currently approved.
 - No additional image generation, HTML/CSS implementation, runtime work, or
   asset pipeline is pre-approved by this docs sync.
 - Phase C convenience candidates, runtime/data/schema/save/combat remain deferred.

@@ -3,13 +3,12 @@
 Purpose: define one bounded visual mockup candidate for the Shop
 Mockup-to-HTML Skinning Lab while preserving the current Shop prototype shell.
 
-Status: `superseded_by_shop_skinning_merge_playbook_v0_1`.
+Status: `retired_historical_after_experiment_completion`.
 
-This early Shop single-screen mockup route has been superseded for current work
-by the isolated Shop Skinning Lab and
-`08_experiments/mockup_to_html/shop_skinning_lab/shop-skinning-merge-playbook-v0.1.md`.
-Do not generate another Shop candidate or implement this brief as the active
-route without new explicit owner approval.
+This early Shop single-screen mockup route is a historical record. The owner
+retired and removed `08_experiments/` after facility skinning exploration
+completed. Do not generate another Shop candidate or implement this brief as an
+active route.
 
 This document is a markdown-only brief. It does not generate an image, approve
 image generation, create a runtime asset, start an asset pipeline, or authorize
@@ -22,10 +21,10 @@ brief_id: gui_shop_mockup_brief_v0_1
 screen_id: facility_shop_screen
 prototype_path: 07_gui_prototype/shop_screen/
 shell_family: transaction_list_detail_npc
-status: superseded_by_shop_skinning_merge_playbook_v0_1
+status: retired_historical_after_experiment_completion
 candidate_count: 1
 generation_status: one_preview_candidate_generated_outside_repository
-implementation_status: superseded_by_lab_merge_slice
+implementation_status: accepted_results_live_in_formal_prototype
 runtime_usage_allowed: false
 asset_pipeline_status: not_started
 ```
@@ -366,13 +365,5 @@ Return to a read-only review if a mockup direction:
 
 ## 12. Next Approval Gate
 
-This brief is ready for owner review.
-
-The next optional action is exactly one Shop visual mockup candidate based on
-Section 9. Creating that candidate requires separate explicit approval and does
-not authorize:
-
-- importing the result as a runtime asset;
-- modifying Shop HTML/CSS/JavaScript;
-- starting an asset pipeline;
-- applying the direction to Magic Shop, Synthesis, or other facilities.
+This brief is retained for historical context only. It does not define a next
+action or authorize renewed Shop mockup, experiment, or implementation work.

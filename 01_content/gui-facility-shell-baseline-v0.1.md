@@ -1,7 +1,7 @@
 # GUI Facility Shell Baseline V0.1
 
-Purpose: define the facility-family composition baseline for a future
-Mockup-to-HTML Skinning Lab.
+Purpose: define the facility-family composition and responsibility baseline for
+current formal prototypes and future visual review.
 
 This baseline separates AI-generated facility hero imagery, HTML/CSS/JS
 presentation, runtime authority, and lab-only prototype markers. It describes
@@ -26,57 +26,42 @@ presentation:
 fixture switcher / UIAction Log / placeholder portrait / construction marker
 ```
 
-Approved read-only references for this correction:
-
-- `08_experiments/mockup_to_html/bg-npc.png`
-- `08_experiments/mockup_to_html/code_artifact.html`
-- `08_experiments/mockup_to_html/shop_skinning_lab/shop-skinning-merge-playbook-v0.1.md`
-
 Interpretation:
 
-- `bg-npc.png` demonstrates the **AI facility hero image layer**. A single image
+- Current formal facility backgrounds demonstrate the **AI facility hero image
+  layer**. A single image
   may contain the facility interior, NPC, lighting, atmosphere, props, and
   composition. It does not contain UI panels, text, values, controls, lists, or
   gameplay state.
-- `code_artifact.html` demonstrates the **HTML/CSS/JS overlay layer**. Cut-corner
+- Current formal facility prototypes demonstrate the **HTML/CSS/JS overlay
+  layer**. Cut-corner
   panels, translucent materials, masks, blur, gradients, typography, form or
   list controls, hover states, buttons, toast messages, and interactive feedback
   can all be rendered above a background image.
-- `shop-skinning-merge-playbook-v0.1.md` records the first validated Shop
-  lab-to-formal-prototype merge-back vertical slice. It proves the process can
-  work when formal Shop prototype elements are extracted into `08_experiments`,
-  iterated locally as a fixture-only lab, then merged back into
-  `07_gui_prototype/shop_screen/` while preserving the formal live bridge.
-- The Tailwind, login-form, audio, and toast implementation details inside
-  `code_artifact.html` are reference examples, not required facility
-  architecture or dependencies.
 - AI reference imagery must not be treated as a fantasy UI atlas that HTML must
   reproduce one-to-one.
 - A facility hero image may support the full screen, not only a current NPC
   placeholder rectangle. Its composition must still preserve overlay-safe
   reading and interaction zones.
 
-## 0.1 Validated Lab Merge-Back Flow
+## 0.1 Retired Experiment Route And Current Adjustment Route
 
-The Shop vertical slice validated this repeatable sequence:
+The owner retired and removed `08_experiments/` after facility skinning
+exploration completed. The experiment route established useful responsibility
+boundaries, but parallel copies and later source-to-target transfer are not the
+default path for future minor visual work.
 
-1. Extract the current formal prototype's visual and fixture ingredients into an
-   isolated `08_experiments/mockup_to_html/<facility>_skinning_lab/` folder.
-2. Keep the lab fixture-only: no runtime client, no Python API calls, no gameplay
-   authority, and no formal asset pipeline.
-3. Iterate the visual shell, NPC / hero composition, panel layout, and interaction
-   feel inside the lab.
-4. Before merge-back, run a read-only source-to-target rehearsal and identify
-   HTML structure, CSS layout, fixture format, image, and render-layer conflicts.
-5. Use a clean git check and a test branch for the merge-back attempt.
-6. Merge back only approved static prototype surfaces. Preserve formal ESM /
-   `runtimeClient` / live bridge behavior instead of copying lab JavaScript.
-7. Verify with syntax checks, bridge smoke checks when live bridge is present,
-   and browser visual QA for the touched screen.
+When visual adjustment resumes:
 
-This flow may guide future Magic Shop / Workshop / Synthesis experiments, but
-each facility still needs its own rehearsal. Shop success does not prove another
-screen can skip mapping or validation.
+1. Start with read-only review and exact-scope owner approval.
+2. Modify the formal `07_gui_prototype/<screen>/` path directly.
+3. Use a short-lived feature branch for uncertain or multi-file work.
+4. Keep static prototype and runtime authority boundaries unchanged.
+5. Verify only the touched surface with fitting syntax, bridge, and browser
+   checks.
+
+Create a separate experiment copy only when an explicit isolation need cannot be
+served by a feature branch.
 
 ## 1. Scope And Boundaries
 
@@ -354,28 +339,11 @@ Static fixtures must not:
 - Storage remains operation-first and does not require a large NPC focal image.
 - Relic Preview remains facility-object-first rather than NPC-first.
 - Academy cannot be classified until a prototype or exact approved scope exists.
-- `code_artifact.html` demonstrates overlay capability, but does not establish
-  Tailwind, login UI, audio, toast, or its exact visual style as project
-  requirements.
-- The superseded Shop readiness checklist and Shop mockup brief must not be
-  treated as the active route. Use the isolated lab docs and merge playbook for
-  current Shop skinning / merge-back work.
+- The retired Shop readiness checklist and Shop mockup brief must not be treated
+  as active routes.
 
 ## 10. Recommended Next Gate
 
-The next smallest same-phase candidates are:
-
-- Shop post-merge browser / responsive QA.
-- Read-only Magic Shop or Workshop source-to-target mapping rehearsal.
-- A markdown-only **Facility Family Overlay Zone Map V0.1**.
-
-It should stay at family level and define:
-
-- which overlay zones must remain text-safe for each shell family;
-- where full-screen hero-image composition may carry visual detail;
-- which runtime-backed state categories each family must display;
-- which lab-only markers are excluded from final visual review;
-- responsive rules that affect hero-image cropping and overlay stacking.
-
-It should not select a single facility for skinning, generate an image brief, or
-authorize HTML/CSS implementation.
+No visual implementation or additional planning candidate is currently
+approved. The paused comparison reference is
+`01_content/facilities-visual-integration-spec-v0.1.md`.

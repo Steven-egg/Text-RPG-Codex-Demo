@@ -9,7 +9,7 @@ what the next boundary is. Detailed MVP verification belongs in Task Zone docs.
 - Work directory: `C:\Users\user\OneDrive\文字冒險遊戲`
 - Current branch expectation: `main` aligned with `origin/main`.
 - Latest stable checkpoint:
-  `c7729df [antig] fix(gui): normalize shop family layout`
+  `ad42c0e [owner] feat(gui): merge storage and workshop facility skins`
 - Latest committed bridge baseline:
   `2ecca91 [antig] feat(gui): add Guild material sell bridge and fix Shop layout`
 - Basic facility CLI-parity bridge coverage is complete through the existing
@@ -43,26 +43,17 @@ Current facility-family planning state:
   AI facility hero image supplies scene / NPC / lighting / atmosphere;
   HTML/CSS/JS supplies panels / text / lists / controls / interaction;
   Python runtime supplies gameplay state, validation, and results.
-- `08_experiments/mockup_to_html/bg-npc.png` and
-  `08_experiments/mockup_to_html/code_artifact.html` are approved reference
-  examples for that responsibility split. They are not runtime assets or a
-  formal asset pipeline.
 - `01_content/gui-facility-shell-baseline-v0.1.md` is the current facility-family
-  planning baseline.
-- The old Shop single-screen readiness checklist and mockup brief are superseded
-  for current work by the isolated Shop Skinning Lab route and merge playbook.
-- Owner-approved isolated Shop Skinning Lab v0.2.2 exists under
-  `08_experiments/mockup_to_html/shop_skinning_lab/` as a fixture-only,
-  player-facing visual baseline. One merge-back vertical slice has succeeded:
-  formal Shop prototype elements were extracted into `08_experiments`, iterated
-  in the lab, then merged back into `07_gui_prototype/shop_screen/` while
-  preserving the Shop ESM `shop-screen.js` live bridge. The local playbook is
-  `shop-skinning-merge-playbook-v0.1.md`.
-- Future lab-only skinning or merge-back should read the lab `README.md`,
-  `shop-skinning-process-note-v1.md`, `shop-skinning-merge-playbook-v0.1.md`,
-  and local lab files first. Use a clean git check and a test branch for the
-  next merge attempt. This remains prototype work, not runtime source, a formal
-  asset pipeline, or gameplay authority.
+  responsibility baseline.
+- The owner has retired and removed `08_experiments/` after facility skinning
+  exploration completed. Accepted visual results live in `07_gui_prototype/`;
+  the isolated lab and merge-back workflow is historical and must not be used as
+  the current route.
+- Future minor visual adjustments should target formal prototype files directly
+  after exact-scope approval. Use a short-lived feature branch for uncertain or
+  multi-file work.
+- `01_content/facilities-visual-integration-spec-v0.1.md` is a paused Draft
+  comparison reference and does not approve implementation.
 
 Current newest GUI live state:
 
@@ -160,14 +151,11 @@ files during ordinary startup.
   `01_content/gui-facility-shell-baseline-v0.1.md`
 - Superseded Shop single-screen planning:
   `01_content/gui-shop-skinning-lab-readiness-checklist-v0.1.md` and
-  `01_content/gui-shop-mockup-brief-v0.1.md`; these are no longer the active
-  route for current Shop skinning work.
-- Isolated Shop Skinning Lab capsule:
-  `08_experiments/mockup_to_html/shop_skinning_lab/README.md` and
-  `08_experiments/mockup_to_html/shop_skinning_lab/shop-skinning-process-note-v1.md`,
-  plus `08_experiments/mockup_to_html/shop_skinning_lab/shop-skinning-merge-playbook-v0.1.md`;
-  read these plus local lab files for owner-approved lab-only skinning or
-  merge-back. This does not reopen runtime work or a formal asset pipeline.
+  `01_content/gui-shop-mockup-brief-v0.1.md`; these are historical records and
+  are not active routes.
+- Facility visual comparison reference:
+  `01_content/facilities-visual-integration-spec-v0.1.md`; currently paused and
+  not implementation approval.
 - GUI live bridge details and landed MVP status notes:
   `01_content/gui-runtime-bridge-plan-v1.md`
 - GUI static prototype screen-level progress and verification:
@@ -205,11 +193,10 @@ reopened through a read-only planning gate and owner-approved exact scope.
 - Endless ScreenModel micro-extraction is not recommended.
 - Shop + Magic Shop GUI Layout Normalization V0.5 first CSS-only checkpoint is
   complete through `c7729df`.
-- Current work has validated the first Shop Skinning Lab merge-back vertical
-  slice while keeping the broader facility-family Mockup-to-HTML shell baseline.
-- The next smallest candidates are Shop post-merge browser / responsive QA, a
-  read-only Magic Shop or Workshop mapping rehearsal, or a markdown-only
-  Facility Family Overlay Zone Map V0.1.
+- Facility skinning exploration is complete and `08_experiments/` has been
+  retired. Accepted results remain in the formal prototype screens.
+- Facilities visual integration review is paused at
+  `01_content/facilities-visual-integration-spec-v0.1.md`.
 - Do not select another facility for skinning, generate an image brief, generate
   a candidate, or implement additional HTML/CSS without new explicit owner
   approval.
