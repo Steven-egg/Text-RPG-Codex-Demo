@@ -8,6 +8,8 @@ screen-level verification, and historical MVP notes live in Task Zone files.
 
 Git baseline:
 
+- Latest accepted World Map visual checkpoint:
+  `e12cab6 [antig] feat(gui): integrate fullscreen World Map presentation`
 - Latest accepted facility visual checkpoint:
   `ad42c0e [owner] feat(gui): merge storage and workshop facility skins`
 - Latest committed bridge baseline:
@@ -51,6 +53,12 @@ GUI state:
   navigation, interaction, and UIAction logging only.
 - Runtime-connected GUI work is opt-in and limited to the already approved local
   live bridge slices listed below.
+- World Map fullscreen presentation is complete through `e12cab6`: a
+  screen-local environment image fills the desktop stage, the menu and player
+  resources use floating HUD presentation, location nodes use simplified hover /
+  selected treatment, and prototype debug controls are hidden unless
+  `?debug=1` is present. Existing static/live action semantics remain unchanged;
+  this does not open a formal asset pipeline.
 - World Map Settings Panel Reduced Motion MVP is shell-only GUI polish: static
   and live mode share a current-page reduced-motion preference and UIAction
   logging without Python dispatch, save persistence, or a formal settings model.
@@ -327,6 +335,9 @@ do not imply gameplay validation.
 - Facilities visual integration review is paused at
   `01_content/facilities-visual-integration-spec-v0.1.md`; no comparison
   candidate or CSS adjustment is currently approved.
+- World Map fullscreen presentation is complete through `e12cab6`. No
+  additional World Map artwork, layout tuning, or interaction redesign is
+  pre-approved by this docs sync.
 - World Map Settings Panel Reduced Motion MVP is complete as current-page,
   shell-only GUI polish. Formal settings, persistence, and cross-screen
   preferences remain closed.

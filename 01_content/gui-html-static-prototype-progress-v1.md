@@ -443,27 +443,49 @@ Reference images:
 
 Current behavior:
 
-- Loads static fixtures only.
-- Renders top player/resource strip, full-width programmatic map placeholder, route lines, clickable location nodes, right-side location detail drawer, primary confirm action, fixture selector, and UIAction log.
+- Supports the existing static fixture mode and approved live bridge mode; the
+  fullscreen presentation pass does not change runtime authority or action
+  semantics.
+- Renders a fullscreen desktop map stage using the screen-local
+  `assets/world-map-environment-v01.jpg` environment image.
+- Uses a floating top-left menu control and floating player/resource HUD over the
+  map rather than reserving a separate top layout row.
+- Uses simplified location emblems with hover / selected labels. Existing route
+  rendering remains in the prototype layer but is visually hidden in the
+  current presentation.
+- Keeps the fixture selector and UIAction Log available only when `?debug=1` is
+  present; normal player-facing URLs hide the prototype debug panel.
 - Top-left menu button opens a left-side main menu drawer.
-- Main menu actions log UIAction events only.
-- Main menu includes `back_to_start_screen`, which writes UIAction log before navigating back to the Start Screen static prototype.
+- In static mode, main menu actions log UIAction events without runtime
+  mutation.
+- Main menu includes `back_to_start_screen`, which writes UIAction log before
+  navigating back to the Start Screen static prototype.
 - Main menu no longer includes `exit_game` / `離開遊戲`; this static-only action duplicated the return-to-title purpose.
 - Initial World Map view keeps the detail drawer closed so the map can use the full main width.
 - Clicking a map node logs `select_world_location` and opens/updates the right-side detail drawer.
-- Unlocked locations allow `confirm_travel`, write the UIAction log, then navigate to the Dungeon Exploration static prototype.
-- Locked locations keep the detail panel visible but block `confirm_travel` with a reason.
+- In static mode, unlocked locations allow `confirm_travel`, write the UIAction
+  log, then navigate to the Dungeon Exploration static prototype.
+- Locked locations keep the detail panel visible but block `confirm_travel` with
+  a reason in both presentation modes.
 
 Accepted World Map decisions:
 
 - Treat the supplied mockups as reference only, not runtime assets.
 - Preserve the user-provided menu-open and detail-drawer mockups in `05_assets/gui_references/world_map/`.
+- Treat `07_gui_prototype/world_map/assets/world-map-environment-v01.jpg` as a
+  screen-local prototype presentation asset. It does not open a formal asset
+  pipeline or become runtime/gameplay authority.
+- Use the map as the fullscreen desktop stage, with dynamic HUD, location nodes,
+  drawers, text, and interactions rendered by HTML/CSS/JS above it.
+- Hide prototype debug controls from normal player-facing URLs and expose them
+  through `?debug=1`.
 - Main menu is opened from the top-left button as a side drawer.
 - Keep return-to-title through `back_to_start_screen`; do not keep a separate static-only `exit_game` command in this prototype.
 - Selecting a map point updates the right-side information panel.
-- Static prototype navigation only; no runtime adapter, no runtime exploration, and no save writes.
+- The presentation checkpoint does not change existing static/live bridge
+  actions, runtime validation, save behavior, or gameplay authority.
 
-World Map main menu read-only classification:
+World Map static-mode main menu read-only classification:
 
 - Keep as current static prototype navigation:
   - `back_to_start_screen`: keep as the accepted return-to-title path; it writes UIAction log before navigating to Start Screen.
@@ -479,8 +501,8 @@ World Map main menu read-only classification:
 
 Deferred World Map items:
 
-- Real world map art or formal asset pipeline.
-- Runtime adapter for location unlocks and travel.
+- Formal World Map asset pipeline or additional environment / location art set.
+- Expansion beyond the existing approved World Map live bridge.
 - Final animation for the side drawer.
 - Keyboard focus graph for map nodes.
 
@@ -635,6 +657,11 @@ Validated during this session:
 - Guild task-list internal scrolling was restored in `2ecca91`.
 - Town Hub `open_facility {"facility_id":"guild"}` logs before navigating to Guild Screen.
 - Guild `back_to_town_hub` logs before navigating to Town Hub.
+- World Map fullscreen presentation checkpoint landed in `e12cab6`: the
+  screen-local environment image fills the desktop stage, the menu and
+  player/resource HUD float over the map, location nodes use simplified hover /
+  selected presentation, and the debug panel is hidden unless `?debug=1` is
+  present.
 - World Map renders 9 location nodes from static fixtures.
 - World Map menu drawer opens and closes.
 - World Map selected location updates the right-side detail panel.
@@ -642,8 +669,11 @@ Validated during this session:
 - World Map locked locations block `confirm_travel` with a reason.
 - World Map unlocked locations dispatch `confirm_travel` and navigate to Dungeon Exploration static prototype without entering runtime.
 - Town Hub `open_world_map` logs before navigating to World Map.
-- World Map does not expose a return-to-town control in the current mockup pass.
+- World Map town-node detail action provides the existing return-to-town path.
 - Browser console error log was 0 during World Map static navigation checks.
+- World Map JavaScript syntax check passed for the `e12cab6` presentation
+  checkpoint, and owner visual review accepted the current fullscreen World Map
+  adjustment.
 - Dungeon Exploration fixtures parse as UTF-8 JSON.
 - Dungeon Exploration JS and World Map JS pass syntax check with the bundled Node.js runtime.
 - Dungeon Exploration default fixture renders 2 visible action buttons, Ash Valley location data, step meter, compact current-run rewards, latest event preview, and UIAction log.

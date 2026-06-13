@@ -8,6 +8,8 @@ what the next boundary is. Detailed MVP verification belongs in Task Zone docs.
 
 - Work directory: `C:\Users\user\OneDrive\文字冒險遊戲`
 - Current branch expectation: `main` aligned with `origin/main`.
+- Latest accepted World Map visual checkpoint:
+  `e12cab6 [antig] feat(gui): integrate fullscreen World Map presentation`
 - Latest accepted facility visual checkpoint:
   `ad42c0e [owner] feat(gui): merge storage and workshop facility skins`
 - Latest committed bridge baseline:
@@ -57,6 +59,12 @@ Current facility-family planning state:
 
 Current newest GUI live state:
 
+- World Map fullscreen presentation landed in `e12cab6`: a screen-local
+  environment image fills the desktop stage, the menu and player resources use
+  floating HUD presentation, location nodes use simplified hover / selected
+  treatment, and prototype debug controls are hidden unless `?debug=1` is
+  present. Existing static/live action semantics remain unchanged; this does not
+  open a formal asset pipeline.
 - World Map Settings Panel Reduced Motion MVP is complete as shell-only GUI
   polish. Static and live mode share the same current-page reduced-motion
   preference and UIAction logging; opening or changing it does not dispatch
@@ -205,6 +213,9 @@ reopened through a read-only planning gate and owner-approved exact scope.
 - Do not select another facility for skinning, generate an image brief, generate
   a candidate, or implement additional HTML/CSS without new explicit owner
   approval.
+- World Map fullscreen presentation is complete through `e12cab6`. No
+  additional World Map artwork, layout tuning, or interaction redesign is
+  pre-approved.
 - World Map Settings Panel Reduced Motion MVP is complete as current-page,
   shell-only GUI polish. Formal settings and persistence remain closed.
 - Phase C convenience candidates, runtime/data/schema/save/combat remain deferred.
@@ -255,6 +266,10 @@ Latest stable verification noted here:
 - `06_tools/validate_data.py`: PASS
 - `element_maze.py --smoke-test`: PASS
 - Workshop bridge smoke: PASS
+- World Map fullscreen presentation checkpoint `e12cab6`: World Map JavaScript
+  syntax check PASS, and owner visual review accepted the fullscreen environment
+  image, floating HUD, simplified location-node presentation, and debug-only
+  prototype controls.
 - Workshop Weapon Equip owner-side manual smoke: purchase does not auto-equip,
   equip does not deduct Gold, old weapon returns to inventory, new weapon becomes
   `equipment.weapon`, and World Map save / reload preserves equipment state.
