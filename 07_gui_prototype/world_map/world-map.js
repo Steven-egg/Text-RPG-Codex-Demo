@@ -964,3 +964,14 @@ function renderUtilityPreview(preview) {
     }
   }
 }
+
+// Initialize debug mode based on URL query param (?debug=1)
+(() => {
+  const urlParams = new URLSearchParams(window.location.search);
+  const isDebug = urlParams.get("debug") === "1";
+  const shell = document.querySelector(".world-map-shell");
+  if (shell) {
+    shell.dataset.debug = String(isDebug);
+  }
+})();
+

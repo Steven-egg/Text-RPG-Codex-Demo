@@ -34,7 +34,7 @@ body {
 
 body {
   margin: 0;
-  padding: 12px;
+  padding: 0 !important;
   font-family:
     Inter, "Noto Sans TC", "Microsoft JhengHei", "PingFang TC", Arial, sans-serif;
   background:
@@ -44,8 +44,7 @@ body {
   color: var(--paper);
   min-width: 0;
   min-height: 100%;
-  display: grid;
-  place-items: center;
+  display: block;
   overflow: hidden;
 }
 
@@ -68,13 +67,11 @@ span {
 }
 
 .world-map-shell {
-  width: min(100%, 1760px);
-  height: min(100%, 980px);
-  max-height: 980px;
+  width: 100%;
+  height: 100%;
   margin: 0;
-  display: grid;
-  grid-template-rows: auto minmax(0, 1fr) clamp(92px, 12dvh, 124px);
-  gap: 10px;
+  display: block;
+  position: relative;
   overflow: hidden;
 }
 
@@ -90,15 +87,25 @@ span {
 }
 
 .top-status-bar {
-  min-height: 64px;
-  padding: 8px 12px;
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  gap: 14px;
-  align-items: center;
-  background:
-    linear-gradient(90deg, rgba(10, 13, 13, 0.98), rgba(17, 22, 20, 0.88)),
-    var(--panel);
+  position: absolute;
+  top: clamp(10px, 1.2vw, 18px);
+  left: clamp(10px, 1.2vw, 18px);
+  right: clamp(10px, 1.2vw, 18px);
+  z-index: 10;
+  min-height: auto;
+  padding: 0;
+  display: flex;
+  justify-content: space-between; /* 讓選單按鈕在最左，狀態列在最右，解放中間天空 */
+  align-items: flex-start;
+  background: none !important;
+  border: none !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  pointer-events: none; /* 讓中間透明區域的滑鼠事件能直接穿透地圖 */
+}
+
+.top-status-bar * {
+  pointer-events: auto; /* 恢復子元素的點擊事件 */
 }
 
 .menu-toggle,
@@ -113,11 +120,24 @@ span {
 
 .menu-toggle {
   width: 52px;
-  aspect-ratio: 1;
+  height: 52px;
+  border: 1px solid rgba(208, 168, 76, 0.42) !important; /* 金色/黃銅細框 */
+  border-radius: 50% !important; /* 圓型徽章 */
+  background: rgba(10, 15, 14, 0.85) !important;
+  backdrop-filter: blur(10px) !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
   display: grid;
   place-items: center;
   gap: 4px;
   padding: 13px;
+  cursor: pointer;
+  transition: border-color 200ms ease, background 200ms ease, box-shadow 200ms ease;
+}
+
+.menu-toggle:hover {
+  border-color: #fff !important;
+  background: rgba(208, 168, 76, 0.15) !important;
+  box-shadow: 0 0 14px rgba(255, 255, 255, 0.25), 0 0 8px var(--gold);
 }
 
 .menu-toggle span {
@@ -137,27 +157,37 @@ select:focus-visible {
 .player-strip {
   min-width: 0;
   display: grid;
-  grid-template-columns: minmax(180px, 0.28fr) minmax(0, 1fr);
-  gap: 12px;
+  grid-template-columns: minmax(130px, auto) minmax(0, 1fr);
+  gap: 16px;
   align-items: center;
+  padding: 8px 18px;
+  border: 1px solid rgba(208, 168, 76, 0.42); /* 細黃銅金色邊框 */
+  border-radius: 8px;
+  background: rgba(20, 17, 14, 0.85); /* 暖黑色深半透明 */
+  backdrop-filter: blur(10px);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.55);
+  max-width: 720px; /* 限制最大寬度使其看起來是獨立浮動面板 */
 }
 
 .player-title {
   min-width: 0;
   display: flex;
-  flex-wrap: wrap;
-  gap: 6px 10px;
-  align-items: baseline;
+  flex-direction: column; /* 改為上下雙行排列，比單排橫拉更精美緊湊，且適應窄螢幕 */
+  gap: 4px;
+  align-items: flex-start;
 }
 
 .player-title strong {
   font-size: 1.1rem;
   color: var(--paper);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
 }
 
 .player-title span {
-  color: var(--paper-muted);
+  color: var(--gold); /* 等級改為亮金色 */
   font-weight: 800;
+  font-size: 0.82rem;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
 }
 
 .resource-strip {
@@ -169,15 +199,14 @@ select:focus-visible {
 
 .resource-item {
   min-width: 0;
-  min-height: 36px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  padding: 7px 9px;
+  min-height: auto;
+  border: none;
+  background: none;
+  padding: 4px 6px;
   display: grid;
   grid-template-columns: auto minmax(42px, 1fr);
   gap: 8px;
   align-items: center;
-  background: rgba(255, 255, 255, 0.055);
 }
 
 .resource-label {
@@ -187,32 +216,44 @@ select:focus-visible {
 }
 
 .resource-meter {
-  height: 8px;
-  border: 1px solid rgba(239, 231, 211, 0.18);
+  height: 6px;
+  border: 1px solid rgba(208, 168, 76, 0.18); /* 微黃銅色邊框 */
   border-radius: 999px;
   overflow: hidden;
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(7, 10, 9, 0.9); /* 黑曜石深色背景 */
 }
 
 .resource-meter span {
   display: block;
   width: var(--meter-value, 100%);
   height: 100%;
-  background: linear-gradient(90deg, var(--meter-color, var(--gold)), rgba(255, 255, 255, 0.75));
+  border-radius: 999px;
 }
 
-.resource-item[data-tone="hp"] .resource-meter {
-  --meter-color: var(--leaf);
+.resource-item[data-tone="hp"] .resource-meter span {
+  background: linear-gradient(90deg, #4d682a 0%, #79924f 60%, #a4c264 100%); /* 寶石翡翠綠漸層 */
+  box-shadow: 0 0 4px rgba(164, 194, 100, 0.4);
 }
 
-.resource-item[data-tone="mp"] .resource-meter {
-  --meter-color: var(--blue);
+.resource-item[data-tone="mp"] .resource-meter span {
+  background: linear-gradient(90deg, #1b476c 0%, #326da1 60%, #609fd5 100%); /* 寶石藍水晶漸層 */
+  box-shadow: 0 0 4px rgba(96, 159, 213, 0.4);
 }
 
 .resource-item[data-tone="gold"] {
-  grid-template-columns: 1fr;
-  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   color: var(--gold);
+  font-weight: 900;
+  font-size: 1.05rem; /* 字體微調大 */
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
+}
+
+.resource-item[data-tone="gold"]::before {
+  content: "🪙";
+  margin-right: 6px;
+  font-size: 1rem;
 }
 
 .world-layout {
@@ -245,13 +286,22 @@ select:focus-visible {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background:
-    linear-gradient(90deg, rgba(0, 0, 0, 0.62), transparent 12%, transparent 84%, rgba(0, 0, 0, 0.62)),
-    linear-gradient(180deg, rgba(0, 0, 0, 0.54), transparent 16%, transparent 72%, rgba(0, 0, 0, 0.62));
+  display: none; /* 移除暗角遮罩，還原明亮精美的插畫背景 */
 }
 
-.map-art,
-.route-layer,
+.map-art {
+  position: absolute;
+  inset: 0;
+  background: url("./assets/world-map-environment-v01.jpg") no-repeat center center;
+  background-size: cover;
+}
+
+.route-layer {
+  position: absolute;
+  inset: 0;
+  display: none; /* 隱藏虛線路線層 */
+}
+
 .location-layer {
   position: absolute;
   inset: 0;
@@ -260,6 +310,7 @@ select:focus-visible {
 .terrain {
   position: absolute;
   pointer-events: none;
+  display: none; /* 使用 CSS 隱藏，但不刪除 DOM 結構以保留程式化 terrain DOM */
 }
 
 .terrain-sea {
@@ -336,131 +387,206 @@ select:focus-visible {
 
 .route-line {
   fill: none;
-  stroke: rgba(239, 231, 211, 0.72);
-  stroke-width: 4;
+  stroke: rgba(255, 244, 220, 0.88); /* 稍微調亮並偏向羊皮紙金黃色，使路線更醒目 */
+  stroke-width: 4.5; /* 稍微加粗 0.5px 以增加辨識度 */
   stroke-linecap: round;
   stroke-linejoin: round;
   stroke-dasharray: 14 14;
+  /* 透過 CSS drop-shadow 濾鏡為 SVG 虛線加上兩層極為強烈的深色外陰影，確保在複雜彩圖上都能一眼看出 */
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.95)) drop-shadow(0 0 1px rgba(0, 0, 0, 0.95));
 }
 
 .route-line[data-status="locked"] {
-  stroke: rgba(239, 231, 211, 0.34);
+  stroke: rgba(239, 231, 211, 0.42); /* 提高鎖定狀態的透明度，防範於暗色底圖背景中消失 */
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.9));
 }
 
 .route-line[data-status="warning"] {
-  stroke: rgba(194, 95, 56, 0.78);
+  stroke: rgba(235, 107, 61, 0.95); /* 警報狀態加強飽和度與紅色調 */
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.95)) drop-shadow(0 0 2px rgba(0, 0, 0, 0.8));
 }
 
 .location-layer {
   z-index: 4;
 }
 
+@keyframes jrpg-hover-float {
+  0% { transform: translate(-50%, -50%); }
+  50% { transform: translate(-50%, calc(-50% - 8px)); } /* 漂浮高度調整為 1.5 倍的 8px */
+  100% { transform: translate(-50%, -50%); }
+}
+
 .location-node {
   position: absolute;
   left: var(--x);
   top: var(--y);
-  width: clamp(104px, 8.8vw, 148px);
-  min-height: clamp(76px, 8.8dvh, 96px);
-  border: 1px solid rgba(239, 231, 211, 0.28);
-  border-radius: 8px;
-  padding: 8px;
-  display: grid;
-  justify-items: center;
-  gap: 4px;
+  width: 72px; /* 熱區調整為 1.5 倍 */
+  height: 72px;
+  min-height: auto;
+  border: none;
+  background: none;
+  box-shadow: none;
+  backdrop-filter: none;
   transform: translate(-50%, -50%);
-  background: rgba(7, 10, 10, 0.75);
-  box-shadow: 0 16px 38px rgba(0, 0, 0, 0.45);
   cursor: pointer;
-  text-align: center;
-  transition:
-    transform 150ms ease,
-    border-color 150ms ease,
-    background 150ms ease,
-    opacity 150ms ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: visible;
+  padding: 0;
+  z-index: 5;
+  transition: transform 150ms ease, opacity 150ms ease;
 }
 
 .location-node:hover,
 .location-node.is-selected {
-  border-color: var(--focus);
-  background: rgba(18, 23, 21, 0.93);
-}
-
-.location-node:hover {
-  transform: translate(-50%, calc(-50% - 3px));
-}
-
-.location-node.is-selected {
-  box-shadow:
-    0 0 0 2px rgba(242, 201, 93, 0.16),
-    0 18px 42px rgba(0, 0, 0, 0.48);
+  animation: jrpg-hover-float 1.6s ease-in-out infinite;
+  outline: none;
 }
 
 .location-node[data-unlocked="false"] {
+  opacity: 1; /* 取消未解鎖節點透明度，防範融合於底圖 */
+}
+
+.location-node[data-unlocked="false"] .marker-emblem {
   border-style: dashed;
-  opacity: 0.72;
+  border-color: rgba(239, 231, 211, 0.55); /* 加強鎖定狀態邊框對比 */
+  background: rgba(7, 9, 9, 0.9) !important;
+  color: rgba(239, 231, 211, 0.75); /* 加強文字可讀性 */
+  box-shadow: none;
 }
 
 .marker-emblem {
-  width: clamp(34px, 3vw, 44px);
-  aspect-ratio: 1;
+  width: 48px; /* 菱形寬度改為 1.5 倍 */
+  height: 48px; /* 菱形高度改為 1.5 倍 */
   display: grid;
   place-items: center;
-  border: 1px solid rgba(239, 231, 211, 0.35);
-  border-radius: 8px;
+  border: 1.5px solid rgba(208, 168, 76, 0.55);
+  border-radius: 8px; /* 圓角等比例調整 */
   transform: rotate(45deg);
-  background: rgba(255, 255, 255, 0.08);
-  color: var(--paper);
+  background: rgba(10, 15, 14, 0.88); /* 深色半透明背景 */
+  color: var(--gold); /* 亮金色文字 */
   font-weight: 900;
+  box-shadow: 0 0 12px rgba(208, 168, 76, 0.3);
+  transition: border-color 200ms ease, background 200ms ease, box-shadow 200ms ease, color 200ms ease;
+}
+
+.location-node:hover .marker-emblem,
+.location-node.is-selected .marker-emblem {
+  border-color: #fff;
+  background: var(--gold) !important; /* 選中時高亮金色 */
+  color: #1a1612; /* 反白深色字 */
+  box-shadow: 0 0 18px rgba(255, 255, 255, 0.85), 0 0 12px var(--gold);
 }
 
 .marker-emblem span {
   transform: rotate(-45deg);
+  font-size: 1.2rem; /* 菱形內縮寫文字改為 1.5 倍 */
+  display: block;
+}
+
+.node-title,
+.node-meta {
+  position: absolute;
+  left: 50%;
+  transform: translate(-50%, 8px); /* 位移等比例調整 */
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 180ms ease, visibility 180ms ease, transform 180ms cubic-bezier(0.25, 0.8, 0.25, 1);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.95), 0 0 2px rgba(0, 0, 0, 0.95);
+  white-space: nowrap;
+  pointer-events: none;
+  text-align: center;
+  z-index: 10;
+}
+
+.node-title {
+  bottom: -32px; /* 配合菱形大小往下位移 */
+  color: var(--accent-gold);
+  font-size: 1.29rem; /* 標題文字改為 1.5 倍 */
+  font-weight: 900;
+}
+
+.node-meta {
+  bottom: -56px; /* 配合標題字體往下位移 */
+  color: var(--paper-muted);
+  font-size: 1.11rem; /* 等級文字改為 1.5 倍 */
+  font-weight: 800;
+}
+
+.node-lock {
+  position: absolute;
+  top: -18px; /* 鎖定文字往上推，避免重疊 */
+  left: 50%;
+  transform: translateX(-50%);
+  color: var(--gold);
+  font-size: 0.98rem; /* 鎖定文字改為 1.5 倍 */
+  font-weight: 900;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+/* 當 Hover 或選取時，文字向外滑出並顯示 */
+.location-node:hover .node-title,
+.location-node.is-selected .node-title {
+  opacity: 1;
+  visibility: visible;
+  transform: translate(-50%, 0);
+}
+
+.location-node:hover .node-meta,
+.location-node.is-selected .node-meta {
+  opacity: 1;
+  visibility: visible;
+  transform: translate(-50%, 0);
 }
 
 .location-node[data-tone="town"] .marker-emblem {
-  background: rgba(50, 109, 161, 0.36);
+  background: rgba(50, 109, 161, 0.88) !important; /* 提高阻光度，確保在複雜底圖上清晰可見 */
 }
 
 .location-node[data-tone="nature"] .marker-emblem {
-  background: rgba(121, 146, 79, 0.34);
+  background: rgba(121, 146, 79, 0.88) !important;
 }
 
 .location-node[data-tone="fire"] .marker-emblem {
-  background: rgba(194, 95, 56, 0.36);
+  background: rgba(194, 95, 56, 0.88) !important;
 }
 
 .location-node[data-tone="ice"] .marker-emblem {
-  background: rgba(158, 198, 217, 0.22);
+  background: rgba(158, 198, 217, 0.82) !important;
 }
 
 .location-node[data-tone="arcane"] .marker-emblem {
-  background: rgba(127, 107, 176, 0.32);
+  background: rgba(127, 107, 176, 0.88) !important;
 }
 
 .location-node[data-tone="water"] .marker-emblem {
-  background: rgba(74, 155, 145, 0.3);
+  background: rgba(74, 155, 145, 0.88) !important;
 }
 
 .location-node[data-tone="bone"] .marker-emblem {
-  background: rgba(184, 164, 124, 0.26);
+  background: rgba(184, 164, 124, 0.88) !important;
 }
 
 .node-title {
   color: var(--paper);
-  font-size: 0.86rem;
+  font-size: 1.29rem;
   font-weight: 900;
   line-height: 1.16;
 }
 
 .node-meta {
   color: var(--paper-muted);
-  font-size: 0.74rem;
+  font-size: 1.11rem;
   font-weight: 800;
 }
 
 .node-lock {
   color: var(--gold);
-  font-size: 0.7rem;
+  font-size: 0.98rem;
 }
 
 .location-detail-panel {
@@ -550,10 +676,10 @@ select:focus-visible {
 }
 
 .location-preview[data-preview-role="town"] {
-  background:
-    linear-gradient(180deg, rgba(50, 109, 161, 0.36), transparent 42%),
-    linear-gradient(120deg, transparent 0 34%, rgba(239, 231, 211, 0.22) 35% 45%, transparent 46% 100%),
-    #17232c;
+  background-image: url('../town_hub/assets/town-hub-environment-v01.jpg');
+  background-size: 220%; /* 放大圖片至 2.2 倍，達成視角縮減與微縮感 */
+  background-position: 50% 58%; /* 精確定位至中心噴泉與特徵雕像 */
+  background-repeat: no-repeat;
 }
 
 .location-preview[data-preview-role="quarry"],
@@ -631,14 +757,7 @@ select:focus-visible {
 }
 
 .feedback-message {
-  min-height: 40px;
-  margin: 0;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  padding: 10px 12px;
-  color: var(--paper-muted);
-  line-height: 1.35;
-  background: rgba(255, 255, 255, 0.052);
+  display: none !important; /* 隱藏玩家看不懂的除錯備註文字（原紅框） */
 }
 
 .detail-actions {
@@ -700,7 +819,7 @@ select:focus-visible {
   top: clamp(10px, 1.2vw, 18px);
   bottom: clamp(10px, 1.2vw, 18px);
   left: clamp(10px, 1.2vw, 18px);
-  width: clamp(320px, 26vw, 410px);
+  width: clamp(380px, 30vw, 480px); /* 拓寬主選單面板 */
   max-width: calc(100% - 20px);
   padding: clamp(14px, 1.2vw, 18px);
   display: grid;
@@ -744,13 +863,13 @@ select:focus-visible {
 }
 
 .menu-action {
-  min-height: 62px;
+  min-height: 72px; /* 提高按鈕高度 */
   border: 1px solid var(--line);
   border-radius: 8px;
-  padding: 10px;
+  padding: 10px 14px; /* 加寬按鈕內襯 */
   display: grid;
-  grid-template-columns: 42px minmax(0, 1fr) auto;
-  gap: 10px;
+  grid-template-columns: 46px minmax(0, 1fr) auto; /* 加大徽章欄寬度 */
+  gap: 12px;
   align-items: center;
   background: rgba(255, 255, 255, 0.052);
   cursor: pointer;
@@ -763,13 +882,14 @@ select:focus-visible {
 }
 
 .menu-action-token {
-  width: 42px;
+  width: 46px; /* 加大徽章尺寸 */
   aspect-ratio: 1;
-  border: 1px solid rgba(239, 231, 211, 0.22);
+  border: 1px solid rgba(208, 168, 76, 0.38); /* 美化徽章邊框為黃銅色 */
   border-radius: 8px;
   display: grid;
   place-items: center;
   color: var(--gold);
+  font-size: 1.15rem; /* 放大徽章字體 */
   font-weight: 900;
   background: rgba(255, 255, 255, 0.06);
 }
@@ -781,14 +901,15 @@ select:focus-visible {
 
 .menu-action-copy strong {
   color: var(--paper);
-  font-size: 1rem;
+  font-size: 1.16rem; /* 放大按鈕標題字體 */
+  letter-spacing: 0.5px;
 }
 
 .menu-action-copy span {
   margin-top: 4px;
   color: var(--paper-muted);
-  font-size: 0.8rem;
-  line-height: 1.35;
+  font-size: 0.9rem; /* 放大按鈕說明字體，顯著提高易讀性 */
+  line-height: 1.4;
 }
 
 .menu-action-chevron {
@@ -797,6 +918,7 @@ select:focus-visible {
 }
 
 .drawer-player-card {
+  display: none; /* 隱藏重複的狀態摘要卡片 */
   border-top: 1px solid var(--line);
   padding-top: 14px;
 }
@@ -817,14 +939,26 @@ select:focus-visible {
   color: var(--paper);
 }
 
+.world-map-shell:not([data-debug="true"]) .prototype-debug-panel {
+  display: none !important;
+}
+
 .prototype-debug-panel {
-  min-height: 0;
-  height: 100%;
+  position: absolute;
+  bottom: clamp(10px, 1.2vw, 18px);
+  left: clamp(10px, 1.2vw, 18px);
+  z-index: 15; /* 確保高於地圖及抽屜 */
+  width: min(calc(100% - 36px), 680px); /* 限制最大寬度以避免遮擋太多地圖 */
+  height: clamp(120px, 16dvh, 160px); /* 限制高度使其成為緊湊的浮動面板 */
   padding: 10px 12px;
   display: grid;
-  grid-template-columns: minmax(190px, 0.2fr) minmax(0, 1fr);
+  grid-template-columns: minmax(190px, 0.22fr) minmax(0, 1fr);
   gap: 12px;
   overflow: hidden;
+  background: rgba(10, 15, 14, 0.94); /* 深色半透明 */
+  border: 1px solid rgba(239, 231, 211, 0.25);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(10px);
 }
 
 .fixture-switcher {
@@ -904,25 +1038,21 @@ select:focus-visible {
 }
 
 @media (max-width: 1180px) {
-  body {
-    padding: 8px;
+  .top-status-bar {
+    top: 10px;
+    left: 10px;
+    right: 10px;
   }
 
-  .world-map-shell {
-    width: 100%;
-    height: 100%;
-    margin: 0;
-    grid-template-rows: auto minmax(0, 1fr) clamp(86px, 13dvh, 112px);
+  .prototype-debug-panel {
+    bottom: 10px;
+    left: 10px;
+    width: min(calc(100% - 20px), 500px);
   }
 
   .player-strip {
     grid-template-columns: minmax(0, 1fr);
     gap: 6px;
-  }
-
-  .location-node {
-    width: clamp(92px, 10.5vw, 124px);
-    min-height: 76px;
   }
 
   .node-title {
@@ -935,40 +1065,72 @@ select:focus-visible {
 }
 
 @media (max-width: 760px) {
-  .world-map-shell {
-    grid-template-rows: auto minmax(0, 1fr) 96px;
-  }
-
   .top-status-bar {
-    grid-template-columns: auto minmax(0, 1fr);
+    top: 8px;
+    left: 8px;
+    right: 8px;
   }
 
   .prototype-debug-panel {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 8px;
+    left: 8px;
+    bottom: 8px;
+    width: calc(100% - 16px);
+    height: 140px;
+    grid-template-columns: 1fr; /* 小螢幕下改為單欄 */
+    grid-template-rows: auto 1fr;
+    gap: 6px;
   }
 
   .menu-toggle {
-    justify-self: auto;
+    width: 44px;
+    height: 44px;
+  }
+
+  .player-strip {
+    padding: 6px 10px;
+    gap: 4px;
+    max-width: calc(100% - 56px); /* 留安全空間不與左邊圓形按鈕重疊 */
+  }
+
+  .player-title strong {
+    font-size: 0.9rem;
+  }
+
+  .player-title span {
+    font-size: 0.72rem;
   }
 
   .resource-strip {
-    grid-template-columns: minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr); /* 資源改為垂直單欄堆疊 */
+    gap: 4px;
   }
 
-  .location-node {
-    width: 88px;
-    min-height: 70px;
-    padding: 7px;
+  .resource-item {
+    padding: 2px 0;
+    gap: 6px;
   }
 
-  .marker-emblem {
-    width: 32px;
+  .resource-label {
+    font-size: 0.78rem;
+  }
+
+  .resource-meter {
+    height: 5px;
+  }
+
+  .resource-item[data-tone="gold"] {
+    font-size: 0.88rem;
+    justify-content: flex-start; /* 堆疊時靠左對齊，視覺更整齊 */
+  }
+
+  .resource-item[data-tone="gold"]::before {
+    font-size: 0.82rem;
+    margin-right: 4px;
   }
 
   .location-detail-panel,
   .menu-drawer {
-    width: calc(100% - 20px);
+    width: calc(100% - 16px);
   }
 
   .stat-row {
@@ -981,24 +1143,14 @@ select:focus-visible {
 }
 
 @media (max-height: 760px) {
-  .world-map-shell {
-    grid-template-rows: auto minmax(0, 1fr) 88px;
-    gap: 8px;
-  }
-
-  .top-status-bar {
-    min-height: 56px;
-    padding: 7px 10px;
+  .prototype-debug-panel {
+    bottom: 6px;
+    left: 6px;
   }
 
   .menu-toggle {
-    width: 46px;
-    padding: 11px;
-  }
-
-  .resource-item {
-    min-height: 32px;
-    padding: 5px 8px;
+    width: 44px;
+    height: 44px;
   }
 
   .location-detail-panel,
@@ -1015,12 +1167,9 @@ select:focus-visible {
     font-size: 1.7rem;
   }
 
-  .location-node {
-    min-height: 70px;
-  }
-
   .menu-action {
-    min-height: 54px;
+    min-height: 60px; /* 高度縮減時稍微緊湊，但仍保留字體空間 */
+    padding: 6px 12px;
   }
 }
 
