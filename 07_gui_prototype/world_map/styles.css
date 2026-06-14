@@ -682,7 +682,15 @@ select:focus-visible {
   background-repeat: no-repeat;
 }
 
-.location-preview[data-preview-role="quarry"],
+.location-preview[data-preview-role="quarry"] {
+  background-image:
+    linear-gradient(to bottom, rgba(12, 18, 19, 0.1) 0%, rgba(12, 18, 19, 0.5) 100%),
+    url("../dungeon_exploration/assets/ember-quarry-exploration-v01.png");
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
+}
+
 .location-preview[data-preview-role="valley"] {
   background:
     linear-gradient(170deg, rgba(194, 95, 56, 0.62), transparent 43%),
