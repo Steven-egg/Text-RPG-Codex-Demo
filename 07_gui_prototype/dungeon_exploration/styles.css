@@ -375,18 +375,31 @@ select:focus-visible {
 }
 
 .meter-track {
-  height: 13px;
-  border: 1px solid rgba(239, 232, 215, 0.22);
+  height: 10px;
+  border: 1px solid rgba(214, 177, 96, 0.22);
   border-radius: 999px;
   overflow: hidden;
-  background: rgba(255, 255, 255, 0.08);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(0, 0, 0, 0.35)),
+    rgba(12, 16, 14, 0.86);
+  box-shadow:
+    inset 0 1px 2px rgba(255, 255, 255, 0.08),
+    inset 0 -2px 4px rgba(0, 0, 0, 0.55);
 }
 
 .meter-fill {
   width: var(--meter-value, 0%);
   height: 100%;
   border-radius: inherit;
-  background: linear-gradient(90deg, var(--teal), var(--gold));
+  background: linear-gradient(
+    90deg,
+    #7c6040 0%,
+    #b99a5d 50%,
+    #e4cf8a 100%
+  );
+  box-shadow:
+    0 0 8px rgba(228, 207, 138, 0.35),
+    inset 0 1px 1px rgba(255, 255, 255, 0.25);
 }
 
 .run-stats {
@@ -737,5 +750,392 @@ select:focus-visible {
   .run-stat span:last-child,
   .reward-row span:last-child {
     text-align: left;
+  }
+}
+
+/* ==========================================================================
+   Ember Quarry Background & Fullscreen visualslice V0.1 Styles
+   ========================================================================== */
+
+/* 預設非偵錯狀態下隱藏偵錯元件 */
+.exploration-shell:not([data-debug="true"]) .exploration-header,
+.exploration-shell:not([data-debug="true"]) .action-log-panel {
+  display: none !important;
+}
+
+/* 焦石礦坑 (Ember Quarry / Scorched Mine) 專屬背景與圖層隱藏 */
+[data-dungeon-id="ember_quarry"] .dungeon-stage,
+[data-dungeon-id="dungeon_scorched_mine"] .dungeon-stage {
+  background: url("./assets/ember-quarry-exploration-v01.png") no-repeat center center !important;
+  background-size: cover !important;
+}
+[data-dungeon-id="ember_quarry"] .dungeon-art,
+[data-dungeon-id="dungeon_scorched_mine"] .dungeon-art {
+  display: none !important;
+}
+
+/* 僅保留黑灰色邊緣壓暗 (Vignette)，移除黃綠色中央強光 */
+[data-dungeon-id="ember_quarry"] .dungeon-stage::before,
+[data-dungeon-id="dungeon_scorched_mine"] .dungeon-stage::before {
+  background: linear-gradient(90deg, rgba(0, 0, 0, 0.36), transparent 29%, transparent 69%, rgba(0, 0, 0, 0.4)) !important;
+}
+[data-dungeon-id="ember_quarry"] .dungeon-stage::after,
+[data-dungeon-id="dungeon_scorched_mine"] .dungeon-stage::after {
+  background:
+    linear-gradient(90deg, rgba(0, 0, 0, 0.54), transparent 18%, transparent 78%, rgba(0, 0, 0, 0.58)),
+    linear-gradient(180deg, rgba(0, 0, 0, 0.35), transparent 28%, rgba(0, 0, 0, 0.64)) !important;
+}
+
+/* 桌面版全螢幕場景佈局樣式 */
+@media (min-width: 821px) {
+  html,
+  body {
+    width: 100% !important;
+    height: 100% !important;
+    overflow: hidden !important;
+  }
+
+  .exploration-shell {
+    width: 100vw !important;
+    height: 100vh !important;
+    max-width: none !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    display: block !important;
+    position: relative !important;
+    overflow: hidden !important;
+  }
+
+  .exploration-layout {
+    position: absolute !important;
+    inset: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    z-index: 1 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* 背景舞台 */
+  .dungeon-stage {
+    position: absolute !important;
+    inset: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    z-index: 0 !important;
+    min-height: 0 !important;
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+  }
+
+  .dungeon-stage::before,
+  .dungeon-stage::after {
+    border-radius: 0 !important;
+  }
+
+  .stage-overlay {
+    position: absolute !important;
+    inset: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    padding: 0 !important;
+    background: transparent !important;
+    pointer-events: none !important;
+    display: block !important;
+  }
+  .stage-overlay * {
+    pointer-events: auto !important;
+  }
+
+  /* 左上地點 Title Panel */
+  .location-card {
+    position: absolute !important;
+    top: 20px !important;
+    left: 20px !important;
+    width: 320px !important;
+    z-index: 10 !important;
+    background: rgba(11, 14, 13, 0.76) !important;
+    border: 1px solid var(--line) !important;
+    border-left: 4px solid var(--gold) !important;
+    border-radius: 8px !important;
+    padding: 14px !important;
+    box-shadow: var(--panel-glow) !important;
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
+  }
+
+  #location-summary {
+    font-size: 0.86rem !important;
+    line-height: 1.45 !important;
+    margin-top: 8px !important;
+  }
+
+  .meta-grid {
+    margin-top: 10px !important;
+    gap: 6px !important;
+  }
+
+  .meta-row {
+    min-height: 32px !important;
+    padding: 6px 8px !important;
+  }
+
+  /* 右上玩家資源 HUD */
+  .resource-strip {
+    position: absolute !important;
+    top: 20px !important;
+    right: 20px !important;
+    width: 320px !important;
+    z-index: 10 !important;
+    min-height: 0 !important;
+    padding: 10px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+    background: rgba(11, 14, 13, 0.76) !important;
+    border: 1px solid var(--line) !important;
+    border-radius: 8px !important;
+    box-shadow: var(--panel-glow) !important;
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
+  }
+
+  .resource-item {
+    width: 100% !important;
+    min-height: 32px !important;
+    padding: 6px 10px !important;
+    border-radius: 6px !important;
+    font-size: 0.9rem !important;
+  }
+
+  /* 右側探索狀態面板 */
+  .side-panel {
+    position: absolute !important;
+    top: 124px !important; /* 緊貼右上資源 HUD (top 20 + 92px height + 12px gap) */
+    right: 20px !important;
+    bottom: auto !important; /* 內容驅動高度，移除拉伸高度 */
+    height: auto !important;
+    max-height: calc(100vh - 304px) !important; /* 避開底部 footer */
+    width: 320px !important;
+    z-index: 10 !important;
+    background: rgba(11, 14, 13, 0.65) !important; /* 降低背景厚重感，維持毛玻璃 */
+    border: 1px solid rgba(239, 232, 215, 0.12) !important;
+    border-radius: 8px !important;
+    padding: 16px !important;
+    box-shadow: var(--panel-glow) !important;
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 12px !important;
+    overflow: hidden !important; /* 防止整個面板滾動，核心資訊常駐可見 */
+  }
+
+  /* 移除內部項目的巢狀邊框與背景灰色塊 */
+  .meta-row,
+  .run-stat,
+  .reward-row {
+    border: none !important;
+    background: transparent !important;
+    padding: 4px 0 !important;
+    min-height: auto !important;
+    box-shadow: none !important;
+  }
+
+  .side-panel .run-card {
+    border-bottom: 1px solid rgba(239, 232, 215, 0.08) !important; /* 調弱底邊線 */
+    padding-bottom: 10px !important;
+    flex-shrink: 0 !important;
+  }
+
+  .side-panel .panel-card:not(.log-preview-card) {
+    border-bottom: 1px solid rgba(239, 232, 215, 0.08) !important; /* 調弱底邊線 */
+    padding-bottom: 10px !important;
+    flex-shrink: 0 !important;
+    display: grid !important;
+  }
+
+  .side-panel .log-preview-card {
+    border: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    flex: 1 !important;
+    min-height: 120px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+  }
+
+  .side-panel .event-preview {
+    flex: 1 !important;
+    overflow-y: auto !important;
+    min-height: 60px !important;
+  }
+
+  /* 底部敘事與操作列 */
+  .exploration-footer {
+    position: absolute !important;
+    left: 20px !important;
+    right: 20px !important;
+    bottom: 20px !important;
+    height: 140px !important;
+    z-index: 10 !important;
+    padding: 14px 18px !important;
+    background: rgba(11, 14, 13, 0.72) !important; /* 降低背景厚重感 */
+    border: 1px solid rgba(239, 232, 215, 0.12) !important;
+    border-radius: 8px !important;
+    box-shadow: var(--shadow) !important;
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
+    display: grid !important;
+    grid-template-columns: clamp(140px, 15vw, 180px) minmax(0, 1fr) clamp(280px, 25vw, 360px) !important;
+    grid-template-rows: 1fr !important; /* 單一 grid row，讓按鈕與文字垂直置中 */
+    gap: 16px !important;
+    align-items: center !important;
+    min-height: 0 !important;
+  }
+
+  .footer-actions-left {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important; /* 欄位內水平置中 */
+    width: 100% !important;
+    align-self: center !important;
+  }
+
+  .footer-actions-right {
+    display: flex !important;
+    gap: 10px !important;
+    width: 100% !important;
+    align-items: center !important;
+    justify-content: center !important; /* 欄位內水平置中 */
+    align-self: center !important;
+  }
+
+  /* 限制按鈕目標寬度，避免過寬且維持一致感 */
+  .footer-actions-left .action-button {
+    width: 150px !important;
+    flex: none !important;
+  }
+
+  .footer-actions-right .action-button {
+    width: 180px !important; /* 單一前進步數按鈕時的寬度 */
+    flex: none !important;
+  }
+
+  .footer-actions-right.has-two-cols .action-button {
+    width: 160px !important; /* 兩個按鈕時微調縮窄，以利並排 */
+    flex: none !important;
+  }
+
+  /* 統一欄位標題為暖灰色，數值為羊皮紙白 */
+  .meta-row span:first-child,
+  .run-stat span:first-child,
+  .reward-row span:first-child {
+    color: var(--paper-muted) !important;
+    font-weight: 500 !important;
+  }
+
+  .meta-row span:last-child,
+  .run-stat span:last-child,
+  .reward-row span:last-child {
+    color: var(--paper) !important;
+    font-weight: 700 !important;
+  }
+
+  /* 保持區段標題為重點金黃色 */
+  .panel-label {
+    color: var(--gold) !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.08em !important;
+  }
+
+  .message-panel {
+    margin: 0 !important;
+    height: 100% !important;
+    border: none !important;
+    background: transparent !important;
+    padding: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+  }
+
+  .message-panel .panel-label {
+    margin-bottom: 6px !important;
+    color: var(--gold) !important;
+    opacity: 0.85 !important;
+  }
+
+  .message-panel p:last-child {
+    font-size: 1.32rem !important; /* 放大正文一至兩級 */
+    line-height: 1.6 !important; /* 增加行高 */
+    color: var(--paper) !important; /* 提高文字對比 */
+    font-weight: 600 !important; /* 加強視覺份量 */
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5) !important;
+  }
+
+  .action-button {
+    height: 72px !important;
+    min-height: 72px !important;
+    padding: 10px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    align-items: center !important;
+    gap: 4px !important;
+  }
+
+  .action-button strong {
+    font-size: 1.15rem !important;
+  }
+
+  /* 浮動偵錯面板樣式 */
+  .exploration-header {
+    position: absolute !important;
+    top: 20px !important;
+    left: 360px !important; /* 浮動在地點卡片右邊 */
+    width: 320px !important;
+    z-index: 100 !important;
+    background: rgba(10, 14, 12, 0.92) !important;
+    border: 1px solid var(--line-strong) !important;
+    border-radius: 8px !important;
+    padding: 12px !important;
+    box-shadow: var(--shadow) !important;
+    backdrop-filter: blur(12px) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+    min-height: 0 !important;
+  }
+
+  .exploration-header .title-copy {
+    display: none !important; /* 隱藏 generic 標題，避免干擾 */
+  }
+
+  .fixture-switcher {
+    width: 100% !important;
+  }
+
+  .action-log-panel {
+    position: absolute !important;
+    top: 130px !important; /* 浮動在偵錯 header 下方 */
+    left: 360px !important;
+    width: 320px !important;
+    z-index: 100 !important;
+    background: rgba(10, 14, 12, 0.92) !important;
+    border: 1px solid var(--line-strong) !important;
+    border-radius: 8px !important;
+    padding: 12px !important;
+    box-shadow: var(--shadow) !important;
+    backdrop-filter: blur(12px) !important;
+    max-height: 200px !important;
+    overflow-y: auto !important;
+  }
+
+  .action-log {
+    max-height: 120px !important;
   }
 }

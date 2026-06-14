@@ -1,0 +1,59 @@
+{
+  "screen_id": "dungeon_exploration",
+  "title": "迷宮探索",
+  "subtitle": "Static fixture driven prototype：對齊 CLI 的步數制探索，不推進 runtime、不讀寫 save。",
+  "resource_strip": [
+    { "label": "HP 183/192", "tone": "hp" },
+    { "label": "MP 38/38", "tone": "mp" }
+  ],
+  "dungeon": {
+    "dungeon_id": "ember_quarry",
+    "name": "焦石礦坑",
+    "summary": "廢棄的礦井深處隱約有赤熱的火光，生鏽的鐵軌和破碎的礦車訴說著這裡曾經的繁忙與災變。",
+    "recommended_level": "Lv8-10",
+    "player_level": "Lv8",
+    "attribute": "火 / 地形",
+    "route_length": "30 步",
+    "clear_state": "未通關",
+    "boss_state": "未確認"
+  },
+  "run_status": {
+    "current_step": 1,
+    "total_steps": 30,
+    "step_note": "剛踏入焦石礦坑，四周的溫度急遽升高，坑道中央鋪設的鐵軌向前延伸。",
+    "status_label": "探索中",
+    "risk_label": "中等風險",
+    "supply_label": "物資充沛",
+    "next_node": "廢棄軌道"
+  },
+  "run_rewards": [
+    { "label": "金幣", "value": "20G" },
+    { "label": "素材", "value": "煤焦岩 x1" }
+  ],
+  "event_preview": [
+    "第 1 步：你越過了塌陷的坑道入口，看見延伸向深處的銹鐵軌道。"
+  ],
+  "narrative_message": "空氣中瀰漫著濃烈的硫磺味，腳下的碎石踏上去發出沙沙聲。礦井的中央鐵軌是前進的最佳路線，但也最容易遭遇潛在的危險。",
+  "actions": [
+    {
+      "action_id": "advance_step",
+      "label": "前進一步",
+      "description": "進入下一步",
+      "enabled": true,
+      "disabled_reason": null,
+      "primary": true,
+      "payload": { "dungeon_id": "ember_quarry", "current_step": 1 },
+      "feedback_message": "已送出 advance_step。static prototype 不會改變目前步數。"
+    },
+    {
+      "action_id": "retreat",
+      "label": "撤退",
+      "description": "結束探索",
+      "enabled": true,
+      "disabled_reason": null,
+      "primary": false,
+      "payload": { "dungeon_id": "ember_quarry" },
+      "feedback_message": "已送出 retreat。static prototype 不會計算撤退結果。"
+    }
+  ]
+}

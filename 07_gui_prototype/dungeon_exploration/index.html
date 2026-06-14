@@ -18,6 +18,7 @@
           <label for="fixture-select">測試狀態</label>
           <select id="fixture-select">
             <option value="./fixtures/dungeon-exploration-default.json">Default Exploration</option>
+            <option value="./fixtures/dungeon-exploration-ember-quarry.json">Ember Quarry Preview</option>
             <option value="./fixtures/dungeon-exploration-encounter.json">Fixed Encounter Preview</option>
           </select>
         </div>
@@ -73,11 +74,13 @@
       </main>
 
       <footer class="exploration-footer">
+        <div id="left-actions" class="footer-actions-left" aria-label="Exploration secondary actions"></div>
         <section class="message-panel" aria-live="polite">
           <p class="panel-label">探索敘事</p>
           <p id="narrative-message"></p>
         </section>
-        <div id="action-row" class="action-row" aria-label="Exploration actions"></div>
+        <div id="right-actions" class="footer-actions-right" aria-label="Exploration primary actions"></div>
+        <div id="action-row" style="display: none;" aria-hidden="true"></div>
       </footer>
 
       <section class="action-log-panel">

@@ -375,7 +375,7 @@ select:focus-visible {
 }
 
 .enemy-focus-card {
-  top: 68px;
+  top: 64px; /* 稍微向上，縮短與上方回合標籤的距離 */
   left: 50%;
   width: min(450px, calc(100% - 640px));
   min-width: 360px;
@@ -790,19 +790,30 @@ select:focus-visible {
 }
 
 .command-button[data-primary="true"] {
-  border-color: rgba(242, 201, 93, 0.52);
+  border-color: rgba(239, 232, 216, 0.24); /* 未選取時弱化邊框 */
   background:
-    linear-gradient(135deg, rgba(56, 111, 145, 0.48), rgba(194, 95, 56, 0.24)),
+    linear-gradient(135deg, rgba(56, 111, 145, 0.28), rgba(194, 95, 56, 0.14)), /* 降低漸層亮度 30% */
     rgba(8, 16, 19, 0.88);
   box-shadow:
-    inset 0 0 0 2px rgba(242, 201, 93, 0.16),
-    0 0 24px rgba(56, 111, 145, 0.18),
-    0 18px 34px rgba(0, 0, 0, 0.36);
+    inset 0 0 0 1px rgba(239, 232, 216, 0.08),
+    0 14px 30px rgba(0, 0, 0, 0.34);
+}
+
+.command-button[data-primary="true"][data-active="true"],
+.command-button[data-primary="true"]:hover {
+  border-color: rgba(242, 201, 93, 0.78) !important; /* 選取或 hover 時恢復明亮金邊 */
+  background:
+    linear-gradient(135deg, rgba(56, 111, 145, 0.48), rgba(194, 95, 56, 0.24)) !important,
+    rgba(8, 16, 19, 0.88) !important;
+  box-shadow:
+    inset 0 0 0 2px rgba(242, 201, 93, 0.24) !important,
+    0 0 24px rgba(56, 111, 145, 0.18) !important,
+    0 18px 34px rgba(0, 0, 0, 0.36) !important;
 }
 
 .command-button[data-active="true"] {
-  border-color: rgba(242, 201, 93, 0.78);
-  box-shadow: 0 0 0 2px rgba(242, 201, 93, 0.16) inset;
+  border-color: rgba(242, 201, 93, 0.78) !important; /* 明亮金色邊框 */
+  box-shadow: 0 0 0 2px rgba(242, 201, 93, 0.16) inset !important;
   background-color: rgba(208, 168, 76, 0.14);
 }
 
@@ -1312,5 +1323,121 @@ select:focus-visible {
 
   .submenu-heading {
     display: grid;
+  }
+}
+
+/* ==========================================================================
+   Combat Screen Fullscreen Ember Quarry + Cinder Bat V0.1 Styles
+   ========================================================================== */
+
+/* 預設非偵錯狀態下隱藏偵錯元件與戰鬥提示列，收緊指令列 */
+.combat-shell:not([data-debug="true"]) .combat-header,
+.combat-shell:not([data-debug="true"]) .action-log-panel,
+.combat-shell:not([data-debug="true"]) .command-message {
+  display: none !important;
+}
+
+.combat-shell:not([data-debug="true"]) .combat-footer {
+  grid-template-rows: minmax(108px, auto) !important;
+  min-height: 0 !important;
+  margin-bottom: 24px !important;
+}
+
+/* 焦石礦坑戰鬥背景條件覆寫 */
+[data-enemy-id="mon_cinder_bat"] .battlefield-stage {
+  background: url("./assets/backgrounds/ember-quarry-combat-v01.png") no-repeat center center !important;
+  background-size: cover !important;
+}
+
+/* 隱藏 fallback 背景層與原本 silhouette */
+[data-enemy-id="mon_cinder_bat"] .field-layer,
+[data-enemy-id="mon_cinder_bat"] .battlefield-art::after,
+[data-enemy-id="mon_cinder_bat"] .enemy-silhouette {
+  display: none !important;
+}
+
+/* 透明焦翼蝠定位與尺寸 (放大 10–15%，並向下微調以配合地面投影) */
+.enemy-image-layer {
+  position: absolute;
+  z-index: 3;
+  left: 50%;
+  top: 38% !important; /* 向上移動且保留臉部主要輪廓，防選單遮擋 */
+  transform: translate(-34%, -50%) !important;
+  width: clamp(450px, 45vw, 680px) !important; /* 放大 10-15% 以增加存在感 */
+  height: clamp(340px, 34vh, 520px) !important;
+  pointer-events: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* 非常柔和、模糊的地面陰影，表達飛行高度並降低貼圖感 */
+.enemy-image-layer::after {
+  content: "";
+  position: absolute;
+  bottom: -40px; /* 懸浮高度 */
+  left: 50%;
+  transform: translateX(-50%);
+  width: 160px;
+  height: 24px;
+  background: rgba(0, 0, 0, 0.55);
+  border-radius: 50%;
+  filter: blur(14px); /* 模糊投影 */
+  z-index: -1;
+  pointer-events: none;
+  display: none;
+}
+
+[data-enemy-id="mon_cinder_bat"] .enemy-image-layer::after {
+  display: block !important;
+}
+
+.enemy-image {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 12px 24px rgba(0, 0, 0, 0.48));
+}
+
+@media (max-width: 1180px) {
+  .enemy-image-layer {
+    left: auto !important;
+    right: 11% !important;
+    top: 32% !important;
+    transform: translate(15%, -15%) !important;
+    width: clamp(320px, 32vw, 480px) !important;
+    height: clamp(230px, 24vw, 350px) !important;
+  }
+}
+
+/* 桌面版背景舞台真正滿版 (fixed)，同時戰鬥紀錄自適應高度與展開 */
+@media (min-width: 1181px) {
+  .battlefield-stage {
+    position: fixed !important;
+    inset: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    z-index: -10 !important; /* 置於最底層 */
+  }
+
+  .combat-side-panel {
+    position: absolute !important;
+    top: 138px !important;
+    right: 18px !important;
+    bottom: auto !important; /* 解除高度拉伸 */
+    height: auto !important; /* 內容驅動高度 */
+    width: min(330px, calc(100% - 36px)) !important;
+    display: grid !important;
+    grid-template-rows: minmax(0, 1fr) !important;
+  }
+
+  /* 普通／收合狀態的戰鬥紀錄面板略微縮短 */
+  .combat-shell[data-log-expanded="false"] .combat-side-panel {
+    max-height: 290px !important;
+  }
+
+  /* 展開狀態維持原樣高度 */
+  .combat-shell[data-log-expanded="true"] .combat-side-panel {
+    max-height: 480px !important;
   }
 }

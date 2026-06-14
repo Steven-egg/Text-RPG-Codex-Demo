@@ -16,8 +16,14 @@ const rewardSummaryEl = document.querySelector("#reward-summary");
 const eventPreviewEl = document.querySelector("#event-preview");
 const narrativeMessageEl = document.querySelector("#narrative-message");
 const actionRowEl = document.querySelector("#action-row");
+const leftActionsEl = document.querySelector("#left-actions");
+const rightActionsEl = document.querySelector("#right-actions");
 const actionLogEl = document.querySelector("#action-log");
 const clearLogEl = document.querySelector("#clear-log");
+
+const urlParams = new URLSearchParams(window.location.search);
+const isDebug = urlParams.get("debug") === "1";
+shellEl.dataset.debug = isDebug ? "true" : "false";
 
 const state = {
   model: null,
@@ -133,6 +139,11 @@ function renderResources(items) {
 }
 
 function renderDungeon(dungeon) {
+  if (dungeon && dungeon.dungeon_id) {
+    shellEl.dataset.dungeonId = dungeon.dungeon_id;
+  } else {
+    delete shellEl.dataset.dungeonId;
+  }
   locationNameEl.textContent = dungeon.name ?? "";
   locationSummaryEl.textContent = dungeon.summary ?? "";
 
@@ -196,36 +207,42 @@ function renderActions(actions) {
   const visibleActionIds = new Set(["advance_step", "retreat", "challenge_boss"]);
   const visibleActions = actions.filter((action) => visibleActionIds.has(action.action_id));
 
+  leftActionsEl.replaceChildren();
+  rightActionsEl.replaceChildren();
+
   const hasBoss = visibleActions.some((a) => a.action_id === "challenge_boss");
   if (hasBoss) {
-    actionRowEl.classList.add("has-three-cols");
+    rightActionsEl.classList.add("has-two-cols");
   } else {
-    actionRowEl.classList.remove("has-three-cols");
+    rightActionsEl.classList.remove("has-two-cols");
   }
 
-  actionRowEl.replaceChildren(
-    ...visibleActions.map((action) => {
-      const button = document.createElement("button");
-      button.type = "button";
-      button.className = "action-button";
-      button.dataset.actionId = action.action_id ?? "unavailable";
-      button.dataset.payload = JSON.stringify(action.payload ?? {});
-      button.dataset.disabledReason = action.disabled_reason ?? "";
-      button.dataset.primary = String(Boolean(action.primary));
-      button.setAttribute("aria-disabled", String(!action.enabled));
-      button.title = action.enabled ? action.description ?? "" : action.disabled_reason ?? "";
+  visibleActions.forEach((action) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "action-button";
+    button.dataset.actionId = action.action_id ?? "unavailable";
+    button.dataset.payload = JSON.stringify(action.payload ?? {});
+    button.dataset.disabledReason = action.disabled_reason ?? "";
+    button.dataset.primary = String(Boolean(action.primary));
+    button.setAttribute("aria-disabled", String(!action.enabled));
+    button.title = action.enabled ? action.description ?? "" : action.disabled_reason ?? "";
 
-      const label = document.createElement("strong");
-      label.textContent = action.label ?? action.action_id;
+    const label = document.createElement("strong");
+    label.textContent = action.label ?? action.action_id;
 
-      const description = document.createElement("span");
-      description.textContent = action.description ?? "";
+    const description = document.createElement("span");
+    description.textContent = action.description ?? "";
 
-      button.append(label, description);
-      button.addEventListener("click", () => activateAction(action, "action_bar"));
-      return button;
-    }),
-  );
+    button.append(label, description);
+    button.addEventListener("click", () => activateAction(action, "action_bar"));
+
+    if (action.action_id === "retreat") {
+      leftActionsEl.append(button);
+    } else {
+      rightActionsEl.append(button);
+    }
+  });
 }
 
 function renderActionLog() {
@@ -389,5 +406,6 @@ function renderLoadError(error) {
   rewardSummaryEl.replaceChildren();
   eventPreviewEl.replaceChildren();
   narrativeMessageEl.textContent = "";
-  actionRowEl.replaceChildren(createEmptyState("沒有可用 action。"));
+  leftActionsEl.replaceChildren();
+  rightActionsEl.replaceChildren(createEmptyState("沒有可用 action。"));
 }

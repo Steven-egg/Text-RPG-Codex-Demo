@@ -33,6 +33,10 @@ const resultNextActionEl = document.querySelector("#result-next-action");
 const actionLogEl = document.querySelector("#action-log");
 const clearLogEl = document.querySelector("#clear-log");
 
+const urlParams = new URLSearchParams(window.location.search);
+const isDebug = urlParams.get("debug") === "1";
+shellEl.dataset.debug = isDebug ? "true" : "false";
+
 const state = {
   model: null,
   actionLog: [],
@@ -186,6 +190,21 @@ function renderBattlefield(model) {
   enemyHpLabelEl.textContent = enemy.hp_label ?? "";
   renderEnemyMeta(enemy);
   playerNameEl.textContent = player.name ?? "";
+
+  const enemyImageEl = document.querySelector("#enemy-image");
+  if (enemy.enemy_id === "mon_cinder_bat") {
+    shellEl.dataset.enemyId = enemy.enemy_id;
+    if (enemyImageEl) {
+      enemyImageEl.src = "./assets/monsters/transparent/mon-cinder-bat-v01.png";
+      enemyImageEl.style.display = "block";
+    }
+  } else {
+    delete shellEl.dataset.enemyId;
+    if (enemyImageEl) {
+      enemyImageEl.src = "";
+      enemyImageEl.style.display = "none";
+    }
+  }
 
   const focusRows = [
     ["HP", player.hp_label ?? ""],
