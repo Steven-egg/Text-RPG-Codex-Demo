@@ -362,7 +362,11 @@ function renderSelectedLocation() {
 
   locationTitleEl.textContent = location.label ?? "";
   locationFavoriteEl.textContent = location.favorite ? "★" : "";
-  locationPreviewEl.dataset.previewRole = location.preview_role ?? "";
+  let previewRole = location.preview_role ?? "";
+  if (location.location_id === "cinder_depths") {
+    previewRole = "cinder";
+  }
+  locationPreviewEl.dataset.previewRole = previewRole;
   locationDescriptionEl.textContent = location.description ?? "";
   feedbackMessageEl.textContent = location.detail_note ?? "";
 
