@@ -16,7 +16,7 @@
   },
   "enemy": {
     "enemy_id": "mon_molten_shell",
-    "name": "熔殼小魔",
+    "name": "熔殼岩獸",
     "hp_label": "HP 12 / 126",
     "hp_percent": 10,
     "attribute": "火",
@@ -26,7 +26,7 @@
   "skill_menu": {
     "label": "技能選擇",
     "title": "技能",
-    "summary": "目前 MP 24/38。目標：熔殼小魔 / 屬性 火 / 狀態 外殼崩裂。再次按技能可收回。",
+    "summary": "目前 MP 24/38。目標：熔殼岩獸 / 屬性 火 / 狀態 外殼崩裂。再次按技能可收回。",
     "empty_message": "尚無可用技能。",
     "items": [
       {
@@ -54,7 +54,7 @@
   "item_menu": {
     "label": "道具選擇",
     "title": "道具",
-    "summary": "目標：熔殼小魔 / 狀態 外殼崩裂。再次按道具可收回。",
+    "summary": "目標：熔殼岩獸 / 狀態 外殼崩裂。再次按道具可收回。",
     "empty_message": "沒有可用道具。",
     "items": [
       {
@@ -103,7 +103,7 @@
     "outcome": "victory",
     "label": "戰鬥結算",
     "title": "勝利",
-    "status_summary": "熔殼小魔被擊退，戰鬥結束。",
+    "status_summary": "熔殼岩獸被擊退，戰鬥結束。",
     "battle_summary": "你抓住外殼裂開的一瞬間斬下最後一擊。這些數值都是 fixture 顯示資料，尚未套用 runtime 結算。",
     "reward_title": "本場結果",
     "rows": [
@@ -121,9 +121,9 @@
     }
   },
   "battle_log": [
-    "第 1 回合：你以普通攻擊命中熔殼小魔，造成輕傷。",
+    "第 1 回合：你以普通攻擊命中熔殼岩獸，造成輕傷。",
     "第 2 回合：你選擇防禦，穩住姿勢。",
-    "第 3 回合：熔殼小魔的外殼裂縫裡冒出紅光。",
+    "第 3 回合：熔殼岩獸的外殼裂縫裡冒出紅光。",
     "第 4 回合：勝利預覽 fixture 等待玩家按攻擊開啟結算 overlay。"
   ],
   "actions": [

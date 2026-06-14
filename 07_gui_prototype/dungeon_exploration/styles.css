@@ -769,18 +769,40 @@ select:focus-visible {
   background: url("./assets/ember-quarry-exploration-v01.png") no-repeat center center !important;
   background-size: cover !important;
 }
+[data-dungeon-id="dungeon_moss_cave"] .dungeon-stage {
+  background: url("./assets/moss-cave-exploration-v01.png") no-repeat center center !important;
+  background-size: cover !important;
+}
+[data-dungeon-id="dungeon_ash_ravine"] .dungeon-stage {
+  background: url("./assets/ash-ravine-exploration-v01.png") no-repeat center center !important;
+  background-size: cover !important;
+}
+[data-dungeon-id="dungeon_cinder_seal_depths"] .dungeon-stage {
+  background: url("./assets/cinder-seal-depths-exploration-v01.png") no-repeat center center !important;
+  background-size: cover !important;
+}
+
 [data-dungeon-id="ember_quarry"] .dungeon-art,
-[data-dungeon-id="dungeon_scorched_mine"] .dungeon-art {
+[data-dungeon-id="dungeon_scorched_mine"] .dungeon-art,
+[data-dungeon-id="dungeon_moss_cave"] .dungeon-art,
+[data-dungeon-id="dungeon_ash_ravine"] .dungeon-art,
+[data-dungeon-id="dungeon_cinder_seal_depths"] .dungeon-art {
   display: none !important;
 }
 
 /* 僅保留黑灰色邊緣壓暗 (Vignette)，移除黃綠色中央強光 */
 [data-dungeon-id="ember_quarry"] .dungeon-stage::before,
-[data-dungeon-id="dungeon_scorched_mine"] .dungeon-stage::before {
+[data-dungeon-id="dungeon_scorched_mine"] .dungeon-stage::before,
+[data-dungeon-id="dungeon_moss_cave"] .dungeon-stage::before,
+[data-dungeon-id="dungeon_ash_ravine"] .dungeon-stage::before,
+[data-dungeon-id="dungeon_cinder_seal_depths"] .dungeon-stage::before {
   background: linear-gradient(90deg, rgba(0, 0, 0, 0.36), transparent 29%, transparent 69%, rgba(0, 0, 0, 0.4)) !important;
 }
 [data-dungeon-id="ember_quarry"] .dungeon-stage::after,
-[data-dungeon-id="dungeon_scorched_mine"] .dungeon-stage::after {
+[data-dungeon-id="dungeon_scorched_mine"] .dungeon-stage::after,
+[data-dungeon-id="dungeon_moss_cave"] .dungeon-stage::after,
+[data-dungeon-id="dungeon_ash_ravine"] .dungeon-stage::after,
+[data-dungeon-id="dungeon_cinder_seal_depths"] .dungeon-stage::after {
   background:
     linear-gradient(90deg, rgba(0, 0, 0, 0.54), transparent 18%, transparent 78%, rgba(0, 0, 0, 0.58)),
     linear-gradient(180deg, rgba(0, 0, 0, 0.35), transparent 28%, rgba(0, 0, 0, 0.64)) !important;

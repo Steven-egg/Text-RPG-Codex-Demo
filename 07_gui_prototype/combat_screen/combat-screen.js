@@ -32,6 +32,103 @@ const resultLinesEl = document.querySelector("#result-lines");
 const resultNextActionEl = document.querySelector("#result-next-action");
 const actionLogEl = document.querySelector("#action-log");
 const clearLogEl = document.querySelector("#clear-log");
+const enemyImageEl = document.querySelector("#enemy-image");
+
+const COMBAT_ENEMY_VISUALS = Object.freeze({
+  mon_cinder_bat: {
+    imageSrc: "./assets/monsters/transparent/mon-cinder-bat-v01.png",
+    environment: "ember-quarry",
+    role: "flying",
+  },
+  mon_lava_imp: {
+    imageSrc: "./assets/monsters/transparent/mon-lava-imp-v01.png",
+    environment: "ember-quarry",
+    role: "small-ground",
+  },
+  mon_scorched_guard: {
+    imageSrc: "./assets/monsters/transparent/mon-scorched-guard-v01.png",
+    environment: "ember-quarry",
+    role: "ground",
+  },
+  boss_glen: {
+    imageSrc: "./assets/monsters/transparent/boss-glen-v01.png",
+    environment: "ember-quarry",
+    role: "boss",
+  },
+  mon_moss_rat: {
+    imageSrc: "./assets/monsters/transparent/mon-moss-rat-v01.png",
+    environment: "moss-cave",
+    role: "small-ground",
+  },
+  mon_cave_slug: {
+    imageSrc: "./assets/monsters/transparent/mon-cave-slug-v01.png",
+    environment: "moss-cave",
+    role: "low-wide",
+  },
+  mon_cracked_golem: {
+    imageSrc: "./assets/monsters/transparent/mon-cracked-golem-v01.png",
+    environment: "moss-cave",
+    role: "ground",
+  },
+  mon_ash_imp: {
+    imageSrc: "./assets/monsters/transparent/mon-ash-imp-v01.png",
+    environment: "ash-ravine",
+    role: "small-ground",
+  },
+  mon_lava_bat: {
+    imageSrc: "./assets/monsters/transparent/mon-lava-bat-v01.png",
+    environment: "ash-ravine",
+    role: "flying",
+  },
+  mon_cinder_soldier: {
+    imageSrc: "./assets/monsters/transparent/mon-cinder-soldier-v01.png",
+    environment: "ash-ravine",
+    role: "ground",
+  },
+  boss_ash_guardian: {
+    imageSrc: "./assets/monsters/transparent/boss-ash-guardian-v01.png",
+    environment: "ash-ravine",
+    role: "boss-heavy",
+  },
+  mon_ember_stalker: {
+    imageSrc: "./assets/monsters/transparent/mon-ember-stalker-v01.png",
+    environment: "cinder-seal-depths",
+    role: "low-wide",
+  },
+  mon_molten_shell: {
+    imageSrc: "./assets/monsters/transparent/mon-molten-shell-v01.png",
+    environment: "cinder-seal-depths",
+    role: "low-wide",
+  },
+  mon_cinder_brand_wisp: {
+    imageSrc: "./assets/monsters/transparent/mon-cinder-brand-wisp-v01.png",
+    environment: "cinder-seal-depths",
+    role: "floating",
+  },
+  boss_cinder_seal_sentinel: {
+    imageSrc: "./assets/monsters/transparent/boss-cinder-seal-sentinel-v01.png",
+    environment: "cinder-seal-depths",
+    role: "boss-tall",
+  },
+});
+
+const DEBUG_ENEMY_NAMES = Object.freeze({
+  mon_cinder_bat: "焦翼蝠",
+  mon_lava_imp: "熔岩小鬼",
+  mon_scorched_guard: "焦石斥候",
+  boss_glen: "山寨頭目葛倫",
+  mon_moss_rat: "青苔鼠",
+  mon_cave_slug: "洞窟黏蟲",
+  mon_cracked_golem: "裂石小魔像",
+  mon_ash_imp: "灰燼小鬼",
+  mon_lava_bat: "熔岩蝙蝠",
+  mon_cinder_soldier: "燼火兵",
+  boss_ash_guardian: "灰燼守衛",
+  mon_ember_stalker: "餘燼潛獵者",
+  mon_molten_shell: "熔殼岩獸",
+  mon_cinder_brand_wisp: "燼印火靈",
+  boss_cinder_seal_sentinel: "燼印鎮衛",
+});
 
 const urlParams = new URLSearchParams(window.location.search);
 const isDebug = urlParams.get("debug") === "1";
@@ -185,23 +282,41 @@ function renderResources(items) {
 function renderBattlefield(model) {
   const player = model.player ?? {};
   const enemy = model.enemy ?? {};
+  const urlEnemyId = isDebug ? urlParams.get("enemy_id") : null;
+  if (urlEnemyId) {
+    enemy.enemy_id = urlEnemyId;
+    const debugName = DEBUG_ENEMY_NAMES[urlEnemyId];
+    if (debugName) {
+      if (urlEnemyId.startsWith("boss_")) {
+        enemy.name = `${debugName} (Debug Boss)`;
+      } else {
+        enemy.name = `${debugName} (Debug)`;
+      }
+    } else {
+      enemy.name = `${urlEnemyId} (Debug Fallback)`;
+    }
+  }
   enemyNameEl.textContent = enemy.name ?? "";
   enemyHpFillEl.style.setProperty("--meter-value", `${Math.max(0, Math.min(100, enemy.hp_percent ?? 0))}%`);
   enemyHpLabelEl.textContent = enemy.hp_label ?? "";
   renderEnemyMeta(enemy);
   playerNameEl.textContent = player.name ?? "";
 
-  const enemyImageEl = document.querySelector("#enemy-image");
-  if (enemy.enemy_id === "mon_cinder_bat") {
+  const enemyVisual = COMBAT_ENEMY_VISUALS[enemy.enemy_id];
+  if (enemyVisual) {
     shellEl.dataset.enemyId = enemy.enemy_id;
+    shellEl.dataset.enemyEnvironment = enemyVisual.environment;
+    shellEl.dataset.enemyVisualRole = enemyVisual.role;
     if (enemyImageEl) {
-      enemyImageEl.src = "./assets/monsters/transparent/mon-cinder-bat-v01.png";
+      enemyImageEl.src = enemyVisual.imageSrc;
       enemyImageEl.style.display = "block";
     }
   } else {
     delete shellEl.dataset.enemyId;
+    delete shellEl.dataset.enemyEnvironment;
+    delete shellEl.dataset.enemyVisualRole;
     if (enemyImageEl) {
-      enemyImageEl.src = "";
+      enemyImageEl.removeAttribute("src");
       enemyImageEl.style.display = "none";
     }
   }

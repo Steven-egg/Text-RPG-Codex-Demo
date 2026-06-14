@@ -1,0 +1,59 @@
+{
+  "screen_id": "dungeon_exploration",
+  "title": "迷宮探索",
+  "subtitle": "Static fixture driven prototype：對齊 CLI 的步數制探索，不推進 runtime、不讀寫 save。",
+  "resource_strip": [
+    { "label": "HP 190/220", "tone": "hp" },
+    { "label": "MP 30/45", "tone": "mp" }
+  ],
+  "dungeon": {
+    "dungeon_id": "dungeon_cinder_seal_depths",
+    "name": "燼印深窟",
+    "summary": "古老封印所在的地下深處，牆面刻有散發暗紅微光的餘燼烙印，空氣中瀰漫著古老魔法與高度濃縮的火元素。",
+    "recommended_level": "Lv10-12",
+    "player_level": "Lv10",
+    "attribute": "火",
+    "route_length": "40 步",
+    "clear_state": "未通關",
+    "boss_state": "封印鎮衛"
+  },
+  "run_status": {
+    "current_step": 1,
+    "total_steps": 40,
+    "step_note": "四周的紅色魔力符文微微閃爍，空氣壓抑沉重，每走一步都能感受到強大的封印威壓。",
+    "status_label": "探索中",
+    "risk_label": "極高風險",
+    "supply_label": "物資緊缺",
+    "next_node": "符文石廊"
+  },
+  "run_rewards": [
+    { "label": "金幣", "value": "30G" },
+    { "label": "素材", "value": "熔岩碎片 x1" }
+  ],
+  "event_preview": [
+    "第 1 步：你跨過佈滿裂痕的封印石門，進入了被暗紅光芒籠罩的深邃坑道。"
+  ],
+  "narrative_message": "通道兩旁的黑色岩石上雕刻著繁複的火紅符文，宛如燃燒的血管般緩慢跳動。高濃度的火元素充斥於此，隨時可能引發局部的元素爆炸，必須時刻保持警惕。",
+  "actions": [
+    {
+      "action_id": "advance_step",
+      "label": "前進一步",
+      "description": "進入下一步",
+      "enabled": true,
+      "disabled_reason": null,
+      "primary": true,
+      "payload": { "dungeon_id": "dungeon_cinder_seal_depths", "current_step": 1 },
+      "feedback_message": "已送出 advance_step。static prototype 不會改變目前步數。"
+    },
+    {
+      "action_id": "retreat",
+      "label": "撤退",
+      "description": "結束探索",
+      "enabled": true,
+      "disabled_reason": null,
+      "primary": false,
+      "payload": { "dungeon_id": "dungeon_cinder_seal_depths" },
+      "feedback_message": "已送出 retreat。static prototype 不會計算撤退結果。"
+    }
+  ]
+}

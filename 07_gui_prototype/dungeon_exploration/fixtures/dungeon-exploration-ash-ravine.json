@@ -1,0 +1,59 @@
+{
+  "screen_id": "dungeon_exploration",
+  "title": "迷宮探索",
+  "subtitle": "Static fixture driven prototype：對齊 CLI 的步數制探索，不推進 runtime、不讀寫 save。",
+  "resource_strip": [
+    { "label": "HP 160/192", "tone": "hp" },
+    { "label": "MP 25/38", "tone": "mp" }
+  ],
+  "dungeon": {
+    "dungeon_id": "dungeon_ash_ravine",
+    "name": "灰燼裂谷",
+    "summary": "地表崩裂產生的深谷，黑色的火山灰如雪般飄落，四周流淌著滾燙的熔岩，是極度炎熱的惡劣環境。",
+    "recommended_level": "Lv7-9",
+    "player_level": "Lv7",
+    "attribute": "火",
+    "route_length": "35 步",
+    "clear_state": "未通關",
+    "boss_state": "守衛健在"
+  },
+  "run_status": {
+    "current_step": 1,
+    "total_steps": 35,
+    "step_note": "熱浪撲面而來，四周漂浮著黑灰，必須小心避開地面上的熔岩裂隙。",
+    "status_label": "探索中",
+    "risk_label": "高風險",
+    "supply_label": "物資一般",
+    "next_node": "熔岩裂口"
+  },
+  "run_rewards": [
+    { "label": "金幣", "value": "15G" },
+    { "label": "素材", "value": "裂谷灰燼 x1" }
+  ],
+  "event_preview": [
+    "第 1 步：你穿過瀰漫的熱氣，踏入了灰燼裂谷的邊緣石板路。"
+  ],
+  "narrative_message": "灼熱的氣息令人呼吸困難，微小的火星在火山灰中若隱若現。前方的谷底有數道岩漿匯聚成河，不時發出咕嘟咕嘟的冒泡聲，滾燙的熱流扭曲了視線。",
+  "actions": [
+    {
+      "action_id": "advance_step",
+      "label": "前進一步",
+      "description": "進入下一步",
+      "enabled": true,
+      "disabled_reason": null,
+      "primary": true,
+      "payload": { "dungeon_id": "dungeon_ash_ravine", "current_step": 1 },
+      "feedback_message": "已送出 advance_step。static prototype 不會改變目前步數。"
+    },
+    {
+      "action_id": "retreat",
+      "label": "撤退",
+      "description": "結束探索",
+      "enabled": true,
+      "disabled_reason": null,
+      "primary": false,
+      "payload": { "dungeon_id": "dungeon_ash_ravine" },
+      "feedback_message": "已送出 retreat。static prototype 不會計算撤退結果。"
+    }
+  ]
+}

@@ -1,0 +1,59 @@
+{
+  "screen_id": "dungeon_exploration",
+  "title": "迷宮探索",
+  "subtitle": "Static fixture driven prototype：對齊 CLI 的步數制探索，不推進 runtime、不讀寫 save。",
+  "resource_strip": [
+    { "label": "HP 100/100", "tone": "hp" },
+    { "label": "MP 20/20", "tone": "mp" }
+  ],
+  "dungeon": {
+    "dungeon_id": "dungeon_moss_cave",
+    "name": "青苔洞窟",
+    "summary": "佈滿發光青苔與潮濕石壁的古老洞窟，深處傳來水滴落與微弱蟲鳴聲，看似寧靜卻隱藏潛伏的掠食者。",
+    "recommended_level": "Lv1-3",
+    "player_level": "Lv1",
+    "attribute": "自然",
+    "route_length": "15 步",
+    "clear_state": "未通關",
+    "boss_state": "無"
+  },
+  "run_status": {
+    "current_step": 1,
+    "total_steps": 15,
+    "step_note": "踏入潮濕的青苔洞窟，空氣中帶著泥土與植物的氣味。",
+    "status_label": "探索中",
+    "risk_label": "低風險",
+    "supply_label": "物資充沛",
+    "next_node": "潮濕石徑"
+  },
+  "run_rewards": [
+    { "label": "金幣", "value": "5G" },
+    { "label": "素材", "value": "青苔纖維 x1" }
+  ],
+  "event_preview": [
+    "第 1 步：你越過了潮濕 the 洞口，看見石壁上發著微光的幽綠青苔。"
+  ],
+  "narrative_message": "石壁上黏滑的苔蘚發出微弱的幽綠光芒，稍微照亮了前行的道路。腳下不時有水滴落下，必須注意濕滑的地板與黑暗中蠕動的陰影。",
+  "actions": [
+    {
+      "action_id": "advance_step",
+      "label": "前進一步",
+      "description": "進入下一步",
+      "enabled": true,
+      "disabled_reason": null,
+      "primary": true,
+      "payload": { "dungeon_id": "dungeon_moss_cave", "current_step": 1 },
+      "feedback_message": "已送出 advance_step。static prototype 不會改變目前步數。"
+    },
+    {
+      "action_id": "retreat",
+      "label": "撤退",
+      "description": "結束探索",
+      "enabled": true,
+      "disabled_reason": null,
+      "primary": false,
+      "payload": { "dungeon_id": "dungeon_moss_cave" },
+      "feedback_message": "已送出 retreat。static prototype 不會計算撤退結果。"
+    }
+  ]
+}

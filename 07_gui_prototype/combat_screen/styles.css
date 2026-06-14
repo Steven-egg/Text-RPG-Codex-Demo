@@ -1327,7 +1327,7 @@ select:focus-visible {
 }
 
 /* ==========================================================================
-   Combat Screen Fullscreen Ember Quarry + Cinder Bat V0.1 Styles
+   Combat Screen Fullscreen Ember Quarry Enemy Family Styles
    ========================================================================== */
 
 /* 預設非偵錯狀態下隱藏偵錯元件與戰鬥提示列，收緊指令列 */
@@ -1343,16 +1343,37 @@ select:focus-visible {
   margin-bottom: 24px !important;
 }
 
-/* 焦石礦坑戰鬥背景條件覆寫 */
-[data-enemy-id="mon_cinder_bat"] .battlefield-stage {
+/* 戰鬥背景條件覆寫 */
+[data-enemy-environment="ember-quarry"] .battlefield-stage {
   background: url("./assets/backgrounds/ember-quarry-combat-v01.png") no-repeat center center !important;
+  background-size: cover !important;
+}
+[data-enemy-environment="moss-cave"] .battlefield-stage {
+  background: url("./assets/backgrounds/moss-cave-combat-v01.png") no-repeat center center !important;
+  background-size: cover !important;
+}
+[data-enemy-environment="ash-ravine"] .battlefield-stage {
+  background: url("./assets/backgrounds/ash-ravine-combat-v01.png") no-repeat center center !important;
+  background-size: cover !important;
+}
+[data-enemy-environment="cinder-seal-depths"] .battlefield-stage {
+  background: url("./assets/backgrounds/cinder-seal-depths-combat-v01.png") no-repeat center center !important;
   background-size: cover !important;
 }
 
 /* 隱藏 fallback 背景層與原本 silhouette */
-[data-enemy-id="mon_cinder_bat"] .field-layer,
-[data-enemy-id="mon_cinder_bat"] .battlefield-art::after,
-[data-enemy-id="mon_cinder_bat"] .enemy-silhouette {
+[data-enemy-environment="ember-quarry"] .field-layer,
+[data-enemy-environment="ember-quarry"] .battlefield-art::after,
+[data-enemy-environment="ember-quarry"] .enemy-silhouette,
+[data-enemy-environment="moss-cave"] .field-layer,
+[data-enemy-environment="moss-cave"] .battlefield-art::after,
+[data-enemy-environment="moss-cave"] .enemy-silhouette,
+[data-enemy-environment="ash-ravine"] .field-layer,
+[data-enemy-environment="ash-ravine"] .battlefield-art::after,
+[data-enemy-environment="ash-ravine"] .enemy-silhouette,
+[data-enemy-environment="cinder-seal-depths"] .field-layer,
+[data-enemy-environment="cinder-seal-depths"] .battlefield-art::after,
+[data-enemy-environment="cinder-seal-depths"] .enemy-silhouette {
   display: none !important;
 }
 
@@ -1388,7 +1409,15 @@ select:focus-visible {
   display: none;
 }
 
-[data-enemy-id="mon_cinder_bat"] .enemy-image-layer::after {
+/* 顯示特定 visual-role 的地面陰影 */
+[data-enemy-visual-role="flying"] .enemy-image-layer::after,
+[data-enemy-visual-role="small-ground"] .enemy-image-layer::after,
+[data-enemy-visual-role="ground"] .enemy-image-layer::after,
+[data-enemy-visual-role="boss"] .enemy-image-layer::after,
+[data-enemy-visual-role="low-wide"] .enemy-image-layer::after,
+[data-enemy-visual-role="floating"] .enemy-image-layer::after,
+[data-enemy-visual-role="boss-heavy"] .enemy-image-layer::after,
+[data-enemy-visual-role="boss-tall"] .enemy-image-layer::after {
   display: block !important;
 }
 
@@ -1399,6 +1428,101 @@ select:focus-visible {
   filter: drop-shadow(0 12px 24px rgba(0, 0, 0, 0.48));
 }
 
+[data-enemy-visual-role="small-ground"] .enemy-image-layer {
+  left: 50% !important;
+  top: 50% !important;
+  transform: translate(-34%, -50%) !important;
+  width: clamp(480px, 46vw, 620px) !important;
+  height: clamp(340px, 52vh, 480px) !important;
+}
+
+[data-enemy-visual-role="small-ground"] .enemy-image-layer::after {
+  width: 110px !important;
+  height: 18px !important;
+  bottom: -20px !important;
+}
+
+[data-enemy-visual-role="ground"] .enemy-image-layer {
+  left: 50% !important;
+  top: 47% !important;
+  transform: translate(-34%, -50%) !important;
+  width: clamp(720px, 70vw, 940px) !important;
+  height: clamp(500px, 78vh, 720px) !important;
+}
+
+[data-enemy-visual-role="boss"] .enemy-image-layer {
+  left: 43% !important;
+  top: 46% !important;
+  transform: translate(-36%, -50%) !important;
+  width: clamp(820px, 76vw, 1120px) !important;
+  height: clamp(540px, 80vh, 760px) !important;
+}
+
+[data-enemy-visual-role="boss"] .enemy-image-layer::after {
+  width: 260px !important;
+  height: 32px !important;
+  bottom: -30px !important;
+}
+
+/* 新增 low-wide, floating, boss-heavy, boss-tall 的定位與尺寸 */
+[data-enemy-visual-role="low-wide"] .enemy-image-layer {
+  left: 50% !important;
+  top: 52% !important;
+  transform: translate(-34%, -50%) !important;
+  width: clamp(700px, 68vw, 900px) !important;
+  height: clamp(400px, 62vh, 560px) !important;
+}
+
+[data-enemy-visual-role="low-wide"] .enemy-image-layer::after {
+  width: 220px !important;
+  height: 24px !important;
+  bottom: -15px !important;
+}
+
+[data-enemy-visual-role="floating"] .enemy-image-layer {
+  left: 50% !important;
+  top: 36% !important;
+  transform: translate(-34%, -50%) !important;
+  width: clamp(380px, 36vw, 520px) !important;
+  height: clamp(300px, 46vh, 440px) !important;
+}
+
+[data-enemy-visual-role="floating"] .enemy-image-layer::after {
+  width: 100px !important;
+  height: 18px !important;
+  bottom: -60px !important;
+  filter: blur(16px) !important;
+  opacity: 0.5 !important;
+}
+
+[data-enemy-visual-role="boss-heavy"] .enemy-image-layer {
+  left: 42% !important;
+  top: 48% !important;
+  transform: translate(-36%, -50%) !important;
+  width: clamp(860px, 80vw, 1180px) !important;
+  height: clamp(560px, 82vh, 800px) !important;
+}
+
+[data-enemy-visual-role="boss-heavy"] .enemy-image-layer::after {
+  width: 300px !important;
+  height: 38px !important;
+  bottom: -20px !important;
+}
+
+[data-enemy-visual-role="boss-tall"] .enemy-image-layer {
+  left: 44% !important;
+  top: 43% !important;
+  transform: translate(-36%, -50%) !important;
+  width: clamp(780px, 72vw, 1060px) !important;
+  height: clamp(600px, 86vh, 880px) !important;
+}
+
+[data-enemy-visual-role="boss-tall"] .enemy-image-layer::after {
+  width: 240px !important;
+  height: 30px !important;
+  bottom: -25px !important;
+}
+
 @media (max-width: 1180px) {
   .enemy-image-layer {
     left: auto !important;
@@ -1407,6 +1531,127 @@ select:focus-visible {
     transform: translate(15%, -15%) !important;
     width: clamp(320px, 32vw, 480px) !important;
     height: clamp(230px, 24vw, 350px) !important;
+  }
+
+  [data-enemy-visual-role="small-ground"] .enemy-image-layer {
+    left: auto !important;
+    right: 6% !important;
+    top: 36% !important;
+    transform: translate(12%, -10%) !important;
+    width: clamp(360px, 45vw, 520px) !important;
+    height: clamp(250px, 38vw, 420px) !important;
+  }
+
+  [data-enemy-visual-role="ground"] .enemy-image-layer {
+    left: auto !important;
+    right: 2% !important;
+    top: 34% !important;
+    transform: translate(12%, -10%) !important;
+    width: clamp(520px, 65vw, 760px) !important;
+    height: clamp(360px, 55vw, 600px) !important;
+  }
+
+  [data-enemy-visual-role="boss"] .enemy-image-layer {
+    left: auto !important;
+    right: -2% !important;
+    top: 32% !important;
+    transform: translate(8%, -8%) !important;
+    width: clamp(600px, 72vw, 820px) !important;
+    height: clamp(420px, 60vw, 640px) !important;
+  }
+
+  [data-enemy-visual-role="low-wide"] .enemy-image-layer {
+    left: auto !important;
+    right: 2% !important;
+    top: 38% !important;
+    transform: translate(12%, -10%) !important;
+    width: clamp(480px, 60vw, 700px) !important;
+    height: clamp(280px, 45vw, 460px) !important;
+  }
+
+  [data-enemy-visual-role="floating"] .enemy-image-layer {
+    left: auto !important;
+    right: 12% !important;
+    top: 30% !important;
+    transform: translate(15%, -15%) !important;
+    width: clamp(280px, 28vw, 400px) !important;
+    height: clamp(220px, 36vh, 320px) !important;
+  }
+
+  [data-enemy-visual-role="boss-heavy"] .enemy-image-layer {
+    left: auto !important;
+    right: -5% !important;
+    top: 33% !important;
+    transform: translate(8%, -8%) !important;
+    width: clamp(620px, 75vw, 860px) !important;
+    height: clamp(440px, 62vw, 680px) !important;
+  }
+
+  [data-enemy-visual-role="boss-tall"] .enemy-image-layer {
+    left: auto !important;
+    right: 0% !important;
+    top: 30% !important;
+    transform: translate(8%, -8%) !important;
+    width: clamp(560px, 68vw, 780px) !important;
+    height: clamp(480px, 68vw, 720px) !important;
+  }
+}
+
+@media (max-width: 560px) {
+  [data-enemy-visual-role="small-ground"] .enemy-image-layer {
+    right: -25% !important;
+    top: 40% !important;
+    transform: none !important;
+    width: 360px !important;
+    height: 250px !important;
+  }
+
+  [data-enemy-visual-role="ground"] .enemy-image-layer {
+    right: -42% !important;
+    top: 38% !important;
+    transform: none !important;
+    width: 520px !important;
+    height: 360px !important;
+  }
+
+  [data-enemy-visual-role="boss"] .enemy-image-layer {
+    right: -50% !important;
+    top: 37% !important;
+    transform: none !important;
+    width: 600px !important;
+    height: 420px !important;
+  }
+
+  [data-enemy-visual-role="low-wide"] .enemy-image-layer {
+    right: -38% !important;
+    top: 42% !important;
+    transform: none !important;
+    width: 480px !important;
+    height: 300px !important;
+  }
+
+  [data-enemy-visual-role="floating"] .enemy-image-layer {
+    right: -15% !important;
+    top: 32% !important;
+    transform: none !important;
+    width: 280px !important;
+    height: 220px !important;
+  }
+
+  [data-enemy-visual-role="boss-heavy"] .enemy-image-layer {
+    right: -55% !important;
+    top: 36% !important;
+    transform: none !important;
+    width: 620px !important;
+    height: 440px !important;
+  }
+
+  [data-enemy-visual-role="boss-tall"] .enemy-image-layer {
+    right: -45% !important;
+    top: 34% !important;
+    transform: none !important;
+    width: 560px !important;
+    height: 480px !important;
   }
 }
 
