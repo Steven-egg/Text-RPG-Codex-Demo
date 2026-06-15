@@ -61,6 +61,8 @@ SYNTHESIS_CATEGORIES = ["全部", "裝備", "戰術道具"]
 FIRE_MARK_GUILD_INQUIRY_FLAG = "fire_mark_guild_inquiry_done"
 FIRE_MARK_CHURCH_BRIDGE_FLAG = "fire_mark_church_bridge_done"
 FIRE_MARK_CHURCH_LOOKUP_FLAG = "fire_mark_church_lookup_done"
+BOSS_GLEN_SIGHTED_FLAG = "boss_glen_sighted"
+BOSS_GLEN_INVESTIGATION_ACCEPTED_FLAG = "boss_glen_investigation_accepted"
 FIRE_MARK_SHARD_ID = "key_fire_mark_shard"
 
 @dataclass
@@ -1729,7 +1731,14 @@ def quest_unlocked(state: dict, quest_id: str) -> bool:
     if quest_id == "quest_mine_scout":
         return "quest_cave_gathering" in state["completed_quests"]
     if quest_id == "quest_boss_glen":
-        return "quest_mine_scout" in state["completed_quests"]
+        return (
+            "quest_mine_scout" in state["completed_quests"]
+            and (
+                state["flags"].get(BOSS_GLEN_INVESTIGATION_ACCEPTED_FLAG, False)
+                or state["flags"].get("boss_glen_defeated", False)
+                or quest_id in state["completed_quests"]
+            )
+        )
     if quest_id == "quest_ash_ravine_scout":
         return "quest_boss_glen" in state["completed_quests"]
     if quest_id == "quest_supply_upgrade":
@@ -1749,6 +1758,35 @@ def can_ask_fire_mark_guild_inquiry(state: dict) -> bool:
         and not state["flags"].get(FIRE_MARK_GUILD_INQUIRY_FLAG)
     )
 
+def record_boss_glen_sighting(state: dict) -> bool:
+    flags = state.setdefault("flags", {})
+    if flags.get("boss_glen_defeated") or flags.get(BOSS_GLEN_SIGHTED_FLAG):
+        return False
+    flags[BOSS_GLEN_SIGHTED_FLAG] = True
+    return True
+
+def can_accept_boss_glen_investigation(state: dict) -> bool:
+    flags = state.setdefault("flags", {})
+    return (
+        flags.get(BOSS_GLEN_SIGHTED_FLAG, False)
+        and not flags.get(BOSS_GLEN_INVESTIGATION_ACCEPTED_FLAG, False)
+        and not flags.get("boss_glen_defeated", False)
+    )
+
+def accept_boss_glen_investigation(state: dict) -> bool:
+    if not can_accept_boss_glen_investigation(state):
+        return False
+    state["flags"][BOSS_GLEN_INVESTIGATION_ACCEPTED_FLAG] = True
+    return True
+
+def boss_glen_investigation(state: dict) -> None:
+    dungeon_name = DUNGEONS["dungeon_scorched_mine"]["name"]
+    boss_name = MONSTERS["boss_glen"]["name"]
+    title(f"{dungeon_name}異常調查")
+    print(f"你向冒險者公會回報了{dungeon_name}深處的強敵。")
+    print(f"公會正式委託你調查並討伐{boss_name}。")
+    accept_boss_glen_investigation(state)
+
 def fire_mark_guild_inquiry(state: dict) -> None:
     title("詢問三枚印記碎片的事情")
     print("你把三枚火之印記碎片放在諾亞面前。")
@@ -1764,6 +1802,9 @@ def fire_mark_guild_inquiry(state: dict) -> None:
 def guild_menu(state: dict) -> None:
     while True:
         options = ["查看委託任務", "收購素材"]
+        glen_investigation_option = can_accept_boss_glen_investigation(state)
+        if glen_investigation_option:
+            options.append(f"接受{DUNGEONS['dungeon_scorched_mine']['name']}異常調查")
         inquiry_option = can_ask_fire_mark_guild_inquiry(state)
         if inquiry_option:
             options.append("詢問三枚印記碎片的事情")
@@ -1785,7 +1826,10 @@ def guild_menu(state: dict) -> None:
             guild_quest_menu(state)
         elif choice == 2:
             guild_material_buy_menu(state)
-        elif inquiry_option and choice == 3:
+        elif glen_investigation_option and choice == 3:
+            boss_glen_investigation(state)
+            pause()
+        elif inquiry_option and choice == 3 + int(glen_investigation_option):
             fire_mark_guild_inquiry(state)
             pause()
 
@@ -2060,7 +2104,11 @@ def dungeon_menu(state: dict) -> None:
 
 def boss_available_at_dungeon_end(state: dict, dungeon_id: str, boss_id: str | None) -> bool:
     if boss_id == "boss_glen":
-        return not state["flags"].get("boss_glen_defeated")
+        return (
+            dungeon_id == "dungeon_scorched_mine"
+            and state["flags"].get(BOSS_GLEN_INVESTIGATION_ACCEPTED_FLAG, False)
+            and not state["flags"].get("boss_glen_defeated")
+        )
     if boss_id == "boss_ash_guardian":
         return (
             dungeon_id == "dungeon_ash_ravine"
@@ -2156,6 +2204,15 @@ def explore_dungeon(state: dict, dungeon_id: str) -> None:
         print(f"首次通關探索路線，工會積分 +{dungeon['clear_guild']}。")
 
     boss_id = dungeon.get("boss")
+    if dungeon_id == "dungeon_scorched_mine" and boss_id == "boss_glen":
+        first_sighting = record_boss_glen_sighting(state)
+        if first_sighting:
+            print(f"\n你在{dungeon['name']}深處發現了{MONSTERS[boss_id]['name']}，但目前情報不足。")
+        if (
+            not state["flags"].get(BOSS_GLEN_INVESTIGATION_ACCEPTED_FLAG)
+            and not state["flags"].get("boss_glen_defeated")
+        ):
+            print(f"請先返回冒險者公會回報，接受{dungeon['name']}異常調查後再來挑戰。")
     if boss_available_at_dungeon_end(state, dungeon_id, boss_id):
         raw = input(boss_challenge_prompt(boss_id)).strip().lower()
         if raw == "y":
@@ -2787,6 +2844,23 @@ def smoke_test() -> None:
     assert legacy_state["storage_unlocked"] is False
     assert legacy_state["storage"] == {}
     assert legacy_state["bestiary"] == []
+    glen_state = create_state("格倫規則測試", "劍士")
+    glen_state["completed_quests"].append("quest_mine_scout")
+    assert not quest_unlocked(glen_state, "quest_boss_glen")
+    assert not boss_available_at_dungeon_end(glen_state, "dungeon_scorched_mine", "boss_glen")
+    assert record_boss_glen_sighting(glen_state)
+    assert not record_boss_glen_sighting(glen_state)
+    assert can_accept_boss_glen_investigation(glen_state)
+    assert accept_boss_glen_investigation(glen_state)
+    assert not accept_boss_glen_investigation(glen_state)
+    assert quest_unlocked(glen_state, "quest_boss_glen")
+    assert boss_available_at_dungeon_end(glen_state, "dungeon_scorched_mine", "boss_glen")
+    legacy_glen_state = create_state("舊格倫進度測試", "劍士")
+    legacy_glen_state["completed_quests"].append("quest_mine_scout")
+    legacy_glen_state["flags"]["boss_glen_defeated"] = True
+    assert quest_unlocked(legacy_glen_state, "quest_boss_glen")
+    assert not can_accept_boss_glen_investigation(legacy_glen_state)
+    assert not boss_available_at_dungeon_end(legacy_glen_state, "dungeon_scorched_mine", "boss_glen")
     assert try_register_bestiary(state, "mon_moss_rat")
     assert state["bestiary"] == ["mon_moss_rat"]
     assert not try_register_bestiary(state, "mon_moss_rat")

@@ -79,6 +79,8 @@ flag:boss_glen_defeated
 
 - `ash_guardian_defeated`
 - `boss_glen_defeated`
+- `boss_glen_investigation_accepted`
+- `boss_glen_sighted`
 - `cinder_seal_sentinel_defeated`
 - `fire_mark_church_bridge_done`
 - `fire_mark_church_lookup_done`

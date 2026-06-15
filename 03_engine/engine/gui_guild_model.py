@@ -16,9 +16,6 @@ def guild_screen_model(state: dict[str, Any]) -> dict[str, Any]:
     unlocked_quests = []
     for q_id, q_data in QUESTS.items():
         if game.quest_unlocked(state, q_id):
-            if q_id == "quest_boss_glen":
-                if not state.get("flags", {}).get("boss_glen_investigation_accepted"):
-                    continue
             unlocked_quests.append((q_id, q_data))
 
     task_rows = []

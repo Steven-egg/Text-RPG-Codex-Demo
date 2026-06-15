@@ -54,7 +54,7 @@
 - `completed_quests` 必須存在於 `QUESTS`。
 - `cleared_dungeons` 必須存在於 `DUNGEONS`。
 - `unlocked` 可包含 dungeon id、quest id、recipe id、item unlock key、shop unlock key、story/system key。
-- `flags` 用於事件狀態，例如 `boss_glen_defeated`。
+- `flags` 用於事件狀態，例如 `boss_glen_sighted`、`boss_glen_investigation_accepted`、`boss_glen_defeated`。
 
 ## 未來注意事項
 

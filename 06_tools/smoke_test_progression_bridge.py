@@ -37,8 +37,8 @@ def run_progression_smoke_test():
     state["inventory"]["mat_fire_stone"] = 2
     session.dispatch("submit_quest", {"task_id": "quest_mine_scout"}, screen_id="guild_screen")
     assert "quest_mine_scout" in state["completed_quests"]
-    assert game.quest_unlocked(state, "quest_boss_glen")
-    print("[Pass] Mine Scout completed and Boss Quest unlocked.")
+    assert not game.quest_unlocked(state, "quest_boss_glen")
+    print("[Pass] Mine Scout completed; Boss Quest remains locked before accepting investigation.")
 
     # Verify quest_boss_glen and story_hint_card are both hidden before reaching 18/18
     guild_model_pre = session.screen_model("guild_screen")
@@ -91,6 +91,7 @@ def run_progression_smoke_test():
     # 7. Accept investigation
     session.dispatch("accept_boss_glen_investigation", screen_id="guild_screen")
     assert state["flags"].get("boss_glen_investigation_accepted") is True
+    assert game.quest_unlocked(state, "quest_boss_glen")
 
     # Verify story hint card is still visible but accepted/disabled, and boss quest is visible but status is requirements_missing
     guild_model_accepted = session.screen_model("guild_screen")

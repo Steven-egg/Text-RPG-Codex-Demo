@@ -385,10 +385,7 @@ class GuiRuntimeSession:
                     if boss_id:
                         boss_name = game.MONSTERS[boss_id]["name"]
                         if game.boss_available_at_dungeon_end(state, dungeon_id, boss_id):
-                            if boss_id == "boss_glen" and not state.get("flags", {}).get("boss_glen_investigation_accepted"):
-                                msg += " 你在焦石礦坑深處感受到一股強烈的氣息。"
-                            else:
-                                msg += f" 終點傳來強烈的氣息……可挑戰守護者 {boss_name}。出發前請確認 HP、藥水與火抗。"
+                            msg += f" 終點傳來強烈的氣息……可挑戰守護者 {boss_name}。出發前請確認 HP、藥水與火抗。"
                         else:
                             if boss_defeated:
                                 msg += f" 守護者 {boss_name} 已被擊敗。"
@@ -482,8 +479,6 @@ class GuiRuntimeSession:
             raise GuiActionError("This dungeon does not have a boss.", status=400)
         if not game.boss_available_at_dungeon_end(state, dungeon_id, boss_id):
             raise GuiActionError("Boss challenge conditions are not met.", status=403)
-        if boss_id == "boss_glen" and not state.get("flags", {}).get("boss_glen_investigation_accepted"):
-            raise GuiActionError("先回工會確認這股氣息。", status=403)
         if state.get("current_hp", 0) <= 0:
             return self.resolve_defeat("You collapsed before challenging the boss.")
         
@@ -1376,12 +1371,12 @@ class GuiRuntimeSession:
 
     def accept_boss_glen_investigation(self, payload: dict[str, Any], screen_id: str | None = None) -> dict[str, Any]:
         state = self.require_state()
-        state.setdefault("flags", {})
-        if not state["flags"].get("boss_glen_sighted"):
-            raise GuiActionError("尚未在焦石礦坑深處感受到強烈氣息。", status=409)
-        if state["flags"].get("boss_glen_investigation_accepted"):
-            raise GuiActionError("已接下調查。", status=409)
-        state["flags"]["boss_glen_investigation_accepted"] = True
+        if not game.accept_boss_glen_investigation(state):
+            if not state.get("flags", {}).get(game.BOSS_GLEN_SIGHTED_FLAG):
+                raise GuiActionError("尚未在焦石礦坑深處感受到強烈氣息。", status=409)
+            if state.get("flags", {}).get(game.BOSS_GLEN_INVESTIGATION_ACCEPTED_FLAG):
+                raise GuiActionError("已接下調查。", status=409)
+            raise GuiActionError("Boss Glen investigation cannot be accepted.", status=409)
         return self._live_response(
             "accept_boss_glen_investigation",
             "你接下了焦石礦坑深處強烈氣息的調查任務。",
@@ -1610,13 +1605,20 @@ class GuiRuntimeSession:
         status = exploration.get("status", "exploring")
 
         if exploration["dungeon_id"] == "dungeon_scorched_mine" and current_step >= total_steps:
-            state.setdefault("flags", {})
-            if not state["flags"].get("boss_glen_defeated"):
-                state["flags"]["boss_glen_sighted"] = True
+            game.record_boss_glen_sighting(state)
 
         boss_id = dungeon.get("boss")
         boss_action = None
-        if boss_id and current_step >= total_steps and game.boss_available_at_dungeon_end(state, exploration["dungeon_id"], boss_id):
+        boss_is_available = boss_id and game.boss_available_at_dungeon_end(
+            state, exploration["dungeon_id"], boss_id
+        )
+        show_pending_glen = (
+            boss_id == "boss_glen"
+            and current_step >= total_steps
+            and state.get("flags", {}).get(game.BOSS_GLEN_SIGHTED_FLAG)
+            and not state.get("flags", {}).get("boss_glen_defeated")
+        )
+        if boss_id and current_step >= total_steps and (boss_is_available or show_pending_glen):
             boss_name = game.MONSTERS[boss_id]["name"]
             is_enabled = status in ("exploring", "resolved") and current_step >= total_steps
             disabled_reason = None
@@ -1624,7 +1626,7 @@ class GuiRuntimeSession:
                 is_enabled = False
                 disabled_reason = "戰鬥中無法執行此動作。"
             elif boss_id == "boss_glen":
-                if not state.get("flags", {}).get("boss_glen_investigation_accepted"):
+                if not state.get("flags", {}).get(game.BOSS_GLEN_INVESTIGATION_ACCEPTED_FLAG):
                     is_enabled = False
                     disabled_reason = "先回工會確認這股氣息。"
 
