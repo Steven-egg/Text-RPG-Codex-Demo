@@ -12,7 +12,9 @@ what the next boundary is. Detailed MVP verification belongs in Task Zone docs.
   `e12cab6 [antig] feat(gui): integrate fullscreen World Map presentation`
 - Latest accepted facility visual checkpoint:
   `ad42c0e [owner] feat(gui): merge storage and workshop facility skins`
-- Latest committed bridge baseline:
+- Latest committed runtime bridge baseline:
+  `e0c8d98 [codex] fix(combat): enforce Boss rule parity in GUI bridge`
+- Latest committed facility bridge baseline:
   `2ecca91 [antig] feat(gui): add Guild material sell bridge and fix Shop layout`
 - Basic facility CLI-parity bridge coverage is complete through the existing
   Guild material-buyback behavior.
@@ -97,6 +99,15 @@ Current newest GUI live state:
 - Owner manual hand test confirmed the Boss challenge deadlock is removed, Blood
   Map can be reported after defeating Glen, Ash Ravine can unlock and clear, and
   later CLI fire-demo progression can surface through the live bridge.
+- Boss Combat Rule Parity landed in `e0c8d98`: CLI and GUI share
+  `dispatch_enemy_turn(...)`; GUI sessions preserve the Boss action marker; Glen,
+  Ash Guardian, and Cinder Seal Sentinel use their specialized Boss actions; and
+  Boss retreat / Escape Scroll use are blocked server-side without consuming a
+  turn or scroll. Combat ScreenModel disables Boss retreat with a reason.
+- Remaining combat parity risk is narrow: Escape Scroll can still appear enabled
+  in the combat item list before server rejection, and player actions /
+  settlement remain parallel CLI / GUI flows. This is not a generic Boss
+  framework or full shared combat state machine.
 - Glen Boss flow UX cleanup is landed in `709dc6c`: the Guild story hint remains
   reviewable after accepting the investigation and after Glen is defeated, Blood
   Map reward unlock keys are mapped to player-facing labels, Dungeon Exploration
@@ -218,16 +229,19 @@ reopened through a read-only planning gate and owner-approved exact scope.
   pre-approved.
 - World Map Settings Panel Reduced Motion MVP is complete as current-page,
   shell-only GUI polish. Formal settings and persistence remain closed.
+- Boss Combat Rule Parity is complete through `e0c8d98`. Further combat
+  authority sharing, item-menu presentation parity, or generic Boss handling
+  requires a new read-only planning gate and owner-approved exact scope.
 - Phase C convenience candidates, runtime/data/schema/save/combat remain deferred.
 
 No next implementation is pre-approved. Basic facility CLI-parity bridge
 coverage is complete through the existing Guild material-buyback behavior.
 
-The Glen UX cleanup and the narrow Ash / Cinder GUI presentation cleanup are
-complete in the current package. Remaining Boss / Act 2 observations are
-coverage-oriented only; this does not approve Ash Guardian, Cinder Seal
-Sentinel, generic Boss handling, full story hints, Temple / Relic gameplay, or
-full Act 2 cleanup beyond the existing bridge presentation work.
+The Glen UX cleanup, narrow Ash / Cinder GUI presentation cleanup, and
+three-Boss combat rule parity are complete in the current package. Remaining
+Boss / Act 2 observations are coverage-oriented only; this does not approve a
+generic Boss framework, full shared combat state machine, full story hints,
+Temple / Relic gameplay, or full Act 2 cleanup.
 
 Remaining Phase C convenience candidates are deferred:
 
@@ -249,6 +263,10 @@ do not touch runtime, JavaScript, data, schema, save, or combat formula.
 
 Latest stable verification noted here:
 
+- Boss Combat Rule Parity after `e0c8d98`:
+  `smoke_test_combat_bridge.py`, `smoke_test_progression_bridge.py`,
+  `element_maze.py --smoke-test`, `validate_data.py`, Python compile checks,
+  and `git diff --check` all PASS.
 - Maintainability checkpoint through `7c23bad`:
   Guild ScreenModel parity and extraction checks PASS.
 - Guild material sell bridge Codex recheck after `2ecca91`:

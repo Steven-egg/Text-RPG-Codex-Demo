@@ -12,7 +12,9 @@ Git baseline:
   `e12cab6 [antig] feat(gui): integrate fullscreen World Map presentation`
 - Latest accepted facility visual checkpoint:
   `ad42c0e [owner] feat(gui): merge storage and workshop facility skins`
-- Latest committed bridge baseline:
+- Latest committed runtime bridge baseline:
+  `e0c8d98 [codex] fix(combat): enforce Boss rule parity in GUI bridge`
+- Latest committed facility bridge baseline:
   `2ecca91 [antig] feat(gui): add Guild material sell bridge and fix Shop layout`
 - Basic facility CLI-parity bridge coverage is complete through the existing
   Guild material-buyback behavior. See `git status --short` before editing.
@@ -88,7 +90,7 @@ Blessed local live bridge coverage:
 | Synthesis | Craft coverage for the four existing Mira recipes through Python runtime validation and `game.craft_recipe_message(...)`. |
 | Inn | `rest_at_inn` deducts 30G and restores HP/MP through Python runtime behavior. |
 | World Map | Runtime-backed location / route ScreenModel; main menu keeps `save_game` and a shell-only Settings Panel Reduced Motion MVP; town return is via town node / detail action. |
-| Dungeon / Combat | Approved traversal and combat loop slice, victory / retreat / defeat routing, route clear / resolved state, and Combat Skill Button MVP. |
+| Dungeon / Combat | Approved traversal and combat loop slice, victory / retreat / defeat routing, route clear / resolved state, Combat Skill Button MVP, and Boss combat rule parity for Glen, Ash Guardian, and Cinder Seal Sentinel. |
 | Guild | Clear report registration, existing `QUESTS` turn-ins, Boss Glen investigation, three-shard fire-mark inquiry, and existing `GUILD_MATERIAL_BUY_PRICES` material sell coverage with Python-side quantity / eligibility / transaction validation. |
 | Guild x Dungeon Boss Glen | Special gating bridge plus UX cleanup: Scorched Mine 18/18 records `boss_glen_sighted`, Guild accepts `boss_glen_investigation_accepted`, Boss Glen challenge opens only after investigation acceptance, persistent Guild story hint cards guide Glen / Act 2 steps, and `quest_boss_glen` / Blood Map turn-in unlocks Ash Ravine through existing runtime progression. |
 | Ash / Cinder presentation cleanup | Ash Ravine and Cinder Seal Depths use existing runtime progression while GUI copy avoids premature Boss / reward / unlock spoilers before the matching scout reports; owner hand test confirmed the progression flow reaches the Temple / Church handoff. |
@@ -131,6 +133,23 @@ Guild x Dungeon Boss Glen live bridge state:
 - This does not open a full quest framework, story hint framework, generic boss
   framework, full Act 2 progression cleanup, schema changes, save migration,
   combat formula changes, or manual `save.json` work.
+
+Boss Combat Rule Parity is complete through `e0c8d98`:
+
+- CLI and GUI combat share `dispatch_enemy_turn(...)`; ordinary enemies use
+  `monster_action(...)`, while Glen, Ash Guardian, and Cinder Seal Sentinel use
+  their existing specialized Boss actions.
+- GUI combat sessions preserve the Boss action marker between turns.
+- Boss retreat and Escape Scroll use are blocked server-side without consuming
+  the scroll or advancing the turn. Combat ScreenModel also disables retreat
+  with a reason.
+- Focused smoke coverage verifies all three Boss markers and resolves a Boss
+  victory through the live combat action loop instead of directly calling
+  victory settlement.
+- Escape Scroll may still appear as enabled inside the combat item list before
+  server rejection. Player-action handling and settlement also remain parallel
+  CLI / GUI flows; this is not a generic Boss framework or full shared combat
+  state machine.
 
 Storage Deposit & Withdraw Live MVP remains part of the current live bridge
 package:
@@ -267,6 +286,8 @@ python element_maze.py --smoke-test
 Direct smoke and validation:
 
 ```powershell
+python 06_tools\smoke_test_combat_bridge.py
+python 06_tools\smoke_test_progression_bridge.py
 python element_maze.py --smoke-test
 python 06_tools\validate_data.py
 ```
@@ -341,6 +362,9 @@ do not imply gameplay validation.
 - World Map Settings Panel Reduced Motion MVP is complete as current-page,
   shell-only GUI polish. Formal settings, persistence, and cross-screen
   preferences remain closed.
+- Boss Combat Rule Parity is complete through `e0c8d98`. Further combat
+  authority sharing, item-menu presentation parity, or generic Boss handling
+  requires a new read-only planning gate and owner-approved exact scope.
 - No additional image generation, HTML/CSS implementation, runtime work, or
   asset pipeline is pre-approved by this docs sync.
 - Phase C convenience candidates, runtime/data/schema/save/combat remain deferred.

@@ -75,6 +75,7 @@ existing runtime-authoritative adapter / ScreenModel pattern where appropriate.
 | Inn | blessed live bridge cleanup | `rest_at_inn` through Python runtime state. | Broader facility framework. |
 | World Map | blessed live bridge cleanup | Runtime-backed route model, `save_game`, shell-only `open_settings`. | Real settings panel or arbitrary town return action. |
 | Dungeon / Combat loop | `be6b06c [antig] feat(gui): complete live combat loop feedback` | Travel, exploration step / retreat, combat actions, victory result, route clear / resolved state. | Complete dungeon framework, boss framework, combat formula changes. |
+| Boss Combat Rule Parity | `e0c8d98 [codex] fix(combat): enforce Boss rule parity in GUI bridge` | Shared CLI / GUI enemy-turn dispatcher; specialized actions and saved markers for Glen, Ash Guardian, and Cinder Seal Sentinel; server-side Boss retreat and Escape Scroll blocking; disabled Boss retreat ScreenModel; focused action-loop smoke coverage. | Generic Boss framework, full shared combat state machine, player-action / settlement unification, combat item-list presentation parity, combat formula changes. |
 | Guild report | `c2052d4 [antig] feat(gui): add guild clear report live bridge` | Clear report registration and display for eligible unlocked dungeon clears. | Full guild / quest / reputation / achievement system. |
 | Guild Quest Turn-in for Synthesis Unlock | `017fa43 [antig] feat(gui): add guild quest synthesis unlock bridge` | Guild live mode shows unlocked existing `QUESTS`; `submit_quest` completes ready turn-ins through existing runtime validation, reward, and unlock behavior. `quest_cave_gathering` unlocks `shop_synthesis_01`. | Full guild / quest framework, new quest data, story inquiry expansion, save/schema/combat changes, full synthesis, generic recipe bridge. |
 | Guild x Dungeon Boss Glen Gating | `9ae502b [antig] fix(gui): repair Boss Glen progression bridge` | Special Scorched Mine Boss Glen gate: 18/18 clue sets `boss_glen_sighted`, Guild `accept_boss_glen_investigation` sets `boss_glen_investigation_accepted`, `challenge_boss` opens after acceptance, and `quest_boss_glen` / Blood Map turn-in unlocks Ash Ravine through existing runtime progression. | Full quest framework, story hint framework, generic boss framework, full Act 2 cleanup, data/schema/save/combat changes. |
@@ -94,12 +95,15 @@ existing runtime-authoritative adapter / ScreenModel pattern where appropriate.
 | Relic Preview live opening | `7080b56 [antig] feat(gui): add Temple and Relic live bridge closure` | Altar screen live-mode loading, previewing registered relics (e.g., ash charm) and requirements, attune action placeholder. | Formal relic effects, equipping/obtaining relics, manual save.json edits. |
 
 
-Latest committed bridge baseline:
+Latest committed runtime bridge baseline:
+`e0c8d98 [codex] fix(combat): enforce Boss rule parity in GUI bridge`.
+
+Latest committed facility bridge baseline:
 `2ecca91 [antig] feat(gui): add Guild material sell bridge and fix Shop layout`.
 
 ## 3.2 Reusable Bridge Pattern Audit
 
-Read-only audit, updated 2026-06-06:
+Read-only audit, updated 2026-06-15:
 
 - Governance rule: each facility / system should first use a narrow MVP to prove
   the runtime bridge shape. After that bridge exists, same-family CLI content
@@ -120,7 +124,7 @@ Read-only audit, updated 2026-06-06:
 | Shop / travel shop | `buy_item` and the live ScreenModel cover all existing `SHOP_INVENTORY["travel"]` entries through runtime availability, price, job, and owned-count behavior. | Low. Existing travel data is covered; Shop sell and generic quantity selection remain separate behavior. | Treat new travel-shop entries as existing-data coverage checks. |
 | Workshop | Weapon & armor buy reads `SHOP_INVENTORY`; `equip_equipment` and `equip_weapon` reuse `game.equip_item(...)`; upgrades support whitelisted recipes. | Low to medium. Weapon, armor, and whitelisted upgrades are reusable; comparison, unequip, and non-whitelisted upgrades remain closed. | Add more recipe ids as coverage. Generic equipment management (unequip, comparison) needs its own planning gate. |
 | Magic shop | `learn_magic_book` validates `MAGIC_BOOKS`, `SKILLS`, job, level, gold, materials, and learned state server-side; ScreenModel iterates existing `MAGIC_BOOKS` and aligns categories with CLI behavior. | Low. Existing magic-book data is covered. | Treat new existing-data books as coverage checks; new skills or rules still require their own gate. |
-| World map / dungeon / exploration / combat | World Map iterates `DUNGEONS` and runtime unlocks; `confirm_travel`, `advance_step`, combat, retreat, route clear, item rows, and skill rows are shared flow pieces. | Medium. Multiple dungeons can route through the bridge, but complete dungeon events, boss framework, and combat formula changes remain closed. | Treat existing dungeons as coverage follow-up unless the task opens boss / special event behavior. |
+| World map / dungeon / exploration / combat | World Map iterates `DUNGEONS` and runtime unlocks; `confirm_travel`, `advance_step`, combat, retreat, route clear, item rows, and skill rows are shared flow pieces. CLI and GUI combat now share enemy-turn dispatch, including the three existing specialized Boss actions and Boss marker progression. | Medium. Boss enemy-turn parity is shared, but player actions, settlement, and combat item-list presentation remain parallel; complete dungeon events, generic Boss framework, full shared combat state machine, and combat formula changes remain closed. | Treat existing dungeons and Boss enemy actions as coverage checks. Any further combat authority sharing or generic Boss behavior needs its own planning gate. |
 | Guild | Current GUI bridge includes dungeon clear reports, existing `QUESTS` turn-ins, Boss Glen investigation, fire-mark inquiry, and material sell through existing `GUILD_MATERIAL_BUY_PRICES`. | Low to medium. Existing CLI Guild behaviors are covered; broad Guild, reputation, achievement, and generic sell frameworks remain closed. | Treat new registered Guild buyback materials as existing-data coverage checks; new Guild behavior needs its own gate. |
 | Synthesis / crafting | Town Hub entry unlock and the existing `craft_recipe` adapter now cover the four existing Mira recipes through runtime helpers, including the warm-stone base-item recipe. | Medium for arbitrary crafting. Existing Mira data is covered; generic recipe iteration and new recipes remain closed. | Treat new Mira data as a coverage check; arbitrary recipes or crafting frameworks require their own gate. |
 | Storage | Opens Town Hub routing, live Storage ScreenModel, `unlock_storage`, `deposit_item`, and `withdraw_item` against existing runtime storage state. Capacity upgrades remain disabled. | Low to medium. Storage unlock, view, and deposit / withdraw transfer are now bridged; capacity upgrade behavior remains closed. | Treat capacity upgrade as a separate read-only gate. Do not let deposit / withdraw imply generic inventory or slot management. |
@@ -711,6 +715,27 @@ Status note, 2026-06-02:
   skill framework, target selection, skill rebalancing, large combat refactor,
   `game.py` changes, data/schema changes, save migration, or combat formula
   changes.
+
+Status note, 2026-06-15:
+
+- Boss Combat Rule Parity landed through
+  `e0c8d98 [codex] fix(combat): enforce Boss rule parity in GUI bridge`.
+- `game.dispatch_enemy_turn(...)` is the shared CLI / GUI enemy-turn authority:
+  ordinary enemies use `monster_action(...)`; Glen, Ash Guardian, and Cinder
+  Seal Sentinel use their existing specialized Boss actions and return a marker.
+- GUI combat sessions preserve that Boss marker between turns. Boss retreat and
+  Escape Scroll use are blocked server-side without consuming a scroll or
+  advancing combat, and Combat ScreenModel disables Boss retreat with a reason.
+- `smoke_test_combat_bridge.py` covers Boss retreat, Boss Escape Scroll, all
+  three specialized Boss action markers, and Boss victory through the live
+  combat action loop. `smoke_test_progression_bridge.py` no longer calls
+  `resolve_victory(...)` directly for Glen.
+- Remaining parity risk is limited but explicit: Escape Scroll can still render
+  as enabled in the combat item list before server rejection, and player-action
+  handling / settlement remain parallel CLI / GUI flows.
+- This status note does not approve a generic Boss framework, full shared combat
+  state machine, item-menu presentation work, combat formula changes,
+  data/schema changes, save migration, or manual `save.json` work.
 
 ## 6. Action Contract
 
