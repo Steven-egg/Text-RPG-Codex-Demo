@@ -124,8 +124,10 @@ def run_progression_smoke_test():
     assert session.exploration["status"] == "combat"
     print("[Pass] Boss Glen combat successfully initiated.")
 
-    # 10. Resolve combat in victory
-    session.resolve_victory(["葛倫的防禦崩潰了！", "葛倫倒地。"])
+    # 10. Resolve combat in victory through the live combat action loop
+    session.combat["enemy_hp"] = 1
+    session.dispatch("basic_attack", {"enemy_id": "boss_glen"}, screen_id="combat_screen")
+    assert session.combat["outcome"] == "victory"
     assert state["flags"].get("boss_glen_defeated") is True
     assert state["inventory"].get("key_blood_map", 0) == 1
     assert state["inventory"].get("key_fire_mark_shard", 0) == 1

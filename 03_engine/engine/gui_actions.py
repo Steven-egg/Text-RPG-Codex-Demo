@@ -519,6 +519,7 @@ class GuiRuntimeSession:
             "enemy_buffs": {},
             "turn": 1,
             "boss": boss,
+            "boss_marker": False,
             "battle_log": [f"遭遇 {enemy['name']}。敵人屬性：{enemy['element']} / HP {enemy['hp']}/{enemy['hp']}。"],
             "last_action_summary": "尚未行動。",
             "outcome": None,
@@ -597,7 +598,17 @@ class GuiRuntimeSession:
             game.record_battle_events(combat["battle_log"], combat["turn"], turn_events)
             return self.resolve_victory(action_result.summary + [f"{enemy['name']}倒下。"])
 
-        enemy_events = game.monster_action(combat["enemy_id"], enemy, state, player_buffs, defending)
+        combat["boss_marker"], enemy_events = game.dispatch_enemy_turn(
+            combat["enemy_id"],
+            enemy,
+            combat["enemy_hp"],
+            state,
+            player_buffs,
+            enemy_buffs,
+            defending,
+            combat["turn"],
+            combat.get("boss_marker", False),
+        )
         effect_events = game.tick_effects(state, player_buffs, enemy_buffs)
         turn_events.extend(enemy_events)
         turn_events.extend(effect_events)
@@ -622,6 +633,12 @@ class GuiRuntimeSession:
         enemy_buffs = combat["enemy_buffs"]
         if state.get("inventory", {}).get(item_id, 0) <= 0:
             raise GuiActionError("Item is not available.", status=409)
+        if item_id == "item_escape_scroll" and combat.get("boss"):
+            raise GuiActionError(
+                "Boss 戰不可使用逃脫卷軸。",
+                status=409,
+                blocked_reason="Boss 戰不可使用逃脫卷軸。",
+            )
         if item_id == "item_potion_s":
             stats = game.get_stats(state)
             before = state["current_hp"]
@@ -663,10 +680,26 @@ class GuiRuntimeSession:
         state = self.require_state()
         combat = self.require_combat()
         enemy = combat["enemy"]
+        if combat.get("boss"):
+            raise GuiActionError(
+                "Boss 戰不可逃跑。",
+                status=409,
+                blocked_reason="Boss 戰不可逃跑。",
+            )
         if game.try_escape(state, enemy):
             return self.resolve_retreat(["你成功脫離戰鬥。"])
         action_result = game.CombatActionResult(events=["逃跑失敗。"], summary=["逃跑失敗。"])
-        enemy_events = game.monster_action(combat["enemy_id"], enemy, state, combat["player_buffs"], False)
+        combat["boss_marker"], enemy_events = game.dispatch_enemy_turn(
+            combat["enemy_id"],
+            enemy,
+            combat["enemy_hp"],
+            state,
+            combat["player_buffs"],
+            combat["enemy_buffs"],
+            False,
+            combat["turn"],
+            combat.get("boss_marker", False),
+        )
         effect_events = game.tick_effects(state, combat["player_buffs"], combat["enemy_buffs"])
         turn_events = list(action_result.events) + enemy_events + effect_events
         game.record_battle_events(combat["battle_log"], combat["turn"], turn_events)
@@ -1810,6 +1843,7 @@ class GuiRuntimeSession:
         stats = game.get_stats(state, combat["player_buffs"])
         enemy_hp = max(0, combat["enemy_hp"])
         resolved = combat.get("outcome") is not None
+        boss = bool(combat.get("boss"))
         usable_items = combat_item_rows(state)
         usable_skills = combat_skill_rows(state, combat, resolved)
         return {
@@ -1896,8 +1930,12 @@ class GuiRuntimeSession:
                     "action_id": "retreat",
                     "label": "逃跑",
                     "description": "嘗試逃離當前戰鬥。",
-                    "enabled": not resolved,
-                    "disabled_reason": None if not resolved else "戰鬥已結束。",
+                    "enabled": not resolved and not boss,
+                    "disabled_reason": (
+                        "戰鬥已結束。" if resolved else (
+                            "Boss 戰不可逃跑。" if boss else None
+                        )
+                    ),
                     "primary": False,
                     "payload": {"enemy_id": combat["enemy_id"]},
                 },

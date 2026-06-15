@@ -2486,14 +2486,17 @@ def combat(state: dict, enemy_id: str, boss: bool = False, run_log: dict | None 
                 last_action_summary = summary[0]
             break
 
-        if boss and enemy_id == "boss_glen":
-            boss_marker, enemy_events = boss_glen_action(enemy, enemy_hp, state, player_buffs, enemy_buffs, defending, turn, boss_marker)
-        elif boss and enemy_id == "boss_ash_guardian":
-            boss_marker, enemy_events = boss_ash_guardian_action(enemy, enemy_hp, state, player_buffs, enemy_buffs, defending, turn, boss_marker)
-        elif boss and enemy_id == "boss_cinder_seal_sentinel":
-            boss_marker, enemy_events = boss_cinder_seal_sentinel_action(enemy, enemy_hp, state, player_buffs, enemy_buffs, defending, turn, boss_marker)
-        else:
-            enemy_events = monster_action(enemy_id, enemy, state, player_buffs, defending)
+        boss_marker, enemy_events = dispatch_enemy_turn(
+            enemy_id,
+            enemy,
+            enemy_hp,
+            state,
+            player_buffs,
+            enemy_buffs,
+            defending,
+            turn,
+            boss_marker,
+        )
 
         effect_events = tick_effects(state, player_buffs, enemy_buffs)
         turn_events.extend(enemy_events)
@@ -2773,6 +2776,52 @@ def boss_cinder_seal_sentinel_action(
     damage = calc_enemy_damage(enemy, state, 1.1, "火", player_buffs, defending)
     state["current_hp"] -= damage
     return charged, [f"{enemy['name']}揮出燼火斬，造成 {damage} 火傷害。"]
+
+def dispatch_enemy_turn(
+    enemy_id: str,
+    enemy: dict,
+    enemy_hp: int,
+    state: dict,
+    player_buffs: dict,
+    enemy_buffs: dict,
+    defending: bool,
+    turn: int,
+    boss_marker: bool,
+) -> tuple[bool, list[str]]:
+    if enemy_id == "boss_glen":
+        return boss_glen_action(
+            enemy,
+            enemy_hp,
+            state,
+            player_buffs,
+            enemy_buffs,
+            defending,
+            turn,
+            boss_marker,
+        )
+    if enemy_id == "boss_ash_guardian":
+        return boss_ash_guardian_action(
+            enemy,
+            enemy_hp,
+            state,
+            player_buffs,
+            enemy_buffs,
+            defending,
+            turn,
+            boss_marker,
+        )
+    if enemy_id == "boss_cinder_seal_sentinel":
+        return boss_cinder_seal_sentinel_action(
+            enemy,
+            enemy_hp,
+            state,
+            player_buffs,
+            enemy_buffs,
+            defending,
+            turn,
+            boss_marker,
+        )
+    return boss_marker, monster_action(enemy_id, enemy, state, player_buffs, defending)
 
 def tick_effects(state: dict, player_buffs: dict, enemy_buffs: dict) -> list[str]:
     events = []
