@@ -78,12 +78,11 @@ from creating new systems.
 Future regional towns extend the existing Shop / travel inventory pattern with
 small local additions instead of new shop systems.
 
-Each Ice, Earth, and Thunder regional town adds four Shop goods:
+Each Ice, Earth, and Thunder regional town adds three Shop goods:
 
 - One HP recovery consumable.
 - One MP recovery consumable.
 - One local resistance accessory.
-- One battle item.
 
 The Final front-line camp adds three high-end supplies:
 
@@ -93,6 +92,42 @@ The Final front-line camp adds three high-end supplies:
 
 Exact item names, numbers, prices, effects, and unlock timing are intentionally
 left for later data planning.
+
+## Regional Magic Shop Baseline
+
+Future regional Magic Shops favor Mage and Cleric growth while still giving
+Warrior and Rogue one local book each. Do not use cross-job tactical books as
+the default expansion pattern.
+
+Each Ice, Earth, Thunder, and Final town adds six magic books:
+
+- Two Mage books.
+- Two Cleric books.
+- One Warrior book.
+- One Rogue book.
+
+Exact book names, skill effects, MP costs, prices, unlock timing, and combat
+numbers are intentionally left for later data planning.
+
+## Regional Synthesis Baseline
+
+Future regional Synthesis additions handle battle-item crafting and resistance
+accessory upgrades. This keeps Shop focused on consumables and base resistance
+accessories while Synthesis handles crafted countermeasures.
+
+Each Ice, Earth, and Thunder regional town adds two synthesis recipes:
+
+- One local battle-item recipe.
+- One local resistance-accessory upgrade recipe.
+
+The Final front-line camp adds four synthesis recipes:
+
+- One endgame battle-item recipe.
+- One endgame resistance-accessory upgrade recipe.
+- Two expensive attribute-boost recipes for endgame material and gold sinks.
+
+Exact recipe names, materials, prices, output quantities, stat effects, and
+unlock timing are intentionally left for later data planning.
 
 ## Regional Equipment And Upgrade Baseline
 
