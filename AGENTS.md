@@ -29,6 +29,7 @@ Default startup route:
 3. The current agent's session ops/governance skill.
 4. `README.md`
 5. `01_content/codex-handoff-short.md`
+6. `01_content/world-content-skeleton-v0.1.md`
 
 For GUI static prototype tasks, also read the current agent's GUI static prototype
 skill. Read detailed GUI progress only when the task needs screen-level detail.
