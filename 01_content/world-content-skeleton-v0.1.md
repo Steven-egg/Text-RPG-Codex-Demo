@@ -61,6 +61,15 @@ runtime, data, schema, save compatibility, combat validation, and smoke tests.
 | Thunder region | 1 | 3 | One regional town, two minor dungeons, one main two-phase dungeon. |
 | Final region | 1 | 3 | One front-line camp, two minor dungeons, one final main two-phase dungeon. |
 
+Detailed region-level data template planning lives in:
+
+- `01_content/regional-data-template-v0.1.md`
+
+That Task Zone file defines reusable data slots, ID naming rules, region hub
+presentation boundaries, material timing, quest turn-in safety, Synthesis /
+Workshop timing, and Antigravity candidate-content handoff. This Hot Zone file
+keeps only the macro content skeleton.
+
 ## Regional Quest And Dungeon Baseline
 
 Future Ice, Earth, Thunder, and Final regions use the same reusable content

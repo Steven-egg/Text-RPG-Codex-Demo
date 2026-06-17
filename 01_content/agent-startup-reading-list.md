@@ -48,6 +48,9 @@ Open these only for matching tasks.
 
 - `01_content/world-content-skeleton-v0.1.md`
   - Hot Zone macro skeleton and current content-count decisions.
+- `01_content/regional-data-template-v0.1.md`
+  - Task Zone template for reusable region data slots, ID naming, material
+    timing, quest turn-in safety, and candidate-content handoff.
 - `01_content/game-design.md`
   - Content-design SSOT; open for named gameplay/content-design questions.
 - `01_content/full-act-structure.md`
