@@ -105,6 +105,7 @@ Lifecycle labels:
 |---|---|---|
 | `01_content/gui-planning-index.md` | core | This GUI routing and lifecycle index. |
 | `01_content/gui-facility-shell-baseline-v0.1.md` | core | Facility-family Mockup-to-HTML four-layer responsibility and configuration baseline. |
+| `01_content/gui-family-classification-visual-token-audit-v0.1.md` | core | Formal 14-screen family classification, Global Visual Tokens V0.1 planning baseline, drift register, and normalization gate. |
 | `01_content/facilities-visual-integration-spec-v0.1.md` | conditional | Paused Draft facility CSS and visual comparison reference; not implementation approval. |
 | `01_content/gui-html-static-prototype-progress-v1.md` | core | Static prototype handoff, built screens, and targeted verification notes. |
 | `01_content/gui-runtime-bridge-plan-v1.md` | core | Runtime bridge plan, approved surfaces, and landed live-slice status notes. |
