@@ -26,7 +26,35 @@ tests and echoes the four elements.
 | Ice region | 1 | 3 | One regional town, two minor dungeons, one main two-phase dungeon. |
 | Earth region | 1 | 3 | One regional town, two minor dungeons, one main two-phase dungeon. |
 | Thunder region | 1 | 3 | One regional town, two minor dungeons, one main two-phase dungeon. |
-| Final region | 0-1 | 3-4 | Optional front-line camp, four-element echo dungeons, final seal core. |
+| Final region | 1 | 3 | One front-line camp, two minor dungeons, one final main two-phase dungeon. |
+
+## Regional Quest And Dungeon Baseline
+
+Future Ice, Earth, Thunder, and Final regions use the same reusable content
+shape: one regional town or front-line camp, two minor dungeons, and one main
+two-phase dungeon.
+
+Each region has five quest slots:
+
+- Quest 1: minor dungeon A.
+- Quest 2: minor dungeon B.
+- Quest 3: main dungeon phase 1.
+- Quest 4: main dungeon phase 2.
+- Quest 5: return / resolution quest. In the Final region, this is the final
+  boss defeat and main ending quest.
+
+Baseline dungeon scale:
+
+| Dungeon Slot | Exploration Turns | Normal Enemy Types | Boss Count |
+|---|---:|---:|---:|
+| Minor dungeon A | 15 | 4 | 1 |
+| Minor dungeon B | 15 | 4 | 1 |
+| Main dungeon phase 1 | 12 | 3 | 1 |
+| Main dungeon phase 2 | 12 | 3 | 1 |
+
+Per region baseline total: 54 exploration turns, 14 normal enemy types, and 4
+bosses. Final region follows the same dungeon scale; its final phase boss is the
+main ending boss.
 
 ## Reuse Rule
 
