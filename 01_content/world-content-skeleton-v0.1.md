@@ -73,6 +73,55 @@ Regional towns reuse the existing facility families whenever possible:
 Town identity should mostly come from local data, presentation, and text, not
 from creating new systems.
 
+## Regional Shop Baseline
+
+Future regional towns extend the existing Shop / travel inventory pattern with
+small local additions instead of new shop systems.
+
+Each Ice, Earth, and Thunder regional town adds four Shop goods:
+
+- One HP recovery consumable.
+- One MP recovery consumable.
+- One local resistance accessory.
+- One battle item.
+
+The Final front-line camp adds three high-end supplies:
+
+- One high-end HP recovery consumable.
+- One high-end MP recovery consumable.
+- One high-end combined HP / MP / abnormal-status recovery consumable.
+
+Exact item names, numbers, prices, effects, and unlock timing are intentionally
+left for later data planning.
+
+## Regional Equipment And Upgrade Baseline
+
+Future regional towns extend the existing weapon / armor shop and Workshop
+patterns with fixed equipment slots instead of new equipment systems.
+
+Each Ice, Earth, Thunder, and Final town adds seven equipment entries:
+
+- Four job weapons, one for each current job.
+- Two shared armor pieces.
+- One role-leaning armor piece.
+
+Resistance accessories from the Shop baseline are counted as Shop / travel
+goods, not as weapon / armor shop equipment.
+
+Upgrade targets stay limited so equipment data does not expand too quickly:
+
+- Ice, Earth, and Thunder each select four upgrade targets: two job weapons, one
+  shared armor piece, and one role-leaning armor piece.
+- Final may select six upgrade targets as endgame loadout consolidation: four
+  final job weapons and two final shared armor pieces.
+
+Rogue pseudo-offhand equipment keeps the current data shape: it remains
+head-slot, role-leaning armor unless a later exact-scope runtime / schema /
+state / UI plan explicitly opens a real offhand slot. If a regional
+role-leaning armor item is a Rogue head-slot pseudo-offhand item, it is
+automatically eligible as that region's role-leaning armor upgrade target. This
+keeps the Rogue identity without adding extra per-region equipment count.
+
 ## Current Fire Route Decision
 
 The fire demo route is considered structurally complete for macro-planning:
