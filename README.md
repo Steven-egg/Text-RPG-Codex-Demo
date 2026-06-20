@@ -64,6 +64,20 @@ Task Zone pointers:
 
 ## How To Run
 
+Recommended Python:
+
+- Python 3.11.x.
+- Keep `.venv/` local to each machine. Do not treat it as a synced or shared
+  environment.
+- Install dependencies from `requirements.txt`.
+
+Create or refresh a local virtual environment:
+
+```powershell
+py -3.11 -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+```
+
 Most local play:
 
 ```powershell
@@ -79,11 +93,10 @@ C:\Users\user\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\py
 With a local virtual environment:
 
 ```powershell
-.\.venv\Scripts\Activate.ps1
-python .\element_maze.py
+.\.venv\Scripts\python.exe .\element_maze.py
 ```
 
-`.venv/` is local tooling only and is ignored by git.
+`.venv/` and `.venv*/` are local tooling only and are ignored by git.
 
 ## Verification
 
@@ -103,10 +116,10 @@ python element_maze.py --smoke-test
 Useful direct checks:
 
 ```powershell
-python 06_tools\content_inventory_report.py
-python 06_tools\content_inventory_report.py --json
-python 06_tools\smoke_test_combat_bridge.py
-python 06_tools\smoke_test_progression_bridge.py
+.\.venv\Scripts\python.exe 06_tools\content_inventory_report.py
+.\.venv\Scripts\python.exe 06_tools\content_inventory_report.py --json
+.\.venv\Scripts\python.exe 06_tools\smoke_test_combat_bridge.py
+.\.venv\Scripts\python.exe 06_tools\smoke_test_progression_bridge.py
 ```
 
 For docs-only cleanup, use markdown/status/diff checks. Runtime smoke is not
