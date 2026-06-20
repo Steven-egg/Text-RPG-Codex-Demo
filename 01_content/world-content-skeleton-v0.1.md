@@ -18,6 +18,18 @@ Element Maze uses four core content elements:
 The final map is not a fifth core element. It is a composite endgame zone that
 tests and echoes the four elements.
 
+## Current Runtime Interpretation
+
+As of `56731f1`, the Ice, Earth, Thunder, and Final CLI playable skeletons have
+landed as traversal and progression scaffolds. This means the required quest,
+dungeon, boss, and ending flow can be exercised in the CLI, but it does not mean
+regional content, naming, encounter texture, reward balance, dialogue, or final
+polish are complete.
+
+Future work should peel these layers deliberately, starting from the smallest
+approved slice and keeping runtime, data, schema, save, combat, GUI bridge, and
+asset-pipeline changes behind the matching read-only planning gate.
+
 ## Job Identity Baseline
 
 The four current jobs should differ by combat rhythm and problem-solving role,
@@ -59,7 +71,7 @@ runtime, data, schema, save compatibility, combat validation, and smoke tests.
 | Ice region | 1 | 3 | One regional town, two minor dungeons, one main two-phase dungeon. |
 | Earth region | 1 | 3 | One regional town, two minor dungeons, one main two-phase dungeon. |
 | Thunder region | 1 | 3 | One regional town, two minor dungeons, one main two-phase dungeon. |
-| Final region | 1 | 3 | One front-line camp, two minor dungeons, one final main two-phase dungeon. |
+| Final region | 1 | 3 | One front-line camp, two minor dungeons, one final main three-phase dungeon. |
 
 Detailed region-level data template planning lives in:
 
@@ -72,9 +84,10 @@ keeps only the macro content skeleton.
 
 ## Regional Quest And Dungeon Baseline
 
-Future Ice, Earth, Thunder, and Final regions use the same reusable content
-shape: one regional town or front-line camp, two minor dungeons, and one main
-two-phase dungeon.
+Ice, Earth, Thunder, and Final regions use the same reusable content shape: one
+regional town or front-line camp, two minor dungeons, and one main dungeon. Ice,
+Earth, and Thunder use two main phases by default; Final may use a longer
+three-phase main dungeon for ending escalation.
 
 Each region has five quest slots:
 
@@ -107,9 +120,10 @@ Baseline dungeon scale:
 | Main dungeon phase 1 | 12 | 3 | 1 |
 | Main dungeon phase 2 | 12 | 3 | 1 |
 
-Per region baseline total: 54 exploration turns, 14 normal enemy types, and 4
-bosses. Final region follows the same dungeon scale; its final phase boss is the
-main ending boss.
+Per region baseline total for Ice, Earth, and Thunder: 54 exploration turns, 14
+normal enemy types, and 4 bosses. Final region may exceed this baseline with an
+ending escalation phase; the landed CLI skeleton uses a three-phase final main
+dungeon whose final phase boss is the main ending boss.
 
 ## Optional Elite Hunt Baseline
 

@@ -124,3 +124,7 @@ touched.
 Latest detailed verification history lives in Task Zone files. For docs-only
 cleanup, status/diff review is enough. Runtime smoke is required only when
 runtime, data, schema, save, combat, or bridge behavior changes.
+
+Manual owner playtest after `56731f1` confirmed Demon King defeat completes
+Final Q5, grants Guild reputation +500, shows the ending panel and
+`MAIN STORY CLEAR` panel, then returns to the title screen.
