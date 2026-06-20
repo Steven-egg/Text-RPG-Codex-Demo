@@ -217,7 +217,7 @@ MONSTERS = {
         "boss": True,
     },
     "mon_ice_drowned_deckhand": {
-        "name": "Drowned Deckhand",
+        "name": "黑牙亡水手",
         "level": 12,
         "hp": 155,
         "attack": 32,
@@ -231,7 +231,7 @@ MONSTERS = {
         "drops": [("mat_ice_saltcloth", 0.46, 1), ("mat_ice_salt", 0.28, 1)],
     },
     "mon_ice_bilge_crab": {
-        "name": "Rime Bilge Crab",
+        "name": "鹽霧弩手",
         "level": 12,
         "hp": 176,
         "attack": 31,
@@ -245,7 +245,7 @@ MONSTERS = {
         "drops": [("mat_ice_wreck_plank", 0.36, 1), ("mat_ice_salt", 0.34, 1)],
     },
     "mon_ice_salt_wisp": {
-        "name": "Salt-Fog Wisp",
+        "name": "鐵鉤船員",
         "level": 13,
         "hp": 142,
         "attack": 35,
@@ -259,7 +259,7 @@ MONSTERS = {
         "drops": [("mat_ice_salt", 0.45, 1), ("mat_ice_seal_dust", 0.08, 1)],
     },
     "mon_ice_ghost_sail": {
-        "name": "Ghost-Sail Remnant",
+        "name": "幽帆瞭望手",
         "level": 13,
         "hp": 168,
         "attack": 34,
@@ -273,7 +273,7 @@ MONSTERS = {
         "drops": [("mat_ice_saltcloth", 0.40, 1), ("mat_ice_wreck_plank", 0.18, 1)],
     },
     "mon_ice_frostroot_lurker": {
-        "name": "Frostroot Lurker",
+        "name": "霜根獵蛛",
         "level": 13,
         "hp": 182,
         "attack": 34,
@@ -287,7 +287,7 @@ MONSTERS = {
         "drops": [("mat_ice_frostroot", 0.48, 1), ("mat_ice_salt", 0.20, 1)],
     },
     "mon_ice_cave_mite": {
-        "name": "Blue-Rime Mite",
+        "name": "凍爪穴熊",
         "level": 14,
         "hp": 150,
         "attack": 37,
@@ -301,7 +301,7 @@ MONSTERS = {
         "drops": [("mat_ice_blue_stone", 0.32, 1), ("mat_ice_frostroot", 0.26, 1)],
     },
     "mon_ice_rime_bloom": {
-        "name": "Rime Bloom",
+        "name": "冰刺蕈妖",
         "level": 14,
         "hp": 196,
         "attack": 35,
@@ -315,7 +315,7 @@ MONSTERS = {
         "drops": [("mat_ice_frostroot", 0.44, 1), ("mat_ice_blue_stone", 0.18, 1)],
     },
     "mon_ice_stone_shell": {
-        "name": "Frost-Stone Shell",
+        "name": "藍光洞靈",
         "level": 14,
         "hp": 218,
         "attack": 36,
@@ -329,7 +329,7 @@ MONSTERS = {
         "drops": [("mat_ice_blue_stone", 0.46, 1), ("mat_ice_deep_core", 0.06, 1)],
     },
     "mon_ice_outer_guard": {
-        "name": "Frostiron Guard",
+        "name": "斷階石衛",
         "level": 15,
         "hp": 220,
         "attack": 40,
@@ -343,7 +343,7 @@ MONSTERS = {
         "drops": [("mat_ice_frostiron", 0.48, 1), ("mat_ice_seal_dust", 0.12, 1)],
     },
     "mon_ice_rime_hound": {
-        "name": "Rime Hound",
+        "name": "裂碑幽魂",
         "level": 15,
         "hp": 190,
         "attack": 42,
@@ -357,7 +357,7 @@ MONSTERS = {
         "drops": [("mat_ice_frostiron", 0.28, 1), ("mat_ice_salt", 0.24, 1)],
     },
     "mon_ice_frost_armor": {
-        "name": "Broken Frost Armor",
+        "name": "殘塔弩手",
         "level": 16,
         "hp": 248,
         "attack": 41,
@@ -371,7 +371,7 @@ MONSTERS = {
         "drops": [("mat_ice_frostiron", 0.50, 1), ("mat_ice_blue_stone", 0.16, 1)],
     },
     "mon_ice_seal_spark": {
-        "name": "Cold Seal Spark",
+        "name": "迴廊石像兵",
         "level": 16,
         "hp": 178,
         "attack": 44,
@@ -385,7 +385,7 @@ MONSTERS = {
         "drops": [("mat_ice_seal_dust", 0.48, 1), ("mat_ice_frostiron", 0.14, 1)],
     },
     "mon_ice_palace_wisp": {
-        "name": "Palace White Wisp",
+        "name": "霜鐵禁衛",
         "level": 17,
         "hp": 210,
         "attack": 46,
@@ -399,7 +399,7 @@ MONSTERS = {
         "drops": [("mat_ice_seal_dust", 0.42, 1), ("mat_ice_deep_core", 0.12, 1)],
     },
     "mon_ice_throne_shade": {
-        "name": "Throne Shade",
+        "name": "鎖誓亡者",
         "level": 17,
         "hp": 236,
         "attack": 45,
@@ -413,7 +413,7 @@ MONSTERS = {
         "drops": [("mat_ice_seal_dust", 0.36, 1), ("mat_ice_frostiron", 0.22, 1)],
     },
     "mon_ice_seal_knight": {
-        "name": "Sealbound Knight",
+        "name": "封印鏈奴",
         "level": 18,
         "hp": 280,
         "attack": 48,
@@ -427,7 +427,7 @@ MONSTERS = {
         "drops": [("mat_ice_frostiron", 0.44, 1), ("mat_ice_deep_core", 0.18, 1)],
     },
     "mon_ice_core_sentry": {
-        "name": "Deep Core Sentry",
+        "name": "碎印法師",
         "level": 18,
         "hp": 260,
         "attack": 49,
@@ -441,7 +441,7 @@ MONSTERS = {
         "drops": [("mat_ice_deep_core", 0.38, 1), ("mat_ice_seal_dust", 0.24, 1)],
     },
     "boss_ice_wreck_captain": {
-        "name": "Wreck Captain",
+        "name": "幽帆舵主 維爾洛",
         "level": 15,
         "hp": 520,
         "attack": 42,
@@ -456,7 +456,7 @@ MONSTERS = {
         "boss": True,
     },
     "boss_ice_frostroot_keeper": {
-        "name": "Frostroot Keeper",
+        "name": "霜根母株 葛魯姆",
         "level": 16,
         "hp": 570,
         "attack": 44,
@@ -471,7 +471,7 @@ MONSTERS = {
         "boss": True,
     },
     "boss_ice_outer_gatewarden": {
-        "name": "Outer Gatewarden",
+        "name": "斷階守誓者 奧登",
         "level": 18,
         "hp": 660,
         "attack": 49,
@@ -486,7 +486,7 @@ MONSTERS = {
         "boss": True,
     },
     "boss_ice_final_seal_lord": {
-        "name": "Final Seal Lord",
+        "name": "霜冠誓王 亞爾溟",
         "level": 20,
         "hp": 780,
         "attack": 54,

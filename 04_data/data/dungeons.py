@@ -103,7 +103,7 @@ DUNGEONS = {
         "boss": "boss_ice_outer_gatewarden",
     },
     "dungeon_ice_main_phase_2": {
-        "name": "霜鐵古城 - 終印宮殿",
+        "name": "霜鐵古城 - 終印誓殿",
         "recommended": "Lv17-20",
         "steps": 12,
         "element": "Ice",
