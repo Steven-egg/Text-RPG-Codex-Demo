@@ -51,6 +51,8 @@ STORY_UNLOCK_KEYS = {
     "unlock_ash_ravine",
     "unlock_ice_region",
     "unlock_earth_region_preview",
+    "unlock_thunder_region_preview",
+    "unlock_final_region_preview",
 }
 
 
@@ -73,6 +75,22 @@ KNOWN_FLAG_KEYS = {
     "ice_outer_gatewarden_defeated",
     "ice_relic_marker_resolved",
     "ice_wreck_captain_defeated",
+    "earth_final_boss_defeated",
+    "earth_outer_grovekeeper_defeated",
+    "earth_quarry_colossus_defeated",
+    "earth_relic_marker_resolved",
+    "earth_rootwarden_defeated",
+    "thunder_channel_keeper_defeated",
+    "thunder_final_boss_defeated",
+    "thunder_lower_array_warden_defeated",
+    "thunder_plateau_beacon_defeated",
+    "thunder_relic_marker_resolved",
+    "final_demon_king_defeated",
+    "final_echo_vanguard_defeated",
+    "final_echo_warden_defeated",
+    "final_ruin_jailer_defeated",
+    "final_seal_core_defeated",
+    "main_story_cleared",
 }
 
 

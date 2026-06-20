@@ -57,6 +57,30 @@ GUILD_MATERIAL_BUY_PRICES = {
     "mat_ice_frostiron": 52,
     "mat_ice_seal_dust": 58,
     "mat_ice_deep_core": 72,
+    "mat_earth_moss_loam": 76,
+    "mat_earth_rootfiber": 82,
+    "mat_earth_spore_cap": 84,
+    "mat_earth_quarry_stone": 90,
+    "mat_earth_petrified_bark": 96,
+    "mat_earth_leyline_shard": 108,
+    "mat_earth_seal_clay": 116,
+    "mat_earth_deep_core": 132,
+    "mat_thunder_charge_sand": 140,
+    "mat_thunder_copper_vein": 148,
+    "mat_thunder_stormglass": 154,
+    "mat_thunder_sky_stone": 164,
+    "mat_thunder_conductor_rod": 172,
+    "mat_thunder_cloud_essence": 188,
+    "mat_thunder_seal_spark": 202,
+    "mat_thunder_deep_core": 226,
+    "mat_final_echo_ash": 240,
+    "mat_final_frost_memory": 248,
+    "mat_final_root_stone": 256,
+    "mat_final_storm_glass": 264,
+    "mat_final_void_shard": 280,
+    "mat_final_seal_core": 310,
+    "mat_final_demon_core": 340,
+    "mat_final_deep_essence": 360,
 }
 
 STORAGE_UNLOCK_COST = 500
@@ -74,6 +98,15 @@ BOSS_GLEN_INVESTIGATION_ACCEPTED_FLAG = "boss_glen_investigation_accepted"
 FIRE_MARK_SHARD_ID = "key_fire_mark_shard"
 ICE_REGION_UNLOCK = "unlock_ice_region"
 ICE_PHASE_2_DUNGEON_ID = "dungeon_ice_main_phase_2"
+EARTH_REGION_UNLOCK = "unlock_earth_region_preview"
+EARTH_PHASE_2_DUNGEON_ID = "dungeon_earth_main_phase_2"
+THUNDER_REGION_UNLOCK = "unlock_thunder_region_preview"
+THUNDER_PHASE_2_DUNGEON_ID = "dungeon_thunder_main_phase_2"
+FINAL_REGION_UNLOCK = "unlock_final_region_preview"
+FINAL_PHASE_2_DUNGEON_ID = "dungeon_final_main_phase_2"
+FINAL_PHASE_3_DUNGEON_ID = "dungeon_final_main_phase_3"
+FINAL_QUEST_ID = "quest_final_demon_king"
+MAIN_STORY_CLEARED_FLAG = "main_story_cleared"
 
 BOSS_CLEAR_FLAGS = {
     "boss_glen": "boss_glen_defeated",
@@ -83,16 +116,42 @@ BOSS_CLEAR_FLAGS = {
     "boss_ice_frostroot_keeper": "ice_frostroot_keeper_defeated",
     "boss_ice_outer_gatewarden": "ice_outer_gatewarden_defeated",
     "boss_ice_final_seal_lord": "ice_final_boss_defeated",
+    "boss_earth_rootwarden": "earth_rootwarden_defeated",
+    "boss_earth_quarry_colossus": "earth_quarry_colossus_defeated",
+    "boss_earth_outer_grovekeeper": "earth_outer_grovekeeper_defeated",
+    "boss_earth_deep_leyline_lord": "earth_final_boss_defeated",
+    "boss_thunder_plateau_beacon": "thunder_plateau_beacon_defeated",
+    "boss_thunder_channel_keeper": "thunder_channel_keeper_defeated",
+    "boss_thunder_lower_array_warden": "thunder_lower_array_warden_defeated",
+    "boss_thunder_crown_storm_lord": "thunder_final_boss_defeated",
+    "boss_final_echo_vanguard": "final_echo_vanguard_defeated",
+    "boss_final_ruin_jailer": "final_ruin_jailer_defeated",
+    "boss_final_echo_warden": "final_echo_warden_defeated",
+    "boss_final_seal_core": "final_seal_core_defeated",
+    "boss_final_demon_king": "final_demon_king_defeated",
 }
 
 BOSS_REQUIRED_QUESTS = {
     "boss_ice_outer_gatewarden": "quest_ice_main_phase_1",
     "boss_ice_final_seal_lord": "quest_ice_main_phase_2",
+    "boss_earth_outer_grovekeeper": "quest_earth_main_phase_1",
+    "boss_earth_deep_leyline_lord": "quest_earth_main_phase_2",
+    "boss_thunder_lower_array_warden": "quest_thunder_main_phase_1",
+    "boss_thunder_crown_storm_lord": "quest_thunder_main_phase_2",
+    "boss_final_echo_warden": "quest_final_main_phase_1",
+    "boss_final_seal_core": "quest_final_main_phase_2",
+    "boss_final_demon_king": FINAL_QUEST_ID,
 }
 
 BOSS_FREE_CHALLENGE = {
     "boss_ice_wreck_captain",
     "boss_ice_frostroot_keeper",
+    "boss_earth_rootwarden",
+    "boss_earth_quarry_colossus",
+    "boss_thunder_plateau_beacon",
+    "boss_thunder_channel_keeper",
+    "boss_final_echo_vanguard",
+    "boss_final_ruin_jailer",
 }
 
 @dataclass
@@ -223,9 +282,21 @@ def boss_defeated(state: dict, boss_id: str | None) -> bool:
 
 def player_facing_dungeon_ids(state: dict) -> list[str]:
     dungeon_ids = []
-    phase_2_unlocked = is_unlocked(state, ICE_PHASE_2_DUNGEON_ID)
+    ice_phase_2_unlocked = is_unlocked(state, ICE_PHASE_2_DUNGEON_ID)
+    earth_phase_2_unlocked = is_unlocked(state, EARTH_PHASE_2_DUNGEON_ID)
+    thunder_phase_2_unlocked = is_unlocked(state, THUNDER_PHASE_2_DUNGEON_ID)
+    final_phase_2_unlocked = is_unlocked(state, FINAL_PHASE_2_DUNGEON_ID)
+    final_phase_3_unlocked = is_unlocked(state, FINAL_PHASE_3_DUNGEON_ID)
     for dungeon_id, dungeon in DUNGEONS.items():
-        if dungeon_id == "dungeon_ice_main_phase_1" and phase_2_unlocked:
+        if dungeon_id == "dungeon_ice_main_phase_1" and ice_phase_2_unlocked:
+            continue
+        if dungeon_id == "dungeon_earth_main_phase_1" and earth_phase_2_unlocked:
+            continue
+        if dungeon_id == "dungeon_thunder_main_phase_1" and thunder_phase_2_unlocked:
+            continue
+        if dungeon_id == "dungeon_final_main_phase_1" and (final_phase_2_unlocked or final_phase_3_unlocked):
+            continue
+        if dungeon_id == "dungeon_final_main_phase_2" and final_phase_3_unlocked:
             continue
         if is_unlocked(state, dungeon.get("unlock")):
             dungeon_ids.append(dungeon_id)
@@ -301,6 +372,8 @@ def ready_quest_titles(state: dict) -> list[str]:
     ]
 
 def next_step_hint(state: dict) -> str:
+    if state.get("flags", {}).get(MAIN_STORY_CLEARED_FLAG):
+        return "Main story cleared. Save if you want to keep this clear file, or start a new run from the title screen."
     if can_ask_fire_mark_guild_inquiry(state):
         return "三枚火之印記碎片正在共鳴，回冒險者工會詢問諾亞。"
     if should_show_fire_mark_church_lookup(state):
@@ -319,6 +392,36 @@ def next_step_hint(state: dict) -> str:
         return "前往灰燼裂谷，帶回偵查素材。"
     if "quest_ice_main_phase_2" in state["completed_quests"] and "quest_ice_return_handoff" not in state["completed_quests"]:
         return "Return to the Guild and file the Ice seal handoff report."
+    if "quest_earth_main_phase_2" in state["completed_quests"] and "quest_earth_return_handoff" not in state["completed_quests"]:
+        return "Return to the Guild and file the Earth seal handoff report."
+    if "quest_thunder_main_phase_2" in state["completed_quests"] and "quest_thunder_return_handoff" not in state["completed_quests"]:
+        return "Return to the Guild and file the Thunder seal handoff report."
+    if "quest_final_main_phase_2" in state["completed_quests"] and FINAL_QUEST_ID not in state["completed_quests"]:
+        return "The Demon King's throne route is open. Enter the final phase and finish Q5."
+    if "quest_final_main_phase_1" in state["completed_quests"] and "quest_final_main_phase_2" not in state["completed_quests"]:
+        return "The final seal core is open. Defeat the Seal Core for Q4."
+    if "quest_final_minor_b" in state["completed_quests"] and "quest_final_main_phase_1" not in state["completed_quests"]:
+        return "The Demon King's Gate is open. Break the Elemental Echo Gate for Q3."
+    if "quest_final_minor_a" in state["completed_quests"] and "quest_final_minor_b" not in state["completed_quests"]:
+        return "Broken Seal Ruins is open. Gather final approach samples for Q2."
+    if is_unlocked(state, FINAL_REGION_UNLOCK) and "quest_final_minor_a" not in state["completed_quests"]:
+        return "Final region is open. Start with Echoing Frontline and prepare for the Demon King."
+    if "quest_thunder_main_phase_1" in state["completed_quests"] and "quest_thunder_main_phase_2" not in state["completed_quests"]:
+        return "Lightning Tower crown route is open. Push to the Crown Array seal."
+    if "quest_thunder_minor_b" in state["completed_quests"] and "quest_thunder_main_phase_1" not in state["completed_quests"]:
+        return "Lightning Tower lower array is open. Defeat the Warden for Q3."
+    if "quest_thunder_minor_a" in state["completed_quests"] and "quest_thunder_minor_b" not in state["completed_quests"]:
+        return "Conductive Channel is open. Gather the anomaly samples for Q2."
+    if is_unlocked(state, THUNDER_REGION_UNLOCK) and "quest_thunder_minor_a" not in state["completed_quests"]:
+        return "Thunder route is open. Start with Stormbreak Plateau and report Q1 samples."
+    if "quest_earth_main_phase_1" in state["completed_quests"] and "quest_earth_main_phase_2" not in state["completed_quests"]:
+        return "Leyline Grove deeper route is open. Push to the Deep Heart seal."
+    if "quest_earth_minor_b" in state["completed_quests"] and "quest_earth_main_phase_1" not in state["completed_quests"]:
+        return "Leyline Grove outer ring is open. Defeat the Grovekeeper for Q3."
+    if "quest_earth_minor_a" in state["completed_quests"] and "quest_earth_minor_b" not in state["completed_quests"]:
+        return "Old Quarry Vein is open. Gather the anomaly samples for Q2."
+    if is_unlocked(state, EARTH_REGION_UNLOCK) and "quest_earth_minor_a" not in state["completed_quests"]:
+        return "Earth route is open. Start with Rootfall Wildwood and report Q1 samples."
     if "quest_ice_main_phase_1" in state["completed_quests"] and "quest_ice_main_phase_2" not in state["completed_quests"]:
         return "霜鐵古城 deeper route is open. Push to the inner palace seal."
     if "quest_ice_minor_b" in state["completed_quests"] and "quest_ice_main_phase_1" not in state["completed_quests"]:
@@ -1816,6 +1919,36 @@ def quest_unlocked(state: dict, quest_id: str) -> bool:
         return "quest_ice_main_phase_1" in state["completed_quests"]
     if quest_id == "quest_ice_return_handoff":
         return "quest_ice_main_phase_2" in state["completed_quests"]
+    if quest_id == "quest_earth_minor_a":
+        return is_unlocked(state, EARTH_REGION_UNLOCK)
+    if quest_id == "quest_earth_minor_b":
+        return "quest_earth_minor_a" in state["completed_quests"]
+    if quest_id == "quest_earth_main_phase_1":
+        return "quest_earth_minor_b" in state["completed_quests"]
+    if quest_id == "quest_earth_main_phase_2":
+        return "quest_earth_main_phase_1" in state["completed_quests"]
+    if quest_id == "quest_earth_return_handoff":
+        return "quest_earth_main_phase_2" in state["completed_quests"]
+    if quest_id == "quest_thunder_minor_a":
+        return is_unlocked(state, THUNDER_REGION_UNLOCK)
+    if quest_id == "quest_thunder_minor_b":
+        return "quest_thunder_minor_a" in state["completed_quests"]
+    if quest_id == "quest_thunder_main_phase_1":
+        return "quest_thunder_minor_b" in state["completed_quests"]
+    if quest_id == "quest_thunder_main_phase_2":
+        return "quest_thunder_main_phase_1" in state["completed_quests"]
+    if quest_id == "quest_thunder_return_handoff":
+        return "quest_thunder_main_phase_2" in state["completed_quests"]
+    if quest_id == "quest_final_minor_a":
+        return is_unlocked(state, FINAL_REGION_UNLOCK)
+    if quest_id == "quest_final_minor_b":
+        return "quest_final_minor_a" in state["completed_quests"]
+    if quest_id == "quest_final_main_phase_1":
+        return "quest_final_minor_b" in state["completed_quests"]
+    if quest_id == "quest_final_main_phase_2":
+        return "quest_final_main_phase_1" in state["completed_quests"]
+    if quest_id == FINAL_QUEST_ID:
+        return "quest_final_main_phase_2" in state["completed_quests"]
     return False
 
 def quest_ready(state: dict, quest_id: str) -> bool:
@@ -2226,6 +2359,32 @@ def clear_dungeon_boss(state: dict, boss_id: str, run_log: dict) -> None:
         clear_ice_outer_gatewarden(state, run_log)
     elif boss_id == "boss_ice_final_seal_lord":
         clear_ice_final_seal_lord(state, run_log)
+    elif boss_id == "boss_earth_rootwarden":
+        clear_earth_rootwarden(state, run_log)
+    elif boss_id == "boss_earth_quarry_colossus":
+        clear_earth_quarry_colossus(state, run_log)
+    elif boss_id == "boss_earth_outer_grovekeeper":
+        clear_earth_outer_grovekeeper(state, run_log)
+    elif boss_id == "boss_earth_deep_leyline_lord":
+        clear_earth_deep_leyline_lord(state, run_log)
+    elif boss_id == "boss_thunder_plateau_beacon":
+        clear_thunder_plateau_beacon(state, run_log)
+    elif boss_id == "boss_thunder_channel_keeper":
+        clear_thunder_channel_keeper(state, run_log)
+    elif boss_id == "boss_thunder_lower_array_warden":
+        clear_thunder_lower_array_warden(state, run_log)
+    elif boss_id == "boss_thunder_crown_storm_lord":
+        clear_thunder_crown_storm_lord(state, run_log)
+    elif boss_id == "boss_final_echo_vanguard":
+        clear_final_echo_vanguard(state, run_log)
+    elif boss_id == "boss_final_ruin_jailer":
+        clear_final_ruin_jailer(state, run_log)
+    elif boss_id == "boss_final_echo_warden":
+        clear_final_echo_warden(state, run_log)
+    elif boss_id == "boss_final_seal_core":
+        clear_final_seal_core(state, run_log)
+    elif boss_id == "boss_final_demon_king":
+        clear_final_demon_king(state, run_log)
 
 def explore_dungeon(state: dict, dungeon_id: str) -> None:
     dungeon = DUNGEONS[dungeon_id]
@@ -2311,6 +2470,10 @@ def explore_dungeon(state: dict, dungeon_id: str) -> None:
                 return
             if result is True:
                 clear_dungeon_boss(state, boss_id, run_log)
+                if state.pop("_ending_pending", False):
+                    show_main_story_ending(state)
+                    state["_return_to_title"] = True
+                    return
     elif (
         dungeon_id == "dungeon_cinder_seal_depths"
         and boss_id == "boss_cinder_seal_sentinel"
@@ -2452,6 +2615,156 @@ def clear_ice_final_seal_lord(state: dict, run_log: dict) -> None:
     add_loot(state, "key_ice_relic_marker_source", 1, run_log)
     add_loot(state, "mat_ice_deep_core", 2, run_log)
     print("\nFinal Seal Lord defeated. Ice relic marker source recovered; no relic effect is active.")
+
+def clear_earth_rootwarden(state: dict, run_log: dict) -> None:
+    if state["flags"].get("earth_rootwarden_defeated"):
+        return
+    state["flags"]["earth_rootwarden_defeated"] = True
+    add_loot(state, "key_earth_rootwarden_seed", 1, run_log)
+    add_loot(state, "mat_earth_rootfiber", 2, run_log)
+    print("\nRootwarden defeated. Key proof recovered: Rootwarden Seed x1.")
+
+def clear_earth_quarry_colossus(state: dict, run_log: dict) -> None:
+    if state["flags"].get("earth_quarry_colossus_defeated"):
+        return
+    state["flags"]["earth_quarry_colossus_defeated"] = True
+    add_loot(state, "key_earth_quarry_core", 1, run_log)
+    add_loot(state, "mat_earth_quarry_stone", 2, run_log)
+    print("\nQuarry Colossus defeated. Key proof recovered: Quarry Colossus Core x1.")
+
+def clear_earth_outer_grovekeeper(state: dict, run_log: dict) -> None:
+    if state["flags"].get("earth_outer_grovekeeper_defeated"):
+        return
+    state["flags"]["earth_outer_grovekeeper_defeated"] = True
+    add_loot(state, "key_earth_outer_grove_sigils", 1, run_log)
+    add_loot(state, "mat_earth_leyline_shard", 2, run_log)
+    print("\nOuter Grovekeeper defeated. Q3 can now be reported at the Guild.")
+
+def clear_earth_deep_leyline_lord(state: dict, run_log: dict) -> None:
+    if state["flags"].get("earth_final_boss_defeated"):
+        return
+    state["flags"]["earth_final_boss_defeated"] = True
+    state["flags"]["earth_relic_marker_resolved"] = True
+    add_loot(state, "key_earth_relic_marker_source", 1, run_log)
+    add_loot(state, "mat_earth_deep_core", 2, run_log)
+    print("\nDeep Leyline Lord defeated. Earth relic marker source recovered; no relic effect is active.")
+
+def clear_thunder_plateau_beacon(state: dict, run_log: dict) -> None:
+    if state["flags"].get("thunder_plateau_beacon_defeated"):
+        return
+    state["flags"]["thunder_plateau_beacon_defeated"] = True
+    add_loot(state, "key_thunder_plateau_beacon", 1, run_log)
+    add_loot(state, "mat_thunder_copper_vein", 2, run_log)
+    print("\nPlateau Beacon defeated. Key proof recovered: Plateau Beacon x1.")
+
+def clear_thunder_channel_keeper(state: dict, run_log: dict) -> None:
+    if state["flags"].get("thunder_channel_keeper_defeated"):
+        return
+    state["flags"]["thunder_channel_keeper_defeated"] = True
+    add_loot(state, "key_thunder_channel_core", 1, run_log)
+    add_loot(state, "mat_thunder_sky_stone", 2, run_log)
+    print("\nChannel Keeper defeated. Key proof recovered: Channel Core x1.")
+
+def clear_thunder_lower_array_warden(state: dict, run_log: dict) -> None:
+    if state["flags"].get("thunder_lower_array_warden_defeated"):
+        return
+    state["flags"]["thunder_lower_array_warden_defeated"] = True
+    add_loot(state, "key_thunder_lower_array_sigils", 1, run_log)
+    add_loot(state, "mat_thunder_cloud_essence", 2, run_log)
+    print("\nLower Array Warden defeated. Q3 can now be reported at the Guild.")
+
+def clear_thunder_crown_storm_lord(state: dict, run_log: dict) -> None:
+    if state["flags"].get("thunder_final_boss_defeated"):
+        return
+    state["flags"]["thunder_final_boss_defeated"] = True
+    state["flags"]["thunder_relic_marker_resolved"] = True
+    add_loot(state, "key_thunder_relic_marker_source", 1, run_log)
+    add_loot(state, "mat_thunder_deep_core", 2, run_log)
+    print("\nCrown Storm Lord defeated. Thunder relic marker source recovered; no relic effect is active.")
+
+def clear_final_echo_vanguard(state: dict, run_log: dict) -> None:
+    if state["flags"].get("final_echo_vanguard_defeated"):
+        return
+    state["flags"]["final_echo_vanguard_defeated"] = True
+    add_loot(state, "key_final_vanguard_proof", 1, run_log)
+    add_loot(state, "mat_final_echo_ash", 2, run_log)
+    print("\nFinal Echo Vanguard defeated. Key proof recovered: Final Vanguard Proof x1.")
+
+def clear_final_ruin_jailer(state: dict, run_log: dict) -> None:
+    if state["flags"].get("final_ruin_jailer_defeated"):
+        return
+    state["flags"]["final_ruin_jailer_defeated"] = True
+    add_loot(state, "key_final_ruin_jailer_core", 1, run_log)
+    add_loot(state, "mat_final_root_stone", 2, run_log)
+    print("\nRuin Jailer defeated. Key proof recovered: Ruin Jailer Core x1.")
+
+def clear_final_echo_warden(state: dict, run_log: dict) -> None:
+    if state["flags"].get("final_echo_warden_defeated"):
+        return
+    state["flags"]["final_echo_warden_defeated"] = True
+    add_loot(state, "key_final_echo_warden_sigils", 1, run_log)
+    add_loot(state, "mat_final_seal_core", 2, run_log)
+    print("\nEcho Warden defeated. Q3 can now be reported at the Guild.")
+
+def clear_final_seal_core(state: dict, run_log: dict) -> None:
+    if state["flags"].get("final_seal_core_defeated"):
+        return
+    state["flags"]["final_seal_core_defeated"] = True
+    add_loot(state, "key_final_seal_core_sigils", 1, run_log)
+    add_loot(state, "mat_final_demon_core", 2, run_log)
+    print("\nFinal Seal Core broken. Q4 can now be reported at the Guild.")
+
+def complete_final_quest_from_boss(state: dict) -> None:
+    if FINAL_QUEST_ID in state["completed_quests"]:
+        return
+    quest = QUESTS[FINAL_QUEST_ID]
+    reward = quest["reward"]
+    state["gold"] += reward.get("gold", 0)
+    guild_gain = reward.get("guild", 0)
+    if state["equipment"].get("special") == "special_trial_badge":
+        guild_gain = math.ceil(guild_gain * 1.05)
+    state["guild_points"] += guild_gain
+    for item_id, qty in reward.get("items", {}).items():
+        add_item(state, item_id, qty)
+    for key in quest.get("unlocks", []):
+        unlock(state, key)
+    state["completed_quests"].append(FINAL_QUEST_ID)
+    print(f"Final Q5 completed. Guild reputation +{guild_gain}.")
+
+def clear_final_demon_king(state: dict, run_log: dict) -> None:
+    if state["flags"].get("final_demon_king_defeated"):
+        return
+    state["flags"]["final_demon_king_defeated"] = True
+    state["flags"][MAIN_STORY_CLEARED_FLAG] = True
+    add_loot(state, "key_final_demon_king_mark", 1, run_log)
+    add_loot(state, "mat_final_demon_core", 2, run_log)
+    complete_final_quest_from_boss(state)
+    state["_ending_pending"] = True
+    print("\nDemon King defeated. The main story ending is ready.")
+
+def show_main_story_ending(state: dict) -> None:
+    render_panel(
+        "Ending",
+        [
+            "The Demon King's throne falls silent.",
+            "The four elemental marks answer one another: ash, frost, root, and thunder.",
+            "The maze does not vanish, but its hunger loosens. Roads that once twisted shut begin to breathe again.",
+            f"{state['name']} returns to the Guild as the first adventurer to close the Element Maze's main seal.",
+        ],
+        border_style="yellow",
+    )
+    pause()
+    render_panel(
+        "MAIN STORY CLEAR",
+        [
+            f"Clear adventurer: {state['name']} / {state['job']} Lv{state['level']}",
+            f"Guild reputation: {state['guild_points']}",
+            "This clear state is not saved automatically.",
+            "Returning to title screen.",
+        ],
+        border_style="green",
+    )
+    pause()
 
 def element_multiplier(attack_element: str, target_element: str, enemy_buffs: dict | None = None) -> float:
     multiplier = 1.0
@@ -2964,7 +3277,7 @@ def tick_effects(state: dict, player_buffs: dict, enemy_buffs: dict) -> list[str
             del buffs[key]
     return events
 
-def main_loop(state: dict) -> None:
+def main_loop(state: dict) -> str | None:
     while True:
         clamp_vitals(state)
         main_options = [
@@ -2990,6 +3303,8 @@ def main_loop(state: dict) -> None:
             town_menu(state)
         elif choice == 3:
             dungeon_menu(state)
+            if state.pop("_return_to_title", False):
+                return "title"
         elif choice == 4:
             bestiary_menu(state)
         elif choice == 5:
@@ -3061,6 +3376,96 @@ def smoke_test() -> None:
     ice_state["completed_quests"].append("quest_ice_main_phase_2")
     assert quest_unlocked(ice_state, "quest_ice_return_handoff")
     assert quest_ready(ice_state, "quest_ice_return_handoff")
+    earth_state = create_state("Earth route smoke", next(iter(JOBS)))
+    unlock(earth_state, EARTH_REGION_UNLOCK)
+    assert quest_unlocked(earth_state, "quest_earth_minor_a")
+    assert "dungeon_earth_minor_a" in player_facing_dungeon_ids(earth_state)
+    assert boss_available_at_dungeon_end(earth_state, "dungeon_earth_minor_a", "boss_earth_rootwarden")
+    earth_state["completed_quests"].append("quest_earth_minor_a")
+    unlock(earth_state, "dungeon_earth_minor_b")
+    assert quest_unlocked(earth_state, "quest_earth_minor_b")
+    assert boss_available_at_dungeon_end(earth_state, "dungeon_earth_minor_b", "boss_earth_quarry_colossus")
+    earth_state["completed_quests"].append("quest_earth_minor_b")
+    unlock(earth_state, "dungeon_earth_main_phase_1")
+    assert quest_unlocked(earth_state, "quest_earth_main_phase_1")
+    assert boss_available_at_dungeon_end(earth_state, "dungeon_earth_main_phase_1", "boss_earth_outer_grovekeeper")
+    earth_state["flags"]["earth_outer_grovekeeper_defeated"] = True
+    assert quest_ready(earth_state, "quest_earth_main_phase_1")
+    earth_state["completed_quests"].append("quest_earth_main_phase_1")
+    unlock(earth_state, "dungeon_earth_main_phase_2")
+    assert "dungeon_earth_main_phase_1" not in player_facing_dungeon_ids(earth_state)
+    assert "dungeon_earth_main_phase_2" in player_facing_dungeon_ids(earth_state)
+    assert quest_unlocked(earth_state, "quest_earth_main_phase_2")
+    assert boss_available_at_dungeon_end(earth_state, "dungeon_earth_main_phase_2", "boss_earth_deep_leyline_lord")
+    earth_state["flags"]["earth_final_boss_defeated"] = True
+    earth_state["flags"]["earth_relic_marker_resolved"] = True
+    assert quest_ready(earth_state, "quest_earth_main_phase_2")
+    earth_state["completed_quests"].append("quest_earth_main_phase_2")
+    assert quest_unlocked(earth_state, "quest_earth_return_handoff")
+    assert quest_ready(earth_state, "quest_earth_return_handoff")
+    thunder_state = create_state("Thunder route smoke", next(iter(JOBS)))
+    unlock(thunder_state, THUNDER_REGION_UNLOCK)
+    assert quest_unlocked(thunder_state, "quest_thunder_minor_a")
+    assert "dungeon_thunder_minor_a" in player_facing_dungeon_ids(thunder_state)
+    assert boss_available_at_dungeon_end(thunder_state, "dungeon_thunder_minor_a", "boss_thunder_plateau_beacon")
+    thunder_state["completed_quests"].append("quest_thunder_minor_a")
+    unlock(thunder_state, "dungeon_thunder_minor_b")
+    assert quest_unlocked(thunder_state, "quest_thunder_minor_b")
+    assert boss_available_at_dungeon_end(thunder_state, "dungeon_thunder_minor_b", "boss_thunder_channel_keeper")
+    thunder_state["completed_quests"].append("quest_thunder_minor_b")
+    unlock(thunder_state, "dungeon_thunder_main_phase_1")
+    assert quest_unlocked(thunder_state, "quest_thunder_main_phase_1")
+    assert boss_available_at_dungeon_end(thunder_state, "dungeon_thunder_main_phase_1", "boss_thunder_lower_array_warden")
+    thunder_state["flags"]["thunder_lower_array_warden_defeated"] = True
+    assert quest_ready(thunder_state, "quest_thunder_main_phase_1")
+    thunder_state["completed_quests"].append("quest_thunder_main_phase_1")
+    unlock(thunder_state, "dungeon_thunder_main_phase_2")
+    assert "dungeon_thunder_main_phase_1" not in player_facing_dungeon_ids(thunder_state)
+    assert "dungeon_thunder_main_phase_2" in player_facing_dungeon_ids(thunder_state)
+    assert quest_unlocked(thunder_state, "quest_thunder_main_phase_2")
+    assert boss_available_at_dungeon_end(thunder_state, "dungeon_thunder_main_phase_2", "boss_thunder_crown_storm_lord")
+    thunder_state["flags"]["thunder_final_boss_defeated"] = True
+    thunder_state["flags"]["thunder_relic_marker_resolved"] = True
+    assert quest_ready(thunder_state, "quest_thunder_main_phase_2")
+    thunder_state["completed_quests"].append("quest_thunder_main_phase_2")
+    assert quest_unlocked(thunder_state, "quest_thunder_return_handoff")
+    assert quest_ready(thunder_state, "quest_thunder_return_handoff")
+    final_state = create_state("Final route smoke", next(iter(JOBS)))
+    unlock(final_state, FINAL_REGION_UNLOCK)
+    assert quest_unlocked(final_state, "quest_final_minor_a")
+    assert "dungeon_final_minor_a" in player_facing_dungeon_ids(final_state)
+    assert boss_available_at_dungeon_end(final_state, "dungeon_final_minor_a", "boss_final_echo_vanguard")
+    final_state["completed_quests"].append("quest_final_minor_a")
+    unlock(final_state, "dungeon_final_minor_b")
+    assert quest_unlocked(final_state, "quest_final_minor_b")
+    assert boss_available_at_dungeon_end(final_state, "dungeon_final_minor_b", "boss_final_ruin_jailer")
+    final_state["completed_quests"].append("quest_final_minor_b")
+    unlock(final_state, "dungeon_final_main_phase_1")
+    assert quest_unlocked(final_state, "quest_final_main_phase_1")
+    assert boss_available_at_dungeon_end(final_state, "dungeon_final_main_phase_1", "boss_final_echo_warden")
+    final_state["flags"]["final_echo_warden_defeated"] = True
+    assert quest_ready(final_state, "quest_final_main_phase_1")
+    final_state["completed_quests"].append("quest_final_main_phase_1")
+    unlock(final_state, FINAL_PHASE_2_DUNGEON_ID)
+    assert "dungeon_final_main_phase_1" not in player_facing_dungeon_ids(final_state)
+    assert "dungeon_final_main_phase_2" in player_facing_dungeon_ids(final_state)
+    assert quest_unlocked(final_state, "quest_final_main_phase_2")
+    assert boss_available_at_dungeon_end(final_state, "dungeon_final_main_phase_2", "boss_final_seal_core")
+    final_state["flags"]["final_seal_core_defeated"] = True
+    assert quest_ready(final_state, "quest_final_main_phase_2")
+    final_state["completed_quests"].append("quest_final_main_phase_2")
+    unlock(final_state, FINAL_PHASE_3_DUNGEON_ID)
+    assert "dungeon_final_main_phase_1" not in player_facing_dungeon_ids(final_state)
+    assert "dungeon_final_main_phase_2" not in player_facing_dungeon_ids(final_state)
+    assert "dungeon_final_main_phase_3" in player_facing_dungeon_ids(final_state)
+    assert quest_unlocked(final_state, FINAL_QUEST_ID)
+    assert not quest_ready(final_state, FINAL_QUEST_ID)
+    assert boss_available_at_dungeon_end(final_state, "dungeon_final_main_phase_3", "boss_final_demon_king")
+    clear_final_demon_king(final_state, {"gold": 0, "items": {}})
+    assert final_state["flags"]["final_demon_king_defeated"]
+    assert final_state["flags"][MAIN_STORY_CLEARED_FLAG]
+    assert FINAL_QUEST_ID in final_state["completed_quests"]
+    assert final_state.pop("_ending_pending", False)
     assert try_register_bestiary(state, "mon_moss_rat")
     assert state["bestiary"] == ["mon_moss_rat"]
     assert not try_register_bestiary(state, "mon_moss_rat")
@@ -3106,11 +3511,13 @@ def main() -> None:
         smoke_test()
         return
 
-    state = None
-    has_save = SAVE_PATH.exists()
-    choice = start_screen_panel(has_save)
-    if has_save and choice == 2:
-        state = load_game()
-    if state is None:
-        state = new_game()
-    main_loop(state)
+    while True:
+        state = None
+        has_save = SAVE_PATH.exists()
+        choice = start_screen_panel(has_save)
+        if has_save and choice == 2:
+            state = load_game()
+        if state is None:
+            state = new_game()
+        if main_loop(state) != "title":
+            return
