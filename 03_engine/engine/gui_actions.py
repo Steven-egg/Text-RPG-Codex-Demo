@@ -78,6 +78,46 @@ WORLD_MAP_PRESENTATION = {
         "detail_note": "目前由 runtime unlock 狀態決定是否可前往。",
         "exploration_rating": "高風險",
     },
+    "dungeon_ice_minor_a": {
+        "location_id": "ice_minor_a",
+        "position": {"x": 67, "y": 18},
+        "tone": "ice",
+        "icon_token": "I",
+        "preview_role": "wreck",
+        "description": "Ice route minor dungeon A / playable skeleton.",
+        "detail_note": "Ghost-Sail Wreck is a live runtime dungeon; names and art are placeholder.",
+        "exploration_rating": "medium",
+    },
+    "dungeon_ice_minor_b": {
+        "location_id": "ice_minor_b",
+        "position": {"x": 76, "y": 28},
+        "tone": "ice",
+        "icon_token": "I",
+        "preview_role": "cave",
+        "description": "Ice route minor dungeon B / playable skeleton.",
+        "detail_note": "Frostroot Cavern is a live runtime dungeon; names and art are placeholder.",
+        "exploration_rating": "medium",
+    },
+    "dungeon_ice_main_phase_1": {
+        "location_id": "ice_main_fortress",
+        "position": {"x": 86, "y": 20},
+        "tone": "ice",
+        "icon_token": "I",
+        "preview_role": "fortress",
+        "description": "Frostiron Keep main dungeon / outer city phase.",
+        "detail_note": "This is the same main dungeon location; phase 2 replaces it after Q3.",
+        "exploration_rating": "high",
+    },
+    "dungeon_ice_main_phase_2": {
+        "location_id": "ice_main_fortress",
+        "position": {"x": 86, "y": 20},
+        "tone": "ice",
+        "icon_token": "I",
+        "preview_role": "fortress",
+        "description": "Frostiron Keep main dungeon / inner palace phase.",
+        "detail_note": "This is the same main dungeon location; it is not a fourth Ice world-map location.",
+        "exploration_rating": "high",
+    },
 }
 WORLD_MAP_ROUTE_SEGMENTS = [
     {"id": "town_to_cave", "from": "border_town", "to": "moss_cave", "points": [[35, 22], [29, 34], [24, 48]]},
@@ -355,14 +395,7 @@ class GuiRuntimeSession:
             if current_step >= total_steps:
                 # Check if the boss was defeated to record the defeat event log
                 boss_id = dungeon.get("boss")
-                boss_defeated = False
-                if boss_id:
-                    if boss_id == "boss_glen":
-                        boss_defeated = bool(state.get("flags", {}).get("boss_glen_defeated"))
-                    elif boss_id == "boss_ash_guardian":
-                        boss_defeated = bool(state.get("flags", {}).get("ash_guardian_defeated"))
-                    elif boss_id == "boss_cinder_seal_sentinel":
-                        boss_defeated = bool(state.get("flags", {}).get("cinder_seal_sentinel_defeated"))
+                boss_defeated = game.boss_defeated(state, boss_id)
 
                 if boss_defeated and not exploration.get("boss_defeat_logged"):
                     exploration["boss_defeat_logged"] = True
@@ -777,6 +810,9 @@ class GuiRuntimeSession:
                 reward_lines.append("🔑 取得戰利品：血跡地圖 x1、火之印記碎片 x1、熔岩碎片 x2。")
             elif enemy_id in {"boss_ash_guardian", "boss_cinder_seal_sentinel"}:
                 reward_lines.append("🔑 取得戰利品：火之印記碎片 x1。")
+
+        if combat.get("boss") and enemy_id.startswith("boss_ice_"):
+            reward_lines.append("Ice Boss proof recovered. Return to the Guild if a quest is ready.")
 
         combat["outcome"] = "victory"
         combat["last_action_summary"] = " / ".join(summary_lines[:2]) if summary_lines else f"擊敗 {enemy['name']}。"
@@ -1756,14 +1792,7 @@ class GuiRuntimeSession:
             else:
                 narrative_msg = f"你正在探索 {dungeon['name']}。注意維持小隊的 HP 與 MP，小心前方的未知遭遇。"
 
-        boss_defeated = False
-        if boss_id:
-            if boss_id == "boss_glen":
-                boss_defeated = bool(state.get("flags", {}).get("boss_glen_defeated"))
-            elif boss_id == "boss_ash_guardian":
-                boss_defeated = bool(state.get("flags", {}).get("ash_guardian_defeated"))
-            elif boss_id == "boss_cinder_seal_sentinel":
-                boss_defeated = bool(state.get("flags", {}).get("cinder_seal_sentinel_defeated"))
+        boss_defeated = game.boss_defeated(state, boss_id)
 
         hp_ratio = state["current_hp"] / stats["max_hp"] if stats["max_hp"] > 0 else 1.0
         if hp_ratio > 0.6:
@@ -1800,7 +1829,13 @@ class GuiRuntimeSession:
                 else:
                     boss_state_label = "深處有異動 (需要完成偵查)"
             else:
-                boss_state_label = boss_label(boss_id)
+                label = boss_label(boss_id)
+                if game.boss_defeated(state, boss_id):
+                    boss_state_label = f"{label} (defeated)"
+                elif game.boss_available_at_dungeon_end(state, exploration["dungeon_id"], boss_id):
+                    boss_state_label = f"{label} (available)"
+                else:
+                    boss_state_label = f"{label} (locked)"
 
         return {
             "screen_id": "dungeon_exploration",
@@ -2184,6 +2219,10 @@ def world_map_model(state: dict[str, Any]) -> dict[str, Any]:
     ]
     unlocked_location_ids = {"border_town"}
     for dungeon_id, dungeon in DUNGEONS.items():
+        if dungeon_id == "dungeon_ice_main_phase_1" and game.is_unlocked(state, "dungeon_ice_main_phase_2"):
+            continue
+        if dungeon_id == "dungeon_ice_main_phase_2" and not game.is_unlocked(state, "dungeon_ice_main_phase_2"):
+            continue
         presentation = WORLD_MAP_PRESENTATION.get(
             dungeon_id,
             {

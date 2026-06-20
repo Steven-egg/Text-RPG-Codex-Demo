@@ -49,6 +49,8 @@ STORY_UNLOCK_KEYS = {
     "second_act_preview",
     "unlock_act_2",
     "unlock_ash_ravine",
+    "unlock_ice_region",
+    "unlock_earth_region_preview",
 }
 
 
@@ -66,6 +68,11 @@ KNOWN_FLAG_KEYS = {
     "fire_mark_church_bridge_done",
     "fire_mark_church_lookup_done",
     "fire_mark_guild_inquiry_done",
+    "ice_final_boss_defeated",
+    "ice_frostroot_keeper_defeated",
+    "ice_outer_gatewarden_defeated",
+    "ice_relic_marker_resolved",
+    "ice_wreck_captain_defeated",
 }
 
 

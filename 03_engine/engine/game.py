@@ -49,6 +49,14 @@ GUILD_MATERIAL_BUY_PRICES = {
     "mat_ravine_ash": 28,
     "mat_charred_iron": 32,
     "mat_flame_stone_refined": 45,
+    "mat_ice_salt": 32,
+    "mat_ice_saltcloth": 36,
+    "mat_ice_wreck_plank": 38,
+    "mat_ice_frostroot": 40,
+    "mat_ice_blue_stone": 44,
+    "mat_ice_frostiron": 52,
+    "mat_ice_seal_dust": 58,
+    "mat_ice_deep_core": 72,
 }
 
 STORAGE_UNLOCK_COST = 500
@@ -64,6 +72,28 @@ FIRE_MARK_CHURCH_LOOKUP_FLAG = "fire_mark_church_lookup_done"
 BOSS_GLEN_SIGHTED_FLAG = "boss_glen_sighted"
 BOSS_GLEN_INVESTIGATION_ACCEPTED_FLAG = "boss_glen_investigation_accepted"
 FIRE_MARK_SHARD_ID = "key_fire_mark_shard"
+ICE_REGION_UNLOCK = "unlock_ice_region"
+ICE_PHASE_2_DUNGEON_ID = "dungeon_ice_main_phase_2"
+
+BOSS_CLEAR_FLAGS = {
+    "boss_glen": "boss_glen_defeated",
+    "boss_ash_guardian": "ash_guardian_defeated",
+    "boss_cinder_seal_sentinel": "cinder_seal_sentinel_defeated",
+    "boss_ice_wreck_captain": "ice_wreck_captain_defeated",
+    "boss_ice_frostroot_keeper": "ice_frostroot_keeper_defeated",
+    "boss_ice_outer_gatewarden": "ice_outer_gatewarden_defeated",
+    "boss_ice_final_seal_lord": "ice_final_boss_defeated",
+}
+
+BOSS_REQUIRED_QUESTS = {
+    "boss_ice_outer_gatewarden": "quest_ice_main_phase_1",
+    "boss_ice_final_seal_lord": "quest_ice_main_phase_2",
+}
+
+BOSS_FREE_CHALLENGE = {
+    "boss_ice_wreck_captain",
+    "boss_ice_frostroot_keeper",
+}
 
 @dataclass
 class CombatActionResult:
@@ -178,7 +208,28 @@ def unlock(state: dict, key: str) -> None:
 def is_unlocked(state: dict, key: str | None) -> bool:
     if not key:
         return True
+    if key == ICE_REGION_UNLOCK and state.get("flags", {}).get("cinder_seal_sentinel_defeated"):
+        return True
     return key in state["unlocked"] or key in state["completed_quests"]
+
+def boss_clear_flag(boss_id: str | None) -> str | None:
+    if not boss_id:
+        return None
+    return BOSS_CLEAR_FLAGS.get(boss_id)
+
+def boss_defeated(state: dict, boss_id: str | None) -> bool:
+    flag = boss_clear_flag(boss_id)
+    return bool(flag and state.get("flags", {}).get(flag))
+
+def player_facing_dungeon_ids(state: dict) -> list[str]:
+    dungeon_ids = []
+    phase_2_unlocked = is_unlocked(state, ICE_PHASE_2_DUNGEON_ID)
+    for dungeon_id, dungeon in DUNGEONS.items():
+        if dungeon_id == "dungeon_ice_main_phase_1" and phase_2_unlocked:
+            continue
+        if is_unlocked(state, dungeon.get("unlock")):
+            dungeon_ids.append(dungeon_id)
+    return dungeon_ids
 
 def get_stats(state: dict, buffs: dict | None = None) -> dict:
     job = JOBS[state["job"]]
@@ -266,6 +317,16 @@ def next_step_hint(state: dict) -> str:
         return "前往灰燼裂谷終點，挑戰灰燼守衛。"
     if "quest_boss_glen" in state["completed_quests"] and "quest_ash_ravine_scout" not in state["completed_quests"]:
         return "前往灰燼裂谷，帶回偵查素材。"
+    if "quest_ice_main_phase_2" in state["completed_quests"] and "quest_ice_return_handoff" not in state["completed_quests"]:
+        return "Return to the Guild and file the Ice seal handoff report."
+    if "quest_ice_main_phase_1" in state["completed_quests"] and "quest_ice_main_phase_2" not in state["completed_quests"]:
+        return "霜鐵古城 deeper route is open. Push to the inner palace seal."
+    if "quest_ice_minor_b" in state["completed_quests"] and "quest_ice_main_phase_1" not in state["completed_quests"]:
+        return "霜鐵古城 outer city is open. Defeat the Gatewarden for Q3."
+    if "quest_ice_minor_a" in state["completed_quests"] and "quest_ice_minor_b" not in state["completed_quests"]:
+        return "霜根岩窟 is open. Gather the anomaly samples for Q2."
+    if is_unlocked(state, ICE_REGION_UNLOCK) and "quest_ice_minor_a" not in state["completed_quests"]:
+        return "Ice route is open. Start with 幽帆沉船 and report Q1 samples."
     ready_titles = ready_quest_titles(state)
     if ready_titles:
         return f"工會有可交付委託：{ready_titles[0]}。"
@@ -1745,6 +1806,16 @@ def quest_unlocked(state: dict, quest_id: str) -> bool:
         return state["flags"].get("ash_guardian_defeated", False)
     if quest_id == "quest_cinder_depths_scout":
         return "quest_supply_upgrade" in state["completed_quests"]
+    if quest_id == "quest_ice_minor_a":
+        return is_unlocked(state, ICE_REGION_UNLOCK)
+    if quest_id == "quest_ice_minor_b":
+        return "quest_ice_minor_a" in state["completed_quests"]
+    if quest_id == "quest_ice_main_phase_1":
+        return "quest_ice_minor_b" in state["completed_quests"]
+    if quest_id == "quest_ice_main_phase_2":
+        return "quest_ice_main_phase_1" in state["completed_quests"]
+    if quest_id == "quest_ice_return_handoff":
+        return "quest_ice_main_phase_2" in state["completed_quests"]
     return False
 
 def quest_ready(state: dict, quest_id: str) -> bool:
@@ -2080,7 +2151,9 @@ def choose_weighted_event() -> str:
 def dungeon_menu(state: dict) -> None:
     if state["flags"].get("ash_guardian_defeated") and not is_unlocked(state, "dungeon_cinder_seal_depths"):
         unlock(state, "dungeon_cinder_seal_depths")
-    unlocked_dungeons = [dungeon_id for dungeon_id, d in DUNGEONS.items() if is_unlocked(state, d["unlock"])]
+    if state["flags"].get("cinder_seal_sentinel_defeated") and not is_unlocked(state, ICE_REGION_UNLOCK):
+        unlock(state, ICE_REGION_UNLOCK)
+    unlocked_dungeons = player_facing_dungeon_ids(state)
     if not unlocked_dungeons:
         print("目前沒有可探索的迷宮。")
         pause()
@@ -2121,6 +2194,14 @@ def boss_available_at_dungeon_end(state: dict, dungeon_id: str, boss_id: str | N
             and "quest_cinder_depths_scout" in state["completed_quests"]
             and not state["flags"].get("cinder_seal_sentinel_defeated")
         )
+    if boss_id in BOSS_FREE_CHALLENGE:
+        return not boss_defeated(state, boss_id)
+    required_quest = BOSS_REQUIRED_QUESTS.get(boss_id)
+    if required_quest:
+        return (
+            quest_unlocked(state, required_quest)
+            and not boss_defeated(state, boss_id)
+        )
     return False
 
 def boss_challenge_prompt(boss_id: str) -> str:
@@ -2137,6 +2218,14 @@ def clear_dungeon_boss(state: dict, boss_id: str, run_log: dict) -> None:
         clear_ash_guardian(state, run_log)
     elif boss_id == "boss_cinder_seal_sentinel":
         clear_cinder_seal_sentinel(state, run_log)
+    elif boss_id == "boss_ice_wreck_captain":
+        clear_ice_wreck_captain(state, run_log)
+    elif boss_id == "boss_ice_frostroot_keeper":
+        clear_ice_frostroot_keeper(state, run_log)
+    elif boss_id == "boss_ice_outer_gatewarden":
+        clear_ice_outer_gatewarden(state, run_log)
+    elif boss_id == "boss_ice_final_seal_lord":
+        clear_ice_final_seal_lord(state, run_log)
 
 def explore_dungeon(state: dict, dungeon_id: str) -> None:
     dungeon = DUNGEONS[dungeon_id]
@@ -2325,10 +2414,44 @@ def clear_cinder_seal_sentinel(state: dict, run_log: dict) -> None:
     if state["flags"].get("cinder_seal_sentinel_defeated"):
         return
     state["flags"]["cinder_seal_sentinel_defeated"] = True
+    unlock(state, ICE_REGION_UNLOCK)
     add_loot(state, "key_fire_mark_shard", 1, run_log)
     print("\n燼印鎮衛碎裂時，胸口的赤紅刻印凝成第三枚碎片。")
     print("取得 火之印記碎片 x1。")
     print("三枚碎片短暫共鳴，像有一個尚未說出口的名字在灰燼裡亮起。")
+
+def clear_ice_wreck_captain(state: dict, run_log: dict) -> None:
+    if state["flags"].get("ice_wreck_captain_defeated"):
+        return
+    state["flags"]["ice_wreck_captain_defeated"] = True
+    add_loot(state, "key_ice_wreck_captain_log", 1, run_log)
+    add_loot(state, "mat_ice_saltcloth", 2, run_log)
+    print("\nWreck Captain defeated. Key proof recovered: Wreck Captain Log x1.")
+
+def clear_ice_frostroot_keeper(state: dict, run_log: dict) -> None:
+    if state["flags"].get("ice_frostroot_keeper_defeated"):
+        return
+    state["flags"]["ice_frostroot_keeper_defeated"] = True
+    add_loot(state, "key_ice_frostroot_core", 1, run_log)
+    add_loot(state, "mat_ice_frostroot", 2, run_log)
+    print("\nFrostroot Keeper defeated. Key proof recovered: Frostroot Core x1.")
+
+def clear_ice_outer_gatewarden(state: dict, run_log: dict) -> None:
+    if state["flags"].get("ice_outer_gatewarden_defeated"):
+        return
+    state["flags"]["ice_outer_gatewarden_defeated"] = True
+    add_loot(state, "key_ice_outer_gate_sigils", 1, run_log)
+    add_loot(state, "mat_ice_frostiron", 2, run_log)
+    print("\nOuter Gatewarden defeated. Q3 can now be reported at the Guild.")
+
+def clear_ice_final_seal_lord(state: dict, run_log: dict) -> None:
+    if state["flags"].get("ice_final_boss_defeated"):
+        return
+    state["flags"]["ice_final_boss_defeated"] = True
+    state["flags"]["ice_relic_marker_resolved"] = True
+    add_loot(state, "key_ice_relic_marker_source", 1, run_log)
+    add_loot(state, "mat_ice_deep_core", 2, run_log)
+    print("\nFinal Seal Lord defeated. Ice relic marker source recovered; no relic effect is active.")
 
 def element_multiplier(attack_element: str, target_element: str, enemy_buffs: dict | None = None) -> float:
     multiplier = 1.0
@@ -2910,6 +3033,34 @@ def smoke_test() -> None:
     assert quest_unlocked(legacy_glen_state, "quest_boss_glen")
     assert not can_accept_boss_glen_investigation(legacy_glen_state)
     assert not boss_available_at_dungeon_end(legacy_glen_state, "dungeon_scorched_mine", "boss_glen")
+    ice_state = create_state("Ice route smoke", next(iter(JOBS)))
+    ice_state["flags"]["cinder_seal_sentinel_defeated"] = True
+    assert is_unlocked(ice_state, ICE_REGION_UNLOCK)
+    assert quest_unlocked(ice_state, "quest_ice_minor_a")
+    assert "dungeon_ice_minor_a" in player_facing_dungeon_ids(ice_state)
+    assert boss_available_at_dungeon_end(ice_state, "dungeon_ice_minor_a", "boss_ice_wreck_captain")
+    ice_state["completed_quests"].append("quest_ice_minor_a")
+    unlock(ice_state, "dungeon_ice_minor_b")
+    assert quest_unlocked(ice_state, "quest_ice_minor_b")
+    assert boss_available_at_dungeon_end(ice_state, "dungeon_ice_minor_b", "boss_ice_frostroot_keeper")
+    ice_state["completed_quests"].append("quest_ice_minor_b")
+    unlock(ice_state, "dungeon_ice_main_phase_1")
+    assert quest_unlocked(ice_state, "quest_ice_main_phase_1")
+    assert boss_available_at_dungeon_end(ice_state, "dungeon_ice_main_phase_1", "boss_ice_outer_gatewarden")
+    ice_state["flags"]["ice_outer_gatewarden_defeated"] = True
+    assert quest_ready(ice_state, "quest_ice_main_phase_1")
+    ice_state["completed_quests"].append("quest_ice_main_phase_1")
+    unlock(ice_state, "dungeon_ice_main_phase_2")
+    assert "dungeon_ice_main_phase_1" not in player_facing_dungeon_ids(ice_state)
+    assert "dungeon_ice_main_phase_2" in player_facing_dungeon_ids(ice_state)
+    assert quest_unlocked(ice_state, "quest_ice_main_phase_2")
+    assert boss_available_at_dungeon_end(ice_state, "dungeon_ice_main_phase_2", "boss_ice_final_seal_lord")
+    ice_state["flags"]["ice_final_boss_defeated"] = True
+    ice_state["flags"]["ice_relic_marker_resolved"] = True
+    assert quest_ready(ice_state, "quest_ice_main_phase_2")
+    ice_state["completed_quests"].append("quest_ice_main_phase_2")
+    assert quest_unlocked(ice_state, "quest_ice_return_handoff")
+    assert quest_ready(ice_state, "quest_ice_return_handoff")
     assert try_register_bestiary(state, "mon_moss_rat")
     assert state["bestiary"] == ["mon_moss_rat"]
     assert not try_register_bestiary(state, "mon_moss_rat")
