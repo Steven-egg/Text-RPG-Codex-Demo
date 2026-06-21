@@ -22,6 +22,7 @@ try:
         MATERIALS,
         MONSTERS,
         QUESTS,
+        RECIPES,
         SKILLS,
     )
 except Exception as exc:  # pragma: no cover - protects CLI diagnostics.
@@ -234,6 +235,71 @@ def duplicate_names(records: dict[str, list[dict[str, str]]]) -> list[dict[str, 
     ]
 
 
+def check_region_id_drift() -> list[str]:
+    drifts = []
+    region_tokens = ["ice", "earth", "thunder", "final"]
+
+    # 1. Check dungeon element vs ID
+    for dungeon_id, dungeon in DUNGEONS.items():
+        element = dungeon.get("element", "").lower()
+        for r in region_tokens:
+            if element == r:
+                expected_prefix = f"dungeon_{r}_"
+                if not dungeon_id.startswith(expected_prefix):
+                    drifts.append(f"Dungeon `{dungeon_id}` has element `{dungeon.get('element')}` but ID does not start with `{expected_prefix}`")
+
+    # 2. Check monster element vs ID
+    for monster_id, monster in MONSTERS.items():
+        element = monster.get("element", "").lower()
+        for r in region_tokens:
+            if element == r:
+                if monster.get("boss"):
+                    expected_prefix = f"boss_{r}_"
+                else:
+                    expected_prefix = f"mon_{r}_"
+                if not monster_id.startswith(expected_prefix):
+                    drifts.append(f"Monster `{monster_id}` (boss={monster.get('boss')}) has element `{monster.get('element')}` but ID does not start with `{expected_prefix}`")
+
+    # 3. Check ID pattern for anything containing region tokens
+    tables = [
+        ("dungeon", DUNGEONS),
+        ("quest", QUESTS),
+        ("mon", {k: v for k, v in MONSTERS.items() if not v.get("boss")}),
+        ("boss", {k: v for k, v in MONSTERS.items() if v.get("boss")}),
+        ("mat", MATERIALS),
+        ("recipe", RECIPES),
+        ("book", MAGIC_BOOKS),
+        ("eq", EQUIPMENT),
+        ("skill", SKILLS),
+    ]
+
+    for prefix, data in tables:
+        for data_id in data:
+            parts = data_id.split("_")
+            found_regions = [r for r in region_tokens if r in parts]
+            if not found_regions:
+                continue
+
+            allowed_prefixes = [prefix]
+            if prefix == "eq":
+                allowed_prefixes = ["weapon", "armor", "acc", "special"]
+            elif prefix == "mat":
+                allowed_prefixes = ["mat", "key"]
+
+            matched = False
+            for r in found_regions:
+                for p in allowed_prefixes:
+                    if data_id.startswith(f"{p}_{r}_"):
+                        matched = True
+                        break
+                if matched:
+                    break
+
+            if not matched:
+                drifts.append(f"ID `{data_id}` contains region tokens {found_regions} but does not match pattern `prefix_region_*` for any of them")
+    return drifts
+
+
 def naming_warnings(records: dict[str, list[dict[str, str]]]) -> list[str]:
     warnings = []
 
@@ -254,6 +320,10 @@ def naming_warnings(records: dict[str, list[dict[str, str]]]) -> list[str]:
     duplicates = duplicate_names(records)
     if duplicates:
         warnings.append(f"Duplicate display names found: {len(duplicates)}")
+
+    drifts = check_region_id_drift()
+    for drift in drifts:
+        warnings.append(f"Region ID prefix drift: {drift}")
 
     return warnings
 
