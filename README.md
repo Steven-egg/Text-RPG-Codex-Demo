@@ -7,7 +7,7 @@ screen-level verification, and historical MVP notes live in Task Zone files.
 ## Current Stable Capsule
 
 - Latest local checkpoint recorded for this handoff:
-  `[codex] feat(content): add Final display naming pass`
+  `[codex] feat(runtime): add four-seal relic flow`
   (use live `git log` for the exact hash).
 - Element Maze is an expandable playable demo, not a closed demo.
 - The Python CLI runtime remains the gameplay authority.
@@ -19,12 +19,23 @@ screen-level verification, and historical MVP notes live in Task Zone files.
 - Ice, Earth, Thunder, and Final display naming passes are complete in runtime
   data for dungeons, monsters, bosses, materials / key proofs, and quest title /
   description text.
+- Relic v1 is complete as a four-element seal enshrinement flow: Fire, Ice,
+  Earth, and Thunder have true seal key items, enshrined flags, validated Relic
+  metadata, CLI placement behavior, and GUI bridge compatibility for
+  `attune_relic`.
+- Fire now consumes the three fire-mark shards at the Relic table after the
+  Guild / Temple lookup closure, creates and enshrines the Fire seal, and
+  unlocks Ice. Ice, Earth, and Thunder source items convert to true seals
+  without combat bonuses.
+- Final access is gated by all four enshrined elemental seals, not by Thunder Q5
+  alone.
 - `06_tools/naming_inventory_report.py` is a read-only naming inventory helper
   for duplicate display names and lightweight term-shape checks.
 - Final display naming keeps `魔王城` as the region-facing target and reveals
   `災禍邪神 阿巴頓` as the final boss display identity.
-- Real Relic Preview registration, resonance, assembly, or effect behavior
-  remains a future runtime / facility planning gate.
+- Relic resonance, active effects, passive effects, stat bonuses, resistance,
+  skill links, and combat behavior remain future runtime / facility planning
+  gates.
 - Basic facility CLI-parity bridge coverage is complete through Guild material
   buyback.
 - The maintainability checkpoint is stable: shared GUI presentation helpers and
@@ -48,8 +59,9 @@ Current macro decisions:
   Ash Outpost.
 - Ice / Earth / Thunder regions each default to one regional town and three
   dungeons: two minor dungeons plus one main two-phase dungeon.
-- Current display naming coverage is complete through Final. Relic Preview /
-  聖物調查台 remains the next likely read-only planning gate.
+- Current display naming coverage is complete through Final.
+- Four-seal Relic v1 is landed as a progression and Final-gating layer only; it
+  does not open relic effects, combat bonuses, or broad facility systems.
 - This skeleton does not approve runtime, data, schema, save, GUI, bridge,
   combat, class, relic, or asset-pipeline implementation.
 
@@ -133,6 +145,7 @@ Useful direct checks:
 .\.venv\Scripts\python.exe 06_tools\naming_inventory_report.py --region final
 .\.venv\Scripts\python.exe 06_tools\smoke_test_combat_bridge.py
 .\.venv\Scripts\python.exe 06_tools\smoke_test_progression_bridge.py
+.\.venv\Scripts\python.exe 06_tools\smoke_test_temple_bridge.py
 ```
 
 For docs-only cleanup, use markdown/status/diff checks. Runtime smoke is not
@@ -187,7 +200,8 @@ No next implementation target is pre-approved.
 
 Allowed as planning only:
 
-- produce a Relic Preview / 聖物調查台 read-only planning gate
+- produce a CLI world map / region routing read-only planning gate
+- produce an AI tooling / validation pipeline audit for future small tools
 - refine `01_content/world-content-skeleton-v0.1.md`
 - route old Hot Zone details into Task / Cold Zone
 - produce a read-only implementation gate for one exact future slice

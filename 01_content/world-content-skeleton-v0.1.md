@@ -20,11 +20,18 @@ tests and echoes the four elements.
 
 ## Current Runtime Interpretation
 
-As of `56731f1`, the Ice, Earth, Thunder, and Final CLI playable skeletons have
-landed as traversal and progression scaffolds. This means the required quest,
-dungeon, boss, and ending flow can be exercised in the CLI, but it does not mean
-regional content, naming, encounter texture, reward balance, dialogue, or final
-polish are complete.
+As of `9445549`, the Ice, Earth, Thunder, and Final CLI playable skeletons have
+landed as traversal and progression scaffolds, display naming is complete
+through Final, and Relic v1 has landed as a four-element seal enshrinement flow.
+This means the required quest, dungeon, boss, ending, elemental seal placement,
+and Final-gate flow can be exercised in the CLI, but it does not mean regional
+content, encounter texture, reward balance, dialogue, map routing, town hub
+presentation, or final polish are complete.
+
+Relic v1 is a progression and Final-gating layer only. Fire, Ice, Earth, and
+Thunder have true seal key items and enshrined flags. Final unlock now depends
+on all four enshrined elemental seals. Relic v1 does not add active effects,
+passive effects, stat bonuses, resistance, skill links, or combat behavior.
 
 Future work should peel these layers deliberately, starting from the smallest
 approved slice and keeping runtime, data, schema, save, combat, GUI bridge, and
@@ -192,7 +199,8 @@ Regional towns reuse the existing facility families whenever possible:
 - Magic Shop: element-relevant books.
 - Temple: seal / class / lore preview.
 - Storage: shared utility.
-- Relic Preview: preview only until formally reopened.
+- Relic Preview: seal inspection / enshrinement surface; active and passive
+  relic effects stay deferred.
 
 Town identity should mostly come from local data, presentation, and text, not
 from creating new systems.
@@ -201,6 +209,11 @@ from creating new systems.
 
 Relic completion should not be treated as a pure key item, but this skeleton
 does not define active or passive relic effects yet.
+
+Current landed interpretation: as of `9445549`, Relic v1 implements true Fire,
+Ice, Earth, and Thunder seal key items, source-to-seal conversion, enshrined
+flags, and Final gating. It remains a progression layer, not a combat or stat
+layer.
 
 For Fire, Ice, Earth, and Thunder, each completed relic is planned as:
 
