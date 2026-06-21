@@ -36,6 +36,45 @@ world_map_visual_reference_v1_user_mockup_detail_drawer.png
 
 These World Map files are reference-only images. They should guide the static prototype layout, drawer behavior, and visual direction, but they are not runtime assets and should not be imported into the engine or used as gameplay data.
 
+## Regional Placeholder Candidates - 2026-06-21
+
+These generated images are visual references only. They are not runtime assets,
+gameplay data, schema inputs, save data, or formal asset-pipeline outputs. Do
+not import them into `03_engine`, `04_data`, `02_schema`, `save.json`, or GUI
+runtime bridge code without a later exact-scope approval.
+
+Current regional world map candidates:
+
+- `ice-world-map-placeholder-candidate-v01.png`: existing Ice world map visual reference.
+- `earth-world-map-placeholder-candidate-v01.png`: Earth world map placeholder candidate.
+- `thunder-world-map-placeholder-candidate-v01.png`: Thunder world map placeholder candidate; accepted as the current Thunder map reference.
+- `final-world-map-placeholder-candidate-v01.png`: Final world map placeholder candidate; accepted as the current Final map reference.
+
+Current regional town hub candidates:
+
+- `ice-town-hub-placeholder-candidate-v01.png`: existing Ice town hub visual reference.
+- `earth-town-hub-placeholder-candidate-v01.png`: Earth town hub placeholder candidate.
+- `thunder-town-hub-placeholder-candidate-v01.png`: Thunder town hub placeholder candidate; accepted as the current Thunder hub reference.
+- `thunder-town-hub-facility-layout-candidate-v01.png`: numbered Thunder hub layout reference; point 6 is the Relic / central plaza reference.
+- `final-town-hub-placeholder-candidate-v01.png`: superseded Final hub draft; retained for history, but too character-heavy and less clear in facility color separation.
+- `final-town-hub-placeholder-candidate-v02.png`: accepted as the current Final hub reference; cleaner no-people composition with more identifiable facility color zones.
+
+Final town hub v02 facility layout reference:
+
+1. Guild / command hall.
+2. Workshop.
+3. Synthesis / alchemy.
+4. Storage / logistics.
+5. Magic Shop / magic support.
+6. Temple / healer pavilion.
+7. Inn / rest area.
+8. Shop / market supplies.
+9. Relic / memorial plaza.
+
+This numbered layout is a visual planning reference only. It does not define
+runtime facility IDs, screen navigation, data entries, quest behavior, unlock
+rules, or GUI bridge behavior.
+
 ## 目前 reference / candidate
 
 - `town_hub/town_hub_visual_reference_v1_user_mockup.png`：Town Hub 使用者參考圖。
