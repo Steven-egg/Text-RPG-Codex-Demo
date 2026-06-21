@@ -6,8 +6,9 @@ screen-level verification, and historical MVP notes live in Task Zone files.
 
 ## Current Stable Capsule
 
-- Latest local checkpoint seen during docs cleanup:
-  `5c0dfad [codex] fix(gui): align Inn and Temple dialogue service shell`.
+- Latest local checkpoint recorded for this handoff:
+  `[codex] feat(content): add Earth and Thunder display naming pass`
+  (use live `git log` for the exact hash).
 - Element Maze is an expandable playable demo, not a closed demo.
 - The Python CLI runtime remains the gameplay authority.
 - Act 1 is playable through the main loop.
@@ -15,6 +16,15 @@ screen-level verification, and historical MVP notes live in Task Zone files.
   Ravine, Cinder Seal Depths, three fire-mark shards, Guild / Temple / Church
   lookup closure, and Boss rule parity for Glen, Ash Guardian, and Cinder Seal
   Sentinel.
+- Ice, Earth, and Thunder display naming passes are complete in runtime data for
+  dungeons, monsters, bosses, materials / key proofs, and quest title /
+  description text.
+- `06_tools/naming_inventory_report.py` is a read-only naming inventory helper
+  for duplicate display names and lightweight term-shape checks.
+- Final display naming has not started; begin with a read-only candidate table
+  before editing data.
+- Real Relic Preview registration, resonance, assembly, or effect behavior
+  remains a future runtime / facility planning gate.
 - Basic facility CLI-parity bridge coverage is complete through Guild material
   buyback.
 - The maintainability checkpoint is stable: shared GUI presentation helpers and
@@ -36,8 +46,10 @@ Current macro decisions:
 - Final region is a composite endgame zone, not a fifth core element.
 - The existing fire demo route uses the existing Border Town only; do not add an
   Ash Outpost.
-- Future Ice / Earth / Thunder regions each default to one regional town and
-  three dungeons: two minor dungeons plus one main two-phase dungeon.
+- Ice / Earth / Thunder regions each default to one regional town and three
+  dungeons: two minor dungeons plus one main two-phase dungeon.
+- Current display naming coverage is complete through Thunder. Final display
+  naming remains the next read-only candidate-table pass.
 - This skeleton does not approve runtime, data, schema, save, GUI, bridge,
   combat, class, relic, or asset-pipeline implementation.
 
@@ -118,6 +130,7 @@ Useful direct checks:
 ```powershell
 .\.venv\Scripts\python.exe 06_tools\content_inventory_report.py
 .\.venv\Scripts\python.exe 06_tools\content_inventory_report.py --json
+.\.venv\Scripts\python.exe 06_tools\naming_inventory_report.py --region thunder
 .\.venv\Scripts\python.exe 06_tools\smoke_test_combat_bridge.py
 .\.venv\Scripts\python.exe 06_tools\smoke_test_progression_bridge.py
 ```
@@ -174,6 +187,7 @@ No next implementation target is pre-approved.
 
 Allowed as planning only:
 
+- produce a Final display naming candidate table
 - refine `01_content/world-content-skeleton-v0.1.md`
 - route old Hot Zone details into Task / Cold Zone
 - produce a read-only implementation gate for one exact future slice

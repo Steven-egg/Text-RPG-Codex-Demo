@@ -501,7 +501,7 @@ MONSTERS = {
         "boss": True,
     },
     "mon_earth_rootling_scavenger": {
-        "name": "Rootling Scavenger",
+        "name": "古根小妖",
         "level": 20,
         "hp": 245,
         "attack": 52,
@@ -515,7 +515,7 @@ MONSTERS = {
         "drops": [("mat_earth_rootfiber", 0.46, 1), ("mat_earth_moss_loam", 0.28, 1)],
     },
     "mon_earth_moss_hound": {
-        "name": "Moss Hound",
+        "name": "古根失誓者",
         "level": 20,
         "hp": 272,
         "attack": 54,
@@ -529,7 +529,7 @@ MONSTERS = {
         "drops": [("mat_earth_moss_loam", 0.44, 1), ("mat_earth_rootfiber", 0.20, 1)],
     },
     "mon_earth_spore_moth": {
-        "name": "Amber Spore Moth",
+        "name": "琥孢花妖",
         "level": 21,
         "hp": 220,
         "attack": 56,
@@ -543,7 +543,7 @@ MONSTERS = {
         "drops": [("mat_earth_spore_cap", 0.40, 1), ("mat_earth_moss_loam", 0.24, 1)],
     },
     "mon_earth_bark_shell": {
-        "name": "Bark-Shell Grazer",
+        "name": "根甲樹精",
         "level": 21,
         "hp": 305,
         "attack": 53,
@@ -557,7 +557,7 @@ MONSTERS = {
         "drops": [("mat_earth_rootfiber", 0.34, 1), ("mat_earth_spore_cap", 0.22, 1)],
     },
     "mon_earth_quarry_mite": {
-        "name": "Quarry Mite",
+        "name": "石脈晶童",
         "level": 21,
         "hp": 238,
         "attack": 57,
@@ -571,7 +571,7 @@ MONSTERS = {
         "drops": [("mat_earth_quarry_stone", 0.42, 1), ("mat_earth_moss_loam", 0.22, 1)],
     },
     "mon_earth_stoneback_boar": {
-        "name": "Stoneback Boar",
+        "name": "瀑崖石蟒",
         "level": 22,
         "hp": 330,
         "attack": 59,
@@ -585,7 +585,7 @@ MONSTERS = {
         "drops": [("mat_earth_quarry_stone", 0.46, 1), ("mat_earth_petrified_bark", 0.12, 1)],
     },
     "mon_earth_fungal_sapper": {
-        "name": "Fungal Sapper",
+        "name": "爆孢菌傭",
         "level": 22,
         "hp": 265,
         "attack": 61,
@@ -599,7 +599,7 @@ MONSTERS = {
         "drops": [("mat_earth_spore_cap", 0.36, 1), ("mat_earth_petrified_bark", 0.20, 1)],
     },
     "mon_earth_ore_wisp": {
-        "name": "Ore-Fog Wisp",
+        "name": "礦霧晶魄",
         "level": 23,
         "hp": 250,
         "attack": 63,
@@ -613,7 +613,7 @@ MONSTERS = {
         "drops": [("mat_earth_quarry_stone", 0.34, 1), ("mat_earth_leyline_shard", 0.08, 1)],
     },
     "mon_earth_leyline_guard": {
-        "name": "Leyline Guard",
+        "name": "地脈石僕",
         "level": 23,
         "hp": 340,
         "attack": 64,
@@ -627,7 +627,7 @@ MONSTERS = {
         "drops": [("mat_earth_leyline_shard", 0.44, 1), ("mat_earth_seal_clay", 0.12, 1)],
     },
     "mon_earth_root_bound_knight": {
-        "name": "Root-Bound Knight",
+        "name": "縛根誓騎",
         "level": 24,
         "hp": 380,
         "attack": 66,
@@ -641,7 +641,7 @@ MONSTERS = {
         "drops": [("mat_earth_leyline_shard", 0.36, 1), ("mat_earth_petrified_bark", 0.18, 1)],
     },
     "mon_earth_seal_spore": {
-        "name": "Seal-Spore Cluster",
+        "name": "外城孢群",
         "level": 24,
         "hp": 292,
         "attack": 68,
@@ -655,7 +655,7 @@ MONSTERS = {
         "drops": [("mat_earth_seal_clay", 0.46, 1), ("mat_earth_spore_cap", 0.18, 1)],
     },
     "mon_earth_heartwood_shade": {
-        "name": "Heartwood Shade",
+        "name": "深根藤姬",
         "level": 25,
         "hp": 335,
         "attack": 70,
@@ -669,7 +669,7 @@ MONSTERS = {
         "drops": [("mat_earth_seal_clay", 0.42, 1), ("mat_earth_deep_core", 0.12, 1)],
     },
     "mon_earth_deep_core_sentry": {
-        "name": "Deep Core Sentry",
+        "name": "封根祭司",
         "level": 25,
         "hp": 405,
         "attack": 71,
@@ -683,7 +683,7 @@ MONSTERS = {
         "drops": [("mat_earth_deep_core", 0.36, 1), ("mat_earth_leyline_shard", 0.22, 1)],
     },
     "mon_earth_petrified_lasher": {
-        "name": "Petrified Lasher",
+        "name": "深脈王蛇",
         "level": 26,
         "hp": 365,
         "attack": 74,
@@ -697,7 +697,7 @@ MONSTERS = {
         "drops": [("mat_earth_petrified_bark", 0.32, 1), ("mat_earth_deep_core", 0.20, 1)],
     },
     "boss_earth_rootwarden": {
-        "name": "Rootwarden",
+        "name": "古根守望者 瑟洛根",
         "level": 22,
         "hp": 760,
         "attack": 62,
@@ -712,7 +712,7 @@ MONSTERS = {
         "boss": True,
     },
     "boss_earth_quarry_colossus": {
-        "name": "Quarry Colossus",
+        "name": "礦心巨像 葛朗姆",
         "level": 23,
         "hp": 840,
         "attack": 65,
@@ -727,7 +727,7 @@ MONSTERS = {
         "boss": True,
     },
     "boss_earth_outer_grovekeeper": {
-        "name": "Outer Grovekeeper",
+        "name": "古根外衛 塞爾姆",
         "level": 25,
         "hp": 960,
         "attack": 70,
@@ -742,7 +742,7 @@ MONSTERS = {
         "boss": True,
     },
     "boss_earth_deep_leyline_lord": {
-        "name": "Deep Leyline Lord",
+        "name": "深脈殿主 亞爾根",
         "level": 27,
         "hp": 1100,
         "attack": 76,
@@ -757,7 +757,7 @@ MONSTERS = {
         "boss": True,
     },
     "mon_thunder_static_lizard": {
-        "name": "Static Lizard",
+        "name": "雷爪翼蜥",
         "level": 27,
         "hp": 380,
         "attack": 78,
@@ -771,7 +771,7 @@ MONSTERS = {
         "drops": [("mat_thunder_charge_sand", 0.42, 1), ("mat_thunder_copper_vein", 0.22, 1)],
     },
     "mon_thunder_plateau_runner": {
-        "name": "Plateau Runner",
+        "name": "裂雷獅鷲",
         "level": 27,
         "hp": 410,
         "attack": 80,
@@ -785,7 +785,7 @@ MONSTERS = {
         "drops": [("mat_thunder_copper_vein", 0.44, 1), ("mat_thunder_charge_sand", 0.24, 1)],
     },
     "mon_thunder_spark_wisp": {
-        "name": "Spark Wisp",
+        "name": "電弧使魔",
         "level": 28,
         "hp": 340,
         "attack": 83,
@@ -799,7 +799,7 @@ MONSTERS = {
         "drops": [("mat_thunder_stormglass", 0.38, 1), ("mat_thunder_charge_sand", 0.22, 1)],
     },
     "mon_thunder_glasswing": {
-        "name": "Stormglass Wing",
+        "name": "風暴玻翼",
         "level": 28,
         "hp": 360,
         "attack": 82,
@@ -813,7 +813,7 @@ MONSTERS = {
         "drops": [("mat_thunder_stormglass", 0.42, 1), ("mat_thunder_copper_vein", 0.16, 1)],
     },
     "mon_thunder_channel_eel": {
-        "name": "Channel Eel",
+        "name": "雲渠雷鰻",
         "level": 28,
         "hp": 395,
         "attack": 84,
@@ -827,7 +827,7 @@ MONSTERS = {
         "drops": [("mat_thunder_sky_stone", 0.40, 1), ("mat_thunder_charge_sand", 0.22, 1)],
     },
     "mon_thunder_copper_hound": {
-        "name": "Copper Hound",
+        "name": "導雷銅獸",
         "level": 29,
         "hp": 455,
         "attack": 86,
@@ -841,7 +841,7 @@ MONSTERS = {
         "drops": [("mat_thunder_conductor_rod", 0.32, 1), ("mat_thunder_copper_vein", 0.24, 1)],
     },
     "mon_thunder_rail_sentry": {
-        "name": "Rail Sentry",
+        "name": "銅軌機偶",
         "level": 29,
         "hp": 500,
         "attack": 88,
@@ -855,7 +855,7 @@ MONSTERS = {
         "drops": [("mat_thunder_conductor_rod", 0.44, 1), ("mat_thunder_sky_stone", 0.18, 1)],
     },
     "mon_thunder_cloud_mite": {
-        "name": "Cloud Mite",
+        "name": "銅軌雷蜈",
         "level": 30,
         "hp": 375,
         "attack": 90,
@@ -869,7 +869,7 @@ MONSTERS = {
         "drops": [("mat_thunder_sky_stone", 0.36, 1), ("mat_thunder_cloud_essence", 0.08, 1)],
     },
     "mon_thunder_array_guard": {
-        "name": "Array Guard",
+        "name": "下層陣偶",
         "level": 30,
         "hp": 525,
         "attack": 92,
@@ -883,7 +883,7 @@ MONSTERS = {
         "drops": [("mat_thunder_cloud_essence", 0.40, 1), ("mat_thunder_seal_spark", 0.12, 1)],
     },
     "mon_thunder_tower_lancer": {
-        "name": "Tower Lancer",
+        "name": "雷塔槍翼",
         "level": 31,
         "hp": 475,
         "attack": 96,
@@ -897,7 +897,7 @@ MONSTERS = {
         "drops": [("mat_thunder_cloud_essence", 0.32, 1), ("mat_thunder_conductor_rod", 0.20, 1)],
     },
     "mon_thunder_seal_orb": {
-        "name": "Seal Orb",
+        "name": "封雷浮球",
         "level": 31,
         "hp": 420,
         "attack": 98,
@@ -911,7 +911,7 @@ MONSTERS = {
         "drops": [("mat_thunder_seal_spark", 0.46, 1), ("mat_thunder_cloud_essence", 0.16, 1)],
     },
     "mon_thunder_crown_wisp": {
-        "name": "Crown Wisp",
+        "name": "破雲雷鳳",
         "level": 32,
         "hp": 450,
         "attack": 102,
@@ -925,7 +925,7 @@ MONSTERS = {
         "drops": [("mat_thunder_seal_spark", 0.40, 1), ("mat_thunder_deep_core", 0.12, 1)],
     },
     "mon_thunder_deep_core_sentry": {
-        "name": "Deep Thunder Core Sentry",
+        "name": "冠頂奇美拉",
         "level": 32,
         "hp": 570,
         "attack": 104,
@@ -939,7 +939,7 @@ MONSTERS = {
         "drops": [("mat_thunder_deep_core", 0.36, 1), ("mat_thunder_cloud_essence", 0.20, 1)],
     },
     "mon_thunder_stormbound_knight": {
-        "name": "Stormbound Knight",
+        "name": "雷冠誓騎",
         "level": 33,
         "hp": 530,
         "attack": 108,
@@ -953,7 +953,7 @@ MONSTERS = {
         "drops": [("mat_thunder_deep_core", 0.30, 1), ("mat_thunder_seal_spark", 0.24, 1)],
     },
     "boss_thunder_plateau_beacon": {
-        "name": "Plateau Beacon",
+        "name": "裂雷獅王 奧爾坎",
         "level": 29,
         "hp": 1180,
         "attack": 92,
@@ -968,7 +968,7 @@ MONSTERS = {
         "boss": True,
     },
     "boss_thunder_channel_keeper": {
-        "name": "Channel Keeper",
+        "name": "導雷渠守 維爾札",
         "level": 30,
         "hp": 1280,
         "attack": 96,
@@ -983,7 +983,7 @@ MONSTERS = {
         "boss": True,
     },
     "boss_thunder_lower_array_warden": {
-        "name": "Lower Array Warden",
+        "name": "陣列雷龍 奧泰爾",
         "level": 32,
         "hp": 1460,
         "attack": 104,
@@ -998,7 +998,7 @@ MONSTERS = {
         "boss": True,
     },
     "boss_thunder_crown_storm_lord": {
-        "name": "Crown Storm Lord",
+        "name": "冠頂風暴龍 亞斯塔爾",
         "level": 34,
         "hp": 1660,
         "attack": 112,

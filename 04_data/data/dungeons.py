@@ -120,7 +120,7 @@ DUNGEONS = {
         "boss": "boss_ice_final_seal_lord",
     },
     "dungeon_earth_minor_a": {
-        "name": "Rootfall Wildwood",
+        "name": "古根遺環",
         "recommended": "Lv20-22",
         "steps": 15,
         "element": "Earth",
@@ -137,7 +137,7 @@ DUNGEONS = {
         "boss": "boss_earth_rootwarden",
     },
     "dungeon_earth_minor_b": {
-        "name": "Old Quarry Vein",
+        "name": "瀑崖礦脈",
         "recommended": "Lv21-23",
         "steps": 15,
         "element": "Earth",
@@ -154,7 +154,7 @@ DUNGEONS = {
         "boss": "boss_earth_quarry_colossus",
     },
     "dungeon_earth_main_phase_1": {
-        "name": "Leyline Grove - Outer Ring",
+        "name": "外城遺構",
         "recommended": "Lv23-25",
         "steps": 12,
         "element": "Earth",
@@ -170,7 +170,7 @@ DUNGEONS = {
         "boss": "boss_earth_outer_grovekeeper",
     },
     "dungeon_earth_main_phase_2": {
-        "name": "Leyline Grove - Deep Heart",
+        "name": "深脈殿",
         "recommended": "Lv25-27",
         "steps": 12,
         "element": "Earth",
@@ -186,7 +186,7 @@ DUNGEONS = {
         "boss": "boss_earth_deep_leyline_lord",
     },
     "dungeon_thunder_minor_a": {
-        "name": "Stormbreak Plateau",
+        "name": "裂雷高原",
         "recommended": "Lv27-29",
         "steps": 15,
         "element": "Thunder",
@@ -203,7 +203,7 @@ DUNGEONS = {
         "boss": "boss_thunder_plateau_beacon",
     },
     "dungeon_thunder_minor_b": {
-        "name": "Conductive Channel",
+        "name": "導雷水道",
         "recommended": "Lv28-30",
         "steps": 15,
         "element": "Thunder",
@@ -220,7 +220,7 @@ DUNGEONS = {
         "boss": "boss_thunder_channel_keeper",
     },
     "dungeon_thunder_main_phase_1": {
-        "name": "Lightning Tower - Lower Array",
+        "name": "下層陣列",
         "recommended": "Lv30-32",
         "steps": 12,
         "element": "Thunder",
@@ -236,7 +236,7 @@ DUNGEONS = {
         "boss": "boss_thunder_lower_array_warden",
     },
     "dungeon_thunder_main_phase_2": {
-        "name": "Lightning Tower - Crown Array",
+        "name": "冠頂陣列",
         "recommended": "Lv32-34",
         "steps": 12,
         "element": "Thunder",
