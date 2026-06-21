@@ -65,6 +65,7 @@ VALID_PROMOTION_REQUIREMENT_KINDS = {"level", "unlock", "quest", "flag", "item"}
 VALID_JOB_SPECIALIZATION_STATUSES = {"preview"}
 VALID_RELIC_STATUSES = {"preview"}
 VALID_RELIC_UNLOCK_KINDS = {"level", "unlock", "quest", "flag", "item"}
+VALID_RELIC_ELEMENT_IDS = {"fire", "ice", "earth", "thunder"}
 
 
 def error(errors: list[str], path: str, message: str) -> None:
@@ -215,11 +216,59 @@ def check_relics(errors: list[str]) -> None:
         error(errors, "RELICS", "contains duplicate relic ids")
 
     for relic_id, relic in RELICS.items():
-        require_keys(errors, f"RELICS.{relic_id}", relic, {"name", "summary", "source", "effect_preview", "status"})
+        require_keys(
+            errors,
+            f"RELICS.{relic_id}",
+            relic,
+            {
+                "action_label",
+                "complete_flag",
+                "complete_text",
+                "effect_preview",
+                "element_id",
+                "label",
+                "locked_text",
+                "name",
+                "ready_text",
+                "seal_item_id",
+                "source",
+                "source_item_id",
+                "source_required",
+                "status",
+                "summary",
+            },
+        )
 
-        for field in ("name", "summary", "source", "effect_preview"):
+        for field in (
+            "action_label",
+            "complete_text",
+            "effect_preview",
+            "label",
+            "locked_text",
+            "name",
+            "ready_text",
+            "source",
+            "summary",
+        ):
             if not isinstance(relic.get(field), str) or not relic.get(field).strip():
                 error(errors, f"RELICS.{relic_id}.{field}", "must be a non-empty string")
+
+        element_id = relic.get("element_id")
+        if element_id not in VALID_RELIC_ELEMENT_IDS:
+            error(errors, f"RELICS.{relic_id}.element_id", f"uses unsupported element id: {element_id}")
+
+        source_required = relic.get("source_required")
+        if not isinstance(source_required, int) or source_required <= 0:
+            error(errors, f"RELICS.{relic_id}.source_required", "must be a positive int")
+
+        for field in ("source_item_id", "seal_item_id"):
+            item_id = relic.get(field)
+            if item_id not in all_item_like_ids():
+                error(errors, f"RELICS.{relic_id}.{field}", f"references missing item/material id: {item_id}")
+
+        complete_flag = relic.get("complete_flag")
+        if complete_flag not in KNOWN_FLAG_KEYS:
+            error(errors, f"RELICS.{relic_id}.complete_flag", f"references unknown flag: {complete_flag}")
 
         status = relic.get("status")
         if status not in VALID_RELIC_STATUSES:

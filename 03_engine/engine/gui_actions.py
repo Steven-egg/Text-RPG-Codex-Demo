@@ -1601,8 +1601,8 @@ class GuiRuntimeSession:
             "「查到了。這三枚碎片不是完整的火之印記，而是它尚未完成的核心。」\n"
             "「它記錄了火的資格，卻還沒有承載力量。現在啟用，只會把印記燒毀。」\n"
             "賽恩用封蠟與灰白布帶暫時封住碎片的共鳴，又把它們交還給你。\n"
-            "「先保管好。等找到真正的熔印之地，再談合成與承載。」\n\n"
-            "已確認：未完成的火之印記核心。正式火之印記合成、啟用與聖物效果尚未開放。"
+            "「去神殿後側的聖物調查台吧。那裡能讓碎片承接成真正的火之聖印。」\n\n"
+            "已確認：未完成的火之印記核心。下一步是前往聖物調查台合成並安置火之聖印；聖印被動效果尚未開放。"
         )
         return self._live_response(
             "fire_mark_church_lookup",
@@ -1625,10 +1625,11 @@ class GuiRuntimeSession:
 
     def attune_relic(self, payload: dict[str, Any], screen_id: str | None = None) -> dict[str, Any]:
         state = self.require_state()
-        msg = "聖物共鳴與正式玩法尚未開放（目前僅供預覽）。"
+        relic_identifier = payload.get("relic_id") or payload.get("relic_name") or payload.get("element_id")
+        result = game.enshrine_relic(state, str(relic_identifier) if relic_identifier else None)
         return self._live_response(
             "attune_relic",
-            msg,
+            result["message"],
             screen_model=self.relic_preview_screen_model()
         )
 

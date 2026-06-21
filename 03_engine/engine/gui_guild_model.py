@@ -239,6 +239,22 @@ def guild_screen_model(state: dict[str, Any]) -> dict[str, Any]:
     ]
 
     completed_quests = state.get("completed_quests", [])
+    story_hint_card = {
+        "id": "story_hint_none",
+        "title": "",
+        "description": "",
+        "detail_description": "",
+        "status": "idle",
+        "status_label": "",
+        "visible": False,
+        "enabled": False,
+        "disabled_reason": None,
+        "primary_action": "unavailable",
+        "action_label": "",
+        "condition_rows": [],
+        "reward_summary": None,
+        "notes": "",
+    }
 
     if "quest_boss_glen" not in completed_quests:
         glen_sighted = state.get("flags", {}).get("boss_glen_sighted")
@@ -429,7 +445,24 @@ def guild_screen_model(state: dict[str, Any]) -> dict[str, Any]:
                     "reward_summary": None,
                     "notes": "詢問完成後將會獲得下一步前往神殿的指引。"
                 }
-            elif state.get("flags", {}).get("fire_mark_guild_inquiry_done"):
+            elif state.get("flags", {}).get(game.FIRE_MARK_CHURCH_LOOKUP_FLAG) and not state.get("flags", {}).get("fire_seal_enshrined"):
+                story_hint_card = {
+                    "id": "story_hint_fire_seal_relic_table",
+                    "title": "前往聖物調查台",
+                    "description": "賽恩已確認碎片能承接為火之聖印。請前往聖物調查台合成並安置。",
+                    "detail_description": "三枚火之印記碎片已完成文獻判讀。前往神殿後側的聖物調查台，將碎片合成為真正的火之聖印；聖印被動效果仍未開放。",
+                    "status": "story_hint",
+                    "status_label": "主線進度",
+                    "visible": True,
+                    "enabled": False,
+                    "disabled_reason": "請前往聖物調查台安置火之聖印。",
+                    "primary_action": "unavailable",
+                    "action_label": "請前往聖物調查台",
+                    "condition_rows": [],
+                    "reward_summary": None,
+                    "notes": "火之聖印安置後，極寒區域路線會穩定開啟。"
+                }
+            elif state.get("flags", {}).get("fire_mark_guild_inquiry_done") and not state.get("flags", {}).get(game.FIRE_MARK_CHURCH_LOOKUP_FLAG):
                 story_hint_card = {
                     "id": "story_hint_fire_mark_guild_inquiry_done",
                     "title": "前往轉職神殿詢問賽恩",

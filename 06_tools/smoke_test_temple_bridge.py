@@ -34,10 +34,14 @@ def run_smoke_test():
 
     model_relic = session.screen_model("relic_preview_screen")
     assert model_relic["screen_id"] == "relic_preview_screen"
-    assert len(model_relic["slots"]) == 3
-    # Check that fire relic (ash charm) is locked initially (because unlock_ash_ravine is not unlocked)
+    assert len(model_relic["slots"]) == 4
+    assert {slot["element_id"] for slot in model_relic["slots"]} == {"fire", "ice", "earth", "thunder"}
+    # Check that fire preview is locked initially because the Temple lookup is not done.
     fire_slot = next(s for s in model_relic["slots"] if s["element_id"] == "fire")
     assert fire_slot["unlocked"] is False
+    assert fire_slot["ready"] is False
+    assert fire_slot["enshrined"] is False
+    assert fire_slot["active"] is False
     print("Initial relic_preview_screen_model loaded successfully.")
 
     # 3. Test temple_pray action
@@ -80,19 +84,68 @@ def run_smoke_test():
     assert state["flags"].get("fire_mark_church_lookup_done") is True
     print("fire_mark_church_lookup action executed and flag set.")
 
-    # Now that lookup is done, let's unlock ash ravine to test relic unlock preview
-    game.unlock(state, "unlock_ash_ravine")
+    # Now that lookup is done, the Fire marker core should be display-unlocked only.
     model_relic = session.screen_model("relic_preview_screen")
     fire_slot = next(s for s in model_relic["slots"] if s["element_id"] == "fire")
     assert fire_slot["unlocked"] is True
-    assert fire_slot["active"] is True
-    print("Relic unlock preview verified (relic_ash_charm becomes unlocked).")
+    assert fire_slot["ready"] is True
+    assert fire_slot["enshrined"] is False
+    assert fire_slot["active"] is False
+    assert fire_slot["collected"] == 3
+    print("Relic ready preview verified (fire seal can be enshrined).")
 
-    # 5. Test attune_relic action
-    res_attune = session.dispatch("attune_relic", {"relic_id": "灰燼護符"}, screen_id="relic_preview_screen")
+    # 5. Test Fire seal enshrinement through the compatibility action.
+    res_attune = session.dispatch("attune_relic", {"relic_id": "relic_fire_seal"}, screen_id="relic_preview_screen")
     assert res_attune["ok"] is True
-    assert "尚未開放" in res_attune["message"]
-    print("attune_relic action verified.")
+    assert "火之聖印" in res_attune["message"]
+    assert state["inventory"].get("key_fire_mark_shard", 0) == 0
+    assert state["inventory"].get("key_fire_seal", 0) == 1
+    assert state["flags"].get("fire_seal_enshrined") is True
+    assert game.is_unlocked(state, "unlock_ice_region")
+    fire_slot = next(s for s in res_attune["screen_model"]["slots"] if s["element_id"] == "fire")
+    assert fire_slot["ready"] is False
+    assert fire_slot["enshrined"] is True
+    assert fire_slot["active"] is False
+    print("Fire seal enshrinement verified.")
+
+    res_repeat = session.dispatch("attune_relic", {"relic_id": "火之聖印"}, screen_id="relic_preview_screen")
+    assert res_repeat["ok"] is True
+    assert "已安置" in res_repeat["message"]
+    print("Repeated enshrinement returns completed hint.")
+
+    # 6. Test regional marker sources convert into true seals without active effects.
+    assert not game.is_unlocked(state, "unlock_final_region_preview")
+    state["flags"]["ice_relic_marker_resolved"] = True
+    state["inventory"]["key_ice_relic_marker_source"] = 1
+    state["flags"]["earth_relic_marker_resolved"] = True
+    state["inventory"]["key_earth_relic_marker_source"] = 1
+    state["flags"]["thunder_relic_marker_resolved"] = True
+    state["inventory"]["key_thunder_relic_marker_source"] = 1
+
+    res_ice = session.dispatch("attune_relic", {"relic_id": "relic_ice_marker_source"}, screen_id="relic_preview_screen")
+    assert res_ice["ok"] is True
+    assert state["inventory"].get("key_ice_relic_marker_source", 0) == 0
+    assert state["inventory"].get("key_ice_seal", 0) == 1
+    assert state["flags"].get("ice_seal_enshrined") is True
+    assert not game.is_unlocked(state, "unlock_final_region_preview")
+
+    res_earth = session.dispatch("attune_relic", {"relic_id": "relic_earth_marker_source"}, screen_id="relic_preview_screen")
+    assert res_earth["ok"] is True
+    assert state["inventory"].get("key_earth_relic_marker_source", 0) == 0
+    assert state["inventory"].get("key_earth_seal", 0) == 1
+    assert state["flags"].get("earth_seal_enshrined") is True
+    assert not game.is_unlocked(state, "unlock_final_region_preview")
+
+    res_thunder = session.dispatch("attune_relic", {"relic_id": "relic_thunder_marker_source"}, screen_id="relic_preview_screen")
+    assert res_thunder["ok"] is True
+    assert state["inventory"].get("key_thunder_relic_marker_source", 0) == 0
+    assert state["inventory"].get("key_thunder_seal", 0) == 1
+    assert state["flags"].get("thunder_seal_enshrined") is True
+    assert game.is_unlocked(state, "unlock_final_region_preview")
+    thunder_slot = next(s for s in res_thunder["screen_model"]["slots"] if s["element_id"] == "thunder")
+    assert thunder_slot["enshrined"] is True
+    assert thunder_slot["active"] is False
+    print("Regional seal enshrinement and Final gate verified.")
 
     print("Temple and Relic Preview bridge smoke test ok!")
 

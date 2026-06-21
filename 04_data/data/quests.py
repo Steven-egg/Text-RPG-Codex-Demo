@@ -184,8 +184,8 @@ QUESTS = {
         "giver": "Guild",
         "turn_in": {"flag:thunder_relic_marker_resolved": 1},
         "reward": {"gold": 780, "items": {}, "guild": 150},
-        "unlocks": ["unlock_final_region_preview", "quest_thunder_return_handoff"],
-        "desc": "向公會回報雷印源證，前往聖物調查台登錄亞斯塔爾龍心；下一個建議路線為魔王城前線。",
+        "unlocks": ["quest_thunder_return_handoff"],
+        "desc": "向公會回報雷印源證，前往聖物調查台安置亞斯塔爾龍心；四聖印皆安置後，魔王城前線才會穩定開啟。",
     },
     "quest_final_minor_a": {
         "title": "攻城外壕偵察",

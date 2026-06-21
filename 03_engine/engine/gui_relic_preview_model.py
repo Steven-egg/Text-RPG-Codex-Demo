@@ -3,7 +3,45 @@ from __future__ import annotations
 from typing import Any
 from . import game
 from .gui_presentation import resource_strip
-from .previews import get_preview_relics
+
+
+ELEMENT_ORDER = {
+    "fire": 0,
+    "ice": 1,
+    "earth": 2,
+    "thunder": 3,
+}
+
+
+def _relic_slot(state: dict[str, Any], relic_id: str, relic: dict[str, Any]) -> dict[str, Any]:
+    required = game.relic_source_required(relic)
+    enshrined = game.relic_enshrined(state, relic)
+    ready = game.relic_ready_to_enshrine(state, relic)
+    collected = required if enshrined else min(game.relic_source_count(state, relic), required)
+    ancient_text = relic["complete_text"] if enshrined else (relic["ready_text"] if ready else relic["locked_text"])
+    status_label = "已安置，效果未開放" if enshrined else ("可安置" if ready else "待調查")
+
+    return {
+        "relic_id": relic_id,
+        "element_id": relic.get("element_id", "unknown"),
+        "label": relic.get("label", relic.get("name", "")),
+        "relic_name": relic.get("name", ""),
+        "collected": collected,
+        "required": required,
+        "unlocked": ready or enshrined,
+        "ready": ready,
+        "enshrined": enshrined,
+        "active": False,
+        "ancient_text": ancient_text,
+        "source": relic.get("source", ""),
+        "summary": relic.get("summary", ""),
+        "effect_preview": relic.get("effect_preview", ""),
+        "source_item_id": relic.get("source_item_id"),
+        "seal_item_id": relic.get("seal_item_id"),
+        "action_label": relic.get("action_label", "安置聖印"),
+        "disabled_reason": None if ready or enshrined else game.relic_disabled_reason(state, relic),
+        "status_label": status_label,
+    }
 
 
 def relic_preview_screen_model(state: dict[str, Any]) -> dict[str, Any]:
@@ -11,60 +49,16 @@ def relic_preview_screen_model(state: dict[str, Any]) -> dict[str, Any]:
 
     strip = resource_strip(state)
 
-    relics = get_preview_relics()
-    slots = []
-
-    ash_relic = next((r for r in relics if r.get("source") == "灰燼裂谷調查線索" or r.get("name") == "灰燼護符"), None)
-
-    if ash_relic:
-        unlocked = game.relic_unlock_met(state, ash_relic.get("unlock"))
-        slots.append({
-            "element_id": "fire",
-            "label": "🔥 火之印記碎片",
-            "relic_name": ash_relic["name"],
-            "collected": 3 if unlocked else 0,
-            "required": 3,
-            "unlocked": unlocked,
-            "active": unlocked,
-            "ancient_text": f"「當三碎聚首，薪火重燃，深谷之衛方可安息...」三個散落的火焰碎片在此相聚，流動著溫熱的餘溫魔能。被動效果（預期）：{ash_relic['effect_preview']}"
-        })
-    else:
-        slots.append({
-            "element_id": "fire",
-            "label": "🔥 火之印記碎片",
-            "relic_name": "未完成的火印核心",
-            "collected": 3 if state.get("inventory", {}).get("key_fire_mark_shard", 0) >= 3 else state.get("inventory", {}).get("key_fire_mark_shard", 0),
-            "required": 3,
-            "unlocked": state.get("inventory", {}).get("key_fire_mark_shard", 0) >= 3,
-            "active": state.get("inventory", {}).get("key_fire_mark_shard", 0) >= 3,
-            "ancient_text": "「當三碎聚首，薪火重燃...」三個散落的火焰碎片在此相聚，流動著溫熱 Genes / 餘溫魔能。被動效果（預估）：火屬性抗性 +15% (實際套用依 CLI runtime 為準)。"
-        })
-
-    slots.append({
-        "element_id": "water",
-        "label": "💧 潮汐之淚",
-        "relic_name": "海神淚滴",
-        "collected": 0,
-        "required": 1,
-        "unlocked": False,
-        "active": False,
-        "ancient_text": "「深海之瞳，凝視深淵...」尚未解鎖。碎片可能掉落於沉沒遺跡或海岸巢穴中。正式聖物玩法尚未開放。"
-    })
-    slots.append({
-        "element_id": "wind",
-        "label": "🌪️ 風暴之羽",
-        "relic_name": "天羽核心",
-        "collected": 0,
-        "required": 1,
-        "unlocked": False,
-        "active": False,
-        "ancient_text": "「狂嵐不息，撕裂天穹...」尚未解鎖。需要在北方高原的峭壁鳥巢中尋得風羽線索。正式聖物玩法尚未開放。"
-    })
+    relic_entries = sorted(
+        game.preview_relic_entries(),
+        key=lambda entry: ELEMENT_ORDER.get(entry[1].get("element_id", ""), 99),
+    )
+    slots = [_relic_slot(state, relic_id, relic) for relic_id, relic in relic_entries]
 
     return {
         "screen_id": "relic_preview_screen",
-        "title": "古代遺物展示台 (Relic Altar)",
-        "subtitle": "檢視與解讀冒險中取得的古代元素聖物與碎片印記。",
+        "title": "聖物調查台 (Relic Preview)",
+        "subtitle": "合成並安置 Fire / Ice / Earth / Thunder 四元素聖印；正式聖印被動效果尚未開放。",
         "resource_strip": strip,
         "slots": slots
     }

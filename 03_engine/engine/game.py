@@ -21,7 +21,7 @@ from .display import (
     title,
 )
 from .formatting import equipment_summary, format_items, item_name, monster_drop_names
-from .previews import get_preview_promotions_for_job, get_preview_relics, show_job_specialization_preview
+from .previews import get_preview_promotions_for_job, show_job_specialization_preview
 from data import (
     DUNGEONS,
     EQUIPMENT,
@@ -32,6 +32,7 @@ from data import (
     MONSTERS,
     QUESTS,
     RECIPES,
+    RELICS,
     SHOP_INVENTORY,
     SKILLS,
 )
@@ -107,6 +108,12 @@ FINAL_PHASE_2_DUNGEON_ID = "dungeon_final_main_phase_2"
 FINAL_PHASE_3_DUNGEON_ID = "dungeon_final_main_phase_3"
 FINAL_QUEST_ID = "quest_final_demon_king"
 MAIN_STORY_CLEARED_FLAG = "main_story_cleared"
+ELEMENTAL_SEAL_FLAGS = (
+    "fire_seal_enshrined",
+    "ice_seal_enshrined",
+    "earth_seal_enshrined",
+    "thunder_seal_enshrined",
+)
 
 BOSS_CLEAR_FLAGS = {
     "boss_glen": "boss_glen_defeated",
@@ -267,8 +274,6 @@ def unlock(state: dict, key: str) -> None:
 def is_unlocked(state: dict, key: str | None) -> bool:
     if not key:
         return True
-    if key == ICE_REGION_UNLOCK and state.get("flags", {}).get("cinder_seal_sentinel_defeated"):
-        return True
     return key in state["unlocked"] or key in state["completed_quests"]
 
 def boss_clear_flag(boss_id: str | None) -> str | None:
@@ -380,6 +385,8 @@ def next_step_hint(state: dict) -> str:
         return "回轉職神殿詢問賽恩的查閱結果。"
     if should_show_fire_mark_church_bridge(state):
         return "帶著三枚火之印記碎片前往轉職神殿。"
+    if ready_relic_names(state):
+        return f"前往聖物調查台安置聖印：{ready_relic_names(state)[0]}。"
     if "quest_cinder_depths_scout" in state["completed_quests"] and not state["flags"].get("cinder_seal_sentinel_defeated"):
         return "前往燼印深窟終點，挑戰燼印鎮衛。"
     if "quest_supply_upgrade" in state["completed_quests"] and "quest_cinder_depths_scout" not in state["completed_quests"]:
@@ -406,6 +413,8 @@ def next_step_hint(state: dict) -> str:
         return "Broken Seal Ruins is open. Gather final approach samples for Q2."
     if is_unlocked(state, FINAL_REGION_UNLOCK) and "quest_final_minor_a" not in state["completed_quests"]:
         return "Final region is open. Start with Echoing Frontline and prepare for the Demon King."
+    if "quest_thunder_return_handoff" in state["completed_quests"] and not is_unlocked(state, FINAL_REGION_UNLOCK):
+        return "四元素路線已回報。將四聖印安置到聖物調查台後，魔王城前線才會穩定開啟。"
     if "quest_thunder_main_phase_1" in state["completed_quests"] and "quest_thunder_main_phase_2" not in state["completed_quests"]:
         return "Lightning Tower crown route is open. Push to the Crown Array seal."
     if "quest_thunder_minor_b" in state["completed_quests"] and "quest_thunder_main_phase_1" not in state["completed_quests"]:
@@ -1522,23 +1531,184 @@ def relic_unlock_line(state: dict, unlock_data: dict | None) -> str:
     status = "已達成" if relic_unlock_met(state, unlock_data) else "未達成"
     return f"解鎖提示：{unlock_data['label']}（{status}）"
 
+
+def preview_relic_entries() -> list[tuple[str, dict]]:
+    return [
+        (relic_id, relic)
+        for relic_id, relic in RELICS.items()
+        if relic.get("status") == "preview"
+    ]
+
+
+def find_preview_relic(identifier: str | None) -> tuple[str, dict] | None:
+    if not identifier:
+        return None
+    for relic_id, relic in preview_relic_entries():
+        if identifier in {relic_id, relic.get("name"), relic.get("seal_item_id"), relic.get("element_id")}:
+            return relic_id, relic
+    return None
+
+
+def relic_source_required(relic: dict) -> int:
+    required = relic.get("source_required", 1)
+    return required if isinstance(required, int) and required > 0 else 1
+
+
+def relic_source_count(state: dict, relic: dict) -> int:
+    return state.get("inventory", {}).get(relic.get("source_item_id"), 0)
+
+
+def relic_enshrined(state: dict, relic: dict) -> bool:
+    return bool(state.get("flags", {}).get(relic.get("complete_flag")))
+
+
+def relic_ready_to_enshrine(state: dict, relic: dict) -> bool:
+    return (
+        not relic_enshrined(state, relic)
+        and relic_unlock_met(state, relic.get("unlock"))
+        and relic_source_count(state, relic) >= relic_source_required(relic)
+    )
+
+
+def relic_disabled_reason(state: dict, relic: dict) -> str | None:
+    if relic_enshrined(state, relic):
+        return "聖印已安置。"
+    if not relic_unlock_met(state, relic.get("unlock")):
+        unlock_data = relic.get("unlock") or {}
+        return f"尚未達成：{unlock_data.get('label', '前置條件')}。"
+    source_item_id = relic.get("source_item_id", "")
+    required = relic_source_required(relic)
+    current = relic_source_count(state, relic)
+    if current < required:
+        return f"需要 {item_name(source_item_id)} x{required}（目前 {current}）。"
+    return None
+
+
+def ready_relic_names(state: dict) -> list[str]:
+    return [
+        relic["name"]
+        for _relic_id, relic in preview_relic_entries()
+        if relic_ready_to_enshrine(state, relic)
+    ]
+
+
+def all_elemental_seals_enshrined(state: dict) -> bool:
+    flags = state.get("flags", {})
+    return all(flags.get(flag) for flag in ELEMENTAL_SEAL_FLAGS)
+
+
+def unlock_final_region_from_relics(state: dict) -> bool:
+    if not all_elemental_seals_enshrined(state):
+        return False
+    if is_unlocked(state, FINAL_REGION_UNLOCK):
+        return False
+    unlock(state, FINAL_REGION_UNLOCK)
+    return True
+
+
+def enshrine_relic(state: dict, identifier: str | None) -> dict:
+    found = find_preview_relic(identifier)
+    if not found:
+        return {
+            "status": "blocked",
+            "changed": False,
+            "message": "找不到指定的聖印資料。",
+        }
+
+    relic_id, relic = found
+    if relic_enshrined(state, relic):
+        return {
+            "status": "complete",
+            "changed": False,
+            "relic_id": relic_id,
+            "message": relic["complete_text"],
+        }
+
+    disabled_reason = relic_disabled_reason(state, relic)
+    if disabled_reason:
+        return {
+            "status": "blocked",
+            "changed": False,
+            "relic_id": relic_id,
+            "message": disabled_reason,
+        }
+
+    source_item_id = relic["source_item_id"]
+    required = relic_source_required(relic)
+    if not remove_item(state, source_item_id, required):
+        return {
+            "status": "blocked",
+            "changed": False,
+            "relic_id": relic_id,
+            "message": f"需要 {item_name(source_item_id)} x{required}。",
+        }
+
+    seal_item_id = relic["seal_item_id"]
+    add_item(state, seal_item_id, 1)
+    state.setdefault("flags", {})[relic["complete_flag"]] = True
+
+    unlocked_lines = []
+    if relic.get("element_id") == "fire" and not is_unlocked(state, ICE_REGION_UNLOCK):
+        unlock(state, ICE_REGION_UNLOCK)
+        unlocked_lines.append("極寒區域路線已開放。")
+    if unlock_final_region_from_relics(state):
+        unlocked_lines.append("四聖印已安置，魔王城前線路線已開放。")
+
+    message_lines = [
+        relic["ready_text"],
+        f"取得並安置：{item_name(seal_item_id)} x1。",
+        "聖印被動效果尚未開放。",
+    ]
+    message_lines.extend(unlocked_lines)
+    return {
+        "status": "enshrined",
+        "changed": True,
+        "relic_id": relic_id,
+        "message": "\n".join(message_lines),
+    }
+
+
 def relic_preview_menu(state: dict) -> None:
     title("聖物調查")
-    previews = get_preview_relics()
+    previews = [relic for _relic_id, relic in preview_relic_entries()]
     if not previews:
         print("目前沒有可預覽的聖物線索。")
         pause()
         return
 
-    print("目前僅為預覽，聖物效果尚未開放。")
+    print("四元素聖印可在此合成或安置；聖印被動效果尚未開放。")
     for relic in previews:
+        complete = relic_enshrined(state, relic)
+        ready = relic_ready_to_enshrine(state, relic)
         print(f"\n{relic['name']}")
         print(relic["summary"])
         print(f"來源：{relic['source']}")
         print(relic_unlock_line(state, relic.get("unlock")))
+        print(f"源證：{item_name(relic['source_item_id'])} {relic_source_count(state, relic)}/{relic_source_required(relic)}")
+        print("狀態：" + ("已安置" if complete else ("可安置" if ready else "待調查")))
         print(f"效果預告：{relic['effect_preview']}")
-        print(f"狀態：{relic['status']}")
-    print("\n這裡不會取得、裝備、啟用或強化聖物。")
+    ready_entries = [
+        (relic_id, relic)
+        for relic_id, relic in preview_relic_entries()
+        if relic_ready_to_enshrine(state, relic)
+    ]
+    if ready_entries:
+        options = [relic["action_label"] for _relic_id, relic in ready_entries]
+        choice = action_menu_panel(
+            "聖印安置",
+            options,
+            "聖物調查台",
+            header_lines=["選擇可安置的聖印。此操作不會啟用任何戰鬥效果。"],
+            allow_back=True,
+            border_style="yellow",
+        )
+        if choice:
+            relic_id, _relic = ready_entries[choice - 1]
+            result = enshrine_relic(state, relic_id)
+            render_panel("聖印安置結果", result["message"].splitlines(), border_style="yellow")
+    else:
+        print("\n目前沒有可安置的聖印。")
+    print("\n這裡不會裝備、啟用、強化聖物，也不會提供戰鬥加成。")
     pause()
 
 def town_menu(state: dict) -> None:
@@ -2236,10 +2406,10 @@ def fire_mark_church_lookup(state: dict) -> None:
     print("「它記錄了火的資格，卻還沒有承載力量。現在啟用，只會把印記燒毀。」")
     print()
     print("賽恩用封蠟與灰白布帶暫時封住碎片的共鳴，又把它們交還給你。")
-    print("「先保管好。等找到真正的熔印之地，再談合成與承載。」")
+    print("「去神殿後側的聖物調查台吧。那裡能讓碎片承接成真正的火之聖印。」")
     print()
     print("已確認：未完成的火之印記核心。")
-    print("正式火之印記合成、啟用與聖物效果尚未開放。")
+    print("下一步：前往聖物調查台合成並安置火之聖印。聖印被動效果尚未開放。")
     state["flags"][FIRE_MARK_CHURCH_LOOKUP_FLAG] = True
     print()
 
@@ -2284,8 +2454,6 @@ def choose_weighted_event() -> str:
 def dungeon_menu(state: dict) -> None:
     if state["flags"].get("ash_guardian_defeated") and not is_unlocked(state, "dungeon_cinder_seal_depths"):
         unlock(state, "dungeon_cinder_seal_depths")
-    if state["flags"].get("cinder_seal_sentinel_defeated") and not is_unlocked(state, ICE_REGION_UNLOCK):
-        unlock(state, ICE_REGION_UNLOCK)
     unlocked_dungeons = player_facing_dungeon_ids(state)
     if not unlocked_dungeons:
         print("目前沒有可探索的迷宮。")
@@ -2577,11 +2745,10 @@ def clear_cinder_seal_sentinel(state: dict, run_log: dict) -> None:
     if state["flags"].get("cinder_seal_sentinel_defeated"):
         return
     state["flags"]["cinder_seal_sentinel_defeated"] = True
-    unlock(state, ICE_REGION_UNLOCK)
     add_loot(state, "key_fire_mark_shard", 1, run_log)
     print("\n燼印鎮衛碎裂時，胸口的赤紅刻印凝成第三枚碎片。")
     print("取得 火之印記碎片 x1。")
-    print("三枚碎片短暫共鳴，像有一個尚未說出口的名字在灰燼裡亮起。")
+    print("三枚碎片短暫共鳴，像有一個尚未說出口的名字在灰燼裡亮起。回城後先向工會與神殿確認。")
 
 def clear_ice_wreck_captain(state: dict, run_log: dict) -> None:
     if state["flags"].get("ice_wreck_captain_defeated"):
@@ -3350,6 +3517,14 @@ def smoke_test() -> None:
     assert not boss_available_at_dungeon_end(legacy_glen_state, "dungeon_scorched_mine", "boss_glen")
     ice_state = create_state("Ice route smoke", next(iter(JOBS)))
     ice_state["flags"]["cinder_seal_sentinel_defeated"] = True
+    ice_state["flags"][FIRE_MARK_CHURCH_LOOKUP_FLAG] = True
+    ice_state["inventory"][FIRE_MARK_SHARD_ID] = 3
+    assert not is_unlocked(ice_state, ICE_REGION_UNLOCK)
+    fire_relic_result = enshrine_relic(ice_state, "relic_fire_seal")
+    assert fire_relic_result["changed"] is True
+    assert ice_state["flags"]["fire_seal_enshrined"]
+    assert ice_state["inventory"].get(FIRE_MARK_SHARD_ID, 0) == 0
+    assert ice_state["inventory"].get("key_fire_seal", 0) == 1
     assert is_unlocked(ice_state, ICE_REGION_UNLOCK)
     assert quest_unlocked(ice_state, "quest_ice_minor_a")
     assert "dungeon_ice_minor_a" in player_facing_dungeon_ids(ice_state)
@@ -3430,6 +3605,21 @@ def smoke_test() -> None:
     thunder_state["completed_quests"].append("quest_thunder_main_phase_2")
     assert quest_unlocked(thunder_state, "quest_thunder_return_handoff")
     assert quest_ready(thunder_state, "quest_thunder_return_handoff")
+    for key in QUESTS["quest_thunder_return_handoff"]["unlocks"]:
+        unlock(thunder_state, key)
+    assert not is_unlocked(thunder_state, FINAL_REGION_UNLOCK)
+    final_gate_state = create_state("Final gate smoke", next(iter(JOBS)))
+    final_gate_state["flags"]["fire_seal_enshrined"] = True
+    final_gate_state["flags"]["ice_seal_enshrined"] = True
+    final_gate_state["flags"]["earth_seal_enshrined"] = True
+    final_gate_state["flags"]["thunder_relic_marker_resolved"] = True
+    final_gate_state["inventory"]["key_thunder_relic_marker_source"] = 1
+    assert not is_unlocked(final_gate_state, FINAL_REGION_UNLOCK)
+    thunder_relic_result = enshrine_relic(final_gate_state, "relic_thunder_marker_source")
+    assert thunder_relic_result["changed"] is True
+    assert final_gate_state["flags"]["thunder_seal_enshrined"]
+    assert final_gate_state["inventory"].get("key_thunder_seal", 0) == 1
+    assert is_unlocked(final_gate_state, FINAL_REGION_UNLOCK)
     final_state = create_state("Final route smoke", next(iter(JOBS)))
     unlock(final_state, FINAL_REGION_UNLOCK)
     assert quest_unlocked(final_state, "quest_final_minor_a")

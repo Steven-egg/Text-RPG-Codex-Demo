@@ -76,7 +76,7 @@ def temple_screen_model(state: dict[str, Any]) -> dict[str, Any]:
             "description": "向賽恩大祭司詢問古代文獻查閱結果與火之印記核心的事。",
             "enabled": True,
             "payload": {},
-            "response_text": "賽恩指著舊文獻，輕聲說道：『查到了。這三枚碎片不是完整的火之印記，而是它尚未完成的核心。它記錄了火的資格，卻還沒有承載力量。現在啟用，只會把印記燒毀。先保管好。等找到真正的熔印之地，再談合成與承載。』"
+            "response_text": "賽恩指著舊文獻，輕聲說道：『查到了。這三枚碎片不是完整的火之印記，而是它尚未完成的核心。去神殿後側的聖物調查台吧。那裡能讓碎片承接成真正的火之聖印。』"
         })
     elif state.get("flags", {}).get("boss_glen_defeated"):
         inquiries.append({
