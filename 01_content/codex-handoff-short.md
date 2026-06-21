@@ -8,19 +8,19 @@ what the next boundary is.
 
 - Work directory: `C:\Users\user\OneDrive\文字冒險遊戲`
 - Latest local checkpoint recorded for this handoff:
-  `[codex] feat(content): add Earth and Thunder display naming pass`
+  `[codex] feat(content): add Final display naming pass`
   (use live `git log` for the exact hash).
 - Python CLI runtime remains the playable game and gameplay authority.
 - Act 1 is playable; Act 2 fire demo runtime / bridge coverage is complete for
   the current narrow slice.
-- Ice, Earth, and Thunder display naming passes are complete in runtime data for
-  dungeons, monsters, bosses, materials / key proofs, and quest title /
+- Ice, Earth, Thunder, and Final display naming passes are complete in runtime
+  data for dungeons, monsters, bosses, materials / key proofs, and quest title /
   description text.
 - `06_tools/naming_inventory_report.py` is available as a read-only naming
   inventory helper for duplicate display names and lightweight term-shape
   checks.
-- Final display naming has not started. Start with a read-only candidate table
-  before editing data.
+- Final display naming keeps `魔王城` as the region-facing target and reveals
+  `災禍邪神 阿巴頓` as the final boss display identity.
 - Real Relic Preview registration, resonance, assembly, or effect behavior is
   still a future runtime / facility planning gate.
 - GUI static prototype exists under `07_gui_prototype/` and remains static by
@@ -70,8 +70,8 @@ Current decisions:
   Ash Outpost.
 - Ice / Earth / Thunder regions default to one regional town and three dungeons:
   two minor dungeons plus one main two-phase dungeon.
-- Current display naming coverage is complete through Thunder. Final display
-  naming remains the next read-only candidate-table pass.
+- Current display naming coverage is complete through Final. Relic Preview /
+  聖物調查台 remains the next likely read-only planning gate.
 - This is planning only. It does not approve runtime, data, schema, save, GUI,
   bridge, combat, class, relic, or asset-pipeline work.
 
@@ -121,7 +121,7 @@ No implementation is pre-approved.
 
 Small safe next steps:
 
-- produce a Final display naming candidate table
+- produce a Relic Preview / 聖物調查台 read-only planning gate
 - refine `01_content/world-content-skeleton-v0.1.md`
 - keep Hot Zone docs short and move historical detail to Task / Cold Zone
 - produce a read-only planning gate for one exact future slice
@@ -139,11 +139,11 @@ Latest detailed verification history lives in Task Zone files. For docs-only
 cleanup, status/diff review is enough. Runtime smoke is required only when
 runtime, data, schema, save, combat, or bridge behavior changes.
 
-Latest naming checkpoint verification:
+Latest naming checkpoint verification after the Final pass:
 
 - `python 06_tools\validate_data.py`
 - `python element_maze.py --smoke-test`
-- `python 06_tools\naming_inventory_report.py --region thunder`
+- `python 06_tools\naming_inventory_report.py --region final`
 - `git diff --check`
 
 Manual owner playtest after `56731f1` confirmed Demon King defeat completes

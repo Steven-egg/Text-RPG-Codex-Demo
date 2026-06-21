@@ -1013,7 +1013,7 @@ MONSTERS = {
         "boss": True,
     },
     "mon_final_ash_echo": {
-        "name": "Ash Echo",
+        "name": "災灰魔兵",
         "level": 34,
         "hp": 560,
         "attack": 116,
@@ -1027,7 +1027,7 @@ MONSTERS = {
         "drops": [("mat_final_echo_ash", 0.42, 1), ("mat_final_void_shard", 0.10, 1)],
     },
     "mon_final_frost_echo": {
-        "name": "Frost Echo",
+        "name": "霜記魔使",
         "level": 34,
         "hp": 540,
         "attack": 114,
@@ -1041,7 +1041,7 @@ MONSTERS = {
         "drops": [("mat_final_frost_memory", 0.42, 1), ("mat_final_echo_ash", 0.18, 1)],
     },
     "mon_final_root_echo": {
-        "name": "Root Echo",
+        "name": "汙根魔僕",
         "level": 35,
         "hp": 630,
         "attack": 118,
@@ -1055,7 +1055,7 @@ MONSTERS = {
         "drops": [("mat_final_root_stone", 0.36, 1), ("mat_final_void_shard", 0.12, 1)],
     },
     "mon_final_storm_echo": {
-        "name": "Storm Echo",
+        "name": "雷玻翼魔",
         "level": 35,
         "hp": 520,
         "attack": 122,
@@ -1069,7 +1069,7 @@ MONSTERS = {
         "drops": [("mat_final_storm_glass", 0.38, 1), ("mat_final_frost_memory", 0.18, 1)],
     },
     "mon_final_seal_larva": {
-        "name": "Seal Larva",
+        "name": "破封百目鬼",
         "level": 35,
         "hp": 575,
         "attack": 124,
@@ -1083,7 +1083,7 @@ MONSTERS = {
         "drops": [("mat_final_void_shard", 0.40, 1), ("mat_final_root_stone", 0.18, 1)],
     },
     "mon_final_ruin_hound": {
-        "name": "Ruin Hound",
+        "name": "赤血惡魔",
         "level": 36,
         "hp": 650,
         "attack": 128,
@@ -1097,7 +1097,7 @@ MONSTERS = {
         "drops": [("mat_final_storm_glass", 0.36, 1), ("mat_final_void_shard", 0.18, 1)],
     },
     "mon_final_void_mite": {
-        "name": "Void Mite",
+        "name": "深淵觸魔",
         "level": 36,
         "hp": 510,
         "attack": 132,
@@ -1111,7 +1111,7 @@ MONSTERS = {
         "drops": [("mat_final_void_shard", 0.46, 1), ("mat_final_deep_essence", 0.08, 1)],
     },
     "mon_final_memory_sentry": {
-        "name": "Memory Sentry",
+        "name": "詛咒偽聖者",
         "level": 37,
         "hp": 690,
         "attack": 130,
@@ -1125,7 +1125,7 @@ MONSTERS = {
         "drops": [("mat_final_root_stone", 0.34, 1), ("mat_final_deep_essence", 0.12, 1)],
     },
     "mon_final_echo_knight": {
-        "name": "Echo Knight",
+        "name": "終門黑騎",
         "level": 37,
         "hp": 720,
         "attack": 136,
@@ -1139,7 +1139,7 @@ MONSTERS = {
         "drops": [("mat_final_seal_core", 0.34, 1), ("mat_final_echo_ash", 0.18, 1)],
     },
     "mon_final_mirror_wisp": {
-        "name": "Mirror Wisp",
+        "name": "黑鏡夢魔",
         "level": 38,
         "hp": 570,
         "attack": 140,
@@ -1153,7 +1153,7 @@ MONSTERS = {
         "drops": [("mat_final_deep_essence", 0.36, 1), ("mat_final_frost_memory", 0.18, 1)],
     },
     "mon_final_gate_sentinel": {
-        "name": "Gate Sentinel",
+        "name": "黑曜冠衛",
         "level": 38,
         "hp": 780,
         "attack": 142,
@@ -1167,7 +1167,7 @@ MONSTERS = {
         "drops": [("mat_final_seal_core", 0.42, 1), ("mat_final_void_shard", 0.16, 1)],
     },
     "mon_final_core_guard": {
-        "name": "Final Core Guard",
+        "name": "封核魔衛",
         "level": 39,
         "hp": 820,
         "attack": 148,
@@ -1181,7 +1181,7 @@ MONSTERS = {
         "drops": [("mat_final_seal_core", 0.38, 1), ("mat_final_demon_core", 0.12, 1)],
     },
     "mon_final_void_lancer": {
-        "name": "Void Lancer",
+        "name": "深淵槍魔",
         "level": 40,
         "hp": 720,
         "attack": 154,
@@ -1195,7 +1195,7 @@ MONSTERS = {
         "drops": [("mat_final_demon_core", 0.30, 1), ("mat_final_deep_essence", 0.20, 1)],
     },
     "mon_final_demon_shade": {
-        "name": "Demon Shade",
+        "name": "女王魅魔",
         "level": 40,
         "hp": 760,
         "attack": 156,
@@ -1209,7 +1209,7 @@ MONSTERS = {
         "drops": [("mat_final_demon_core", 0.34, 1), ("mat_final_void_shard", 0.22, 1)],
     },
     "mon_final_throne_wraith": {
-        "name": "Throne Wraith",
+        "name": "王座怨靈",
         "level": 41,
         "hp": 780,
         "attack": 162,
@@ -1223,7 +1223,7 @@ MONSTERS = {
         "drops": [("mat_final_deep_essence", 0.38, 1), ("mat_final_demon_core", 0.18, 1)],
     },
     "mon_final_crown_guard": {
-        "name": "Crown Guard",
+        "name": "災禍冠衛",
         "level": 42,
         "hp": 900,
         "attack": 166,
@@ -1237,7 +1237,7 @@ MONSTERS = {
         "drops": [("mat_final_demon_core", 0.36, 1), ("mat_final_seal_core", 0.22, 1)],
     },
     "mon_final_last_shadow": {
-        "name": "Last Shadow",
+        "name": "終影魔將",
         "level": 42,
         "hp": 820,
         "attack": 170,
@@ -1251,7 +1251,7 @@ MONSTERS = {
         "drops": [("mat_final_void_shard", 0.32, 1), ("mat_final_deep_essence", 0.24, 1)],
     },
     "boss_final_echo_vanguard": {
-        "name": "Final Echo Vanguard",
+        "name": "終門魔將 巴爾迦",
         "level": 36,
         "hp": 1840,
         "attack": 142,
@@ -1266,7 +1266,7 @@ MONSTERS = {
         "boss": True,
     },
     "boss_final_ruin_jailer": {
-        "name": "Ruin Jailer",
+        "name": "破封魔爵 維迦洛",
         "level": 37,
         "hp": 1980,
         "attack": 148,
@@ -1281,7 +1281,7 @@ MONSTERS = {
         "boss": True,
     },
     "boss_final_echo_warden": {
-        "name": "Echo Warden",
+        "name": "王座魔龍 札哈克",
         "level": 39,
         "hp": 2260,
         "attack": 158,
@@ -1296,7 +1296,7 @@ MONSTERS = {
         "boss": True,
     },
     "boss_final_seal_core": {
-        "name": "Final Seal Core",
+        "name": "黑曜女王 莉莉絲",
         "level": 41,
         "hp": 2520,
         "attack": 168,
@@ -1311,7 +1311,7 @@ MONSTERS = {
         "boss": True,
     },
     "boss_final_demon_king": {
-        "name": "Demon King",
+        "name": "災禍邪神 阿巴頓",
         "level": 43,
         "hp": 3000,
         "attack": 182,

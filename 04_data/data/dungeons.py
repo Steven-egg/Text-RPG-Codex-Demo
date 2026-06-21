@@ -252,7 +252,7 @@ DUNGEONS = {
         "boss": "boss_thunder_crown_storm_lord",
     },
     "dungeon_final_minor_a": {
-        "name": "Echoing Frontline",
+        "name": "攻城外壕",
         "recommended": "Lv34-36",
         "steps": 15,
         "element": "Final",
@@ -269,7 +269,7 @@ DUNGEONS = {
         "boss": "boss_final_echo_vanguard",
     },
     "dungeon_final_minor_b": {
-        "name": "Broken Seal Ruins",
+        "name": "破封城墟",
         "recommended": "Lv35-37",
         "steps": 15,
         "element": "Final",
@@ -286,7 +286,7 @@ DUNGEONS = {
         "boss": "boss_final_ruin_jailer",
     },
     "dungeon_final_main_phase_1": {
-        "name": "Demon King's Gate - Elemental Echo",
+        "name": "黑曜城門",
         "recommended": "Lv37-39",
         "steps": 12,
         "element": "Final",
@@ -302,7 +302,7 @@ DUNGEONS = {
         "boss": "boss_final_echo_warden",
     },
     "dungeon_final_main_phase_2": {
-        "name": "Demon King's Gate - Seal Core",
+        "name": "封核中樞",
         "recommended": "Lv39-41",
         "steps": 12,
         "element": "Final",
@@ -318,7 +318,7 @@ DUNGEONS = {
         "boss": "boss_final_seal_core",
     },
     "dungeon_final_main_phase_3": {
-        "name": "Demon King's Gate - Throne",
+        "name": "魔王王座",
         "recommended": "Lv41-43",
         "steps": 12,
         "element": "Final",
