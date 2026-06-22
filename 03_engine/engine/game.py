@@ -33,8 +33,16 @@ from data import (
     QUESTS,
     RECIPES,
     RELICS,
+    REGIONS,
     SHOP_INVENTORY,
     SKILLS,
+    get_facility_dialogue,
+    get_facility_display_name,
+    get_npc_display_name,
+    get_region_by_dungeon,
+    get_region_by_quest,
+    get_unlocked_regions,
+    get_dialogue,
 )
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -285,14 +293,19 @@ def boss_defeated(state: dict, boss_id: str | None) -> bool:
     flag = boss_clear_flag(boss_id)
     return bool(flag and state.get("flags", {}).get(flag))
 
-def player_facing_dungeon_ids(state: dict) -> list[str]:
+def player_facing_dungeon_ids(state: dict, region_id: str | None = None) -> list[str]:
     dungeon_ids = []
+    allowed_dungeon_ids = None
+    if region_id is not None and region_id in REGIONS:
+        allowed_dungeon_ids = set(REGIONS[region_id]["dungeon_ids"])
     ice_phase_2_unlocked = is_unlocked(state, ICE_PHASE_2_DUNGEON_ID)
     earth_phase_2_unlocked = is_unlocked(state, EARTH_PHASE_2_DUNGEON_ID)
     thunder_phase_2_unlocked = is_unlocked(state, THUNDER_PHASE_2_DUNGEON_ID)
     final_phase_2_unlocked = is_unlocked(state, FINAL_PHASE_2_DUNGEON_ID)
     final_phase_3_unlocked = is_unlocked(state, FINAL_PHASE_3_DUNGEON_ID)
     for dungeon_id, dungeon in DUNGEONS.items():
+        if allowed_dungeon_ids is not None and dungeon_id not in allowed_dungeon_ids:
+            continue
         if dungeon_id == "dungeon_ice_main_phase_1" and ice_phase_2_unlocked:
             continue
         if dungeon_id == "dungeon_earth_main_phase_1" and earth_phase_2_unlocked:
@@ -876,12 +889,13 @@ def buy_travel_shop_item(state: dict, item_id: str) -> str:
     add_item(state, item_id, 1)
     return f"購買了 {item_name(item_id)}。"
 
-def travel_shop_item_menu(state: dict, category: str) -> None:
+def travel_shop_item_menu(state: dict, category: str, region_id: str = "border_fire") -> None:
     while True:
         item_ids = travel_shop_available_items(state, category)
+        facility_name = get_facility_display_name(region_id, "shop")
         if not item_ids:
             render_panel(
-                "旅人小鋪 - 商品清單",
+                f"{facility_name} - 商品清單",
                 [f"分類：{category}", "目前此分類沒有可購買商品。"],
                 border_style="green",
             )
@@ -890,7 +904,7 @@ def travel_shop_item_menu(state: dict, category: str) -> None:
         choice = action_menu_panel(
             "選擇商品",
             [travel_shop_item_line(state, item_id) for item_id in item_ids],
-            "旅人小鋪 - 商品清單",
+            f"{facility_name} - 商品清單",
             header_lines=[
                 f"持有金幣：{state['gold']}G",
                 f"分類：{category} / 可購買商品 {len(item_ids)} 種",
@@ -905,7 +919,7 @@ def travel_shop_item_menu(state: dict, category: str) -> None:
         action = action_menu_panel(
             "商品操作",
             ["購買 1 個"],
-            "旅人小鋪 - 商品詳情",
+            f"{facility_name} - 商品詳情",
             header_lines=travel_shop_detail_lines(state, item_id),
             allow_back=True,
             border_style="green",
@@ -914,24 +928,26 @@ def travel_shop_item_menu(state: dict, category: str) -> None:
             continue
         result = buy_travel_shop_item(state, item_id)
         render_panel(
-            "旅人小鋪 - 購買結果",
+            f"{facility_name} - 購買結果",
             [result, f"目前金幣：{state['gold']}G", f"{item_name(item_id)} 持有：x{travel_shop_owned_count(state, item_id)}"],
             border_style="green",
         )
         pause()
 
-def travel_shop(state: dict) -> None:
+def travel_shop(state: dict, region_id: str = "border_fire") -> None:
     while True:
         available = travel_shop_available_items(state)
         category_options = []
         for category in TRAVEL_SHOP_CATEGORIES:
             count = len(travel_shop_available_items(state, category))
             category_options.append(f"{category} / {count} 種商品")
+        shop_title = f"{get_facility_display_name(region_id, 'shop')} - {get_npc_display_name(region_id, 'rabi')}"
         choice = action_menu_panel(
             "選擇分類",
             category_options,
-            "旅人小鋪 - 拉比",
+            shop_title,
             header_lines=[
+                get_dialogue(region_id, "shop", "welcome"),
                 f"持有金幣：{state['gold']}G",
                 f"可購買商品：{len(available)} 種",
             ],
@@ -941,7 +957,7 @@ def travel_shop(state: dict) -> None:
         )
         if choice == 0:
             return
-        travel_shop_item_menu(state, TRAVEL_SHOP_CATEGORIES[choice - 1])
+        travel_shop_item_menu(state, TRAVEL_SHOP_CATEGORIES[choice - 1], region_id)
 
 def equipment_owned_count(state: dict, item_id: str) -> int:
     owned = state["inventory"].get(item_id, 0)
@@ -1280,18 +1296,20 @@ def learn_magic_book_message(state: dict, book_id: str) -> str:
     state["learned_skills"].append(skill_id)
     return f"你學會了 {SKILLS[skill_id]['name']}。"
 
-def magic_shop(state: dict) -> None:
+def magic_shop(state: dict, region_id: str = "border_fire") -> None:
     while True:
         category_options = []
         for category in MAGIC_SHOP_CATEGORIES:
             count = len(magic_shop_book_ids(category))
             category_options.append(f"{category} / {count} 本魔法書")
+        facility_name = get_facility_display_name(region_id, "magic_shop")
+        welcome_text = get_dialogue(region_id, "magic_shop", "welcome")
         choice = action_menu_panel(
             "選擇分類",
             category_options,
-            "星燈魔法商店",
+            facility_name,
             header_lines=[
-                "伊芙輕輕敲了敲書脊：「願星辰指引你的靈魂，冒險者。」",
+                welcome_text,
                 f"持有金幣：{state['gold']}G",
             ],
             hint_lines=["依魔法功能分類瀏覽；選中魔法書後可查看職業、等級、素材與技能效果。"],
@@ -1300,14 +1318,15 @@ def magic_shop(state: dict) -> None:
         )
         if choice == 0:
             return
-        magic_shop_book_menu(state, MAGIC_SHOP_CATEGORIES[choice - 1])
+        magic_shop_book_menu(state, MAGIC_SHOP_CATEGORIES[choice - 1], region_id)
 
-def magic_shop_book_menu(state: dict, category: str) -> None:
+def magic_shop_book_menu(state: dict, category: str, region_id: str = "border_fire") -> None:
     while True:
         book_ids = magic_shop_book_ids(category)
+        facility_name = get_facility_display_name(region_id, "magic_shop")
         if not book_ids:
             render_panel(
-                "星燈魔法商店 - 魔法書列表",
+                f"{facility_name} - 魔法書列表",
                 [f"分類：{category}", "目前此分類沒有魔法書。"],
                 border_style="magenta",
             )
@@ -1316,7 +1335,7 @@ def magic_shop_book_menu(state: dict, category: str) -> None:
         choice = action_menu_panel(
             "選擇魔法書",
             [magic_book_line(state, book_id) for book_id in book_ids],
-            "星燈魔法商店 - 魔法書列表",
+            f"{facility_name} - 魔法書列表",
             header_lines=[
                 f"持有金幣：{state['gold']}G",
                 f"分類：{category} / 魔法書 {len(book_ids)} 本",
@@ -1431,7 +1450,8 @@ def synthesis_recipe_detail_lines(state: dict, recipe_id: str) -> list[str]:
         "合成會消耗素材；若需要基底裝備，已裝備物也可被消耗。",
     ]
 
-def craft_menu(state: dict, title_text: str, recipe_ids: list[str]) -> None:
+def craft_menu(state: dict, title_text: str, recipe_ids: list[str], region_id: str = "border_fire") -> None:
+    title_text = get_facility_display_name(region_id, "synthesis")
     while True:
         available = synthesis_available_recipes(state, recipe_ids)
         if not available:
@@ -1446,7 +1466,7 @@ def craft_menu(state: dict, title_text: str, recipe_ids: list[str]) -> None:
             ],
             title_text,
             header_lines=[
-                "米菈把配方卡排成一列：「先看你想做什麼，再決定要不要動手。」",
+                get_dialogue(region_id, "synthesis", "welcome"),
                 f"持有金幣：{state['gold']}G",
             ],
             hint_lines=["分類瀏覽可用配方；選中配方後會顯示產出、持有數、基底與素材狀態。"],
@@ -1668,8 +1688,9 @@ def enshrine_relic(state: dict, identifier: str | None) -> dict:
     }
 
 
-def relic_preview_menu(state: dict) -> None:
-    title("聖物調查")
+def relic_preview_menu(state: dict, region_id: str = "border_fire") -> None:
+    facility_name = get_facility_display_name(region_id, "relic")
+    title(facility_name)
     previews = [relic for _relic_id, relic in preview_relic_entries()]
     if not previews:
         print("目前沒有可預覽的聖物線索。")
@@ -1697,7 +1718,7 @@ def relic_preview_menu(state: dict) -> None:
         choice = action_menu_panel(
             "聖印安置",
             options,
-            "聖物調查台",
+            facility_name,
             header_lines=["選擇可安置的聖印。此操作不會啟用任何戰鬥效果。"],
             allow_back=True,
             border_style="yellow",
@@ -1711,24 +1732,25 @@ def relic_preview_menu(state: dict) -> None:
     print("\n這裡不會裝備、啟用、強化聖物，也不會提供戰鬥加成。")
     pause()
 
-def town_menu(state: dict) -> None:
+def town_menu(state: dict, region_id: str = "border_fire") -> None:
     while True:
+        region = REGIONS.get(region_id, REGIONS["border_fire"])
         options = [
-            "冒險者工會 - 委託、素材收購與火印線索",
-            "鐵刃工坊 - 武器購買與強化",
-            "堅甲工坊 - 防具購買與強化",
-            "旅人小鋪 - 補給與特殊道具",
-            "米菈合成屋 - 把素材轉成裝備與戰術道具",
-            "星燈魔法商店 - 學習永久技能",
-            "轉職神殿 - 轉職、火印與未來方向預覽",
-            "聖物調查 - 預覽未開放聖物線索",
-            "倉庫 - 存放與取出非關鍵物品",
-            "旅館休息 30G - 回復 HP/MP",
+            f"{get_facility_display_name(region_id, 'guild')} - 委託、素材收購與火印線索",
+            f"{get_facility_display_name(region_id, 'weapon_workshop')} - 武器購買與強化",
+            f"{get_facility_display_name(region_id, 'armor_workshop')} - 防具購買與強化",
+            f"{get_facility_display_name(region_id, 'shop')} - 補給與特殊道具",
+            f"{get_facility_display_name(region_id, 'synthesis')} - 把素材轉成裝備與戰術道具",
+            f"{get_facility_display_name(region_id, 'magic_shop')} - 學習永久技能",
+            f"{get_facility_display_name(region_id, 'temple')} - 轉職、火印與未來方向預覽",
+            f"{get_facility_display_name(region_id, 'relic')} - 預覽未開放聖物線索",
+            f"{get_facility_display_name(region_id, 'storage')} - 存放與取出非關鍵物品",
+            f"{get_facility_display_name(region_id, 'inn')}休息 30G - 回復 HP/MP",
         ]
         choice = action_menu_panel(
             "你要去哪裡",
             options,
-            "邊境城鎮艾爾姆",
+            region["town_name"],
             header_lines=player_resource_lines(state)[:2],
             hint_lines=town_hint_lines(state),
             allow_back=True,
@@ -1737,79 +1759,83 @@ def town_menu(state: dict) -> None:
         if choice == 0:
             return
         if choice == 1:
-            guild_menu(state)
+            guild_menu(state, region_id)
         elif choice == 2:
-            iron_workshop(state)
+            iron_workshop(state, region_id)
         elif choice == 3:
-            armor_workshop(state)
+            armor_workshop(state, region_id)
         elif choice == 4:
-            travel_shop(state)
+            travel_shop(state, region_id)
         elif choice == 5:
             if not is_unlocked(state, "shop_synthesis_01"):
-                print("米菈的店門半掩著。先完成工會任務「洞窟採集」吧。")
+                mira_name = get_npc_display_name(region_id, "mira")
+                print(f"{mira_name}的店門半掩著。先完成工會任務「洞窟採集」吧。")
                 pause()
             else:
                 craft_menu(
                     state,
-                    "米菈合成屋",
-                    ["recipe_fire_cloak", "recipe_focus_pouch", "recipe_heat_charm", "recipe_piercing_bundle"],
+                    get_facility_display_name(region_id, "synthesis"),
+                    ["recipe_fire_cloak", "recipe_focus_pouch", "recipe_heat_charm", "recipe_piercing_bundle"], region_id,
                 )
         elif choice == 6:
-            magic_shop(state)
+            magic_shop(state, region_id)
         elif choice == 7:
-            temple(state)
+            temple(state, region_id)
         elif choice == 8:
-            relic_preview_menu(state)
+            relic_preview_menu(state, region_id)
         elif choice == 9:
-            storage_menu(state)
+            storage_menu(state, region_id)
         elif choice == 10:
-            rest_inn(state)
+            rest_inn(state, region_id)
 
-def iron_workshop(state: dict) -> None:
+def iron_workshop(state: dict, region_id: str = "border_fire") -> None:
+    title_text = get_facility_display_name(region_id, "weapon_workshop")
+    ambiance = get_dialogue(region_id, "weapon_workshop", "ambiance")
+    quote = get_dialogue(region_id, "weapon_workshop", "quote")
     workshop_catalog(
         state,
-        "鐵刃工坊",
+        title_text,
         "購買武器",
         "強化武器",
         SHOP_INVENTORY["weapon"],
         ["recipe_iron_sword_plus_1"],
-        [
-            "伴隨著鐵錘敲擊砧台的節奏，這裡充滿了金屬與汗水的硬派氣息。",
-            "葛雷抹了一把汗：「最好的防禦就是進攻。」",
-        ],
+        [ambiance, quote],
         ["武器升級能縮短戰鬥回合；購買後仍需到背包/裝備中替換。"],
         "yellow",
     )
 
-def armor_workshop(state: dict) -> None:
+def armor_workshop(state: dict, region_id: str = "border_fire") -> None:
+    title_text = get_facility_display_name(region_id, "armor_workshop")
+    ambiance = get_dialogue(region_id, "armor_workshop", "ambiance")
+    quote = get_dialogue(region_id, "armor_workshop", "quote")
     workshop_catalog(
         state,
-        "堅甲工坊",
+        title_text,
         "購買防具",
         "強化防具",
         SHOP_INVENTORY["armor"],
         ["recipe_leather_armor_plus_1"],
-        [
-            "布琳的手指滑過一排整齊的甲冑。",
-            "「耐用、實惠，品質無可挑剔。每一件都經得起實戰檢驗。」",
-        ],
+        [ambiance, quote],
         ["防具與抗性裝能提高長探索容錯；購買後仍需到背包/裝備中替換。"],
         "green",
     )
 
-def rest_inn(state: dict) -> None:
+def rest_inn(state: dict, region_id: str = "border_fire") -> None:
     stats = get_stats(state)
+    title_text = get_facility_display_name(region_id, "inn")
+    welcome_text = get_dialogue(region_id, "inn", "welcome")
+    reject_text = get_dialogue(region_id, "inn", "reject")
     render_panel(
-        "微光旅店",
+        title_text,
         [
-            "旅店老闆擦亮櫃台上的銅鈴：「睡一晚，明天的路會比較像路。」",
+            welcome_text,
             f"費用：30G / 目前金幣：{state['gold']}G",
             f"目前 HP {state['current_hp']}/{stats['max_hp']} / MP {state['current_mp']}/{stats['max_mp']}",
         ],
         border_style="green",
     )
     if state["gold"] < 30:
-        print("旅館老闆搖搖頭：「先去工會看看有沒有簡單委託吧。」")
+        print(reject_text)
         pause()
         return
     raw = input("要休息一晚嗎？(y/n) > ").strip().lower()
@@ -1848,13 +1874,15 @@ def prompt_quantity(action: str, item_id: str, available: int) -> int | None:
         return None
     return qty
 
-def storage_menu(state: dict) -> None:
+def storage_menu(state: dict, region_id: str = "border_fire") -> None:
     ensure_state_defaults(state)
+    facility_name = get_facility_display_name(region_id, "storage")
     if not state["storage_unlocked"]:
+        locked_msg = get_dialogue(region_id, "storage", "locked")
         render_panel(
-            "工會倉庫",
+            facility_name,
             [
-                "工會旁的小倉庫還沒整理好，木箱上還掛著新的銅鎖。",
+                locked_msg,
                 f"開啟 LV1 倉庫需要 {STORAGE_UNLOCK_COST}G。",
                 f"目前金幣：{state['gold']}G / 容量：{STORAGE_CAPACITY} 種非關鍵物品。",
             ],
@@ -1875,13 +1903,14 @@ def storage_menu(state: dict) -> None:
         return
 
     while True:
+        unlocked_msg = get_dialogue(region_id, "storage", "unlocked")
         choice = action_menu_panel(
             "選擇動作",
             ["查看倉庫", "存入物品", "取出物品"],
-            "倉庫 LV1",
+            f"{facility_name} LV1",
             header_lines=[
+                unlocked_msg,
                 f"容量：{storage_kind_count(state)}/{STORAGE_CAPACITY} 種物品。",
-                "關鍵道具不會存入倉庫。",
             ],
             allow_back=True,
             border_style="green",
@@ -2173,7 +2202,7 @@ def fire_mark_guild_inquiry(state: dict) -> None:
     print("正式火之印記流程尚未開放；你已記下下一步該詢問教會。")
     state["flags"][FIRE_MARK_GUILD_INQUIRY_FLAG] = True
 
-def guild_menu(state: dict) -> None:
+def guild_menu(state: dict, region_id: str = "border_fire") -> None:
     while True:
         options = ["查看委託任務", "收購素材"]
         glen_investigation_option = can_accept_boss_glen_investigation(state)
@@ -2182,13 +2211,16 @@ def guild_menu(state: dict) -> None:
         inquiry_option = can_ask_fire_mark_guild_inquiry(state)
         if inquiry_option:
             options.append("詢問三枚印記碎片的事情")
+        facility_name = get_facility_display_name(region_id, "guild")
+        greeting = get_dialogue(region_id, "guild", "greeting")
+        welcome = get_dialogue(region_id, "guild", "welcome")
         choice = action_menu_panel(
             "選擇服務",
             options,
-            "冒險者工會",
+            facility_name,
             header_lines=[
-                "諾亞從一堆文件中抬頭，對你點了點頭。",
-                "「歡迎回來。想挑戰新目標，還是要交付已完成的委託？」",
+                greeting,
+                welcome,
             ],
             hint_lines=guild_hint_lines(state),
             allow_back=True,
@@ -2197,7 +2229,7 @@ def guild_menu(state: dict) -> None:
         if choice == 0:
             return
         if choice == 1:
-            guild_quest_menu(state)
+            guild_quest_menu(state, region_id)
         elif choice == 2:
             guild_material_buy_menu(state)
         elif glen_investigation_option and choice == 3:
@@ -2207,7 +2239,7 @@ def guild_menu(state: dict) -> None:
             fire_mark_guild_inquiry(state)
             pause()
 
-def guild_quest_menu(state: dict) -> None:
+def guild_quest_menu(state: dict, region_id: str = "border_fire") -> None:
     while True:
         quest_ids = [qid for qid in QUESTS if quest_unlocked(state, qid)]
         options = []
@@ -2414,9 +2446,11 @@ def fire_mark_church_lookup(state: dict) -> None:
     print()
 
 
-def temple(state: dict) -> None:
-    title("轉職神殿")
-    print("賽恩站在門前，像一塊懂得呼吸的石碑。")
+def temple(state: dict, region_id: str = "border_fire") -> None:
+    facility_name = get_facility_display_name(region_id, "temple")
+    welcome_msg = get_dialogue(region_id, "temple", "welcome")
+    title(facility_name)
+    print(welcome_msg)
     if should_show_fire_mark_church_bridge(state):
         fire_mark_church_bridge(state)
     elif should_show_fire_mark_church_lookup(state):
@@ -2451,7 +2485,7 @@ def choose_weighted_event() -> str:
             return event
     return "empty"
 
-def dungeon_menu(state: dict) -> None:
+def dungeon_menu(state: dict, region_id: str = "border_fire") -> None:
     if state["flags"].get("ash_guardian_defeated") and not is_unlocked(state, "dungeon_cinder_seal_depths"):
         unlock(state, "dungeon_cinder_seal_depths")
     unlocked_dungeons = player_facing_dungeon_ids(state)
@@ -3492,6 +3526,19 @@ def smoke_test() -> None:
     assert state["storage_unlocked"] is False
     assert state["storage"] == {}
     assert state["bestiary"] == []
+    assert get_region_by_dungeon("dungeon_ice_minor_a") == "ice"
+    assert get_region_by_quest("quest_final_demon_king") == "final"
+    assert get_unlocked_regions(state) == ["border_fire"]
+    assert get_npc_display_name("ice", "innkeeper")
+    assert get_facility_display_name("final", "guild")
+    assert get_facility_dialogue("thunder", "shop")
+    # Dialogue helper checks
+    assert get_dialogue("ice", "guild", "welcome") == "「霜潮港隨時需要人手，看看今天的委託吧。」"
+    # Fallback to border_fire check
+    assert get_dialogue("invalid_region", "guild", "welcome") == "「歡迎回來。想挑戰新目標，還是要交付已完成的委託？」"
+    assert "dungeon_moss_cave" in player_facing_dungeon_ids(state)
+    assert "dungeon_moss_cave" in player_facing_dungeon_ids(state, "border_fire")
+    assert "dungeon_ice_minor_a" not in player_facing_dungeon_ids(state, "border_fire")
     legacy_state = {"inventory": {}}
     ensure_state_defaults(legacy_state)
     assert legacy_state["flags"] == {}
@@ -3526,8 +3573,11 @@ def smoke_test() -> None:
     assert ice_state["inventory"].get(FIRE_MARK_SHARD_ID, 0) == 0
     assert ice_state["inventory"].get("key_fire_seal", 0) == 1
     assert is_unlocked(ice_state, ICE_REGION_UNLOCK)
+    assert "ice" in get_unlocked_regions(ice_state)
     assert quest_unlocked(ice_state, "quest_ice_minor_a")
     assert "dungeon_ice_minor_a" in player_facing_dungeon_ids(ice_state)
+    assert "dungeon_ice_minor_a" in player_facing_dungeon_ids(ice_state, "ice")
+    assert "dungeon_moss_cave" not in player_facing_dungeon_ids(ice_state, "ice")
     assert boss_available_at_dungeon_end(ice_state, "dungeon_ice_minor_a", "boss_ice_wreck_captain")
     ice_state["completed_quests"].append("quest_ice_minor_a")
     unlock(ice_state, "dungeon_ice_minor_b")

@@ -9,9 +9,12 @@ from .materials import MATERIALS
 from .monsters import MONSTERS
 from .promotions import PROMOTIONS
 from .relics import RELICS
+from .regions import REGIONS
 from .quests import QUESTS
 from .shops import SHOP_INVENTORY
 from .skills import MAGIC_BOOKS, SKILLS
+from .display_names import FACILITY_DIALOGUES, FACILITY_DISPLAY_NAMES, NPC_DISPLAY_NAMES
+from .dialogues import FACILITY_GREETINGS
 
 
 DATA_REGISTRY = {
@@ -30,6 +33,11 @@ DATA_REGISTRY = {
     "shop_inventory": SHOP_INVENTORY,
     "promotions": PROMOTIONS,
     "relics": RELICS,
+    "regions": REGIONS,
+    "npc_display_names": NPC_DISPLAY_NAMES,
+    "facility_display_names": FACILITY_DISPLAY_NAMES,
+    "facility_dialogues": FACILITY_DIALOGUES,
+    "facility_greetings": FACILITY_GREETINGS,
 }
 
 
@@ -144,6 +152,10 @@ def all_promotion_ids() -> set[str]:
 
 def all_relic_ids() -> set[str]:
     return set(RELICS)
+
+
+def all_region_ids() -> set[str]:
+    return set(REGIONS)
 
 
 def promotion_previews_for_job(job_id: str) -> list[tuple[str, dict]]:

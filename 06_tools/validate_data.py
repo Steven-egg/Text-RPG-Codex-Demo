@@ -12,18 +12,25 @@ if str(DATA_ROOT) not in sys.path:
 
 try:
     from data import (
+        CORE_FACILITY_KEYS,
+        CORE_NPC_KEYS,
         DUNGEONS,
         EQUIPMENT,
         EVENT_WEIGHTS,
+        FACILITY_DIALOGUES,
+        FACILITY_DISPLAY_NAMES,
+        FACILITY_GREETINGS,
         ITEMS,
         JOB_SPECIALIZATIONS,
         JOBS,
         MAGIC_BOOKS,
         MATERIALS,
         MONSTERS,
+        NPC_DISPLAY_NAMES,
         PROMOTIONS,
         QUESTS,
         RECIPES,
+        REGIONS,
         RELICS,
         SHOP_INVENTORY,
         SKILLS,
@@ -455,6 +462,101 @@ def check_shops(errors: list[str]) -> None:
                 error(errors, f"SHOP_INVENTORY.{inventory_key}", f"references missing item/equipment id: {item_id}")
 
 
+def check_regions(errors: list[str]) -> None:
+    dungeon_regions: dict[str, list[str]] = {dungeon_id: [] for dungeon_id in DUNGEONS}
+    quest_regions: dict[str, list[str]] = {quest_id: [] for quest_id in QUESTS}
+
+    for region_id, region in REGIONS.items():
+        path = f"REGIONS.{region_id}"
+        require_keys(errors, path, region, {"name", "town_name", "unlock_key", "dungeon_ids", "quest_ids"})
+
+        for field in ("name", "town_name"):
+            if not isinstance(region.get(field), str) or not region.get(field).strip():
+                error(errors, f"{path}.{field}", "must be a non-empty string")
+
+        unlock_key = region.get("unlock_key")
+        if unlock_key is not None and unlock_key not in all_unlock_producers():
+            error(errors, f"{path}.unlock_key", f"has no known unlock producer: {unlock_key}")
+
+        dungeon_ids = region.get("dungeon_ids", [])
+        if not isinstance(dungeon_ids, list):
+            error(errors, f"{path}.dungeon_ids", "must be a list")
+        else:
+            seen_dungeons: set[str] = set()
+            for dungeon_id in dungeon_ids:
+                if dungeon_id in seen_dungeons:
+                    error(errors, f"{path}.dungeon_ids", f"duplicates dungeon id: {dungeon_id}")
+                    continue
+                seen_dungeons.add(dungeon_id)
+                if dungeon_id not in DUNGEONS:
+                    error(errors, f"{path}.dungeon_ids", f"references missing dungeon_id: {dungeon_id}")
+                    continue
+                dungeon_regions[dungeon_id].append(region_id)
+
+        quest_ids = region.get("quest_ids", [])
+        if not isinstance(quest_ids, list):
+            error(errors, f"{path}.quest_ids", "must be a list")
+        else:
+            seen_quests: set[str] = set()
+            for quest_id in quest_ids:
+                if quest_id in seen_quests:
+                    error(errors, f"{path}.quest_ids", f"duplicates quest id: {quest_id}")
+                    continue
+                seen_quests.add(quest_id)
+                if quest_id not in QUESTS:
+                    error(errors, f"{path}.quest_ids", f"references missing quest_id: {quest_id}")
+                    continue
+                quest_regions[quest_id].append(region_id)
+
+        for source_name, source, required_keys in (
+            ("NPC_DISPLAY_NAMES", NPC_DISPLAY_NAMES, CORE_NPC_KEYS),
+            ("FACILITY_DISPLAY_NAMES", FACILITY_DISPLAY_NAMES, CORE_FACILITY_KEYS),
+            ("FACILITY_DIALOGUES", FACILITY_DIALOGUES, CORE_FACILITY_KEYS),
+        ):
+            entries = source.get(region_id)
+            if not isinstance(entries, dict):
+                error(errors, f"{source_name}.{region_id}", "must define a dict for every region")
+                continue
+            for key in required_keys:
+                value = entries.get(key)
+                if not isinstance(value, str) or not value.strip():
+                    error(errors, f"{source_name}.{region_id}.{key}", "must be a non-empty string")
+
+        # Check FACILITY_GREETINGS
+        greetings = FACILITY_GREETINGS.get(region_id)
+        if not isinstance(greetings, dict):
+            error(errors, f"FACILITY_GREETINGS.{region_id}", "must define a dict for every region")
+        else:
+            required_greetings = {
+                "guild": ["greeting", "welcome"],
+                "weapon_workshop": ["ambiance", "quote"],
+                "armor_workshop": ["ambiance", "quote"],
+                "shop": ["welcome", "greeting"],
+                "synthesis": ["welcome"],
+                "magic_shop": ["welcome"],
+                "temple": ["welcome"],
+                "storage": ["locked", "unlocked"],
+                "inn": ["welcome", "reject"],
+            }
+            for fac_key, subkeys in required_greetings.items():
+                fac_entry = greetings.get(fac_key)
+                if not isinstance(fac_entry, dict):
+                    error(errors, f"FACILITY_GREETINGS.{region_id}.{fac_key}", "must be a dict")
+                    continue
+                for subkey in subkeys:
+                    val = fac_entry.get(subkey)
+                    if not isinstance(val, str) or not val.strip():
+                        error(errors, f"FACILITY_GREETINGS.{region_id}.{fac_key}.{subkey}", "must be a non-empty string")
+
+    for dungeon_id, region_ids in dungeon_regions.items():
+        if len(region_ids) != 1:
+            error(errors, f"DUNGEONS.{dungeon_id}", f"must map to exactly one region, found: {region_ids}")
+
+    for quest_id, region_ids in quest_regions.items():
+        if len(region_ids) != 1:
+            error(errors, f"QUESTS.{quest_id}", f"must map to exactly one region, found: {region_ids}")
+
+
 def validate() -> list[str]:
     errors: list[str] = []
     check_jobs(errors)
@@ -470,6 +572,7 @@ def validate() -> list[str]:
     check_dungeons(errors)
     check_quests(errors)
     check_shops(errors)
+    check_regions(errors)
     return errors
 
 
