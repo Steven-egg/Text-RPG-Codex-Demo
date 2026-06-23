@@ -36,8 +36,8 @@ from data import (
     REGIONS,
     SHOP_INVENTORY,
     SKILLS,
-    get_facility_dialogue,
     get_facility_display_name,
+    get_facility_short_description,
     get_npc_display_name,
     get_region_by_dungeon,
     get_region_by_quest,
@@ -3531,7 +3531,7 @@ def smoke_test() -> None:
     assert get_unlocked_regions(state) == ["border_fire"]
     assert get_npc_display_name("ice", "innkeeper")
     assert get_facility_display_name("final", "guild")
-    assert get_facility_dialogue("thunder", "shop")
+    assert get_facility_short_description("thunder", "shop")
     # Dialogue helper checks
     assert get_dialogue("ice", "guild", "welcome") == "「霜潮港隨時需要人手，看看今天的委託吧。」"
     # Fallback to border_fire check

@@ -145,7 +145,7 @@ FACILITY_DISPLAY_NAMES = {
 }
 
 
-FACILITY_DIALOGUES = {
+FACILITY_SHORT_DESCRIPTIONS = {
     "border_fire": {
         "guild": "諾亞從一堆文件中抬頭，對你點了點頭。",
         "weapon_workshop": "格雷把新磨好的鐵刃放回架上。",
@@ -225,5 +225,5 @@ def get_facility_display_name(region_id: str, key: str) -> str:
     return _regional_lookup(FACILITY_DISPLAY_NAMES, region_id, key)
 
 
-def get_facility_dialogue(region_id: str, key: str) -> str:
-    return _regional_lookup(FACILITY_DIALOGUES, region_id, key)
+def get_facility_short_description(region_id: str, key: str) -> str:
+    return _regional_lookup(FACILITY_SHORT_DESCRIPTIONS, region_id, key)

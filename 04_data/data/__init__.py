@@ -16,11 +16,11 @@ from .regions import REGIONS, get_region_by_dungeon, get_region_by_quest, get_un
 from .display_names import (
     CORE_FACILITY_KEYS,
     CORE_NPC_KEYS,
-    FACILITY_DIALOGUES,
     FACILITY_DISPLAY_NAMES,
+    FACILITY_SHORT_DESCRIPTIONS,
     NPC_DISPLAY_NAMES,
-    get_facility_dialogue,
     get_facility_display_name,
+    get_facility_short_description,
     get_npc_display_name,
 )
 from .dialogues import FACILITY_GREETINGS, get_dialogue
@@ -45,7 +45,7 @@ __all__ = [
     "REGIONS",
     "NPC_DISPLAY_NAMES",
     "FACILITY_DISPLAY_NAMES",
-    "FACILITY_DIALOGUES",
+    "FACILITY_SHORT_DESCRIPTIONS",
     "FACILITY_GREETINGS",
     "CORE_NPC_KEYS",
     "CORE_FACILITY_KEYS",
@@ -54,7 +54,7 @@ __all__ = [
     "get_region_by_quest",
     "get_npc_display_name",
     "get_facility_display_name",
-    "get_facility_dialogue",
+    "get_facility_short_description",
     "get_dialogue",
     "DATA_REGISTRY",
 ]

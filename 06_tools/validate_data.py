@@ -17,9 +17,9 @@ try:
         DUNGEONS,
         EQUIPMENT,
         EVENT_WEIGHTS,
-        FACILITY_DIALOGUES,
         FACILITY_DISPLAY_NAMES,
         FACILITY_GREETINGS,
+        FACILITY_SHORT_DESCRIPTIONS,
         ITEMS,
         JOB_SPECIALIZATIONS,
         JOBS,
@@ -511,7 +511,7 @@ def check_regions(errors: list[str]) -> None:
         for source_name, source, required_keys in (
             ("NPC_DISPLAY_NAMES", NPC_DISPLAY_NAMES, CORE_NPC_KEYS),
             ("FACILITY_DISPLAY_NAMES", FACILITY_DISPLAY_NAMES, CORE_FACILITY_KEYS),
-            ("FACILITY_DIALOGUES", FACILITY_DIALOGUES, CORE_FACILITY_KEYS),
+            ("FACILITY_SHORT_DESCRIPTIONS", FACILITY_SHORT_DESCRIPTIONS, CORE_FACILITY_KEYS),
         ):
             entries = source.get(region_id)
             if not isinstance(entries, dict):

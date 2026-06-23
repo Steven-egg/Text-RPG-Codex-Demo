@@ -13,7 +13,7 @@ from .regions import REGIONS
 from .quests import QUESTS
 from .shops import SHOP_INVENTORY
 from .skills import MAGIC_BOOKS, SKILLS
-from .display_names import FACILITY_DIALOGUES, FACILITY_DISPLAY_NAMES, NPC_DISPLAY_NAMES
+from .display_names import FACILITY_DISPLAY_NAMES, FACILITY_SHORT_DESCRIPTIONS, NPC_DISPLAY_NAMES
 from .dialogues import FACILITY_GREETINGS
 
 
@@ -36,7 +36,7 @@ DATA_REGISTRY = {
     "regions": REGIONS,
     "npc_display_names": NPC_DISPLAY_NAMES,
     "facility_display_names": FACILITY_DISPLAY_NAMES,
-    "facility_dialogues": FACILITY_DIALOGUES,
+    "facility_short_descriptions": FACILITY_SHORT_DESCRIPTIONS,
     "facility_greetings": FACILITY_GREETINGS,
 }
 
