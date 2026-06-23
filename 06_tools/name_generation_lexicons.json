@@ -1,0 +1,211 @@
+{
+  "prefixes": {
+    "quality": {
+      "tier1": [
+        {"word": "粗糙的", "stats": {"accuracy": -2}},
+        {"word": "生鏽的", "stats": {"attack": -1}},
+        {"word": "破損的", "stats": {"defense": -1}}
+      ],
+      "tier2": [
+        {"word": "普通的", "stats": {}},
+        {"word": "耐用的", "stats": {"defense": 1}},
+        {"word": "磨光的", "stats": {"accuracy": 1}}
+      ],
+      "tier3": [
+        {"word": "精良的", "stats": {"attack": 2, "defense": 2}},
+        {"word": "厚重的", "stats": {"defense": 4, "agility": -1}, "tags": ["heavy"]},
+        {"word": "輕盈的", "stats": {"agility": 2}, "tags": ["light"]}
+      ],
+      "tier4": [
+        {"word": "史詩的", "stats": {"attack": 5, "defense": 5, "crit": 2}},
+        {"word": "傳說的", "stats": {"attack": 8, "defense": 8, "crit": 4, "agility": 1}},
+        {"word": "不朽的", "stats": {"defense": 10, "hp_max": 30}, "tags": ["immortal"]}
+      ]
+    },
+    "elemental": {
+      "fire": [
+        {"word": "烈焰的", "stats": {"fire_damage": 5, "fire_resist": 5}, "tags": ["fire"]},
+        {"word": "灼熱的", "stats": {"fire_damage": 4}, "tags": ["fire"]},
+        {"word": "焦炭的", "stats": {"fire_resist": 8}, "tags": ["fire"]}
+      ],
+      "ice": [
+        {"word": "寒冰的", "stats": {"ice_damage": 5, "ice_resist": 5}, "tags": ["ice"]},
+        {"word": "霜凍的", "stats": {"ice_damage": 4}, "tags": ["ice"]},
+        {"word": "極寒的", "stats": {"ice_resist": 8, "agility": -1}, "tags": ["ice"]}
+      ],
+      "earth": [
+        {"word": "磐石的", "stats": {"defense": 5, "earth_resist": 5}, "tags": ["earth"]},
+        {"word": "大地的", "stats": {"hp_max": 20, "earth_resist": 5}, "tags": ["earth"]},
+        {"word": "青苔的", "stats": {"earth_resist": 8, "hp_regen": 1}, "tags": ["earth"]}
+      ],
+      "thunder": [
+        {"word": "雷霆的", "stats": {"thunder_damage": 5, "thunder_resist": 5}, "tags": ["thunder"]},
+        {"word": "閃電的", "stats": {"thunder_damage": 4, "agility": 1}, "tags": ["thunder"]},
+        {"word": "風暴的", "stats": {"thunder_resist": 8, "magic_attack": 2}, "tags": ["thunder"]}
+      ],
+      "final": [
+        {"word": "虛空的", "stats": {"attack": 6, "magic_attack": 6}, "tags": ["void"]},
+        {"word": "深淵的", "stats": {"crit": 3, "dark_resist": 8}, "tags": ["dark"]},
+        {"word": "災厄的", "stats": {"attack": 8, "hp_max": -10}, "tags": ["calamity"]}
+      ]
+    },
+    "traits": {
+      "warrior": [
+        {"word": "堅固的", "stats": {"defense": 3}, "tags": ["physical"]},
+        {"word": "不屈的", "stats": {"defense": 2, "hp_max": 10}, "tags": ["physical"]},
+        {"word": "守護的", "stats": {"defense": 4}, "tags": ["guardian"]}
+      ],
+      "rogue": [
+        {"word": "鋒利的", "stats": {"attack": 3}, "tags": ["physical"]},
+        {"word": "迅捷的", "stats": {"agility": 2}, "tags": ["speed"]},
+        {"word": "致命的", "stats": {"crit": 3}, "tags": ["lethal"]}
+      ],
+      "mage": [
+        {"word": "睿智的", "stats": {"magic_attack": 3}, "tags": ["magical"]},
+        {"word": "奧術的", "stats": {"magic_attack": 2, "mp_max": 10}, "tags": ["magical"]},
+        {"word": "神秘的", "stats": {"magic_attack": 4}, "tags": ["magical"]}
+      ],
+      "cleric": [
+        {"word": "神聖的", "stats": {"magic_attack": 2, "healing": 4}, "tags": ["holy"]},
+        {"word": "虔誠的", "stats": {"mp_max": 15}, "tags": ["holy"]},
+        {"word": "庇護的", "stats": {"defense": 2, "hp_regen": 1}, "tags": ["holy"]}
+      ]
+    }
+  },
+  "materials": {
+    "tier1": [
+      {"word": "木製", "stats": {"attack": 1, "defense": 1}, "tags": ["wood"]},
+      {"word": "布製", "stats": {"defense": 1}, "tags": ["cloth"]},
+      {"word": "石製", "stats": {"attack": 2, "agility": -1}, "tags": ["stone"]},
+      {"word": "骨製", "stats": {"attack": 2}, "tags": ["bone"]}
+    ],
+    "tier2": [
+      {"word": "銅製", "stats": {"attack": 3, "defense": 2}, "tags": ["copper"]},
+      {"word": "鐵製", "stats": {"attack": 4, "defense": 3}, "tags": ["iron"]},
+      {"word": "皮革", "stats": {"defense": 2, "agility": 1}, "tags": ["leather"]},
+      {"word": "硬皮", "stats": {"defense": 3, "agility": 1}, "tags": ["leather"]}
+    ],
+    "tier3": [
+      {"word": "鋼製", "stats": {"attack": 6, "defense": 5}, "tags": ["steel"]},
+      {"word": "銀製", "stats": {"attack": 5, "magic_attack": 3, "defense": 4}, "tags": ["silver"]},
+      {"word": "龍鱗", "stats": {"defense": 6, "fire_resist": 5}, "tags": ["dragon", "fire"]},
+      {"word": "青銅", "stats": {"attack": 4, "defense": 4}, "tags": ["bronze"]}
+    ],
+    "tier4": [
+      {"word": "秘銀", "stats": {"magic_attack": 6, "defense": 4, "agility": 2}, "tags": ["mithril", "light"]},
+      {"word": "精金", "stats": {"defense": 8, "agility": -1}, "tags": ["adamant", "heavy"]},
+      {"word": "黑曜石", "stats": {"attack": 8, "defense": 3, "fire_resist": 8}, "tags": ["obsidian"]},
+      {"word": "星鐵", "stats": {"attack": 8, "defense": 6}, "tags": ["star_metal"]}
+    ]
+  },
+  "suffixes": {
+    "general": [
+      {"word": "守護", "stats": {"defense": 4}, "tags": ["guardian"]},
+      {"word": "庇護", "stats": {"defense": 3, "hp_max": 10}, "tags": ["guardian"]},
+      {"word": "星辰", "stats": {"magic_attack": 4, "mp_regen": 1}, "tags": ["star"]},
+      {"word": "永恆", "stats": {"hp_max": 20, "mp_max": 10}, "tags": ["eternity"]},
+      {"word": "靜謐", "stats": {"agility": 1, "accuracy": 2}, "tags": ["quiet"]}
+    ],
+    "elemental": {
+      "fire": [
+        {"word": "餘燼", "stats": {"fire_damage": 3}, "tags": ["fire"]},
+        {"word": "毀滅", "stats": {"attack": 5}, "tags": ["fire"]},
+        {"word": "烈陽", "stats": {"fire_damage": 4, "healing": 2}, "tags": ["fire", "holy"]}
+      ],
+      "ice": [
+        {"word": "霜落", "stats": {"ice_damage": 3}, "tags": ["ice"]},
+        {"word": "寒流", "stats": {"ice_damage": 2, "agility": 1}, "tags": ["ice"]},
+        {"word": "永凍", "stats": {"ice_resist": 5, "defense": 2}, "tags": ["ice"]}
+      ],
+      "earth": [
+        {"word": "壁壘", "stats": {"defense": 6}, "tags": ["earth"]},
+        {"word": "不屈", "stats": {"hp_max": 25}, "tags": ["earth"]},
+        {"word": "地脈", "stats": {"hp_max": 15, "mp_max": 5}, "tags": ["earth"]}
+      ],
+      "thunder": [
+        {"word": "轟鳴", "stats": {"thunder_damage": 3}, "tags": ["thunder"]},
+        {"word": "破曉", "stats": {"attack": 4}, "tags": ["thunder", "holy"]},
+        {"word": "狂雷", "stats": {"thunder_damage": 5, "accuracy": -1}, "tags": ["thunder"]}
+      ]
+    }
+  },
+  "weapon_bases": {
+    "warrior": [
+      {"word": "長劍", "stats": {"attack": 10}, "tags": ["sword"]},
+      {"word": "戰鎚", "stats": {"attack": 14, "agility": -1}, "tags": ["hammer"]},
+      {"word": "短劍", "stats": {"attack": 8, "accuracy": 1}, "tags": ["sword"]},
+      {"word": "騎士劍", "stats": {"attack": 11, "defense": 2}, "tags": ["sword"]},
+      {"word": "軍刀", "stats": {"attack": 12}, "tags": ["sword"]},
+      {"word": "細劍", "stats": {"attack": 9, "accuracy": 2}, "tags": ["rapier"]},
+      {"word": "手斧", "stats": {"attack": 11}, "tags": ["axe"]},
+      {"word": "單手斧", "stats": {"attack": 13}, "tags": ["axe"]},
+      {"word": "釘鎚", "stats": {"attack": 10, "block_rate": 2}, "tags": ["mace"]},
+      {"word": "狼牙棒", "stats": {"attack": 13, "crit": 1}, "tags": ["mace"]}
+    ],
+    "rogue": [
+      {"word": "匕首", "stats": {"attack": 6, "crit": 2}, "tags": ["dagger"]},
+      {"word": "飛刀", "stats": {"attack": 5, "accuracy": 2}, "tags": ["throwing"]},
+      {"word": "短刀", "stats": {"attack": 7, "agility": 1}, "tags": ["dagger"]},
+      {"word": "雙刃", "stats": {"attack": 8}, "tags": ["dual_blades"]},
+      {"word": "細劍", "stats": {"attack": 7, "crit": 1, "accuracy": 1}, "tags": ["rapier"]},
+      {"word": "刺劍", "stats": {"attack": 8, "crit": 2}, "tags": ["rapier"]}
+    ],
+    "mage": [
+      {"word": "法杖", "stats": {"magic_attack": 10}, "tags": ["staff"]},
+      {"word": "法球", "stats": {"magic_attack": 8, "crit": 1}, "tags": ["orb"]},
+      {"word": "魔杖", "stats": {"magic_attack": 7, "accuracy": 1}, "tags": ["wand"]},
+      {"word": "魔導書", "stats": {"magic_attack": 9, "mp_max": 10}, "tags": ["book"]},
+      {"word": "秘典", "stats": {"magic_attack": 11}, "tags": ["book"]},
+      {"word": "符文石", "stats": {"magic_attack": 8, "magic_defense": 2}, "tags": ["rune"]}
+    ],
+    "priest": [
+      {"word": "聖杖", "stats": {"magic_attack": 8, "healing": 5}, "tags": ["staff"]},
+      {"word": "聖典", "stats": {"magic_attack": 6, "healing": 3, "mp_max": 15}, "tags": ["book"]},
+      {"word": "權杖", "stats": {"magic_attack": 7, "defense": 2}, "tags": ["scepter"]},
+      {"word": "聖鎚", "stats": {"attack": 8, "healing": 3}, "tags": ["hammer"]},
+      {"word": "聖印", "stats": {"magic_attack": 7, "healing": 4}, "tags": ["sigil"]},
+      {"word": "祈禱書", "stats": {"healing": 6, "mp_regen": 1}, "tags": ["book"]}
+    ]
+  },
+  "armor_bases": {
+    "head": [
+      {"word": "頭盔", "stats": {"defense": 3}, "tags": ["helmet"]},
+      {"word": "兜帽", "stats": {"defense": 1, "magic_defense": 2}, "tags": ["hood"]},
+      {"word": "頭巾", "stats": {"defense": 1, "agility": 1}, "tags": ["bandana"]},
+      {"word": "皮帽", "stats": {"defense": 2}, "tags": ["cap"]},
+      {"word": "戰盔", "stats": {"defense": 4, "accuracy": 1}, "tags": ["helmet"]},
+      {"word": "冠冕", "stats": {"defense": 2, "magic_attack": 2}, "tags": ["circlet"]},
+      {"word": "面甲", "stats": {"defense": 3, "crit_evasion": 2}, "tags": ["visor"]}
+    ],
+    "body": [
+      {"word": "胸甲", "stats": {"defense": 8, "agility": -1}, "tags": ["chestplate"]},
+      {"word": "法袍", "stats": {"defense": 3, "magic_defense": 6}, "tags": ["robe"]},
+      {"word": "布甲", "stats": {"defense": 2}, "tags": ["cloth_armor"]},
+      {"word": "皮甲", "stats": {"defense": 4, "agility": 1}, "tags": ["leather_armor"]},
+      {"word": "鎖甲", "stats": {"defense": 6}, "tags": ["chainmail"]},
+      {"word": "戰甲", "stats": {"defense": 9, "agility": -1}, "tags": ["plate_armor"]},
+      {"word": "聖袍", "stats": {"defense": 4, "magic_defense": 5, "healing": 2}, "tags": ["robe"]},
+      {"word": "斗篷", "stats": {"defense": 3, "evasion": 2}, "tags": ["cloak"]}
+    ],
+    "hand": [
+      {"word": "盾牌", "stats": {"defense": 5, "block_rate": 5}, "tags": ["shield"]},
+      {"word": "護手", "stats": {"defense": 2, "agility": 1}, "tags": ["gauntlets"]},
+      {"word": "圓盾", "stats": {"defense": 3, "block_rate": 3}, "tags": ["shield"]},
+      {"word": "塔盾", "stats": {"defense": 8, "agility": -2, "block_rate": 8}, "tags": ["shield"]},
+      {"word": "臂甲", "stats": {"defense": 3}, "tags": ["vambraces"]},
+      {"word": "手套", "stats": {"defense": 1, "accuracy": 1}, "tags": ["gloves"]},
+      {"word": "符文盾", "stats": {"defense": 4, "magic_defense": 3, "block_rate": 4}, "tags": ["shield"]},
+      {"word": "聖盾", "stats": {"defense": 5, "magic_defense": 4, "block_rate": 6}, "tags": ["shield"]}
+    ],
+    "accessory": [
+      {"word": "戒指", "stats": {"mp_max": 10}, "tags": ["ring"]},
+      {"word": "護符", "stats": {"hp_max": 20}, "tags": ["talisman"]},
+      {"word": "項鍊", "stats": {"magic_defense": 3}, "tags": ["necklace"]},
+      {"word": "耳環", "stats": {"magic_attack": 2}, "tags": ["earrings"]},
+      {"word": "腰帶", "stats": {"hp_max": 15, "defense": 1}, "tags": ["belt"]},
+      {"word": "披風", "stats": {"evasion": 2}, "tags": ["cape"]},
+      {"word": "徽章", "stats": {"accuracy": 2}, "tags": ["badge"]},
+      {"word": "聖印", "stats": {"healing": 3}, "tags": ["sigil"]}
+    ]
+  }
+}
