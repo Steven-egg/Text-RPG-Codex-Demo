@@ -6,7 +6,19 @@ from copy import deepcopy
 from datetime import datetime
 from typing import Any
 
-from data import DUNGEONS, EQUIPMENT, ITEMS, JOBS, SKILLS, SHOP_INVENTORY, MAGIC_BOOKS, RECIPES, QUESTS
+from data import (
+    DUNGEONS,
+    EQUIPMENT,
+    ITEMS,
+    JOBS,
+    MAGIC_BOOKS,
+    QUESTS,
+    RECIPES,
+    REGIONS,
+    SHOP_INVENTORY,
+    SKILLS,
+    get_unlocked_regions,
+)
 
 from . import game
 from .formatting import item_name
@@ -180,6 +192,114 @@ WORLD_MAP_PREVIEW_LOCATIONS = [
     },
 ]
 
+REGION_ORDER = ["border_fire", "ice", "earth", "thunder", "final"]
+REGION_LABELS = {
+    "border_fire": "Border / Fire",
+    "ice": "Ice",
+    "earth": "Earth",
+    "thunder": "Thunder",
+    "final": "Final",
+}
+REGION_TONES = {
+    "border_fire": "fire",
+    "ice": "ice",
+    "earth": "nature",
+    "thunder": "arcane",
+    "final": "bone",
+}
+REGION_TOKENS = {
+    "border_fire": "F",
+    "ice": "I",
+    "earth": "E",
+    "thunder": "T",
+    "final": "X",
+}
+REGION_X = {
+    "border_fire": 12,
+    "ice": 32,
+    "earth": 52,
+    "thunder": 72,
+    "final": 88,
+}
+REGION_TOWN_Y = 16
+DUNGEON_Y = [34, 46, 58, 70, 82]
+REGION_ROUTE_ENABLED = {"border_fire", "ice"}
+REGION_GATE_DESTINATIONS = ["ice", "earth", "thunder", "final"]
+REGION_MAP_ASSETS = {
+    "border_fire": "./assets/world-map-environment-v01.jpg",
+    "ice": "./assets/ice-world-map-placeholder-candidate-v01.png",
+    "earth": "./assets/earth-world-map-placeholder-candidate-v01.png",
+    "thunder": "./assets/thunder-world-map-placeholder-candidate-v01.png",
+    "final": "./assets/final-world-map-placeholder-candidate-v01.png",
+}
+REGION_TOWN_ASSETS = {
+    "border_fire": "../town_hub/assets/town-hub-environment-v01.jpg",
+    "ice": "../town_hub/assets/ice-town-hub-placeholder-candidate-v01.png",
+    "earth": "../town_hub/assets/earth-town-hub-placeholder-candidate-v01.png",
+    "thunder": "../town_hub/assets/thunder-town-hub-placeholder-candidate-v01.png",
+    "final": "../town_hub/assets/final-town-hub-placeholder-candidate-v02.png",
+}
+REGION_TOWN_POSITIONS = {
+    "border_fire": {"x": 35, "y": 22},
+    "ice": {"x": 21, "y": 77},
+    "earth": {"x": 24, "y": 72},
+    "thunder": {"x": 28, "y": 70},
+    "final": {"x": 22, "y": 76},
+}
+REGION_GATE_POSITION = {"x": 82, "y": 78}
+REGION_DUNGEON_LAYOUTS = {
+    "border_fire": [
+        {"node_id": "dungeon_moss_cave", "dungeon_ids": ["dungeon_moss_cave"], "position": {"x": 24, "y": 48}, "preview_role": "cave"},
+        {"node_id": "dungeon_scorched_mine", "dungeon_ids": ["dungeon_scorched_mine"], "position": {"x": 49, "y": 42}, "preview_role": "quarry"},
+        {"node_id": "dungeon_ash_ravine", "dungeon_ids": ["dungeon_ash_ravine"], "position": {"x": 48, "y": 67}, "preview_role": "valley"},
+        {"node_id": "dungeon_cinder_seal_depths", "dungeon_ids": ["dungeon_cinder_seal_depths"], "position": {"x": 64, "y": 82}, "preview_role": "cinder"},
+    ],
+    "ice": [
+        {"node_id": "dungeon_ice_minor_a", "dungeon_ids": ["dungeon_ice_minor_a"], "position": {"x": 28, "y": 39}, "preview_role": "wreck"},
+        {"node_id": "dungeon_ice_minor_b", "dungeon_ids": ["dungeon_ice_minor_b"], "position": {"x": 64, "y": 73}, "preview_role": "cave"},
+        {
+            "node_id": "dungeon_ice_main",
+            "dungeon_ids": ["dungeon_ice_main_phase_1", "dungeon_ice_main_phase_2"],
+            "position": {"x": 77, "y": 33},
+            "preview_role": "fortress",
+            "label": "Ice Main Dungeon",
+        },
+    ],
+    "earth": [
+        {"node_id": "dungeon_earth_minor_a", "dungeon_ids": ["dungeon_earth_minor_a"], "position": {"x": 28, "y": 38}, "preview_role": "forest"},
+        {"node_id": "dungeon_earth_minor_b", "dungeon_ids": ["dungeon_earth_minor_b"], "position": {"x": 63, "y": 74}, "preview_role": "quarry"},
+        {
+            "node_id": "dungeon_earth_main",
+            "dungeon_ids": ["dungeon_earth_main_phase_1", "dungeon_earth_main_phase_2"],
+            "position": {"x": 76, "y": 34},
+            "preview_role": "forest",
+            "label": "Earth Main Dungeon",
+        },
+    ],
+    "thunder": [
+        {"node_id": "dungeon_thunder_minor_a", "dungeon_ids": ["dungeon_thunder_minor_a"], "position": {"x": 28, "y": 38}, "preview_role": "tower"},
+        {"node_id": "dungeon_thunder_minor_b", "dungeon_ids": ["dungeon_thunder_minor_b"], "position": {"x": 63, "y": 73}, "preview_role": "tower"},
+        {
+            "node_id": "dungeon_thunder_main",
+            "dungeon_ids": ["dungeon_thunder_main_phase_1", "dungeon_thunder_main_phase_2"],
+            "position": {"x": 76, "y": 33},
+            "preview_role": "tower",
+            "label": "Thunder Main Dungeon",
+        },
+    ],
+    "final": [
+        {"node_id": "dungeon_final_minor_a", "dungeon_ids": ["dungeon_final_minor_a"], "position": {"x": 29, "y": 39}, "preview_role": "ruins"},
+        {"node_id": "dungeon_final_minor_b", "dungeon_ids": ["dungeon_final_minor_b"], "position": {"x": 63, "y": 72}, "preview_role": "ruins"},
+        {
+            "node_id": "dungeon_final_main",
+            "dungeon_ids": ["dungeon_final_main_phase_1", "dungeon_final_main_phase_2", "dungeon_final_main_phase_3"],
+            "position": {"x": 77, "y": 33},
+            "preview_role": "fortress",
+            "label": "Final Main Dungeon",
+        },
+    ],
+}
+
 
 class GuiActionError(Exception):
     def __init__(
@@ -201,6 +321,7 @@ class GuiRuntimeSession:
         self.state: dict[str, Any] | None = None
         self.exploration: dict[str, Any] | None = None
         self.combat: dict[str, Any] | None = None
+        self.current_region_id = "border_fire"
         self._save_backup_created = False
 
     @property
@@ -212,10 +333,19 @@ class GuiRuntimeSession:
             raise GuiActionError("未載入遊戲核心狀態。", status=409)
         return self.state
 
+    def set_current_region(self, requested_region_id: str | None = None) -> str:
+        state = self.require_state()
+        self.current_region_id = normalize_region_id(state, requested_region_id or self.current_region_id)
+        if "flags" not in state:
+            state["flags"] = {}
+        state["flags"]["current_region_id"] = self.current_region_id
+        return self.current_region_id
+
     def new_game(self, name: str | None, job_id: str | None) -> dict[str, Any]:
         job_key = normalize_job_id(job_id)
         character_name = str(name or "").strip() or "見習冒險者"
         self.state = game.create_state(character_name, job_key)
+        self.current_region_id = "border_fire"
         self._clear_live_run()
         return action_response(
             "start_new_game",
@@ -228,6 +358,7 @@ class GuiRuntimeSession:
     def load_demo_seed(self) -> dict[str, Any]:
         job_key = normalize_job_id("warrior")
         self.state = game.create_state("GUI Demo Adventurer", job_key)
+        self.current_region_id = "border_fire"
         self.state["level"] = max(self.state.get("level", 1), 4)
         self.state["gold"] = max(self.state.get("gold", 0), 620)
         for unlock_key in ("dungeon_moss_cave", "dungeon_scorched_mine"):
@@ -258,6 +389,8 @@ class GuiRuntimeSession:
                 blocked_reason="無可用的有效存檔資料。",
             )
         self.state = loaded
+        saved_region = loaded.get("flags", {}).get("current_region_id")
+        self.current_region_id = normalize_region_id(loaded, saved_region)
         self._clear_live_run()
         return action_response(
             "load_game",
@@ -269,9 +402,18 @@ class GuiRuntimeSession:
 
     def save_game(self, *, screen_id: str = "world_map") -> dict[str, Any]:
         state = self.require_state()
+        if "flags" not in state:
+            state["flags"] = {}
+        state["flags"]["current_region_id"] = self.current_region_id
         self._backup_save_once()
         game.save_game(state)
-        return action_response("save_game", "存檔寫入成功。", state, screen_id=screen_id)
+        if screen_id == "town_hub":
+            screen_model = town_hub_model(state, selected_region_id=self.current_region_id)
+        elif screen_id in {"guild_screen", "facility_guild_screen"}:
+            screen_model = self.guild_screen_model()
+        else:
+            screen_model = world_map_model(state, self.current_region_id)
+        return self._live_response("save_game", "Saved.", screen_model=screen_model)
 
     def dispatch(self, action_id: str, payload: dict[str, Any] | None = None, screen_id: str | None = None) -> dict[str, Any]:
         payload = payload or {}
@@ -287,7 +429,7 @@ class GuiRuntimeSession:
             return self.save_game(screen_id=screen_id or "world_map")
         if action_id == "view_status":
             state = self.require_state()
-            model = world_map_model(state)
+            model = world_map_model(state, self.current_region_id)
             model["utility_preview"] = {
                 "type": "status",
                 "title": "角色狀態摘要",
@@ -300,7 +442,7 @@ class GuiRuntimeSession:
             )
         if action_id == "open_inventory":
             state = self.require_state()
-            model = world_map_model(state)
+            model = world_map_model(state, self.current_region_id)
             model["utility_preview"] = {
                 "type": "inventory",
                 "title": "背包 / 裝備",
@@ -313,7 +455,7 @@ class GuiRuntimeSession:
             )
         if action_id == "open_bestiary":
             state = self.require_state()
-            model = world_map_model(state)
+            model = world_map_model(state, self.current_region_id)
             model["utility_preview"] = {
                 "type": "bestiary",
                 "title": "魔物圖鑑摘要",
@@ -362,8 +504,17 @@ class GuiRuntimeSession:
             return self.temple_pray(payload, screen_id=screen_id)
         if action_id == "attune_relic":
             return self.attune_relic(payload, screen_id=screen_id)
+        if action_id == "travel_region":
+            return self.travel_region(payload)
         if action_id == "open_world_map":
             state = self.require_state()
+            region_id = self.set_current_region(payload.get("region_id"))
+            return self._live_response(
+                action_id,
+                "Opening world map.",
+                screen_model=world_map_model(state, region_id),
+                next_route="../world_map/index.html?mode=live",
+            )
             return action_response(
                 action_id,
                 "正在開啟世界地圖...",
@@ -373,12 +524,12 @@ class GuiRuntimeSession:
             )
         if action_id == "back_to_town_hub":
             state = self.require_state()
+            region_id = self.set_current_region(payload.get("region_id"))
             self._clear_live_run()
-            return action_response(
+            return self._live_response(
                 action_id,
                 "正在返回城鎮...",
-                state,
-                screen_id="town_hub",
+                screen_model=town_hub_model(state, selected_region_id=region_id),
                 next_route="../town_hub/index.html?mode=live",
             )
         if action_id in {"return_to_exploration", "back_to_exploration"}:
@@ -448,6 +599,22 @@ class GuiRuntimeSession:
             return self.dispatch_combat_action(action_id, payload)
         raise GuiActionError(f"Unknown GUI action: {action_id}", status=404)
 
+    def travel_region(self, payload: dict[str, Any]) -> dict[str, Any]:
+        state = self.require_state()
+        region_id = str(payload.get("region_id") or "")
+        if region_id not in REGION_ORDER:
+            raise GuiActionError("Unknown region.", status=400)
+        if not region_route_enabled(state, region_id):
+            raise GuiActionError(region_locked_reason(region_id), status=403)
+        self.current_region_id = region_id
+        self._clear_live_run()
+        return self._live_response(
+            "travel_region",
+            f"Traveling to {REGION_LABELS[region_id]}.",
+            screen_model=world_map_model(state, self.current_region_id),
+            next_route="../world_map/index.html?mode=live",
+        )
+
     def confirm_travel(self, payload: dict[str, Any]) -> dict[str, Any]:
         state = self.require_state()
         dungeon_id = payload.get("dungeon_id") or payload.get("location_id")
@@ -456,6 +623,7 @@ class GuiRuntimeSession:
         dungeon = DUNGEONS[dungeon_id]
         if not game.is_unlocked(state, dungeon.get("unlock")):
             raise GuiActionError("Dungeon is locked.", status=403)
+        self.current_region_id = normalize_region_id(state, payload.get("region_id") or region_for_dungeon_id(dungeon_id))
         game.clamp_vitals(state)
         run_log = {"gold": 0, "items": {}}
         if state.get("equipment", {}).get("special") == "special_focus_pouch":
@@ -536,7 +704,7 @@ class GuiRuntimeSession:
         return self._live_response(
             "retreat",
             "已撤退並回到世界地圖。",
-            screen_model=world_map_model(state),
+            screen_model=world_map_model(state, self.current_region_id),
             next_route="../world_map/index.html?mode=live",
         )
 
@@ -1433,7 +1601,7 @@ class GuiRuntimeSession:
         return action_response("craft_recipe", result, state, screen_id=screen_to_use)
 
     def guild_screen_model(self) -> dict[str, Any]:
-        return guild_screen_model(self.require_state())
+        return guild_screen_model(self.require_state(), selected_region_id=self.current_region_id)
 
     def storage_screen_model(self) -> dict[str, Any]:
         return storage_screen_model(self.require_state())
@@ -1638,21 +1806,21 @@ class GuiRuntimeSession:
             return start_screen_model(save_exists())
         state = self.require_state()
         if screen_id == "world_map":
-            return world_map_model(state)
+            return world_map_model(state, self.current_region_id)
         if screen_id == "town_hub":
-            return town_hub_model(state)
+            return town_hub_model(state, selected_region_id=self.current_region_id)
         if screen_id == "inn_screen":
             return inn_screen_model(state)
         if screen_id in {"guild_screen", "facility_guild_screen"}:
             return self.guild_screen_model()
         if screen_id in {"shop_screen", "facility_shop_screen"}:
-            return shop_screen_model(state)
+            return shop_screen_model(state, selected_region_id=self.current_region_id)
         if screen_id in {"workshop_screen", "facility_workshop_screen"}:
-            return workshop_screen_model(state)
+            return workshop_screen_model(state, selected_region_id=self.current_region_id)
         if screen_id in {"magic_shop_screen", "facility_magic_shop_screen"}:
-            return magic_shop_screen_model(state)
+            return magic_shop_screen_model(state, selected_region_id=self.current_region_id)
         if screen_id in {"synthesis_screen", "facility_synthesis_screen"}:
-            return synthesis_screen_model(state)
+            return synthesis_screen_model(state, selected_region_id=self.current_region_id)
         if screen_id in {"storage_screen", "facility_storage_screen"}:
             return self.storage_screen_model()
         if screen_id in {"temple_screen", "facility_temple_screen"}:
@@ -2036,6 +2204,7 @@ def action_response(
     *,
     screen_id: str | None,
     next_route: str | None = None,
+    selected_region_id: str | None = None,
 ) -> dict[str, Any]:
     return {
         "ok": True,
@@ -2043,29 +2212,34 @@ def action_response(
         "action_id": action_id,
         "message": message,
         "state_summary": state_summary(state),
-        "screen_model": build_screen_model(screen_id, state) if screen_id else None,
+        "screen_model": build_screen_model(screen_id, state, selected_region_id=selected_region_id) if screen_id else None,
         "next_route": next_route,
         "next_screen_id": screen_id,
     }
 
 
-def build_screen_model(screen_id: str | None, state: dict[str, Any]) -> dict[str, Any] | None:
+def build_screen_model(
+    screen_id: str | None,
+    state: dict[str, Any],
+    *,
+    selected_region_id: str | None = None,
+) -> dict[str, Any] | None:
     if screen_id == "world_map":
-        return world_map_model(state)
+        return world_map_model(state, selected_region_id)
     if screen_id == "town_hub":
-        return town_hub_model(state)
+        return town_hub_model(state, selected_region_id=selected_region_id)
     if screen_id == "inn_screen":
         return inn_screen_model(state)
     if screen_id in {"guild_screen", "facility_guild_screen"}:
-        return guild_screen_model(state)
+        return guild_screen_model(state, selected_region_id=selected_region_id)
     if screen_id in {"shop_screen", "facility_shop_screen"}:
-        return shop_screen_model(state)
+        return shop_screen_model(state, selected_region_id=selected_region_id)
     if screen_id in {"workshop_screen", "facility_workshop_screen"}:
-        return workshop_screen_model(state)
+        return workshop_screen_model(state, selected_region_id=selected_region_id)
     if screen_id in {"magic_shop_screen", "facility_magic_shop_screen"}:
-        return magic_shop_screen_model(state)
+        return magic_shop_screen_model(state, selected_region_id=selected_region_id)
     if screen_id in {"synthesis_screen", "facility_synthesis_screen"}:
-        return synthesis_screen_model(state)
+        return synthesis_screen_model(state, selected_region_id=selected_region_id)
     if screen_id in {"temple_screen", "facility_temple_screen"}:
         return temple_screen_model(state)
     if screen_id in {"relic_preview_screen", "facility_relic_preview_screen"}:
@@ -2188,7 +2362,7 @@ def player_model(state: dict[str, Any]) -> dict[str, Any]:
 
 
 
-def world_map_model(state: dict[str, Any]) -> dict[str, Any]:
+def legacy_world_map_model(state: dict[str, Any]) -> dict[str, Any]:
     locations = [
         {
             "location_id": "border_town",
@@ -2320,7 +2494,7 @@ def world_map_model(state: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-def town_hub_model(state: dict[str, Any]) -> dict[str, Any]:
+def legacy_town_hub_model(state: dict[str, Any]) -> dict[str, Any]:
     return {
         "screen_id": "town_hub",
         "layout_family": "hub",
@@ -2471,6 +2645,323 @@ def facility(
         "payload": payload or {"facility_id": facility_id},
         "target_screen_id": target_screen_id,
         "navigation_route": navigation_route,
+    }
+
+
+def region_town_location_id(region_id: str) -> str:
+    return "border_town" if region_id == "border_fire" else f"town_{region_id}"
+
+
+def region_route_status(unlocked_location_ids: set[str], *location_ids: str) -> str:
+    return "open" if all(location_id in unlocked_location_ids for location_id in location_ids) else "locked"
+
+
+
+def region_runtime_unlocked(state: dict[str, Any], region_id: str) -> bool:
+    return region_id in set(get_unlocked_regions(state))
+
+
+def region_route_enabled(state: dict[str, Any], region_id: str) -> bool:
+    return region_id in REGION_ROUTE_ENABLED and region_runtime_unlocked(state, region_id)
+
+
+def normalize_region_id(state: dict[str, Any], requested_region_id: str | None = None) -> str:
+    if requested_region_id in REGION_ROUTE_ENABLED and region_route_enabled(state, str(requested_region_id)):
+        return str(requested_region_id)
+    return "border_fire"
+
+
+def region_locked_reason(region_id: str) -> str:
+    if region_id == "ice":
+        return "Ice route unlocks after the Fire Seal route is complete."
+    if region_id in {"earth", "thunder", "final"}:
+        return "This region is not open in the current runtime bridge slice."
+    return f"{REGION_LABELS.get(region_id, region_id)} region is not unlocked yet."
+
+
+def region_options_model(state: dict[str, Any], selected_region_id: str | None = None) -> list[dict[str, Any]]:
+    current_region_id = normalize_region_id(state, selected_region_id)
+    options = []
+    for region_id in REGION_ORDER:
+        region = REGIONS[region_id]
+        runtime_unlocked = region_runtime_unlocked(state, region_id)
+        route_enabled = region_route_enabled(state, region_id)
+        options.append(
+            {
+                "region_id": region_id,
+                "label": REGION_LABELS[region_id],
+                "name": region.get("name", REGION_LABELS[region_id]),
+                "town_name": region.get("town_name", REGION_LABELS[region_id]),
+                "unlocked": runtime_unlocked,
+                "route_enabled": route_enabled,
+                "current": region_id == current_region_id,
+                "unlock_key": region.get("unlock_key"),
+                "dungeon_count": len(region.get("dungeon_ids", [])),
+                "quest_count": len(region.get("quest_ids", [])),
+                "disabled_reason": None if route_enabled else region_locked_reason(region_id),
+            }
+        )
+    return options
+
+
+def default_region_id(state: dict[str, Any], requested_region_id: str | None = None) -> str:
+    return normalize_region_id(state, requested_region_id)
+
+
+def region_for_dungeon_id(dungeon_id: str) -> str:
+    for region_id, region in REGIONS.items():
+        if dungeon_id in region.get("dungeon_ids", []):
+            return region_id
+    return "border_fire"
+
+
+def active_dungeon_id_for_slot(state: dict[str, Any], slot: dict[str, Any]) -> str:
+    dungeon_ids = slot.get("dungeon_ids", [])
+    for dungeon_id in reversed(dungeon_ids):
+        dungeon = DUNGEONS[dungeon_id]
+        if game.is_unlocked(state, dungeon.get("unlock")):
+            return dungeon_id
+    return dungeon_ids[0]
+
+
+def region_gate_options_model(state: dict[str, Any], source_region_id: str) -> list[dict[str, Any]]:
+    all_regions = ["border_fire", "ice", "earth", "thunder", "final"]
+    destinations = [r for r in all_regions if r != source_region_id]
+    options = []
+    for region_id in destinations:
+        route_enabled = region_route_enabled(state, region_id)
+        options.append(
+            {
+                "region_id": region_id,
+                "label": REGION_LABELS[region_id],
+                "name": REGIONS[region_id].get("name", REGION_LABELS[region_id]),
+                "town_name": REGIONS[region_id].get("town_name", REGION_LABELS[region_id]),
+                "enabled": route_enabled,
+                "unlocked": region_runtime_unlocked(state, region_id),
+                "disabled_reason": None if route_enabled else region_locked_reason(region_id),
+                "action_id": "travel_region",
+                "payload": {"region_id": region_id},
+            }
+        )
+    return options
+
+
+def world_map_model(state: dict[str, Any], selected_region_id: str | None = None) -> dict[str, Any]:
+    region_id = normalize_region_id(state, selected_region_id)
+    region = REGIONS[region_id]
+    region_label = REGION_LABELS[region_id]
+    town_name = region.get("town_name", region_label)
+    town_id = region_town_location_id(region_id)
+    locations: list[dict[str, Any]] = []
+    route_segments: list[dict[str, Any]] = []
+    unlocked_location_ids: set[str] = {town_id}
+
+    locations.append(
+        {
+            "location_id": town_id,
+            "region_id": region_id,
+            "label": town_name,
+            "description": f"{region_label} town hub. Facilities reuse the shared live Town Hub shell for now.",
+            "detail_note": "Live region context is carried by the runtime bridge; facilities remain shared for this slice.",
+            "position": REGION_TOWN_POSITIONS[region_id],
+            "tone": "town",
+            "icon_token": "TOWN",
+            "unlocked": True,
+            "locked_reason": None,
+            "favorite": region_id == "border_fire",
+            "status_label": "Town Hub",
+            "recommended_level": "Hub",
+            "steps": "0",
+            "attribute": region_label,
+            "clear_state": "Available",
+            "exploration_rating": "safe",
+            "boss": "-",
+            "preview_role": "town",
+            "primary_action": {
+                "action_id": "back_to_town_hub",
+                "label": "Enter town",
+                "enabled": True,
+                "disabled_reason": None,
+                "payload": {"region_id": region_id, "location_id": town_id, "town_name": town_name},
+            },
+        }
+    )
+
+    previous_id = town_id
+    previous_position = REGION_TOWN_POSITIONS[region_id]
+    for slot in REGION_DUNGEON_LAYOUTS[region_id]:
+        dungeon_id = active_dungeon_id_for_slot(state, slot)
+        dungeon = DUNGEONS[dungeon_id]
+        node_id = slot["node_id"]
+        dungeon_unlocked = game.is_unlocked(state, dungeon.get("unlock"))
+        locked_reason = None if dungeon_unlocked else "Dungeon is locked by runtime progression."
+        if dungeon_unlocked:
+            unlocked_location_ids.add(node_id)
+
+        locations.append(
+            {
+                "location_id": node_id,
+                "region_id": region_id,
+                "dungeon_id": dungeon_id,
+                "dungeon_ids": slot.get("dungeon_ids", []),
+                "label": slot.get("label", dungeon["name"]),
+                "description": (
+                    f"{region_label} dungeon from runtime data: {dungeon['recommended']} / "
+                    f"{dungeon['steps']} steps / {len(dungeon.get('monsters', []))} encounter entries."
+                ),
+                "detail_note": "This map node dispatches the active runtime dungeon_id to Python.",
+                "position": slot["position"],
+                "tone": REGION_TONES[region_id],
+                "icon_token": REGION_TOKENS[region_id],
+                "unlocked": dungeon_unlocked,
+                "locked_reason": locked_reason,
+                "favorite": region_id == "border_fire",
+                "status_label": "Playable" if dungeon_unlocked else "Locked",
+                "recommended_level": dungeon["recommended"],
+                "steps": f"{dungeon['steps']}",
+                "attribute": dungeon.get("element", region_label),
+                "clear_state": "Cleared" if dungeon_id in state.get("cleared_dungeons", []) else "Uncleared",
+                "exploration_rating": "runtime",
+                "boss": boss_label(dungeon.get("boss")),
+                "preview_role": slot.get("preview_role", "dungeon"),
+                "primary_action": {
+                    "action_id": "confirm_travel",
+                    "label": "Travel",
+                    "enabled": dungeon_unlocked,
+                    "disabled_reason": locked_reason,
+                    "payload": {"dungeon_id": dungeon_id, "location_id": node_id, "region_id": region_id},
+                },
+            }
+        )
+        route_segments.append(
+            {
+                "id": f"{previous_id}_to_{node_id}",
+                "status": region_route_status(unlocked_location_ids, previous_id, node_id),
+                "points": [
+                    [previous_position["x"], previous_position["y"]],
+                    [slot["position"]["x"], slot["position"]["y"]],
+                ],
+            }
+        )
+        previous_id = node_id
+        previous_position = slot["position"]
+
+    gate_options = region_gate_options_model(state, region_id)
+    if region_id == "border_fire":
+        ice_enabled = any(option["region_id"] == "ice" and option["enabled"] for option in gate_options)
+        gate_unlocked = ice_enabled
+        gate_locked_reason = None if ice_enabled else region_locked_reason("ice")
+        gate_location_id = "region_gate_ice"
+    else:
+        gate_unlocked = True
+        gate_locked_reason = None
+        gate_location_id = "region_gate_border"
+
+    region_gate = {
+        "location_id": gate_location_id,
+        "region_id": region_id,
+        "label": "Region Gate",
+        "description": "A route marker for leaving this region." if region_id != "border_fire" else "A route marker for leaving the fire border after the Fire Seal route is complete.",
+        "detail_note": "Returning to Border is always enabled; later regions remain locked placeholders." if region_id != "border_fire" else "Only Ice is enabled in this runtime bridge slice; later regions remain locked placeholders.",
+        "position": REGION_GATE_POSITION,
+        "tone": "gate",
+        "icon_token": "GATE",
+        "unlocked": gate_unlocked,
+        "locked_reason": gate_locked_reason,
+        "favorite": False,
+        "status_label": "Open" if gate_unlocked else "Locked",
+        "recommended_level": "Route",
+        "steps": "0",
+        "attribute": "Return Region" if region_id != "border_fire" else "New Region",
+        "clear_state": "Available" if gate_unlocked else "Locked",
+        "exploration_rating": "route",
+        "boss": "-",
+        "preview_role": "gate",
+        "options": gate_options,
+        "primary_action": {
+            "action_id": "open_region_gate",
+            "label": "Choose Region",
+            "enabled": True,
+            "disabled_reason": None,
+            "payload": {"source_region_id": region_id},
+        },
+    }
+    locations.append(region_gate)
+    route_segments.append(
+        {
+            "id": f"{previous_id}_to_{gate_location_id}",
+            "status": "open" if gate_unlocked else "locked",
+            "points": [
+                [previous_position["x"], previous_position["y"]],
+                [REGION_GATE_POSITION["x"], REGION_GATE_POSITION["y"]],
+            ],
+        }
+    )
+
+    selected_location_id = next(
+        (location["location_id"] for location in locations if location["location_id"] != town_id and location["unlocked"]),
+        town_id,
+    )
+    return {
+        "screen_id": "world_map",
+        "layout_family": "navigation_map",
+        "title": "World Map",
+        "subtitle": f"Live region routing: {region_label} map view.",
+        "selected_location_id": selected_location_id,
+        "current_location_id": town_id,
+        "current_region_id": region_id,
+        "current_region_label": region_label,
+        "current_town_name": town_name,
+        "map_asset": REGION_MAP_ASSETS.get(region_id),
+        "town_asset": REGION_TOWN_ASSETS.get(region_id),
+        "region_gate": region_gate,
+        "region_options": region_options_model(state, region_id),
+        "player": player_model(state),
+        "menu_actions": [
+            {"action_id": "view_status", "label": "Status", "description": "Open live player status preview.", "enabled": True, "payload": {}},
+            {"action_id": "open_bestiary", "label": "Bestiary", "description": "Open live bestiary preview.", "enabled": True, "payload": {}},
+            {"action_id": "open_inventory", "label": "Inventory", "description": "Open live inventory preview.", "enabled": True, "payload": {}},
+            {"action_id": "save_game", "label": "Save", "description": "Save through the Python runtime.", "enabled": True, "payload": {}},
+            {"action_id": "open_settings", "label": "Settings", "description": "Open settings placeholder.", "enabled": True, "payload": {}},
+            {"action_id": "back_to_start_screen", "label": "Title", "description": "Return to start screen.", "enabled": True, "payload": {}},
+        ],
+        "route_segments": route_segments,
+        "locations": locations,
+    }
+
+
+def town_hub_model(state: dict[str, Any], selected_region_id: str | None = None) -> dict[str, Any]:
+    region_id = default_region_id(state, selected_region_id)
+    region = REGIONS[region_id]
+    region_label = REGION_LABELS[region_id]
+    town_name = region.get("town_name", region_label)
+    return {
+        "screen_id": "town_hub",
+        "layout_family": "hub",
+        "title": f"{town_name} (Live)",
+        "subtitle": "Live Town Hub uses shared facilities while carrying region context from CLI data.",
+        "current_region_id": region_id,
+        "selected_region_id": region_id,
+        "current_region_label": region_label,
+        "current_town_name": town_name,
+        "town_asset": REGION_TOWN_ASSETS.get(region_id),
+        "region_options": region_options_model(state, region_id),
+        "resource_strip": resource_strip(state),
+        "town_guidance": [
+            f"Current region: {region_label} / {town_name}.",
+            "Facilities are shared live shells for this slice; region-specific facility content is deferred.",
+        ],
+        "selected_facility_id": "guild",
+        "facility_nodes": facility_nodes(state),
+        "navigation_actions": [
+            {
+                "action_id": "open_world_map",
+                "label": "Open World Map",
+                "description": "Return to the five-region live world map.",
+                "enabled": True,
+                "payload": {"region_id": region_id},
+            },
+        ],
     }
 
 

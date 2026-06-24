@@ -28,7 +28,11 @@ def run_smoke_test():
 
     rows = model["list_rows"]
     row_item_ids = [row["item_id"] for row in rows]
-    assert row_item_ids == SHOP_INVENTORY["travel"]
+    expected_travel_items = [
+        i_id for i_id in SHOP_INVENTORY["travel"]
+        if (ITEMS.get(i_id) or EQUIPMENT.get(i_id, {})).get("region", "border_fire") == "border_fire"
+    ]
+    assert row_item_ids == expected_travel_items
     assert len(row_item_ids) == 9
     print("Shop model row IDs and order verified matches SHOP_INVENTORY['travel'].")
 

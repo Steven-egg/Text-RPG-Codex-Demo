@@ -85,7 +85,11 @@ def run_smoke_test():
     # Verify we cover all MAGIC_BOOKS
     rows = model["list_rows"]
     row_book_ids = {row["book_id"] for row in rows}
-    assert row_book_ids == set(MAGIC_BOOKS.keys())
+    expected_books = {
+        b_id for b_id, b in MAGIC_BOOKS.items()
+        if b.get("region", "border_fire") == "border_fire"
+    }
+    assert row_book_ids == expected_books
     assert len(row_book_ids) == 6
     print("All MAGIC_BOOKS covered in model rows.")
 
@@ -107,7 +111,7 @@ def run_smoke_test():
     print("book_cinder_mark special/特殊魔法 category verified.")
 
     # Verify details, actions and requirements are present for all books
-    for b_id in MAGIC_BOOKS:
+    for b_id in expected_books:
         assert b_id in model["book_details"]
         assert b_id in model["requirement_rows"]
         assert b_id in model["primary_actions"]
