@@ -5,7 +5,7 @@ from data import EQUIPMENT, SHOP_INVENTORY, RECIPES, MATERIALS
 from . import game
 
 
-def workshop_screen_model(state: dict[str, Any]) -> dict[str, Any]:
+def workshop_screen_model(state: dict[str, Any], selected_region_id: str | None = None) -> dict[str, Any]:
     gold = state.get("gold", 0)
     stats = game.get_stats(state)
 
@@ -23,8 +23,17 @@ def workshop_screen_model(state: dict[str, Any]) -> dict[str, Any]:
         "equipment": state.get("equipment", {})
     }
 
+    from data.regions import REGIONS, _is_unlocked
+    region_id = selected_region_id or "border_fire"
+    if region_id not in REGIONS or region_id not in ("border_fire", "ice") or not _is_unlocked(state, REGIONS[region_id].get("unlock_key")):
+        region_id = "border_fire"
+    weapons_to_show = [
+        w_id for w_id in SHOP_INVENTORY["weapon"]
+        if EQUIPMENT.get(w_id, {}).get("region", "border_fire") == region_id
+    ]
+
     weapons_list = []
-    for item_id in SHOP_INVENTORY["weapon"]:
+    for item_id in weapons_to_show:
         if item_id in EQUIPMENT:
             eq = EQUIPMENT[item_id]
             weapons_list.append({
@@ -38,8 +47,13 @@ def workshop_screen_model(state: dict[str, Any]) -> dict[str, Any]:
                 "desc": eq["desc"]
             })
 
+    armors_to_show = [
+        a_id for a_id in SHOP_INVENTORY["armor"]
+        if EQUIPMENT.get(a_id, {}).get("region", "border_fire") == region_id
+    ]
+
     armors_list = []
-    for item_id in SHOP_INVENTORY["armor"]:
+    for item_id in armors_to_show:
         if item_id in EQUIPMENT:
             eq = EQUIPMENT[item_id]
             armors_list.append({
@@ -67,7 +81,12 @@ def workshop_screen_model(state: dict[str, Any]) -> dict[str, Any]:
         }
 
     upgrades_list = []
-    whitelisted_recipes = ["recipe_iron_sword_plus_1", "recipe_leather_armor_plus_1"]
+    whitelisted_recipes = [
+        r_id for r_id, r in RECIPES.items()
+        if r.get("region", "border_fire") == region_id
+        and r.get("base_item")
+        and EQUIPMENT.get(list(r["output"].keys())[0], {}).get("slot") != "accessory"
+    ]
     for recipe_id in whitelisted_recipes:
         if recipe_id in RECIPES:
             r = RECIPES[recipe_id]

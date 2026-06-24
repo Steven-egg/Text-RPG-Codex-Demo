@@ -1,13 +1,35 @@
 from __future__ import annotations
 
 from typing import Any
-from data import DUNGEONS, EQUIPMENT, ITEMS, QUESTS
+from data import DUNGEONS, EQUIPMENT, ITEMS, QUESTS, REGIONS, get_region_by_dungeon, get_region_by_quest
 from . import game
 from .formatting import item_name
 from .gui_presentation import resource_strip
 
 
-def guild_screen_model(state: dict[str, Any]) -> dict[str, Any]:
+REGION_ORDER = ["border_fire", "ice", "earth", "thunder", "final"]
+REGION_LABELS = {
+    "border_fire": "Border / Fire",
+    "ice": "Ice",
+    "earth": "Earth",
+    "thunder": "Thunder",
+    "final": "Final",
+}
+
+
+def normalize_guild_region_id(selected_region_id: str | None = None) -> str:
+    if selected_region_id in REGION_ORDER:
+        return str(selected_region_id)
+    return "border_fire"
+
+
+def guild_screen_model(state: dict[str, Any], selected_region_id: str | None = None) -> dict[str, Any]:
+    from data.regions import REGIONS, _is_unlocked
+    current_region_id = selected_region_id or "border_fire"
+    if current_region_id not in REGIONS or current_region_id not in ("border_fire", "ice") or not _is_unlocked(state, REGIONS[current_region_id].get("unlock_key")):
+        current_region_id = "border_fire"
+    current_region = REGIONS[current_region_id]
+    current_region_label = REGION_LABELS[current_region_id]
     unlocked_dungeons = []
     for d_id, d_data in DUNGEONS.items():
         if game.is_unlocked(state, d_data.get("unlock")):
@@ -24,6 +46,8 @@ def guild_screen_model(state: dict[str, Any]) -> dict[str, Any]:
     condition_rows = {}
 
     for d_id, d_data in unlocked_dungeons:
+        region_id = get_region_by_dungeon(d_id)
+        region_label = REGION_LABELS[region_id]
         cleared = d_id in state.get("cleared_dungeons", [])
         reported = state.get("flags", {}).get(f"guild_reported_{d_id}", False)
 
@@ -54,6 +78,8 @@ def guild_screen_model(state: dict[str, Any]) -> dict[str, Any]:
 
         task_rows.append({
             "task_id": d_id,
+            "region_id": region_id,
+            "region_label": region_label,
             "title": f"{d_data['name']} 探索回報",
             "giver": "工會",
             "status": status,
@@ -65,6 +91,8 @@ def guild_screen_model(state: dict[str, Any]) -> dict[str, Any]:
 
         task_details[d_id] = {
             "task_id": d_id,
+            "region_id": region_id,
+            "region_label": region_label,
             "title": f"{d_data['name']} 探索回報",
             "giver": "工會",
             "description": desc,
@@ -99,6 +127,8 @@ def guild_screen_model(state: dict[str, Any]) -> dict[str, Any]:
         ]
 
     for q_id, q_data in unlocked_quests:
+        region_id = get_region_by_quest(q_id)
+        region_label = REGION_LABELS[region_id]
         cleared = q_id in state.get("completed_quests", [])
         ready = game.quest_ready(state, q_id)
 
@@ -129,6 +159,8 @@ def guild_screen_model(state: dict[str, Any]) -> dict[str, Any]:
 
         task_rows.append({
             "task_id": q_id,
+            "region_id": region_id,
+            "region_label": region_label,
             "title": q_data.get("title", q_id),
             "giver": q_data.get("giver", "工會"),
             "status": status,
@@ -140,6 +172,8 @@ def guild_screen_model(state: dict[str, Any]) -> dict[str, Any]:
 
         task_details[q_id] = {
             "task_id": q_id,
+            "region_id": region_id,
+            "region_label": region_label,
             "title": q_data.get("title", q_id),
             "giver": q_data.get("giver", "工會"),
             "description": desc,
@@ -228,15 +262,24 @@ def guild_screen_model(state: dict[str, Any]) -> dict[str, Any]:
                 })
         condition_rows[q_id] = conds
 
-    all_count = len(task_rows)
-    ready_count = sum(1 for row in task_rows if row["status"] == "ready_to_submit")
-    completed_count = sum(1 for row in task_rows if row["status"] == "completed")
+    task_rows = [row for row in task_rows if row.get("region_id") == current_region_id]
+    visible_task_ids = {row["task_id"] for row in task_rows}
+    task_details = {task_id: detail for task_id, detail in task_details.items() if task_id in visible_task_ids}
+    reward_summaries = {task_id: reward for task_id, reward in reward_summaries.items() if task_id in visible_task_ids}
+    condition_rows = {task_id: rows for task_id, rows in condition_rows.items() if task_id in visible_task_ids}
 
+    all_count = len(task_rows)
     task_filters = [
         { "id": "all", "label": "全部委託", "count": all_count, "enabled": True },
-        { "id": "ready_to_submit", "label": "可回報", "count": ready_count, "enabled": True },
-        { "id": "completed", "label": "已完成", "count": completed_count, "enabled": True }
     ]
+    task_filters.append({
+        "id": current_region_id,
+        "label": current_region_label,
+        "count": all_count,
+        "enabled": True,
+        "region_name": current_region.get("name", current_region_label),
+        "town_name": current_region.get("town_name", current_region_label),
+    })
 
     completed_quests = state.get("completed_quests", [])
     story_hint_card = {
@@ -256,7 +299,7 @@ def guild_screen_model(state: dict[str, Any]) -> dict[str, Any]:
         "notes": "",
     }
 
-    if "quest_boss_glen" not in completed_quests:
+    if current_region_id == "border_fire" and "quest_boss_glen" not in completed_quests:
         glen_sighted = state.get("flags", {}).get("boss_glen_sighted")
         glen_accepted = state.get("flags", {}).get("boss_glen_investigation_accepted")
         glen_defeated = state.get("flags", {}).get("boss_glen_defeated")
@@ -329,7 +372,7 @@ def guild_screen_model(state: dict[str, Any]) -> dict[str, Any]:
                 "condition_rows": [],
                 "reward_summary": None
             }
-    else:
+    elif current_region_id == "border_fire":
         if "quest_ash_ravine_scout" not in completed_quests:
             story_hint_card = {
                 "id": "story_hint_ash_ravine_unlocked",
@@ -545,6 +588,9 @@ def guild_screen_model(state: dict[str, Any]) -> dict[str, Any]:
             "name": "莉娜",
             "role": "工會接待員，負責登記迷宮探索回報。"
         },
+        "current_region_id": current_region_id,
+        "current_region_label": current_region_label,
+        "current_town_name": current_region.get("town_name", current_region_label),
         "resource_strip": resource_strip(state),
         "task_filters": task_filters,
         "selected_filter_id": "all",

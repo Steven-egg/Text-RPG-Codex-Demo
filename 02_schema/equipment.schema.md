@@ -35,6 +35,7 @@ EQUIPMENT = {
 ## 選填欄位
 
 - `unlock`
+- `region`
 
 ## 型別與規則
 
@@ -42,6 +43,7 @@ EQUIPMENT = {
 - `jobs` 內的 job id 必須存在於 `JOBS`。
 - `price` 可為 `0`，通常代表任務、合成或關鍵裝備。
 - `stats` key 目前支援：`attack`、`magic_attack`、`defense`、`agility`、`accuracy`、`crit`、`fire_resist`、`trap_evasion`、`rare_drop`。
+- `region` 若存在，必須為合法的區域 ID（例如 `border_fire`、`ice`、`earth`、`thunder`、`final` 之一）。
 
 ## 引用規則
 

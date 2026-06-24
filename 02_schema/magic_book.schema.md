@@ -31,7 +31,7 @@ MAGIC_BOOKS = {
 
 ## 選填欄位
 
-目前無選填欄位。
+- `region`
 
 ## 引用規則
 
@@ -39,6 +39,7 @@ MAGIC_BOOKS = {
 - `materials` key 必須存在於 `MATERIALS`。
 - `skill` 必須存在於 `SKILLS`。
 - 同一個 skill 原則上不應由多本魔法書重複教學，除非明確設計成不同版本。
+- `region` 若存在，必須為合法的區域 ID（例如 `border_fire`、`ice`、`earth`、`thunder`、`final` 之一）。
 
 ## 未來注意事項
 

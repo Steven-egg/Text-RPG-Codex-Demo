@@ -73,6 +73,7 @@ VALID_JOB_SPECIALIZATION_STATUSES = {"preview"}
 VALID_RELIC_STATUSES = {"preview"}
 VALID_RELIC_UNLOCK_KINDS = {"level", "unlock", "quest", "flag", "item"}
 VALID_RELIC_ELEMENT_IDS = {"fire", "ice", "earth", "thunder"}
+VALID_REGIONS = {"border_fire", "ice", "earth", "thunder", "final"}
 
 
 def error(errors: list[str], path: str, message: str) -> None:
@@ -295,6 +296,9 @@ def check_items(errors: list[str]) -> None:
         unlock_key = item.get("unlock")
         if unlock_key and unlock_key not in all_unlock_producers():
             error(errors, f"ITEMS.{item_id}.unlock", f"has no known producer: {unlock_key}")
+        region = item.get("region")
+        if region and region not in VALID_REGIONS:
+            error(errors, f"ITEMS.{item_id}.region", f"uses unsupported region: {region}")
 
 
 def check_equipment(errors: list[str]) -> None:
@@ -313,6 +317,9 @@ def check_equipment(errors: list[str]) -> None:
         unlock_key = equipment.get("unlock")
         if unlock_key and unlock_key not in all_unlock_producers():
             error(errors, f"EQUIPMENT.{eq_id}.unlock", f"has no known producer: {unlock_key}")
+        region = equipment.get("region")
+        if region and region not in VALID_REGIONS:
+            error(errors, f"EQUIPMENT.{eq_id}.region", f"uses unsupported region: {region}")
 
 
 def check_skills(errors: list[str]) -> None:
@@ -357,6 +364,9 @@ def check_magic_books(errors: list[str]) -> None:
             error(errors, f"MAGIC_BOOKS.{book_id}.skill", f"duplicates skill taught by {taught_skills[skill_id]}: {skill_id}")
         else:
             taught_skills[skill_id] = book_id
+        region = book.get("region")
+        if region and region not in VALID_REGIONS:
+            error(errors, f"MAGIC_BOOKS.{book_id}.region", f"uses unsupported region: {region}")
 
 
 def check_recipes(errors: list[str]) -> None:
@@ -376,6 +386,9 @@ def check_recipes(errors: list[str]) -> None:
         unlock_key = recipe.get("unlock")
         if unlock_key not in all_unlock_producers():
             error(errors, f"RECIPES.{recipe_id}.unlock", f"has no known producer: {unlock_key}")
+        region = recipe.get("region")
+        if region and region not in VALID_REGIONS:
+            error(errors, f"RECIPES.{recipe_id}.region", f"uses unsupported region: {region}")
 
 
 def check_monsters(errors: list[str]) -> None:

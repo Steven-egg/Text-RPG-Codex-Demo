@@ -843,8 +843,12 @@ def travel_shop_owned_count(state: dict, item_id: str) -> int:
         owned += 1
     return owned
 
-def travel_shop_available_items(state: dict, category: str = "全部") -> list[str]:
-    available = [item_id for item_id in SHOP_INVENTORY["travel"] if is_shop_item_available(state, item_id)]
+def travel_shop_available_items(state: dict, category: str = "全部", region_id: str = "border_fire") -> list[str]:
+    available = [
+        item_id for item_id in SHOP_INVENTORY["travel"]
+        if is_shop_item_available(state, item_id)
+        and (ITEMS.get(item_id) or EQUIPMENT.get(item_id)).get("region", "border_fire") == region_id
+    ]
     if category == "全部":
         return available
     return [item_id for item_id in available if travel_shop_category(item_id) == category]
@@ -891,7 +895,7 @@ def buy_travel_shop_item(state: dict, item_id: str) -> str:
 
 def travel_shop_item_menu(state: dict, category: str, region_id: str = "border_fire") -> None:
     while True:
-        item_ids = travel_shop_available_items(state, category)
+        item_ids = travel_shop_available_items(state, category, region_id)
         facility_name = get_facility_display_name(region_id, "shop")
         if not item_ids:
             render_panel(
@@ -935,11 +939,12 @@ def travel_shop_item_menu(state: dict, category: str, region_id: str = "border_f
         pause()
 
 def travel_shop(state: dict, region_id: str = "border_fire") -> None:
+    region_id = check_and_normalize_region(state, region_id)
     while True:
-        available = travel_shop_available_items(state)
+        available = travel_shop_available_items(state, region_id=region_id)
         category_options = []
         for category in TRAVEL_SHOP_CATEGORIES:
-            count = len(travel_shop_available_items(state, category))
+            count = len(travel_shop_available_items(state, category, region_id))
             category_options.append(f"{category} / {count} 種商品")
         shop_title = f"{get_facility_display_name(region_id, 'shop')} - {get_npc_display_name(region_id, 'rabi')}"
         choice = action_menu_panel(
@@ -1231,8 +1236,11 @@ def magic_book_status(state: dict, book_id: str) -> str:
         return "素材不足"
     return "可學習"
 
-def magic_shop_book_ids(category: str = "全部") -> list[str]:
-    book_ids = list(MAGIC_BOOKS.keys())
+def magic_shop_book_ids(category: str = "全部", region_id: str = "border_fire") -> list[str]:
+    book_ids = [
+        book_id for book_id, book in MAGIC_BOOKS.items()
+        if book.get("region", "border_fire") == region_id
+    ]
     if category == "全部":
         return book_ids
     return [book_id for book_id in book_ids if magic_shop_category(book_id) == category]
@@ -1297,10 +1305,11 @@ def learn_magic_book_message(state: dict, book_id: str) -> str:
     return f"你學會了 {SKILLS[skill_id]['name']}。"
 
 def magic_shop(state: dict, region_id: str = "border_fire") -> None:
+    region_id = check_and_normalize_region(state, region_id)
     while True:
         category_options = []
         for category in MAGIC_SHOP_CATEGORIES:
-            count = len(magic_shop_book_ids(category))
+            count = len(magic_shop_book_ids(category, region_id))
             category_options.append(f"{category} / {count} 本魔法書")
         facility_name = get_facility_display_name(region_id, "magic_shop")
         welcome_text = get_dialogue(region_id, "magic_shop", "welcome")
@@ -1322,7 +1331,7 @@ def magic_shop(state: dict, region_id: str = "border_fire") -> None:
 
 def magic_shop_book_menu(state: dict, category: str, region_id: str = "border_fire") -> None:
     while True:
-        book_ids = magic_shop_book_ids(category)
+        book_ids = magic_shop_book_ids(category, region_id)
         facility_name = get_facility_display_name(region_id, "magic_shop")
         if not book_ids:
             render_panel(
@@ -1689,6 +1698,7 @@ def enshrine_relic(state: dict, identifier: str | None) -> dict:
 
 
 def relic_preview_menu(state: dict, region_id: str = "border_fire") -> None:
+    region_id = check_and_normalize_region(state, region_id)
     facility_name = get_facility_display_name(region_id, "relic")
     title(facility_name)
     previews = [relic for _relic_id, relic in preview_relic_entries()]
@@ -1732,7 +1742,19 @@ def relic_preview_menu(state: dict, region_id: str = "border_fire") -> None:
     print("\n這裡不會裝備、啟用、強化聖物，也不會提供戰鬥加成。")
     pause()
 
+def check_and_normalize_region(state: dict, region_id: str | None) -> str:
+    from data.regions import REGIONS, _is_unlocked
+    if not region_id or region_id not in REGIONS:
+        return "border_fire"
+    # 目前 slice 只允許 border_fire 和 ice
+    if region_id not in ("border_fire", "ice"):
+        return "border_fire"
+    if not _is_unlocked(state, REGIONS[region_id].get("unlock_key")):
+        return "border_fire"
+    return region_id
+
 def town_menu(state: dict, region_id: str = "border_fire") -> None:
+    region_id = check_and_normalize_region(state, region_id)
     while True:
         region = REGIONS.get(region_id, REGIONS["border_fire"])
         options = [
@@ -1775,7 +1797,7 @@ def town_menu(state: dict, region_id: str = "border_fire") -> None:
                 craft_menu(
                     state,
                     get_facility_display_name(region_id, "synthesis"),
-                    ["recipe_fire_cloak", "recipe_focus_pouch", "recipe_heat_charm", "recipe_piercing_bundle"], region_id,
+                    [r_id for r_id, r in RECIPES.items() if r.get("region", "border_fire") == region_id and (not r.get("base_item") or EQUIPMENT.get(list(r["output"].keys())[0], {}).get("slot") == "accessory")], region_id,
                 )
         elif choice == 6:
             magic_shop(state, region_id)
@@ -1789,6 +1811,7 @@ def town_menu(state: dict, region_id: str = "border_fire") -> None:
             rest_inn(state, region_id)
 
 def iron_workshop(state: dict, region_id: str = "border_fire") -> None:
+    region_id = check_and_normalize_region(state, region_id)
     title_text = get_facility_display_name(region_id, "weapon_workshop")
     ambiance = get_dialogue(region_id, "weapon_workshop", "ambiance")
     quote = get_dialogue(region_id, "weapon_workshop", "quote")
@@ -1798,13 +1821,14 @@ def iron_workshop(state: dict, region_id: str = "border_fire") -> None:
         "購買武器",
         "強化武器",
         SHOP_INVENTORY["weapon"],
-        ["recipe_iron_sword_plus_1"],
+        [r_id for r_id, r in RECIPES.items() if r.get("region", "border_fire") == region_id and r.get("base_item") and EQUIPMENT.get(list(r["output"].keys())[0], {}).get("slot") == "weapon"],
         [ambiance, quote],
         ["武器升級能縮短戰鬥回合；購買後仍需到背包/裝備中替換。"],
         "yellow",
     )
 
 def armor_workshop(state: dict, region_id: str = "border_fire") -> None:
+    region_id = check_and_normalize_region(state, region_id)
     title_text = get_facility_display_name(region_id, "armor_workshop")
     ambiance = get_dialogue(region_id, "armor_workshop", "ambiance")
     quote = get_dialogue(region_id, "armor_workshop", "quote")
@@ -1814,7 +1838,7 @@ def armor_workshop(state: dict, region_id: str = "border_fire") -> None:
         "購買防具",
         "強化防具",
         SHOP_INVENTORY["armor"],
-        ["recipe_leather_armor_plus_1"],
+        [r_id for r_id, r in RECIPES.items() if r.get("region", "border_fire") == region_id and r.get("base_item") and EQUIPMENT.get(list(r["output"].keys())[0], {}).get("slot") not in ("weapon", "accessory")],
         [ambiance, quote],
         ["防具與抗性裝能提高長探索容錯；購買後仍需到背包/裝備中替換。"],
         "green",

@@ -41,13 +41,21 @@ def get_magic_book_description(book_id: str, name: str, skill_desc: str) -> str:
     return descs.get(book_id, f"記載著{name}術式的古老魔法書。")
 
 
-def magic_shop_screen_model(state: dict[str, Any]) -> dict[str, Any]:
+def magic_shop_screen_model(state: dict[str, Any], selected_region_id: str | None = None) -> dict[str, Any]:
     gold = state.get("gold", 0)
     level = state.get("level", 1)
     job = state.get("job", "")
+    from data.regions import REGIONS, _is_unlocked
+    region_id = selected_region_id or "border_fire"
+    if region_id not in REGIONS or region_id not in ("border_fire", "ice") or not _is_unlocked(state, REGIONS[region_id].get("unlock_key")):
+        region_id = "border_fire"
+    book_ids = [
+        b_id for b_id, b in MAGIC_BOOKS.items()
+        if b.get("region", "border_fire") == region_id
+    ]
 
     categories_counts = {"all": 0, "damage": 0, "heal": 0, "buff": 0, "special": 0}
-    for b_id in MAGIC_BOOKS:
+    for b_id in book_ids:
         categories_counts["all"] += 1
         cat_id, _ = get_magic_book_category(b_id)
         if cat_id in categories_counts:
@@ -66,7 +74,7 @@ def magic_shop_screen_model(state: dict[str, Any]) -> dict[str, Any]:
     requirement_rows = {}
     primary_actions = {}
 
-    book_ids = list(MAGIC_BOOKS.keys())
+
     for b_id in book_ids:
         if b_id not in MAGIC_BOOKS:
             continue

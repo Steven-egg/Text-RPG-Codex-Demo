@@ -25,9 +25,16 @@ def get_consumable_effect_summary(item_id: str) -> str:
     return effects.get(item_id, "")
 
 
-def shop_screen_model(state: dict[str, Any]) -> dict[str, Any]:
+def shop_screen_model(state: dict[str, Any], selected_region_id: str | None = None) -> dict[str, Any]:
     gold = state.get("gold", 0)
-    travel_items = SHOP_INVENTORY["travel"]
+    from data.regions import REGIONS, _is_unlocked
+    region_id = selected_region_id or "border_fire"
+    if region_id not in REGIONS or region_id not in ("border_fire", "ice") or not _is_unlocked(state, REGIONS[region_id].get("unlock_key")):
+        region_id = "border_fire"
+    travel_items = [
+        item_id for item_id in SHOP_INVENTORY["travel"]
+        if (ITEMS.get(item_id) or EQUIPMENT.get(item_id, {})).get("region", "border_fire") == region_id
+    ]
 
     list_rows = []
     item_details = {}

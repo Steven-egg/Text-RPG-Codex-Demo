@@ -6,9 +6,17 @@ from . import game
 from .gui_presentation import resource_strip
 
 
-def synthesis_screen_model(state: dict[str, Any]) -> dict[str, Any]:
+def synthesis_screen_model(state: dict[str, Any], selected_region_id: str | None = None) -> dict[str, Any]:
     gold = state.get("gold", 0)
-    mira_recipes = ["recipe_fire_cloak", "recipe_focus_pouch", "recipe_heat_charm", "recipe_piercing_bundle"]
+    from data.regions import REGIONS, _is_unlocked
+    region_id = selected_region_id or "border_fire"
+    if region_id not in REGIONS or region_id not in ("border_fire", "ice") or not _is_unlocked(state, REGIONS[region_id].get("unlock_key")):
+        region_id = "border_fire"
+    mira_recipes = [
+        r_id for r_id, r in RECIPES.items()
+        if r.get("region", "border_fire") == region_id
+        and (not r.get("base_item") or EQUIPMENT.get(list(r["output"].keys())[0], {}).get("slot") == "accessory")
+    ]
 
     recipe_rows = []
     recipe_details = {}
@@ -36,7 +44,7 @@ def synthesis_screen_model(state: dict[str, Any]) -> dict[str, Any]:
             battle_count += 1
 
     # Default selection to the first whitelisted recipe
-    default_recipe_id = mira_recipes[0]
+    default_recipe_id = mira_recipes[0] if mira_recipes else ""
 
     for r_id in mira_recipes:
         recipe = RECIPES[r_id]

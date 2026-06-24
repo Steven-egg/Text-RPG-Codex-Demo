@@ -29,12 +29,14 @@ ITEMS = {
 ## 選填欄位
 
 - `unlock`
+- `region`
 
 ## 型別與規則
 
 - `kind` 目前支援 `consumable`、`special`、`battle`。
 - `price` 是商店售價，必須為 `int >= 0`。
 - `unlock` 若存在，必須能由任務、怪物事件或劇情流程加入 `state["unlocked"]`。
+- `region` 若存在，必須為合法的區域 ID（例如 `border_fire`、`ice`、`earth`、`thunder`、`final` 之一）。
 
 ## 引用規則
 
