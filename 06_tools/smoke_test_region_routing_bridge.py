@@ -65,6 +65,7 @@ def run_smoke_test() -> None:
     assert all(unlocked_options[region_id]["enabled"] is False for region_id in FUTURE_REGION_IDS)
 
     ice_response = session.dispatch("travel_region", {"region_id": "ice"}, screen_id="world_map")
+    assert session.require_state().get("flags", {}).get("current_region_id") == "ice"
     ice_world = ice_response["screen_model"]
     ice_ids = location_ids(ice_world)
     assert ice_world["current_region_id"] == "ice"
@@ -72,7 +73,7 @@ def run_smoke_test() -> None:
     assert ice_ids == {"town_ice", *ICE_DUNGEON_NODES, "region_gate_border"}
     assert_only_region(ice_world, "ice")
     assert not (FIRE_DUNGEON_NODES & ice_ids)
-    print(" - unlocked gate switches to the Ice map with three Ice dungeon nodes and region_gate_border.")
+    print(" - unlocked gate switches to the Ice map and syncs state flags to ice.")
 
     ice_gate = next(location for location in ice_world["locations"] if location["location_id"] == "region_gate_border")
     ice_gate_options = {option["region_id"]: option for option in ice_gate["options"]}
@@ -110,9 +111,25 @@ def run_smoke_test() -> None:
     print(" - future regions remain locked from the gate.")
 
     back_response = session.dispatch("travel_region", {"region_id": "border_fire"}, screen_id="world_map")
+    assert session.require_state().get("flags", {}).get("current_region_id") == "border_fire"
     back_world = back_response["screen_model"]
     assert back_world["current_region_id"] == "border_fire"
-    print(" - successfully traveled from Ice back to Border / Fire.")
+    print(" - successfully traveled from Ice back to Border / Fire and flags reset.")
+
+    # 模擬 load_game 恢復存檔中的 current_region_id = "ice"
+    original_load_game = game.load_game
+    try:
+        mock_state = game.create_state("Load Test Adventurer", "劍士")
+        game.unlock(mock_state, game.ICE_REGION_UNLOCK)
+        mock_state["flags"] = {"current_region_id": "ice"}
+        game.load_game = lambda: mock_state
+
+        load_response = session.dispatch("load_game")
+        assert load_response["ok"] is True
+        assert load_response["screen_model"]["current_region_id"] == "ice"
+        print(" - load_game recovery of selected_region_id verified successfully.")
+    finally:
+        game.load_game = original_load_game
 
     print("All region routing bridge smoke tests passed successfully!")
 

@@ -398,6 +398,7 @@ class GuiRuntimeSession:
             self.state,
             screen_id="town_hub",
             next_route="../town_hub/index.html?mode=live",
+            selected_region_id=self.current_region_id,
         )
 
     def save_game(self, *, screen_id: str = "world_map") -> dict[str, Any]:
@@ -606,7 +607,7 @@ class GuiRuntimeSession:
             raise GuiActionError("Unknown region.", status=400)
         if not region_route_enabled(state, region_id):
             raise GuiActionError(region_locked_reason(region_id), status=403)
-        self.current_region_id = region_id
+        self.set_current_region(region_id)
         self._clear_live_run()
         return self._live_response(
             "travel_region",
