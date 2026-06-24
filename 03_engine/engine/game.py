@@ -2241,7 +2241,8 @@ def guild_menu(state: dict, region_id: str = "border_fire") -> None:
 
 def guild_quest_menu(state: dict, region_id: str = "border_fire") -> None:
     while True:
-        quest_ids = [qid for qid in QUESTS if quest_unlocked(state, qid)]
+        allowed_quest_ids = set(REGIONS.get(region_id, REGIONS["border_fire"]).get("quest_ids", []))
+        quest_ids = [qid for qid in QUESTS if qid in allowed_quest_ids and quest_unlocked(state, qid)]
         options = []
         for quest_id in quest_ids:
             quest = QUESTS[quest_id]
@@ -2488,7 +2489,7 @@ def choose_weighted_event() -> str:
 def dungeon_menu(state: dict, region_id: str = "border_fire") -> None:
     if state["flags"].get("ash_guardian_defeated") and not is_unlocked(state, "dungeon_cinder_seal_depths"):
         unlock(state, "dungeon_cinder_seal_depths")
-    unlocked_dungeons = player_facing_dungeon_ids(state)
+    unlocked_dungeons = player_facing_dungeon_ids(state, region_id)
     if not unlocked_dungeons:
         print("目前沒有可探索的迷宮。")
         pause()
@@ -3478,7 +3479,54 @@ def tick_effects(state: dict, player_buffs: dict, enemy_buffs: dict) -> list[str
             del buffs[key]
     return events
 
+CLI_REGION_ORDER = ["border_fire", "ice", "earth", "thunder", "final"]
+CLI_REGION_ROUTE_ENABLED = {"border_fire", "ice"}
+
+
+def cli_region_label(region_id: str) -> str:
+    region = REGIONS.get(region_id, {})
+    return region.get("name") or region.get("town_name") or region_id
+
+
+def cli_region_route_enabled(state: dict, region_id: str) -> bool:
+    return region_id in CLI_REGION_ROUTE_ENABLED and region_id in get_unlocked_regions(state)
+
+
+def cli_region_locked_reason(region_id: str) -> str:
+    if region_id == "ice":
+        return "Ice unlocks after the Fire Seal route is complete."
+    if region_id in {"earth", "thunder", "final"}:
+        return "This region is not open in the current slice."
+    return "This region is locked."
+
+
+def region_travel_menu(state: dict, current_region_id: str) -> str:
+    options = []
+    for region_id in CLI_REGION_ORDER:
+        status = "current" if region_id == current_region_id else ("open" if cli_region_route_enabled(state, region_id) else "locked")
+        options.append(f"{cli_region_label(region_id)} / {status}")
+    choice = action_menu_panel(
+        "Travel to new region",
+        options,
+        "Region Gate",
+        header_lines=["Only Ice is open in this bridge slice after the Fire Seal route unlocks it."],
+        allow_back=True,
+        border_style="blue",
+    )
+    if choice == 0:
+        return current_region_id
+    region_id = CLI_REGION_ORDER[choice - 1]
+    if not cli_region_route_enabled(state, region_id):
+        print(cli_region_locked_reason(region_id))
+        pause()
+        return current_region_id
+    print(f"Traveling to {cli_region_label(region_id)}.")
+    pause()
+    return region_id
+
+
 def main_loop(state: dict) -> str | None:
+    current_region_id = "border_fire"
     while True:
         clamp_vitals(state)
         main_options = [
@@ -3490,6 +3538,7 @@ def main_loop(state: dict) -> str | None:
             "存檔",
             "離開遊戲",
         ]
+        main_options.insert(3, "前往新區域 / 前往新大陸")
         choice = main_menu_panel(
             "選擇行動",
             main_options,
@@ -3501,19 +3550,21 @@ def main_loop(state: dict) -> str | None:
             show_status(state)
             pause()
         elif choice == 2:
-            town_menu(state)
+            town_menu(state, current_region_id)
         elif choice == 3:
-            dungeon_menu(state)
+            dungeon_menu(state, current_region_id)
             if state.pop("_return_to_title", False):
                 return "title"
         elif choice == 4:
-            bestiary_menu(state)
+            current_region_id = region_travel_menu(state, current_region_id)
         elif choice == 5:
-            backpack_menu(state, allow_storage=False)
+            bestiary_menu(state)
         elif choice == 6:
+            backpack_menu(state, allow_storage=False)
+        elif choice == 7:
             save_game(state)
             pause()
-        elif choice == 7:
+        elif choice == 8:
             raw = input("離開前要存檔嗎？(y/n) > ").strip().lower()
             if raw == "y":
                 save_game(state)
