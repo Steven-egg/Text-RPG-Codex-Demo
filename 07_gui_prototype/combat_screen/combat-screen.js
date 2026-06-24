@@ -312,9 +312,9 @@ function renderBattlefield(model) {
       enemyImageEl.style.display = "block";
     }
   } else {
-    delete shellEl.dataset.enemyId;
-    delete shellEl.dataset.enemyEnvironment;
-    delete shellEl.dataset.enemyVisualRole;
+    shellEl.dataset.enemyId = enemy.enemy_id ?? "unknown";
+    shellEl.dataset.enemyEnvironment = enemy.asset_slot?.state === "placeholder" ? "asset-slot" : "unknown";
+    shellEl.dataset.enemyVisualRole = "placeholder";
     if (enemyImageEl) {
       enemyImageEl.removeAttribute("src");
       enemyImageEl.style.display = "none";

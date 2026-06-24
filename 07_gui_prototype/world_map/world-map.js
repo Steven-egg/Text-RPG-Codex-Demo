@@ -2,6 +2,7 @@ import { runtimeClient } from "../shared/runtime-client.js";
 
 const fixtureSelect = document.querySelector("#fixture-select");
 const shellEl = document.querySelector(".world-map-shell");
+const mapArtEl = document.querySelector(".map-art");
 const menuToggleEl = document.querySelector("#menu-toggle");
 const closeMenuEl = document.querySelector("#close-menu");
 const closeDetailEl = document.querySelector("#close-detail");
@@ -180,6 +181,11 @@ async function loadStaticFallback(path, liveError) {
 
 function render() {
   const { model } = state;
+  const currentRegionId = model.current_region_id ?? "border_fire";
+  shellEl.dataset.currentRegionId = currentRegionId;
+  if (mapArtEl && model.map_asset) {
+    mapArtEl.style.backgroundImage = `url("${model.map_asset}")`;
+  }
   renderPlayer(model.player);
   renderMenu(model.menu_actions ?? []);
   renderRoutes(model.route_segments ?? []);
@@ -296,6 +302,8 @@ function renderLocations(locations) {
       button.dataset.locationId = location.location_id;
       button.dataset.tone = location.tone ?? "neutral";
       button.dataset.unlocked = String(Boolean(location.unlocked));
+      button.dataset.previewRole = location.preview_role ?? "";
+      button.dataset.regionId = location.region_id ?? "";
       button.style.setProperty("--x", `${location.position?.x ?? 50}%`);
       button.style.setProperty("--y", `${location.position?.y ?? 50}%`);
       button.setAttribute("aria-pressed", String(location.location_id === state.selectedLocationId));
@@ -321,6 +329,14 @@ function renderLocations(locations) {
       meta.textContent = location.unlocked ? location.recommended_level ?? "" : location.status_label ?? "尚未解鎖";
 
       button.append(emblem, title, meta);
+
+      if (location.preview_role === "town" && location.region_id && location.region_id !== "border_fire") {
+        const landmark = document.createElement("span");
+        landmark.className = "region-map-landmark";
+        landmark.setAttribute("aria-hidden", "true");
+        landmark.textContent = "MAP";
+        button.append(landmark);
+      }
 
       if (!location.unlocked) {
         const lock = document.createElement("span");
@@ -468,6 +484,12 @@ async function activateAction(action, source) {
   if (action.action_id === "open_settings") {
     renderSettingsPanel();
     feedbackMessageEl.textContent = "已開啟畫面設定。此偏好僅套用於目前的世界地圖頁面。";
+    return;
+  }
+
+  if (action.action_id === "open_region_gate") {
+    renderRegionGatePanel();
+    feedbackMessageEl.textContent = "選擇可前往的新區域。";
     return;
   }
 
@@ -768,6 +790,60 @@ function setUtilityOpen(open) {
   }
 }
 
+function renderRegionGatePanel() {
+  const gate = state.model?.region_gate ?? getSelectedLocation();
+  const options = gate?.options ?? [];
+  utilityPanelLabelEl.textContent = "區域門";
+  utilityTitleEl.textContent = "前往新區域";
+
+  if (options.length === 0) {
+    utilityContentEl.innerHTML = `<p class="utility-empty-msg">目前沒有可選擇的區域。</p>`;
+    setUtilityOpen(true);
+    return;
+  }
+
+  utilityContentEl.replaceChildren(
+    ...options.map((option) => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "utility-list-item region-gate-option";
+      button.dataset.enabled = String(Boolean(option.enabled));
+      button.disabled = !option.enabled;
+
+      const header = document.createElement("span");
+      header.className = "utility-list-item-header";
+
+      const name = document.createElement("span");
+      name.className = "name";
+      name.textContent = option.label ?? option.region_id;
+
+      const meta = document.createElement("span");
+      meta.className = "meta";
+      meta.textContent = option.enabled ? "open" : "locked";
+
+      const desc = document.createElement("span");
+      desc.className = "utility-list-item-desc";
+      desc.textContent = option.enabled
+        ? option.town_name ?? option.name ?? ""
+        : option.disabled_reason ?? "locked";
+
+      header.append(name, meta);
+      button.append(header, desc);
+      button.addEventListener("click", () => {
+        const gateAction = {
+          action_id: option.action_id ?? "travel_region",
+          payload: option.payload ?? { region_id: option.region_id },
+          enabled: Boolean(option.enabled),
+          disabled_reason: option.disabled_reason,
+        };
+        activateAction(gateAction, "region_gate");
+      });
+      return button;
+    }),
+  );
+  setUtilityOpen(true);
+}
+
 function renderSettingsPanel() {
   renderUtilityPreview({
     type: "settings",
@@ -978,4 +1054,3 @@ function renderUtilityPreview(preview) {
     shell.dataset.debug = String(isDebug);
   }
 })();
-

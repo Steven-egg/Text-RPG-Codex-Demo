@@ -188,6 +188,10 @@ async function loadStaticFallback(path, liveError) {
 
 function render() {
   const { model } = state;
+  shellEl.dataset.currentRegionId = model.current_region_id ?? "border_fire";
+  if (model.town_asset) {
+    facilitySceneEl.style.backgroundImage = `url("${model.town_asset}")`;
+  }
 
   // 動態處理並剝離 (Live) 大字標題，改成精緻的小徽章
   let displayTitle = model.title ?? "";

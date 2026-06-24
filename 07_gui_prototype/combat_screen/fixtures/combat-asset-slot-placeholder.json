@@ -1,0 +1,77 @@
+{
+  "screen_id": "combat_screen",
+  "title": "戰鬥",
+  "subtitle": "Combat asset slot placeholder：敵人來自 CLI data，但目前沒有正式 GUI 貼圖。",
+  "resource_strip": [
+    {
+      "label": "回合 1",
+      "tone": "neutral"
+    }
+  ],
+  "player": {
+    "name": "米菈",
+    "class_label": "冒險者",
+    "level_label": "Lv12",
+    "hp_label": "160 / 160",
+    "mp_label": "46 / 52",
+    "status_label": "正常",
+    "stance_label": "探索中"
+  },
+  "enemy": {
+    "enemy_id": "mon_ice_drowned_deckhand",
+    "name": "黑牙亡水手",
+    "hp_label": "HP 155 / 155",
+    "hp_percent": 100,
+    "attribute": "Ice",
+    "status_label": "asset slot placeholder",
+    "asset_slot": {
+      "state": "placeholder",
+      "reason": "No formal GUI monster image yet."
+    }
+  },
+  "command_message": "這個敵人 entry 已存在於 CLI data；GUI 目前只保留 asset slot，不補正式圖片。",
+  "skill_menu": {
+    "label": "技能",
+    "title": "技能",
+    "summary": "Static placeholder",
+    "empty_message": "無",
+    "items": []
+  },
+  "item_menu": {
+    "label": "道具",
+    "title": "道具",
+    "summary": "Static placeholder",
+    "empty_message": "無",
+    "items": []
+  },
+  "battle_log": [
+    "黑牙亡水手 由 CLI MONSTERS 產生。",
+    "這個 fixture 用來驗證 GUI fallback，不代表正式 asset pipeline 已開啟。"
+  ],
+  "actions": [
+    {
+      "action_id": "basic_attack",
+      "label": "攻擊",
+      "description": "記錄 UIAction；static prototype 不計算傷害。",
+      "enabled": true,
+      "disabled_reason": null,
+      "primary": true,
+      "payload": {
+        "enemy_id": "mon_ice_drowned_deckhand"
+      },
+      "feedback_message": "已送出 basic_attack；static prototype 不計算戰鬥結果。"
+    },
+    {
+      "action_id": "retreat",
+      "label": "撤退",
+      "description": "回到探索畫面。",
+      "enabled": true,
+      "disabled_reason": null,
+      "primary": false,
+      "payload": {
+        "enemy_id": "mon_ice_drowned_deckhand"
+      },
+      "feedback_message": "已送出 retreat；static prototype 只記錄 UIAction。"
+    }
+  ]
+}

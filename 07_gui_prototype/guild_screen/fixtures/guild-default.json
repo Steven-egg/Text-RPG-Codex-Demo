@@ -1,179 +1,1823 @@
 {
   "screen_id": "facility_guild_screen",
   "facility_id": "guild",
-  "title": "冒險者工會 / 委託板",
-  "subtitle": "接待員把已解鎖的委託整理在木板上。這裡只呈現 Guild Screen 的 static fixture。",
+  "title": "冒險者工會 / CLI 任務骨架",
+  "subtitle": "Guild parity shell：依 REGIONS + QUESTS 產生，region filter 只做靜態對照。",
   "visual_baseline_id": "gui_guild_screen_visual_baseline_v1",
   "npc": {
     "id": "guild_receptionist",
-    "name": "莉娜",
-    "role": "工會接待員，負責整理委託回報與鎮內傳聞。"
+    "name": "諾亞",
+    "role": "冒險者工會會長"
   },
   "task_filters": [
-    { "id": "all", "label": "全部委託", "count": 3, "selected": true, "enabled": true },
-    { "id": "ready_to_submit", "label": "可回報", "count": 1, "selected": false, "enabled": true },
-    { "id": "completed", "label": "已完成", "count": 1, "selected": false, "enabled": true }
+    {
+      "id": "all",
+      "label": "全部任務",
+      "count": 28,
+      "selected": true,
+      "enabled": true
+    },
+    {
+      "id": "border_fire",
+      "label": "Border / Fire",
+      "count": 8,
+      "selected": false,
+      "enabled": true
+    },
+    {
+      "id": "ice",
+      "label": "Ice",
+      "count": 5,
+      "selected": false,
+      "enabled": true
+    },
+    {
+      "id": "earth",
+      "label": "Earth",
+      "count": 5,
+      "selected": false,
+      "enabled": true
+    },
+    {
+      "id": "thunder",
+      "label": "Thunder",
+      "count": 5,
+      "selected": false,
+      "enabled": true
+    },
+    {
+      "id": "final",
+      "label": "Final",
+      "count": 5,
+      "selected": false,
+      "enabled": true
+    }
   ],
   "selected_filter_id": "all",
-  "selected_task_id": "quest_herb_delivery",
+  "selected_task_id": "quest_register",
   "task_rows": [
     {
-      "task_id": "quest_herb_delivery",
-      "title": "藥草補給回報",
-      "giver": "伊芙",
-      "status": "ready_to_submit",
-      "status_label": "可回報",
-      "status_icon_id": "ready",
+      "task_id": "quest_register",
+      "title": "冒險者登記",
+      "giver": "諾亞",
+      "status": "border_fire",
+      "region_id": "border_fire",
+      "status_label": "Border / Fire",
+      "status_icon_id": "region",
       "enabled": true,
       "disabled_reason": null,
       "sort_key": 10
     },
     {
-      "task_id": "quest_north_gate_trace",
-      "title": "北門火光調查",
+      "task_id": "quest_cave_gathering",
+      "title": "洞窟採集",
       "giver": "諾亞",
-      "status": "requirements_missing",
-      "status_label": "條件不足",
-      "status_icon_id": "missing",
+      "status": "border_fire",
+      "region_id": "border_fire",
+      "status_label": "Border / Fire",
+      "status_icon_id": "region",
       "enabled": true,
       "disabled_reason": null,
       "sort_key": 20
     },
     {
-      "task_id": "quest_cellar_slime",
-      "title": "地下倉庫清理",
-      "giver": "拉比",
-      "status": "completed",
-      "status_label": "已完成",
-      "status_icon_id": "completed",
+      "task_id": "quest_magic_crystal",
+      "title": "魔晶研究",
+      "giver": "伊芙",
+      "status": "border_fire",
+      "region_id": "border_fire",
+      "status_label": "Border / Fire",
+      "status_icon_id": "region",
       "enabled": true,
       "disabled_reason": null,
       "sort_key": 30
+    },
+    {
+      "task_id": "quest_mine_scout",
+      "title": "焦石偵查",
+      "giver": "拉比",
+      "status": "border_fire",
+      "region_id": "border_fire",
+      "status_label": "Border / Fire",
+      "status_icon_id": "region",
+      "enabled": true,
+      "disabled_reason": null,
+      "sort_key": 40
+    },
+    {
+      "task_id": "quest_boss_glen",
+      "title": "血跡地圖",
+      "giver": "諾亞",
+      "status": "border_fire",
+      "region_id": "border_fire",
+      "status_label": "Border / Fire",
+      "status_icon_id": "region",
+      "enabled": true,
+      "disabled_reason": null,
+      "sort_key": 50
+    },
+    {
+      "task_id": "quest_ash_ravine_scout",
+      "title": "灰燼裂谷偵查",
+      "giver": "諾亞",
+      "status": "border_fire",
+      "region_id": "border_fire",
+      "status_label": "Border / Fire",
+      "status_icon_id": "region",
+      "enabled": true,
+      "disabled_reason": null,
+      "sort_key": 60
+    },
+    {
+      "task_id": "quest_supply_upgrade",
+      "title": "補給線升級",
+      "giver": "諾亞",
+      "status": "border_fire",
+      "region_id": "border_fire",
+      "status_label": "Border / Fire",
+      "status_icon_id": "region",
+      "enabled": true,
+      "disabled_reason": null,
+      "sort_key": 70
+    },
+    {
+      "task_id": "quest_cinder_depths_scout",
+      "title": "燼印深窟偵查",
+      "giver": "諾亞",
+      "status": "border_fire",
+      "region_id": "border_fire",
+      "status_label": "Border / Fire",
+      "status_icon_id": "region",
+      "enabled": true,
+      "disabled_reason": null,
+      "sort_key": 80
+    },
+    {
+      "task_id": "quest_ice_minor_a",
+      "title": "Ice Q1 - 幽帆沉船的勘查",
+      "giver": "Guild",
+      "status": "ice",
+      "region_id": "ice",
+      "status_label": "Ice",
+      "status_icon_id": "region",
+      "enabled": true,
+      "disabled_reason": null,
+      "sort_key": 90
+    },
+    {
+      "task_id": "quest_ice_minor_b",
+      "title": "Ice Q2 - 霜根岩窟的異變",
+      "giver": "Guild",
+      "status": "ice",
+      "region_id": "ice",
+      "status_label": "Ice",
+      "status_icon_id": "region",
+      "enabled": true,
+      "disabled_reason": null,
+      "sort_key": 100
+    },
+    {
+      "task_id": "quest_ice_main_phase_1",
+      "title": "Ice Q3 - 突破斷階外城",
+      "giver": "Guild",
+      "status": "ice",
+      "region_id": "ice",
+      "status_label": "Ice",
+      "status_icon_id": "region",
+      "enabled": true,
+      "disabled_reason": null,
+      "sort_key": 110
+    },
+    {
+      "task_id": "quest_ice_main_phase_2",
+      "title": "Ice Q4 - 終印誓殿的誓約",
+      "giver": "Guild",
+      "status": "ice",
+      "region_id": "ice",
+      "status_label": "Ice",
+      "status_icon_id": "region",
+      "enabled": true,
+      "disabled_reason": null,
+      "sort_key": 120
+    },
+    {
+      "task_id": "quest_ice_return_handoff",
+      "title": "Ice Q5 - 極寒封印的回報",
+      "giver": "Guild",
+      "status": "ice",
+      "region_id": "ice",
+      "status_label": "Ice",
+      "status_icon_id": "region",
+      "enabled": true,
+      "disabled_reason": null,
+      "sort_key": 130
+    },
+    {
+      "task_id": "quest_earth_minor_a",
+      "title": "古根遺環調查",
+      "giver": "Guild",
+      "status": "earth",
+      "region_id": "earth",
+      "status_label": "Earth",
+      "status_icon_id": "region",
+      "enabled": true,
+      "disabled_reason": null,
+      "sort_key": 140
+    },
+    {
+      "task_id": "quest_earth_minor_b",
+      "title": "瀑崖礦脈檢查",
+      "giver": "Guild",
+      "status": "earth",
+      "region_id": "earth",
+      "status_label": "Earth",
+      "status_icon_id": "region",
+      "enabled": true,
+      "disabled_reason": null,
+      "sort_key": 150
+    },
+    {
+      "task_id": "quest_earth_main_phase_1",
+      "title": "外城遺構封鎖",
+      "giver": "Guild",
+      "status": "earth",
+      "region_id": "earth",
+      "status_label": "Earth",
+      "status_icon_id": "region",
+      "enabled": true,
+      "disabled_reason": null,
+      "sort_key": 160
+    },
+    {
+      "task_id": "quest_earth_main_phase_2",
+      "title": "深脈殿決戰",
+      "giver": "Guild",
+      "status": "earth",
+      "region_id": "earth",
+      "status_label": "Earth",
+      "status_icon_id": "region",
+      "enabled": true,
+      "disabled_reason": null,
+      "sort_key": 170
+    },
+    {
+      "task_id": "quest_earth_return_handoff",
+      "title": "翠瀑回報",
+      "giver": "Guild",
+      "status": "earth",
+      "region_id": "earth",
+      "status_label": "Earth",
+      "status_icon_id": "region",
+      "enabled": true,
+      "disabled_reason": null,
+      "sort_key": 180
+    },
+    {
+      "task_id": "quest_thunder_minor_a",
+      "title": "裂雷高原調查",
+      "giver": "Guild",
+      "status": "thunder",
+      "region_id": "thunder",
+      "status_label": "Thunder",
+      "status_icon_id": "region",
+      "enabled": true,
+      "disabled_reason": null,
+      "sort_key": 190
+    },
+    {
+      "task_id": "quest_thunder_minor_b",
+      "title": "導雷水道檢查",
+      "giver": "Guild",
+      "status": "thunder",
+      "region_id": "thunder",
+      "status_label": "Thunder",
+      "status_icon_id": "region",
+      "enabled": true,
+      "disabled_reason": null,
+      "sort_key": 200
+    },
+    {
+      "task_id": "quest_thunder_main_phase_1",
+      "title": "下層陣列封鎖",
+      "giver": "Guild",
+      "status": "thunder",
+      "region_id": "thunder",
+      "status_label": "Thunder",
+      "status_icon_id": "region",
+      "enabled": true,
+      "disabled_reason": null,
+      "sort_key": 210
+    },
+    {
+      "task_id": "quest_thunder_main_phase_2",
+      "title": "冠頂陣列決戰",
+      "giver": "Guild",
+      "status": "thunder",
+      "region_id": "thunder",
+      "status_label": "Thunder",
+      "status_icon_id": "region",
+      "enabled": true,
+      "disabled_reason": null,
+      "sort_key": 220
+    },
+    {
+      "task_id": "quest_thunder_return_handoff",
+      "title": "鳴雷回報",
+      "giver": "Guild",
+      "status": "thunder",
+      "region_id": "thunder",
+      "status_label": "Thunder",
+      "status_icon_id": "region",
+      "enabled": true,
+      "disabled_reason": null,
+      "sort_key": 230
+    },
+    {
+      "task_id": "quest_final_minor_a",
+      "title": "攻城外壕偵察",
+      "giver": "Guild",
+      "status": "final",
+      "region_id": "final",
+      "status_label": "Final",
+      "status_icon_id": "region",
+      "enabled": true,
+      "disabled_reason": null,
+      "sort_key": 240
+    },
+    {
+      "task_id": "quest_final_minor_b",
+      "title": "破封城墟調查",
+      "giver": "Guild",
+      "status": "final",
+      "region_id": "final",
+      "status_label": "Final",
+      "status_icon_id": "region",
+      "enabled": true,
+      "disabled_reason": null,
+      "sort_key": 250
+    },
+    {
+      "task_id": "quest_final_main_phase_1",
+      "title": "黑曜城門突破",
+      "giver": "Guild",
+      "status": "final",
+      "region_id": "final",
+      "status_label": "Final",
+      "status_icon_id": "region",
+      "enabled": true,
+      "disabled_reason": null,
+      "sort_key": 260
+    },
+    {
+      "task_id": "quest_final_main_phase_2",
+      "title": "封核中樞決戰",
+      "giver": "Guild",
+      "status": "final",
+      "region_id": "final",
+      "status_label": "Final",
+      "status_icon_id": "region",
+      "enabled": true,
+      "disabled_reason": null,
+      "sort_key": 270
+    },
+    {
+      "task_id": "quest_final_demon_king",
+      "title": "災禍邪神討伐",
+      "giver": "Guild",
+      "status": "final",
+      "region_id": "final",
+      "status_label": "Final",
+      "status_icon_id": "region",
+      "enabled": true,
+      "disabled_reason": null,
+      "sort_key": 280
     }
   ],
   "story_hint_card": {
-    "id": "story_hint_fire_mark_guild_inquiry",
-    "title": "詢問三枚印記碎片的事情",
-    "description": "收集三枚火印碎片後，可以向諾亞詢問主線線索。",
-    "detail_description": "目前碎片數不足。接待員提醒你，這不是正式委託，也不會出現在任務篩選中。",
-    "status": "story_hint",
-    "status_label": "主線線索",
-    "visible": false,
-    "enabled": false,
-    "disabled_reason": "尚未持有三枚火印碎片。",
-    "primary_action": "open_story_hint",
-    "action_label": "詢問線索"
+    "visible": false
   },
   "task_details": {
-    "quest_herb_delivery": {
-      "task_id": "quest_herb_delivery",
-      "title": "藥草補給回報",
-      "giver": "伊芙",
-      "description": "伊芙需要一批新鮮藥草交給旅店。你已經備齊材料，可以在工會櫃台完成回報。",
-      "status_label": "可回報",
-      "related_unlocks": [],
-      "notes": "Static fixture display only；不代表正式任務資料。",
-      "ready_feedback": { "tone": "success", "speaker": "莉娜", "text": "材料看起來齊了，可以替你登記回報。" }
-    },
-    "quest_north_gate_trace": {
-      "task_id": "quest_north_gate_trace",
-      "title": "北門火光調查",
+    "quest_register": {
+      "task_id": "quest_register",
+      "title": "冒險者登記",
       "giver": "諾亞",
-      "description": "北門外有人看見微弱火光。諾亞想確認是否和遺跡中的印記碎片有關。",
-      "status_label": "條件不足",
-      "notes": "條件不足時只能查看詳情，不能回報。",
-      "disabled_reason": "需要火印碎片 x2，目前只有 x1。",
-      "missing_feedback": { "tone": "warning", "speaker": "莉娜", "text": "這份委託還差一些線索，先別急著回報。" }
+      "description": "選擇職業並領取見習徽章。",
+      "status_label": "Border / Fire",
+      "related_unlocks": [
+        "dungeon_moss_cave"
+      ],
+      "notes": "CLI quest skeleton parity fixture：只呈現任務資料，不執行交付或進度變更。",
+      "disabled_reason": "Static parity fixture 不送出正式任務行為。",
+      "missing_feedback": {
+        "tone": "info",
+        "speaker": "諾亞",
+        "text": "這是 CLI 任務骨架對照列；正式可交付狀態仍以 runtime 為準。"
+      }
     },
-    "quest_cellar_slime": {
-      "task_id": "quest_cellar_slime",
-      "title": "地下倉庫清理",
+    "quest_cave_gathering": {
+      "task_id": "quest_cave_gathering",
+      "title": "洞窟採集",
+      "giver": "諾亞",
+      "description": "交付青苔纖維 x3、破裂石片 x2。",
+      "status_label": "Border / Fire",
+      "related_unlocks": [
+        "shop_synthesis_01",
+        "item_escape_scroll",
+        "dungeon_scorched_mine",
+        "quest_cave_gathering"
+      ],
+      "notes": "CLI quest skeleton parity fixture：只呈現任務資料，不執行交付或進度變更。",
+      "disabled_reason": "Static parity fixture 不送出正式任務行為。",
+      "missing_feedback": {
+        "tone": "info",
+        "speaker": "諾亞",
+        "text": "這是 CLI 任務骨架對照列；正式可交付狀態仍以 runtime 為準。"
+      }
+    },
+    "quest_magic_crystal": {
+      "task_id": "quest_magic_crystal",
+      "title": "魔晶研究",
+      "giver": "伊芙",
+      "description": "交付小魔晶 x2，火花術書折價 50G。",
+      "status_label": "Border / Fire",
+      "related_unlocks": [
+        "recipe_focus_pouch",
+        "quest_magic_crystal"
+      ],
+      "notes": "CLI quest skeleton parity fixture：只呈現任務資料，不執行交付或進度變更。",
+      "disabled_reason": "Static parity fixture 不送出正式任務行為。",
+      "missing_feedback": {
+        "tone": "info",
+        "speaker": "諾亞",
+        "text": "這是 CLI 任務骨架對照列；正式可交付狀態仍以 runtime 為準。"
+      }
+    },
+    "quest_mine_scout": {
+      "task_id": "quest_mine_scout",
+      "title": "焦石偵查",
       "giver": "拉比",
-      "description": "拉比先前委託你清理地下倉庫的黏液怪。這份回報已經結束，保留在列表中供確認。",
-      "status_label": "已完成",
-      "notes": "已完成任務不提供再次回報。",
-      "completed_feedback": { "tone": "info", "speaker": "莉娜", "text": "這份委託已經結案，記錄仍會留在板上。" }
+      "description": "進入焦石礦坑並帶回火焰石 x2。",
+      "status_label": "Border / Fire",
+      "related_unlocks": [
+        "item_warm_stone",
+        "recipe_fire_cloak",
+        "quest_mine_scout"
+      ],
+      "notes": "CLI quest skeleton parity fixture：只呈現任務資料，不執行交付或進度變更。",
+      "disabled_reason": "Static parity fixture 不送出正式任務行為。",
+      "missing_feedback": {
+        "tone": "info",
+        "speaker": "諾亞",
+        "text": "這是 CLI 任務骨架對照列；正式可交付狀態仍以 runtime 為準。"
+      }
+    },
+    "quest_boss_glen": {
+      "task_id": "quest_boss_glen",
+      "title": "血跡地圖",
+      "giver": "諾亞",
+      "description": "擊敗山寨頭目葛倫。交回血跡地圖後，工會會指示下一步偵查灰燼裂谷。",
+      "status_label": "Border / Fire",
+      "related_unlocks": [
+        "second_act_preview",
+        "unlock_act_2",
+        "unlock_ash_ravine",
+        "quest_boss_glen"
+      ],
+      "notes": "CLI quest skeleton parity fixture：只呈現任務資料，不執行交付或進度變更。",
+      "disabled_reason": "Static parity fixture 不送出正式任務行為。",
+      "missing_feedback": {
+        "tone": "info",
+        "speaker": "諾亞",
+        "text": "這是 CLI 任務骨架對照列；正式可交付狀態仍以 runtime 為準。"
+      }
+    },
+    "quest_ash_ravine_scout": {
+      "task_id": "quest_ash_ravine_scout",
+      "title": "灰燼裂谷偵查",
+      "giver": "諾亞",
+      "description": "前往新解鎖的灰燼裂谷偵查，帶回裂谷灰 x2、焦黑鐵片 x1。這不是討伐任務，遇到壓力就先撤回城鎮。",
+      "status_label": "Border / Fire",
+      "related_unlocks": [
+        "quest_ash_ravine_scout"
+      ],
+      "notes": "CLI quest skeleton parity fixture：只呈現任務資料，不執行交付或進度變更。",
+      "disabled_reason": "Static parity fixture 不送出正式任務行為。",
+      "missing_feedback": {
+        "tone": "info",
+        "speaker": "諾亞",
+        "text": "這是 CLI 任務骨架對照列；正式可交付狀態仍以 runtime 為準。"
+      }
+    },
+    "quest_supply_upgrade": {
+      "task_id": "quest_supply_upgrade",
+      "title": "補給線升級",
+      "giver": "諾亞",
+      "description": "灰燼守衛已倒下，工會開始整理更深入火系迷宮的補給路線。交付精煉火石 x3、熔岩碎片 x2，用來穩定中藥水的耐熱瓶封。",
+      "status_label": "Border / Fire",
+      "related_unlocks": [
+        "item_potion_m",
+        "dungeon_cinder_seal_depths",
+        "quest_supply_upgrade"
+      ],
+      "notes": "CLI quest skeleton parity fixture：只呈現任務資料，不執行交付或進度變更。",
+      "disabled_reason": "Static parity fixture 不送出正式任務行為。",
+      "missing_feedback": {
+        "tone": "info",
+        "speaker": "諾亞",
+        "text": "這是 CLI 任務骨架對照列；正式可交付狀態仍以 runtime 為準。"
+      }
+    },
+    "quest_cinder_depths_scout": {
+      "task_id": "quest_cinder_depths_scout",
+      "title": "燼印深窟偵查",
+      "giver": "諾亞",
+      "description": "補給線穩定後，前往燼印深窟記錄燼印反應。帶回精煉火石 x2、熔岩碎片 x1；工會只需要偵查資料，不會補發火之印記碎片。",
+      "status_label": "Border / Fire",
+      "related_unlocks": [
+        "quest_cinder_depths_scout"
+      ],
+      "notes": "CLI quest skeleton parity fixture：只呈現任務資料，不執行交付或進度變更。",
+      "disabled_reason": "Static parity fixture 不送出正式任務行為。",
+      "missing_feedback": {
+        "tone": "info",
+        "speaker": "諾亞",
+        "text": "這是 CLI 任務骨架對照列；正式可交付狀態仍以 runtime 為準。"
+      }
+    },
+    "quest_ice_minor_a": {
+      "task_id": "quest_ice_minor_a",
+      "title": "Ice Q1 - 幽帆沉船的勘查",
+      "giver": "Guild",
+      "description": "前往幽帆沉船收集沉船材料，確認霧笛港外的碎冰航路仍可通行。",
+      "status_label": "Ice",
+      "related_unlocks": [
+        "dungeon_ice_minor_b",
+        "quest_ice_minor_a"
+      ],
+      "notes": "CLI quest skeleton parity fixture：只呈現任務資料，不執行交付或進度變更。",
+      "disabled_reason": "Static parity fixture 不送出正式任務行為。",
+      "missing_feedback": {
+        "tone": "info",
+        "speaker": "諾亞",
+        "text": "這是 CLI 任務骨架對照列；正式可交付狀態仍以 runtime 為準。"
+      }
+    },
+    "quest_ice_minor_b": {
+      "task_id": "quest_ice_minor_b",
+      "title": "Ice Q2 - 霜根岩窟的異變",
+      "giver": "Guild",
+      "description": "深入霜根岩窟，確認凍結根系與異常黑水的擴散情況。",
+      "status_label": "Ice",
+      "related_unlocks": [
+        "dungeon_ice_main_phase_1",
+        "quest_ice_minor_b"
+      ],
+      "notes": "CLI quest skeleton parity fixture：只呈現任務資料，不執行交付或進度變更。",
+      "disabled_reason": "Static parity fixture 不送出正式任務行為。",
+      "missing_feedback": {
+        "tone": "info",
+        "speaker": "諾亞",
+        "text": "這是 CLI 任務骨架對照列；正式可交付狀態仍以 runtime 為準。"
+      }
+    },
+    "quest_ice_main_phase_1": {
+      "task_id": "quest_ice_main_phase_1",
+      "title": "Ice Q3 - 突破斷階外城",
+      "giver": "Guild",
+      "description": "前往霜鐵古城外圍，擊敗斷階守誓者奧登，開闢通往終印誓殿的道路。",
+      "status_label": "Ice",
+      "related_unlocks": [
+        "dungeon_ice_main_phase_2",
+        "quest_ice_main_phase_1"
+      ],
+      "notes": "CLI quest skeleton parity fixture：只呈現任務資料，不執行交付或進度變更。",
+      "disabled_reason": "Static parity fixture 不送出正式任務行為。",
+      "missing_feedback": {
+        "tone": "info",
+        "speaker": "諾亞",
+        "text": "這是 CLI 任務骨架對照列；正式可交付狀態仍以 runtime 為準。"
+      }
+    },
+    "quest_ice_main_phase_2": {
+      "task_id": "quest_ice_main_phase_2",
+      "title": "Ice Q4 - 終印誓殿的誓約",
+      "giver": "Guild",
+      "description": "深入終印誓殿，擊敗霜冠誓王亞爾溟，穩固極寒封印；本階段不實裝聖物效果。",
+      "status_label": "Ice",
+      "related_unlocks": [
+        "quest_ice_main_phase_2"
+      ],
+      "notes": "CLI quest skeleton parity fixture：只呈現任務資料，不執行交付或進度變更。",
+      "disabled_reason": "Static parity fixture 不送出正式任務行為。",
+      "missing_feedback": {
+        "tone": "info",
+        "speaker": "諾亞",
+        "text": "這是 CLI 任務骨架對照列；正式可交付狀態仍以 runtime 為準。"
+      }
+    },
+    "quest_ice_return_handoff": {
+      "task_id": "quest_ice_return_handoff",
+      "title": "Ice Q5 - 極寒封印的回報",
+      "giver": "Guild",
+      "description": "向公會回報極寒封印已穩固，留下前往大地區域的通行線索；本階段不實裝聖物效果。",
+      "status_label": "Ice",
+      "related_unlocks": [
+        "unlock_earth_region_preview",
+        "quest_ice_return_handoff"
+      ],
+      "notes": "CLI quest skeleton parity fixture：只呈現任務資料，不執行交付或進度變更。",
+      "disabled_reason": "Static parity fixture 不送出正式任務行為。",
+      "missing_feedback": {
+        "tone": "info",
+        "speaker": "諾亞",
+        "text": "這是 CLI 任務骨架對照列；正式可交付狀態仍以 runtime 為準。"
+      }
+    },
+    "quest_earth_minor_a": {
+      "task_id": "quest_earth_minor_a",
+      "title": "古根遺環調查",
+      "giver": "Guild",
+      "description": "前往古根遺環，帶回古根根瘤與琥珀孢囊，協助公會確認古根失誓者的活動範圍。",
+      "status_label": "Earth",
+      "related_unlocks": [
+        "dungeon_earth_minor_b",
+        "quest_earth_minor_a"
+      ],
+      "notes": "CLI quest skeleton parity fixture：只呈現任務資料，不執行交付或進度變更。",
+      "disabled_reason": "Static parity fixture 不送出正式任務行為。",
+      "missing_feedback": {
+        "tone": "info",
+        "speaker": "諾亞",
+        "text": "這是 CLI 任務骨架對照列；正式可交付狀態仍以 runtime 為準。"
+      }
+    },
+    "quest_earth_minor_b": {
+      "task_id": "quest_earth_minor_b",
+      "title": "瀑崖礦脈檢查",
+      "giver": "Guild",
+      "description": "前往瀑崖礦脈，帶回石脈晶核與石化根髓，確認礦脈怪物化的源頭。",
+      "status_label": "Earth",
+      "related_unlocks": [
+        "dungeon_earth_main_phase_1",
+        "quest_earth_minor_b"
+      ],
+      "notes": "CLI quest skeleton parity fixture：只呈現任務資料，不執行交付或進度變更。",
+      "disabled_reason": "Static parity fixture 不送出正式任務行為。",
+      "missing_feedback": {
+        "tone": "info",
+        "speaker": "諾亞",
+        "text": "這是 CLI 任務骨架對照列；正式可交付狀態仍以 runtime 為準。"
+      }
+    },
+    "quest_earth_main_phase_1": {
+      "task_id": "quest_earth_main_phase_1",
+      "title": "外城遺構封鎖",
+      "giver": "Guild",
+      "description": "突破外城遺構，擊敗古根外衛 塞爾姆，取回塞爾姆外印以開啟深脈殿路線。",
+      "status_label": "Earth",
+      "related_unlocks": [
+        "dungeon_earth_main_phase_2",
+        "quest_earth_main_phase_1"
+      ],
+      "notes": "CLI quest skeleton parity fixture：只呈現任務資料，不執行交付或進度變更。",
+      "disabled_reason": "Static parity fixture 不送出正式任務行為。",
+      "missing_feedback": {
+        "tone": "info",
+        "speaker": "諾亞",
+        "text": "這是 CLI 任務骨架對照列；正式可交付狀態仍以 runtime 為準。"
+      }
+    },
+    "quest_earth_main_phase_2": {
+      "task_id": "quest_earth_main_phase_2",
+      "title": "深脈殿決戰",
+      "giver": "Guild",
+      "description": "深入深脈殿，擊敗深脈殿主 亞爾根，回收亞爾根深核作為大地印記源證。",
+      "status_label": "Earth",
+      "related_unlocks": [
+        "quest_earth_main_phase_2"
+      ],
+      "notes": "CLI quest skeleton parity fixture：只呈現任務資料，不執行交付或進度變更。",
+      "disabled_reason": "Static parity fixture 不送出正式任務行為。",
+      "missing_feedback": {
+        "tone": "info",
+        "speaker": "諾亞",
+        "text": "這是 CLI 任務骨架對照列；正式可交付狀態仍以 runtime 為準。"
+      }
+    },
+    "quest_earth_return_handoff": {
+      "task_id": "quest_earth_return_handoff",
+      "title": "翠瀑回報",
+      "giver": "Guild",
+      "description": "向公會回報大地印記源證，前往聖物調查台登錄亞爾根深核；下一個建議路線為鳴雷天原。",
+      "status_label": "Earth",
+      "related_unlocks": [
+        "unlock_thunder_region_preview",
+        "quest_earth_return_handoff"
+      ],
+      "notes": "CLI quest skeleton parity fixture：只呈現任務資料，不執行交付或進度變更。",
+      "disabled_reason": "Static parity fixture 不送出正式任務行為。",
+      "missing_feedback": {
+        "tone": "info",
+        "speaker": "諾亞",
+        "text": "這是 CLI 任務骨架對照列；正式可交付狀態仍以 runtime 為準。"
+      }
+    },
+    "quest_thunder_minor_a": {
+      "task_id": "quest_thunder_minor_a",
+      "title": "裂雷高原調查",
+      "giver": "Guild",
+      "description": "前往裂雷高原，帶回雲銅導片與風暴玻璃，協助公會確認高原雷暴的異常源。",
+      "status_label": "Thunder",
+      "related_unlocks": [
+        "dungeon_thunder_minor_b",
+        "quest_thunder_minor_a"
+      ],
+      "notes": "CLI quest skeleton parity fixture：只呈現任務資料，不執行交付或進度變更。",
+      "disabled_reason": "Static parity fixture 不送出正式任務行為。",
+      "missing_feedback": {
+        "tone": "info",
+        "speaker": "諾亞",
+        "text": "這是 CLI 任務骨架對照列；正式可交付狀態仍以 runtime 為準。"
+      }
+    },
+    "quest_thunder_minor_b": {
+      "task_id": "quest_thunder_minor_b",
+      "title": "導雷水道檢查",
+      "giver": "Guild",
+      "description": "前往導雷水道，帶回雲路鳴囊與導雷銅芯，確認水道導雷結構的失控原因。",
+      "status_label": "Thunder",
+      "related_unlocks": [
+        "dungeon_thunder_main_phase_1",
+        "quest_thunder_minor_b"
+      ],
+      "notes": "CLI quest skeleton parity fixture：只呈現任務資料，不執行交付或進度變更。",
+      "disabled_reason": "Static parity fixture 不送出正式任務行為。",
+      "missing_feedback": {
+        "tone": "info",
+        "speaker": "諾亞",
+        "text": "這是 CLI 任務骨架對照列；正式可交付狀態仍以 runtime 為準。"
+      }
+    },
+    "quest_thunder_main_phase_1": {
+      "task_id": "quest_thunder_main_phase_1",
+      "title": "下層陣列封鎖",
+      "giver": "Guild",
+      "description": "進入下層陣列，擊敗陣列雷龍 奧泰爾，取回奧泰爾逆鱗以開啟冠頂陣列路線。",
+      "status_label": "Thunder",
+      "related_unlocks": [
+        "dungeon_thunder_main_phase_2",
+        "quest_thunder_main_phase_1"
+      ],
+      "notes": "CLI quest skeleton parity fixture：只呈現任務資料，不執行交付或進度變更。",
+      "disabled_reason": "Static parity fixture 不送出正式任務行為。",
+      "missing_feedback": {
+        "tone": "info",
+        "speaker": "諾亞",
+        "text": "這是 CLI 任務骨架對照列；正式可交付狀態仍以 runtime 為準。"
+      }
+    },
+    "quest_thunder_main_phase_2": {
+      "task_id": "quest_thunder_main_phase_2",
+      "title": "冠頂陣列決戰",
+      "giver": "Guild",
+      "description": "攀上冠頂陣列，擊敗冠頂風暴龍 亞斯塔爾，回收亞斯塔爾龍心作為雷印源證。",
+      "status_label": "Thunder",
+      "related_unlocks": [
+        "quest_thunder_main_phase_2"
+      ],
+      "notes": "CLI quest skeleton parity fixture：只呈現任務資料，不執行交付或進度變更。",
+      "disabled_reason": "Static parity fixture 不送出正式任務行為。",
+      "missing_feedback": {
+        "tone": "info",
+        "speaker": "諾亞",
+        "text": "這是 CLI 任務骨架對照列；正式可交付狀態仍以 runtime 為準。"
+      }
+    },
+    "quest_thunder_return_handoff": {
+      "task_id": "quest_thunder_return_handoff",
+      "title": "鳴雷回報",
+      "giver": "Guild",
+      "description": "向公會回報雷印源證，前往聖物調查台安置亞斯塔爾龍心；四聖印皆安置後，魔王城前線才會穩定開啟。",
+      "status_label": "Thunder",
+      "related_unlocks": [
+        "quest_thunder_return_handoff"
+      ],
+      "notes": "CLI quest skeleton parity fixture：只呈現任務資料，不執行交付或進度變更。",
+      "disabled_reason": "Static parity fixture 不送出正式任務行為。",
+      "missing_feedback": {
+        "tone": "info",
+        "speaker": "諾亞",
+        "text": "這是 CLI 任務骨架對照列；正式可交付狀態仍以 runtime 為準。"
+      }
+    },
+    "quest_final_minor_a": {
+      "task_id": "quest_final_minor_a",
+      "title": "攻城外壕偵察",
+      "giver": "Guild",
+      "description": "前往攻城外壕，帶回災灰餘燼與霜記殘片，確認魔王城前線的汙染殘響。",
+      "status_label": "Final",
+      "related_unlocks": [
+        "dungeon_final_minor_b",
+        "quest_final_minor_a"
+      ],
+      "notes": "CLI quest skeleton parity fixture：只呈現任務資料，不執行交付或進度變更。",
+      "disabled_reason": "Static parity fixture 不送出正式任務行為。",
+      "missing_feedback": {
+        "tone": "info",
+        "speaker": "諾亞",
+        "text": "這是 CLI 任務骨架對照列；正式可交付狀態仍以 runtime 為準。"
+      }
+    },
+    "quest_final_minor_b": {
+      "task_id": "quest_final_minor_b",
+      "title": "破封城墟調查",
+      "giver": "Guild",
+      "description": "前往破封城墟，帶回汙根石片與雷玻碎片，確認黑曜王城可被突入的破口。",
+      "status_label": "Final",
+      "related_unlocks": [
+        "dungeon_final_main_phase_1",
+        "quest_final_minor_b"
+      ],
+      "notes": "CLI quest skeleton parity fixture：只呈現任務資料，不執行交付或進度變更。",
+      "disabled_reason": "Static parity fixture 不送出正式任務行為。",
+      "missing_feedback": {
+        "tone": "info",
+        "speaker": "諾亞",
+        "text": "這是 CLI 任務骨架對照列；正式可交付狀態仍以 runtime 為準。"
+      }
+    },
+    "quest_final_main_phase_1": {
+      "task_id": "quest_final_main_phase_1",
+      "title": "黑曜城門突破",
+      "giver": "Guild",
+      "description": "突破黑曜城門，擊敗王座魔龍 札哈克，取回札哈克魔鱗以開啟封核中樞路線。",
+      "status_label": "Final",
+      "related_unlocks": [
+        "dungeon_final_main_phase_2",
+        "quest_final_main_phase_1"
+      ],
+      "notes": "CLI quest skeleton parity fixture：只呈現任務資料，不執行交付或進度變更。",
+      "disabled_reason": "Static parity fixture 不送出正式任務行為。",
+      "missing_feedback": {
+        "tone": "info",
+        "speaker": "諾亞",
+        "text": "這是 CLI 任務骨架對照列；正式可交付狀態仍以 runtime 為準。"
+      }
+    },
+    "quest_final_main_phase_2": {
+      "task_id": "quest_final_main_phase_2",
+      "title": "封核中樞決戰",
+      "giver": "Guild",
+      "description": "深入封核中樞，擊敗黑曜女王 莉莉絲，取回莉莉絲王冠以開啟魔王王座。",
+      "status_label": "Final",
+      "related_unlocks": [
+        "dungeon_final_main_phase_3",
+        "quest_final_main_phase_2"
+      ],
+      "notes": "CLI quest skeleton parity fixture：只呈現任務資料，不執行交付或進度變更。",
+      "disabled_reason": "Static parity fixture 不送出正式任務行為。",
+      "missing_feedback": {
+        "tone": "info",
+        "speaker": "諾亞",
+        "text": "這是 CLI 任務骨架對照列；正式可交付狀態仍以 runtime 為準。"
+      }
+    },
+    "quest_final_demon_king": {
+      "task_id": "quest_final_demon_king",
+      "title": "災禍邪神討伐",
+      "giver": "Guild",
+      "description": "進入魔王王座，擊敗災禍邪神 阿巴頓，終結魔王城前線的災禍源頭。",
+      "status_label": "Final",
+      "related_unlocks": [
+        "quest_final_demon_king"
+      ],
+      "notes": "CLI quest skeleton parity fixture：只呈現任務資料，不執行交付或進度變更。",
+      "disabled_reason": "Static parity fixture 不送出正式任務行為。",
+      "missing_feedback": {
+        "tone": "info",
+        "speaker": "諾亞",
+        "text": "這是 CLI 任務骨架對照列；正式可交付狀態仍以 runtime 為準。"
+      }
     }
   },
   "reward_summaries": {
-    "quest_herb_delivery": {
-      "gold": 120,
-      "guild_points": 3,
+    "quest_register": {
+      "gold": 0,
+      "guild_points": 0,
       "items": [
-        { "item_id": "item_small_potion", "label": "小型治療藥", "quantity": 1, "icon_id": "potion" }
+        {
+          "item_id": "item_potion_s",
+          "label": "小藥水",
+          "quantity": 2,
+          "icon_id": "item"
+        },
+        {
+          "item_id": "special_trial_badge",
+          "label": "見習徽章",
+          "quantity": 1,
+          "icon_id": "item"
+        }
       ],
-      "unlocks": [],
-      "notes": "報酬只作 prototype display。"
+      "unlocks": [
+        "dungeon_moss_cave"
+      ],
+      "notes": "Rewards copied from CLI data for display parity only."
     },
-    "quest_north_gate_trace": {
+    "quest_cave_gathering": {
+      "gold": 120,
+      "guild_points": 30,
+      "items": [],
+      "unlocks": [
+        "shop_synthesis_01",
+        "item_escape_scroll",
+        "dungeon_scorched_mine",
+        "quest_cave_gathering"
+      ],
+      "notes": "Rewards copied from CLI data for display parity only."
+    },
+    "quest_magic_crystal": {
+      "gold": 0,
+      "guild_points": 20,
+      "items": [],
+      "unlocks": [
+        "recipe_focus_pouch",
+        "quest_magic_crystal"
+      ],
+      "notes": "Rewards copied from CLI data for display parity only."
+    },
+    "quest_mine_scout": {
+      "gold": 0,
+      "guild_points": 40,
+      "items": [],
+      "unlocks": [
+        "item_warm_stone",
+        "recipe_fire_cloak",
+        "quest_mine_scout"
+      ],
+      "notes": "Rewards copied from CLI data for display parity only."
+    },
+    "quest_boss_glen": {
+      "gold": 300,
+      "guild_points": 100,
+      "items": [],
+      "unlocks": [
+        "second_act_preview",
+        "unlock_act_2",
+        "unlock_ash_ravine",
+        "quest_boss_glen"
+      ],
+      "notes": "Rewards copied from CLI data for display parity only."
+    },
+    "quest_ash_ravine_scout": {
       "gold": 180,
-      "guild_points": 4,
-      "items": [],
-      "unlocks": ["北門外傳聞紀錄"],
-      "notes": null
+      "guild_points": 70,
+      "items": [
+        {
+          "item_id": "item_potion_s",
+          "label": "小藥水",
+          "quantity": 2,
+          "icon_id": "item"
+        }
+      ],
+      "unlocks": [
+        "quest_ash_ravine_scout"
+      ],
+      "notes": "Rewards copied from CLI data for display parity only."
     },
-    "quest_cellar_slime": {
-      "gold": 80,
-      "guild_points": 2,
+    "quest_supply_upgrade": {
+      "gold": 0,
+      "guild_points": 0,
+      "items": [
+        {
+          "item_id": "item_potion_m",
+          "label": "中藥水",
+          "quantity": 2,
+          "icon_id": "item"
+        }
+      ],
+      "unlocks": [
+        "item_potion_m",
+        "dungeon_cinder_seal_depths",
+        "quest_supply_upgrade"
+      ],
+      "notes": "Rewards copied from CLI data for display parity only."
+    },
+    "quest_cinder_depths_scout": {
+      "gold": 220,
+      "guild_points": 80,
+      "items": [
+        {
+          "item_id": "item_potion_m",
+          "label": "中藥水",
+          "quantity": 1,
+          "icon_id": "item"
+        }
+      ],
+      "unlocks": [
+        "quest_cinder_depths_scout"
+      ],
+      "notes": "Rewards copied from CLI data for display parity only."
+    },
+    "quest_ice_minor_a": {
+      "gold": 260,
+      "guild_points": 90,
+      "items": [
+        {
+          "item_id": "item_potion_m",
+          "label": "中藥水",
+          "quantity": 1,
+          "icon_id": "item"
+        }
+      ],
+      "unlocks": [
+        "dungeon_ice_minor_b",
+        "quest_ice_minor_a"
+      ],
+      "notes": "Rewards copied from CLI data for display parity only."
+    },
+    "quest_ice_minor_b": {
+      "gold": 300,
+      "guild_points": 100,
+      "items": [
+        {
+          "item_id": "item_potion_m",
+          "label": "中藥水",
+          "quantity": 1,
+          "icon_id": "item"
+        }
+      ],
+      "unlocks": [
+        "dungeon_ice_main_phase_1",
+        "quest_ice_minor_b"
+      ],
+      "notes": "Rewards copied from CLI data for display parity only."
+    },
+    "quest_ice_main_phase_1": {
+      "gold": 420,
+      "guild_points": 140,
       "items": [],
-      "unlocks": [],
-      "notes": "已領取"
+      "unlocks": [
+        "dungeon_ice_main_phase_2",
+        "quest_ice_main_phase_1"
+      ],
+      "notes": "Rewards copied from CLI data for display parity only."
+    },
+    "quest_ice_main_phase_2": {
+      "gold": 520,
+      "guild_points": 170,
+      "items": [],
+      "unlocks": [
+        "quest_ice_main_phase_2"
+      ],
+      "notes": "Rewards copied from CLI data for display parity only."
+    },
+    "quest_ice_return_handoff": {
+      "gold": 360,
+      "guild_points": 80,
+      "items": [],
+      "unlocks": [
+        "unlock_earth_region_preview",
+        "quest_ice_return_handoff"
+      ],
+      "notes": "Rewards copied from CLI data for display parity only."
+    },
+    "quest_earth_minor_a": {
+      "gold": 420,
+      "guild_points": 130,
+      "items": [
+        {
+          "item_id": "item_potion_m",
+          "label": "中藥水",
+          "quantity": 1,
+          "icon_id": "item"
+        }
+      ],
+      "unlocks": [
+        "dungeon_earth_minor_b",
+        "quest_earth_minor_a"
+      ],
+      "notes": "Rewards copied from CLI data for display parity only."
+    },
+    "quest_earth_minor_b": {
+      "gold": 460,
+      "guild_points": 145,
+      "items": [
+        {
+          "item_id": "item_potion_m",
+          "label": "中藥水",
+          "quantity": 1,
+          "icon_id": "item"
+        }
+      ],
+      "unlocks": [
+        "dungeon_earth_main_phase_1",
+        "quest_earth_minor_b"
+      ],
+      "notes": "Rewards copied from CLI data for display parity only."
+    },
+    "quest_earth_main_phase_1": {
+      "gold": 620,
+      "guild_points": 190,
+      "items": [],
+      "unlocks": [
+        "dungeon_earth_main_phase_2",
+        "quest_earth_main_phase_1"
+      ],
+      "notes": "Rewards copied from CLI data for display parity only."
+    },
+    "quest_earth_main_phase_2": {
+      "gold": 760,
+      "guild_points": 230,
+      "items": [],
+      "unlocks": [
+        "quest_earth_main_phase_2"
+      ],
+      "notes": "Rewards copied from CLI data for display parity only."
+    },
+    "quest_earth_return_handoff": {
+      "gold": 520,
+      "guild_points": 110,
+      "items": [],
+      "unlocks": [
+        "unlock_thunder_region_preview",
+        "quest_earth_return_handoff"
+      ],
+      "notes": "Rewards copied from CLI data for display parity only."
+    },
+    "quest_thunder_minor_a": {
+      "gold": 620,
+      "guild_points": 180,
+      "items": [
+        {
+          "item_id": "item_potion_m",
+          "label": "中藥水",
+          "quantity": 1,
+          "icon_id": "item"
+        }
+      ],
+      "unlocks": [
+        "dungeon_thunder_minor_b",
+        "quest_thunder_minor_a"
+      ],
+      "notes": "Rewards copied from CLI data for display parity only."
+    },
+    "quest_thunder_minor_b": {
+      "gold": 700,
+      "guild_points": 200,
+      "items": [
+        {
+          "item_id": "item_potion_m",
+          "label": "中藥水",
+          "quantity": 1,
+          "icon_id": "item"
+        }
+      ],
+      "unlocks": [
+        "dungeon_thunder_main_phase_1",
+        "quest_thunder_minor_b"
+      ],
+      "notes": "Rewards copied from CLI data for display parity only."
+    },
+    "quest_thunder_main_phase_1": {
+      "gold": 900,
+      "guild_points": 260,
+      "items": [],
+      "unlocks": [
+        "dungeon_thunder_main_phase_2",
+        "quest_thunder_main_phase_1"
+      ],
+      "notes": "Rewards copied from CLI data for display parity only."
+    },
+    "quest_thunder_main_phase_2": {
+      "gold": 1080,
+      "guild_points": 310,
+      "items": [],
+      "unlocks": [
+        "quest_thunder_main_phase_2"
+      ],
+      "notes": "Rewards copied from CLI data for display parity only."
+    },
+    "quest_thunder_return_handoff": {
+      "gold": 780,
+      "guild_points": 150,
+      "items": [],
+      "unlocks": [
+        "quest_thunder_return_handoff"
+      ],
+      "notes": "Rewards copied from CLI data for display parity only."
+    },
+    "quest_final_minor_a": {
+      "gold": 980,
+      "guild_points": 260,
+      "items": [
+        {
+          "item_id": "item_potion_m",
+          "label": "中藥水",
+          "quantity": 1,
+          "icon_id": "item"
+        }
+      ],
+      "unlocks": [
+        "dungeon_final_minor_b",
+        "quest_final_minor_a"
+      ],
+      "notes": "Rewards copied from CLI data for display parity only."
+    },
+    "quest_final_minor_b": {
+      "gold": 1120,
+      "guild_points": 290,
+      "items": [
+        {
+          "item_id": "item_potion_m",
+          "label": "中藥水",
+          "quantity": 1,
+          "icon_id": "item"
+        }
+      ],
+      "unlocks": [
+        "dungeon_final_main_phase_1",
+        "quest_final_minor_b"
+      ],
+      "notes": "Rewards copied from CLI data for display parity only."
+    },
+    "quest_final_main_phase_1": {
+      "gold": 1360,
+      "guild_points": 360,
+      "items": [],
+      "unlocks": [
+        "dungeon_final_main_phase_2",
+        "quest_final_main_phase_1"
+      ],
+      "notes": "Rewards copied from CLI data for display parity only."
+    },
+    "quest_final_main_phase_2": {
+      "gold": 1580,
+      "guild_points": 430,
+      "items": [],
+      "unlocks": [
+        "dungeon_final_main_phase_3",
+        "quest_final_main_phase_2"
+      ],
+      "notes": "Rewards copied from CLI data for display parity only."
+    },
+    "quest_final_demon_king": {
+      "gold": 0,
+      "guild_points": 500,
+      "items": [],
+      "unlocks": [
+        "quest_final_demon_king"
+      ],
+      "notes": "Rewards copied from CLI data for display parity only."
     }
   },
   "condition_rows": {
-    "quest_herb_delivery": [
+    "quest_register": [
       {
-        "id": "condition_herb",
-        "condition_type": "turn_in_item",
-        "label": "新鮮藥草",
-        "required_value": "x3",
-        "current_value": "x3",
-        "status": "met",
-        "status_label": "已滿足",
-        "status_icon_id": "met",
-        "disabled_reason": null,
-        "source": "fixture"
-      }
-    ],
-    "quest_north_gate_trace": [
-      {
-        "id": "condition_fire_mark_shard",
-        "condition_type": "turn_in_item",
-        "label": "火印碎片",
-        "required_value": "x2",
-        "current_value": "x1",
-        "status": "missing",
-        "status_label": "未滿足",
-        "status_icon_id": "missing",
-        "disabled_reason": "需要火印碎片 x2，目前只有 x1。",
-        "source": "fixture"
-      }
-    ],
-    "quest_cellar_slime": [
-      {
-        "id": "condition_completed",
+        "id": "quest_register_condition_none",
         "condition_type": "none",
-        "label": "任務已完成",
-        "required_value": "完成記錄",
-        "current_value": "已登記",
+        "label": "交付條件",
+        "required_value": "無",
+        "current_value": "無",
         "status": "not_applicable",
-        "status_label": "已完成",
-        "status_icon_id": "completed",
+        "status_label": "無交付",
+        "status_icon_id": "none",
         "disabled_reason": null,
-        "source": "fixture"
+        "source": "cli_data"
+      }
+    ],
+    "quest_cave_gathering": [
+      {
+        "id": "quest_cave_gathering_condition_1",
+        "condition_type": "turn_in",
+        "label": "青苔纖維",
+        "required_value": "x3",
+        "current_value": "runtime 判定",
+        "status": "not_applicable",
+        "status_label": "CLI 條件",
+        "status_icon_id": "condition",
+        "disabled_reason": null,
+        "source": "cli_data"
+      },
+      {
+        "id": "quest_cave_gathering_condition_2",
+        "condition_type": "turn_in",
+        "label": "破裂石片",
+        "required_value": "x2",
+        "current_value": "runtime 判定",
+        "status": "not_applicable",
+        "status_label": "CLI 條件",
+        "status_icon_id": "condition",
+        "disabled_reason": null,
+        "source": "cli_data"
+      }
+    ],
+    "quest_magic_crystal": [
+      {
+        "id": "quest_magic_crystal_condition_1",
+        "condition_type": "turn_in",
+        "label": "小魔晶",
+        "required_value": "x2",
+        "current_value": "runtime 判定",
+        "status": "not_applicable",
+        "status_label": "CLI 條件",
+        "status_icon_id": "condition",
+        "disabled_reason": null,
+        "source": "cli_data"
+      }
+    ],
+    "quest_mine_scout": [
+      {
+        "id": "quest_mine_scout_condition_1",
+        "condition_type": "turn_in",
+        "label": "火焰石",
+        "required_value": "x2",
+        "current_value": "runtime 判定",
+        "status": "not_applicable",
+        "status_label": "CLI 條件",
+        "status_icon_id": "condition",
+        "disabled_reason": null,
+        "source": "cli_data"
+      }
+    ],
+    "quest_boss_glen": [
+      {
+        "id": "quest_boss_glen_condition_1",
+        "condition_type": "turn_in",
+        "label": "boss_glen_defeated",
+        "required_value": "x1",
+        "current_value": "runtime 判定",
+        "status": "not_applicable",
+        "status_label": "CLI 條件",
+        "status_icon_id": "condition",
+        "disabled_reason": null,
+        "source": "cli_data"
+      }
+    ],
+    "quest_ash_ravine_scout": [
+      {
+        "id": "quest_ash_ravine_scout_condition_1",
+        "condition_type": "turn_in",
+        "label": "裂谷灰",
+        "required_value": "x2",
+        "current_value": "runtime 判定",
+        "status": "not_applicable",
+        "status_label": "CLI 條件",
+        "status_icon_id": "condition",
+        "disabled_reason": null,
+        "source": "cli_data"
+      },
+      {
+        "id": "quest_ash_ravine_scout_condition_2",
+        "condition_type": "turn_in",
+        "label": "焦黑鐵片",
+        "required_value": "x1",
+        "current_value": "runtime 判定",
+        "status": "not_applicable",
+        "status_label": "CLI 條件",
+        "status_icon_id": "condition",
+        "disabled_reason": null,
+        "source": "cli_data"
+      }
+    ],
+    "quest_supply_upgrade": [
+      {
+        "id": "quest_supply_upgrade_condition_1",
+        "condition_type": "turn_in",
+        "label": "精煉火焰石",
+        "required_value": "x3",
+        "current_value": "runtime 判定",
+        "status": "not_applicable",
+        "status_label": "CLI 條件",
+        "status_icon_id": "condition",
+        "disabled_reason": null,
+        "source": "cli_data"
+      },
+      {
+        "id": "quest_supply_upgrade_condition_2",
+        "condition_type": "turn_in",
+        "label": "熔岩碎片",
+        "required_value": "x2",
+        "current_value": "runtime 判定",
+        "status": "not_applicable",
+        "status_label": "CLI 條件",
+        "status_icon_id": "condition",
+        "disabled_reason": null,
+        "source": "cli_data"
+      }
+    ],
+    "quest_cinder_depths_scout": [
+      {
+        "id": "quest_cinder_depths_scout_condition_1",
+        "condition_type": "turn_in",
+        "label": "精煉火焰石",
+        "required_value": "x2",
+        "current_value": "runtime 判定",
+        "status": "not_applicable",
+        "status_label": "CLI 條件",
+        "status_icon_id": "condition",
+        "disabled_reason": null,
+        "source": "cli_data"
+      },
+      {
+        "id": "quest_cinder_depths_scout_condition_2",
+        "condition_type": "turn_in",
+        "label": "熔岩碎片",
+        "required_value": "x1",
+        "current_value": "runtime 判定",
+        "status": "not_applicable",
+        "status_label": "CLI 條件",
+        "status_icon_id": "condition",
+        "disabled_reason": null,
+        "source": "cli_data"
+      }
+    ],
+    "quest_ice_minor_a": [
+      {
+        "id": "quest_ice_minor_a_condition_1",
+        "condition_type": "turn_in",
+        "label": "Salt-Frozen Sailcloth",
+        "required_value": "x2",
+        "current_value": "runtime 判定",
+        "status": "not_applicable",
+        "status_label": "CLI 條件",
+        "status_icon_id": "condition",
+        "disabled_reason": null,
+        "source": "cli_data"
+      },
+      {
+        "id": "quest_ice_minor_a_condition_2",
+        "condition_type": "turn_in",
+        "label": "Rime-Warped Plank",
+        "required_value": "x1",
+        "current_value": "runtime 判定",
+        "status": "not_applicable",
+        "status_label": "CLI 條件",
+        "status_icon_id": "condition",
+        "disabled_reason": null,
+        "source": "cli_data"
+      }
+    ],
+    "quest_ice_minor_b": [
+      {
+        "id": "quest_ice_minor_b_condition_1",
+        "condition_type": "turn_in",
+        "label": "Frostroot Fiber",
+        "required_value": "x2",
+        "current_value": "runtime 判定",
+        "status": "not_applicable",
+        "status_label": "CLI 條件",
+        "status_icon_id": "condition",
+        "disabled_reason": null,
+        "source": "cli_data"
+      },
+      {
+        "id": "quest_ice_minor_b_condition_2",
+        "condition_type": "turn_in",
+        "label": "Blue Rime Stone",
+        "required_value": "x1",
+        "current_value": "runtime 判定",
+        "status": "not_applicable",
+        "status_label": "CLI 條件",
+        "status_icon_id": "condition",
+        "disabled_reason": null,
+        "source": "cli_data"
+      }
+    ],
+    "quest_ice_main_phase_1": [
+      {
+        "id": "quest_ice_main_phase_1_condition_1",
+        "condition_type": "turn_in",
+        "label": "ice_outer_gatewarden_defeated",
+        "required_value": "x1",
+        "current_value": "runtime 判定",
+        "status": "not_applicable",
+        "status_label": "CLI 條件",
+        "status_icon_id": "condition",
+        "disabled_reason": null,
+        "source": "cli_data"
+      }
+    ],
+    "quest_ice_main_phase_2": [
+      {
+        "id": "quest_ice_main_phase_2_condition_1",
+        "condition_type": "turn_in",
+        "label": "ice_final_boss_defeated",
+        "required_value": "x1",
+        "current_value": "runtime 判定",
+        "status": "not_applicable",
+        "status_label": "CLI 條件",
+        "status_icon_id": "condition",
+        "disabled_reason": null,
+        "source": "cli_data"
+      }
+    ],
+    "quest_ice_return_handoff": [
+      {
+        "id": "quest_ice_return_handoff_condition_1",
+        "condition_type": "turn_in",
+        "label": "ice_relic_marker_resolved",
+        "required_value": "x1",
+        "current_value": "runtime 判定",
+        "status": "not_applicable",
+        "status_label": "CLI 條件",
+        "status_icon_id": "condition",
+        "disabled_reason": null,
+        "source": "cli_data"
+      }
+    ],
+    "quest_earth_minor_a": [
+      {
+        "id": "quest_earth_minor_a_condition_1",
+        "condition_type": "turn_in",
+        "label": "古根根瘤",
+        "required_value": "x2",
+        "current_value": "runtime 判定",
+        "status": "not_applicable",
+        "status_label": "CLI 條件",
+        "status_icon_id": "condition",
+        "disabled_reason": null,
+        "source": "cli_data"
+      },
+      {
+        "id": "quest_earth_minor_a_condition_2",
+        "condition_type": "turn_in",
+        "label": "琥珀孢囊",
+        "required_value": "x1",
+        "current_value": "runtime 判定",
+        "status": "not_applicable",
+        "status_label": "CLI 條件",
+        "status_icon_id": "condition",
+        "disabled_reason": null,
+        "source": "cli_data"
+      }
+    ],
+    "quest_earth_minor_b": [
+      {
+        "id": "quest_earth_minor_b_condition_1",
+        "condition_type": "turn_in",
+        "label": "石脈晶核",
+        "required_value": "x2",
+        "current_value": "runtime 判定",
+        "status": "not_applicable",
+        "status_label": "CLI 條件",
+        "status_icon_id": "condition",
+        "disabled_reason": null,
+        "source": "cli_data"
+      },
+      {
+        "id": "quest_earth_minor_b_condition_2",
+        "condition_type": "turn_in",
+        "label": "石化根髓",
+        "required_value": "x1",
+        "current_value": "runtime 判定",
+        "status": "not_applicable",
+        "status_label": "CLI 條件",
+        "status_icon_id": "condition",
+        "disabled_reason": null,
+        "source": "cli_data"
+      }
+    ],
+    "quest_earth_main_phase_1": [
+      {
+        "id": "quest_earth_main_phase_1_condition_1",
+        "condition_type": "turn_in",
+        "label": "earth_outer_grovekeeper_defeated",
+        "required_value": "x1",
+        "current_value": "runtime 判定",
+        "status": "not_applicable",
+        "status_label": "CLI 條件",
+        "status_icon_id": "condition",
+        "disabled_reason": null,
+        "source": "cli_data"
+      }
+    ],
+    "quest_earth_main_phase_2": [
+      {
+        "id": "quest_earth_main_phase_2_condition_1",
+        "condition_type": "turn_in",
+        "label": "earth_final_boss_defeated",
+        "required_value": "x1",
+        "current_value": "runtime 判定",
+        "status": "not_applicable",
+        "status_label": "CLI 條件",
+        "status_icon_id": "condition",
+        "disabled_reason": null,
+        "source": "cli_data"
+      }
+    ],
+    "quest_earth_return_handoff": [
+      {
+        "id": "quest_earth_return_handoff_condition_1",
+        "condition_type": "turn_in",
+        "label": "earth_relic_marker_resolved",
+        "required_value": "x1",
+        "current_value": "runtime 判定",
+        "status": "not_applicable",
+        "status_label": "CLI 條件",
+        "status_icon_id": "condition",
+        "disabled_reason": null,
+        "source": "cli_data"
+      }
+    ],
+    "quest_thunder_minor_a": [
+      {
+        "id": "quest_thunder_minor_a_condition_1",
+        "condition_type": "turn_in",
+        "label": "雲銅導片",
+        "required_value": "x2",
+        "current_value": "runtime 判定",
+        "status": "not_applicable",
+        "status_label": "CLI 條件",
+        "status_icon_id": "condition",
+        "disabled_reason": null,
+        "source": "cli_data"
+      },
+      {
+        "id": "quest_thunder_minor_a_condition_2",
+        "condition_type": "turn_in",
+        "label": "風暴玻璃",
+        "required_value": "x1",
+        "current_value": "runtime 判定",
+        "status": "not_applicable",
+        "status_label": "CLI 條件",
+        "status_icon_id": "condition",
+        "disabled_reason": null,
+        "source": "cli_data"
+      }
+    ],
+    "quest_thunder_minor_b": [
+      {
+        "id": "quest_thunder_minor_b_condition_1",
+        "condition_type": "turn_in",
+        "label": "雲路鳴囊",
+        "required_value": "x2",
+        "current_value": "runtime 判定",
+        "status": "not_applicable",
+        "status_label": "CLI 條件",
+        "status_icon_id": "condition",
+        "disabled_reason": null,
+        "source": "cli_data"
+      },
+      {
+        "id": "quest_thunder_minor_b_condition_2",
+        "condition_type": "turn_in",
+        "label": "導雷銅芯",
+        "required_value": "x1",
+        "current_value": "runtime 判定",
+        "status": "not_applicable",
+        "status_label": "CLI 條件",
+        "status_icon_id": "condition",
+        "disabled_reason": null,
+        "source": "cli_data"
+      }
+    ],
+    "quest_thunder_main_phase_1": [
+      {
+        "id": "quest_thunder_main_phase_1_condition_1",
+        "condition_type": "turn_in",
+        "label": "thunder_lower_array_warden_defeated",
+        "required_value": "x1",
+        "current_value": "runtime 判定",
+        "status": "not_applicable",
+        "status_label": "CLI 條件",
+        "status_icon_id": "condition",
+        "disabled_reason": null,
+        "source": "cli_data"
+      }
+    ],
+    "quest_thunder_main_phase_2": [
+      {
+        "id": "quest_thunder_main_phase_2_condition_1",
+        "condition_type": "turn_in",
+        "label": "thunder_final_boss_defeated",
+        "required_value": "x1",
+        "current_value": "runtime 判定",
+        "status": "not_applicable",
+        "status_label": "CLI 條件",
+        "status_icon_id": "condition",
+        "disabled_reason": null,
+        "source": "cli_data"
+      }
+    ],
+    "quest_thunder_return_handoff": [
+      {
+        "id": "quest_thunder_return_handoff_condition_1",
+        "condition_type": "turn_in",
+        "label": "thunder_relic_marker_resolved",
+        "required_value": "x1",
+        "current_value": "runtime 判定",
+        "status": "not_applicable",
+        "status_label": "CLI 條件",
+        "status_icon_id": "condition",
+        "disabled_reason": null,
+        "source": "cli_data"
+      }
+    ],
+    "quest_final_minor_a": [
+      {
+        "id": "quest_final_minor_a_condition_1",
+        "condition_type": "turn_in",
+        "label": "災灰餘燼",
+        "required_value": "x2",
+        "current_value": "runtime 判定",
+        "status": "not_applicable",
+        "status_label": "CLI 條件",
+        "status_icon_id": "condition",
+        "disabled_reason": null,
+        "source": "cli_data"
+      },
+      {
+        "id": "quest_final_minor_a_condition_2",
+        "condition_type": "turn_in",
+        "label": "霜記殘片",
+        "required_value": "x1",
+        "current_value": "runtime 判定",
+        "status": "not_applicable",
+        "status_label": "CLI 條件",
+        "status_icon_id": "condition",
+        "disabled_reason": null,
+        "source": "cli_data"
+      }
+    ],
+    "quest_final_minor_b": [
+      {
+        "id": "quest_final_minor_b_condition_1",
+        "condition_type": "turn_in",
+        "label": "汙根石片",
+        "required_value": "x2",
+        "current_value": "runtime 判定",
+        "status": "not_applicable",
+        "status_label": "CLI 條件",
+        "status_icon_id": "condition",
+        "disabled_reason": null,
+        "source": "cli_data"
+      },
+      {
+        "id": "quest_final_minor_b_condition_2",
+        "condition_type": "turn_in",
+        "label": "雷玻碎片",
+        "required_value": "x1",
+        "current_value": "runtime 判定",
+        "status": "not_applicable",
+        "status_label": "CLI 條件",
+        "status_icon_id": "condition",
+        "disabled_reason": null,
+        "source": "cli_data"
+      }
+    ],
+    "quest_final_main_phase_1": [
+      {
+        "id": "quest_final_main_phase_1_condition_1",
+        "condition_type": "turn_in",
+        "label": "final_echo_warden_defeated",
+        "required_value": "x1",
+        "current_value": "runtime 判定",
+        "status": "not_applicable",
+        "status_label": "CLI 條件",
+        "status_icon_id": "condition",
+        "disabled_reason": null,
+        "source": "cli_data"
+      }
+    ],
+    "quest_final_main_phase_2": [
+      {
+        "id": "quest_final_main_phase_2_condition_1",
+        "condition_type": "turn_in",
+        "label": "final_seal_core_defeated",
+        "required_value": "x1",
+        "current_value": "runtime 判定",
+        "status": "not_applicable",
+        "status_label": "CLI 條件",
+        "status_icon_id": "condition",
+        "disabled_reason": null,
+        "source": "cli_data"
+      }
+    ],
+    "quest_final_demon_king": [
+      {
+        "id": "quest_final_demon_king_condition_1",
+        "condition_type": "turn_in",
+        "label": "final_demon_king_defeated",
+        "required_value": "x1",
+        "current_value": "runtime 判定",
+        "status": "not_applicable",
+        "status_label": "CLI 條件",
+        "status_icon_id": "condition",
+        "disabled_reason": null,
+        "source": "cli_data"
       }
     ]
   },
   "feedback_message": {
     "tone": "info",
-    "speaker": "莉娜",
-    "text": "委託板只顯示已解鎖委託；這裡沒有接取任務流程。"
+    "speaker": "諾亞",
+    "text": "這份委託板由 CLI data 產生，用來檢查 GUI 是否看得到正式 region quest skeleton。"
   },
   "secondary_actions": [
     {
       "action_id": "back_to_town_hub",
       "label": "返回城鎮",
-      "description": "離開工會，回到 Town Hub。",
+      "description": "回到 Town Hub static prototype。",
       "enabled": true,
       "disabled_reason": null,
       "payload": {},
@@ -181,25 +1825,60 @@
     }
   ],
   "empty_state": {
-    "title": "沒有委託",
-    "message": "目前沒有符合篩選條件的已解鎖委託。",
-    "suggested_action": "切換其他篩選。"
+    "title": "沒有任務",
+    "message": "目前沒有符合此 region filter 的 CLI 任務。",
+    "suggested_action": "切換其他 region filter。"
   },
   "resource_strip": [
-    { "id": "hero", "label": "測試冒險者 / 戰士 Lv1", "tone": "primary" },
-    { "id": "hp", "label": "HP 45/45", "tone": "healthy" },
-    { "id": "mp", "label": "MP 10/10", "tone": "mana" },
-    { "id": "gold", "label": "150G", "tone": "gold" },
-    { "id": "guild_points", "label": "Guild 5", "tone": "neutral" }
+    {
+      "id": "hero",
+      "label": "米菈 / 冒險者 Lv12",
+      "tone": "primary"
+    },
+    {
+      "id": "hp",
+      "label": "HP 160/160",
+      "tone": "healthy"
+    },
+    {
+      "id": "mp",
+      "label": "MP 46/52",
+      "tone": "mana"
+    },
+    {
+      "id": "gold",
+      "label": "1957G",
+      "tone": "gold"
+    },
+    {
+      "id": "guild_points",
+      "label": "Guild 120",
+      "tone": "neutral"
+    }
   ],
   "sellable_materials": [
-    { "item_id": "mat_moss_fiber", "title": "青苔纖維", "owned_count": 8, "unit_price": 6 },
-    { "item_id": "mat_cracked_stone", "title": "破裂石片", "owned_count": 5, "unit_price": 6 },
-    { "item_id": "mat_small_crystal", "title": "小魔晶", "owned_count": 2, "unit_price": 14 }
+    {
+      "item_id": "mat_moss_fiber",
+      "title": "青苔纖維",
+      "owned_count": 8,
+      "unit_price": 6
+    },
+    {
+      "item_id": "mat_cracked_stone",
+      "title": "破裂石片",
+      "owned_count": 5,
+      "unit_price": 6
+    },
+    {
+      "item_id": "mat_small_crystal",
+      "title": "小魔晶",
+      "owned_count": 2,
+      "unit_price": 14
+    }
   ],
   "debug_notes": [
-    "Default Guild fixture is static display data only.",
-    "Guild Screen V1 does not include a quest acceptance flow.",
-    "Task filters are UI-only and should not be written to save."
+    "Generated by 06_tools/gui_static_parity_builder.py.",
+    "Rows use real QUESTS ids.",
+    "Region filters are static prototype UI only."
   ]
 }

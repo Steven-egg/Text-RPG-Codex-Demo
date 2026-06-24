@@ -1,30 +1,196 @@
 {
   "screen_id": "world_map",
-  "title": "世界地圖",
-  "subtitle": "警戒版 fixture：用來檢查鎖定、風險與 blocked action 的呈現。",
-  "selected_location_id": "ember_quarry",
+  "layout_family": "navigation_map",
+  "title": "World Map",
+  "subtitle": "Live region routing: Border / Fire map view.",
+  "selected_location_id": "dungeon_moss_cave",
   "current_location_id": "border_town",
+  "current_region_id": "border_fire",
+  "current_region_label": "Border / Fire",
+  "current_town_name": "邊境城鎮艾爾姆",
+  "map_asset": "./assets/world-map-environment-v01.jpg",
+  "town_asset": "../town_hub/assets/town-hub-environment-v01.jpg",
+  "region_gate": {
+    "location_id": "region_gate_ice",
+    "region_id": "border_fire",
+    "label": "Region Gate",
+    "description": "A route marker for leaving the fire border after the Fire Seal route is complete.",
+    "detail_note": "Only Ice is enabled in this runtime bridge slice; later regions remain locked placeholders.",
+    "position": {
+      "x": 82,
+      "y": 78
+    },
+    "tone": "gate",
+    "icon_token": "GATE",
+    "unlocked": true,
+    "locked_reason": null,
+    "favorite": false,
+    "status_label": "Open",
+    "recommended_level": "Route",
+    "steps": "0",
+    "attribute": "New Region",
+    "clear_state": "Available",
+    "exploration_rating": "route",
+    "boss": "-",
+    "preview_role": "gate",
+    "options": [
+      {
+        "region_id": "ice",
+        "label": "Ice",
+        "name": "Ice Region",
+        "town_name": "霜潮港",
+        "enabled": true,
+        "unlocked": true,
+        "disabled_reason": null,
+        "action_id": "travel_region",
+        "payload": {
+          "region_id": "ice"
+        }
+      },
+      {
+        "region_id": "earth",
+        "label": "Earth",
+        "name": "Earth Region",
+        "town_name": "根環營地",
+        "enabled": false,
+        "unlocked": false,
+        "disabled_reason": "This region is not open in the current runtime bridge slice.",
+        "action_id": "travel_region",
+        "payload": {
+          "region_id": "earth"
+        }
+      },
+      {
+        "region_id": "thunder",
+        "label": "Thunder",
+        "name": "Thunder Region",
+        "town_name": "雷脊前哨",
+        "enabled": false,
+        "unlocked": false,
+        "disabled_reason": "This region is not open in the current runtime bridge slice.",
+        "action_id": "travel_region",
+        "payload": {
+          "region_id": "thunder"
+        }
+      },
+      {
+        "region_id": "final",
+        "label": "Final",
+        "name": "Final Region",
+        "town_name": "魔王城前線",
+        "enabled": false,
+        "unlocked": false,
+        "disabled_reason": "This region is not open in the current runtime bridge slice.",
+        "action_id": "travel_region",
+        "payload": {
+          "region_id": "final"
+        }
+      }
+    ],
+    "primary_action": {
+      "action_id": "open_region_gate",
+      "label": "Choose Region",
+      "enabled": true,
+      "disabled_reason": null,
+      "payload": {
+        "source_region_id": "border_fire"
+      }
+    }
+  },
+  "region_options": [
+    {
+      "region_id": "border_fire",
+      "label": "Border / Fire",
+      "name": "Border / Fire Route",
+      "town_name": "邊境城鎮艾爾姆",
+      "unlocked": true,
+      "route_enabled": true,
+      "current": true,
+      "unlock_key": null,
+      "dungeon_count": 4,
+      "quest_count": 8,
+      "disabled_reason": null
+    },
+    {
+      "region_id": "ice",
+      "label": "Ice",
+      "name": "Ice Region",
+      "town_name": "霜潮港",
+      "unlocked": true,
+      "route_enabled": true,
+      "current": false,
+      "unlock_key": "unlock_ice_region",
+      "dungeon_count": 4,
+      "quest_count": 5,
+      "disabled_reason": null
+    },
+    {
+      "region_id": "earth",
+      "label": "Earth",
+      "name": "Earth Region",
+      "town_name": "根環營地",
+      "unlocked": false,
+      "route_enabled": false,
+      "current": false,
+      "unlock_key": "unlock_earth_region_preview",
+      "dungeon_count": 4,
+      "quest_count": 5,
+      "disabled_reason": "This region is not open in the current runtime bridge slice."
+    },
+    {
+      "region_id": "thunder",
+      "label": "Thunder",
+      "name": "Thunder Region",
+      "town_name": "雷脊前哨",
+      "unlocked": false,
+      "route_enabled": false,
+      "current": false,
+      "unlock_key": "unlock_thunder_region_preview",
+      "dungeon_count": 4,
+      "quest_count": 5,
+      "disabled_reason": "This region is not open in the current runtime bridge slice."
+    },
+    {
+      "region_id": "final",
+      "label": "Final",
+      "name": "Final Region",
+      "town_name": "魔王城前線",
+      "unlocked": false,
+      "route_enabled": false,
+      "current": false,
+      "unlock_key": "unlock_final_region_preview",
+      "dungeon_count": 5,
+      "quest_count": 5,
+      "disabled_reason": "This region is not open in the current runtime bridge slice."
+    }
+  ],
   "player": {
-    "name": "見習冒險者",
-    "class_label": "劍士",
-    "level_label": "Lv7",
-    "hp": { "label": "HP 117/192", "percent": 61 },
-    "mp": { "label": "MP 22/38", "percent": 58 },
+    "name": "米菈",
+    "class_label": "冒險者",
+    "level_label": "Lv12",
+    "hp": {
+      "label": "HP 160/160",
+      "percent": 100
+    },
+    "mp": {
+      "label": "MP 46/52",
+      "percent": 88
+    },
     "gold_label": "1957G"
   },
   "menu_actions": [
     {
       "action_id": "view_status",
       "label": "查看狀態",
-      "description": "確認角色的狀態與能力",
+      "description": "開啟角色狀態預覽。",
       "enabled": true,
       "disabled_reason": null,
       "payload": {}
     },
     {
       "action_id": "open_bestiary",
-      "label": "怪物圖鑑",
-      "description": "查看已發現的怪物資訊",
+      "label": "圖鑑",
+      "description": "查看已知敵人預覽。",
       "enabled": true,
       "disabled_reason": null,
       "payload": {}
@@ -32,288 +198,385 @@
     {
       "action_id": "open_inventory",
       "label": "背包 / 裝備",
-      "description": "查看與管理道具與裝備",
+      "description": "查看背包與裝備預覽。",
       "enabled": true,
       "disabled_reason": null,
       "payload": {}
     },
     {
       "action_id": "save_game",
-      "label": "存檔",
-      "description": "static prototype 只記錄 UIAction",
+      "label": "儲存",
+      "description": "static prototype 只記錄 UIAction。",
       "enabled": false,
-      "disabled_reason": "警戒 fixture 中暫停存檔測試",
+      "disabled_reason": "警報 fixture 停用儲存按鈕，用來驗證 blocked UIAction。",
       "payload": {}
     },
     {
       "action_id": "open_settings",
       "label": "設定",
-      "description": "調整遊戲設定",
+      "description": "切換 prototype 顯示設定。",
       "enabled": true,
       "disabled_reason": null,
       "payload": {}
     },
     {
       "action_id": "back_to_start_screen",
-      "label": "回到標題",
-      "description": "返回 Start Screen static prototype",
+      "label": "回標題",
+      "description": "返回 Start Screen static prototype。",
       "enabled": true,
       "disabled_reason": null,
       "payload": {}
     }
   ],
   "route_segments": [
-    { "id": "town_to_cave", "status": "open", "points": [[35, 22], [29, 34], [24, 48]] },
-    { "id": "cave_to_quarry", "status": "open", "points": [[24, 48], [37, 44], [49, 42]] },
-    { "id": "quarry_to_valley", "status": "warning", "points": [[49, 42], [49, 55], [48, 67]] },
-    { "id": "town_to_frost", "status": "locked", "points": [[35, 22], [50, 15], [66, 18]] },
-    { "id": "quarry_to_forest", "status": "locked", "points": [[49, 42], [62, 38], [75, 38]] },
-    { "id": "forest_to_tower", "status": "locked", "points": [[75, 38], [72, 49], [70, 57]] },
-    { "id": "valley_to_highlands", "status": "locked", "points": [[48, 67], [56, 77], [64, 82]] },
-    { "id": "cave_to_ruins", "status": "locked", "points": [[24, 48], [23, 64], [26, 78]] }
+    {
+      "id": "border_town_to_dungeon_moss_cave",
+      "status": "open",
+      "points": [
+        [
+          35,
+          22
+        ],
+        [
+          24,
+          48
+        ]
+      ]
+    },
+    {
+      "id": "dungeon_moss_cave_to_dungeon_scorched_mine",
+      "status": "open",
+      "points": [
+        [
+          24,
+          48
+        ],
+        [
+          49,
+          42
+        ]
+      ]
+    },
+    {
+      "id": "dungeon_scorched_mine_to_dungeon_ash_ravine",
+      "status": "locked",
+      "points": [
+        [
+          49,
+          42
+        ],
+        [
+          48,
+          67
+        ]
+      ]
+    },
+    {
+      "id": "dungeon_ash_ravine_to_dungeon_cinder_seal_depths",
+      "status": "locked",
+      "points": [
+        [
+          48,
+          67
+        ],
+        [
+          64,
+          82
+        ]
+      ]
+    },
+    {
+      "id": "dungeon_cinder_seal_depths_to_region_gate_ice",
+      "status": "open",
+      "points": [
+        [
+          64,
+          82
+        ],
+        [
+          82,
+          78
+        ]
+      ]
+    }
   ],
   "locations": [
     {
       "location_id": "border_town",
-      "label": "邊境城鎮 艾爾姆",
-      "description": "旅程的據點，公會、旅店與工坊都集中在城牆內。",
-      "detail_note": "目前所在城鎮。可從這裡返回 Town Hub static prototype。",
-      "position": { "x": 35, "y": 22 },
+      "region_id": "border_fire",
+      "label": "邊境城鎮艾爾姆",
+      "description": "Border / Fire town hub. Facilities reuse the shared live Town Hub shell for now.",
+      "detail_note": "Live region context is carried by the runtime bridge; facilities remain shared for this slice.",
+      "position": {
+        "x": 35,
+        "y": 22
+      },
       "tone": "town",
-      "icon_token": "城",
+      "icon_token": "TOWN",
       "unlocked": true,
       "locked_reason": null,
-      "favorite": false,
-      "status_label": "目前據點",
-      "recommended_level": "安全",
-      "steps": "0 步",
-      "attribute": "城鎮 / 無",
-      "clear_state": "可返回",
-      "exploration_rating": "整備中",
-      "boss": "無",
+      "favorite": true,
+      "status_label": "Town Hub",
+      "recommended_level": "Hub",
+      "steps": "0",
+      "attribute": "Border / Fire",
+      "clear_state": "Available",
+      "exploration_rating": "safe",
+      "boss": "-",
       "preview_role": "town",
       "primary_action": {
         "action_id": "back_to_town_hub",
-        "label": "返回城鎮",
+        "label": "Enter town",
         "enabled": true,
         "disabled_reason": null,
-        "payload": { "location_id": "border_town" }
+        "payload": {
+          "region_id": "border_fire",
+          "location_id": "border_town",
+          "town_name": "邊境城鎮艾爾姆"
+        }
       }
     },
     {
-      "location_id": "moss_cave",
+      "location_id": "dungeon_moss_cave",
+      "region_id": "border_fire",
+      "dungeon_id": "dungeon_moss_cave",
+      "dungeon_ids": [
+        "dungeon_moss_cave"
+      ],
       "label": "青苔洞窟",
-      "description": "洞窟內的青苔被火山灰覆上一層灰，部分小徑暫時封住。",
-      "detail_note": "警戒 fixture：仍可前往，但回收效率下降。",
-      "position": { "x": 24, "y": 48 },
-      "tone": "nature",
-      "icon_token": "葉",
+      "description": "Border / Fire dungeon from runtime data: Lv1-3 / 12 steps / 3 encounter entries.",
+      "detail_note": "This map node dispatches the active runtime dungeon_id to Python.",
+      "position": {
+        "x": 24,
+        "y": 48
+      },
+      "tone": "fire",
+      "icon_token": "F",
       "unlocked": true,
       "locked_reason": null,
       "favorite": true,
-      "status_label": "可探索",
+      "status_label": "Playable",
       "recommended_level": "Lv1-3",
-      "steps": "14 步",
-      "attribute": "自然 / 灰霧",
-      "clear_state": "已通關",
-      "exploration_rating": "略不穩定",
-      "boss": "無",
+      "steps": "12",
+      "attribute": "自然/無",
+      "clear_state": "Uncleared",
+      "exploration_rating": "runtime",
+      "boss": "-",
       "preview_role": "cave",
       "primary_action": {
         "action_id": "confirm_travel",
-        "label": "確認前往",
+        "label": "Travel",
         "enabled": true,
         "disabled_reason": null,
-        "payload": { "location_id": "moss_cave" }
+        "payload": {
+          "dungeon_id": "dungeon_moss_cave",
+          "location_id": "dungeon_moss_cave",
+          "region_id": "border_fire"
+        }
       }
     },
     {
-      "location_id": "ember_quarry",
+      "location_id": "dungeon_scorched_mine",
+      "region_id": "border_fire",
+      "dungeon_id": "dungeon_scorched_mine",
+      "dungeon_ids": [
+        "dungeon_scorched_mine"
+      ],
       "label": "焦石礦坑",
-      "description": "礦坑內的熱流異常升高，公會建議確認補給後再出發。",
-      "detail_note": "這個 fixture 預設選中高風險地點，方便檢查右側資訊欄。",
-      "position": { "x": 49, "y": 42 },
+      "description": "Border / Fire dungeon from runtime data: Lv4-6 / 18 steps / 3 encounter entries.",
+      "detail_note": "This map node dispatches the active runtime dungeon_id to Python.",
+      "position": {
+        "x": 49,
+        "y": 42
+      },
       "tone": "fire",
-      "icon_token": "火",
+      "icon_token": "F",
       "unlocked": true,
       "locked_reason": null,
       "favorite": true,
-      "status_label": "警戒中",
+      "status_label": "Playable",
       "recommended_level": "Lv4-6",
-      "steps": "20 步",
-      "attribute": "火 / 礦物",
-      "clear_state": "未通關",
-      "exploration_rating": "不穩定",
-      "boss": "可能出沒",
+      "steps": "18",
+      "attribute": "火",
+      "clear_state": "Uncleared",
+      "exploration_rating": "runtime",
+      "boss": "山寨頭目葛倫",
       "preview_role": "quarry",
       "primary_action": {
         "action_id": "confirm_travel",
-        "label": "確認前往",
+        "label": "Travel",
         "enabled": true,
         "disabled_reason": null,
-        "payload": { "location_id": "ember_quarry" }
+        "payload": {
+          "dungeon_id": "dungeon_scorched_mine",
+          "location_id": "dungeon_scorched_mine",
+          "region_id": "border_fire"
+        }
       }
     },
     {
-      "location_id": "ash_valley",
+      "location_id": "dungeon_ash_ravine",
+      "region_id": "border_fire",
+      "dungeon_id": "dungeon_ash_ravine",
+      "dungeon_ids": [
+        "dungeon_ash_ravine"
+      ],
       "label": "灰燼裂谷",
-      "description": "裂谷熱浪封住主路，偵察隊建議暫緩前往。",
-      "detail_note": "警戒 fixture 中此地點會顯示 blocked confirm action。",
-      "position": { "x": 48, "y": 67 },
+      "description": "Border / Fire dungeon from runtime data: Lv7-9 / 18 steps / 3 encounter entries.",
+      "detail_note": "This map node dispatches the active runtime dungeon_id to Python.",
+      "position": {
+        "x": 48,
+        "y": 67
+      },
       "tone": "fire",
-      "icon_token": "火",
+      "icon_token": "F",
       "unlocked": false,
-      "locked_reason": "熱浪封路，等待公會解除警戒",
+      "locked_reason": "Dungeon is locked by runtime progression.",
       "favorite": true,
-      "status_label": "暫時封鎖",
+      "status_label": "Locked",
       "recommended_level": "Lv7-9",
-      "steps": "未知",
-      "attribute": "火 / 地形",
-      "clear_state": "封鎖",
-      "exploration_rating": "高風險",
-      "boss": "未確認",
+      "steps": "18",
+      "attribute": "火",
+      "clear_state": "Uncleared",
+      "exploration_rating": "runtime",
+      "boss": "灰燼守衛",
       "preview_role": "valley",
       "primary_action": {
         "action_id": "confirm_travel",
-        "label": "確認前往",
+        "label": "Travel",
         "enabled": false,
-        "disabled_reason": "熱浪封路，等待公會解除警戒",
-        "payload": { "location_id": "ash_valley" }
+        "disabled_reason": "Dungeon is locked by runtime progression.",
+        "payload": {
+          "dungeon_id": "dungeon_ash_ravine",
+          "location_id": "dungeon_ash_ravine",
+          "region_id": "border_fire"
+        }
       }
     },
     {
-      "location_id": "frost_pass",
-      "label": "冰封峽谷",
-      "description": "北方山脈被冰雪封住，峽谷入口覆著厚重霜霧。",
-      "detail_note": "尚未解鎖。之後可用來測試 locked detail panel。",
-      "position": { "x": 66, "y": 18 },
-      "tone": "ice",
-      "icon_token": "冰",
-      "unlocked": false,
-      "locked_reason": "尚未取得北境通行線索",
-      "favorite": false,
-      "status_label": "尚未解鎖",
-      "recommended_level": "未知",
-      "steps": "未知",
-      "attribute": "冰 / 山脈",
-      "clear_state": "鎖定",
-      "exploration_rating": "無資料",
-      "boss": "未知",
-      "preview_role": "frost",
+      "location_id": "dungeon_cinder_seal_depths",
+      "region_id": "border_fire",
+      "dungeon_id": "dungeon_cinder_seal_depths",
+      "dungeon_ids": [
+        "dungeon_cinder_seal_depths"
+      ],
+      "label": "燼印深窟",
+      "description": "Border / Fire dungeon from runtime data: Lv9-11 / 18 steps / 3 encounter entries.",
+      "detail_note": "This map node dispatches the active runtime dungeon_id to Python.",
+      "position": {
+        "x": 64,
+        "y": 82
+      },
+      "tone": "fire",
+      "icon_token": "F",
+      "unlocked": true,
+      "locked_reason": null,
+      "favorite": true,
+      "status_label": "Playable",
+      "recommended_level": "Lv9-11",
+      "steps": "18",
+      "attribute": "火",
+      "clear_state": "Uncleared",
+      "exploration_rating": "runtime",
+      "boss": "燼印鎮衛",
+      "preview_role": "cinder",
       "primary_action": {
         "action_id": "confirm_travel",
-        "label": "確認前往",
-        "enabled": false,
-        "disabled_reason": "尚未取得北境通行線索",
-        "payload": { "location_id": "frost_pass" }
+        "label": "Travel",
+        "enabled": true,
+        "disabled_reason": null,
+        "payload": {
+          "dungeon_id": "dungeon_cinder_seal_depths",
+          "location_id": "dungeon_cinder_seal_depths",
+          "region_id": "border_fire"
+        }
       }
     },
     {
-      "location_id": "mist_forest",
-      "label": "遺忘森林",
-      "description": "林間常年飄著薄霧，路徑會在日落後改變方向。",
-      "detail_note": "尚未解鎖。未來可接故事線索或公會委託。",
-      "position": { "x": 75, "y": 38 },
-      "tone": "nature",
-      "icon_token": "森",
-      "unlocked": false,
-      "locked_reason": "需要完成青苔洞窟後續調查",
+      "location_id": "region_gate_ice",
+      "region_id": "border_fire",
+      "label": "Region Gate",
+      "description": "A route marker for leaving the fire border after the Fire Seal route is complete.",
+      "detail_note": "Only Ice is enabled in this runtime bridge slice; later regions remain locked placeholders.",
+      "position": {
+        "x": 82,
+        "y": 78
+      },
+      "tone": "gate",
+      "icon_token": "GATE",
+      "unlocked": true,
+      "locked_reason": null,
       "favorite": false,
-      "status_label": "尚未解鎖",
-      "recommended_level": "未知",
-      "steps": "未知",
-      "attribute": "自然 / 幻霧",
-      "clear_state": "鎖定",
-      "exploration_rating": "無資料",
-      "boss": "未知",
-      "preview_role": "forest",
+      "status_label": "Open",
+      "recommended_level": "Route",
+      "steps": "0",
+      "attribute": "New Region",
+      "clear_state": "Available",
+      "exploration_rating": "route",
+      "boss": "-",
+      "preview_role": "gate",
+      "options": [
+        {
+          "region_id": "ice",
+          "label": "Ice",
+          "name": "Ice Region",
+          "town_name": "霜潮港",
+          "enabled": true,
+          "unlocked": true,
+          "disabled_reason": null,
+          "action_id": "travel_region",
+          "payload": {
+            "region_id": "ice"
+          }
+        },
+        {
+          "region_id": "earth",
+          "label": "Earth",
+          "name": "Earth Region",
+          "town_name": "根環營地",
+          "enabled": false,
+          "unlocked": false,
+          "disabled_reason": "This region is not open in the current runtime bridge slice.",
+          "action_id": "travel_region",
+          "payload": {
+            "region_id": "earth"
+          }
+        },
+        {
+          "region_id": "thunder",
+          "label": "Thunder",
+          "name": "Thunder Region",
+          "town_name": "雷脊前哨",
+          "enabled": false,
+          "unlocked": false,
+          "disabled_reason": "This region is not open in the current runtime bridge slice.",
+          "action_id": "travel_region",
+          "payload": {
+            "region_id": "thunder"
+          }
+        },
+        {
+          "region_id": "final",
+          "label": "Final",
+          "name": "Final Region",
+          "town_name": "魔王城前線",
+          "enabled": false,
+          "unlocked": false,
+          "disabled_reason": "This region is not open in the current runtime bridge slice.",
+          "action_id": "travel_region",
+          "payload": {
+            "region_id": "final"
+          }
+        }
+      ],
       "primary_action": {
-        "action_id": "confirm_travel",
-        "label": "確認前往",
-        "enabled": false,
-        "disabled_reason": "需要完成青苔洞窟後續調查",
-        "payload": { "location_id": "mist_forest" }
-      }
-    },
-    {
-      "location_id": "moon_tower",
-      "label": "影月塔",
-      "description": "高塔矗立在灰白岩脊上，塔頂會在夜裡反射紫色月光。",
-      "detail_note": "尚未解鎖。這裡只提供地圖瀏覽與 blocked action。",
-      "position": { "x": 70, "y": 57 },
-      "tone": "arcane",
-      "icon_token": "月",
-      "unlocked": false,
-      "locked_reason": "需要影月塔入口鑰印",
-      "favorite": false,
-      "status_label": "尚未解鎖",
-      "recommended_level": "未知",
-      "steps": "未知",
-      "attribute": "秘法 / 月影",
-      "clear_state": "鎖定",
-      "exploration_rating": "無資料",
-      "boss": "未知",
-      "preview_role": "tower",
-      "primary_action": {
-        "action_id": "confirm_travel",
-        "label": "確認前往",
-        "enabled": false,
-        "disabled_reason": "需要影月塔入口鑰印",
-        "payload": { "location_id": "moon_tower" }
-      }
-    },
-    {
-      "location_id": "drowned_ruins",
-      "label": "沉沒遺跡",
-      "description": "海岸旁的古代遺跡半沉在潮水裡，退潮時才露出入口。",
-      "detail_note": "尚未解鎖。可檢查低亮度地點和鎖定狀態。",
-      "position": { "x": 26, "y": 78 },
-      "tone": "water",
-      "icon_token": "潮",
-      "unlocked": false,
-      "locked_reason": "尚未取得潮汐時刻表",
-      "favorite": false,
-      "status_label": "尚未解鎖",
-      "recommended_level": "未知",
-      "steps": "未知",
-      "attribute": "水 / 遺跡",
-      "clear_state": "鎖定",
-      "exploration_rating": "無資料",
-      "boss": "未知",
-      "preview_role": "ruins",
-      "primary_action": {
-        "action_id": "confirm_travel",
-        "label": "確認前往",
-        "enabled": false,
-        "disabled_reason": "尚未取得潮汐時刻表",
-        "payload": { "location_id": "drowned_ruins" }
-      }
-    },
-    {
-      "location_id": "windbite_plateau",
-      "label": "風蝕高原",
-      "description": "乾裂高原被強風吹出縱橫溝壑，遠處可看見巨獸骨骸。",
-      "detail_note": "尚未解鎖。用於測試右下點位與 detail panel 的穩定性。",
-      "position": { "x": 64, "y": 82 },
-      "tone": "bone",
-      "icon_token": "骨",
-      "unlocked": false,
-      "locked_reason": "需要穿越灰燼裂谷",
-      "favorite": false,
-      "status_label": "尚未解鎖",
-      "recommended_level": "未知",
-      "steps": "未知",
-      "attribute": "荒原 / 風",
-      "clear_state": "鎖定",
-      "exploration_rating": "無資料",
-      "boss": "未知",
-      "preview_role": "plateau",
-      "primary_action": {
-        "action_id": "confirm_travel",
-        "label": "確認前往",
-        "enabled": false,
-        "disabled_reason": "需要穿越灰燼裂谷",
-        "payload": { "location_id": "windbite_plateau" }
+        "action_id": "open_region_gate",
+        "label": "Choose Region",
+        "enabled": true,
+        "disabled_reason": null,
+        "payload": {
+          "source_region_id": "border_fire"
+        }
       }
     }
   ]

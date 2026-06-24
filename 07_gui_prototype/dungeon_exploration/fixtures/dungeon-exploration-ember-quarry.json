@@ -3,11 +3,17 @@
   "title": "迷宮探索",
   "subtitle": "Static fixture driven prototype：對齊 CLI 的步數制探索，不推進 runtime、不讀寫 save。",
   "resource_strip": [
-    { "label": "HP 183/192", "tone": "hp" },
-    { "label": "MP 38/38", "tone": "mp" }
+    {
+      "label": "HP 183/192",
+      "tone": "hp"
+    },
+    {
+      "label": "MP 38/38",
+      "tone": "mp"
+    }
   ],
   "dungeon": {
-    "dungeon_id": "ember_quarry",
+    "dungeon_id": "dungeon_scorched_mine",
     "name": "焦石礦坑",
     "summary": "廢棄的礦井深處隱約有赤熱的火光，生鏽的鐵軌和破碎的礦車訴說著這裡曾經的繁忙與災變。",
     "recommended_level": "Lv8-10",
@@ -27,8 +33,14 @@
     "next_node": "廢棄軌道"
   },
   "run_rewards": [
-    { "label": "金幣", "value": "20G" },
-    { "label": "素材", "value": "煤焦岩 x1" }
+    {
+      "label": "金幣",
+      "value": "20G"
+    },
+    {
+      "label": "素材",
+      "value": "煤焦岩 x1"
+    }
   ],
   "event_preview": [
     "第 1 步：你越過了塌陷的坑道入口，看見延伸向深處的銹鐵軌道。"
@@ -42,7 +54,10 @@
       "enabled": true,
       "disabled_reason": null,
       "primary": true,
-      "payload": { "dungeon_id": "ember_quarry", "current_step": 1 },
+      "payload": {
+        "dungeon_id": "dungeon_scorched_mine",
+        "current_step": 1
+      },
       "feedback_message": "已送出 advance_step。static prototype 不會改變目前步數。"
     },
     {
@@ -52,7 +67,9 @@
       "enabled": true,
       "disabled_reason": null,
       "primary": false,
-      "payload": { "dungeon_id": "ember_quarry" },
+      "payload": {
+        "dungeon_id": "dungeon_scorched_mine"
+      },
       "feedback_message": "已送出 retreat。static prototype 不會計算撤退結果。"
     }
   ]

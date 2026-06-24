@@ -3,11 +3,17 @@
   "title": "迷宮探索",
   "subtitle": "Static prototype 固定遇怪預覽：這是測試用 fixture，用來驗證「前進 → Combat Screen」流程，正式遊玩仍應由未來 runtime 隨機判定。",
   "resource_strip": [
-    { "label": "HP 71/192", "tone": "warning" },
-    { "label": "MP 12/38", "tone": "mp" }
+    {
+      "label": "HP 71/192",
+      "tone": "warning"
+    },
+    {
+      "label": "MP 12/38",
+      "tone": "mp"
+    }
   ],
   "dungeon": {
-    "dungeon_id": "ash_valley",
+    "dungeon_id": "dungeon_ash_ravine",
     "name": "灰燼裂谷",
     "summary": "裂谷深處的火光忽明忽暗，碎石間出現了不屬於你的腳印。",
     "recommended_level": "Lv7-9",
@@ -27,9 +33,18 @@
     "next_node": "熱霧岔路"
   },
   "run_rewards": [
-    { "label": "金幣", "value": "142G" },
-    { "label": "素材", "value": "焦黑鐵礦 x3" },
-    { "label": "素材", "value": "火焰石 x1" }
+    {
+      "label": "金幣",
+      "value": "142G"
+    },
+    {
+      "label": "素材",
+      "value": "焦黑鐵礦 x3"
+    },
+    {
+      "label": "素材",
+      "value": "火焰石 x1"
+    }
   ],
   "event_preview": [
     "第 13 步：熱霧裡傳來快速摩擦岩面的聲音。"
@@ -43,7 +58,11 @@
       "enabled": true,
       "disabled_reason": null,
       "primary": true,
-      "payload": { "dungeon_id": "ash_valley", "current_step": 13, "encounter_hint": true },
+      "payload": {
+        "dungeon_id": "dungeon_ash_ravine",
+        "current_step": 13,
+        "encounter_hint": true
+      },
       "feedback_message": "已送出 advance_step。固定遇怪預覽將進入 Combat Screen static prototype。"
     },
     {
@@ -53,7 +72,9 @@
       "enabled": true,
       "disabled_reason": null,
       "primary": false,
-      "payload": { "dungeon_id": "ash_valley" },
+      "payload": {
+        "dungeon_id": "dungeon_ash_ravine"
+      },
       "feedback_message": "已送出 retreat。static prototype 不會計算撤退結果。"
     }
   ]

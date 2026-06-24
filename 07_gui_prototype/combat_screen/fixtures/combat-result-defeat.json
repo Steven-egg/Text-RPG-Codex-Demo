@@ -3,7 +3,10 @@
   "title": "戰鬥",
   "subtitle": "Static fixture driven prototype：Defeat Result Preview 只驗證同畫面結算 overlay。",
   "resource_strip": [
-    { "label": "第 6 回合", "tone": "neutral" }
+    {
+      "label": "第 6 回合",
+      "tone": "neutral"
+    }
   ],
   "player": {
     "name": "見習冒險者",
@@ -36,7 +39,10 @@
         "description": "物理傷害，倍率 1.25。",
         "enabled": false,
         "disabled_reason": "MP 不足，無法使用重斬。",
-        "payload": { "skill_id": "skill_power_slash", "enemy_id": "mon_ember_stalker" },
+        "payload": {
+          "skill_id": "skill_power_slash",
+          "enemy_id": "mon_ember_stalker"
+        },
         "feedback_message": "已送出 use_skill：重斬。static prototype 不會計算傷害或消耗 MP。"
       },
       {
@@ -46,7 +52,9 @@
         "description": "3 回合防禦 +20%。",
         "enabled": false,
         "disabled_reason": "MP 不足，無法使用守護符文。",
-        "payload": { "skill_id": "skill_guardian_rune" },
+        "payload": {
+          "skill_id": "skill_guardian_rune"
+        },
         "feedback_message": "已送出 use_skill：守護符文。static prototype 不會套用 buff 或消耗 MP。"
       }
     ]
@@ -64,7 +72,9 @@
         "description": "回復 HP 35。",
         "enabled": false,
         "disabled_reason": "小藥水已用完。",
-        "payload": { "item_id": "item_potion_s" },
+        "payload": {
+          "item_id": "item_potion_s"
+        },
         "feedback_message": "已送出 use_item：小藥水。static prototype 不會回復 HP 或消耗道具。"
       },
       {
@@ -74,7 +84,9 @@
         "description": "解除中毒；v1 中也可緩解灼傷。",
         "enabled": true,
         "disabled_reason": null,
-        "payload": { "item_id": "item_antidote" },
+        "payload": {
+          "item_id": "item_herb_antidote"
+        },
         "feedback_message": "已送出 use_item：解毒草。static prototype 不會解除狀態或消耗道具。"
       }
     ]
@@ -87,14 +99,25 @@
     "battle_summary": "餘燼潛獵者的追擊突破防線。這些內容只是戰敗結算畫面的 fixture 顯示資料，尚未套用 runtime 或 save。",
     "reward_title": "本場結果",
     "rows": [
-      { "label": "戰鬥獎勵", "value": "未取得", "tone": "danger" },
-      { "label": "本趟收益", "value": "未套用", "tone": "danger", "detail": "static prototype 不處理實際素材、金幣或 EXP 結算。" }
+      {
+        "label": "戰鬥獎勵",
+        "value": "未取得",
+        "tone": "danger"
+      },
+      {
+        "label": "本趟收益",
+        "value": "未套用",
+        "tone": "danger",
+        "detail": "static prototype 不處理實際素材、金幣或 EXP 結算。"
+      }
     ],
     "next_action": {
       "action_id": "return_to_town_hub",
       "label": "返回城鎮",
       "description": "回到 Town Hub static prototype。",
-      "payload": { "from": "combat_result_defeat" },
+      "payload": {
+        "from": "combat_result_defeat"
+      },
       "navigate_to": "../town_hub/index.html",
       "feedback_message": "已送出 return_to_town_hub。"
     }
@@ -112,7 +135,9 @@
       "enabled": true,
       "disabled_reason": null,
       "primary": false,
-      "payload": { "enemy_id": "mon_ember_stalker" },
+      "payload": {
+        "enemy_id": "mon_ember_stalker"
+      },
       "feedback_message": "已送出 basic_attack。static prototype 不會改變敵人 HP。"
     },
     {
@@ -122,7 +147,9 @@
       "enabled": true,
       "disabled_reason": null,
       "primary": false,
-      "payload": { "source": "combat_screen" },
+      "payload": {
+        "source": "combat_screen"
+      },
       "feedback_message": "已開啟技能選單。再次按技能可收回。"
     },
     {
@@ -132,7 +159,9 @@
       "enabled": true,
       "disabled_reason": null,
       "primary": false,
-      "payload": { "source": "combat_screen" },
+      "payload": {
+        "source": "combat_screen"
+      },
       "feedback_message": "已開啟道具選單。再次按道具可收回。"
     },
     {
@@ -153,7 +182,9 @@
       "enabled": true,
       "disabled_reason": null,
       "primary": false,
-      "payload": { "enemy_id": "mon_ember_stalker" },
+      "payload": {
+        "enemy_id": "mon_ember_stalker"
+      },
       "feedback_message": "已送出 retreat。static prototype 不會結算逃跑。"
     }
   ]

@@ -714,7 +714,9 @@ function getVisibleTaskRows() {
   if (state.selectedFilterId === "all") {
     return rows;
   }
-  return rows.filter((row) => row.status === state.selectedFilterId);
+  return rows.filter(
+    (row) => row.region_id === state.selectedFilterId || row.status === state.selectedFilterId,
+  );
 }
 
 function ensureSelectionVisible() {

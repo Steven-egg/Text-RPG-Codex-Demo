@@ -1,0 +1,224 @@
+{
+  "screen_id": "town_hub",
+  "title": "Regional Facility Slot Shell",
+  "subtitle": "Static fixture：呈現 CLI region facility slot 缺口，不新增正式 shop/equipment/recipe/book data。",
+  "resource_strip": [
+    {
+      "id": "hero",
+      "label": "米菈 / 冒險者 Lv12",
+      "tone": "primary"
+    },
+    {
+      "id": "hp",
+      "label": "HP 160/160",
+      "tone": "healthy"
+    },
+    {
+      "id": "mp",
+      "label": "MP 46/52",
+      "tone": "mana"
+    },
+    {
+      "id": "gold",
+      "label": "1957G",
+      "tone": "gold"
+    },
+    {
+      "id": "guild_points",
+      "label": "Guild 120",
+      "tone": "neutral"
+    }
+  ],
+  "town_guidance": [
+    "這是 parity shell：GUI 先看得到 region facility slots，正式數值與解鎖仍留在 runtime/data planning gate。",
+    "缺口來自 06_tools/region_coverage_report.py；placeholder 不代表 gameplay data 已落地。"
+  ],
+  "selected_facility_id": "guild",
+  "facility_nodes": [
+    {
+      "facility_id": "guild",
+      "label": "冒險者工會",
+      "description": "諾亞從一堆文件中抬頭，對你點了點頭。 / Quest shell 已可從 CLI REGIONS/QUESTS 產生，適合做 region 任務對照。",
+      "visual_group": "guild",
+      "visual_anchor": "top_center_guild_hall",
+      "icon_role": "guild",
+      "enabled": true,
+      "disabled_reason": null,
+      "badges": [
+        {
+          "badge_id": "quest_parity",
+          "label": "28 quests",
+          "kind": "notification",
+          "priority": 80
+        }
+      ],
+      "primary_action": "open_facility",
+      "payload": {
+        "facility_id": "guild"
+      }
+    },
+    {
+      "facility_id": "inn",
+      "label": "旅館",
+      "description": "旅館老闆擦著木杯，示意你可以休息。 / 共用休息設施；目前不需要區域化 gameplay data。",
+      "visual_group": "rest",
+      "visual_anchor": "left_inn",
+      "icon_role": "bed",
+      "enabled": true,
+      "disabled_reason": null,
+      "badges": [],
+      "primary_action": "open_facility",
+      "payload": {
+        "facility_id": "inn"
+      }
+    },
+    {
+      "facility_id": "travel_shop",
+      "label": "旅人小鋪",
+      "description": "拉比把補給袋推到櫃台前。 / Regional shop slot placeholder：Ice 0/3；Earth 0/3；Thunder 0/3；Final 0/3",
+      "visual_group": "shop",
+      "visual_anchor": "mid_left_market",
+      "icon_role": "shop",
+      "enabled": true,
+      "disabled_reason": null,
+      "badges": [
+        {
+          "badge_id": "slot_placeholder",
+          "label": "Slot plan",
+          "kind": "notification",
+          "priority": 60
+        }
+      ],
+      "primary_action": "open_facility",
+      "payload": {
+        "facility_id": "travel_shop"
+      }
+    },
+    {
+      "facility_id": "workshop",
+      "label": "鐵刃工坊",
+      "description": "格雷把新磨好的鐵刃放回架上。 / Regional equipment placeholder：Ice 0/7；Earth 0/7；Thunder 0/7；Final 0/7；upgrade placeholder：Ice 0/4；Earth 0/4；Thunder 0/4；Final 0/6",
+      "visual_group": "workshop",
+      "visual_anchor": "right_workshop_group",
+      "icon_role": "hammer",
+      "enabled": true,
+      "disabled_reason": null,
+      "badges": [
+        {
+          "badge_id": "slot_placeholder",
+          "label": "Slot plan",
+          "kind": "notification",
+          "priority": 60
+        }
+      ],
+      "primary_action": "open_facility",
+      "payload": {
+        "facility_id": "workshop"
+      }
+    },
+    {
+      "facility_id": "synthesis",
+      "label": "米菈合成屋",
+      "description": "米菈整理著素材瓶，等你挑選配方。 / Regional synthesis placeholder：Ice 0/2；Earth 0/2；Thunder 0/2；Final 0/4",
+      "visual_group": "alchemy",
+      "visual_anchor": "bottom_left_alchemy",
+      "icon_role": "alchemy",
+      "enabled": true,
+      "disabled_reason": null,
+      "badges": [
+        {
+          "badge_id": "slot_placeholder",
+          "label": "Slot plan",
+          "kind": "notification",
+          "priority": 60
+        }
+      ],
+      "primary_action": "open_facility",
+      "payload": {
+        "facility_id": "synthesis"
+      }
+    },
+    {
+      "facility_id": "magic_shop",
+      "label": "星燈魔法商店",
+      "description": "伊芙翻開星燈旁的魔法書目錄。 / Regional magic book placeholder：Ice 1/6；Earth 0/6；Thunder 0/6；Final 0/6",
+      "visual_group": "magic",
+      "visual_anchor": "right_arcane_shop",
+      "icon_role": "magic",
+      "enabled": true,
+      "disabled_reason": null,
+      "badges": [
+        {
+          "badge_id": "slot_placeholder",
+          "label": "Slot plan",
+          "kind": "notification",
+          "priority": 60
+        }
+      ],
+      "primary_action": "open_facility",
+      "payload": {
+        "facility_id": "magic_shop"
+      }
+    },
+    {
+      "facility_id": "temple",
+      "label": "轉職神殿",
+      "description": "賽恩站在門前，像一塊懂得呼吸的石碑。 / Seal / class / lore preview shell；不開啟正式 class transfer 或 relic effects。",
+      "visual_group": "temple",
+      "visual_anchor": "bottom_center_temple",
+      "icon_role": "temple",
+      "enabled": true,
+      "disabled_reason": null,
+      "badges": [],
+      "primary_action": "open_facility",
+      "payload": {
+        "facility_id": "temple"
+      }
+    },
+    {
+      "facility_id": "relic_preview",
+      "label": "聖物調查",
+      "description": "聖物調查台安靜地映出四元素的微光。 / Four-seal relic v1 inspection shell；不呈現 active/passive/combat effect。",
+      "visual_group": "archive",
+      "visual_anchor": "bottom_right_archive",
+      "icon_role": "relic",
+      "enabled": true,
+      "disabled_reason": null,
+      "badges": [],
+      "primary_action": "open_facility",
+      "payload": {
+        "facility_id": "relic_preview"
+      }
+    },
+    {
+      "facility_id": "storage",
+      "label": "倉庫",
+      "description": "工會旁的小倉庫掛著新銅鎖。 / 共用倉庫設施；不開啟容量升級或 save schema 變更。",
+      "visual_group": "storage",
+      "visual_anchor": "far_bottom_right_depot",
+      "icon_role": "storage",
+      "enabled": true,
+      "disabled_reason": null,
+      "badges": [],
+      "primary_action": "open_facility",
+      "payload": {
+        "facility_id": "storage"
+      }
+    }
+  ],
+  "navigation_actions": [
+    {
+      "action_id": "open_world_map",
+      "label": "前往世界地圖",
+      "description": "回到 World Map CLI parity shell。",
+      "enabled": true,
+      "disabled_reason": null,
+      "payload": {}
+    }
+  ],
+  "debug_notes": [
+    "Generated by 06_tools/gui_static_parity_builder.py.",
+    "Facility placeholders are display-only.",
+    "Do not treat fixture values as gameplay SSOT."
+  ]
+}

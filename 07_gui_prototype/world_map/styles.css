@@ -571,6 +571,13 @@ select:focus-visible {
   background: rgba(184, 164, 124, 0.88) !important;
 }
 
+.location-node[data-tone="gate"] .marker-emblem {
+  background: rgba(208, 168, 76, 0.9) !important;
+  color: #15100a;
+  border-color: rgba(255, 244, 220, 0.78);
+  box-shadow: 0 0 18px rgba(208, 168, 76, 0.42);
+}
+
 .node-title {
   color: var(--paper);
   font-size: 1.29rem;
@@ -587,6 +594,73 @@ select:focus-visible {
 .node-lock {
   color: var(--gold);
   font-size: 0.98rem;
+}
+
+.region-map-landmark {
+  position: absolute;
+  top: -44px;
+  left: 50%;
+  min-width: 42px;
+  height: 22px;
+  padding: 0 8px 0 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(239, 231, 211, 0.72);
+  border-radius: 5px;
+  background: rgba(10, 15, 14, 0.82);
+  color: var(--paper);
+  font-size: 0.66rem;
+  font-weight: 900;
+  letter-spacing: 0;
+  line-height: 1;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.88);
+  transform: translateX(-50%);
+  pointer-events: none;
+  box-shadow: 0 5px 14px rgba(0, 0, 0, 0.42), inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+  z-index: 11;
+}
+
+.region-map-landmark::before {
+  content: "";
+  position: absolute;
+  left: 7px;
+  width: 10px;
+  height: 12px;
+  border: 1.5px solid currentColor;
+  border-radius: 2px;
+  background:
+    linear-gradient(90deg, transparent 32%, currentColor 33%, currentColor 38%, transparent 39%),
+    linear-gradient(90deg, transparent 63%, currentColor 64%, currentColor 69%, transparent 70%);
+  opacity: 0.9;
+}
+
+.location-node[data-region-id="ice"] .region-map-landmark {
+  color: #d8f2ff;
+  border-color: rgba(158, 198, 217, 0.82);
+}
+
+.location-node[data-region-id="earth"] .region-map-landmark {
+  color: #dbe8bb;
+  border-color: rgba(121, 146, 79, 0.82);
+}
+
+.location-node[data-region-id="thunder"] .region-map-landmark {
+  color: #e6ddff;
+  border-color: rgba(127, 107, 176, 0.86);
+}
+
+.location-node[data-region-id="final"] .region-map-landmark {
+  color: #f1dfb8;
+  border-color: rgba(184, 164, 124, 0.86);
+}
+
+.location-node:hover .region-map-landmark,
+.location-node.is-selected .region-map-landmark {
+  background: rgba(208, 168, 76, 0.94);
+  border-color: #fff;
+  color: #17120c;
+  text-shadow: none;
 }
 
 .location-detail-panel {
@@ -1318,6 +1392,21 @@ select:focus-visible {
 .utility-list-item:hover {
   background: rgba(255, 255, 255, 0.045);
   border-color: rgba(208, 168, 76, 0.28);
+}
+
+.region-gate-option {
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+}
+
+.region-gate-option:disabled {
+  cursor: not-allowed;
+  opacity: 0.58;
+}
+
+.region-gate-option[data-enabled="true"] {
+  border-color: rgba(158, 198, 217, 0.42);
 }
 
 .utility-list-item-header {
