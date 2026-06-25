@@ -1746,9 +1746,6 @@ def check_and_normalize_region(state: dict, region_id: str | None) -> str:
     from data.regions import REGIONS, _is_unlocked
     if not region_id or region_id not in REGIONS:
         return "border_fire"
-    # 目前 slice 只允許 border_fire 和 ice
-    if region_id not in ("border_fire", "ice"):
-        return "border_fire"
     if not _is_unlocked(state, REGIONS[region_id].get("unlock_key")):
         return "border_fire"
     return region_id
@@ -3504,7 +3501,7 @@ def tick_effects(state: dict, player_buffs: dict, enemy_buffs: dict) -> list[str
     return events
 
 CLI_REGION_ORDER = ["border_fire", "ice", "earth", "thunder", "final"]
-CLI_REGION_ROUTE_ENABLED = {"border_fire", "ice"}
+CLI_REGION_ROUTE_ENABLED = {"border_fire", "ice", "earth", "thunder", "final"}
 
 
 def cli_region_label(region_id: str) -> str:
@@ -3518,9 +3515,13 @@ def cli_region_route_enabled(state: dict, region_id: str) -> bool:
 
 def cli_region_locked_reason(region_id: str) -> str:
     if region_id == "ice":
-        return "Ice unlocks after the Fire Seal route is complete."
-    if region_id in {"earth", "thunder", "final"}:
-        return "This region is not open in the current slice."
+        return "Ice Region unlocks after the Fire Seal route is complete."
+    if region_id == "earth":
+        return "Earth Region unlocks after completing Ice Region quests."
+    if region_id == "thunder":
+        return "Thunder Region unlocks after completing Earth Region quests."
+    if region_id == "final":
+        return "Final Region requires all four enshrined elemental seals."
     return "This region is locked."
 
 
@@ -3533,7 +3534,7 @@ def region_travel_menu(state: dict, current_region_id: str) -> str:
         "Travel to new region",
         options,
         "Region Gate",
-        header_lines=["Only Ice is open in this bridge slice after the Fire Seal route unlocks it."],
+        header_lines=["Travel through the region gate to other unlocked regions."],
         allow_back=True,
         border_style="blue",
     )
@@ -3550,7 +3551,7 @@ def region_travel_menu(state: dict, current_region_id: str) -> str:
 
 
 def main_loop(state: dict) -> str | None:
-    current_region_id = "border_fire"
+    current_region_id = state.get("flags", {}).get("current_region_id") or "border_fire"
     while True:
         clamp_vitals(state)
         main_options = [
@@ -3581,6 +3582,9 @@ def main_loop(state: dict) -> str | None:
                 return "title"
         elif choice == 4:
             current_region_id = region_travel_menu(state, current_region_id)
+            if "flags" not in state:
+                state["flags"] = {}
+            state["flags"]["current_region_id"] = current_region_id
         elif choice == 5:
             bestiary_menu(state)
         elif choice == 6:
@@ -3818,6 +3822,36 @@ def smoke_test() -> None:
     assert "skill_guardian_rune" in state["learned_skills"]
     damage, _ = calc_player_damage(state, MONSTERS["mon_moss_rat"], None, {}, {})
     assert damage > 0
+
+    # 測試漸進式 CLI 路由與區域正規化
+    cli_state = create_state("CLI Route Test", "劍士")
+    assert cli_region_route_enabled(cli_state, "border_fire")
+    assert not cli_region_route_enabled(cli_state, "ice")
+    assert not cli_region_route_enabled(cli_state, "earth")
+    assert check_and_normalize_region(cli_state, "earth") == "border_fire"
+    assert check_and_normalize_region(cli_state, "thunder") == "border_fire"
+    assert check_and_normalize_region(cli_state, "final") == "border_fire"
+
+    unlock(cli_state, "unlock_ice_region")
+    assert cli_region_route_enabled(cli_state, "ice")
+    assert not cli_region_route_enabled(cli_state, "earth")
+    assert check_and_normalize_region(cli_state, "ice") == "ice"
+    assert check_and_normalize_region(cli_state, "earth") == "border_fire"
+
+    unlock(cli_state, "unlock_earth_region_preview")
+    assert cli_region_route_enabled(cli_state, "earth")
+    assert check_and_normalize_region(cli_state, "earth") == "earth"
+    assert check_and_normalize_region(cli_state, "thunder") == "border_fire"
+
+    unlock(cli_state, "unlock_thunder_region_preview")
+    assert cli_region_route_enabled(cli_state, "thunder")
+    assert check_and_normalize_region(cli_state, "thunder") == "thunder"
+    assert check_and_normalize_region(cli_state, "final") == "border_fire"
+
+    unlock(cli_state, "unlock_final_region_preview")
+    assert cli_region_route_enabled(cli_state, "final")
+    assert check_and_normalize_region(cli_state, "final") == "final"
+
     print("smoke test ok")
 
 def main() -> None:

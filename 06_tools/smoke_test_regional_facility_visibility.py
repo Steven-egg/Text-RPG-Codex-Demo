@@ -151,6 +151,75 @@ def run_visibility_test():
     assert set(gui_ice_upgrade_ids) == set(cli_ice_upgrades)
 
     print("GUI Model visibility in Ice matches CLI completely.")
+
+    # === 3. Simulate Earth Region Unlock and switch region ===
+    print("\n--- Verifying Earth Region Visibility (After unlock) ---")
+    game.unlock(state, game.EARTH_REGION_UNLOCK)
+    session.current_region_id = "earth"
+
+    # CLI Filters
+    cli_earth_travel = game.travel_shop_available_items(state, region_id="earth")
+    cli_earth_weapons = [w for w in SHOP_INVENTORY["weapon"] if game.EQUIPMENT[w].get("region", "border_fire") == "earth"]
+    cli_earth_armors = [a for a in SHOP_INVENTORY["armor"] if game.EQUIPMENT[a].get("region", "border_fire") == "earth"]
+    cli_earth_books = game.magic_shop_book_ids(region_id="earth")
+    cli_earth_recipes = [r_id for r_id, r in RECIPES.items() if r.get("region", "border_fire") == "earth" and (not r.get("base_item") or game.EQUIPMENT.get(list(r["output"].keys())[0], {}).get("slot") == "accessory") and game.recipe_available(state, r_id)]
+    cli_earth_upgrades = [r_id for r_id, r in RECIPES.items() if r.get("region", "border_fire") == "earth" and r.get("base_item") and game.EQUIPMENT.get(list(r["output"].keys())[0], {}).get("slot") != "accessory" and game.recipe_available(state, r_id)]
+
+    # Ensure Earth items exist
+    assert len(cli_earth_travel) > 0
+    assert len(cli_earth_weapons) > 0
+    assert len(cli_earth_armors) > 0
+    assert len(cli_earth_books) > 0
+    assert len(cli_earth_recipes) > 0
+    assert len(cli_earth_upgrades) > 0
+
+    # Verify only Earth items show up
+    for item_id in cli_earth_travel:
+        assert "_earth_" in item_id
+        assert "_ice_" not in item_id and "_thunder_" not in item_id and "_final_" not in item_id
+    for w_id in cli_earth_weapons:
+        assert "_earth_" in w_id
+        assert "_ice_" not in w_id and "_thunder_" not in w_id and "_final_" not in w_id
+    for a_id in cli_earth_armors:
+        assert "_earth_" in a_id
+        assert "_ice_" not in a_id and "_thunder_" not in a_id and "_final_" not in a_id
+    for b_id in cli_earth_books:
+        assert "_earth_" in b_id
+        assert "_ice_" not in b_id and "_thunder_" not in b_id and "_final_" not in b_id
+    for r_id in cli_earth_recipes:
+        assert "_earth_" in r_id
+        assert "_ice_" not in r_id and "_thunder_" not in r_id and "_final_" not in r_id
+    for r_id in cli_earth_upgrades:
+        assert "_earth_" in r_id
+        assert "_ice_" not in r_id and "_thunder_" not in r_id and "_final_" not in r_id
+
+    print("CLI visibility in Earth verified: Only Earth elements visible, no other region leak.")
+
+    # GUI Models
+    gui_earth_shop = session.screen_model("shop_screen")
+    gui_earth_magic = session.screen_model("magic_shop_screen")
+    gui_earth_synth = session.screen_model("synthesis_screen")
+    gui_earth_work = session.screen_model("workshop_screen")
+
+    gui_earth_travel_ids = [row["item_id"] for row in gui_earth_shop["list_rows"] if game.is_shop_item_available(state, row["item_id"])]
+    assert set(gui_earth_travel_ids) == set(cli_earth_travel)
+
+    gui_earth_book_ids = [row["book_id"] for row in gui_earth_magic["list_rows"]]
+    assert set(gui_earth_book_ids) == set(cli_earth_books)
+
+    gui_earth_recipe_ids = [row["recipe_id"] for row in gui_earth_synth["recipe_rows"] if game.recipe_available(state, row["recipe_id"])]
+    assert set(gui_earth_recipe_ids) == set(cli_earth_recipes)
+
+    gui_earth_weapon_ids = [w["id"] for w in gui_earth_work["weapons"]]
+    assert set(gui_earth_weapon_ids) == set(cli_earth_weapons)
+
+    gui_earth_armor_ids = [a["id"] for a in gui_earth_work["armors"]]
+    assert set(gui_earth_armor_ids) == set(cli_earth_armors)
+
+    gui_earth_upgrade_ids = [r["id"] for r in gui_earth_work["upgrades"] if game.recipe_available(state, r["id"])]
+    assert set(gui_earth_upgrade_ids) == set(cli_earth_upgrades)
+
+    print("GUI Model visibility in Earth matches CLI completely.")
     print("\nRegional Facility Visibility smoke test successfully completed all checks!")
 
 

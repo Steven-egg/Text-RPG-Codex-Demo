@@ -47,7 +47,7 @@ def magic_shop_screen_model(state: dict[str, Any], selected_region_id: str | Non
     job = state.get("job", "")
     from data.regions import REGIONS, _is_unlocked
     region_id = selected_region_id or "border_fire"
-    if region_id not in REGIONS or region_id not in ("border_fire", "ice") or not _is_unlocked(state, REGIONS[region_id].get("unlock_key")):
+    if region_id not in REGIONS or not _is_unlocked(state, REGIONS[region_id].get("unlock_key")):
         region_id = "border_fire"
     book_ids = [
         b_id for b_id, b in MAGIC_BOOKS.items()

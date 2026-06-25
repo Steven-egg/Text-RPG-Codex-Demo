@@ -116,6 +116,23 @@ def run_smoke_test() -> None:
     assert back_world["current_region_id"] == "border_fire"
     print(" - successfully traveled from Ice back to Border / Fire and flags reset.")
 
+    # 測試漸進式解鎖 Earth 區域
+    game.unlock(state, "unlock_earth_region_preview")
+    earth_travel_response = session.dispatch("travel_region", {"region_id": "earth"}, screen_id="world_map")
+    assert session.require_state().get("flags", {}).get("current_region_id") == "earth"
+    earth_world = earth_travel_response["screen_model"]
+    assert earth_world["current_region_id"] == "earth"
+    print(" - successfully unlocked and traveled to Earth region progressive route.")
+
+    # 驗證 Earth 設施在 Earth 語境下不回退
+    earth_shop = session.screen_model("shop_screen")
+    assert any("_earth_" in row["item_id"] for row in earth_shop["list_rows"])
+    assert not any("_ice_" in row["item_id"] for row in earth_shop["list_rows"])
+    print(" - successfully verified Earth facility (shop) in Earth context without fallback.")
+
+    # 回到 border_fire 確保後續載入測試環境乾淨
+    session.dispatch("travel_region", {"region_id": "border_fire"}, screen_id="world_map")
+
     # 模擬 load_game 恢復存檔中的 current_region_id = "ice"
     original_load_game = game.load_game
     try:

@@ -26,7 +26,7 @@ def normalize_guild_region_id(selected_region_id: str | None = None) -> str:
 def guild_screen_model(state: dict[str, Any], selected_region_id: str | None = None) -> dict[str, Any]:
     from data.regions import REGIONS, _is_unlocked
     current_region_id = selected_region_id or "border_fire"
-    if current_region_id not in REGIONS or current_region_id not in ("border_fire", "ice") or not _is_unlocked(state, REGIONS[current_region_id].get("unlock_key")):
+    if current_region_id not in REGIONS or not _is_unlocked(state, REGIONS[current_region_id].get("unlock_key")):
         current_region_id = "border_fire"
     current_region = REGIONS[current_region_id]
     current_region_label = REGION_LABELS[current_region_id]

@@ -223,7 +223,7 @@ REGION_X = {
 }
 REGION_TOWN_Y = 16
 DUNGEON_Y = [34, 46, 58, 70, 82]
-REGION_ROUTE_ENABLED = {"border_fire", "ice"}
+REGION_ROUTE_ENABLED = {"border_fire", "ice", "earth", "thunder", "final"}
 REGION_GATE_DESTINATIONS = ["ice", "earth", "thunder", "final"]
 REGION_MAP_ASSETS = {
     "border_fire": "./assets/world-map-environment-v01.jpg",
@@ -2675,8 +2675,12 @@ def normalize_region_id(state: dict[str, Any], requested_region_id: str | None =
 def region_locked_reason(region_id: str) -> str:
     if region_id == "ice":
         return "Ice route unlocks after the Fire Seal route is complete."
-    if region_id in {"earth", "thunder", "final"}:
-        return "This region is not open in the current runtime bridge slice."
+    if region_id == "earth":
+        return "Earth route unlocks after completing Ice Region quests."
+    if region_id == "thunder":
+        return "Thunder route unlocks after completing Earth Region quests."
+    if region_id == "final":
+        return "Final Region requires all four enshrined elemental seals."
     return f"{REGION_LABELS.get(region_id, region_id)} region is not unlocked yet."
 
 
