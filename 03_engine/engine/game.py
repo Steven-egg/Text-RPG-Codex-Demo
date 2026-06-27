@@ -72,7 +72,16 @@ from data import (
     get_unlocked_regions,
     get_dialogue,
 )
-from .cli_helpers import GUILD_MATERIAL_BUY_PRICES, get_region_locked_reason
+from .cli_helpers import (
+    GUILD_MATERIAL_BUY_PRICES,
+    get_region_locked_reason,
+    QUEST_COMPLETE_DIALOGUES,
+    DUNGEON_EVENT_TEMPLATES,
+    DUNGEON_TREASURE_CONFIG,
+    DUNGEON_TRAP_CONFIG,
+    DUNGEON_SPECIAL_CONFIG,
+)
+
 
 ROOT = Path(__file__).resolve().parents[2]
 SAVE_PATH = ROOT / "save.json"
@@ -2173,21 +2182,9 @@ def show_or_complete_quest(state: dict, quest_id: str) -> None:
         unlock(state, key)
     state["completed_quests"].append(quest_id)
     print(f"任務完成。獲得 {reward.get('gold', 0)}G、工會積分 +{guild_gain}。")
-    if quest_id == "quest_cave_gathering":
-        print("米菈合成屋開放了。拉比也開始販售逃脫卷軸。")
-    elif quest_id == "quest_magic_crystal":
-        print("伊芙記下小魔晶的光色。火花術書現在折價 50G。")
-    elif quest_id == "quest_mine_scout":
-        print("拉比壓低聲音：焦石礦坑深處很熱，抗火斗篷的配方已交給米菈。")
-    elif quest_id == "quest_boss_glen":
-        print("諾亞看著血跡地圖，表情第一次變得猶豫。第二幕的元素迷宮露出了入口。")
-        print("下一步很明確：前往「迷宮探索」中的灰燼裂谷，先帶回少量裂谷素材完成偵查。")
-    elif quest_id == "quest_ash_ravine_scout":
-        print("諾亞收起裂谷灰與焦黑鐵片：這些足夠證明灰燼裂谷值得深入調查，但現在還不是挑戰守衛的時候。")
-    elif quest_id == "quest_supply_upgrade":
-        print("諾亞點頭：旅人小鋪已能販售中藥水。接下來的長戰鬥，記得把補給準備好。")
-    elif quest_id == "quest_cinder_depths_scout":
-        print("諾亞攤開偵查圖：深窟最底層有一座燼印鎮衛。若要第三枚火之印記碎片，只能親自擊敗它。")
+    if quest_id in QUEST_COMPLETE_DIALOGUES:
+        for line in QUEST_COMPLETE_DIALOGUES[quest_id]:
+            print(line)
 
 def promotion_requirement_met(state: dict, requirement: dict) -> bool:
     kind = requirement.get("kind")
@@ -2499,42 +2496,45 @@ def dungeon_material_event(state: dict, dungeon: dict, run_log: dict) -> None:
     item_id = random.choice(dungeon["materials"])
     qty = 2 if random.random() < 0.2 else 1
     add_loot(state, item_id, qty, run_log)
-    print(f"你找到 {item_name(item_id)} x{qty}。")
+    print(DUNGEON_EVENT_TEMPLATES["material"].format(item_name=item_name(item_id), qty=qty))
 
 def dungeon_treasure_event(state: dict, dungeon: dict, run_log: dict) -> None:
-    if random.random() < 0.65:
+    if random.random() < DUNGEON_TREASURE_CONFIG["gold_chance"]:
         gold = random.randint(*dungeon["gold_range"])
         add_gold(state, gold, run_log)
-        print(f"你打開一只舊木箱，取得 {gold}G。")
+        print(DUNGEON_EVENT_TEMPLATES["treasure_gold"].format(gold=gold))
     else:
-        item_id = random.choice(["item_potion_s", "item_focus_drop"])
+        item_id = random.choice(DUNGEON_TREASURE_CONFIG["fallback_items"])
         add_loot(state, item_id, 1, run_log)
-        print(f"你找到 {item_name(item_id)} x1。")
+        print(DUNGEON_EVENT_TEMPLATES["treasure_item"].format(item_name=item_name(item_id)))
 
 def dungeon_trap_event(state: dict, dungeon: dict) -> None:
     stats = get_stats(state)
-    dodge = min(65, stats["agility"] * 2 + stats.get("trap_evasion", 0))
+    dodge = min(DUNGEON_TRAP_CONFIG["max_dodge_chance"], stats["agility"] * 2 + stats.get("trap_evasion", 0))
     if random.randint(1, 100) <= dodge:
-        print("你察覺地面異樣，及時避開了陷阱。")
+        print(DUNGEON_EVENT_TEMPLATES["trap_dodge"])
         return
     if dungeon["element"] == "火":
-        damage = math.ceil(14 * (1 - stats["fire_resist"] / 100))
+        damage = math.ceil(DUNGEON_TRAP_CONFIG["fire_base_damage"] * (1 - stats["fire_resist"] / 100))
         state["current_hp"] -= damage
-        print(f"熱風從裂縫噴出，你受到 {damage} 點火傷害。")
+        print(DUNGEON_TRAP_CONFIG["fire_msg"].format(damage=damage))
     else:
-        damage = 8
+        damage = DUNGEON_TRAP_CONFIG["default_damage"]
         state["current_hp"] -= damage
-        print(f"碎石從腳邊滑落，你受到 {damage} 點傷害。")
+        print(DUNGEON_TRAP_CONFIG["default_msg"].format(damage=damage))
 
 def dungeon_special_event(state: dict, dungeon_id: str, run_log: dict) -> None:
-    if dungeon_id == "dungeon_moss_cave":
-        add_loot(state, "mat_small_crystal", 1, run_log)
-        print("牆上刻著舊工會標記：別把小魔晶賣掉。你取得小魔晶 x1。")
+    cfg = DUNGEON_SPECIAL_CONFIG.get(dungeon_id, DUNGEON_SPECIAL_CONFIG["default"])
+    print(cfg["msg_main"])
+    if cfg["chance"] >= 1.0:
+        add_loot(state, cfg["loot_item"], cfg["loot_qty"], run_log)
+        if cfg["msg_loot"]:
+            print(cfg["msg_loot"])
     else:
-        print("你發現有人故意遮住通往深處的舊路標。拉比的情報看來沒錯。")
-        if random.random() < 0.4:
-            add_loot(state, "mat_lava_shard", 1, run_log)
-            print("路標後方還卡著熔岩碎片 x1。")
+        if random.random() < cfg["chance"]:
+            add_loot(state, cfg["loot_item"], cfg["loot_qty"], run_log)
+            if cfg["msg_loot"]:
+                print(cfg["msg_loot"])
 
 def handle_defeat(state: dict, run_log: dict) -> None:
     lost_gold = math.floor(run_log.get("gold", 0) * 0.3)
