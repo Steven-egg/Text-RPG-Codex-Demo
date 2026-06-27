@@ -31,274 +31,68 @@ from .gui_synthesis_model import synthesis_screen_model
 from .gui_temple_model import temple_screen_model
 from .gui_relic_preview_model import relic_preview_screen_model
 from .gui_guild_model import guild_screen_model
+from .gui_presentation_helpers import (
+    JOB_IDS,
+    JOB_ID_TO_KEY,
+    JOB_KEY_TO_ID,
+    save_exists,
+    percent,
+    state_summary,
+    player_model,
+    normalize_job_id,
+)
+from .gui_world_map_model import (
+    WORLD_MAP_PRESENTATION,
+    WORLD_MAP_ROUTE_SEGMENTS,
+    WORLD_MAP_PREVIEW_LOCATIONS,
+    REGION_ORDER,
+    REGION_LABELS,
+    REGION_TONES,
+    REGION_TOKENS,
+    REGION_X,
+    REGION_TOWN_Y,
+    DUNGEON_Y,
+    REGION_ROUTE_ENABLED,
+    REGION_GATE_DESTINATIONS,
+    REGION_MAP_ASSETS,
+    REGION_TOWN_ASSETS,
+    REGION_TOWN_POSITIONS,
+    REGION_GATE_POSITION,
+    REGION_DUNGEON_LAYOUTS,
+    region_town_location_id,
+    region_route_status,
+    region_runtime_unlocked,
+    region_route_enabled,
+    normalize_region_id,
+    region_locked_reason,
+    region_options_model,
+    default_region_id,
+    region_for_dungeon_id,
+    active_dungeon_id_for_slot,
+    region_gate_options_model,
+    legacy_world_map_model,
+    world_map_model,
+)
+from .gui_town_hub_model import (
+    FACILITY_VISUALS,
+    legacy_town_hub_model,
+    facility_nodes,
+    facility,
+    town_hub_model,
+    inn_screen_model,
+)
+from .gui_exploration_model import exploration_screen_model
+from .gui_combat_model import (
+    combat_item_rows,
+    combat_skill_rows,
+    result_overlay_model,
+    combat_screen_model,
+)
 
-
-JOB_IDS = ["warrior", "mage", "rogue", "cleric"]
-JOB_ID_TO_KEY = dict(zip(JOB_IDS, JOBS.keys()))
-JOB_KEY_TO_ID = {value: key for key, value in JOB_ID_TO_KEY.items()}
 SAVE_BACKUP_PREFIX = "save.gui-backup"
 STORAGE_UNLOCK_COST = game.STORAGE_UNLOCK_COST
-FACILITY_VISUALS = {
-    "guild": {"visual_group": "guild", "visual_anchor": "top_center_guild_hall"},
-    "inn": {"visual_group": "rest", "visual_anchor": "left_inn"},
-    "travel_shop": {"visual_group": "shop", "visual_anchor": "mid_left_market"},
-    "workshop": {"visual_group": "workshop", "visual_anchor": "right_workshop_group"},
-    "synthesis": {"visual_group": "alchemy", "visual_anchor": "bottom_left_alchemy"},
-    "magic_shop": {"visual_group": "magic", "visual_anchor": "right_arcane_shop"},
-    "temple": {"visual_group": "temple", "visual_anchor": "bottom_center_temple"},
-    "relic_preview": {"visual_group": "archive", "visual_anchor": "bottom_right_archive"},
-    "storage": {"visual_group": "storage", "visual_anchor": "far_bottom_right_depot"},
-}
-WORLD_MAP_PRESENTATION = {
-    "dungeon_moss_cave": {
-        "location_id": "moss_cave",
-        "position": {"x": 24, "y": 48},
-        "tone": "nature",
-        "icon_token": "葉",
-        "preview_role": "cave",
-        "description": "潮濕陰暗的洞窟，布滿青苔與藤蔓，棲息著各種小型魔物。",
-        "detail_note": "適合作為早期探索地點，live mode 會交由 Python runtime 驗證前往條件。",
-        "exploration_rating": "低風險",
-    },
-    "dungeon_scorched_mine": {
-        "location_id": "ember_quarry",
-        "position": {"x": 49, "y": 42},
-        "tone": "fire",
-        "icon_token": "火",
-        "preview_role": "quarry",
-        "description": "黑色岩壁間冒著餘燼，舊礦道仍殘留火元素的熱度。",
-        "detail_note": "推薦攜帶回復道具。live mode 會交由 Python runtime 驗證前往條件。",
-        "exploration_rating": "中等風險",
-    },
-    "dungeon_ash_ravine": {
-        "location_id": "ash_valley",
-        "position": {"x": 48, "y": 67},
-        "tone": "fire",
-        "icon_token": "火",
-        "preview_role": "valley",
-        "description": "裂谷底部流動著暗紅熔脈，空氣裡混著鐵鏽與焦土味。",
-        "detail_note": "比焦石礦坑更危險，適合裝備更新後挑戰。",
-        "exploration_rating": "高風險",
-    },
-    "dungeon_cinder_seal_depths": {
-        "location_id": "cinder_depths",
-        "position": {"x": 64, "y": 82},
-        "tone": "fire",
-        "icon_token": "燼",
-        "preview_role": "plateau",
-        "description": "深處的岩層帶著燼印反光，火印線索在洞壁間若隱若現。",
-        "detail_note": "目前由 runtime unlock 狀態決定是否可前往。",
-        "exploration_rating": "高風險",
-    },
-    "dungeon_ice_minor_a": {
-        "location_id": "ice_minor_a",
-        "position": {"x": 67, "y": 18},
-        "tone": "ice",
-        "icon_token": "I",
-        "preview_role": "wreck",
-        "description": "Ice route minor dungeon A / playable skeleton.",
-        "detail_note": "Ghost-Sail Wreck is a live runtime dungeon; names and art are placeholder.",
-        "exploration_rating": "medium",
-    },
-    "dungeon_ice_minor_b": {
-        "location_id": "ice_minor_b",
-        "position": {"x": 76, "y": 28},
-        "tone": "ice",
-        "icon_token": "I",
-        "preview_role": "cave",
-        "description": "Ice route minor dungeon B / playable skeleton.",
-        "detail_note": "Frostroot Cavern is a live runtime dungeon; names and art are placeholder.",
-        "exploration_rating": "medium",
-    },
-    "dungeon_ice_main_phase_1": {
-        "location_id": "ice_main_fortress",
-        "position": {"x": 86, "y": 20},
-        "tone": "ice",
-        "icon_token": "I",
-        "preview_role": "fortress",
-        "description": "Frostiron Keep main dungeon / outer city phase.",
-        "detail_note": "This is the same main dungeon location; phase 2 replaces it after Q3.",
-        "exploration_rating": "high",
-    },
-    "dungeon_ice_main_phase_2": {
-        "location_id": "ice_main_fortress",
-        "position": {"x": 86, "y": 20},
-        "tone": "ice",
-        "icon_token": "I",
-        "preview_role": "fortress",
-        "description": "Frostiron Keep main dungeon / inner palace phase.",
-        "detail_note": "This is the same main dungeon location; it is not a fourth Ice world-map location.",
-        "exploration_rating": "high",
-    },
-}
-WORLD_MAP_ROUTE_SEGMENTS = [
-    {"id": "town_to_cave", "from": "border_town", "to": "moss_cave", "points": [[35, 22], [29, 34], [24, 48]]},
-    {"id": "cave_to_quarry", "from": "moss_cave", "to": "ember_quarry", "points": [[24, 48], [37, 44], [49, 42]]},
-    {"id": "quarry_to_valley", "from": "ember_quarry", "to": "ash_valley", "points": [[49, 42], [49, 55], [48, 67]]},
-    {"id": "valley_to_depths", "from": "ash_valley", "to": "cinder_depths", "points": [[48, 67], [56, 77], [64, 82]]},
-    {"id": "town_to_frost", "from": "border_town", "to": "frost_pass", "points": [[35, 22], [50, 15], [66, 18]]},
-    {"id": "quarry_to_forest", "from": "ember_quarry", "to": "mist_forest", "points": [[49, 42], [62, 38], [75, 38]]},
-    {"id": "forest_to_tower", "from": "mist_forest", "to": "moon_tower", "points": [[75, 38], [72, 49], [70, 57]]},
-    {"id": "cave_to_ruins", "from": "moss_cave", "to": "drowned_ruins", "points": [[24, 48], [23, 64], [26, 78]]},
-]
-WORLD_MAP_PREVIEW_LOCATIONS = [
-    {
-        "location_id": "frost_pass",
-        "label": "冰封峽谷",
-        "description": "北方山脈被冰雪封住，峽谷入口覆著厚重霜霧。",
-        "detail_note": "尚未解鎖。這裡只提供地圖瀏覽與 blocked action。",
-        "position": {"x": 66, "y": 18},
-        "tone": "ice",
-        "icon_token": "冰",
-        "locked_reason": "尚未取得北境通行線索",
-        "attribute": "冰 / 山脈",
-        "preview_role": "frost",
-    },
-    {
-        "location_id": "mist_forest",
-        "label": "遺忘森林",
-        "description": "林間常年飄著薄霧，路徑會在日落後改變方向。",
-        "detail_note": "尚未解鎖。未來可接故事線索或公會委託。",
-        "position": {"x": 75, "y": 38},
-        "tone": "nature",
-        "icon_token": "森",
-        "locked_reason": "需要完成青苔洞窟後續調查",
-        "attribute": "自然 / 幻霧",
-        "preview_role": "forest",
-    },
-    {
-        "location_id": "moon_tower",
-        "label": "影月塔",
-        "description": "高塔矗立在灰白岩脊上，塔頂會在夜裡反射紫色月光。",
-        "detail_note": "尚未解鎖。這裡只提供地圖瀏覽與 blocked action。",
-        "position": {"x": 70, "y": 57},
-        "tone": "arcane",
-        "icon_token": "月",
-        "locked_reason": "需要影月塔入口鑰印",
-        "attribute": "秘法 / 月影",
-        "preview_role": "tower",
-    },
-    {
-        "location_id": "drowned_ruins",
-        "label": "沉沒遺跡",
-        "description": "海岸旁的古代遺跡半沉在潮水裡，退潮時才露出入口。",
-        "detail_note": "尚未解鎖。可檢查低亮度地點和鎖定狀態。",
-        "position": {"x": 26, "y": 78},
-        "tone": "water",
-        "icon_token": "潮",
-        "locked_reason": "尚未取得潮汐時刻表",
-        "attribute": "水 / 遺跡",
-        "preview_role": "ruins",
-    },
-]
 
-REGION_ORDER = ["border_fire", "ice", "earth", "thunder", "final"]
-REGION_LABELS = {
-    "border_fire": "Border / Fire",
-    "ice": "Ice",
-    "earth": "Earth",
-    "thunder": "Thunder",
-    "final": "Final",
-}
-REGION_TONES = {
-    "border_fire": "fire",
-    "ice": "ice",
-    "earth": "nature",
-    "thunder": "arcane",
-    "final": "bone",
-}
-REGION_TOKENS = {
-    "border_fire": "F",
-    "ice": "I",
-    "earth": "E",
-    "thunder": "T",
-    "final": "X",
-}
-REGION_X = {
-    "border_fire": 12,
-    "ice": 32,
-    "earth": 52,
-    "thunder": 72,
-    "final": 88,
-}
-REGION_TOWN_Y = 16
-DUNGEON_Y = [34, 46, 58, 70, 82]
-REGION_ROUTE_ENABLED = {"border_fire", "ice", "earth", "thunder", "final"}
-REGION_GATE_DESTINATIONS = ["ice", "earth", "thunder", "final"]
-REGION_MAP_ASSETS = {
-    "border_fire": "./assets/world-map-environment-v01.jpg",
-    "ice": "./assets/ice-world-map-placeholder-candidate-v01.png",
-    "earth": "./assets/earth-world-map-placeholder-candidate-v01.png",
-    "thunder": "./assets/thunder-world-map-placeholder-candidate-v01.png",
-    "final": "./assets/final-world-map-placeholder-candidate-v01.png",
-}
-REGION_TOWN_ASSETS = {
-    "border_fire": "../town_hub/assets/town-hub-environment-v01.jpg",
-    "ice": "../town_hub/assets/ice-town-hub-placeholder-candidate-v01.png",
-    "earth": "../town_hub/assets/earth-town-hub-placeholder-candidate-v01.png",
-    "thunder": "../town_hub/assets/thunder-town-hub-placeholder-candidate-v01.png",
-    "final": "../town_hub/assets/final-town-hub-placeholder-candidate-v02.png",
-}
-REGION_TOWN_POSITIONS = {
-    "border_fire": {"x": 35, "y": 22},
-    "ice": {"x": 21, "y": 77},
-    "earth": {"x": 24, "y": 72},
-    "thunder": {"x": 28, "y": 70},
-    "final": {"x": 22, "y": 76},
-}
-REGION_GATE_POSITION = {"x": 82, "y": 78}
-REGION_DUNGEON_LAYOUTS = {
-    "border_fire": [
-        {"node_id": "dungeon_moss_cave", "dungeon_ids": ["dungeon_moss_cave"], "position": {"x": 24, "y": 48}, "preview_role": "cave"},
-        {"node_id": "dungeon_scorched_mine", "dungeon_ids": ["dungeon_scorched_mine"], "position": {"x": 49, "y": 42}, "preview_role": "quarry"},
-        {"node_id": "dungeon_ash_ravine", "dungeon_ids": ["dungeon_ash_ravine"], "position": {"x": 48, "y": 67}, "preview_role": "valley"},
-        {"node_id": "dungeon_cinder_seal_depths", "dungeon_ids": ["dungeon_cinder_seal_depths"], "position": {"x": 64, "y": 82}, "preview_role": "cinder"},
-    ],
-    "ice": [
-        {"node_id": "dungeon_ice_minor_a", "dungeon_ids": ["dungeon_ice_minor_a"], "position": {"x": 28, "y": 39}, "preview_role": "wreck"},
-        {"node_id": "dungeon_ice_minor_b", "dungeon_ids": ["dungeon_ice_minor_b"], "position": {"x": 64, "y": 73}, "preview_role": "cave"},
-        {
-            "node_id": "dungeon_ice_main",
-            "dungeon_ids": ["dungeon_ice_main_phase_1", "dungeon_ice_main_phase_2"],
-            "position": {"x": 77, "y": 33},
-            "preview_role": "fortress",
-            "label": "Ice Main Dungeon",
-        },
-    ],
-    "earth": [
-        {"node_id": "dungeon_earth_minor_a", "dungeon_ids": ["dungeon_earth_minor_a"], "position": {"x": 28, "y": 38}, "preview_role": "forest"},
-        {"node_id": "dungeon_earth_minor_b", "dungeon_ids": ["dungeon_earth_minor_b"], "position": {"x": 63, "y": 74}, "preview_role": "quarry"},
-        {
-            "node_id": "dungeon_earth_main",
-            "dungeon_ids": ["dungeon_earth_main_phase_1", "dungeon_earth_main_phase_2"],
-            "position": {"x": 76, "y": 34},
-            "preview_role": "forest",
-            "label": "Earth Main Dungeon",
-        },
-    ],
-    "thunder": [
-        {"node_id": "dungeon_thunder_minor_a", "dungeon_ids": ["dungeon_thunder_minor_a"], "position": {"x": 28, "y": 38}, "preview_role": "tower"},
-        {"node_id": "dungeon_thunder_minor_b", "dungeon_ids": ["dungeon_thunder_minor_b"], "position": {"x": 63, "y": 73}, "preview_role": "tower"},
-        {
-            "node_id": "dungeon_thunder_main",
-            "dungeon_ids": ["dungeon_thunder_main_phase_1", "dungeon_thunder_main_phase_2"],
-            "position": {"x": 76, "y": 33},
-            "preview_role": "tower",
-            "label": "Thunder Main Dungeon",
-        },
-    ],
-    "final": [
-        {"node_id": "dungeon_final_minor_a", "dungeon_ids": ["dungeon_final_minor_a"], "position": {"x": 29, "y": 39}, "preview_role": "ruins"},
-        {"node_id": "dungeon_final_minor_b", "dungeon_ids": ["dungeon_final_minor_b"], "position": {"x": 63, "y": 72}, "preview_role": "ruins"},
-        {
-            "node_id": "dungeon_final_main",
-            "dungeon_ids": ["dungeon_final_main_phase_1", "dungeon_final_main_phase_2", "dungeon_final_main_phase_3"],
-            "position": {"x": 77, "y": 33},
-            "preview_role": "fortress",
-            "label": "Final Main Dungeon",
-        },
-    ],
-}
+
 
 
 class GuiActionError(Exception):
@@ -583,7 +377,7 @@ class GuiRuntimeSession:
             return self._live_response(
                 action_id,
                 "正在返回探索...",
-                screen_model=self.exploration_screen_model(),
+                screen_model=exploration_screen_model(self),
                 next_route="../dungeon_exploration/index.html?mode=live",
             )
         if action_id == "confirm_travel":
@@ -644,7 +438,7 @@ class GuiRuntimeSession:
         return self._live_response(
             "confirm_travel",
             f"已進入迷宮：{dungeon['name']}。",
-            screen_model=self.exploration_screen_model(),
+            screen_model=exploration_screen_model(self),
             next_route="../dungeon_exploration/index.html?mode=live",
         )
 
@@ -665,7 +459,7 @@ class GuiRuntimeSession:
         return self._live_response(
             "advance_step",
             f"遭遇魔物：{game.MONSTERS[monster_id]['name']}。",
-            screen_model=self.combat_screen_model(),
+            screen_model=combat_screen_model(self),
             next_route="../combat_screen/index.html?mode=live",
         )
 
@@ -691,7 +485,7 @@ class GuiRuntimeSession:
         return self._live_response(
             "challenge_boss",
             f"決戰開始：{game.MONSTERS[boss_id]['name']}！",
-            screen_model=self.combat_screen_model(),
+            screen_model=combat_screen_model(self),
             next_route="../combat_screen/index.html?mode=live",
         )
 
@@ -825,7 +619,7 @@ class GuiRuntimeSession:
         return self._live_response(
             action_id,
             combat["last_action_summary"],
-            screen_model=self.combat_screen_model(),
+            screen_model=combat_screen_model(self),
         )
 
     def use_combat_item(self, item_id: str) -> game.CombatActionResult:
@@ -910,7 +704,7 @@ class GuiRuntimeSession:
         combat["turn"] += 1
         if state.get("current_hp", 0) <= 0:
             return self.resolve_defeat("You were defeated while retreating.")
-        return self._live_response("retreat", combat["last_action_summary"], screen_model=self.combat_screen_model())
+        return self._live_response("retreat", combat["last_action_summary"], screen_model=combat_screen_model(self))
 
     def resolve_victory(self, summary_lines: list[str]) -> dict[str, Any]:
         state = self.require_state()
@@ -992,7 +786,7 @@ class GuiRuntimeSession:
             combat["last_action_summary"],
             reward_lines + [game.run_loot_summary(run_log)],
         )
-        return self._live_response("basic_attack", "Victory.", screen_model=self.combat_screen_model())
+        return self._live_response("basic_attack", "Victory.", screen_model=combat_screen_model(self))
 
     def resolve_retreat(self, summary_lines: list[str]) -> dict[str, Any]:
         combat = self.require_combat()
@@ -1012,7 +806,7 @@ class GuiRuntimeSession:
             reward_lines,
         )
         game.record_battle_events(combat["battle_log"], combat["turn"], summary_lines or ["你撤出戰鬥。"])
-        return self._live_response("retreat", "Retreated from combat.", screen_model=self.combat_screen_model())
+        return self._live_response("retreat", "Retreated from combat.", screen_model=combat_screen_model(self))
 
     def resolve_defeat(self, message: str) -> dict[str, Any]:
         state = self.require_state()
@@ -1049,7 +843,7 @@ class GuiRuntimeSession:
             reward_lines,
         )
         combat.setdefault("battle_log", []).append("戰鬥結束：你倒下了。")
-        return self._live_response("defeat", "Defeated. Returned by rescue.", screen_model=self.combat_screen_model())
+        return self._live_response("defeat", "Defeated. Returned by rescue.", screen_model=combat_screen_model(self))
 
     def require_exploration(self) -> dict[str, Any]:
         if self.exploration is None:
@@ -1741,6 +1535,12 @@ class GuiRuntimeSession:
     def relic_preview_screen_model(self) -> dict[str, Any]:
         return relic_preview_screen_model(self.require_state())
 
+    def exploration_screen_model(self) -> dict[str, Any]:
+        return exploration_screen_model(self)
+
+    def combat_screen_model(self) -> dict[str, Any]:
+        return combat_screen_model(self)
+
     def fire_mark_church_bridge(self, payload: dict[str, Any], screen_id: str | None = None) -> dict[str, Any]:
         state = self.require_state()
         if not game.should_show_fire_mark_church_bridge(state):
@@ -1829,323 +1629,10 @@ class GuiRuntimeSession:
         if screen_id in {"relic_preview_screen", "facility_relic_preview_screen"}:
             return self.relic_preview_screen_model()
         if screen_id == "dungeon_exploration":
-            return self.exploration_screen_model()
+            return exploration_screen_model(self)
         if screen_id == "combat_screen":
-            return self.combat_screen_model()
+            return combat_screen_model(self)
         raise GuiActionError(f"未支援的 Live 畫面：{screen_id}", status=404)
-
-    def exploration_screen_model(self) -> dict[str, Any]:
-        state = self.require_state()
-        exploration = self.require_exploration()
-        dungeon = DUNGEONS[exploration["dungeon_id"]]
-        stats = game.get_stats(state)
-        current_step = exploration.get("current_step", 0)
-        total_steps = dungeon["steps"]
-        status = exploration.get("status", "exploring")
-
-        if exploration["dungeon_id"] == "dungeon_scorched_mine" and current_step >= total_steps:
-            game.record_boss_glen_sighting(state)
-
-        boss_id = dungeon.get("boss")
-        boss_action = None
-        boss_is_available = boss_id and game.boss_available_at_dungeon_end(
-            state, exploration["dungeon_id"], boss_id
-        )
-        show_pending_glen = (
-            boss_id == "boss_glen"
-            and current_step >= total_steps
-            and state.get("flags", {}).get(game.BOSS_GLEN_SIGHTED_FLAG)
-            and not state.get("flags", {}).get("boss_glen_defeated")
-        )
-        if boss_id and current_step >= total_steps and (boss_is_available or show_pending_glen):
-            boss_name = game.MONSTERS[boss_id]["name"]
-            is_enabled = status in ("exploring", "resolved") and current_step >= total_steps
-            disabled_reason = None
-            if status == "combat":
-                is_enabled = False
-                disabled_reason = "戰鬥中無法執行此動作。"
-            elif boss_id == "boss_glen":
-                if not state.get("flags", {}).get(game.BOSS_GLEN_INVESTIGATION_ACCEPTED_FLAG):
-                    is_enabled = False
-                    disabled_reason = "先回工會確認這股氣息。"
-
-            boss_action = {
-                "action_id": "challenge_boss",
-                "label": f"挑戰 {boss_name}",
-                "description": f"決戰迷宮守護者 {boss_name}。",
-                "enabled": is_enabled,
-                "disabled_reason": disabled_reason,
-                "primary": is_enabled,
-                "payload": {"dungeon_id": exploration["dungeon_id"], "boss_id": boss_id},
-            }
-
-        actions = [
-            {
-                "action_id": "advance_step",
-                "label": "前進一步",
-                "description": "前進探索下一步。",
-                "enabled": status == "exploring" and current_step < total_steps,
-                "disabled_reason": (
-                    "戰鬥中無法執行此動作。" if status == "combat" else (
-                        "已抵達終點，請挑戰守護者或離開返回地圖。" if current_step >= total_steps else None
-                    )
-                ),
-                "primary": not (boss_action and boss_action["enabled"]),
-                "payload": {"dungeon_id": exploration["dungeon_id"], "current_step": current_step},
-            }
-        ]
-        if boss_action:
-            actions.append(boss_action)
-        actions.append({
-            "action_id": "retreat",
-            "label": "離開迷宮" if current_step >= total_steps else "撤退",
-            "description": "返回世界地圖。" if current_step >= total_steps else "撤離當前迷宮並返回地圖。",
-            "enabled": status != "combat",
-            "disabled_reason": None if status != "combat" else "請先結束戰鬥。",
-            "primary": not (boss_action and boss_action["enabled"]),
-            "payload": {"dungeon_id": exploration["dungeon_id"]},
-        })
-
-        # Generate narrative guidance message
-        glen_sighted = state.get("flags", {}).get("boss_glen_sighted")
-        glen_accepted = state.get("flags", {}).get("boss_glen_investigation_accepted")
-        glen_defeated = state.get("flags", {}).get("boss_glen_defeated")
-
-        if exploration["dungeon_id"] == "dungeon_scorched_mine":
-            if current_step >= total_steps:
-                if glen_defeated:
-                    narrative_msg = "山寨頭目葛倫已被擊敗。焦石礦坑深處的熱度逐漸退去，你可以隨時離開迷宮返回城鎮。"
-                elif glen_accepted:
-                    narrative_msg = "已確認焦石礦坑最深處葛倫的藏身處。準備好迎接激烈的首領戰了嗎？"
-                else:
-                    narrative_msg = "你感覺到一股強大的敵意就在前方！但似乎需要先回工會回報，以了解如何開啟挑戰。"
-            else:
-                if glen_accepted:
-                    narrative_msg = "你正在前往焦石礦坑最深處。葛倫的嘍囉們在四處游蕩，請保持警惕，準備決戰。"
-                elif glen_sighted:
-                    narrative_msg = "已確認焦石礦坑深處異常氣息，請先撤退回到工會接受葛倫的調查委託。"
-                else:
-                    narrative_msg = "焦石礦坑內部瀰漫著焦油的氣息，山賊嘍囉隱蔽在礦道陰影中。小心前進。"
-        elif exploration["dungeon_id"] == "dungeon_ash_ravine":
-            ash_defeated = state.get("flags", {}).get("ash_guardian_defeated")
-            ash_scouted = "quest_ash_ravine_scout" in state.get("completed_quests", [])
-            if current_step >= total_steps:
-                if ash_defeated:
-                    narrative_msg = "灰燼裂谷終點的熱度逐漸退去，古老守護者已歸於灰燼。你可以安全離開迷宮。"
-                elif ash_scouted:
-                    narrative_msg = "已確認灰燼裂谷最深處的熱能波動。古老的巨影在熱風中蠢蠢欲動，準備好迎接決戰了嗎？"
-                else:
-                    narrative_msg = "裂谷深處熱浪滾滾，你隱約感受到強烈的震動與不尋常的熱源。請收集好裂谷素材，先撤退回工會登記偵查回報。"
-            else:
-                if ash_scouted:
-                    narrative_msg = "你再次深入灰燼裂谷。周圍的溫度比上次更高，元素守衛的甦醒震動愈加強烈。"
-                else:
-                    narrative_msg = "灰燼裂谷中熱浪襲人，四周散落著焦黑的鐵片。小心前進，收集工會所需的偵查素材。"
-        elif exploration["dungeon_id"] == "dungeon_cinder_seal_depths":
-            cinder_defeated = state.get("flags", {}).get("cinder_seal_sentinel_defeated")
-            cinder_scouted = "quest_cinder_depths_scout" in state.get("completed_quests", [])
-            if current_step >= total_steps:
-                if cinder_defeated:
-                    narrative_msg = "結界核心已解除封印，古老的鎮衛碎裂為塵土。第一幕的主線探索已告一段落。"
-                elif cinder_scouted:
-                    narrative_msg = "燼印深窟的最底層，結界核心傳來沉重的機械甦醒聲。做好萬全準備發起挑戰！"
-                else:
-                    narrative_msg = "深窟底層的火印微弱共鳴，前方氣流異常混亂。似乎需要先回工會，將此處的偵查結果報告給諾亞。"
-            else:
-                if cinder_scouted:
-                    narrative_msg = "你正在深入封印的核心地帶。空氣中的火元素粒子異常活躍，準備迎擊最終的守護者。"
-                else:
-                    narrative_msg = "深窟內部分佈著交錯的紅石礦脈，古老結界的氣息若隱若現。小心前進，收集深窟偵查素材。"
-        else:
-            if current_step >= total_steps:
-                narrative_msg = f"你已抵達 {dungeon['name']} 的最深處。前方沒有路了，整理收穫後即可離開迷宮。"
-            else:
-                narrative_msg = f"你正在探索 {dungeon['name']}。注意維持小隊的 HP 與 MP，小心前方的未知遭遇。"
-
-        boss_defeated = game.boss_defeated(state, boss_id)
-
-        hp_ratio = state["current_hp"] / stats["max_hp"] if stats["max_hp"] > 0 else 1.0
-        if hp_ratio > 0.6:
-            squad_status = "良好"
-        elif hp_ratio > 0.25:
-            squad_status = "警告"
-        else:
-            squad_status = "危急"
-
-        # Determine dynamic boss label and availability wording
-        boss_state_label = "-"
-        if boss_id:
-            if boss_id == "boss_glen":
-                if state.get("flags", {}).get("boss_glen_defeated"):
-                    boss_state_label = "山寨頭目葛倫 (已擊敗)"
-                elif state.get("flags", {}).get("boss_glen_investigation_accepted"):
-                    boss_state_label = "山寨頭目葛倫 (可挑戰)"
-                elif state.get("flags", {}).get("boss_glen_sighted"):
-                    boss_state_label = "山寨頭目葛倫 (未接受調查)"
-                else:
-                    boss_state_label = "深處有異動 (需要完成偵查)"
-            elif boss_id == "boss_ash_guardian":
-                if state.get("flags", {}).get("ash_guardian_defeated"):
-                    boss_state_label = "灰燼守衛 (已擊敗)"
-                elif "quest_ash_ravine_scout" in state.get("completed_quests", []):
-                    boss_state_label = "灰燼守衛 (可挑戰)"
-                else:
-                    boss_state_label = "深處有異動 (需要完成偵查)"
-            elif boss_id == "boss_cinder_seal_sentinel":
-                if state.get("flags", {}).get("cinder_seal_sentinel_defeated"):
-                    boss_state_label = "燼印鎮衛 (已擊敗)"
-                elif "quest_cinder_depths_scout" in state.get("completed_quests", []):
-                    boss_state_label = "燼印鎮衛 (可挑戰)"
-                else:
-                    boss_state_label = "深處有異動 (需要完成偵查)"
-            else:
-                label = boss_label(boss_id)
-                if game.boss_defeated(state, boss_id):
-                    boss_state_label = f"{label} (defeated)"
-                elif game.boss_available_at_dungeon_end(state, exploration["dungeon_id"], boss_id):
-                    boss_state_label = f"{label} (available)"
-                else:
-                    boss_state_label = f"{label} (locked)"
-
-        return {
-            "screen_id": "dungeon_exploration",
-            "title": "迷宮探索",
-            "subtitle": "正在進行迷宮探索，冒險的下一步正等待著你。",
-            "resource_strip": [
-                {"id": "hp", "label": f"HP {state['current_hp']}/{stats['max_hp']}", "tone": "hp" if state["current_hp"] > stats["max_hp"] * 0.35 else "warning"},
-                {"id": "mp", "label": f"MP {state['current_mp']}/{stats['max_mp']}", "tone": "mp"},
-            ],
-            "dungeon": {
-                "dungeon_id": exploration["dungeon_id"],
-                "name": dungeon["name"],
-                "summary": f"屬性：{dungeon['element']} / 推薦等級：{dungeon['recommended']}",
-                "recommended_level": dungeon["recommended"],
-                "player_level": f"Lv{state.get('level', 1)}",
-                "attribute": dungeon["element"],
-                "route_length": f"{total_steps} 步",
-                "clear_state": "已通關" if exploration["dungeon_id"] in state.get("cleared_dungeons", []) else "未通關",
-                "boss_state": boss_state_label,
-            },
-            "run_status": {
-                "current_step": current_step,
-                "total_steps": total_steps,
-                "step_note": exploration.get("last_message", "已抵達入口，準備前進。"),
-                "status_label": "已通關" if boss_defeated else ("戰鬥中" if status == "combat" else "探索中"),
-                "risk_label": "無" if boss_defeated else ("極高 (首領)" if current_step >= total_steps else "中等"),
-                "supply_label": squad_status,
-                "next_node": "下一步",
-            },
-            "run_rewards": run_reward_rows(exploration.get("run_log", {})),
-            "event_preview": exploration.get("events", [])[-5:],
-            "narrative_message": narrative_msg,
-            "actions": actions,
-        }
-
-    def combat_screen_model(self) -> dict[str, Any]:
-        state = self.require_state()
-        combat = self.require_combat()
-        enemy = combat["enemy"]
-        stats = game.get_stats(state, combat["player_buffs"])
-        enemy_hp = max(0, combat["enemy_hp"])
-        resolved = combat.get("outcome") is not None
-        boss = bool(combat.get("boss"))
-        usable_items = combat_item_rows(state)
-        usable_skills = combat_skill_rows(state, combat, resolved)
-        return {
-            "screen_id": "combat_screen",
-            "title": "戰鬥",
-            "subtitle": "迎擊眼前的強敵，取得勝利以推進探索。",
-            "resource_strip": [{"label": f"第 {combat['turn']} 回合", "tone": "neutral"}],
-            "player": {
-                "name": state.get("name", ""),
-                "class_label": state.get("job", ""),
-                "level_label": f"Lv{state.get('level', 1)}",
-                "hp_label": f"{state['current_hp']} / {stats['max_hp']}",
-                "mp_label": f"{state['current_mp']} / {stats['max_mp']}",
-                "status_label": game.buff_summary(combat["player_buffs"]),
-                "stance_label": "戰鬥結束" if resolved else "可行動",
-            },
-            "enemy": {
-                "enemy_id": combat["enemy_id"],
-                "name": enemy["name"],
-                "hp_label": f"HP {enemy_hp} / {enemy['hp']}",
-                "hp_percent": percent(enemy_hp, enemy["hp"]),
-                "attribute": enemy["element"],
-                "status_label": game.buff_summary(combat["enemy_buffs"]),
-            },
-            "command_message": combat.get("last_action_summary", ""),
-            "skill_menu": {
-                "label": "技能選擇",
-                "title": "技能",
-                "summary": f"目前 MP {state['current_mp']}/{stats['max_mp']}。目標：{enemy['name']} / 屬性 {enemy['element']} / 狀態 {game.buff_summary(combat['enemy_buffs'])}。再次按技能可收回。",
-                "empty_message": "尚無可用技能。" if state.get("learned_skills", []) else "沒有學會任何技能。",
-                "items": usable_skills,
-            },
-            "item_menu": {
-                "label": "道具選擇",
-                "title": "道具",
-                "summary": f"目標：{enemy['name']} / 狀態 {game.buff_summary(combat['enemy_buffs'])}。",
-                "empty_message": "沒有可用道具。",
-                "items": usable_items,
-            },
-            "battle_log": combat.get("battle_log", []),
-            "result_overlay": combat.get("result_overlay"),
-            "actions": [
-                {
-                    "action_id": "basic_attack",
-                    "label": "攻擊",
-                    "description": "進行普通攻擊。",
-                    "enabled": not resolved,
-                    "disabled_reason": None if not resolved else "戰鬥已結束。",
-                    "primary": True,
-                    "payload": {"enemy_id": combat["enemy_id"]},
-                },
-                {
-                    "action_id": "open_skill_menu",
-                    "label": "技能",
-                    "description": "職業特殊技能。",
-                    "enabled": not resolved and bool(state.get("learned_skills", [])),
-                    "disabled_reason": (
-                        "戰鬥已結束。" if resolved else (
-                            "你尚未學會任何技能。" if not state.get("learned_skills", []) else None
-                        )
-                    ),
-                    "primary": False,
-                    "payload": {"source": "combat_screen"},
-                },
-                {
-                    "action_id": "open_item_menu",
-                    "label": "道具",
-                    "description": "使用攜帶的戰鬥道具。",
-                    "enabled": not resolved and bool(usable_items),
-                    "disabled_reason": None if usable_items else "沒有可用道具。",
-                    "primary": False,
-                    "payload": {"source": "combat_screen"},
-                },
-                {
-                    "action_id": "defend",
-                    "label": "防禦",
-                    "description": "採取防禦姿態降低下回合所受傷害。",
-                    "enabled": not resolved,
-                    "disabled_reason": None if not resolved else "戰鬥已結束。",
-                    "primary": False,
-                    "payload": {},
-                },
-                {
-                    "action_id": "retreat",
-                    "label": "逃跑",
-                    "description": "嘗試逃離當前戰鬥。",
-                    "enabled": not resolved and not boss,
-                    "disabled_reason": (
-                        "戰鬥已結束。" if resolved else (
-                            "Boss 戰不可逃跑。" if boss else None
-                        )
-                    ),
-                    "primary": False,
-                    "payload": {"enemy_id": combat["enemy_id"]},
-                },
-            ],
-        }
 
     def session_info(self) -> dict[str, Any]:
         return {
@@ -2165,37 +1652,6 @@ class GuiRuntimeSession:
         shutil.copy2(game.SAVE_PATH, backup_path)
         self._save_backup_created = True
 
-
-def normalize_job_id(job_id: str | None) -> str:
-    if job_id in JOB_ID_TO_KEY:
-        return JOB_ID_TO_KEY[str(job_id)]
-    if job_id in JOBS:
-        return str(job_id)
-    raise GuiActionError("Unknown job id.", status=400)
-
-
-def save_exists() -> bool:
-    return game.SAVE_PATH.exists()
-
-
-def state_summary(state: dict[str, Any] | None) -> dict[str, Any] | None:
-    if state is None:
-        return None
-    game.ensure_state_defaults(state)
-    stats = game.get_stats(state)
-    job_key = state.get("job")
-    return {
-        "name": state.get("name", ""),
-        "job_id": JOB_KEY_TO_ID.get(job_key, str(job_key)),
-        "job_label": str(job_key),
-        "level": state.get("level", 1),
-        "exp": state.get("exp", 0),
-        "gold": state.get("gold", 0),
-        "guild_points": state.get("guild_points", 0),
-        "hp": {"current": state.get("current_hp", stats["max_hp"]), "max": stats["max_hp"]},
-        "mp": {"current": state.get("current_mp", stats["max_mp"]), "max": stats["max_mp"]},
-        "save_exists": save_exists(),
-    }
 
 
 def action_response(
@@ -2346,788 +1802,9 @@ def registration_model() -> dict[str, Any]:
     }
 
 
-def player_model(state: dict[str, Any]) -> dict[str, Any]:
-    summary = state_summary(state) or {}
-    hp = summary["hp"]
-    mp = summary["mp"]
-    return {
-        "name": summary["name"],
-        "class_label": summary["job_label"],
-        "level_label": f"Lv{summary['level']}",
-        "hp": {"label": f"HP {hp['current']}/{hp['max']}", "percent": percent(hp["current"], hp["max"])},
-        "mp": {"label": f"MP {mp['current']}/{mp['max']}", "percent": percent(mp["current"], mp["max"])},
-        "gold_label": f"{summary['gold']}G",
-    }
 
 
 
-
-
-def legacy_world_map_model(state: dict[str, Any]) -> dict[str, Any]:
-    locations = [
-        {
-            "location_id": "border_town",
-            "label": "邊境城鎮 艾爾姆",
-            "description": "旅程的據點，公會、旅店與工坊都集中在城牆內。",
-            "detail_note": "目前所在城鎮。可從這裡返回 Town Hub live screen。",
-            "position": {"x": 35, "y": 22},
-            "tone": "town",
-            "icon_token": "城",
-            "unlocked": True,
-            "locked_reason": None,
-            "favorite": False,
-            "status_label": "目前據點",
-            "recommended_level": "安全",
-            "steps": "0 步",
-            "attribute": "城鎮 / 無",
-            "clear_state": "可返回",
-            "exploration_rating": "整備中",
-            "boss": "無",
-            "preview_role": "town",
-            "primary_action": {
-                "action_id": "back_to_town_hub",
-                "label": "返回城鎮",
-                "enabled": True,
-                "disabled_reason": None,
-                "payload": {"location_id": "border_town"},
-            },
-        }
-    ]
-    unlocked_location_ids = {"border_town"}
-    for dungeon_id, dungeon in DUNGEONS.items():
-        if dungeon_id == "dungeon_ice_main_phase_1" and game.is_unlocked(state, "dungeon_ice_main_phase_2"):
-            continue
-        if dungeon_id == "dungeon_ice_main_phase_2" and not game.is_unlocked(state, "dungeon_ice_main_phase_2"):
-            continue
-        presentation = WORLD_MAP_PRESENTATION.get(
-            dungeon_id,
-            {
-                "location_id": dungeon_id,
-                "position": {"x": 50, "y": 50},
-                "tone": "fire" if "fire" in dungeon_id or "cinder" in dungeon_id else "nature",
-                "icon_token": "地",
-                "preview_role": "cave",
-                "description": f"{dungeon['recommended']} / {dungeon['steps']} 步",
-                "detail_note": "Live 模式將由遊戲核心驗證前往條件。",
-                "exploration_rating": "核心驗證",
-            },
-        )
-        unlocked = game.is_unlocked(state, dungeon.get("unlock"))
-        location_id = presentation["location_id"]
-        if unlocked:
-            unlocked_location_ids.add(location_id)
-        locations.append(
-            {
-                "location_id": location_id,
-                "label": dungeon["name"],
-                "description": presentation["description"],
-                "detail_note": presentation["detail_note"],
-                "position": presentation["position"],
-                "tone": presentation["tone"],
-                "icon_token": presentation["icon_token"],
-                "unlocked": unlocked,
-                "locked_reason": None if unlocked else "尚未由 runtime 解鎖。",
-                "favorite": dungeon_id in {"dungeon_moss_cave", "dungeon_scorched_mine", "dungeon_ash_ravine"},
-                "status_label": "可探索" if unlocked else "尚未解鎖",
-                "recommended_level": dungeon["recommended"],
-                "steps": f"{dungeon['steps']} 步",
-                "attribute": dungeon["element"],
-                "clear_state": "已通關" if dungeon_id in state.get("cleared_dungeons", []) else "未通關",
-                "exploration_rating": presentation["exploration_rating"],
-                "boss": boss_label(dungeon.get("boss")),
-                "preview_role": presentation["preview_role"],
-                "primary_action": {
-                    "action_id": "confirm_travel",
-                    "label": "確認前往",
-                    "enabled": unlocked,
-                    "disabled_reason": None if unlocked else "尚未由 runtime 解鎖。",
-                    "payload": {"dungeon_id": dungeon_id, "location_id": location_id},
-                },
-            }
-        )
-    for location in WORLD_MAP_PREVIEW_LOCATIONS:
-        locations.append(
-            {
-                **location,
-                "unlocked": False,
-                "favorite": False,
-                "status_label": "尚未解鎖",
-                "recommended_level": "未知",
-                "steps": "未知",
-                "clear_state": "鎖定",
-                "exploration_rating": "無資料",
-                "boss": "未知",
-                "primary_action": {
-                    "action_id": "confirm_travel",
-                    "label": "確認前往",
-                    "enabled": False,
-                    "disabled_reason": location["locked_reason"],
-                    "payload": {"location_id": location["location_id"]},
-                },
-            }
-        )
-    route_segments = [
-        {
-            "id": route["id"],
-            "status": "open" if route["from"] in unlocked_location_ids and route["to"] in unlocked_location_ids else "locked",
-            "points": route["points"],
-        }
-        for route in WORLD_MAP_ROUTE_SEGMENTS
-    ]
-    return {
-        "screen_id": "world_map",
-        "layout_family": "navigation_map",
-        "title": "世界地圖",
-        "subtitle": "Live 模式使用遊戲核心狀態；畫面結構與靜態原型保持一致。",
-        "selected_location_id": next((location["location_id"] for location in locations if location["location_id"] != "border_town" and location["unlocked"]), "border_town"),
-        "current_location_id": "border_town",
-        "player": player_model(state),
-        "menu_actions": [
-            {"action_id": "view_status", "label": "查看狀態", "description": "查看冒險者的能力數值與目前裝備。", "enabled": True, "payload": {}},
-            {"action_id": "open_bestiary", "label": "怪物圖鑑", "description": "查看冒險中已登錄的魔物資訊。", "enabled": True, "payload": {}},
-            {"action_id": "open_inventory", "label": "背包 / 裝備", "description": "查看背包內持有的道具、裝備與素材。", "enabled": True, "payload": {}},
-            {"action_id": "save_game", "label": "存檔", "description": "透過遊戲核心寫入目前的進度。", "enabled": True, "payload": {}},
-            {"action_id": "open_settings", "label": "設定", "description": "調整遊戲設定。", "enabled": True, "payload": {}},
-            {"action_id": "back_to_start_screen", "label": "回到標題", "description": "返回遊戲開始標題畫面。", "enabled": True, "payload": {}},
-        ],
-        "route_segments": route_segments,
-        "locations": locations,
-    }
-
-
-def legacy_town_hub_model(state: dict[str, Any]) -> dict[str, Any]:
-    return {
-        "screen_id": "town_hub",
-        "layout_family": "hub",
-        "title": "艾爾姆城鎮 (Live)",
-        "subtitle": "角色資源狀態與核心行為皆與 Python 遊戲引擎同步。",
-        "resource_strip": resource_strip(state),
-        "town_guidance": [
-            "Live 模式：所有冒險行為皆經由 Python 核心驗證。",
-            "可前往世界地圖繼續冒險，或在城鎮旅店進行休整。",
-        ],
-        "selected_facility_id": "guild",
-        "facility_nodes": facility_nodes(state),
-        "navigation_actions": [
-            {"action_id": "open_world_map", "label": "前往世界地圖", "description": "離開城鎮，選擇下一個目的地。", "enabled": True, "payload": {}},
-        ],
-    }
-
-
-def facility_nodes(state: dict[str, Any]) -> list[dict[str, Any]]:
-    return [
-        facility(
-            "guild",
-            "冒險者工會",
-            "前往冒險者工會，回報已通關的迷宮探索。",
-            "guild",
-            "open_facility",
-            payload={"facility_id": "guild", "target_screen_id": "guild_screen"},
-            target_screen_id="guild_screen",
-            navigation_route="../guild_screen/index.html",
-        ),
-        facility(
-            "inn",
-            "旅店",
-            "前往旅店，提供金幣休整並回復狀態。",
-            "bed",
-            "open_facility",
-            payload={"facility_id": "inn", "target_screen_id": "inn_screen"},
-            target_screen_id="inn_screen",
-            navigation_route="../inn_screen/index.html",
-        ),
-        facility(
-            "travel_shop",
-            "旅人小鋪",
-            "前往旅人小鋪購買消耗性補給品。",
-            "shop",
-            "open_facility",
-            payload={"facility_id": "travel_shop", "target_screen_id": "shop_screen"},
-            target_screen_id="shop_screen",
-            navigation_route="../shop_screen/index.html",
-            enabled=True,
-        ),
-        facility(
-            "workshop",
-            "鐵刃 / 堅甲工坊",
-            "前往工坊購買武器。（MVP 僅開放武器購買，防具與強化尚不可用）",
-            "hammer",
-            "open_facility",
-            payload={"facility_id": "workshop", "target_screen_id": "workshop_screen"},
-            target_screen_id="workshop_screen",
-            navigation_route="../workshop_screen/index.html",
-            enabled=True,
-        ),
-        facility(
-            "synthesis",
-            "米菈合成屋",
-            "前往米菈合成屋，進行物品與裝備的鍊金合成。" if game.is_unlocked(state, "shop_synthesis_01") else "米菈的店門半掩著。先完成工會任務「洞窟採集」吧。",
-            "alchemy",
-            "open_facility",
-            payload={"facility_id": "synthesis", "target_screen_id": "synthesis_screen"},
-            target_screen_id="synthesis_screen",
-            navigation_route="../synthesis_screen/index.html",
-            enabled=game.is_unlocked(state, "shop_synthesis_01"),
-            disabled_reason="米菈的店門半掩著。先完成工會任務「洞窟採集」吧。",
-        ),
-        facility(
-            "magic_shop",
-            "星燈魔法商店",
-            "前往星燈魔法商店學習與研讀術式魔法書。",
-            "magic",
-            "open_facility",
-            payload={"facility_id": "magic_shop", "target_screen_id": "magic_shop_screen"},
-            target_screen_id="magic_shop_screen",
-            navigation_route="../magic_shop_screen/index.html",
-            enabled=True,
-        ),
-        facility(
-            "temple",
-            "轉職神殿",
-            "前往轉職神殿，進行職業晉升預覽與印記諮詢。",
-            "temple",
-            "open_facility",
-            payload={"facility_id": "temple", "target_screen_id": "temple_screen"},
-            target_screen_id="temple_screen",
-            navigation_route="../temple_screen/index.html",
-            enabled=True,
-        ),
-        facility(
-            "relic_preview",
-            "聖物調查",
-            "前往神殿後側的遺跡調查，預覽未開啟的正式聖物玩法。",
-            "relic",
-            "open_facility",
-            payload={"facility_id": "relic_preview", "target_screen_id": "relic_preview_screen"},
-            target_screen_id="relic_preview_screen",
-            navigation_route="../relic_preview_screen/index.html",
-            enabled=True,
-        ),
-        facility(
-            "storage",
-            "城鎮倉庫",
-            "前往城鎮倉庫，解鎖並檢視保管箱狀態；寄存與取出尚未開放。",
-            "storage",
-            "open_facility",
-            payload={"facility_id": "storage", "target_screen_id": "storage_screen"},
-            target_screen_id="storage_screen",
-            navigation_route="../storage_screen/index.html",
-            enabled=True,
-        ),
-    ]
-
-
-def facility(
-    facility_id: str,
-    label: str,
-    description: str,
-    icon_role: str,
-    action_id: str,
-    *,
-    payload: dict[str, Any] | None = None,
-    enabled: bool = True,
-    target_screen_id: str | None = None,
-    navigation_route: str | None = None,
-    disabled_reason: str | None = None,
-) -> dict[str, Any]:
-    visual = FACILITY_VISUALS.get(facility_id, {})
-    default_reason = "此設施的 Live 模式功能將在後續版本開放。"
-    return {
-        "facility_id": facility_id,
-        "label": label,
-        "description": description,
-        "visual_group": visual.get("visual_group", facility_id),
-        "visual_anchor": visual.get("visual_anchor", facility_id),
-        "icon_role": icon_role,
-        "enabled": enabled,
-        "disabled_reason": None if enabled else (disabled_reason or default_reason),
-        "badges": [],
-        "primary_action": action_id,
-        "payload": payload or {"facility_id": facility_id},
-        "target_screen_id": target_screen_id,
-        "navigation_route": navigation_route,
-    }
-
-
-def region_town_location_id(region_id: str) -> str:
-    return "border_town" if region_id == "border_fire" else f"town_{region_id}"
-
-
-def region_route_status(unlocked_location_ids: set[str], *location_ids: str) -> str:
-    return "open" if all(location_id in unlocked_location_ids for location_id in location_ids) else "locked"
-
-
-
-def region_runtime_unlocked(state: dict[str, Any], region_id: str) -> bool:
-    return region_id in set(get_unlocked_regions(state))
-
-
-def region_route_enabled(state: dict[str, Any], region_id: str) -> bool:
-    return region_id in REGION_ROUTE_ENABLED and region_runtime_unlocked(state, region_id)
-
-
-def normalize_region_id(state: dict[str, Any], requested_region_id: str | None = None) -> str:
-    if requested_region_id in REGION_ROUTE_ENABLED and region_route_enabled(state, str(requested_region_id)):
-        return str(requested_region_id)
-    return "border_fire"
-
-
-def region_locked_reason(region_id: str) -> str:
-    if region_id == "ice":
-        return "Ice route unlocks after the Fire Seal route is complete."
-    if region_id == "earth":
-        return "Earth route unlocks after completing Ice Region quests."
-    if region_id == "thunder":
-        return "Thunder route unlocks after completing Earth Region quests."
-    if region_id == "final":
-        return "Final Region requires all four enshrined elemental seals."
-    return f"{REGION_LABELS.get(region_id, region_id)} region is not unlocked yet."
-
-
-def region_options_model(state: dict[str, Any], selected_region_id: str | None = None) -> list[dict[str, Any]]:
-    current_region_id = normalize_region_id(state, selected_region_id)
-    options = []
-    for region_id in REGION_ORDER:
-        region = REGIONS[region_id]
-        runtime_unlocked = region_runtime_unlocked(state, region_id)
-        route_enabled = region_route_enabled(state, region_id)
-        options.append(
-            {
-                "region_id": region_id,
-                "label": REGION_LABELS[region_id],
-                "name": region.get("name", REGION_LABELS[region_id]),
-                "town_name": region.get("town_name", REGION_LABELS[region_id]),
-                "unlocked": runtime_unlocked,
-                "route_enabled": route_enabled,
-                "current": region_id == current_region_id,
-                "unlock_key": region.get("unlock_key"),
-                "dungeon_count": len(region.get("dungeon_ids", [])),
-                "quest_count": len(region.get("quest_ids", [])),
-                "disabled_reason": None if route_enabled else region_locked_reason(region_id),
-            }
-        )
-    return options
-
-
-def default_region_id(state: dict[str, Any], requested_region_id: str | None = None) -> str:
-    return normalize_region_id(state, requested_region_id)
-
-
-def region_for_dungeon_id(dungeon_id: str) -> str:
-    for region_id, region in REGIONS.items():
-        if dungeon_id in region.get("dungeon_ids", []):
-            return region_id
-    return "border_fire"
-
-
-def active_dungeon_id_for_slot(state: dict[str, Any], slot: dict[str, Any]) -> str:
-    dungeon_ids = slot.get("dungeon_ids", [])
-    for dungeon_id in reversed(dungeon_ids):
-        dungeon = DUNGEONS[dungeon_id]
-        if game.is_unlocked(state, dungeon.get("unlock")):
-            return dungeon_id
-    return dungeon_ids[0]
-
-
-def region_gate_options_model(state: dict[str, Any], source_region_id: str) -> list[dict[str, Any]]:
-    all_regions = ["border_fire", "ice", "earth", "thunder", "final"]
-    destinations = [r for r in all_regions if r != source_region_id]
-    options = []
-    for region_id in destinations:
-        route_enabled = region_route_enabled(state, region_id)
-        options.append(
-            {
-                "region_id": region_id,
-                "label": REGION_LABELS[region_id],
-                "name": REGIONS[region_id].get("name", REGION_LABELS[region_id]),
-                "town_name": REGIONS[region_id].get("town_name", REGION_LABELS[region_id]),
-                "enabled": route_enabled,
-                "unlocked": region_runtime_unlocked(state, region_id),
-                "disabled_reason": None if route_enabled else region_locked_reason(region_id),
-                "action_id": "travel_region",
-                "payload": {"region_id": region_id},
-            }
-        )
-    return options
-
-
-def world_map_model(state: dict[str, Any], selected_region_id: str | None = None) -> dict[str, Any]:
-    region_id = normalize_region_id(state, selected_region_id)
-    region = REGIONS[region_id]
-    region_label = REGION_LABELS[region_id]
-    town_name = region.get("town_name", region_label)
-    town_id = region_town_location_id(region_id)
-    locations: list[dict[str, Any]] = []
-    route_segments: list[dict[str, Any]] = []
-    unlocked_location_ids: set[str] = {town_id}
-
-    locations.append(
-        {
-            "location_id": town_id,
-            "region_id": region_id,
-            "label": town_name,
-            "description": f"{region_label} town hub. Facilities reuse the shared live Town Hub shell for now.",
-            "detail_note": "Live region context is carried by the runtime bridge; facilities remain shared for this slice.",
-            "position": REGION_TOWN_POSITIONS[region_id],
-            "tone": "town",
-            "icon_token": "TOWN",
-            "unlocked": True,
-            "locked_reason": None,
-            "favorite": region_id == "border_fire",
-            "status_label": "Town Hub",
-            "recommended_level": "Hub",
-            "steps": "0",
-            "attribute": region_label,
-            "clear_state": "Available",
-            "exploration_rating": "safe",
-            "boss": "-",
-            "preview_role": "town",
-            "primary_action": {
-                "action_id": "back_to_town_hub",
-                "label": "Enter town",
-                "enabled": True,
-                "disabled_reason": None,
-                "payload": {"region_id": region_id, "location_id": town_id, "town_name": town_name},
-            },
-        }
-    )
-
-    previous_id = town_id
-    previous_position = REGION_TOWN_POSITIONS[region_id]
-    for slot in REGION_DUNGEON_LAYOUTS[region_id]:
-        dungeon_id = active_dungeon_id_for_slot(state, slot)
-        dungeon = DUNGEONS[dungeon_id]
-        node_id = slot["node_id"]
-        dungeon_unlocked = game.is_unlocked(state, dungeon.get("unlock"))
-        locked_reason = None if dungeon_unlocked else "Dungeon is locked by runtime progression."
-        if dungeon_unlocked:
-            unlocked_location_ids.add(node_id)
-
-        locations.append(
-            {
-                "location_id": node_id,
-                "region_id": region_id,
-                "dungeon_id": dungeon_id,
-                "dungeon_ids": slot.get("dungeon_ids", []),
-                "label": slot.get("label", dungeon["name"]),
-                "description": (
-                    f"{region_label} dungeon from runtime data: {dungeon['recommended']} / "
-                    f"{dungeon['steps']} steps / {len(dungeon.get('monsters', []))} encounter entries."
-                ),
-                "detail_note": "This map node dispatches the active runtime dungeon_id to Python.",
-                "position": slot["position"],
-                "tone": REGION_TONES[region_id],
-                "icon_token": REGION_TOKENS[region_id],
-                "unlocked": dungeon_unlocked,
-                "locked_reason": locked_reason,
-                "favorite": region_id == "border_fire",
-                "status_label": "Playable" if dungeon_unlocked else "Locked",
-                "recommended_level": dungeon["recommended"],
-                "steps": f"{dungeon['steps']}",
-                "attribute": dungeon.get("element", region_label),
-                "clear_state": "Cleared" if dungeon_id in state.get("cleared_dungeons", []) else "Uncleared",
-                "exploration_rating": "runtime",
-                "boss": boss_label(dungeon.get("boss")),
-                "preview_role": slot.get("preview_role", "dungeon"),
-                "primary_action": {
-                    "action_id": "confirm_travel",
-                    "label": "Travel",
-                    "enabled": dungeon_unlocked,
-                    "disabled_reason": locked_reason,
-                    "payload": {"dungeon_id": dungeon_id, "location_id": node_id, "region_id": region_id},
-                },
-            }
-        )
-        route_segments.append(
-            {
-                "id": f"{previous_id}_to_{node_id}",
-                "status": region_route_status(unlocked_location_ids, previous_id, node_id),
-                "points": [
-                    [previous_position["x"], previous_position["y"]],
-                    [slot["position"]["x"], slot["position"]["y"]],
-                ],
-            }
-        )
-        previous_id = node_id
-        previous_position = slot["position"]
-
-    gate_options = region_gate_options_model(state, region_id)
-    if region_id == "border_fire":
-        ice_enabled = any(option["region_id"] == "ice" and option["enabled"] for option in gate_options)
-        gate_unlocked = ice_enabled
-        gate_locked_reason = None if ice_enabled else region_locked_reason("ice")
-        gate_location_id = "region_gate_ice"
-    else:
-        gate_unlocked = True
-        gate_locked_reason = None
-        gate_location_id = "region_gate_border"
-
-    region_gate = {
-        "location_id": gate_location_id,
-        "region_id": region_id,
-        "label": "Region Gate",
-        "description": "A route marker for leaving this region." if region_id != "border_fire" else "A route marker for leaving the fire border after the Fire Seal route is complete.",
-        "detail_note": "Returning to Border is always enabled; later regions remain locked placeholders." if region_id != "border_fire" else "Only Ice is enabled in this runtime bridge slice; later regions remain locked placeholders.",
-        "position": REGION_GATE_POSITION,
-        "tone": "gate",
-        "icon_token": "GATE",
-        "unlocked": gate_unlocked,
-        "locked_reason": gate_locked_reason,
-        "favorite": False,
-        "status_label": "Open" if gate_unlocked else "Locked",
-        "recommended_level": "Route",
-        "steps": "0",
-        "attribute": "Return Region" if region_id != "border_fire" else "New Region",
-        "clear_state": "Available" if gate_unlocked else "Locked",
-        "exploration_rating": "route",
-        "boss": "-",
-        "preview_role": "gate",
-        "options": gate_options,
-        "primary_action": {
-            "action_id": "open_region_gate",
-            "label": "Choose Region",
-            "enabled": True,
-            "disabled_reason": None,
-            "payload": {"source_region_id": region_id},
-        },
-    }
-    locations.append(region_gate)
-    route_segments.append(
-        {
-            "id": f"{previous_id}_to_{gate_location_id}",
-            "status": "open" if gate_unlocked else "locked",
-            "points": [
-                [previous_position["x"], previous_position["y"]],
-                [REGION_GATE_POSITION["x"], REGION_GATE_POSITION["y"]],
-            ],
-        }
-    )
-
-    selected_location_id = next(
-        (location["location_id"] for location in locations if location["location_id"] != town_id and location["unlocked"]),
-        town_id,
-    )
-    return {
-        "screen_id": "world_map",
-        "layout_family": "navigation_map",
-        "title": "World Map",
-        "subtitle": f"Live region routing: {region_label} map view.",
-        "selected_location_id": selected_location_id,
-        "current_location_id": town_id,
-        "current_region_id": region_id,
-        "current_region_label": region_label,
-        "current_town_name": town_name,
-        "map_asset": REGION_MAP_ASSETS.get(region_id),
-        "town_asset": REGION_TOWN_ASSETS.get(region_id),
-        "region_gate": region_gate,
-        "region_options": region_options_model(state, region_id),
-        "player": player_model(state),
-        "menu_actions": [
-            {"action_id": "view_status", "label": "Status", "description": "Open live player status preview.", "enabled": True, "payload": {}},
-            {"action_id": "open_bestiary", "label": "Bestiary", "description": "Open live bestiary preview.", "enabled": True, "payload": {}},
-            {"action_id": "open_inventory", "label": "Inventory", "description": "Open live inventory preview.", "enabled": True, "payload": {}},
-            {"action_id": "save_game", "label": "Save", "description": "Save through the Python runtime.", "enabled": True, "payload": {}},
-            {"action_id": "open_settings", "label": "Settings", "description": "Open settings placeholder.", "enabled": True, "payload": {}},
-            {"action_id": "back_to_start_screen", "label": "Title", "description": "Return to start screen.", "enabled": True, "payload": {}},
-        ],
-        "route_segments": route_segments,
-        "locations": locations,
-    }
-
-
-def town_hub_model(state: dict[str, Any], selected_region_id: str | None = None) -> dict[str, Any]:
-    region_id = default_region_id(state, selected_region_id)
-    region = REGIONS[region_id]
-    region_label = REGION_LABELS[region_id]
-    town_name = region.get("town_name", region_label)
-    return {
-        "screen_id": "town_hub",
-        "layout_family": "hub",
-        "title": f"{town_name} (Live)",
-        "subtitle": "Live Town Hub uses shared facilities while carrying region context from CLI data.",
-        "current_region_id": region_id,
-        "selected_region_id": region_id,
-        "current_region_label": region_label,
-        "current_town_name": town_name,
-        "town_asset": REGION_TOWN_ASSETS.get(region_id),
-        "region_options": region_options_model(state, region_id),
-        "resource_strip": resource_strip(state),
-        "town_guidance": [
-            f"Current region: {region_label} / {town_name}.",
-            "Facilities are shared live shells for this slice; region-specific facility content is deferred.",
-        ],
-        "selected_facility_id": "guild",
-        "facility_nodes": facility_nodes(state),
-        "navigation_actions": [
-            {
-                "action_id": "open_world_map",
-                "label": "Open World Map",
-                "description": "Return to the five-region live world map.",
-                "enabled": True,
-                "payload": {"region_id": region_id},
-            },
-        ],
-    }
-
-
-def inn_screen_model(state: dict[str, Any]) -> dict[str, Any]:
-    summary = state_summary(state) or {}
-    return {
-        "screen_id": "inn_screen",
-        "layout_family": "dialogue_node",
-        "title": "艾爾姆旅店 (Live)",
-        "subtitle": "與遊戲核心同步的休息休整服務。",
-        "resource_strip": resource_strip(state),
-        "feedback_message": None,
-        "service": {
-            "service_id": "overnight_rest",
-            "label": "住宿休息",
-            "description": "支付 30G 住宿費用，並由遊戲核心回復所有生命值與魔力值。",
-            "cost": 30,
-            "enabled": summary.get("gold", 0) >= 30,
-            "disabled_reason": None if summary.get("gold", 0) >= 30 else "身上金幣不足。",
-            "action_id": "rest_at_inn",
-            "payload": {"service_id": "overnight_rest", "cost": 30},
-        },
-        "actions": [
-            {
-                "action_id": "rest_at_inn",
-                "label": "休息休整",
-                "description": "支付 30G 費用以完全回復狀態。",
-                "enabled": summary.get("gold", 0) >= 30,
-                "disabled_reason": None if summary.get("gold", 0) >= 30 else "身上金幣不足。",
-                "payload": {"service_id": "overnight_rest", "cost": 30},
-            }
-        ],
-        "navigation_actions": [
-            {
-                "action_id": "back_to_town_hub",
-                "label": "返回城鎮",
-                "description": "離開旅店返回城鎮廣場。",
-                "enabled": True,
-                "payload": {"from": "inn_screen"},
-            }
-        ],
-    }
-
-
-
-
-
-
-
-
-def run_reward_rows(run_log: dict[str, Any]) -> list[dict[str, str]]:
-    rows = []
-    gold = int(run_log.get("gold", 0) or 0)
-    if gold:
-        rows.append({"label": "金幣", "value": f"{gold}G"})
-    for item_id, qty in run_log.get("items", {}).items():
-        rows.append({"label": item_name(item_id), "value": f"x{qty}"})
-    return rows
-
-
-def combat_item_rows(state: dict[str, Any]) -> list[dict[str, Any]]:
-    rows = []
-    for item_id in ["item_potion_s", "item_potion_m", "item_focus_drop", "item_herb_antidote", "item_armor_piercer", "item_escape_scroll"]:
-        qty = state.get("inventory", {}).get(item_id, 0)
-        if qty <= 0:
-            continue
-        item = ITEMS.get(item_id, {})
-        rows.append(
-            {
-                "action_id": "use_item",
-                "label": item.get("name", item_name(item_id)),
-                "meta": f"x{qty}",
-                "description": item.get("desc", ""),
-                "enabled": True,
-                "disabled_reason": None,
-                "payload": {"item_id": item_id},
-            }
-        )
-    return rows
-
-
-def combat_skill_rows(state: dict[str, Any], combat: dict[str, Any] | None, resolved: bool) -> list[dict[str, Any]]:
-    rows = []
-    learned_skills = state.get("learned_skills", [])
-    for skill_id in learned_skills:
-        skill = SKILLS.get(skill_id)
-        if not skill:
-            continue
-        mp_cost = skill.get("mp", 0)
-        has_enough_mp = state.get("current_mp", 0) >= mp_cost
-        enabled = not resolved and has_enough_mp
-        disabled_reason = None
-        if resolved:
-            disabled_reason = "戰鬥已結束。"
-        elif not has_enough_mp:
-            disabled_reason = "MP 不足。"
-
-        payload = {"skill_id": skill_id}
-        kind = skill.get("kind")
-        if kind in ("damage", "debuff") and combat and "enemy_id" in combat:
-            payload["enemy_id"] = combat["enemy_id"]
-
-        rows.append(
-            {
-                "action_id": "use_skill",
-                "label": skill.get("name", skill_id),
-                "meta": f"MP {mp_cost}",
-                "description": skill.get("desc", ""),
-                "enabled": enabled,
-                "disabled_reason": disabled_reason,
-                "payload": payload,
-            }
-        )
-    return rows
-
-
-def result_overlay_model(outcome: str, title: str, status: str, summary: str, rows: list[str]) -> dict[str, Any]:
-    if outcome in ("victory", "retreat"):
-        next_action = {
-            "action_id": "back_to_exploration",
-            "label": "返回探索",
-            "description": "回到探索畫面繼續前進。",
-            "payload": {"from": f"combat_result_{outcome}"},
-            "feedback_message": "正在返回探索...",
-            "navigate_to": "../dungeon_exploration/index.html?mode=live",
-        }
-    else:
-        next_action = {
-            "action_id": "back_to_town_hub",
-            "label": "回到城鎮",
-            "description": "返回城鎮廣場進行休整。",
-            "payload": {"from": f"combat_result_{outcome}"},
-            "feedback_message": "正在返回城鎮...",
-            "navigate_to": "../town_hub/index.html?mode=live",
-        }
-    return {
-        "outcome": outcome,
-        "label": "戰鬥結束",
-        "title": title,
-        "status_summary": status,
-        "battle_summary": summary,
-        "reward_title": "結算",
-        "rows": [
-            {"label": f"{index}.", "value": row, "tone": "danger" if outcome == "defeat" and index == 1 else "neutral"}
-            for index, row in enumerate(rows, start=1)
-        ],
-        "next_action": next_action,
-    }
-
-
-def boss_label(boss_id: str | None) -> str:
-    if not boss_id:
-        return "-"
-    monster = game.MONSTERS.get(boss_id)
-    return monster["name"] if monster else boss_id
-
-
-def percent(current: int, maximum: int) -> int:
-    if maximum <= 0:
-        return 0
-    return max(0, min(100, round(current / maximum * 100)))
 
 
 def inventory_preview(state: dict[str, Any]) -> list[dict[str, Any]]:

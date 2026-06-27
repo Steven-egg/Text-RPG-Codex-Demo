@@ -1,12 +1,12 @@
 from __future__ import annotations
 
 from typing import Any
-from . import game
+from .state import ensure_state_defaults, get_stats
 
 
 def resource_strip(state: dict[str, Any]) -> list[dict[str, str]]:
-    game.ensure_state_defaults(state)
-    stats = game.get_stats(state)
+    ensure_state_defaults(state)
+    stats = get_stats(state)
     name = state.get("name", "")
     job_key = state.get("job")
     job_label = str(job_key)
