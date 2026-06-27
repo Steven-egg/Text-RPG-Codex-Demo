@@ -72,53 +72,12 @@ from data import (
     get_unlocked_regions,
     get_dialogue,
 )
+from .cli_helpers import GUILD_MATERIAL_BUY_PRICES, get_region_locked_reason
 
 ROOT = Path(__file__).resolve().parents[2]
 SAVE_PATH = ROOT / "save.json"
 
-GUILD_MATERIAL_BUY_PRICES = {
-    "mat_moss_fiber": 6,
-    "mat_cracked_stone": 6,
-    "mat_small_crystal": 14,
-    "mat_fire_stone": 18,
-    "mat_scorched_iron": 22,
-    "mat_lava_shard": 30,
-    "mat_ravine_ash": 28,
-    "mat_charred_iron": 32,
-    "mat_flame_stone_refined": 45,
-    "mat_ice_salt": 32,
-    "mat_ice_saltcloth": 36,
-    "mat_ice_wreck_plank": 38,
-    "mat_ice_frostroot": 40,
-    "mat_ice_blue_stone": 44,
-    "mat_ice_frostiron": 52,
-    "mat_ice_seal_dust": 58,
-    "mat_ice_deep_core": 72,
-    "mat_earth_moss_loam": 76,
-    "mat_earth_rootfiber": 82,
-    "mat_earth_spore_cap": 84,
-    "mat_earth_quarry_stone": 90,
-    "mat_earth_petrified_bark": 96,
-    "mat_earth_leyline_shard": 108,
-    "mat_earth_seal_clay": 116,
-    "mat_earth_deep_core": 132,
-    "mat_thunder_charge_sand": 140,
-    "mat_thunder_copper_vein": 148,
-    "mat_thunder_stormglass": 154,
-    "mat_thunder_sky_stone": 164,
-    "mat_thunder_conductor_rod": 172,
-    "mat_thunder_cloud_essence": 188,
-    "mat_thunder_seal_spark": 202,
-    "mat_thunder_deep_core": 226,
-    "mat_final_echo_ash": 240,
-    "mat_final_frost_memory": 248,
-    "mat_final_root_stone": 256,
-    "mat_final_storm_glass": 264,
-    "mat_final_void_shard": 280,
-    "mat_final_seal_core": 310,
-    "mat_final_demon_core": 340,
-    "mat_final_deep_essence": 360,
-}
+
 
 STORAGE_UNLOCK_COST = 500
 STORAGE_CAPACITY = 10
@@ -3338,15 +3297,7 @@ def cli_region_route_enabled(state: dict, region_id: str) -> bool:
 
 
 def cli_region_locked_reason(region_id: str) -> str:
-    if region_id == "ice":
-        return "Ice Region unlocks after the Fire Seal route is complete."
-    if region_id == "earth":
-        return "Earth Region unlocks after completing Ice Region quests."
-    if region_id == "thunder":
-        return "Thunder Region unlocks after completing Earth Region quests."
-    if region_id == "final":
-        return "Final Region requires all four enshrined elemental seals."
-    return "This region is locked."
+    return get_region_locked_reason(region_id)
 
 
 def region_travel_menu(state: dict, current_region_id: str) -> str:
