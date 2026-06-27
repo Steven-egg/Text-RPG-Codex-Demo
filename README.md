@@ -7,7 +7,7 @@ screen-level verification, and historical MVP notes live in Task Zone files.
 ## Current Stable Capsule
 
 - Latest local checkpoint recorded for this handoff:
-  `[codex] feat(runtime): add four-seal relic flow`
+  `[antig] fix(runtime): allow progressive CLI region gate travel`
   (use live `git log` for the exact hash).
 - Element Maze is an expandable playable demo, not a closed demo.
 - The Python CLI runtime remains the gameplay authority.
@@ -77,6 +77,10 @@ Current macro decisions:
 
 Task Zone pointers:
 
+- Task coordination board:
+  `task.md`
+- World content detailed baselines:
+  `01_content/world-content-baselines-v0.1.md`
 - GUI live bridge plan and landed live-slice notes:
   `01_content/gui-runtime-bridge-plan-v1.md`
 - GUI static prototype handoff and screen verification:

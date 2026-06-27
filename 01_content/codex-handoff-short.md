@@ -8,39 +8,13 @@ what the next boundary is.
 
 - Work directory: `C:\Users\user\OneDrive\文字冒險遊戲`
 - Latest local checkpoint recorded for this handoff:
-  `[codex] feat(runtime): add four-seal relic flow`
+  `[antig] fix(runtime): allow progressive CLI region gate travel`
   (use live `git log` for the exact hash).
-- Python CLI runtime remains the playable game and gameplay authority.
-- Act 1 is playable; Act 2 fire demo runtime / bridge coverage is complete for
-  the current narrow slice.
-- Ice, Earth, Thunder, and Final display naming passes are complete in runtime
-  data for dungeons, monsters, bosses, materials / key proofs, and quest title /
-  description text.
-- Relic v1 is complete as a four-element seal enshrinement flow for Fire, Ice,
-  Earth, and Thunder.
-- Fire consumes the three fire-mark shards at the Relic table after Guild /
-  Temple lookup closure, creates and enshrines the Fire seal, and unlocks Ice.
-- Ice, Earth, and Thunder source items convert to true seals without combat
-  bonuses, and Final unlock now requires all four enshrined elemental seals.
-- `06_tools/naming_inventory_report.py` is available as a read-only naming
-  inventory helper for duplicate display names and lightweight term-shape
-  checks.
-- Final display naming keeps `魔王城` as the region-facing target and reveals
-  `災禍邪神 阿巴頓` as the final boss display identity.
-- Relic resonance, active effects, passive effects, stat bonuses, resistance,
-  skill links, and combat behavior remain future runtime / facility planning
-  gates.
-- GUI static prototype exists under `07_gui_prototype/` and remains static by
-  default.
-- A local runtime-connected GUI bridge exists only for explicitly approved
-  blessed slices.
-- Basic facility CLI-parity bridge coverage is complete through Guild material
-  buyback.
-- Boss Combat Rule Parity is complete for Glen, Ash Guardian, and Cinder Seal
-  Sentinel.
-- Element Maze is an expandable playable demo, not a closed demo. Narrow MVP
-  language controls current-round risk; it does not close future extension
-  points.
+- For the full stable capsule details (CLI runtime authority, Relic v1
+  flow, naming passes, and bridge parity), see [README.md](../README.md#current-stable-capsule).
+- Note: Element Maze is an expandable playable demo, not a closed demo.
+  Narrow MVP language controls current-round risk; it does not close
+  future extension points.
 
 See `git status --short` before editing. There may be owner-side docs/archive
 cleanup in the worktree.
@@ -71,20 +45,17 @@ Macro content skeleton:
 
 Current decisions:
 
-- Four core content elements: Fire, Ice, Earth, Thunder.
-- Final region is a composite endgame zone, not a fifth core element.
-- Existing fire demo route uses the existing Border Town only; do not add an
-  Ash Outpost.
-- Ice / Earth / Thunder regions default to one regional town and three dungeons:
-  two minor dungeons plus one main two-phase dungeon.
-- Current display naming coverage is complete through Final.
-- Four-seal Relic v1 is landed as a progression and Final-gating layer only; it
-  does not open relic effects, combat bonuses, or broad facility systems.
+- For the full content decisions (core elements, region town/dungeon
+  counts, and relic progression boundaries), see [README.md](../README.md#content-skeleton).
 - This is planning only. It does not approve runtime, data, schema, save, GUI,
   bridge, combat, class, relic, or asset-pipeline work.
 
 ## Task Zone Routing
 
+- Task coordination board:
+  `../task.md`
+- World content detailed baselines:
+  `01_content/world-content-baselines-v0.1.md`
 - GUI live bridge details and landed MVP status notes:
   `01_content/gui-runtime-bridge-plan-v1.md`
 - GUI static prototype screen-level progress and verification:

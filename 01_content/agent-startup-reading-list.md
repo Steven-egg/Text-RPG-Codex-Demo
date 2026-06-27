@@ -44,10 +44,17 @@ lifecycle, or task routing.
 
 Open these only for matching tasks.
 
+### Task Board & Coordination
+
+- `task.md`
+  - Long task board for docs drift control, asset inventory, and runtime slimming coordination. Open this when continuing the weekend task chain.
+
 ### World / Content Planning
 
 - `01_content/world-content-skeleton-v0.1.md`
   - Hot Zone macro skeleton and current content-count decisions.
+- `01_content/world-content-baselines-v0.1.md`
+  - Task Zone detailed content baseline specifications for jobs, promotions, quests, and facilities.
 - `01_content/regional-data-template-v0.1.md`
   - Task Zone template for reusable region data slots, ID naming, material
     timing, quest turn-in safety, and candidate-content handoff.
