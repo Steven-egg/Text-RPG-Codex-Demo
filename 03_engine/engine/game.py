@@ -2352,46 +2352,42 @@ def boss_challenge_prompt(boss_id: str) -> str:
     return "礦坑深處傳來粗暴的笑聲。要挑戰 Boss 嗎？(y/n) > "
 
 def clear_dungeon_boss(state: dict, boss_id: str, run_log: dict) -> None:
-    if boss_id == "boss_glen":
-        clear_boss_glen(state, run_log)
-    elif boss_id == "boss_ash_guardian":
-        clear_ash_guardian(state, run_log)
-    elif boss_id == "boss_cinder_seal_sentinel":
-        clear_cinder_seal_sentinel(state, run_log)
-    elif boss_id == "boss_ice_wreck_captain":
-        clear_ice_wreck_captain(state, run_log)
-    elif boss_id == "boss_ice_frostroot_keeper":
-        clear_ice_frostroot_keeper(state, run_log)
-    elif boss_id == "boss_ice_outer_gatewarden":
-        clear_ice_outer_gatewarden(state, run_log)
-    elif boss_id == "boss_ice_final_seal_lord":
-        clear_ice_final_seal_lord(state, run_log)
-    elif boss_id == "boss_earth_rootwarden":
-        clear_earth_rootwarden(state, run_log)
-    elif boss_id == "boss_earth_quarry_colossus":
-        clear_earth_quarry_colossus(state, run_log)
-    elif boss_id == "boss_earth_outer_grovekeeper":
-        clear_earth_outer_grovekeeper(state, run_log)
-    elif boss_id == "boss_earth_deep_leyline_lord":
-        clear_earth_deep_leyline_lord(state, run_log)
-    elif boss_id == "boss_thunder_plateau_beacon":
-        clear_thunder_plateau_beacon(state, run_log)
-    elif boss_id == "boss_thunder_channel_keeper":
-        clear_thunder_channel_keeper(state, run_log)
-    elif boss_id == "boss_thunder_lower_array_warden":
-        clear_thunder_lower_array_warden(state, run_log)
-    elif boss_id == "boss_thunder_crown_storm_lord":
-        clear_thunder_crown_storm_lord(state, run_log)
-    elif boss_id == "boss_final_echo_vanguard":
-        clear_final_echo_vanguard(state, run_log)
-    elif boss_id == "boss_final_ruin_jailer":
-        clear_final_ruin_jailer(state, run_log)
-    elif boss_id == "boss_final_echo_warden":
-        clear_final_echo_warden(state, run_log)
-    elif boss_id == "boss_final_seal_core":
-        clear_final_seal_core(state, run_log)
-    elif boss_id == "boss_final_demon_king":
-        clear_final_demon_king(state, run_log)
+    from .cli_helpers import BOSS_CLEAR_DATA
+    if boss_id not in BOSS_CLEAR_DATA:
+        return
+
+    data = BOSS_CLEAR_DATA[boss_id]
+    defeated_flag = data["defeated_flag"]
+    if state["flags"].get(defeated_flag):
+        return
+
+    state["flags"][defeated_flag] = True
+
+    # Extra Flags
+    for flag_key, flag_val in data.get("extra_flags", {}).items():
+        state["flags"][flag_key] = flag_val
+
+    # Unlocks
+    for dungeon_to_unlock in data.get("unlocks", []):
+        unlock(state, dungeon_to_unlock)
+
+    # Loot
+    for item_id, qty in data.get("loot", []):
+        add_loot(state, item_id, qty, run_log)
+
+    # Special Action
+    if data.get("special_action") == "demon_king_ending":
+        state["flags"][MAIN_STORY_CLEARED_FLAG] = True
+        complete_final_quest_from_boss(state)
+        state["_ending_pending"] = True
+
+    # Messages
+    messages = data.get("messages", [])
+    if messages:
+        print(f"\n{messages[0]}")
+        for msg in messages[1:]:
+            print(msg)
+
 
 def explore_dungeon(state: dict, dungeon_id: str) -> None:
     dungeon = DUNGEONS[dungeon_id]
@@ -2563,162 +2559,6 @@ def handle_defeat(state: dict, run_log: dict) -> None:
     render_panel("戰鬥失敗 / 回城結算", result_lines, border_style="red")
     pause()
 
-def clear_boss_glen(state: dict, run_log: dict) -> None:
-    state["flags"]["boss_glen_defeated"] = True
-    add_loot(state, "key_blood_map", 1, run_log)
-    add_loot(state, "key_fire_mark_shard", 1, run_log)
-    add_loot(state, "mat_lava_shard", 2, run_log)
-    print("\n葛倫倒下時，懷裡掉出一張染血地圖。")
-    print("取得 血跡地圖 x1、火之印記碎片 x1、熔岩碎片 x2。")
-
-def clear_ash_guardian(state: dict, run_log: dict) -> None:
-    if state["flags"].get("ash_guardian_defeated"):
-        return
-    state["flags"]["ash_guardian_defeated"] = True
-    unlock(state, "dungeon_cinder_seal_depths")
-    add_loot(state, "key_fire_mark_shard", 1, run_log)
-    print("\n灰燼守衛的爐心逐漸熄滅，一枚赤紅碎片從灰殼中落下。")
-    print("取得 火之印記碎片 x1。")
-
-def clear_cinder_seal_sentinel(state: dict, run_log: dict) -> None:
-    if state["flags"].get("cinder_seal_sentinel_defeated"):
-        return
-    state["flags"]["cinder_seal_sentinel_defeated"] = True
-    add_loot(state, "key_fire_mark_shard", 1, run_log)
-    print("\n燼印鎮衛碎裂時，胸口的赤紅刻印凝成第三枚碎片。")
-    print("取得 火之印記碎片 x1。")
-    print("三枚碎片短暫共鳴，像有一個尚未說出口的名字在灰燼裡亮起。回城後先向工會與神殿確認。")
-
-def clear_ice_wreck_captain(state: dict, run_log: dict) -> None:
-    if state["flags"].get("ice_wreck_captain_defeated"):
-        return
-    state["flags"]["ice_wreck_captain_defeated"] = True
-    add_loot(state, "key_ice_wreck_captain_log", 1, run_log)
-    add_loot(state, "mat_ice_saltcloth", 2, run_log)
-    print("\nWreck Captain defeated. Key proof recovered: Wreck Captain Log x1.")
-
-def clear_ice_frostroot_keeper(state: dict, run_log: dict) -> None:
-    if state["flags"].get("ice_frostroot_keeper_defeated"):
-        return
-    state["flags"]["ice_frostroot_keeper_defeated"] = True
-    add_loot(state, "key_ice_frostroot_core", 1, run_log)
-    add_loot(state, "mat_ice_frostroot", 2, run_log)
-    print("\nFrostroot Keeper defeated. Key proof recovered: Frostroot Core x1.")
-
-def clear_ice_outer_gatewarden(state: dict, run_log: dict) -> None:
-    if state["flags"].get("ice_outer_gatewarden_defeated"):
-        return
-    state["flags"]["ice_outer_gatewarden_defeated"] = True
-    add_loot(state, "key_ice_outer_gate_sigils", 1, run_log)
-    add_loot(state, "mat_ice_frostiron", 2, run_log)
-    print("\nOuter Gatewarden defeated. Q3 can now be reported at the Guild.")
-
-def clear_ice_final_seal_lord(state: dict, run_log: dict) -> None:
-    if state["flags"].get("ice_final_boss_defeated"):
-        return
-    state["flags"]["ice_final_boss_defeated"] = True
-    state["flags"]["ice_relic_marker_resolved"] = True
-    add_loot(state, "key_ice_relic_marker_source", 1, run_log)
-    add_loot(state, "mat_ice_deep_core", 2, run_log)
-    print("\nFinal Seal Lord defeated. Ice relic marker source recovered; no relic effect is active.")
-
-def clear_earth_rootwarden(state: dict, run_log: dict) -> None:
-    if state["flags"].get("earth_rootwarden_defeated"):
-        return
-    state["flags"]["earth_rootwarden_defeated"] = True
-    add_loot(state, "key_earth_rootwarden_seed", 1, run_log)
-    add_loot(state, "mat_earth_rootfiber", 2, run_log)
-    print("\nRootwarden defeated. Key proof recovered: Rootwarden Seed x1.")
-
-def clear_earth_quarry_colossus(state: dict, run_log: dict) -> None:
-    if state["flags"].get("earth_quarry_colossus_defeated"):
-        return
-    state["flags"]["earth_quarry_colossus_defeated"] = True
-    add_loot(state, "key_earth_quarry_core", 1, run_log)
-    add_loot(state, "mat_earth_quarry_stone", 2, run_log)
-    print("\nQuarry Colossus defeated. Key proof recovered: Quarry Colossus Core x1.")
-
-def clear_earth_outer_grovekeeper(state: dict, run_log: dict) -> None:
-    if state["flags"].get("earth_outer_grovekeeper_defeated"):
-        return
-    state["flags"]["earth_outer_grovekeeper_defeated"] = True
-    add_loot(state, "key_earth_outer_grove_sigils", 1, run_log)
-    add_loot(state, "mat_earth_leyline_shard", 2, run_log)
-    print("\nOuter Grovekeeper defeated. Q3 can now be reported at the Guild.")
-
-def clear_earth_deep_leyline_lord(state: dict, run_log: dict) -> None:
-    if state["flags"].get("earth_final_boss_defeated"):
-        return
-    state["flags"]["earth_final_boss_defeated"] = True
-    state["flags"]["earth_relic_marker_resolved"] = True
-    add_loot(state, "key_earth_relic_marker_source", 1, run_log)
-    add_loot(state, "mat_earth_deep_core", 2, run_log)
-    print("\nDeep Leyline Lord defeated. Earth relic marker source recovered; no relic effect is active.")
-
-def clear_thunder_plateau_beacon(state: dict, run_log: dict) -> None:
-    if state["flags"].get("thunder_plateau_beacon_defeated"):
-        return
-    state["flags"]["thunder_plateau_beacon_defeated"] = True
-    add_loot(state, "key_thunder_plateau_beacon", 1, run_log)
-    add_loot(state, "mat_thunder_copper_vein", 2, run_log)
-    print("\nPlateau Beacon defeated. Key proof recovered: Plateau Beacon x1.")
-
-def clear_thunder_channel_keeper(state: dict, run_log: dict) -> None:
-    if state["flags"].get("thunder_channel_keeper_defeated"):
-        return
-    state["flags"]["thunder_channel_keeper_defeated"] = True
-    add_loot(state, "key_thunder_channel_core", 1, run_log)
-    add_loot(state, "mat_thunder_sky_stone", 2, run_log)
-    print("\nChannel Keeper defeated. Key proof recovered: Channel Core x1.")
-
-def clear_thunder_lower_array_warden(state: dict, run_log: dict) -> None:
-    if state["flags"].get("thunder_lower_array_warden_defeated"):
-        return
-    state["flags"]["thunder_lower_array_warden_defeated"] = True
-    add_loot(state, "key_thunder_lower_array_sigils", 1, run_log)
-    add_loot(state, "mat_thunder_cloud_essence", 2, run_log)
-    print("\nLower Array Warden defeated. Q3 can now be reported at the Guild.")
-
-def clear_thunder_crown_storm_lord(state: dict, run_log: dict) -> None:
-    if state["flags"].get("thunder_final_boss_defeated"):
-        return
-    state["flags"]["thunder_final_boss_defeated"] = True
-    state["flags"]["thunder_relic_marker_resolved"] = True
-    add_loot(state, "key_thunder_relic_marker_source", 1, run_log)
-    add_loot(state, "mat_thunder_deep_core", 2, run_log)
-    print("\nCrown Storm Lord defeated. Thunder relic marker source recovered; no relic effect is active.")
-
-def clear_final_echo_vanguard(state: dict, run_log: dict) -> None:
-    if state["flags"].get("final_echo_vanguard_defeated"):
-        return
-    state["flags"]["final_echo_vanguard_defeated"] = True
-    add_loot(state, "key_final_vanguard_proof", 1, run_log)
-    add_loot(state, "mat_final_echo_ash", 2, run_log)
-    print("\nFinal Echo Vanguard defeated. Key proof recovered: Final Vanguard Proof x1.")
-
-def clear_final_ruin_jailer(state: dict, run_log: dict) -> None:
-    if state["flags"].get("final_ruin_jailer_defeated"):
-        return
-    state["flags"]["final_ruin_jailer_defeated"] = True
-    add_loot(state, "key_final_ruin_jailer_core", 1, run_log)
-    add_loot(state, "mat_final_root_stone", 2, run_log)
-    print("\nRuin Jailer defeated. Key proof recovered: Ruin Jailer Core x1.")
-
-def clear_final_echo_warden(state: dict, run_log: dict) -> None:
-    if state["flags"].get("final_echo_warden_defeated"):
-        return
-    state["flags"]["final_echo_warden_defeated"] = True
-    add_loot(state, "key_final_echo_warden_sigils", 1, run_log)
-    add_loot(state, "mat_final_seal_core", 2, run_log)
-    print("\nEcho Warden defeated. Q3 can now be reported at the Guild.")
-
-def clear_final_seal_core(state: dict, run_log: dict) -> None:
-    if state["flags"].get("final_seal_core_defeated"):
-        return
-    state["flags"]["final_seal_core_defeated"] = True
-    add_loot(state, "key_final_seal_core_sigils", 1, run_log)
-    add_loot(state, "mat_final_demon_core", 2, run_log)
-    print("\nFinal Seal Core broken. Q4 can now be reported at the Guild.")
 
 def complete_final_quest_from_boss(state: dict) -> None:
     if FINAL_QUEST_ID in state["completed_quests"]:
@@ -2737,16 +2577,6 @@ def complete_final_quest_from_boss(state: dict) -> None:
     state["completed_quests"].append(FINAL_QUEST_ID)
     print(f"Final Q5 completed. Guild reputation +{guild_gain}.")
 
-def clear_final_demon_king(state: dict, run_log: dict) -> None:
-    if state["flags"].get("final_demon_king_defeated"):
-        return
-    state["flags"]["final_demon_king_defeated"] = True
-    state["flags"][MAIN_STORY_CLEARED_FLAG] = True
-    add_loot(state, "key_final_demon_king_mark", 1, run_log)
-    add_loot(state, "mat_final_demon_core", 2, run_log)
-    complete_final_quest_from_boss(state)
-    state["_ending_pending"] = True
-    print("\nDemon King defeated. The main story ending is ready.")
 
 def show_main_story_ending(state: dict) -> None:
     render_panel(
@@ -3558,7 +3388,7 @@ def smoke_test() -> None:
     assert quest_unlocked(final_state, FINAL_QUEST_ID)
     assert not quest_ready(final_state, FINAL_QUEST_ID)
     assert boss_available_at_dungeon_end(final_state, "dungeon_final_main_phase_3", "boss_final_demon_king")
-    clear_final_demon_king(final_state, {"gold": 0, "items": {}})
+    clear_dungeon_boss(final_state, "boss_final_demon_king", {"gold": 0, "items": {}})
     assert final_state["flags"]["final_demon_king_defeated"]
     assert final_state["flags"][MAIN_STORY_CLEARED_FLAG]
     assert FINAL_QUEST_ID in final_state["completed_quests"]
