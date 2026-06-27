@@ -209,7 +209,7 @@
 
 後續若要實作，應先選一個副武器與一個效果做最小原型，不一次完成完整狀態系統。職業特化可在未來承接副武器玩法，但不應作為下一個副武器 MVP 的前置條件。
 
-職業玩法、屬性暫緩與副武器追擊的分層結論另見 `01_content/combat-growth-layering-plan.md`。
+職業玩法、屬性暫緩與副武器追擊的分層結論另見 `01_content/archive/combat-growth-layering-plan.md`。
 
 ### 5.6 經濟基準
 

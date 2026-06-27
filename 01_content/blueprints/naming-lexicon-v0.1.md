@@ -9,9 +9,9 @@ combat formulas, GUI implementation, bridge expansion, or asset-pipeline work.
 Use this file with:
 
 - `01_content/world-content-skeleton-v0.1.md`
-- `01_content/regional-canon-debt-policy-v0.1.md`
-- `01_content/regional-data-template-v0.1.md`
-- `01_content/regional-data-instantiation-plan-v0.1.md`
+- `01_content/blueprints/regional-canon-debt-policy-v0.1.md`
+- `01_content/blueprints/regional-data-template-v0.1.md`
+- `01_content/blueprints/regional-data-instantiation-plan-v0.1.md`
 
 ## Core Rule
 

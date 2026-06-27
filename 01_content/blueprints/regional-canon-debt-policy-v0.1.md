@@ -9,8 +9,8 @@ generation implementation.
 Use this file with:
 
 - `01_content/world-content-skeleton-v0.1.md`
-- `01_content/regional-data-template-v0.1.md`
-- `01_content/regional-data-instantiation-plan-v0.1.md`
+- `01_content/blueprints/regional-data-template-v0.1.md`
+- `01_content/blueprints/regional-data-instantiation-plan-v0.1.md`
 
 ## Core Principle
 
@@ -102,7 +102,7 @@ This layer includes:
 - Facility copy.
 
 Data IDs should remain type-first and region-prefixed when new formal data is
-planned, following `01_content/regional-data-template-v0.1.md`.
+planned, following `01_content/blueprints/regional-data-template-v0.1.md`.
 
 Do not rename large amounts of runtime data without a read-only data planning
 gate, because renames may affect registry helpers, schema docs, validation,

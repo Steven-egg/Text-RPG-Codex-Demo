@@ -8,7 +8,7 @@ schema, save, combat, GUI, bridge, or asset-pipeline implementation.
 Use this file after:
 
 - `01_content/world-content-skeleton-v0.1.md`
-- `01_content/regional-data-template-v0.1.md`
+- `01_content/blueprints/regional-data-template-v0.1.md`
 
 ## Core Approach
 
@@ -297,8 +297,8 @@ in a separate UI art preparation brief.
 
 Recommended next documents, if approved later:
 
-- `01_content/antigravity-candidate-content-brief-v0.1.md`
-- `01_content/ui-art-prep-brief-v0.1.md`
+- `01_content/archive/antigravity-candidate-content-brief-v0.1.md`
+- `01_content/archive/ui-art-prep-brief-v0.1.md`
 
 Do not update existing Hot Zone files from this plan unless the owner approves
 that exact docs surface.

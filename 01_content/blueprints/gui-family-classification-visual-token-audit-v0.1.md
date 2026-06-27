@@ -46,9 +46,9 @@ Evidence labels used in this audit:
 Files reviewed:
 
 - `01_content/gui-planning-index.md`
-- `01_content/gui-facility-shell-baseline-v0.1.md`
-- `01_content/facilities-visual-integration-spec-v0.1.md`
-- `01_content/gui-ui-direction-brief.md`
+- `01_content/blueprints/gui-facility-shell-baseline-v0.1.md`
+- `01_content/blueprints/facilities-visual-integration-spec-v0.1.md`
+- `01_content/archive/gui-ui-direction-brief.md`
 - all 14 `07_gui_prototype/*/styles.css` files
 - stylesheet and font-link sections from all 14 screen `index.html` files
 
