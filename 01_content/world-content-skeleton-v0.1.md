@@ -60,7 +60,7 @@ These baselines are for planning only and do not constitute implementation appro
 
 Detailed region-level data template planning lives in:
 
-- `01_content/regional-data-template-v0.1.md`
+- `01_content/blueprints/regional-data-template-v0.1.md`
 
 That Task Zone file defines reusable data slots, ID naming rules, region hub
 presentation boundaries, material timing, quest turn-in safety, Synthesis /

@@ -13,9 +13,9 @@
 本文件承接：
 
 - `README.md` 的 project-level SSOT。
-- `01_content/game-design.md` 的 v1 MVP 垂直切片。
-- `01_content/game-architecture.md` 的擴大版系統架構。
-- `01_content/act-2-content-plan.md` 的第二幕第一輪內容計畫。
+- `01_content/blueprints/game-design.md` 的 v1 MVP 垂直切片。
+- `01_content/archive/game-architecture.md` 的擴大版系統架構。
+- `01_content/archive/act-2-content-plan.md` 的第二幕第一輪內容計畫。
 
 本文件不取代上述文件，也不直接定義 runtime data。若未來進入實作，仍需依照以下順序逐步確認：
 

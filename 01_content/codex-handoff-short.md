@@ -63,7 +63,7 @@ Current decisions:
 - GUI planning / document lifecycle / archive candidate routing:
   `01_content/gui-planning-index.md`
 - Facility-family Mockup-to-HTML responsibility baseline:
-  `01_content/gui-facility-shell-baseline-v0.1.md`
+  `01_content/blueprints/gui-facility-shell-baseline-v0.1.md`
 - Runtime bridge approval route:
   read `01_content/gui-runtime-bridge-plan-v1.md` and stop at a read-only
   planning gate before implementation.
@@ -71,8 +71,8 @@ Current decisions:
   read `.codex/skills/element-maze-gui-static-prototype/SKILL.md` and only the
   relevant `07_gui_prototype/<screen>/` files.
 - Content-design background:
-  `01_content/game-design.md`, `01_content/full-act-structure.md`, and
-  `01_content/act-2-content-plan.md` are Cold / Task Zone references. Open them
+  `01_content/blueprints/game-design.md`, `01_content/blueprints/full-act-structure.md`, and
+  `01_content/archive/act-2-content-plan.md` are Cold / Task Zone references. Open them
   only for named content-design or history tasks.
 
 ## Explicitly Not Open

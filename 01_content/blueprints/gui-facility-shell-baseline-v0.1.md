@@ -346,4 +346,4 @@ Static fixtures must not:
 
 No visual implementation or additional planning candidate is currently
 approved. The paused comparison reference is
-`01_content/facilities-visual-integration-spec-v0.1.md`.
+`01_content/blueprints/facilities-visual-integration-spec-v0.1.md`.

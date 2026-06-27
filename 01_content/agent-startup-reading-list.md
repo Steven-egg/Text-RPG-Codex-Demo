@@ -55,14 +55,14 @@ Open these only for matching tasks.
   - Hot Zone macro skeleton and current content-count decisions.
 - `01_content/world-content-baselines-v0.1.md`
   - Task Zone detailed content baseline specifications for jobs, promotions, quests, and facilities.
-- `01_content/regional-data-template-v0.1.md`
+- `01_content/blueprints/regional-data-template-v0.1.md`
   - Task Zone template for reusable region data slots, ID naming, material
     timing, quest turn-in safety, and candidate-content handoff.
-- `01_content/game-design.md`
+- `01_content/blueprints/game-design.md`
   - Content-design SSOT; open for named gameplay/content-design questions.
-- `01_content/full-act-structure.md`
+- `01_content/blueprints/full-act-structure.md`
   - Five-act long-term skeleton; open for act routing or long-form planning.
-- `01_content/act-2-content-plan.md`
+- `01_content/archive/act-2-content-plan.md`
   - Act 2 fire-demo detail and history; open only when Act 2 detail matters.
 - `04_data/data/*.py`
   - Runtime data SSOT; read during runtime/data planning gates, not ordinary
@@ -78,9 +78,9 @@ Open these only for matching tasks.
 - `01_content/gui-planning-index.md`
   - GUI document lifecycle, planning routing, drift audit, and archive candidate
     index.
-- `01_content/ui-flow-blueprint.md`
+- `01_content/blueprints/ui-flow-blueprint.md`
   - CLI thin-layer to GUI flow mapping.
-- `01_content/gui-screen-map.md`
+- `01_content/blueprints/gui-screen-map.md`
   - Screen, ScreenModel, and UIAction map.
 - `07_gui_prototype/<screen>/`
   - Read only the relevant screen's HTML/CSS/render-layer JS/fixtures.
@@ -90,10 +90,10 @@ Open these only for matching tasks.
 - `01_content/gui-runtime-bridge-plan-v1.md`
   - Runtime-connected prototype plan, approved surfaces, and landed live-slice
     status notes.
-- `01_content/gui-runtime-bridge-preflight-v1.md`
+- `01_content/blueprints/gui-runtime-bridge-preflight-v1.md`
   - Read only when a bridge preflight or runtime-connected planning task
     requires it.
-- `01_content/gui-bridge-vertical-slice-contract-audit-v1.md`
+- `01_content/blueprints/gui-bridge-vertical-slice-contract-audit-v1.md`
   - Read only for bridge contract audits.
 
 Runtime-connected prototype work is not implied by static prototype approval.
@@ -113,11 +113,11 @@ load them during ordinary startup.
 
 Examples:
 
-- `01_content/game-architecture.md`
-- `01_content/combat-growth-layering-plan.md`
-- `01_content/codex-session-snapshot.md`
-- `01_content/demo-playtest-notes.md`
-- `01_content/gui-implementation-platform-tradeoff.md`
+- `01_content/archive/game-architecture.md`
+- `01_content/archive/combat-growth-layering-plan.md`
+- `01_content/archive/codex-session-snapshot.md`
+- `01_content/archive/demo-playtest-notes.md`
+- `01_content/archive/gui-implementation-platform-tradeoff.md`
 - retired or superseded GUI prompt / mockup / wireframe docs listed in
   `01_content/gui-planning-index.md`
 - long-form old backup folders or archive packages under `01_content/`

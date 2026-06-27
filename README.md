@@ -88,7 +88,7 @@ Task Zone pointers:
 - GUI document routing and lifecycle:
   `01_content/gui-planning-index.md`
 - Facility-family responsibility baseline:
-  `01_content/gui-facility-shell-baseline-v0.1.md`
+  `01_content/blueprints/gui-facility-shell-baseline-v0.1.md`
 
 ## How To Run
 
@@ -177,7 +177,7 @@ required unless runtime, data, schema, save, combat, or bridge behavior changes.
 - `01_content/gui-runtime-bridge-plan-v1.md`: GUI live bridge details.
 - `01_content/gui-html-static-prototype-progress-v1.md`: static prototype
   screen-level details.
-- `01_content/game-design.md`: content-design SSOT.
+- `01_content/blueprints/game-design.md`: content-design SSOT.
 - `02_schema/*.schema.md`: data contracts.
 - `04_data/data/*.py`: runtime data SSOT.
 - `04_data/data/registry.py`: runtime data index and helper id sets.

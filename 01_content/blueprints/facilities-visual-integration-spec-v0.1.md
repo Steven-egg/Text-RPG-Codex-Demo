@@ -39,8 +39,8 @@ visual review.
 
 Read this document after:
 
-- `01_content/gui-facility-shell-baseline-v0.1.md`
-- `01_content/gui-facility-screen-template.md`
+- `01_content/blueprints/gui-facility-shell-baseline-v0.1.md`
+- `01_content/archive/gui-facility-screen-template.md`
 
 The facility shell baseline owns the responsibility split:
 

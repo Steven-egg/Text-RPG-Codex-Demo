@@ -198,7 +198,7 @@ TownHubScreenModel
 - global_actions
 ```
 
-Town Hub 採場景式 hub，不以純列表作為主要結構。`facility_nodes` 承接工會、旅館、工坊、商店、合成屋、魔法商店、轉職神殿、聖物調查與倉庫等建築入口；badge 只保留少量高價值提示，例如工會可回報、火印線索、合成屋未解鎖。完整規格見 `01_content/gui-town-hub-screen-model-draft.md`。
+Town Hub 採場景式 hub，不以純列表作為主要結構。`facility_nodes` 承接工會、旅館、工坊、商店、合成屋、魔法商店、轉職神殿、聖物調查與倉庫等建築入口；badge 只保留少量高價值提示，例如工會可回報、火印線索、合成屋未解鎖。完整規格見 `01_content/archive/gui-town-hub-screen-model-draft.md`。
 
 ## 6. 後續實驗對象
 
