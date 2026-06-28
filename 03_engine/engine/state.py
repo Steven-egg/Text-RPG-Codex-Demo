@@ -272,3 +272,121 @@ def check_and_normalize_region(state: dict, region_id: str | None) -> str:
     if not is_unlocked(state, REGIONS[region_id].get("unlock_key")):
         return "border_fire"
     return region_id
+
+
+BOSS_GLEN_INVESTIGATION_ACCEPTED_FLAG = "boss_glen_investigation_accepted"
+EARTH_REGION_UNLOCK = "unlock_earth_region_preview"
+THUNDER_REGION_UNLOCK = "unlock_thunder_region_preview"
+FINAL_QUEST_ID = "quest_final_demon_king"
+
+
+def can_pay_items(state: dict, cost: dict) -> bool:
+    for item_id, qty in cost.items():
+        if item_id.startswith("flag:"):
+            flag = item_id.split(":", 1)[1]
+            if not state["flags"].get(flag):
+                return False
+            continue
+        if state["inventory"].get(item_id, 0) < qty:
+            return False
+    return True
+
+
+def pay_items(state: dict, cost: dict) -> None:
+    for item_id, qty in cost.items():
+        if item_id.startswith("flag:"):
+            continue
+        remove_item(state, item_id, qty)
+
+
+def quest_unlocked(state: dict, quest_id: str) -> bool:
+    if quest_id == "quest_register":
+        return True
+    if quest_id in {"quest_cave_gathering", "quest_magic_crystal"}:
+        return "quest_register" in state["completed_quests"]
+    if quest_id == "quest_mine_scout":
+        return "quest_cave_gathering" in state["completed_quests"]
+    if quest_id == "quest_boss_glen":
+        return (
+            "quest_mine_scout" in state["completed_quests"]
+            and (
+                state["flags"].get(BOSS_GLEN_INVESTIGATION_ACCEPTED_FLAG, False)
+                or state["flags"].get("boss_glen_defeated", False)
+                or quest_id in state["completed_quests"]
+            )
+        )
+    if quest_id == "quest_ash_ravine_scout":
+        return "quest_boss_glen" in state["completed_quests"]
+    if quest_id == "quest_supply_upgrade":
+        return state["flags"].get("ash_guardian_defeated", False)
+    if quest_id == "quest_cinder_depths_scout":
+        return "quest_supply_upgrade" in state["completed_quests"]
+    if quest_id == "quest_ice_minor_a":
+        return is_unlocked(state, ICE_REGION_UNLOCK)
+    if quest_id == "quest_ice_minor_b":
+        return "quest_ice_minor_a" in state["completed_quests"]
+    if quest_id == "quest_ice_main_phase_1":
+        return "quest_ice_minor_b" in state["completed_quests"]
+    if quest_id == "quest_ice_main_phase_2":
+        return "quest_ice_main_phase_1" in state["completed_quests"]
+    if quest_id == "quest_ice_return_handoff":
+        return "quest_ice_main_phase_2" in state["completed_quests"]
+    if quest_id == "quest_earth_minor_a":
+        return is_unlocked(state, EARTH_REGION_UNLOCK)
+    if quest_id == "quest_earth_minor_b":
+        return "quest_earth_minor_a" in state["completed_quests"]
+    if quest_id == "quest_earth_main_phase_1":
+        return "quest_earth_minor_b" in state["completed_quests"]
+    if quest_id == "quest_earth_main_phase_2":
+        return "quest_earth_main_phase_1" in state["completed_quests"]
+    if quest_id == "quest_earth_return_handoff":
+        return "quest_earth_main_phase_2" in state["completed_quests"]
+    if quest_id == "quest_thunder_minor_a":
+        return is_unlocked(state, THUNDER_REGION_UNLOCK)
+    if quest_id == "quest_thunder_minor_b":
+        return "quest_thunder_minor_a" in state["completed_quests"]
+    if quest_id == "quest_thunder_main_phase_1":
+        return "quest_thunder_minor_b" in state["completed_quests"]
+    if quest_id == "quest_thunder_main_phase_2":
+        return "quest_thunder_main_phase_1" in state["completed_quests"]
+    if quest_id == "quest_thunder_return_handoff":
+        return "quest_thunder_main_phase_2" in state["completed_quests"]
+    if quest_id == "quest_final_minor_a":
+        return is_unlocked(state, FINAL_REGION_UNLOCK)
+    if quest_id == "quest_final_minor_b":
+        return "quest_final_minor_a" in state["completed_quests"]
+    if quest_id == "quest_final_main_phase_1":
+        return "quest_final_minor_b" in state["completed_quests"]
+    if quest_id == "quest_final_main_phase_2":
+        return "quest_final_main_phase_1" in state["completed_quests"]
+    if quest_id == FINAL_QUEST_ID:
+        return "quest_final_main_phase_2" in state["completed_quests"]
+    return False
+
+
+def quest_ready(state: dict, quest_id: str) -> bool:
+    if quest_id in state["completed_quests"]:
+        return False
+    return can_pay_items(state, QUESTS[quest_id]["turn_in"])
+
+
+def player_summary_line(state: dict) -> str:
+    clamp_vitals(state)
+    stats = get_stats(state)
+    return (
+        f"{state['name']} / {state['job']} Lv{state['level']} / "
+        f"HP {state['current_hp']}/{stats['max_hp']} / "
+        f"MP {state['current_mp']}/{stats['max_mp']} / {state['gold']}G"
+    )
+
+
+def player_resource_lines(state: dict) -> list[str]:
+    stats = get_stats(state)
+    return [
+        player_summary_line(state),
+        f"工會積分 {state['guild_points']} / 經驗 {state['exp']}/{exp_to_next(state['level'])}",
+        (
+            f"攻擊 {stats['attack']} / 魔攻 {stats['magic_attack']} / 防禦 {stats['defense']} / "
+            f"敏捷 {stats['agility']} / 暴擊 {stats['crit']}% / 火抗 {stats['fire_resist']}%"
+        ),
+    ]

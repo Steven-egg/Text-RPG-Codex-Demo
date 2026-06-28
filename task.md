@@ -1,4 +1,4 @@
-# Weekend Task Board: Docs, Asset Inventory, Runtime Slimming
+# Weekend / Weekday Task Board: Docs, Asset Inventory, Runtime Slimming
 
 Purpose: let desktop Codex, desktop Antigravity, and the owner continue the
 same long task chain without a long spoken handoff.
@@ -13,12 +13,27 @@ The owner decides direction changes and approves any implementation surface.
 Do not push. Do not read or write save.json.
 ```
 
+Weekday / cross-machine short prompt:
+
+```text
+Read AGENTS.md Hot Zone first, then read task.md.
+Use live git status/log on this machine; do not trust another machine's local
+working tree as current.
+Continue only the smallest approved slice.
+Runtime/data/schema/save/combat work starts with a read-only planning gate
+unless the owner explicitly approved exact implementation files.
+Do not read or write save.json. Do not push unless explicitly asked.
+```
+
 ## Current Owner Intent
 
 - CLI expansion and the local GUI bridge are close to structurally complete.
 - Next work should prepare visual assets and reduce future drift risk.
 - World / encounter assets can come before late balance work.
 - Late balance work is not part of this task chain yet.
+- Engine slimming is useful before heavy weekday work on image production,
+  class and element balance, relic effects, promotion / class transfer, and
+  asset connection, because it reduces read cost and narrows future edit risk.
 
 Out of scope for the asset phase:
 
@@ -34,7 +49,7 @@ Out of scope for the asset phase:
 
 1. Documentation drift control.
 2. Asset production inventory.
-3. `game.py` / `gui_actions.py` slimming review.
+3. `game.py` / `gui_actions.py` slimming review and engine domain split.
 4. Asset connection strategy.
 
 Do the phases in this order unless the owner changes it.
@@ -123,6 +138,10 @@ Goal:
 
 - Review `03_engine/engine/game.py` and `03_engine/engine/gui_actions.py`
   before image connection work makes them longer.
+- Keep `game.py` focused as the CLI game loop / interface orchestrator rather
+  than a mixed gameplay, facility, combat, dungeon, and dialogue god file.
+- Reduce future read cost for asset mapping, class / element balance, relic
+  effects, promotion / class transfer, and GUI bridge review.
 
 Allowed first output:
 
@@ -140,6 +159,49 @@ Preferred Codex role:
 - Review behavior risk, save/load implications, smoke coverage, and diff size.
 
 Implementation requires owner approval for the exact runtime files.
+
+### Phase 3 Architecture Direction
+
+Avoid micro-splitting each shop or facility into tiny files. Prefer domain-sized
+modules that keep related CLI/runtime behavior together:
+
+- `game.py`: CLI lifecycle, title / save / load, main loop, high-level routing.
+- `facilities.py`: town facility CLI menus and shared facility actions,
+  including Guild, shops, workshops, synthesis, magic shop, storage, inn, and
+  Temple-facing CLI flows that are not relic-domain logic.
+- `dungeon.py`: dungeon menu, exploration loop, weighted events, treasure,
+  traps, special events, boss gate / clear handoff, run-log defeat handling.
+- `combat.py`: turn-based combat loop, damage formulas, hit / crit / escape,
+  player actions, item use in combat, enemy and boss actions, effect ticking.
+- `state.py`: durable state defaults, inventory/equipment mutation, unlocks,
+  stat calculation, region normalization, pure state helpers.
+- `relic.py`: relic / elemental seal progression domain, enshrinement, Final
+  gate unlock, and CLI relic preview. Keep separate from generic facilities
+  because relic behavior crosses progression, items, and GUI preview.
+
+Preferred slimming order:
+
+1. Land / review the current dialogue-template foundation and `relic.py` slice.
+2. Plan `facilities.py` as the next low-risk domain extraction; preserve
+   existing public `game.py` re-exports where GUI bridge code still imports
+   through `game`.
+   - *Deferred cleanup note*: `buy_menu` appears unused after the newer shop mechanism replaced it; do not delete during first `facilities.py` extraction; revisit as separate dead-code cleanup after extraction and bridge smoke tests pass.
+3. Plan `dungeon.py` after facilities, because it touches exploration flow,
+   random events, run logs, boss gates, and defeat handling.
+4. Plan `combat.py` last, because it is the highest-risk balance and formula
+   surface.
+
+Each runtime extraction slice should:
+
+- Start with a read-only planning gate unless the owner explicitly approves the
+  exact implementation surface.
+- Move behavior without changing gameplay, text, formulas, rewards, save shape,
+  or GUI bridge contracts.
+- Keep API compatibility through `game.py` re-exports when existing GUI bridge
+  modules depend on `game.<function>`.
+- Include targeted checks before review: `python 06_tools/validate_data.py`,
+  `python element_maze.py --smoke-test`, relevant bridge smoke tests, and
+  `git diff --check`.
 
 ## Phase 4: Asset Connection Strategy
 
@@ -194,4 +256,3 @@ Suggested checks:
 - Do not start class balance, class promotion, element formula, relic effect, or
   endgame balance work during this task chain.
 - Do not stage, commit, merge, or archive unless the owner asks.
-
