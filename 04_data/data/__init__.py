@@ -23,7 +23,7 @@ from .display_names import (
     get_facility_short_description,
     get_npc_display_name,
 )
-from .dialogues import FACILITY_GREETINGS, get_dialogue
+from .dialogues import FACILITY_GREETINGS, get_dialogue, say, has_template
 from .registry import DATA_REGISTRY
 
 __all__ = [
@@ -56,5 +56,7 @@ __all__ = [
     "get_facility_display_name",
     "get_facility_short_description",
     "get_dialogue",
+    "say",
+    "has_template",
     "DATA_REGISTRY",
 ]

@@ -49,6 +49,18 @@ from .state import (
     FINAL_PHASE_3_DUNGEON_ID,
     FINAL_REGION_UNLOCK,
     BOSS_CLEAR_FLAGS,
+    check_and_normalize_region,
+)
+from .relic import (
+    relic_enshrined,
+    relic_ready_to_enshrine,
+    relic_source_count,
+    relic_source_required,
+    relic_disabled_reason,
+    preview_relic_entries,
+    enshrine_relic,
+    relic_preview_menu,
+    ready_relic_names,
 )
 from data import (
     DUNGEONS,
@@ -60,7 +72,6 @@ from data import (
     MONSTERS,
     QUESTS,
     RECIPES,
-    RELICS,
     REGIONS,
     SHOP_INVENTORY,
     SKILLS,
@@ -75,8 +86,6 @@ from data import (
 from .cli_helpers import (
     GUILD_MATERIAL_BUY_PRICES,
     get_region_locked_reason,
-    QUEST_COMPLETE_DIALOGUES,
-    DUNGEON_EVENT_TEMPLATES,
     DUNGEON_TREASURE_CONFIG,
     DUNGEON_TRAP_CONFIG,
     DUNGEON_SPECIAL_CONFIG,
@@ -112,12 +121,7 @@ FINAL_PHASE_2_DUNGEON_ID = "dungeon_final_main_phase_2"
 FINAL_PHASE_3_DUNGEON_ID = "dungeon_final_main_phase_3"
 FINAL_QUEST_ID = "quest_final_demon_king"
 MAIN_STORY_CLEARED_FLAG = "main_story_cleared"
-ELEMENTAL_SEAL_FLAGS = (
-    "fire_seal_enshrined",
-    "ice_seal_enshrined",
-    "earth_seal_enshrined",
-    "thunder_seal_enshrined",
-)
+
 
 BOSS_CLEAR_FLAGS = {
     "boss_glen": "boss_glen_defeated",
@@ -1330,217 +1334,7 @@ def craft_recipe_list_menu(state: dict, title_text: str, recipe_ids: list[str], 
 def craft_recipe(state: dict, recipe_id: str) -> None:
     print(craft_recipe_message(state, recipe_id))
 
-def relic_unlock_met(state: dict, unlock_data: dict | None) -> bool:
-    if not unlock_data:
-        return True
-    kind = unlock_data.get("kind")
-    if kind == "level":
-        return state.get("level", 0) >= unlock_data.get("value", 0)
-    if kind == "unlock":
-        return is_unlocked(state, unlock_data.get("key"))
-    if kind == "quest":
-        return unlock_data.get("key") in state.get("completed_quests", [])
-    if kind == "flag":
-        return bool(state.get("flags", {}).get(unlock_data.get("key")))
-    if kind == "item":
-        return state.get("inventory", {}).get(unlock_data.get("key"), 0) > 0
-    return False
 
-def relic_unlock_line(state: dict, unlock_data: dict | None) -> str:
-    if not unlock_data:
-        return "解鎖提示：目前無額外提示。"
-    status = "已達成" if relic_unlock_met(state, unlock_data) else "未達成"
-    return f"解鎖提示：{unlock_data['label']}（{status}）"
-
-
-def preview_relic_entries() -> list[tuple[str, dict]]:
-    return [
-        (relic_id, relic)
-        for relic_id, relic in RELICS.items()
-        if relic.get("status") == "preview"
-    ]
-
-
-def find_preview_relic(identifier: str | None) -> tuple[str, dict] | None:
-    if not identifier:
-        return None
-    for relic_id, relic in preview_relic_entries():
-        if identifier in {relic_id, relic.get("name"), relic.get("seal_item_id"), relic.get("element_id")}:
-            return relic_id, relic
-    return None
-
-
-def relic_source_required(relic: dict) -> int:
-    required = relic.get("source_required", 1)
-    return required if isinstance(required, int) and required > 0 else 1
-
-
-def relic_source_count(state: dict, relic: dict) -> int:
-    return state.get("inventory", {}).get(relic.get("source_item_id"), 0)
-
-
-def relic_enshrined(state: dict, relic: dict) -> bool:
-    return bool(state.get("flags", {}).get(relic.get("complete_flag")))
-
-
-def relic_ready_to_enshrine(state: dict, relic: dict) -> bool:
-    return (
-        not relic_enshrined(state, relic)
-        and relic_unlock_met(state, relic.get("unlock"))
-        and relic_source_count(state, relic) >= relic_source_required(relic)
-    )
-
-
-def relic_disabled_reason(state: dict, relic: dict) -> str | None:
-    if relic_enshrined(state, relic):
-        return "聖印已安置。"
-    if not relic_unlock_met(state, relic.get("unlock")):
-        unlock_data = relic.get("unlock") or {}
-        return f"尚未達成：{unlock_data.get('label', '前置條件')}。"
-    source_item_id = relic.get("source_item_id", "")
-    required = relic_source_required(relic)
-    current = relic_source_count(state, relic)
-    if current < required:
-        return f"需要 {item_name(source_item_id)} x{required}（目前 {current}）。"
-    return None
-
-
-def ready_relic_names(state: dict) -> list[str]:
-    return [
-        relic["name"]
-        for _relic_id, relic in preview_relic_entries()
-        if relic_ready_to_enshrine(state, relic)
-    ]
-
-
-def all_elemental_seals_enshrined(state: dict) -> bool:
-    flags = state.get("flags", {})
-    return all(flags.get(flag) for flag in ELEMENTAL_SEAL_FLAGS)
-
-
-def unlock_final_region_from_relics(state: dict) -> bool:
-    if not all_elemental_seals_enshrined(state):
-        return False
-    if is_unlocked(state, FINAL_REGION_UNLOCK):
-        return False
-    unlock(state, FINAL_REGION_UNLOCK)
-    return True
-
-
-def enshrine_relic(state: dict, identifier: str | None) -> dict:
-    found = find_preview_relic(identifier)
-    if not found:
-        return {
-            "status": "blocked",
-            "changed": False,
-            "message": "找不到指定的聖印資料。",
-        }
-
-    relic_id, relic = found
-    if relic_enshrined(state, relic):
-        return {
-            "status": "complete",
-            "changed": False,
-            "relic_id": relic_id,
-            "message": relic["complete_text"],
-        }
-
-    disabled_reason = relic_disabled_reason(state, relic)
-    if disabled_reason:
-        return {
-            "status": "blocked",
-            "changed": False,
-            "relic_id": relic_id,
-            "message": disabled_reason,
-        }
-
-    source_item_id = relic["source_item_id"]
-    required = relic_source_required(relic)
-    if not remove_item(state, source_item_id, required):
-        return {
-            "status": "blocked",
-            "changed": False,
-            "relic_id": relic_id,
-            "message": f"需要 {item_name(source_item_id)} x{required}。",
-        }
-
-    seal_item_id = relic["seal_item_id"]
-    add_item(state, seal_item_id, 1)
-    state.setdefault("flags", {})[relic["complete_flag"]] = True
-
-    unlocked_lines = []
-    if relic.get("element_id") == "fire" and not is_unlocked(state, ICE_REGION_UNLOCK):
-        unlock(state, ICE_REGION_UNLOCK)
-        unlocked_lines.append("極寒區域路線已開放。")
-    if unlock_final_region_from_relics(state):
-        unlocked_lines.append("四聖印已安置，魔王城前線路線已開放。")
-
-    message_lines = [
-        relic["ready_text"],
-        f"取得並安置：{item_name(seal_item_id)} x1。",
-        "聖印被動效果尚未開放。",
-    ]
-    message_lines.extend(unlocked_lines)
-    return {
-        "status": "enshrined",
-        "changed": True,
-        "relic_id": relic_id,
-        "message": "\n".join(message_lines),
-    }
-
-
-def relic_preview_menu(state: dict, region_id: str = "border_fire") -> None:
-    region_id = check_and_normalize_region(state, region_id)
-    facility_name = get_facility_display_name(region_id, "relic")
-    title(facility_name)
-    previews = [relic for _relic_id, relic in preview_relic_entries()]
-    if not previews:
-        print("目前沒有可預覽的聖物線索。")
-        pause()
-        return
-
-    print("四元素聖印可在此合成或安置；聖印被動效果尚未開放。")
-    for relic in previews:
-        complete = relic_enshrined(state, relic)
-        ready = relic_ready_to_enshrine(state, relic)
-        print(f"\n{relic['name']}")
-        print(relic["summary"])
-        print(f"來源：{relic['source']}")
-        print(relic_unlock_line(state, relic.get("unlock")))
-        print(f"源證：{item_name(relic['source_item_id'])} {relic_source_count(state, relic)}/{relic_source_required(relic)}")
-        print("狀態：" + ("已安置" if complete else ("可安置" if ready else "待調查")))
-        print(f"效果預告：{relic['effect_preview']}")
-    ready_entries = [
-        (relic_id, relic)
-        for relic_id, relic in preview_relic_entries()
-        if relic_ready_to_enshrine(state, relic)
-    ]
-    if ready_entries:
-        options = [relic["action_label"] for _relic_id, relic in ready_entries]
-        choice = action_menu_panel(
-            "聖印安置",
-            options,
-            facility_name,
-            header_lines=["選擇可安置的聖印。此操作不會啟用任何戰鬥效果。"],
-            allow_back=True,
-            border_style="yellow",
-        )
-        if choice:
-            relic_id, _relic = ready_entries[choice - 1]
-            result = enshrine_relic(state, relic_id)
-            render_panel("聖印安置結果", result["message"].splitlines(), border_style="yellow")
-    else:
-        print("\n目前沒有可安置的聖印。")
-    print("\n這裡不會裝備、啟用、強化聖物，也不會提供戰鬥加成。")
-    pause()
-
-def check_and_normalize_region(state: dict, region_id: str | None) -> str:
-    from data.regions import REGIONS, _is_unlocked
-    if not region_id or region_id not in REGIONS:
-        return "border_fire"
-    if not _is_unlocked(state, REGIONS[region_id].get("unlock_key")):
-        return "border_fire"
-    return region_id
 
 def town_menu(state: dict, region_id: str = "border_fire") -> None:
     region_id = check_and_normalize_region(state, region_id)
@@ -2182,8 +1976,10 @@ def show_or_complete_quest(state: dict, quest_id: str) -> None:
         unlock(state, key)
     state["completed_quests"].append(quest_id)
     print(f"任務完成。獲得 {reward.get('gold', 0)}G、工會積分 +{guild_gain}。")
-    if quest_id in QUEST_COMPLETE_DIALOGUES:
-        for line in QUEST_COMPLETE_DIALOGUES[quest_id]:
+    quest_complete_key = f"quest_complete.{quest_id}"
+    if has_template(quest_complete_key):
+        lines = say(quest_complete_key)
+        for line in lines:
             print(line)
 
 def promotion_requirement_met(state: dict, requirement: dict) -> bool:
@@ -2496,45 +2292,45 @@ def dungeon_material_event(state: dict, dungeon: dict, run_log: dict) -> None:
     item_id = random.choice(dungeon["materials"])
     qty = 2 if random.random() < 0.2 else 1
     add_loot(state, item_id, qty, run_log)
-    print(DUNGEON_EVENT_TEMPLATES["material"].format(item_name=item_name(item_id), qty=qty))
+    print(say("dungeon.event.material", item_name=item_name(item_id), qty=qty))
 
 def dungeon_treasure_event(state: dict, dungeon: dict, run_log: dict) -> None:
     if random.random() < DUNGEON_TREASURE_CONFIG["gold_chance"]:
         gold = random.randint(*dungeon["gold_range"])
         add_gold(state, gold, run_log)
-        print(DUNGEON_EVENT_TEMPLATES["treasure_gold"].format(gold=gold))
+        print(say("dungeon.event.treasure_gold", gold=gold))
     else:
         item_id = random.choice(DUNGEON_TREASURE_CONFIG["fallback_items"])
         add_loot(state, item_id, 1, run_log)
-        print(DUNGEON_EVENT_TEMPLATES["treasure_item"].format(item_name=item_name(item_id)))
+        print(say("dungeon.event.treasure_item", item_name=item_name(item_id)))
 
 def dungeon_trap_event(state: dict, dungeon: dict) -> None:
     stats = get_stats(state)
     dodge = min(DUNGEON_TRAP_CONFIG["max_dodge_chance"], stats["agility"] * 2 + stats.get("trap_evasion", 0))
     if random.randint(1, 100) <= dodge:
-        print(DUNGEON_EVENT_TEMPLATES["trap_dodge"])
+        print(say("dungeon.event.trap_dodge"))
         return
     if dungeon["element"] == "火":
         damage = math.ceil(DUNGEON_TRAP_CONFIG["fire_base_damage"] * (1 - stats["fire_resist"] / 100))
         state["current_hp"] -= damage
-        print(DUNGEON_TRAP_CONFIG["fire_msg"].format(damage=damage))
+        print(say(DUNGEON_TRAP_CONFIG["fire_msg_key"], damage=damage))
     else:
         damage = DUNGEON_TRAP_CONFIG["default_damage"]
         state["current_hp"] -= damage
-        print(DUNGEON_TRAP_CONFIG["default_msg"].format(damage=damage))
+        print(say(DUNGEON_TRAP_CONFIG["default_msg_key"], damage=damage))
 
 def dungeon_special_event(state: dict, dungeon_id: str, run_log: dict) -> None:
     cfg = DUNGEON_SPECIAL_CONFIG.get(dungeon_id, DUNGEON_SPECIAL_CONFIG["default"])
-    print(cfg["msg_main"])
+    print(say(cfg["msg_main_key"]))
     if cfg["chance"] >= 1.0:
         add_loot(state, cfg["loot_item"], cfg["loot_qty"], run_log)
-        if cfg["msg_loot"]:
-            print(cfg["msg_loot"])
+        if cfg["msg_loot_key"]:
+            print(say(cfg["msg_loot_key"]))
     else:
         if random.random() < cfg["chance"]:
             add_loot(state, cfg["loot_item"], cfg["loot_qty"], run_log)
-            if cfg["msg_loot"]:
-                print(cfg["msg_loot"])
+            if cfg["msg_loot_key"]:
+                print(say(cfg["msg_loot_key"]))
 
 def handle_defeat(state: dict, run_log: dict) -> None:
     lost_gold = math.floor(run_log.get("gold", 0) * 0.3)

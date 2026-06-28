@@ -161,7 +161,7 @@ def unlock(state: dict, key: str) -> None:
 def is_unlocked(state: dict, key: str | None) -> bool:
     if not key:
         return True
-    return key in state["unlocked"] or key in state["completed_quests"]
+    return key in state.get("unlocked", []) or key in state.get("completed_quests", [])
 
 
 def boss_clear_flag(boss_id: str | None) -> str | None:
@@ -264,3 +264,11 @@ def equip_item(state: dict, item_id: str, quiet: bool = False) -> bool:
     if not quiet:
         print(f"已裝備 {eq['name']}。")
     return True
+
+
+def check_and_normalize_region(state: dict, region_id: str | None) -> str:
+    if not region_id or region_id not in REGIONS:
+        return "border_fire"
+    if not is_unlocked(state, REGIONS[region_id].get("unlock_key")):
+        return "border_fire"
+    return region_id

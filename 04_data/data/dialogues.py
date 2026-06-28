@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from typing import Any
+import random
+from typing import Any, Mapping
 
 
 FACILITY_GREETINGS = {
@@ -197,3 +198,392 @@ def get_dialogue(region_id: str, facility_id: str, key: str, default: str = "") 
                 return facility[facility_id][key]
 
     return default
+
+
+class SafeFormatDict(dict):
+    """Leave missing placeholders visible instead of crashing."""
+    def __missing__(self, key: str) -> str:
+        return "{" + key + "}"
+
+def render_template(template: Any, context: Mapping[str, Any]) -> Any:
+    """Render one template string or list of strings with safe fallback."""
+    if isinstance(template, list):
+        return [t.format_map(SafeFormatDict(context)) for t in template]
+    return template.format_map(SafeFormatDict(context))
+
+DEFAULT_CONTEXT: dict[str, Any] = {
+    "player": "見習冒險者",
+    "npc": "諾亞",
+    "facility": "轉職神殿",
+    "region": "灰燼裂谷",
+    "name": "火之印記",
+    "boss": "灰燼守衛",
+    "item": "火之印記碎片",
+    "quest": "裂谷偵查委託",
+    "amount": 0,
+}
+
+DIALOGUE_TEMPLATES: dict[str, dict[str, Any]] = {
+    # Generic templates from dialogue_templates_demo.py
+    "greeting.generic": {
+        "label": "一般歡迎語",
+        "variables": ["npc", "player"],
+        "templates": [
+            "{npc}抬頭看向{player}：「回來了啊。」",
+            "{npc}整理著文件：「今天也要出發嗎？」",
+            "{npc}點了點頭：「準備好了就開始吧。」",
+            "{npc}：「一路辛苦了，有什麼需要就說。」",
+        ],
+    },
+    "guide.investigate": {
+        "label": "調查引導",
+        "variables": ["name", "facility"],
+        "templates": [
+            "如果想調查{name}，可以去{facility}看看。",
+            "關於{name}，{facility}那邊或許會有線索。",
+            "有人建議先到{facility}確認{name}的狀況。",
+            "{name}不是一般東西，最好去{facility}問清楚。",
+        ],
+    },
+    "guide.go_region": {
+        "label": "前往區域引導",
+        "variables": ["region"],
+        "templates": [
+            "最近{region}不太平靜，可以去看看。",
+            "有冒險者從{region}帶回了奇怪的消息。",
+            "下一步，應該先確認{region}那邊的狀況。",
+            "如果要追線索，{region}會是目前最合理的方向。",
+        ],
+    },
+    "guide.find_npc": {
+        "label": "尋找 NPC",
+        "variables": ["npc"],
+        "templates": [
+            "可以去找{npc}問問。",
+            "{npc}應該知道一些情況。",
+            "這件事，最好先和{npc}確認。",
+            "去問問{npc}吧，別自己亂猜。",
+        ],
+    },
+    "warning.boss": {
+        "label": "Boss 警告",
+        "variables": ["boss", "region"],
+        "templates": [
+            "聽說{region}深處有個大家伙，名字叫{boss}。",
+            "挑戰{boss}之前，最好先把補給準備好。",
+            "不少冒險者都在{boss}面前吃過虧。",
+            "如果在{region}遇到{boss}，別硬撐。",
+        ],
+    },
+    "warning.item": {
+        "label": "重要道具提醒",
+        "variables": ["item", "facility"],
+        "templates": [
+            "{item}先別亂丟，{facility}那邊可能用得上。",
+            "如果找到{item}，記得帶去{facility}確認。",
+            "{item}看起來不像普通素材，先留著比較好。",
+        ],
+    },
+    "lore.region": {
+        "label": "區域世界觀",
+        "variables": ["region"],
+        "templates": [
+            "很久以前，{region}不是現在這個樣子。",
+            "關於{region}，老冒險者通常不太願意多談。",
+            "{region}的異常，可能比表面看起來更麻煩。",
+            "那片{region}，最近連風向都變得奇怪。",
+        ],
+    },
+    "quest.brief": {
+        "label": "任務重點提示",
+        "variables": ["quest", "region"],
+        "templates": [
+            "{quest}的重點在{region}，先從那裡查起。",
+            "這次{quest}不要拖太久，{region}的情況正在變化。",
+            "如果要處理{quest}，{region}會是第一個要確認的地方。",
+        ],
+    },
+    "quest.after_clear": {
+        "label": "任務完成回應",
+        "variables": ["npc", "quest"],
+        "templates": [
+            "{npc}：「{quest}完成得不錯。」",
+            "{npc}鬆了口氣：「這樣一來，局勢就穩一些了。」",
+            "{npc}：「辛苦了，這件事我會登記下來。」",
+        ],
+    },
+    "shop.welcome": {
+        "label": "商店歡迎語",
+        "variables": ["npc", "facility"],
+        "templates": [
+            "{npc}把商品排開：「出發前補給一下吧。」",
+            "{npc}：「{facility}今天也有新鮮補給。」",
+            "{npc}笑著說：「需要什麼就自己看。」",
+        ],
+    },
+    "shop.no_gold": {
+        "label": "金幣不足",
+        "variables": [],
+        "templates": [
+            "金幣不足。",
+            "錢不夠，先去探索賺點金幣吧。",
+            "目前金幣不夠購買這項物品。",
+        ],
+    },
+    "system.save": {
+        "label": "存檔訊息",
+        "variables": [],
+        "templates": [
+            "已存檔。",
+            "存檔完成。",
+            "目前進度已保存。",
+        ],
+    },
+    "combat.exp_gain": {
+        "label": "獲得經驗",
+        "variables": ["amount"],
+        "templates": [
+            "獲得經驗 {amount}。",
+            "戰鬥經驗 +{amount}。",
+            "累積了 {amount} 點經驗。",
+        ],
+    },
+
+    # Migrated Dungeon Event Templates from cli_helpers.py
+    "dungeon.event.material": {
+        "label": "找到素材",
+        "variables": ["item_name", "qty"],
+        "templates": [
+            "你找到 {item_name} x{qty}。"
+        ],
+    },
+    "dungeon.event.treasure_gold": {
+        "label": "找到金幣寶箱",
+        "variables": ["gold"],
+        "templates": [
+            "你打開一只舊木箱，取得 {gold}G。"
+        ],
+    },
+    "dungeon.event.treasure_item": {
+        "label": "找到道具寶箱",
+        "variables": ["item_name"],
+        "templates": [
+            "你找到 {item_name} x1。"
+        ],
+    },
+    "dungeon.event.trap_dodge": {
+        "label": "避開陷阱",
+        "variables": [],
+        "templates": [
+            "你察覺地面異樣，及時避開了陷阱。"
+        ],
+    },
+    "dungeon.event.trap_hit_fire": {
+        "label": "踩到火陷阱",
+        "variables": ["damage"],
+        "templates": [
+            "熱風從裂縫噴出，你受到 {damage} 點火傷害。"
+        ],
+    },
+    "dungeon.event.trap_hit_default": {
+        "label": "踩到一般陷阱",
+        "variables": ["damage"],
+        "templates": [
+            "碎石從腳邊滑落，你受到 {damage} 點傷害。"
+        ],
+    },
+    "dungeon.event.special_moss_cave": {
+        "label": "苔石洞窟特殊事件",
+        "variables": [],
+        "templates": [
+            "牆上刻著舊工會標記：別把小魔晶賣掉。你取得小魔晶 x1。"
+        ],
+    },
+    "dungeon.event.special_default_main": {
+        "label": "預設特殊事件主提示",
+        "variables": [],
+        "templates": [
+            "你發現有人故意遮住通往深處的舊路標。拉比的情報看來沒錯。"
+        ],
+    },
+    "dungeon.event.special_default_loot": {
+        "label": "預設特殊事件取得道具",
+        "variables": [],
+        "templates": [
+            "路標後方還卡著熔岩碎片 x1。"
+        ],
+    },
+
+    # Migrated Quest Complete Dialogues from cli_helpers.py
+    "quest_complete.quest_cave_gathering": {
+        "label": "洞窟採集委託完成對話",
+        "variables": [],
+        "templates": [
+            ["米菈合成屋開放了。拉比也開始販售逃脫卷軸。"]
+        ],
+    },
+    "quest_complete.quest_magic_crystal": {
+        "label": "魔晶研究委託完成對話",
+        "variables": [],
+        "templates": [
+            ["伊芙記下小魔晶的光色。火花術書現在折價 50G。"]
+        ],
+    },
+    "quest_complete.quest_mine_scout": {
+        "label": "焦石礦坑偵查委託完成對話",
+        "variables": [],
+        "templates": [
+            ["拉比壓低聲音：焦石礦坑深處很熱，抗火斗篷的配方已交給米菈。"]
+        ],
+    },
+    "quest_complete.quest_boss_glen": {
+        "label": "葛倫討伐委託完成對話",
+        "variables": [],
+        "templates": [
+            [
+                "諾亞看著血跡地圖，表情第一次變得猶豫。第二幕的元素迷宮露出了入口。",
+                "下一步很明確：前往「迷宮探索」中的灰燼裂谷，先帶回少量裂谷素材完成偵查。"
+            ]
+        ],
+    },
+    "quest_complete.quest_ash_ravine_scout": {
+        "label": "灰燼裂谷偵查委託完成對話",
+        "variables": [],
+        "templates": [
+            ["諾亞收起裂谷灰與焦黑鐵片：這些足夠證明灰燼裂谷值得深入調查，但現在還不是挑戰守衛的時候。"]
+        ],
+    },
+    "quest_complete.quest_supply_upgrade": {
+        "label": "補給線升級委託完成對話",
+        "variables": [],
+        "templates": [
+            ["諾亞點頭：旅人小鋪已能販售中藥水。接下來的長戰鬥，記得把補給準備好。"]
+        ],
+    },
+    "quest_complete.quest_cinder_depths_scout": {
+        "label": "燼印深窟偵查委託完成對話",
+        "variables": [],
+        "templates": [
+            ["諾亞攤開偵查圖：深窟最底層有一座燼印鎮衛。若要第三枚火之印記碎片，只能親自擊敗它。"]
+        ],
+    },
+    # Narrative Story Dialogues
+    "prologue.welcome": {
+        "label": "開局諾亞致歡迎詞對話",
+        "variables": ["player", "job"],
+        "templates": [
+            "\n諾亞替你別上見習徽章：「歡迎來到艾爾姆，{player}。今天開始，你就是{job}了。」"
+        ],
+    },
+    "quest.fire_mark_guild_inquiry": {
+        "label": "詢問三枚印記碎片的事宜",
+        "variables": [],
+        "templates": [
+            [
+                "你把三枚火之印記碎片放在諾亞面前。",
+                "碎片彼此靠近時，裂紋裡浮起微弱的紅光，像在回應同一個呼吸。",
+                "",
+                "諾亞仔細翻過工會的舊紀錄，最後搖了搖頭：",
+                "「三枚碎片的反應已經很明顯，但工會沒有足夠資料判讀它真正的用途。」",
+                "「去教堂問問吧。教會保存的舊文獻，也許能解釋這些印記碎片代表什麼。」",
+                "",
+                "正式火之印記流程尚未開放；你已記下下一步該詢問教會。"
+            ]
+        ],
+    },
+    "quest.fire_mark_church_bridge": {
+        "label": "攜帶碎片前往神殿與賽恩對話",
+        "variables": [],
+        "templates": [
+            [
+                "賽恩聽完諾亞的轉介，視線落在三枚火之印記碎片上。",
+                "碎片的紅光在神殿石階間一明一滅，像是在尋找尚未打開的門。",
+                "「工會看不懂它，是因為這不是委託紀錄裡的東西。」賽恩低聲說。",
+                "「它不普通，但我還不能斷言它是什麼。我要花點時間查閱舊文獻。」",
+                "「先把碎片收好。等我整理出線索，再回神殿找我。」",
+                "",
+                "你記下賽恩的囑咐：先保管碎片，稍後再回神殿詢問查閱結果。"
+            ]
+        ],
+    },
+    "quest.fire_mark_church_lookup": {
+        "label": "回到神殿詢問賽恩查閱結果",
+        "variables": [],
+        "templates": [
+            [
+                "賽恩把翻開的舊文獻推到石桌中央，頁面上畫著三道分裂的火印。",
+                "「查到了。這三枚碎片不是完整的火之印記，而是它尚未完成的核心。」",
+                "「它記錄了火的資格，卻還沒有承載力量。現在啟用，只會把印記燒毀。」",
+                "",
+                "賽恩用封蠟與灰白布帶暫時封住碎片的共鳴，又把它們交還給你。",
+                "「去神殿後側的聖物調查台吧。那裡能讓碎片承接成真正的火之聖印。」",
+                "",
+                "已確認：未完成的火之印記核心。",
+                "下一步：前往聖物調查台合成並安置火之聖印。聖印被動效果尚未開放。"
+            ]
+        ],
+    },
+    # Facility Lock & Region Lock Warnings
+    "facility.synthesis.locked": {
+        "label": "合成店鋪鎖定提示",
+        "variables": ["mira"],
+        "templates": [
+            "{mira}的店門半掩著。先完成工會任務「洞窟採集」吧。"
+        ],
+    },
+    "region.locked.ice": {
+        "label": "極寒區域鎖定提示",
+        "variables": [],
+        "templates": [
+            "Ice Region unlocks after the Fire Seal route is complete."
+        ],
+    },
+    "region.locked.earth": {
+        "label": "大地區域鎖定提示",
+        "variables": [],
+        "templates": [
+            "Earth Region unlocks after completing Ice Region quests."
+        ],
+    },
+    "region.locked.thunder": {
+        "label": "雷霆區域鎖定提示",
+        "variables": [],
+        "templates": [
+            "Thunder Region unlocks after completing Earth Region quests."
+        ],
+    },
+    "region.locked.final": {
+        "label": "魔王前線鎖定提示",
+        "variables": [],
+        "templates": [
+            "Final Region requires all four enshrined elemental seals."
+        ],
+    },
+    "region.locked.default": {
+        "label": "預設區域鎖定提示",
+        "variables": [],
+        "templates": [
+            "This region is locked."
+        ],
+    },
+}
+
+_dialogue_rng = random.Random()
+
+
+def has_template(key: str) -> bool:
+    """Check if a template key exists in the registry."""
+    return key in DIALOGUE_TEMPLATES
+
+
+def say(key: str, *, rng: random.Random | None = None, **context: Any) -> Any:
+    """Pick a template, format it, and return the rendered string or list of strings."""
+    active_rng = rng or _dialogue_rng
+    group = DIALOGUE_TEMPLATES.get(key)
+    if not group:
+        return f"{{missing dialogue template: {key}}}"
+    templates = group.get("templates") or []
+    if not templates:
+        return f"{{empty dialogue template: {key}}}"
+    merged = {**DEFAULT_CONTEXT, **context}
+    return render_template(active_rng.choice(templates), merged)
