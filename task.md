@@ -25,6 +25,16 @@ unless the owner explicitly approved exact implementation files.
 Do not read or write save.json. Do not push unless explicitly asked.
 ```
 
+Current pushed runtime checkpoint:
+
+- `510db7c [antig] refactor(runtime): extract town facilities domain`
+- Branch pushed for this checkpoint:
+  `antig/facilities-domain-extraction`
+- Working-tree note:
+  `06_tools/dialogue_templates_demo.py` may exist as an owner-provided local
+  scratch/demo note. Do not include it in runtime slimming commits unless the
+  owner explicitly approves that exact file.
+
 ## Current Owner Intent
 
 - CLI expansion and the local GUI bridge are close to structurally complete.
@@ -160,6 +170,21 @@ Preferred Codex role:
 
 Implementation requires owner approval for the exact runtime files.
 
+Current landed status:
+
+- `03_engine/engine/facilities.py` is landed as the town facility CLI domain for
+  Guild, shops, workshops, synthesis, magic shop, storage, inn, and
+  Temple-facing CLI flows that are not relic-domain logic.
+- `03_engine/engine/state.py` now owns pure payment / quest readiness helpers
+  used by facilities and GUI bridge models.
+- `03_engine/engine/game.py` keeps compatibility re-exports for the extracted
+  facility and state helper API, including `iron_workshop` and
+  `armor_workshop`.
+- Codex merge-readiness review passed after re-review. Validation used:
+  `python 06_tools/validate_data.py`, `python element_maze.py --smoke-test`,
+  all current `06_tools/smoke_test_*.py` bridge smoke tests, and
+  `git diff --check`.
+
 ### Phase 3 Architecture Direction
 
 Avoid micro-splitting each shop or facility into tiny files. Prefer domain-sized
@@ -181,10 +206,10 @@ modules that keep related CLI/runtime behavior together:
 
 Preferred slimming order:
 
-1. Land / review the current dialogue-template foundation and `relic.py` slice.
-2. Plan `facilities.py` as the next low-risk domain extraction; preserve
-   existing public `game.py` re-exports where GUI bridge code still imports
-   through `game`.
+1. Landed: dialogue-template foundation and `relic.py` slice.
+2. Landed: `facilities.py` town facility domain extraction; preserve existing
+   public `game.py` re-exports where GUI bridge code still imports through
+   `game`.
    - *Deferred cleanup note*: `buy_menu` appears unused after the newer shop mechanism replaced it; do not delete during first `facilities.py` extraction; revisit as separate dead-code cleanup after extraction and bridge smoke tests pass.
 3. Plan `dungeon.py` after facilities, because it touches exploration flow,
    random events, run logs, boss gates, and defeat handling.

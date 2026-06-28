@@ -8,10 +8,13 @@ what the next boundary is.
 
 - Work directory: `C:\Users\user\OneDrive\文字冒險遊戲`
 - Latest local checkpoint recorded for this handoff:
-  `[antig] fix(runtime): allow progressive CLI region gate travel`
-  (use live `git log` for the exact hash).
+  `510db7c [antig] refactor(runtime): extract town facilities domain`.
 - For the full stable capsule details (CLI runtime authority, Relic v1
   flow, naming passes, and bridge parity), see [README.md](../README.md#current-stable-capsule).
+- Phase 3 facilities extraction is landed: town facility CLI behavior now lives
+  in `03_engine/engine/facilities.py`, pure payment / quest helpers live in
+  `03_engine/engine/state.py`, and `game.py` keeps facade re-exports for GUI
+  bridge compatibility.
 - Note: Element Maze is an expandable playable demo, not a closed demo.
   Narrow MVP language controls current-round risk; it does not close
   future extension points.
@@ -87,8 +90,9 @@ slice. It is not a permanent ban or demo freeze.
 - Storage capacity upgrade.
 - Shop sell, equipment sell, generic sell, generic unequip, comparison, or
   generic workshop framework.
-- Full shop, magic shop, synthesis, guild, quest, boss, dungeon, magic, skill,
-  target-selection, or facility framework.
+- New or expanded shop, magic shop, synthesis, guild, quest, boss, dungeon,
+  magic, skill, target-selection, or facility gameplay framework beyond the
+  landed extraction.
 - Formal class transfer, class specialization gameplay, relic effects, endgame
   systems, or formal settings persistence.
 - GUI bridge expansion, GUI visual implementation, image generation, or formal
@@ -100,7 +104,8 @@ No implementation is pre-approved.
 
 Small safe next steps:
 
-- produce a CLI world map / region routing read-only planning gate
+- produce a `dungeon.py` domain extraction read-only planning gate
+- produce a dead-code cleanup gate for the unused legacy `buy_menu`
 - produce an AI tooling / validation pipeline audit for future small tools
 - refine `01_content/world-content-skeleton-v0.1.md`
 - keep Hot Zone docs short and move historical detail to Task / Cold Zone
@@ -119,10 +124,11 @@ Latest detailed verification history lives in Task Zone files. For docs-only
 cleanup, status/diff review is enough. Runtime smoke is required only when
 runtime, data, schema, save, combat, or bridge behavior changes.
 
-Latest Relic v1 checkpoint verification:
+Latest facilities extraction checkpoint verification:
 
 - `python 06_tools\validate_data.py`
 - `python element_maze.py --smoke-test`
+- all current `06_tools\smoke_test_*.py` bridge smoke tests
 - `python 06_tools\smoke_test_temple_bridge.py`
 - `git diff --check`
 

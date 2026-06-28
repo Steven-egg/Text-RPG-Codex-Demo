@@ -7,8 +7,7 @@ screen-level verification, and historical MVP notes live in Task Zone files.
 ## Current Stable Capsule
 
 - Latest local checkpoint recorded for this handoff:
-  `[antig] fix(runtime): allow progressive CLI region gate travel`
-  (use live `git log` for the exact hash).
+  `510db7c [antig] refactor(runtime): extract town facilities domain`.
 - Element Maze is an expandable playable demo, not a closed demo.
 - The Python CLI runtime remains the gameplay authority.
 - Act 1 is playable through the main loop.
@@ -39,8 +38,10 @@ screen-level verification, and historical MVP notes live in Task Zone files.
 - Basic facility CLI-parity bridge coverage is complete through Guild material
   buyback.
 - The maintainability checkpoint is stable: shared GUI presentation helpers and
-  facility ScreenModel extraction are in place; action dispatch and mutation
-  remain in `gui_actions.py`.
+  facility ScreenModel extraction are in place; town facility CLI behavior now
+  lives in `03_engine/engine/facilities.py`, pure payment / quest helper logic
+  lives in `03_engine/engine/state.py`, and `game.py` keeps facade re-exports
+  for GUI bridge compatibility.
 
 See `git status --short` before editing. The workspace may contain owner-side
 document cleanup or archive changes.
@@ -161,6 +162,11 @@ required unless runtime, data, schema, save, combat, or bridge behavior changes.
 - `01_content/`: content design, handoff, startup, and planning docs.
 - `02_schema/`: data contract docs.
 - `03_engine/engine/`: runtime flow and gameplay rules.
+  - `game.py`: CLI lifecycle, save / load, main loop, dungeon and combat flows,
+    and compatibility re-exports for extracted domains.
+  - `facilities.py`: town facility CLI menus and shared facility actions.
+  - `state.py`: durable state defaults, mutation helpers, stat calculation,
+    progression checks, and pure state helpers.
 - `04_data/data/`: runtime data tables.
 - `05_assets/`: future/reference asset area.
 - `06_tools/`: validation, smoke, bridge helper, and inventory tools.
@@ -204,7 +210,8 @@ No next implementation target is pre-approved.
 
 Allowed as planning only:
 
-- produce a CLI world map / region routing read-only planning gate
+- produce a `dungeon.py` domain extraction read-only planning gate
+- produce a dead-code cleanup gate for the unused legacy `buy_menu`
 - produce an AI tooling / validation pipeline audit for future small tools
 - refine `01_content/world-content-skeleton-v0.1.md`
 - route old Hot Zone details into Task / Cold Zone
@@ -215,7 +222,7 @@ Still closed until a later exact-scope approval:
 - runtime/data/schema/save/combat changes
 - new quest data or broad quest framework work
 - generic inventory/equipment, storage capacity, shop sell, generic sell, or
-  full facility systems
+  new / expanded facility gameplay systems beyond the landed extraction
 - formal class transfer, relic effects, endgame systems, settings persistence,
   or cross-screen preferences
 - GUI visual implementation, image generation, bridge expansion, or asset
