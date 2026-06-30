@@ -390,3 +390,17 @@ def player_resource_lines(state: dict) -> list[str]:
             f"敏捷 {stats['agility']} / 暴擊 {stats['crit']}% / 火抗 {stats['fire_resist']}%"
         ),
     ]
+
+
+def add_gold(state: dict, amount: int, run_log: dict | None = None) -> None:
+    if amount <= 0:
+        return
+    state["gold"] += amount
+    if run_log is not None:
+        run_log["gold"] += amount
+
+
+def add_loot(state: dict, item_id: str, qty: int, run_log: dict | None = None) -> None:
+    add_item(state, item_id, qty)
+    if run_log is not None:
+        run_log["items"][item_id] = run_log["items"].get(item_id, 0) + qty
