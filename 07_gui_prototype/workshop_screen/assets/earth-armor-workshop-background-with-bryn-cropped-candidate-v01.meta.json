@@ -1,0 +1,99 @@
+{
+  "image_id": "earth-armor-workshop-background-with-bryn-cropped-candidate-v01",
+  "display_name": "Earth-region armor workshop",
+  "region": "earth",
+  "facility": "armor_workshop",
+  "intended_gui_path": "07_gui_prototype/workshop_screen/assets/earth-armor-workshop-background-with-bryn-cropped-candidate-v01.png",
+  "canvas": "1672x941",
+  "aspect_intent": "16:9 GUI cropped candidate from 20:9-ish overscan master",
+  "source_master": "07_gui_prototype/workshop_screen/assets/earth-armor-workshop-background-with-bryn-overscan-master-v01.png",
+  "source_manifest": "C:/Users/User/AppData/Local/Temp/element-maze-gui-candidate-review/20260704T115020Z-earth-armor-workshop-bryn-v01-crop-b-core.manifest.json",
+  "selected_crop": {
+    "label": "earth-armor-workshop-bryn-v01-crop-b-core",
+    "crop_center": {
+      "x": 0.5,
+      "y": 0.5
+    },
+    "crop_zoom": 1.0,
+    "crop_box_px": {
+      "left": 168,
+      "top": 0,
+      "right": 1680,
+      "bottom": 851,
+      "width": 1512,
+      "height": 851
+    },
+    "crop_box_normalized": {
+      "x": 0.09086,
+      "y": 0.0,
+      "width": 0.817739,
+      "height": 1.0
+    }
+  },
+  "npc": {
+    "name": "Bryn",
+    "gender": "female",
+    "role": "armor artisan",
+    "species_style": "elf-like fantasy character with pointed ears",
+    "scale_rule": "ordinary",
+    "canonical_status": "visual candidate using the regional facility NPC role; generated image contains no text"
+  },
+  "pipeline": {
+    "mode": "overscan_master_to_16x9_candidate",
+    "css_preset": "workshop",
+    "subject_boxes": {
+      "face": {
+        "x": 0.71,
+        "y": 0.1,
+        "width": 0.16,
+        "height": 0.25
+      },
+      "torso_core": {
+        "x": 0.69,
+        "y": 0.33,
+        "width": 0.17,
+        "height": 0.27
+      }
+    }
+  },
+  "prompt": "Cropped 16:9 candidate produced from the v01 Earth armor workshop overscan master. See the source master metadata for the reconstructed generation prompt and Earth armor workshop rules.",
+  "negative_prompt": "See source master metadata.",
+  "reference_images": [
+    "07_gui_prototype/workshop_screen/assets/workshop-background-02.jpg",
+    "07_gui_prototype/workshop_screen/assets/ice-armor-workshop-with-brin-cropped-candidate-v03.png",
+    "07_gui_prototype/workshop_screen/assets/earth-armor-workshop-background-with-bryn-overscan-master-v01.png"
+  ],
+  "date": "2026-07-04",
+  "tool": "06_tools/gui_facility_image_compare.py",
+  "model": "unknown",
+  "seed": "unknown",
+  "source_generated_image": "C:/Users/User/AppData/Local/Temp/element-maze-gui-candidate-review/20260704T115020Z-earth-armor-workshop-bryn-v01-crop-b-core.candidate.png",
+  "review_status": "agent_selected_crop_candidate",
+  "owner_notes": "Owner asked to continue Earth facility image generation.",
+  "accepted_or_rejected_reason": "Selected because Bryn reads as an Earth-region elf armor artisan, the armor-shop environment has readable left/middle depth, and the face plus upper torso core pass the workshop CSS blocking-mask check.",
+  "agent_notes": "Candidate is not installed as the GUI background. Lower hands, chestplate, and tools may be partly covered by workshop panels, matching the current workshop crop rule.",
+  "comparison_outputs": {
+    "before": "C:/Users/User/AppData/Local/Temp/element-maze-gui-candidate-review/20260704T115020Z-earth-armor-workshop-bryn-v01-crop-b-core.before.png",
+    "after": "C:/Users/User/AppData/Local/Temp/element-maze-gui-candidate-review/20260704T115020Z-earth-armor-workshop-bryn-v01-crop-b-core.candidate.png",
+    "overlay": "C:/Users/User/AppData/Local/Temp/element-maze-gui-candidate-review/20260704T115020Z-earth-armor-workshop-bryn-v01-crop-b-core.overlay-55.png",
+    "css_preview": "C:/Users/User/AppData/Local/Temp/element-maze-gui-candidate-review/20260704T115020Z-earth-armor-workshop-bryn-v01-crop-b-core.css-preview.png",
+    "contact_sheet": "C:/Users/User/AppData/Local/Temp/element-maze-gui-candidate-review/20260704T115020Z-earth-armor-workshop-bryn-v01-crop-b-core.contact-sheet.png",
+    "manifest": "C:/Users/User/AppData/Local/Temp/element-maze-gui-candidate-review/20260704T115020Z-earth-armor-workshop-bryn-v01-crop-b-core.manifest.json"
+  },
+  "checks": {
+    "width": 1672,
+    "height": 941,
+    "format": "PNG",
+    "sha256": "dff0652c32f669d43ddb062e2a212ad323d02fcdc4c3c89498cc4a3f3a90a3a0",
+    "base_candidate_dimensions_match": false,
+    "prepared_candidate_dimensions_match": true,
+    "face_inside_frame": true,
+    "face_blocking_overlap_ratio": 0.0,
+    "face_passed": true,
+    "torso_inside_frame": true,
+    "torso_blocking_overlap_ratio": 0.0,
+    "torso_passed": true,
+    "review_passed": true,
+    "installed_as_gui_background": false
+  }
+}

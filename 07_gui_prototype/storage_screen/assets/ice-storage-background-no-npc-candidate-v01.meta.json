@@ -1,0 +1,43 @@
+{
+  "image_id": "ice-storage-background-no-npc-candidate-v01",
+  "display_name": "港口倉庫",
+  "region": "ice",
+  "facility": "storage",
+  "intended_gui_path": "07_gui_prototype/storage_screen/assets/ice-storage-background-no-npc-candidate-v01.png",
+  "canvas": "1672x941",
+  "npc": {
+    "name": "",
+    "gender": "",
+    "role": "",
+    "scale_rule": "none"
+  },
+  "prompt": "Use case: stylized-concept\nAsset type: game GUI facility background candidate for a JRPG static prototype\nPrimary request: Create a wide 16:9 mature fantasy anime JRPG background for the Ice-region storage facility, display name: 港口倉庫. This is a new v01 candidate, not a replacement of an existing asset.\nScene/backdrop: Frost-tide harbor warehouse interior with no character: wet dark timber beams, rope coils, cargo crates, barrels, pulley hooks, wrapped parcels, brass lanterns, salt frost, ledger desk, stone floor reflections, sea-fogged arched door/window on the left with distant cold harbor silhouettes. Preserve readable left and middle background depth for GUI panels.\nPrimary focus: center-right stacked cargo and warehouse counter area, with enough negative space and depth to survive GUI overlay cropping.\nStyle/medium: polished 2D anime fantasy game background, painterly JRPG facility art, mature and grounded, detailed but not cluttered, matching existing fantasy facility GUI mood.\nComposition/framing: 1672x941 target aspect. No NPC. Keep focal cargo and tools center-right/lower-right, left side readable as harbor warehouse depth, no oversized foreground object blocking GUI panels.\nLighting/mood: cold blue harbor light plus warm amber brass lanterns, damp winter storage atmosphere.\nConstraints: no in-image text, no readable signs, no UI panels, no logos, no runtime IDs, no watermark.",
+  "negative_prompt": "text, captions, logo, UI panels, signs with readable words, runtime IDs, character, portrait, cropped face, plain white snowfield, empty ice cave, modern objects, unreadable clutter, overexposed pure white ice, image with no usable left/middle background depth.",
+  "reference_images": [
+    "07_gui_prototype/storage_screen/assets/storage-background.jpg"
+  ],
+  "date": "2026-07-01",
+  "tool": "built-in image_gen",
+  "model": "unknown",
+  "seed": "unknown",
+  "source_generated_image": "C:/Users/user/.codex/generated_images/019f18b4-109e-7943-954c-a01ffaff5b16/ig_0763041333197f54016a444c1fd5548191b6376c0c36d0b6f2.png",
+  "review_status": "candidate",
+  "owner_notes": "",
+  "accepted_or_rejected_reason": "",
+  "agent_notes": "Candidate v01 treats storage as a no-NPC facility, using harbor cargo and wet warehouse depth as the main visual focus. It is not installed as the GUI background.",
+  "comparison_outputs": {
+    "before": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260630T231551Z-storage-ice-no-npc-v01.before.png",
+    "after": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260630T231551Z-storage-ice-no-npc-v01.candidate.png",
+    "overlay": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260630T231551Z-storage-ice-no-npc-v01.overlay-55.png",
+    "contact_sheet": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260630T231551Z-storage-ice-no-npc-v01.contact-sheet.png",
+    "manifest": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260630T231551Z-storage-ice-no-npc-v01.manifest.json"
+  },
+  "checks": {
+    "width": 1672,
+    "height": 941,
+    "format": "PNG",
+    "sha256": "0f004ee3df3f7b958a5ad1a49cc244040eedcb956a86b4256e69ef81f1d5e089",
+    "base_candidate_dimensions_match": true,
+    "installed_as_gui_background": false
+  }
+}

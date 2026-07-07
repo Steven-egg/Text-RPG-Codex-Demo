@@ -1,0 +1,93 @@
+{
+  "image_id": "ice-synthesis-background-with-mira-cropped-candidate-v02",
+  "display_name": "Ice-region synthesis workshop",
+  "region": "ice",
+  "facility": "synthesis",
+  "intended_gui_path": "07_gui_prototype/synthesis_screen/assets/ice-synthesis-background-with-mira-cropped-candidate-v02.png",
+  "canvas": "1672x941",
+  "source_master": "07_gui_prototype/synthesis_screen/assets/ice-synthesis-background-with-mira-overscan-master-v01.png",
+  "npc": {
+    "name": "Mira",
+    "gender": "female",
+    "role": "synthesis artisan",
+    "scale_rule": "ordinary"
+  },
+  "pipeline": {
+    "mode": "overscan_master_to_16x9_candidate",
+    "crop_center": {
+      "x": 0.5,
+      "y": 0.5
+    },
+    "crop_zoom": 1.0,
+    "crop_box_px": {
+      "left": 164,
+      "top": 0,
+      "right": 1680,
+      "bottom": 853,
+      "width": 1516,
+      "height": 853
+    },
+    "crop_box_normalized": {
+      "x": 0.088937,
+      "y": 0.0,
+      "width": 0.822126,
+      "height": 1.0
+    },
+    "css_preset": "synthesis",
+    "subject_boxes": {
+      "face": {
+        "x": 0.75,
+        "y": 0.14,
+        "width": 0.1,
+        "height": 0.17
+      },
+      "torso_core": {
+        "x": 0.68,
+        "y": 0.31,
+        "width": 0.27,
+        "height": 0.34
+      }
+    }
+  },
+  "prompt": "Cropped 16:9 candidate produced from the v01 overscan master. See the source master metadata for the generation prompt.",
+  "negative_prompt": "See source master metadata.",
+  "reference_images": [
+    "07_gui_prototype/synthesis_screen/assets/synthesis-background.jpg",
+    "07_gui_prototype/synthesis_screen/assets/ice-synthesis-background-with-mira-overscan-master-v01.png",
+    "07_gui_prototype/magic_shop_screen/assets/ice-magic-shop-background-with-eve-cropped-candidate-v02.png",
+    "07_gui_prototype/guild_screen/assets/ice-guild-background-with-noah-cropped-candidate-v04.png"
+  ],
+  "date": "2026-07-02",
+  "tool": "06_tools/gui_facility_image_compare.py",
+  "model": "unknown",
+  "seed": "unknown",
+  "source_generated_image": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260701T153010Z-synthesis-overscan-mira-v01-crop-a.candidate.png",
+  "review_status": "agent_selected_crop_candidate",
+  "owner_notes": "Owner requested finishing the remaining Ice facility candidates in this pipeline. This candidate has not been installed as the GUI background.",
+  "accepted_or_rejected_reason": "Selected because Mira is visually distinct from Eve and Noah, reads as a hands-on crystal synthesis artisan, and face/torso core both have zero blocking-mask overlap in the synthesis CSS preview.",
+  "agent_notes": "Crop-a was selected over crop-b because crop-b preserved slightly more right-edge breathing room but introduced a 0.0741 torso overlap with the center detail mask. Hands/tools/lower work surface may be covered by panels; face, shoulders, and torso core remain visually safe.",
+  "comparison_outputs": {
+    "before": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260701T153010Z-synthesis-overscan-mira-v01-crop-a.before.png",
+    "after": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260701T153010Z-synthesis-overscan-mira-v01-crop-a.candidate.png",
+    "overlay": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260701T153010Z-synthesis-overscan-mira-v01-crop-a.overlay-55.png",
+    "css_preview": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260701T153010Z-synthesis-overscan-mira-v01-crop-a.css-preview.png",
+    "contact_sheet": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260701T153010Z-synthesis-overscan-mira-v01-crop-a.contact-sheet.png",
+    "manifest": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260701T153010Z-synthesis-overscan-mira-v01-crop-a.manifest.json"
+  },
+  "checks": {
+    "width": 1672,
+    "height": 941,
+    "format": "PNG",
+    "sha256": "be32140a4226480acf2e4e9322b192602ec8b35edc0fd508a114e1fa39268abe",
+    "base_candidate_dimensions_match": false,
+    "prepared_candidate_dimensions_match": true,
+    "face_inside_frame": true,
+    "face_blocking_overlap_ratio": 0.0,
+    "face_passed": true,
+    "torso_inside_frame": true,
+    "torso_blocking_overlap_ratio": 0.0,
+    "torso_passed": true,
+    "review_passed": true,
+    "installed_as_gui_background": false
+  }
+}

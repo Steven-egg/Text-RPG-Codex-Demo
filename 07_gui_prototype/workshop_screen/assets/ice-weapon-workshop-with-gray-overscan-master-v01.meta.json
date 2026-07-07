@@ -1,0 +1,38 @@
+{
+  "image_id": "ice-weapon-workshop-with-gray-overscan-master-v01",
+  "display_name": "Ice-region weapon workshop",
+  "region": "ice",
+  "facility": "weapon_workshop",
+  "intended_gui_path": "07_gui_prototype/workshop_screen/assets/ice-weapon-workshop-with-gray-overscan-master-v01.png",
+  "canvas": "1866x843",
+  "aspect_intent": "20:9 overscan master for later 16:9 crop",
+  "npc": {
+    "name": "Gray",
+    "gender": "male",
+    "role": "blacksmith",
+    "scale_rule": "ordinary"
+  },
+  "prompt": "Use case: stylized-concept\nAsset type: extra-wide overscan master candidate for a game GUI facility background in a JRPG static prototype\nPrimary request: Create a mature fantasy anime JRPG background for the Ice-region weapon workshop facility. This is a 20:9 overscan master, not the final crop. It will later be cropped to a 16:9 GUI background, so keep extra safe background buffer on both left and right edges.\nScene/backdrop: Interior of a frost-tide harbor cold forge: dark wet timber beams, black iron furnace hood, frost-blue forge flame, frosted anvils, racks of heavy swords and tools, cold iron ingots, metal clamps, ropes, salt-frosted windows on the left, distant cold harbor silhouettes, brass lanterns, soot, wet stone, and faint blue forge vapor. It should read as a working cold forge, not a pure glacier or empty cave.\nSubject: Gray, adult male blacksmith, rugged and distinct, late 30s to early 40s, broad-shouldered but not exaggerated bodybuilder, square jaw, weathered face, short messy ash-brown hair with frost-damp strands, trimmed beard, stern focused expression, thick leather apron over rolled sleeves, fur-lined shoulder vest, heavy gloves. He is holding cold-forged tongs or working near an anvil with a blade. Make him clearly different from a warm innkeeper: harder expression, forge posture, work-worn hands, blacksmith silhouette.\nComposition/framing: extra-wide 20:9 canvas. Design the central 80% so it can crop cleanly to 16:9. Gray is medium-close half-body in the right foreground but not near the outer crop edge; his face should sit safely inside the eventual 16:9 crop, around the upper-right safe zone, with breathing room above and to the right. Keep his face and core torso out of the lower action/dialogue area and above the right-side dialogue panel zone. His hands, tools, anvil, and blade may sit lower and may be partially covered by GUI panels. Preserve readable left and middle background depth for GUI panels.\nConstraints: no in-image text, no readable signs, no UI panels, no logos, no runtime IDs, no watermark.",
+  "negative_prompt": "text, captions, logo, UI panels, signs with readable words, runtime IDs, cropped face, face at image edge, tiny distant NPC, full-body far shot, duplicate male face, same body type as innkeeper, overly handsome generic face, plain white snowfield, empty ice cave, modern objects, broken hands, extra fingers, warped tools, unreadable clutter, overexposed pure white ice.",
+  "reference_images": [
+    "07_gui_prototype/workshop_screen/assets/workshop-background.jpg",
+    "07_gui_prototype/workshop_screen/assets/workshop-background-02.jpg",
+    "07_gui_prototype/workshop_screen/assets/ice-weapon-workshop-with-gray-candidate-v02.png"
+  ],
+  "date": "2026-07-01",
+  "tool": "built-in image_gen",
+  "model": "unknown",
+  "seed": "unknown",
+  "source_generated_image": "C:/Users/user/.codex/generated_images/019f18b4-109e-7943-954c-a01ffaff5b16/ig_0624bb86188b0e3c016a45239562788191ba06234f21f5ab68.png",
+  "review_status": "candidate_master",
+  "owner_notes": "",
+  "accepted_or_rejected_reason": "",
+  "agent_notes": "Overscan master generated for the workshop pipeline pass. It is intentionally not a 16:9 GUI background and is not installed as the GUI background.",
+  "checks": {
+    "width": 1866,
+    "height": 843,
+    "format": "PNG",
+    "sha256": "a8dc02763fdb49c654724d0e6a82a88fea808573fdf326b54543e0a672878f0a",
+    "installed_as_gui_background": false
+  }
+}

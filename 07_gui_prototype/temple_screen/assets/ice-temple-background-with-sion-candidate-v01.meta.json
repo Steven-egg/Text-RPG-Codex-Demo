@@ -1,0 +1,43 @@
+{
+  "image_id": "ice-temple-background-with-sion-candidate-v01",
+  "display_name": "霜碑神殿",
+  "region": "ice",
+  "facility": "temple",
+  "intended_gui_path": "07_gui_prototype/temple_screen/assets/ice-temple-background-with-sion-candidate-v01.png",
+  "canvas": "1672x941",
+  "npc": {
+    "name": "賽恩",
+    "gender": "male",
+    "role": "temple guardian priest",
+    "scale_rule": "temple_exception"
+  },
+  "prompt": "Use case: stylized-concept\nAsset type: game GUI facility background candidate for a JRPG static prototype\nPrimary request: Create a wide 16:9 mature fantasy anime JRPG background for the Ice-region temple facility, display name: 霜碑神殿. This is a new v01 candidate, not a replacement of an existing asset.\nScene/backdrop: Sacred frost-stone temple interior with dark blue stone floor, frost pillars, banners, candles, altar steps, ritual brass, sea-fogged stained windows, and a central frost tablet. Temple may be more ceremonial and larger in scale than ordinary facilities.\nSubject: 賽恩, adult male temple guardian priest, solemn and severe, pale silver hair, long ceremonial robes, dark gloves, angular face, calm ritual posture. Make him clearly distinct from Gray and the innkeeper.\nStyle/medium: polished 2D anime fantasy game background, painterly JRPG facility art, mature and grounded, detailed but not cluttered, matching existing fantasy facility GUI mood.\nComposition/framing: 1672x941 target aspect. 賽恩 is a closer ceremonial foreground figure on the right or center-right, larger than ordinary facility NPCs but not cropped at the face, with breathing room from the right edge. The altar and frost tablet remain readable in the center/left background. Keep face and upper torso clear of the bottom action bar area.\nLighting/mood: cold divine blue window light plus warm candle and brass light, solemn frost-tide ritual atmosphere.\nConstraints: no in-image text, no readable signs, no UI panels, no logos, no runtime IDs, no watermark.",
+  "negative_prompt": "text, captions, logo, UI panels, signs with readable words, runtime IDs, cropped face, face at image edge, tiny distant NPC, full-body far shot, duplicate male face, same body type, same pose, overly handsome generic face, plain white snowfield, empty ice cave, modern objects, extra fingers, broken hands, warped ritual tools, unreadable clutter, overexposed pure white ice, image with no usable left/middle background depth.",
+  "reference_images": [
+    "07_gui_prototype/temple_screen/assets/temple-background.jpg"
+  ],
+  "date": "2026-07-01",
+  "tool": "built-in image_gen",
+  "model": "unknown",
+  "seed": "unknown",
+  "source_generated_image": "C:/Users/user/.codex/generated_images/019f18b4-109e-7943-954c-a01ffaff5b16/ig_0202759da4126ac5016a444b6908e88191972ff3085cce5497.png",
+  "review_status": "candidate",
+  "owner_notes": "",
+  "accepted_or_rejected_reason": "",
+  "agent_notes": "Candidate v01 applies the temple scale exception: 賽恩 is larger and more ceremonial than ordinary facility NPCs, while the altar depth remains visible. It is not installed as the GUI background.",
+  "comparison_outputs": {
+    "before": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260630T231551Z-temple-ice-sion-v01.before.png",
+    "after": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260630T231551Z-temple-ice-sion-v01.candidate.png",
+    "overlay": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260630T231551Z-temple-ice-sion-v01.overlay-55.png",
+    "contact_sheet": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260630T231551Z-temple-ice-sion-v01.contact-sheet.png",
+    "manifest": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260630T231551Z-temple-ice-sion-v01.manifest.json"
+  },
+  "checks": {
+    "width": 1672,
+    "height": 941,
+    "format": "PNG",
+    "sha256": "830968a1f05dce9f7e5d36478fd44977bf9463d4c4ebff8a2abf8b64514e810e",
+    "base_candidate_dimensions_match": true,
+    "installed_as_gui_background": false
+  }
+}

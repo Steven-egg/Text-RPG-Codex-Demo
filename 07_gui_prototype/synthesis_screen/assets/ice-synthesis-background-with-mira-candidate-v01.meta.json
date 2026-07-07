@@ -1,0 +1,43 @@
+{
+  "image_id": "ice-synthesis-background-with-mira-candidate-v01",
+  "display_name": "霜潮合成台",
+  "region": "ice",
+  "facility": "synthesis",
+  "intended_gui_path": "07_gui_prototype/synthesis_screen/assets/ice-synthesis-background-with-mira-candidate-v01.png",
+  "canvas": "1672x941",
+  "npc": {
+    "name": "米菈",
+    "gender": "female",
+    "role": "synthesis artisan",
+    "scale_rule": "ordinary"
+  },
+  "prompt": "Use case: stylized-concept\nAsset type: game GUI facility background candidate for a JRPG static prototype\nPrimary request: Create a wide 16:9 mature fantasy anime JRPG background for the Ice-region synthesis facility, display name: 霜潮合成台. This is a new v01 candidate, not a replacement of an existing asset.\nScene/backdrop: Interior of a frost-tide synthesis workshop: wet dark timber, brass lamps, shelves of reagents, blue crystal shards, glass vessels, ropes, sea charts, alchemical clamps, a practical workbench, sea-fogged windows on the left, distant cold harbor silhouettes, and salt frost on metal. Preserve readable left and middle background depth for GUI panels.\nSubject: 米菈, adult female synthesis artisan and alchemist, practical and focused, warm brown hair, teal winter work coat, leather tool straps, gloves, holding a small vial or crystal tool. She should feel distinct from 伊芙 and 諾亞, more hands-on craftsperson than mystic shopkeeper.\nStyle/medium: polished 2D anime fantasy game background, painterly JRPG facility art, mature and grounded, detailed but not cluttered, matching existing fantasy facility GUI mood.\nComposition/framing: 1672x941 target aspect. 米菈 is a medium-close half-body figure in the right foreground, face in the upper-right safe zone, not cropped, with breathing room from the right edge. Center foreground has the synthesis table with crystals, vessels, and tools; left side keeps readable workshop depth and harbor windows. Keep face and upper torso clear of the bottom action bar area.\nLighting/mood: cold blue coastal light mixed with warm brass lanterns and small cyan reagent glow, quiet winter craft atmosphere.\nConstraints: no in-image text, no readable signs, no UI panels, no logos, no runtime IDs, no watermark.",
+  "negative_prompt": "text, captions, logo, UI panels, signs with readable words, runtime IDs, cropped face, face at image edge, tiny distant NPC, full-body far shot, duplicate female face, same body type, same pose, seductive costume, plain white snowfield, empty ice cave, modern objects, extra fingers, broken hands, warped tools, unreadable clutter, overexposed pure white ice, image with no usable left/middle background depth.",
+  "reference_images": [
+    "07_gui_prototype/synthesis_screen/assets/synthesis-background.jpg"
+  ],
+  "date": "2026-07-01",
+  "tool": "built-in image_gen",
+  "model": "unknown",
+  "seed": "unknown",
+  "source_generated_image": "C:/Users/user/.codex/generated_images/019f18b4-109e-7943-954c-a01ffaff5b16/ig_04e57bd355ac7032016a444aaeda248191949d7f6b06d7fc2b.png",
+  "review_status": "candidate",
+  "owner_notes": "",
+  "accepted_or_rejected_reason": "",
+  "agent_notes": "Candidate v01 keeps 米菈 as a right-foreground craft NPC and puts the synthesis work surface in the center-right lower area. It is not installed as the GUI background.",
+  "comparison_outputs": {
+    "before": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260630T231550Z-synthesis-ice-mira-v01.before.png",
+    "after": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260630T231550Z-synthesis-ice-mira-v01.candidate.png",
+    "overlay": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260630T231550Z-synthesis-ice-mira-v01.overlay-55.png",
+    "contact_sheet": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260630T231550Z-synthesis-ice-mira-v01.contact-sheet.png",
+    "manifest": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260630T231550Z-synthesis-ice-mira-v01.manifest.json"
+  },
+  "checks": {
+    "width": 1672,
+    "height": 941,
+    "format": "PNG",
+    "sha256": "8e8cc819900fd60da49d8bf8fb025f2ff81b3234c36ae79f626cb1159597981e",
+    "base_candidate_dimensions_match": true,
+    "installed_as_gui_background": false
+  }
+}

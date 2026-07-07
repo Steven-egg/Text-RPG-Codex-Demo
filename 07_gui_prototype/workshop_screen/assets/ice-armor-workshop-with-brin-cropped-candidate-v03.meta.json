@@ -1,0 +1,54 @@
+{
+  "image_id": "ice-armor-workshop-with-brin-cropped-candidate-v03",
+  "display_name": "Ice-region armor workshop",
+  "region": "ice",
+  "facility": "armor_workshop",
+  "intended_gui_path": "07_gui_prototype/workshop_screen/assets/ice-armor-workshop-with-brin-cropped-candidate-v03.png",
+  "canvas": "1672x941",
+  "aspect_intent": "16:9 GUI cropped candidate from 20:9 overscan master",
+  "source_master": "07_gui_prototype/workshop_screen/assets/ice-armor-workshop-with-brin-overscan-master-v03.png",
+  "source_manifest": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260702T140517Z-armor-workshop-overscan-brin-v03-crop-c.manifest.json",
+  "selected_crop": {
+    "label": "armor-workshop-overscan-brin-v03-crop-c",
+    "crop_center": {
+      "x": 0.47,
+      "y": 0.5
+    },
+    "crop_zoom": 1.0,
+    "crop_box_px": {
+      "left": 132,
+      "top": 0,
+      "right": 1626,
+      "bottom": 841,
+      "width": 1494,
+      "height": 841
+    }
+  },
+  "npc": {
+    "name": "Brin",
+    "gender": "female",
+    "role": "armor artisan",
+    "scale_rule": "ordinary"
+  },
+  "review_status": "agent_selected_crop_candidate",
+  "owner_notes": "Owner requested fixing Brin's character style to Japanese visual novel / JRPG facility CG while preserving Ice-region identity and conservative clothing.",
+  "accepted_or_rejected_reason": "",
+  "agent_notes": "Selected crop-c because it keeps Brin's face, shoulders, and chest/apron core clear of workshop panels. Lower hands and worktable tools may be covered by the right dialogue or bottom action panels, matching the accepted workshop crop rule. This candidate is not installed as the GUI background.",
+  "comparison_outputs": {
+    "selected_candidate": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260702T140517Z-armor-workshop-overscan-brin-v03-crop-c.candidate.png",
+    "selected_css_preview": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260702T140517Z-armor-workshop-overscan-brin-v03-crop-c.css-preview.png",
+    "selected_contact_sheet": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260702T140517Z-armor-workshop-overscan-brin-v03-crop-c.contact-sheet.png",
+    "selected_manifest": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260702T140517Z-armor-workshop-overscan-brin-v03-crop-c.manifest.json",
+    "alternate_manifest": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260702T135927Z-armor-workshop-overscan-brin-v03-crop-a.manifest.json"
+  },
+  "checks": {
+    "width": 1672,
+    "height": 941,
+    "format": "PNG",
+    "sha256": "b23b48bd4a7f700a2b7831cb49716506b5340635789ef23dd1c485f8b274f2e8",
+    "face_passed_tool_threshold": true,
+    "torso_passed_tool_threshold": true,
+    "selected_crop_review_passed": true,
+    "installed_as_gui_background": false
+  }
+}

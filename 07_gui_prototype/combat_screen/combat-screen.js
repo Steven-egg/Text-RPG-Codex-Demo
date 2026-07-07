@@ -110,6 +110,391 @@ const COMBAT_ENEMY_VISUALS = Object.freeze({
     environment: "cinder-seal-depths",
     role: "boss-tall",
   },
+  mon_ice_drowned_deckhand: {
+    imageSrc: "./assets/monsters/transparent/mon-ice-drowned-deckhand-v01.png",
+    environment: "ice-minor-a",
+    role: "ground",
+  },
+  mon_ice_bilge_crab: {
+    imageSrc: "./assets/monsters/transparent/mon-ice-bilge-crab-v01.png",
+    environment: "ice-minor-a",
+    role: "ground",
+  },
+  mon_ice_salt_wisp: {
+    imageSrc: "./assets/monsters/transparent/mon-ice-salt-wisp-v01.png",
+    environment: "ice-minor-a",
+    role: "floating",
+  },
+  mon_ice_ghost_sail: {
+    imageSrc: "./assets/monsters/transparent/mon-ice-ghost-sail-v01.png",
+    environment: "ice-minor-a",
+    role: "floating",
+  },
+  boss_ice_wreck_captain: {
+    imageSrc: "./assets/monsters/transparent/boss-ice-wreck-captain-v01.png",
+    environment: "ice-minor-a",
+    role: "boss",
+  },
+  mon_ice_frostroot_lurker: {
+    imageSrc: "./assets/monsters/transparent/mon-ice-frostroot-lurker-v01.png",
+    environment: "ice-minor-b",
+    role: "low-wide",
+  },
+  mon_ice_cave_mite: {
+    imageSrc: "./assets/monsters/transparent/mon-ice-cave-mite-v01.png",
+    environment: "ice-minor-b",
+    role: "ground",
+  },
+  mon_ice_rime_bloom: {
+    imageSrc: "./assets/monsters/transparent/mon-ice-rime-bloom-v01.png",
+    environment: "ice-minor-b",
+    role: "low-wide",
+  },
+  mon_ice_stone_shell: {
+    imageSrc: "./assets/monsters/transparent/mon-ice-stone-shell-v01.png",
+    environment: "ice-minor-b",
+    role: "low-wide",
+  },
+  boss_ice_frostroot_keeper: {
+    imageSrc: "./assets/monsters/transparent/boss-ice-frostroot-keeper-v01.png",
+    environment: "ice-minor-b",
+    role: "boss-heavy",
+  },
+  mon_ice_outer_guard: {
+    imageSrc: "./assets/monsters/transparent/mon-ice-outer-guard-v01.png",
+    environment: "ice-main-phase-1",
+    role: "ground",
+  },
+  mon_ice_rime_hound: {
+    imageSrc: "./assets/monsters/transparent/mon-ice-rime-hound-v01.png",
+    environment: "ice-main-phase-1",
+    role: "ground",
+  },
+  mon_ice_frost_armor: {
+    imageSrc: "./assets/monsters/transparent/mon-ice-frost-armor-v01.png",
+    environment: "ice-main-phase-1",
+    role: "ground",
+  },
+  mon_ice_seal_spark: {
+    imageSrc: "./assets/monsters/transparent/mon-ice-seal-spark-v02.png",
+    environment: "ice-main-phase-1",
+    role: "floating",
+  },
+  boss_ice_outer_gatewarden: {
+    imageSrc: "./assets/monsters/transparent/boss-ice-outer-gatewarden-v01.png",
+    environment: "ice-main-phase-1",
+    role: "boss-heavy",
+  },
+  mon_ice_palace_wisp: {
+    imageSrc: "./assets/monsters/transparent/mon-ice-palace-wisp-v01.png",
+    environment: "ice-main-phase-2",
+    role: "ground",
+  },
+  mon_ice_throne_shade: {
+    imageSrc: "./assets/monsters/transparent/mon-ice-throne-shade-v01.png",
+    environment: "ice-main-phase-2",
+    role: "floating",
+  },
+  mon_ice_seal_knight: {
+    imageSrc: "./assets/monsters/transparent/mon-ice-seal-knight-v01.png",
+    environment: "ice-main-phase-2",
+    role: "boss-heavy",
+  },
+  mon_ice_core_sentry: {
+    imageSrc: "./assets/monsters/transparent/mon-ice-core-sentry-v02.png",
+    environment: "ice-main-phase-2",
+    role: "ground",
+  },
+  boss_ice_final_seal_lord: {
+    imageSrc: "./assets/monsters/transparent/boss-ice-final-seal-lord-v01.png",
+    environment: "ice-main-phase-2",
+    role: "boss-tall",
+  },
+  mon_earth_rootling_scavenger: {
+    imageSrc: "./assets/monsters/transparent/mon-earth-rootling-scavenger-v01.png",
+    environment: "earth-minor-a",
+    role: "small-ground",
+  },
+  mon_earth_moss_hound: {
+    imageSrc: "./assets/monsters/transparent/mon-earth-moss-hound-v01.png",
+    environment: "earth-minor-a",
+    role: "low-wide",
+  },
+  mon_earth_spore_moth: {
+    imageSrc: "./assets/monsters/transparent/mon-earth-spore-moth-v01.png",
+    environment: "earth-minor-a",
+    role: "flying",
+  },
+  boss_earth_rootwarden: {
+    imageSrc: "./assets/monsters/transparent/boss-earth-rootwarden-v01.png",
+    environment: "earth-minor-a",
+    role: "boss-heavy",
+  },
+  mon_earth_quarry_mite: {
+    imageSrc: "./assets/monsters/transparent/mon-earth-quarry-mite-v01.png",
+    environment: "earth-minor-b",
+    role: "small-ground",
+  },
+  mon_earth_stoneback_boar: {
+    imageSrc: "./assets/monsters/transparent/mon-earth-stoneback-boar-v01.png",
+    environment: "earth-minor-b",
+    role: "low-wide",
+  },
+  mon_earth_fungal_sapper: {
+    imageSrc: "./assets/monsters/transparent/mon-earth-fungal-sapper-v01.png",
+    environment: "earth-minor-b",
+    role: "ground",
+  },
+  mon_earth_ore_wisp: {
+    imageSrc: "./assets/monsters/transparent/mon-earth-ore-wisp-v01.png",
+    environment: "earth-minor-b",
+    role: "floating",
+  },
+  boss_earth_quarry_colossus: {
+    imageSrc: "./assets/monsters/transparent/boss-earth-quarry-colossus-v01.png",
+    environment: "earth-minor-b",
+    role: "boss-heavy",
+  },
+  mon_earth_leyline_guard: {
+    imageSrc: "./assets/monsters/transparent/mon-earth-leyline-guard-v01.png",
+    environment: "earth-main-phase-1",
+    role: "ground",
+  },
+  mon_earth_root_bound_knight: {
+    imageSrc: "./assets/monsters/transparent/mon-earth-root-bound-knight-v01.png",
+    environment: "earth-main-phase-1",
+    role: "ground",
+  },
+  mon_earth_seal_spore: {
+    imageSrc: "./assets/monsters/transparent/mon-earth-seal-spore-v01.png",
+    environment: "earth-main-phase-1",
+    role: "floating",
+  },
+  boss_earth_outer_grovekeeper: {
+    imageSrc: "./assets/monsters/transparent/boss-earth-outer-grovekeeper-v01.png",
+    environment: "earth-main-phase-1",
+    role: "boss-tall",
+  },
+  mon_earth_heartwood_shade: {
+    imageSrc: "./assets/monsters/transparent/mon-earth-heartwood-shade-v01.png",
+    environment: "earth-main-phase-2",
+    role: "floating",
+  },
+  mon_earth_deep_core_sentry: {
+    imageSrc: "./assets/monsters/transparent/mon-earth-deep-core-sentry-v01.png",
+    environment: "earth-main-phase-2",
+    role: "ground",
+  },
+  mon_earth_petrified_lasher: {
+    imageSrc: "./assets/monsters/transparent/mon-earth-petrified-lasher-v01.png",
+    environment: "earth-main-phase-2",
+    role: "low-wide",
+  },
+  boss_earth_deep_leyline_lord: {
+    imageSrc: "./assets/monsters/transparent/boss-earth-deep-leyline-lord-v01.png",
+    environment: "earth-main-phase-2",
+    role: "boss-tall",
+  },
+  mon_thunder_static_lizard: {
+    imageSrc: "./assets/monsters/transparent/mon-thunder-static-lizard-v03.png",
+    environment: "thunder-minor-a",
+    role: "low-wide",
+  },
+  mon_thunder_plateau_runner: {
+    imageSrc: "./assets/monsters/transparent/mon-thunder-plateau-runner-v03.png",
+    environment: "thunder-minor-a",
+    role: "low-wide",
+  },
+  mon_thunder_spark_wisp: {
+    imageSrc: "./assets/monsters/transparent/mon-thunder-spark-wisp-v03.png",
+    environment: "thunder-minor-a",
+    role: "floating",
+  },
+  mon_thunder_glasswing: {
+    imageSrc: "./assets/monsters/transparent/mon-thunder-glasswing-v03.png",
+    environment: "thunder-minor-a",
+    role: "flying",
+  },
+  boss_thunder_plateau_beacon: {
+    imageSrc: "./assets/monsters/transparent/boss-thunder-plateau-beacon-v03.png",
+    environment: "thunder-minor-a",
+    role: "boss-tall",
+  },
+  mon_thunder_channel_eel: {
+    imageSrc: "./assets/monsters/transparent/mon-thunder-channel-eel-v03.png",
+    environment: "thunder-minor-b",
+    role: "low-wide",
+  },
+  mon_thunder_copper_hound: {
+    imageSrc: "./assets/monsters/transparent/mon-thunder-copper-hound-v03.png",
+    environment: "thunder-minor-b",
+    role: "low-wide",
+  },
+  mon_thunder_rail_sentry: {
+    imageSrc: "./assets/monsters/transparent/mon-thunder-rail-sentry-v03.png",
+    environment: "thunder-minor-b",
+    role: "ground",
+  },
+  mon_thunder_cloud_mite: {
+    imageSrc: "./assets/monsters/transparent/mon-thunder-cloud-mite-v03.png",
+    environment: "thunder-minor-b",
+    role: "small-ground",
+  },
+  boss_thunder_channel_keeper: {
+    imageSrc: "./assets/monsters/transparent/boss-thunder-channel-keeper-v03.png",
+    environment: "thunder-minor-b",
+    role: "boss",
+  },
+  mon_thunder_array_guard: {
+    imageSrc: "./assets/monsters/transparent/mon-thunder-array-guard-v03.png",
+    environment: "thunder-main-phase-1",
+    role: "ground",
+  },
+  mon_thunder_tower_lancer: {
+    imageSrc: "./assets/monsters/transparent/mon-thunder-tower-lancer-v03.png",
+    environment: "thunder-main-phase-1",
+    role: "ground",
+  },
+  mon_thunder_seal_orb: {
+    imageSrc: "./assets/monsters/transparent/mon-thunder-seal-orb-v03.png",
+    environment: "thunder-main-phase-1",
+    role: "floating",
+  },
+  boss_thunder_lower_array_warden: {
+    imageSrc: "./assets/monsters/transparent/boss-thunder-lower-array-warden-v03.png",
+    environment: "thunder-main-phase-1",
+    role: "boss-heavy",
+  },
+  mon_thunder_crown_wisp: {
+    imageSrc: "./assets/monsters/transparent/mon-thunder-crown-wisp-v03.png",
+    environment: "thunder-main-phase-2",
+    role: "floating",
+  },
+  mon_thunder_deep_core_sentry: {
+    imageSrc: "./assets/monsters/transparent/mon-thunder-deep-core-sentry-v03.png",
+    environment: "thunder-main-phase-2",
+    role: "ground",
+  },
+  mon_thunder_stormbound_knight: {
+    imageSrc: "./assets/monsters/transparent/mon-thunder-stormbound-knight-v03.png",
+    environment: "thunder-main-phase-2",
+    role: "ground",
+  },
+  boss_thunder_crown_storm_lord: {
+    imageSrc: "./assets/monsters/transparent/boss-thunder-crown-storm-lord-v03.png",
+    environment: "thunder-main-phase-2",
+    role: "boss-tall",
+  },
+  mon_final_ash_echo: {
+    imageSrc: "./assets/monsters/transparent/mon-final-ash-echo-regenerated-v02.png",
+    environment: "final-minor-a",
+    role: "ground",
+  },
+  mon_final_frost_echo: {
+    imageSrc: "./assets/monsters/transparent/mon-final-frost-echo-regenerated-v01.png",
+    environment: "final-minor-a",
+    role: "ground",
+  },
+  mon_final_root_echo: {
+    imageSrc: "./assets/monsters/transparent/mon-final-root-echo-regenerated-v01.png",
+    environment: "final-minor-a",
+    role: "ground",
+  },
+  mon_final_storm_echo: {
+    imageSrc: "./assets/monsters/transparent/mon-final-storm-echo-regenerated-v01.png",
+    environment: "final-minor-a",
+    role: "flying",
+  },
+  boss_final_echo_vanguard: {
+    imageSrc: "./assets/monsters/transparent/boss-final-echo-vanguard-regenerated-v02.png",
+    environment: "final-minor-a",
+    role: "boss",
+  },
+  mon_final_seal_larva: {
+    imageSrc: "./assets/monsters/transparent/mon-final-seal-larva-regenerated-v01.png",
+    environment: "final-minor-b",
+    role: "low-wide",
+  },
+  mon_final_ruin_hound: {
+    imageSrc: "./assets/monsters/transparent/mon-final-ruin-hound-regenerated-v01.png",
+    environment: "final-minor-b",
+    role: "low-wide",
+  },
+  mon_final_void_mite: {
+    imageSrc: "./assets/monsters/transparent/mon-final-void-mite-regenerated-v01.png",
+    environment: "final-minor-b",
+    role: "small-ground",
+  },
+  mon_final_memory_sentry: {
+    imageSrc: "./assets/monsters/transparent/mon-final-memory-sentry-regenerated-v02.png",
+    environment: "final-minor-b",
+    role: "ground",
+  },
+  boss_final_ruin_jailer: {
+    imageSrc: "./assets/monsters/transparent/boss-final-ruin-jailer-regenerated-v02.png",
+    environment: "final-minor-b",
+    role: "boss",
+  },
+  mon_final_echo_knight: {
+    imageSrc: "./assets/monsters/transparent/mon-final-echo-knight-regenerated-v01.png",
+    environment: "final-main-phase-1",
+    role: "ground",
+  },
+  mon_final_mirror_wisp: {
+    imageSrc: "./assets/monsters/transparent/mon-final-mirror-wisp-regenerated-v01.png",
+    environment: "final-main-phase-1",
+    role: "floating",
+  },
+  mon_final_gate_sentinel: {
+    imageSrc: "./assets/monsters/transparent/mon-final-gate-sentinel-regenerated-v01.png",
+    environment: "final-main-phase-1",
+    role: "ground",
+  },
+  boss_final_echo_warden: {
+    imageSrc: "./assets/monsters/transparent/boss-final-echo-warden-regenerated-v01.png",
+    environment: "final-main-phase-1",
+    role: "boss-tall",
+  },
+  mon_final_core_guard: {
+    imageSrc: "./assets/monsters/transparent/mon-final-core-guard-regenerated-v01.png",
+    environment: "final-main-phase-2",
+    role: "ground",
+  },
+  mon_final_void_lancer: {
+    imageSrc: "./assets/monsters/transparent/mon-final-void-lancer-regenerated-v01.png",
+    environment: "final-main-phase-2",
+    role: "ground",
+  },
+  mon_final_demon_shade: {
+    imageSrc: "./assets/monsters/transparent/mon-final-demon-shade-regenerated-v01.png",
+    environment: "final-main-phase-2",
+    role: "ground",
+  },
+  boss_final_seal_core: {
+    imageSrc: "./assets/monsters/transparent/boss-final-seal-core-regenerated-v01.png",
+    environment: "final-main-phase-2",
+    role: "boss-tall",
+  },
+  mon_final_throne_wraith: {
+    imageSrc: "./assets/monsters/transparent/mon-final-throne-wraith-regenerated-v01.png",
+    environment: "final-main-phase-3",
+    role: "floating",
+  },
+  mon_final_crown_guard: {
+    imageSrc: "./assets/monsters/transparent/mon-final-crown-guard-regenerated-v01.png",
+    environment: "final-main-phase-3",
+    role: "ground",
+  },
+  mon_final_last_shadow: {
+    imageSrc: "./assets/monsters/transparent/mon-final-last-shadow-regenerated-v01.png",
+    environment: "final-main-phase-3",
+    role: "ground",
+  },
+  boss_final_demon_king: {
+    imageSrc: "./assets/monsters/transparent/boss-final-demon-king-regenerated-v01.png",
+    environment: "final-main-phase-3",
+    role: "boss-tall",
+  },
 });
 
 const DEBUG_ENEMY_NAMES = Object.freeze({

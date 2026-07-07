@@ -1,0 +1,37 @@
+{
+  "image_id": "ice-travel-shop-background-with-terry-overscan-master-v01",
+  "display_name": "Ice-region travel shop",
+  "region": "ice",
+  "facility": "travel_shop",
+  "intended_gui_path": "07_gui_prototype/shop_screen/assets/ice-travel-shop-background-with-terry-overscan-master-v01.png",
+  "canvas": "1870x841",
+  "aspect_intent": "20:9 overscan master for later 16:9 crop",
+  "npc": {
+    "name": "Terry",
+    "gender": "male",
+    "role": "travel shop keeper",
+    "scale_rule": "ordinary"
+  },
+  "prompt": "Initial travel shop overscan master generated from the approved Terry/shop layout direction before the owner clarified that the image must avoid Western style.",
+  "negative_prompt": "not fully constrained against Western fantasy realism in this rejected draft",
+  "reference_images": [
+    "07_gui_prototype/shop_screen/bg-npc.jpg"
+  ],
+  "date": "2026-07-02",
+  "tool": "built-in image_gen",
+  "model": "unknown",
+  "seed": "unknown",
+  "source_generated_image": "C:/Users/user/.codex/generated_images/019f1e26-d5ba-7db3-883e-b7ab17115d85/ig_09a2cf85d942d1b5016a45edb01ae881998682f44b1803f1ba.png",
+  "review_status": "rejected_style_drift",
+  "owner_notes": "Owner rejected the direction as drifting out of the existing project art style and reminded that the next drafts should not be Western style.",
+  "accepted_or_rejected_reason": "Too close to Western fantasy realism / heroic portrait style; do not crop or use as GUI background candidate.",
+  "agent_notes": "Recorded only for provenance because the PNG was already copied into the workspace. No crop review should be run for this draft.",
+  "crop_review_outputs": [],
+  "checks": {
+    "width": 1870,
+    "height": 841,
+    "format": "PNG",
+    "sha256": "bb3d113d303489fd3811ff71b7212c7062fbf3f5de8d6449615677898204a3d4",
+    "installed_as_gui_background": false
+  }
+}

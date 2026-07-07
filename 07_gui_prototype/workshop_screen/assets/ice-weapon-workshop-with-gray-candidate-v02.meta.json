@@ -1,0 +1,46 @@
+{
+  "image_id": "ice-weapon-workshop-with-gray-candidate-v02",
+  "display_name": "霜鐵工坊",
+  "region": "ice",
+  "facility": "weapon_workshop",
+  "intended_gui_path": "07_gui_prototype/workshop_screen/assets/ice-weapon-workshop-with-gray-candidate-v02.png",
+  "canvas": "1672x941",
+  "npc": {
+    "name": "格雷",
+    "gender": "male",
+    "role": "blacksmith",
+    "scale_rule": "ordinary"
+  },
+  "prompt": "Use case: stylized-concept\nAsset type: game GUI facility background candidate for a JRPG static prototype\nPrimary request: Create a corrected wide 16:9 mature fantasy anime JRPG background for the Ice-region weapon workshop facility, display name: 霜鐵工坊. This is a new v02 candidate, not a replacement of an existing asset.\nScene/backdrop: Interior of a frost-tide harbor cold forge: dark wet timber beams, black iron furnace hood, frost-blue forge flame, frosted anvils, racks of heavy swords and tools, salt-frosted windows on the left with cold harbor silhouettes and sea fog, brass lanterns, ropes, metal clamps, cold iron ingots. Keep the left and middle background readable for GUI panels.\nSubject: Gray / 格雷, adult male blacksmith, rugged and distinct: late 30s to early 40s, broad-shouldered but not bodybuilder exaggerated, square jaw, weathered face, short messy ash-brown hair with a few frost-damp strands, trimmed beard, stern focused expression, thick leather apron over rolled sleeves, fur-lined shoulder vest, heavy gloves. He is actively working at the anvil or holding cold-forged tongs; make him clearly different from other male NPCs.\nStyle/medium: polished 2D anime fantasy game background, painterly JRPG facility art, mature and grounded, detailed but not cluttered, matching existing fantasy facility GUI mood.\nComposition/framing: 1672x941 target aspect. Gray is a medium-close half-body figure in the right foreground, face around x 70-82%, y 16-34%, not cropped, with breathing room from the right edge. The anvil and cold-forged blade occupy the center-right foreground; left side keeps readable workshop depth and harbor window. Avoid making the NPC too distant or too tiny; avoid pushing the face into the right crop edge. Keep core face and upper torso clear of bottom action bar area.\nLighting/mood: cold blue ambient harbor light plus warm amber brass lanterns and subtle forge glow; wet dark wood, blackened metal, frost vapor, quiet heavy winter workshop atmosphere.\nColor palette: dark iron, deep navy, cold blue frost, charcoal, warm brass gold, muted amber.\nMaterials/textures: black iron, frosted steel, leather apron, fur trim, wet timber, brass lanterns, salt frost, rope, stone, soot, faint blue vapor.\nConstraints: no in-image text, no readable signs, no UI panels, no logos, no runtime IDs, no watermark. Avoid cropped face, tiny distant NPC, full-body far shot, duplicate male face, same body type as other male NPCs, overly handsome generic face, plain white snowfield, empty ice cave, modern objects, broken hands, extra fingers, warped tools, unreadable clutter, overexposed pure white ice.",
+  "negative_prompt": "text, captions, logo, UI panels, signs with readable words, runtime IDs, cropped face, face at image edge, tiny distant NPC, full-body far shot, duplicate male face, same body type, same pose, overly handsome generic face, plain white snowfield, empty ice cave, modern objects, extra fingers, broken hands, warped tools, unreadable clutter, overexposed pure white ice, image with no usable left/middle background depth.",
+  "reference_images": [
+    "07_gui_prototype/workshop_screen/assets/workshop-background.jpg",
+    "07_gui_prototype/workshop_screen/assets/workshop-background-02.jpg",
+    "07_gui_prototype/workshop_screen/assets/ice-weapon-workshop-with-gray-candidate-v01.png",
+    "C:/Users/user/AppData/Local/Temp/element-maze-gui-c0-compare/20260630T140936Z-workshop-ice-c0.contact-sheet.png"
+  ],
+  "date": "2026-07-01",
+  "tool": "built-in image_gen",
+  "model": "unknown",
+  "seed": "unknown",
+  "source_generated_image": "C:/Users/user/.codex/generated_images/019f18b4-109e-7943-954c-a01ffaff5b16/ig_0c13e3862c673b41016a44450b4e088191a04936615c618e9a.png",
+  "review_status": "candidate",
+  "owner_notes": "",
+  "accepted_or_rejected_reason": "",
+  "agent_notes": "Candidate v02 keeps the usable right-foreground workshop scale from v01 while making Gray more rugged and distinct: older square-jawed face, heavier blacksmith posture, stronger cold forge/anvil focus, and readable left-side frost harbor workshop depth. It is not installed as the GUI background.",
+  "comparison_outputs": {
+    "before": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260630T224401Z-workshop-ice-gray-v02.before.png",
+    "after": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260630T224401Z-workshop-ice-gray-v02.candidate.png",
+    "overlay": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260630T224401Z-workshop-ice-gray-v02.overlay-55.png",
+    "contact_sheet": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260630T224401Z-workshop-ice-gray-v02.contact-sheet.png",
+    "manifest": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260630T224401Z-workshop-ice-gray-v02.manifest.json"
+  },
+  "checks": {
+    "width": 1672,
+    "height": 941,
+    "format": "PNG",
+    "sha256": "4223ce192cee9a67b022f8281997dc25115fae52abe4713988ccbee20b95ea6b",
+    "base_candidate_dimensions_match": true,
+    "installed_as_gui_background": false
+  }
+}

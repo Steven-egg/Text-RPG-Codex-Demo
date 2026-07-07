@@ -7,7 +7,7 @@ screen-level verification, and historical MVP notes live in Task Zone files.
 ## Current Stable Capsule
 
 - Latest local checkpoint recorded for this handoff:
-  `510db7c [antig] refactor(runtime): extract town facilities domain`.
+  `029c10b 2026-06-30 [antig] refactor(runtime): extract dungeon domain`.
 - Element Maze is an expandable playable demo, not a closed demo.
 - The Python CLI runtime remains the gameplay authority.
 - Act 1 is playable through the main loop.
@@ -73,6 +73,14 @@ Current macro decisions:
   navigation, interaction, and UIAction logging only.
 - Runtime-connected GUI work is opt-in and limited to already approved local
   live bridge slices.
+- GUI monster image generation is complete and owner-finalized. Combat monster
+  assets now live under
+  `07_gui_prototype/combat_screen/assets/monsters/{fire,ice,earth,thunder,final}/`.
+  The old raw / transparent monster folders were removed or superseded, and
+  `fire/` is the formal replacement for the old transparent Fire / demo assets.
+- No further monster image generation is planned. The next smallest GUI step is
+  static combat screen image path linking: update `combat-screen.js` imageSrc
+  mappings to point at the finalized element folders.
 - Detailed GUI bridge and screen status lives in Task Zone files, not this
   README.
 
@@ -215,6 +223,8 @@ Allowed as planning only:
 - produce an AI tooling / validation pipeline audit for future small tools
 - refine `01_content/world-content-skeleton-v0.1.md`
 - route old Hot Zone details into Task / Cold Zone
+- link finalized combat monster images in the GUI static prototype after exact
+  `07_gui_prototype/combat_screen/combat-screen.js` approval
 - produce a read-only implementation gate for one exact future slice
 
 Still closed until a later exact-scope approval:
@@ -225,5 +235,4 @@ Still closed until a later exact-scope approval:
   new / expanded facility gameplay systems beyond the landed extraction
 - formal class transfer, relic effects, endgame systems, settings persistence,
   or cross-screen preferences
-- GUI visual implementation, image generation, bridge expansion, or asset
-  pipeline work
+- new GUI image generation, bridge expansion, or formal asset pipeline work

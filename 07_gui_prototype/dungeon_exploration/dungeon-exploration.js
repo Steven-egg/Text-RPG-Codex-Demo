@@ -139,8 +139,10 @@ function renderResources(items) {
 }
 
 function renderDungeon(dungeon) {
-  if (dungeon && dungeon.dungeon_id) {
-    shellEl.dataset.dungeonId = dungeon.dungeon_id;
+  const debugDungeonId = isDebug ? urlParams.get("dungeon_id") : null;
+  const dungeonId = debugDungeonId || dungeon?.dungeon_id;
+  if (dungeonId) {
+    shellEl.dataset.dungeonId = dungeonId;
   } else {
     delete shellEl.dataset.dungeonId;
   }

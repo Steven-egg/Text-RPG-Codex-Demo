@@ -1,0 +1,47 @@
+{
+  "image_id": "earth-travel-shop-background-with-rabi-overscan-master-v01",
+  "display_name": "Earth-region provisions shop",
+  "region": "earth",
+  "facility": "shop",
+  "intended_gui_path": "07_gui_prototype/shop_screen/assets/earth-travel-shop-background-with-rabi-overscan-master-v01.png",
+  "canvas": "1870x841",
+  "aspect_intent": "20:9-ish overscan master for later 16:9 crop",
+  "npc": {
+    "name": "Rabi",
+    "gender": "female",
+    "role": "shopkeeper",
+    "species_style": "elf-like fantasy character with pointed ears",
+    "scale_rule": "ordinary",
+    "canonical_status": "visual candidate using the regional facility NPC role; generated image contains no text"
+  },
+  "earth_visual_rules": {
+    "style_target": "Japanese visual novel fantasy CG, anime-style JRPG elf NPC, soft facial features, clean elegant linework, detailed painterly facility interior",
+    "regional_identity": "hot and humid forest-quarry Earth region with root network, moss, herbs, geodes, carved leyline stone, dark timber, and muted green-gold leyline light",
+    "clothing_rule": "warm-climate conservative shop clothing: breathable linen, short sleeves or cap sleeves, cropped work vest, waist apron, belt pouch, no heavy coat, no winter layering",
+    "hair_rule": "neck-length short hair / short bob ending around the neck; ears visible; no long hair past shoulders",
+    "avoid": "Western fantasy realism, D&D portrait, American comic face, rugged realistic portrait, heroic character card, photorealistic concept art, sexy costume, heavy coat, winter clothes, long hair, gold dust, glitter, dense bokeh speckles, floating magic motes"
+  },
+  "prompt": "Use case: stylized-concept. Asset type: 20:9 overscan master candidate for a game GUI facility background in the Element Maze JRPG static prototype. Primary request: Create an Earth-region provisions shop / travel shop background in Japanese visual novel fantasy CG style, anime-style JRPG facility art, for later cropping to a 1672x941 GUI background. Scene/backdrop: A hot and humid Earth-region forest-quarry market shop built into carved leyline stone and dark timber. Interior has breathable shade screens, woven baskets, clay jars, herbs, mossy stone shelves, travel packs, ropes, mineral samples, root-fiber cloth bundles, mushrooms in trays, geodes, preserved fruits, and warm amber resin lamps mixed with muted green-gold leyline glow. Keep readable left and middle background depth for GUI panels, not a flat wall and not an outdoor-only forest scene. Subject: Rabi, adult female elf-like shopkeeper, visual-only candidate NPC. Soft Japanese VN / JRPG face, pointed ears visible, neck-length short hair / short bob ending around the neck, warm chestnut or olive-brown hair, lively practical merchant expression, slim but grounded adult build. She wears conservative hot-climate shopkeeper clothing: cream linen blouse with short or cap sleeves, moss-green cropped vest, light brown waist apron, bead-and-stone bracelet, small belt pouch, no heavy coat, no winter layers. She is medium-close half-body in the right foreground, one hand near a basket of supplies or a small ledger with no readable writing, face in the upper-right safe zone with breathing room from the image edge, hands and counter visible. Style/medium: polished 2D anime fantasy game background, Japanese visual novel facility CG, clean elegant linework, painterly mature JRPG texture, soft facial features, detailed but not cluttered. Composition/framing: extra-wide 20:9 landscape overscan. Design the central 80% so it can crop cleanly to 16:9. Keep Rabi medium-close on the right or center-right, face around x 68%-82% and y 14%-34% of the eventual 16:9 crop, not cropped. Preserve usable left/middle space for GUI list and detail panels. Lower counter and hands may be partly hidden by GUI panels; face and core torso must remain safe. Lighting/mood: warm humid forest-shop atmosphere, amber resin lamps, green-gold leyline glow, cool filtered forest window light, rich dark wood and mossy stone. Color palette: moss green, olive, dark timber brown, warm amber, muted gold-green, clay terracotta, cream linen. Materials/textures: carved quarry stone, moss, roots, woven baskets, linen, clay, brass clips, geodes, herbs, dried fungi, root fiber, dark timber. Constraints: no in-image text, no readable signs, no UI panels, no logos, no runtime IDs, no watermark, no captions.",
+  "negative_prompt": "Western fantasy realism, D&D portrait, American comic face, rugged realistic portrait, photorealistic concept art, heroic character card, seductive costume, low neckline, exposed chest, bare midriff, childlike girl, long hair past shoulders, heavy coat, winter clothes, gold dust, glitter, dense bokeh speckles, floating magic motes, pure outdoor forest landscape, empty cave, cropped face, face at image edge, tiny distant NPC, full-body far shot, extra fingers, broken hands, warped tools, modern objects, unreadable clutter, text, readable signs, UI panels, logos, runtime IDs, watermark.",
+  "reference_images": [
+    "07_gui_prototype/shop_screen/assets/ice-travel-shop-background-with-terry-cropped-candidate-v04.png",
+    "07_gui_prototype/guild_screen/assets/earth-guild-background-with-liaison-cropped-candidate-v01.png",
+    "07_gui_prototype/synthesis_screen/assets/earth-synthesis-background-with-elf-artisan-cropped-candidate-v02.png"
+  ],
+  "date": "2026-07-04",
+  "tool": "built-in image_gen",
+  "model": "unknown",
+  "seed": "unknown",
+  "source_generated_image": "C:/Users/User/.codex/generated_images/019f2bcc-3017-7c53-9cf9-028ae753c082/ig_03bd11e947f30579016a48b1d512848191abc7649695fbe8dd.png",
+  "review_status": "candidate_master",
+  "owner_notes": "Owner asked to continue Earth facility generation after the Earth guild and Earth synthesis candidates. Existing Earth direction: hot region, elf-like characters, short neck-length hair for female characters.",
+  "accepted_or_rejected_reason": "",
+  "agent_notes": "Generated as the first Earth shop candidate. The composition keeps left/middle shop depth for GUI panels, places Rabi in the right safe zone, and avoids readable text. It is not installed as the GUI background.",
+  "checks": {
+    "width": 1870,
+    "height": 841,
+    "format": "PNG",
+    "sha256": "238e553ea27c1f978f96c5ab9d9d91c6ca1e26c02182816059ebb0c57fdbba67",
+    "installed_as_gui_background": false
+  }
+}

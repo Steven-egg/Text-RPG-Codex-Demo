@@ -1,0 +1,47 @@
+{
+  "image_id": "earth-magic-shop-background-with-eve-overscan-master-v01",
+  "display_name": "Earth-region magic shop",
+  "region": "earth",
+  "facility": "magic_shop",
+  "intended_gui_path": "07_gui_prototype/magic_shop_screen/assets/earth-magic-shop-background-with-eve-overscan-master-v01.png",
+  "canvas": "1870x841",
+  "aspect_intent": "20:9-ish overscan master for later 16:9 crop",
+  "npc": {
+    "name": "Eve",
+    "gender": "female",
+    "role": "magic shop keeper",
+    "species_style": "elf-like fantasy character with pointed ears",
+    "scale_rule": "ordinary",
+    "canonical_status": "visual candidate using the regional facility NPC role; generated image contains no readable text"
+  },
+  "earth_visual_rules": {
+    "style_target": "Japanese visual novel fantasy CG, anime-style JRPG elf NPC, soft but distinct facial features, clean elegant linework, detailed painterly facility interior",
+    "regional_identity": "hot and humid forest-quarry Earth region with living roots, carved leyline stone, moss, herbs, geodes, dark timber, and muted green-gold leyline light",
+    "clothing_rule": "warm-climate conservative mage-merchant clothing: high-neck top, cropped mantle, sash, brass clasps, no heavy coat, no winter layering",
+    "hair_rule": "neck-length short angular bob or asymmetrical short hair ending around the neck; ears visible; no long hair past shoulders",
+    "avoid": "resemblance to Rabi or the synthesis artisan, Western fantasy realism, D&D portrait, American comic face, rugged realistic portrait, heroic character card, photorealistic concept art, sexy costume, heavy coat, winter clothes, long hair, spectacles, gold dust, glitter, dense bokeh speckles, floating magic motes"
+  },
+  "prompt": "Use case: stylized-concept. Asset type: 20:9 overscan master candidate for a game GUI facility background in the Element Maze JRPG static prototype. Primary request: Create an Earth-region magic shop background in Japanese visual novel fantasy CG style, anime-style JRPG facility art, for later cropping to a 1672x941 GUI background. Scene/backdrop: A hot and humid Earth-region root-and-stone magic shop built inside an old quarry shrine and living tree-root chamber. Interior has dark timber shelves, carved leyline stone arches, moss, hanging dried herbs, sealed spellbooks with no readable writing, root-bound crystal lamps, green-gold leyline veins in the walls, mushroom-shaped candle stands, brass instruments, geode prisms, clay incense bowls, and woven shade screens. Keep readable left and middle background depth for GUI panels; the room must feel like a working magic shop, not an empty cave or pure outdoor forest. Subject: Eve, adult female elf-like magic shop keeper, visual-only candidate NPC. Make her clearly distinct from Rabi the shopkeeper and the synthesis artisan: sharper and more mysterious expression, pointed ears visible, neck-length short angular bob or asymmetrical short hair ending around the neck, dark jade-black or deep auburn hair, gold-green eyes, calm observant gaze. She wears conservative hot-climate mage-merchant clothing: sleeveless or cap-sleeved charcoal-linen high-neck top, moss-green and deep teal cropped mantle, thin brass clasps, waist sash with small crystal tools, no heavy coat, no winter layers, no exposed chest or bare midriff. She is medium-close half-body in the right foreground, one hand near a closed spellbook, geode prism, or brass astrolabe with no readable text, face in the upper-right safe zone with breathing room from the image edge, hands and work counter visible. Style/medium: polished 2D anime fantasy game background, Japanese visual novel facility CG, clean elegant linework, mature painterly JRPG texture, soft but distinct facial features, detailed but not cluttered. Composition/framing: extra-wide 20:9 landscape overscan. Design the central 80% so it can crop cleanly to 16:9. Keep Eve medium-close on the right or center-right, face around x 68%-82% and y 14%-34% of the eventual 16:9 crop, not cropped. Preserve usable left/middle space for GUI list and detail panels. Lower counter, hands, spellbook, and geode tools may be partly hidden by GUI panels; face and core torso must remain safe. Lighting/mood: humid sacred-magical interior, warm amber resin lamps, muted green-gold leyline glow, small teal crystal highlights, cool filtered forest window light, quiet mysterious shop atmosphere. Color palette: deep moss green, dark teal, charcoal linen, warm amber, muted gold-green, dark timber brown, clay terracotta, cyan-green crystal highlights. Materials/textures: carved quarry stone, living roots, moss, brass, geodes, crystals, dried herbs, clay incense, dark timber, linen, woven reed shade screens. Constraints: no in-image text, no readable signs, no UI panels, no logos, no runtime IDs, no watermark, no captions.",
+  "negative_prompt": "resemblance to Rabi or the synthesis artisan, warm chestnut shopkeeper bob, pale ash synthesis artisan hair, spectacles, Western fantasy realism, D&D portrait, American comic face, rugged realistic portrait, photorealistic concept art, heroic character card, seductive costume, low neckline, exposed chest, bare midriff, childlike girl, long hair past shoulders, heavy coat, winter clothes, gold dust, glitter, dense bokeh speckles, floating magic motes, pure outdoor forest landscape, empty cave, cropped face, face at image edge, tiny distant NPC, full-body far shot, extra fingers, broken hands, warped tools, modern objects, unreadable clutter, text, readable signs, UI panels, logos, runtime IDs, watermark.",
+  "reference_images": [
+    "07_gui_prototype/magic_shop_screen/assets/ice-magic-shop-background-with-eve-cropped-candidate-v02.png",
+    "07_gui_prototype/shop_screen/assets/earth-travel-shop-background-with-rabi-cropped-candidate-v01.png",
+    "07_gui_prototype/synthesis_screen/assets/earth-synthesis-background-with-elf-artisan-cropped-candidate-v02.png"
+  ],
+  "date": "2026-07-04",
+  "tool": "built-in image_gen",
+  "model": "unknown",
+  "seed": "unknown",
+  "source_generated_image": "C:/Users/User/.codex/generated_images/019f2bcc-3017-7c53-9cf9-028ae753c082/ig_0d1921cbf1b7b319016a48b35ff6848191af596b804a1abafc.png",
+  "review_status": "candidate_master",
+  "owner_notes": "Owner asked to continue Earth facility generation after the Earth guild, synthesis, and shop candidates.",
+  "accepted_or_rejected_reason": "",
+  "agent_notes": "Generated as the first Earth magic shop candidate. Eve is darker, sharper, and more mage-like than Rabi and the synthesis artisan. Decorative rune-like ornaments are treated as non-readable visual texture. It is not installed as the GUI background.",
+  "checks": {
+    "width": 1870,
+    "height": 841,
+    "format": "PNG",
+    "sha256": "4eddb5c2e41ed69ad4117ceb3c0f3a3e2a5657723f3b7ae21f45ceed42a348aa",
+    "installed_as_gui_background": false
+  }
+}

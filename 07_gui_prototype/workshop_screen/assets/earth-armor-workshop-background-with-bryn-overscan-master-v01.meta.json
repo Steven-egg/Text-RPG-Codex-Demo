@@ -1,0 +1,59 @@
+{
+  "image_id": "earth-armor-workshop-background-with-bryn-overscan-master-v01",
+  "display_name": "Earth-region armor workshop",
+  "region": "earth",
+  "facility": "armor_workshop",
+  "intended_gui_path": "07_gui_prototype/workshop_screen/assets/earth-armor-workshop-background-with-bryn-overscan-master-v01.png",
+  "canvas": "1849x851",
+  "aspect_intent": "20:9-ish overscan master for later 16:9 crop",
+  "npc": {
+    "name": "Bryn",
+    "gender": "female",
+    "role": "armor artisan",
+    "species_style": "elf-like fantasy character with pointed ears",
+    "scale_rule": "ordinary",
+    "canonical_status": "visual candidate using the regional facility NPC role; generated image contains no text"
+  },
+  "earth_visual_rules": {
+    "style_target": "Japanese visual novel fantasy CG, anime-style JRPG elf NPC, mature demo-facility composition, clean elegant linework, detailed painterly facility interior",
+    "regional_identity": "hot forest-quarry Earth armor workshop with carved quarry stone, roots, moss, geode-inlaid shields, dark timber, warm resin lamps, filtered forest light, and muted green-gold leyline detail",
+    "demo_style_reference": "keep right-foreground medium-close NPC, substantial work surface, dense wood/stone/metal props, warm light, and readable left/middle facility depth"
+  },
+  "prompt_status": "exact generator prompt unavailable in resumed session; prompt below is reconstructed from the active Earth facility standard and the accepted visual direction",
+  "prompt": "Use case: stylized-concept. Asset type: 20:9 overscan master candidate for a game GUI facility background in the Element Maze JRPG static prototype. Primary request: Create an Earth-region armor workshop background in Japanese visual novel fantasy CG style, anime-style JRPG facility art, for later cropping to a 1672x941 GUI background. Scene/backdrop: A hot Earth-region armor atelier set in an old quarry-root hall, with dark timber beams, carved leyline stone, living roots, moss, geode-inlaid shields, armor mannequins, leather rolls, rivet tools, brass clamps, hanging lanterns, green cloth accents, and filtered forest light. Subject: Bryn as an adult female elf-like armor artisan, right foreground medium-close half-body, pointed ears visible, short auburn hair, focused calm expression, conservative hot-climate artisan clothing, leather work apron, shoulder armor piece, wrapped forearms, tools in hand while working on a green stone-inlaid chestplate. Composition/framing: extra-wide 20:9 landscape overscan, central crop safe for 16:9, face and upper torso in the upper-right safe zone with breathing room, hands and armor work surface visible, left and middle background readable for workshop overlay panels. Lighting/mood: warm amber resin lamps, muted green-gold leyline glow, humid forest-quarry atmosphere, mature handcrafted facility mood. Constraints: no in-image text, no readable signs, no UI panels, no logos, no runtime IDs, no watermark, no captions.",
+  "negative_prompt": "Western fantasy realism, D&D warrior woman, American comic-book face, photorealistic concept art, rugged realistic portrait, oversexualized armor, low neckline, cleavage, pin-up pose, bikini armor, heavy winter coat, fur layers, weapon forge focus, sword forging, massive hammer pose, gold dust, glitter, dense bokeh speckles, floating magic motes, pure outdoor forest landscape, empty cave, cropped face, face at image edge, tiny distant NPC, full-body far shot, extra fingers, broken hands, warped tools, modern objects, readable text, UI panels, logos, runtime IDs, watermark.",
+  "reference_images": [
+    "07_gui_prototype/workshop_screen/assets/workshop-background-02.jpg",
+    "07_gui_prototype/workshop_screen/assets/ice-armor-workshop-with-brin-cropped-candidate-v03.png",
+    "07_gui_prototype/workshop_screen/assets/earth-weapon-workshop-background-with-gray-cropped-candidate-v02.png"
+  ],
+  "date": "2026-07-04",
+  "tool": "built-in image_gen",
+  "model": "unknown",
+  "seed": "unknown",
+  "source_generated_image": "unknown; master image already existed in workspace when this session resumed",
+  "review_status": "candidate_master",
+  "owner_notes": "Owner asked to continue Earth facility image generation. This session resumed from this already-created Earth armor overscan master and completed crop/metadata review.",
+  "accepted_or_rejected_reason": "",
+  "agent_notes": "The image keeps Bryn as a right-foreground Earth-region elf armor artisan, with enough left/middle workshop depth for the existing workshop overlay. It is not installed as the GUI background.",
+  "crop_review_outputs": [
+    {
+      "label": "earth-armor-workshop-bryn-v01-crop-b-core",
+      "crop_center": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "contact_sheet": "C:/Users/User/AppData/Local/Temp/element-maze-gui-candidate-review/20260704T115020Z-earth-armor-workshop-bryn-v01-crop-b-core.contact-sheet.png",
+      "css_preview": "C:/Users/User/AppData/Local/Temp/element-maze-gui-candidate-review/20260704T115020Z-earth-armor-workshop-bryn-v01-crop-b-core.css-preview.png",
+      "manifest": "C:/Users/User/AppData/Local/Temp/element-maze-gui-candidate-review/20260704T115020Z-earth-armor-workshop-bryn-v01-crop-b-core.manifest.json",
+      "selected": true
+    }
+  ],
+  "checks": {
+    "width": 1849,
+    "height": 851,
+    "format": "PNG",
+    "sha256": "8348f8d633e7faf3885e3c8f226fbcf4fcdf2ea13d51ca3e4a98b566099aebe8",
+    "installed_as_gui_background": false
+  }
+}

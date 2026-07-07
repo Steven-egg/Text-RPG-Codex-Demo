@@ -1,0 +1,54 @@
+{
+  "image_id": "ice-travel-shop-background-with-terry-cropped-candidate-v04",
+  "display_name": "Ice-region travel shop",
+  "region": "ice",
+  "facility": "travel_shop",
+  "intended_gui_path": "07_gui_prototype/shop_screen/assets/ice-travel-shop-background-with-terry-cropped-candidate-v04.png",
+  "canvas": "1672x941",
+  "aspect_intent": "16:9 GUI cropped candidate from 20:9 overscan master",
+  "source_master": "07_gui_prototype/shop_screen/assets/ice-travel-shop-background-with-terry-overscan-master-v04.png",
+  "source_manifest": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260702T135927Z-travel-shop-overscan-terry-v04-crop-b.manifest.json",
+  "selected_crop": {
+    "label": "travel-shop-overscan-terry-v04-crop-b",
+    "crop_center": {
+      "x": 0.47,
+      "y": 0.5
+    },
+    "crop_zoom": 1.0,
+    "crop_box_px": {
+      "left": 132,
+      "top": 0,
+      "right": 1626,
+      "bottom": 841,
+      "width": 1494,
+      "height": 841
+    }
+  },
+  "npc": {
+    "name": "Terry",
+    "gender": "male",
+    "role": "travel shop keeper",
+    "scale_rule": "ordinary"
+  },
+  "review_status": "agent_selected_crop_candidate",
+  "owner_notes": "Owner requested fixing Terry's character style to Japanese visual novel / JRPG facility CG while preserving Ice-region identity.",
+  "accepted_or_rejected_reason": "",
+  "agent_notes": "Selected crop-b because it keeps Terry's face and torso core clear of the wide-shop center panel and preserves the item-shop shelves and cold harbor window. This candidate is not installed as the GUI background.",
+  "comparison_outputs": {
+    "selected_candidate": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260702T135927Z-travel-shop-overscan-terry-v04-crop-b.candidate.png",
+    "selected_css_preview": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260702T135927Z-travel-shop-overscan-terry-v04-crop-b.css-preview.png",
+    "selected_contact_sheet": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260702T135927Z-travel-shop-overscan-terry-v04-crop-b.contact-sheet.png",
+    "selected_manifest": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260702T135927Z-travel-shop-overscan-terry-v04-crop-b.manifest.json",
+    "alternate_manifest": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260702T135927Z-travel-shop-overscan-terry-v04-crop-a.manifest.json"
+  },
+  "checks": {
+    "width": 1672,
+    "height": 941,
+    "format": "PNG",
+    "sha256": "14c0e1a249bd2cef0181419dc2739867c9bb17be9e556531fc59f9d467cc3e0e",
+    "face_passed_tool_threshold": true,
+    "torso_passed_tool_threshold": true,
+    "selected_crop_review_passed": true,
+    "installed_as_gui_background": false
+  }
+}

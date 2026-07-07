@@ -1,0 +1,96 @@
+{
+  "image_id": "earth-synthesis-background-with-elf-artisan-cropped-candidate-v02",
+  "display_name": "Earth-region synthesis workshop",
+  "region": "earth",
+  "facility": "synthesis",
+  "intended_gui_path": "07_gui_prototype/synthesis_screen/assets/earth-synthesis-background-with-elf-artisan-cropped-candidate-v02.png",
+  "canvas": "1672x941",
+  "aspect_intent": "16:9 GUI cropped candidate from 20:9-ish overscan master",
+  "source_master": "07_gui_prototype/synthesis_screen/assets/earth-synthesis-background-with-elf-artisan-overscan-master-v02.png",
+  "source_manifest": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260702T154455Z-earth-synthesis-elf-artisan-v02-crop-a.manifest.json",
+  "revises": "07_gui_prototype/synthesis_screen/assets/earth-synthesis-background-with-artisan-cropped-candidate-v01.png",
+  "npc": {
+    "name": "unnamed Earth elf synthesis artisan candidate",
+    "gender": "female",
+    "role": "synthesis artisan",
+    "species_style": "elf-like fantasy character with pointed ears",
+    "scale_rule": "ordinary",
+    "canonical_status": "visual-only candidate; not a runtime/data name"
+  },
+  "pipeline": {
+    "mode": "overscan_master_to_16x9_candidate",
+    "crop_center": {
+      "x": 0.5,
+      "y": 0.5
+    },
+    "crop_zoom": 1.0,
+    "crop_box_px": {
+      "left": 188,
+      "top": 0,
+      "right": 1682,
+      "bottom": 841,
+      "width": 1494,
+      "height": 841
+    },
+    "crop_box_normalized": {
+      "x": 0.100535,
+      "y": 0.0,
+      "width": 0.79893,
+      "height": 1.0
+    },
+    "css_preset": "synthesis",
+    "subject_boxes": {
+      "face": {
+        "x": 0.73,
+        "y": 0.14,
+        "width": 0.11,
+        "height": 0.18
+      },
+      "torso_core": {
+        "x": 0.67,
+        "y": 0.30,
+        "width": 0.28,
+        "height": 0.35
+      }
+    }
+  },
+  "prompt": "Cropped 16:9 candidate produced from the v02 Earth elf synthesis overscan master. See the source master metadata for the generation prompt and revised Earth elf / hot-climate clothing rules.",
+  "negative_prompt": "See source master metadata.",
+  "reference_images": [
+    "07_gui_prototype/synthesis_screen/assets/synthesis-background.jpg",
+    "07_gui_prototype/synthesis_screen/assets/earth-synthesis-background-with-elf-artisan-overscan-master-v02.png"
+  ],
+  "date": "2026-07-02",
+  "tool": "06_tools/gui_facility_image_compare.py",
+  "model": "unknown",
+  "seed": "unknown",
+  "source_generated_image": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260702T154455Z-earth-synthesis-elf-artisan-v02-crop-a.candidate.png",
+  "review_status": "agent_selected_crop_candidate",
+  "owner_notes": "Owner clarified that future Earth characters should be elf-like, Earth is hot, and the female character should have short hair ending around the neck.",
+  "accepted_or_rejected_reason": "Selected because the NPC is visibly elf-like, the hair is neck-length short, lighter hot-climate craft clothing replaces the heavy coat, and face/torso core pass the synthesis CSS blocking-mask check.",
+  "agent_notes": "Candidate is not installed as the GUI background. Hands/tools/workbench can tolerate lower-panel occlusion while face and torso core remain safe.",
+  "comparison_outputs": {
+    "before": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260702T154455Z-earth-synthesis-elf-artisan-v02-crop-a.before.png",
+    "after": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260702T154455Z-earth-synthesis-elf-artisan-v02-crop-a.candidate.png",
+    "overlay": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260702T154455Z-earth-synthesis-elf-artisan-v02-crop-a.overlay-55.png",
+    "css_preview": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260702T154455Z-earth-synthesis-elf-artisan-v02-crop-a.css-preview.png",
+    "contact_sheet": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260702T154455Z-earth-synthesis-elf-artisan-v02-crop-a.contact-sheet.png",
+    "manifest": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260702T154455Z-earth-synthesis-elf-artisan-v02-crop-a.manifest.json"
+  },
+  "checks": {
+    "width": 1672,
+    "height": 941,
+    "format": "PNG",
+    "sha256": "552c20adc5500bbeeeab616d2879e52df1f9151bc9bbe5f3d8fb5085dd1d88d6",
+    "base_candidate_dimensions_match": false,
+    "prepared_candidate_dimensions_match": true,
+    "face_inside_frame": true,
+    "face_blocking_overlap_ratio": 0.0,
+    "face_passed": true,
+    "torso_inside_frame": true,
+    "torso_blocking_overlap_ratio": 0.0,
+    "torso_passed": true,
+    "review_passed": true,
+    "installed_as_gui_background": false
+  }
+}

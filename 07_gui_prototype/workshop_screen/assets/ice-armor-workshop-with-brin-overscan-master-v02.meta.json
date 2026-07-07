@@ -1,0 +1,61 @@
+{
+  "image_id": "ice-armor-workshop-with-brin-overscan-master-v02",
+  "display_name": "Ice-region armor workshop",
+  "region": "ice",
+  "facility": "armor_workshop",
+  "intended_gui_path": "07_gui_prototype/workshop_screen/assets/ice-armor-workshop-with-brin-overscan-master-v02.png",
+  "canvas": "1870x841",
+  "aspect_intent": "20:9 overscan master for later 16:9 crop",
+  "npc": {
+    "name": "Brin",
+    "gender": "female",
+    "role": "armor artisan",
+    "scale_rule": "ordinary"
+  },
+  "prompt": "Create a new v02 20:9 wide landscape overscan master image for the Ice-region armor workshop / Brin armor route. This is a review candidate master, not a final replacement asset. The previous draft drifted into Western fantasy realism / character-card style; this version must return to the accepted Ice facility art direction. Style target: dark Japanese fantasy RPG facility background art, painterly anime JRPG background, close to classic console RPG visual novel facility backgrounds: atmospheric, intricate, moody, character partly integrated into the scene. Scene/backdrop: a dim frost-coast armor workshop interior focused on armor crafting and repair, with wet dark timber beams, blackened stone, cold iron armor stands, leather rolls, stitched padding, shoulder plates, chestplates, shields, rivet tools, clamps, measuring cord, low steady brazier, and frosted side window with cold harbor blue. Subject: Brin, adult female armor artisan, sturdy and grounded but drawn in a Japanese fantasy RPG style, not a Western warrior portrait; calm observant expression, short black hair with one side braid, steel-gray or pale green eyes, warm brown or deep tan skin, sage-green and dark leather heavy work outfit, riveted apron, bracers, gloves, measuring cord, small armor tools. Composition: Brin medium half-body on the right or center-right, embedded in workshop shadow; preserve left and middle background for GUI panels. Constraints: no in-image text, no readable signs, no UI panels, no logos, no runtime IDs, no watermark, no captions.",
+  "negative_prompt": "Western fantasy realism, D&D portrait, American comic-book face, superhero lighting, heroic character card, photorealistic concept art, overly clean modern anime character sheet, warrior pin-up, gold dust, glitter, sparkling particles, dense forge sparks, floating magic motes, overexposed white fog, sword-focused weapon shop, same face/body/posture as Gray, cropped face, face at image edge, tiny distant NPC, extra fingers, broken hands, warped armor, modern objects.",
+  "reference_images": [
+    "07_gui_prototype/workshop_screen/assets/ice-weapon-workshop-with-gray-cropped-candidate-v04.png",
+    "07_gui_prototype/workshop_screen/assets/workshop-background-02.jpg"
+  ],
+  "date": "2026-07-02",
+  "tool": "built-in image_gen",
+  "model": "unknown",
+  "seed": "unknown",
+  "source_generated_image": "C:/Users/user/.codex/generated_images/019f1e26-d5ba-7db3-883e-b7ab17115d85/ig_02b693a4d9db5e5d016a45f03f00fc81918c7cd0c9da37c1c4.png",
+  "review_status": "superseded_style_revision",
+  "owner_notes": "Owner asked to avoid Western style and reduce glitter/gold-dust particle effects. V01 was rejected as style drift. Owner later flagged the v02 character style as still problematic for the desired Japanese visual novel / JRPG facility CG style.",
+  "accepted_or_rejected_reason": "Superseded by ice-armor-workshop-with-brin-overscan-master-v03 for character-style direction.",
+  "agent_notes": "V02 returns Brin to the accepted dark Ice facility style, with an armor-focused workshop rather than a weapon forge or Western character-card portrait. It is not installed as the GUI background. Superseded on 2026-07-02 by the v03 style revision.",
+  "crop_review_outputs": [
+    {
+      "label": "armor-workshop-overscan-brin-v02-crop-a",
+      "crop_center": {
+        "x": 0.47,
+        "y": 0.5
+      },
+      "contact_sheet": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260702T051400Z-armor-workshop-overscan-brin-v02-crop-a.contact-sheet.png",
+      "css_preview": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260702T051400Z-armor-workshop-overscan-brin-v02-crop-a.css-preview.png",
+      "manifest": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260702T051400Z-armor-workshop-overscan-brin-v02-crop-a.manifest.json",
+      "selected": false
+    },
+    {
+      "label": "armor-workshop-overscan-brin-v02-crop-b",
+      "crop_center": {
+        "x": 0.45,
+        "y": 0.5
+      },
+      "contact_sheet": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260702T051400Z-armor-workshop-overscan-brin-v02-crop-b.contact-sheet.png",
+      "css_preview": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260702T051400Z-armor-workshop-overscan-brin-v02-crop-b.css-preview.png",
+      "manifest": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260702T051400Z-armor-workshop-overscan-brin-v02-crop-b.manifest.json",
+      "selected": true
+    }
+  ],
+  "checks": {
+    "width": 1870,
+    "height": 841,
+    "format": "PNG",
+    "sha256": "fa43ab883bea78c0288200026a4c0e13ca49e63e5a85ec501db03c76f3fbb971",
+    "installed_as_gui_background": false
+  }
+}

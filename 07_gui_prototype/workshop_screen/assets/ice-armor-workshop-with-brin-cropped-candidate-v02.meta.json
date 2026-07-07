@@ -1,0 +1,54 @@
+{
+  "image_id": "ice-armor-workshop-with-brin-cropped-candidate-v02",
+  "display_name": "Ice-region armor workshop",
+  "region": "ice",
+  "facility": "armor_workshop",
+  "intended_gui_path": "07_gui_prototype/workshop_screen/assets/ice-armor-workshop-with-brin-cropped-candidate-v02.png",
+  "canvas": "1672x941",
+  "aspect_intent": "16:9 GUI cropped candidate from 20:9 overscan master",
+  "source_master": "07_gui_prototype/workshop_screen/assets/ice-armor-workshop-with-brin-overscan-master-v02.png",
+  "source_manifest": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260702T051400Z-armor-workshop-overscan-brin-v02-crop-b.manifest.json",
+  "selected_crop": {
+    "label": "armor-workshop-overscan-brin-v02-crop-b",
+    "crop_center": {
+      "x": 0.45,
+      "y": 0.5
+    },
+    "crop_zoom": 1.0,
+    "crop_box_px": {
+      "left": 94,
+      "top": 0,
+      "right": 1588,
+      "bottom": 841,
+      "width": 1494,
+      "height": 841
+    }
+  },
+  "npc": {
+    "name": "Brin",
+    "gender": "female",
+    "role": "armor artisan",
+    "scale_rule": "ordinary"
+  },
+  "review_status": "superseded_style_revision",
+  "owner_notes": "Owner asked to avoid Western style and reduce glitter/gold-dust particle effects, then later flagged Brin's character style as still problematic for the desired Japanese visual novel / JRPG facility CG style.",
+  "accepted_or_rejected_reason": "Superseded by ice-armor-workshop-with-brin-cropped-candidate-v03 for character-style direction.",
+  "agent_notes": "Selected crop-b because it shifts Brin far enough right for the workshop CSS panels while keeping her face, shoulders, chest, and apron core readable. Lower hands/tools may be covered or cropped, consistent with the accepted workshop crop rule. This candidate is not installed as the GUI background. Superseded on 2026-07-02 by the v03 style revision.",
+  "comparison_outputs": {
+    "selected_candidate": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260702T051400Z-armor-workshop-overscan-brin-v02-crop-b.candidate.png",
+    "selected_css_preview": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260702T051400Z-armor-workshop-overscan-brin-v02-crop-b.css-preview.png",
+    "selected_contact_sheet": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260702T051400Z-armor-workshop-overscan-brin-v02-crop-b.contact-sheet.png",
+    "selected_manifest": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260702T051400Z-armor-workshop-overscan-brin-v02-crop-b.manifest.json",
+    "alternate_manifest": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260702T051400Z-armor-workshop-overscan-brin-v02-crop-a.manifest.json"
+  },
+  "checks": {
+    "width": 1672,
+    "height": 941,
+    "format": "PNG",
+    "sha256": "ff697b702d8347729dfcd5ab1ad494102271ccfed30e41c520ed8c9e8abce435",
+    "face_passed_tool_threshold": true,
+    "torso_passed_tool_threshold": true,
+    "selected_crop_review_passed": true,
+    "installed_as_gui_background": false
+  }
+}

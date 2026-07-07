@@ -1,0 +1,60 @@
+{
+  "image_id": "ice-magic-shop-background-with-eve-overscan-master-v02",
+  "display_name": "Ice-region magic shop",
+  "region": "ice",
+  "facility": "magic_shop",
+  "intended_gui_path": "07_gui_prototype/magic_shop_screen/assets/ice-magic-shop-background-with-eve-overscan-master-v02.png",
+  "canvas": "1846x852",
+  "aspect_intent": "20:9-ish overscan master for later 16:9 crop",
+  "npc": {
+    "name": "Eve",
+    "gender": "female",
+    "role": "magic shop keeper",
+    "scale_rule": "ordinary"
+  },
+  "prompt": "Use case: stylized-concept\nAsset type: game GUI facility background candidate for the Element Maze JRPG static prototype\nPrimary request: Create a new v02 20:9 overscan master image for the Ice-region magic shop facility. This is a review candidate master, not a final replacement asset. The previous magic shop and guild candidates looked too similar, so this version must make the magic shop keeper visually distinct from the Ice guild liaison while still belonging to the same Ice-region culture.\nScene/backdrop: Interior of an ice-lantern magic shop on a frost-tide harbor: wet dark wood shelves, brass and blue-glass lanterns, sealed spellbooks, star charts, crystal tools, hanging charms, sea-fogged arched windows on the left with distant cold harbor silhouettes, salt frost on glass and metal. Keep readable left and middle background depth for GUI panels.\nSubject: Eve, adult female magic shop keeper, calm, clever, professional, and slightly eccentric. Make her clearly distinct from a guild liaison: copper auburn hair or warm chestnut hair, short wavy bob with one side braid or pinned-up asymmetrical hairstyle, amber or green eyes, small half-moon spectacles or a delicate monocle charm, sharper merchant-mage silhouette. She wears a practical deep plum and charcoal winter mage coat with teal lining, brass clasps, small crystal charms, fingerless gloves, and only subtle fur trim. Do not give her long straight black hair, blue eyes, or a navy-and-cream guild uniform.\nStyle/medium: polished 2D anime fantasy game background, painterly JRPG facility art, mature and grounded, detailed but not cluttered.\nComposition/framing: 20:9 wide landscape overscan canvas, designed to crop safely down to 1672x941 16:9. Put Eve as a medium-close half-body figure in the right foreground. Her face should land in the upper-right safe zone with breathing room above and to the right, not touching any image edge. Keep her core shoulders and torso visible after a centered or slightly-left 16:9 crop. Hands, spellbook, lantern, small crystal abacus, and lower work surface may be partly hidden by GUI panels. Preserve extra horizontal environment on both sides for CSS cover/crop adjustment.\nLighting/mood: cold blue coastal light mixed with warm amber brass lanterns and icy cyan magical glow, quiet winter harbor magic-shop atmosphere.\nColor palette: cold blue environment, deep plum and charcoal clothing, brass amber, teal lining, cyan crystal highlights, warm auburn hair.\nConstraints: no in-image text, no readable signs, no UI panels, no logos, no runtime IDs, no watermark, no captions.",
+  "negative_prompt": "resemblance to the Ice guild candidate, black long straight hair, blue eyes, identical fur-collar navy uniform, text, captions, logo, UI panels, signs with readable words, runtime IDs, cropped face, face at image edge, tiny distant NPC, full-body far shot, seductive costume, plain white snowfield, empty ice cave, modern objects, extra fingers, broken hands, warped tools, unreadable clutter, overexposed pure white ice, image with no usable left/middle background depth.",
+  "reference_images": [
+    "07_gui_prototype/magic_shop_screen/assets/magic-shop-background.jpg",
+    "07_gui_prototype/magic_shop_screen/assets/ice-magic-shop-background-with-eve-candidate-v01.png",
+    "07_gui_prototype/guild_screen/assets/ice-guild-background-with-noah-cropped-candidate-v04.png"
+  ],
+  "date": "2026-07-01",
+  "tool": "built-in image_gen",
+  "model": "unknown",
+  "seed": "unknown",
+  "source_generated_image": "C:/Users/user/.codex/generated_images/019f1e26-d5ba-7db3-883e-b7ab17115d85/ig_057dadd141147c5c016a452d0bb75481919bf696b4052d662a.png",
+  "review_status": "candidate_master",
+  "owner_notes": "Generated after owner feedback that the Ice magic shop and guild candidates looked too similar. Ice regional clothing context may remain shared, but hair color, eye color, hairstyle, and silhouette should distinguish Eve from Noah.",
+  "accepted_or_rejected_reason": "",
+  "agent_notes": "V02 separates Eve from the guild candidate with copper auburn short wavy hair, amber eyes, spectacles, and a deep plum/charcoal merchant-mage outfit while preserving the Ice-region harbor shop context. Crop-b currently looks stronger than crop-a because it preserves more right-edge breathing room while keeping face and torso clear of CSS blocking panels. It is not installed as the GUI background.",
+  "crop_review_outputs": [
+    {
+      "label": "magic-shop-overscan-eve-v02-crop-a",
+      "crop_center": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "contact_sheet": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260701T151227Z-magic-shop-overscan-eve-v02-crop-a.contact-sheet.png",
+      "css_preview": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260701T151227Z-magic-shop-overscan-eve-v02-crop-a.css-preview.png",
+      "manifest": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260701T151227Z-magic-shop-overscan-eve-v02-crop-a.manifest.json"
+    },
+    {
+      "label": "magic-shop-overscan-eve-v02-crop-b",
+      "crop_center": {
+        "x": 0.53,
+        "y": 0.5
+      },
+      "contact_sheet": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260701T151227Z-magic-shop-overscan-eve-v02-crop-b.contact-sheet.png",
+      "css_preview": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260701T151227Z-magic-shop-overscan-eve-v02-crop-b.css-preview.png",
+      "manifest": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260701T151227Z-magic-shop-overscan-eve-v02-crop-b.manifest.json"
+    }
+  ],
+  "checks": {
+    "width": 1846,
+    "height": 852,
+    "format": "PNG",
+    "sha256": "49dcfbd375f514c9be5266cb66b24784dca3b08dedc3d5c85a1e700b51f3e886",
+    "installed_as_gui_background": false
+  }
+}

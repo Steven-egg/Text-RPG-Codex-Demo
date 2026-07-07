@@ -1,0 +1,47 @@
+{
+  "image_id": "earth-synthesis-background-with-elf-artisan-overscan-master-v02",
+  "display_name": "Earth-region synthesis workshop",
+  "region": "earth",
+  "facility": "synthesis",
+  "intended_gui_path": "07_gui_prototype/synthesis_screen/assets/earth-synthesis-background-with-elf-artisan-overscan-master-v02.png",
+  "canvas": "1870x841",
+  "aspect_intent": "20:9-ish overscan master for later 16:9 crop",
+  "revises": "07_gui_prototype/synthesis_screen/assets/earth-synthesis-background-with-artisan-overscan-master-v01.png",
+  "npc": {
+    "name": "unnamed Earth elf synthesis artisan candidate",
+    "gender": "female",
+    "role": "synthesis artisan",
+    "species_style": "elf-like fantasy character with pointed ears",
+    "scale_rule": "ordinary",
+    "canonical_status": "visual-only candidate; not a runtime/data name"
+  },
+  "earth_visual_rules": {
+    "style_target": "Japanese visual novel fantasy CG, anime-style JRPG elf NPC, soft facial features, clean elegant linework, detailed painterly facility interior",
+    "regional_identity": "hot and humid forest-quarry Earth region with root network, moss, fungi, herbs, geodes, and muted green-gold leyline light",
+    "clothing_rule": "warm-climate conservative craft clothing: breathable linen, short sleeves or cap sleeves, cropped work vest, waist apron, tool belt, no heavy coat, no winter layering",
+    "hair_rule": "neck-length short hair / short bob ending around the neck; ears visible; no long thick braids or hair past shoulders",
+    "avoid": "Western fantasy realism, D&D portrait, American comic face, rugged realistic portrait, heroic character card, photorealistic concept art, sexy costume, heavy coat, long hair, gold dust, glitter, dense bokeh speckles, floating magic motes"
+  },
+  "prompt": "Revise the Earth synthesis overscan master into a hot-humid Earth-region elf candidate. Preserve the quarry-greenhouse synthesis workshop layout, workbench, geode / leyline stone focus, right-side artisan placement, left/middle background depth, roots, moss, bottles, herbs, stone, and warm lantern atmosphere. Change the adult female artisan into an elf-like Japanese VN / JRPG NPC with pointed ears and neck-length short hair / short bob ending around the neck. Replace heavy coat and bundled layers with breathable hot-climate craft clothing: modest short-sleeved or cap-sleeved cream linen work top, open moss-green cropped work vest, light brown waist apron, tool belt, fingerless gloves or wrist wraps, and small brass/stone clips. Conservative and practical; no exposed chest, no bare midriff, no seductive pose. No text, no UI, no logos, no runtime IDs, no watermark.",
+  "negative_prompt": "Western fantasy realism, D&D portrait, American comic-book face, rugged realistic portrait, heroic character card, photorealistic concept art, heavy coat, winter clothes, long thick braids, hair past shoulders, sexy costume, low neckline, exposed chest, bare midriff, pin-up pose, childlike girl, gold dust, glitter, dense bokeh speckles, floating magic motes, pure outdoor forest landscape, empty cave, cropped face, face at image edge, tiny distant NPC, full-body far shot, extra fingers, broken hands, warped tools, modern objects, readable text, UI panels, logos, runtime IDs, watermark.",
+  "reference_images": [
+    "07_gui_prototype/synthesis_screen/assets/earth-synthesis-background-with-artisan-overscan-master-v01.png",
+    "07_gui_prototype/synthesis_screen/assets/synthesis-background.jpg"
+  ],
+  "date": "2026-07-02",
+  "tool": "built-in image_gen",
+  "model": "unknown",
+  "seed": "unknown",
+  "source_generated_image": "C:/Users/user/.codex/generated_images/019f2362-7946-74f0-8e35-fc1335a50397/ig_02b64cf2705f8e93016a4685f9db648191933e836b86e44465.png",
+  "review_status": "candidate_master",
+  "owner_notes": "Owner clarified that future Earth characters should be elf-like, Earth is hot, and the female character should have short hair ending around the neck.",
+  "accepted_or_rejected_reason": "",
+  "agent_notes": "V02 revises the v01 synthesis artisan into a visible elf with neck-length short hair and light hot-climate craft clothing while preserving facility composition. It is not installed as the GUI background.",
+  "checks": {
+    "width": 1870,
+    "height": 841,
+    "format": "PNG",
+    "sha256": "8078410a752f336ed3b209505204ac4fce4ea215f06d3f65902fc4d79b11868a",
+    "installed_as_gui_background": false
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "image_id": "earth-guild-background-with-liaison-overscan-master-v01",
+  "display_name": "Earth-region guild liaison office",
+  "region": "earth",
+  "facility": "guild",
+  "intended_gui_path": "07_gui_prototype/guild_screen/assets/earth-guild-background-with-liaison-overscan-master-v01.png",
+  "canvas": "1871x841",
+  "aspect_intent": "20:9-ish overscan master for later 16:9 crop",
+  "npc": {
+    "name": "unnamed Earth guild liaison candidate",
+    "gender": "male",
+    "role": "guild liaison",
+    "scale_rule": "ordinary",
+    "canonical_status": "visual-only candidate; not a runtime/data name"
+  },
+  "earth_visual_rules": {
+    "style_target": "Japanese visual novel fantasy CG, anime-style JRPG NPC, soft facial features, clean elegant linework, detailed painterly facility interior",
+    "regional_identity": "forest ring, root network, old quarry stone, moss, ivy, fungal and herbal details, mineral samples, muted green-gold leyline light",
+    "lighting": "warm amber lantern or resin-lamp light mixed with soft green-gold leyline glow and cool forest window light",
+    "avoid": "Western fantasy realism, D&D portrait, American comic face, rugged realistic portrait, heroic character card, photorealistic concept art, sexy costume, gold dust, glitter, dense bokeh speckles, floating magic motes"
+  },
+  "prompt": "Create a 20:9 overscan master for an Earth-region guild liaison office in Japanese visual novel / JRPG facility CG style. The scene is an old quarry lodge at the edge of an ancient forest ring, with carved leyline stone, dark timber, living roots, moss, ivy, map and quest-paper shapes without readable text, mineral samples, herb bundles, wax seals, and a sturdy desk. The unnamed adult male liaison is a visual-only candidate NPC: gentle, capable, soft anime face, chestnut tied hair, moss-green guild coat, earth-brown short cloak, conservative clothing, one hand near a ledger or quill. Keep him medium-close on the right or center-right, with face and core torso safe for a later 1672x941 GUI crop, and preserve left/middle background depth. No text, no UI, no logos, no runtime IDs, no watermark.",
+  "negative_prompt": "Western fantasy realism, D&D portrait, American comic-book face, rugged realistic portrait, square heroic jaw, bearded hard-man portrait, heroic character card, photorealistic concept art, sexy costume, low neckline, pin-up pose, gold dust, glitter, dense bokeh speckles, floating magic motes, overgrown unreadable jungle, pure outdoor forest landscape, cropped face, face at image edge, tiny distant NPC, full-body far shot, extra fingers, broken hands, modern objects, readable text, UI panels, logos, runtime IDs, watermark.",
+  "reference_images": [
+    "07_gui_prototype/guild_screen/assets/guild-background.jpg",
+    "07_gui_prototype/guild_screen/assets/ice-guild-background-with-noah-cropped-candidate-v04.png"
+  ],
+  "date": "2026-07-02",
+  "tool": "built-in image_gen",
+  "model": "unknown",
+  "seed": "unknown",
+  "source_generated_image": "C:/Users/user/.codex/generated_images/019f2362-7946-74f0-8e35-fc1335a50397/ig_06db79edef1880eb016a46803053f48191ae998b4cf2cae236.png",
+  "review_status": "candidate_master",
+  "owner_notes": "Owner asked to start Earth facility style with 1-2 representative candidates before batching Earth / Thunder / Final.",
+  "accepted_or_rejected_reason": "",
+  "agent_notes": "First Earth representative NPC facility candidate. It keeps the user's Japanese VN / JRPG facility CG direction, avoids Western rugged realism, and is not installed as the GUI background.",
+  "checks": {
+    "width": 1871,
+    "height": 841,
+    "format": "PNG",
+    "sha256": "b5d1552451d3b0dd9c2a3ffc4e7b7cd0a86d98c34e0d2bc0de61475923ec2364",
+    "installed_as_gui_background": false
+  }
+}

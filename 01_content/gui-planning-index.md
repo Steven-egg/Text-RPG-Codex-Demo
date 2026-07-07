@@ -104,6 +104,7 @@ Lifecycle labels:
 | File | Lifecycle | Role |
 |---|---|---|
 | `01_content/gui-planning-index.md` | core | This GUI routing and lifecycle index. |
+| `01_content/gui-facility-image-generation-standard-v0.1.md` | conditional | Facility background image generation and review standard; not image-generation or asset-pipeline approval by itself. |
 | `01_content/blueprints/gui-facility-shell-baseline-v0.1.md` | core | Facility-family Mockup-to-HTML four-layer responsibility and configuration baseline. |
 | `01_content/blueprints/gui-family-classification-visual-token-audit-v0.1.md` | core | Formal 14-screen family classification, Global Visual Tokens V0.1 planning baseline, drift register, and normalization gate. |
 | `01_content/blueprints/facilities-visual-integration-spec-v0.1.md` | conditional | Paused Draft facility CSS and visual comparison reference; not implementation approval. |

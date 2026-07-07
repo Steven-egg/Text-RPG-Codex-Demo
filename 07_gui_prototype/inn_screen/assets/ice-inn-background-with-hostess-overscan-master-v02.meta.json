@@ -1,0 +1,61 @@
+{
+  "image_id": "ice-inn-background-with-hostess-overscan-master-v02",
+  "display_name": "Ice-region inn",
+  "region": "ice",
+  "facility": "inn",
+  "intended_gui_path": "07_gui_prototype/inn_screen/assets/ice-inn-background-with-hostess-overscan-master-v02.png",
+  "canvas": "1870x841",
+  "aspect_intent": "20:9 overscan master for later 16:9 crop",
+  "npc": {
+    "name": "inn hostess",
+    "gender": "female",
+    "role": "innkeeper / hostess",
+    "scale_rule": "ordinary"
+  },
+  "prompt": "Create a new 20:9 wide landscape overscan master image for the Ice-region inn facility. This is a review candidate master, not a final replacement asset. The previous innkeeper candidate looked too Western / rugged realistic; this version must match the user's preferred Japanese fantasy visual novel / JRPG facility CG style while staying in the Ice region. Style target: Japanese visual novel fantasy CG, anime-style elegant adult NPC, delicate JRPG facility art, soft facial features, clean elegant linework, detailed painterly interior background, warm cinematic lantern light mixed with cold blue window light. Scene/backdrop: a warm ice-harbor inn interior at night with polished dark timber counter, brass key rack, lanterns, guest ledger, tea set, folded winter blankets, wooden staircase, arched frost-glass windows showing faint blue cold harbor silhouettes and snow outside. Subject: adult female Ice-region inn hostess / innkeeper, kind and welcoming, refined but practical, soft anime face, warm amber or hazel eyes, chestnut-brown hair pinned in a neat bun with loose side strands, conservative cream blouse, dark teal/deep green vest, navy sash or apron with subtle gold star/compass embroidery, small brass keys at the waist, modest wool/fur trim. Composition: hostess on right or center-right behind the inn counter, medium half-body, hands near a ledger, face in upper-right safe zone, preserve left/middle background for GUI panels.",
+  "negative_prompt": "Western fantasy realism, rugged male innkeeper, D&D tavern portrait, American comic-book face, square heroic jaw, photorealistic concept art, overly gritty tavern, seductive costume, low neckline, pin-up pose, gold dust, glitter, dense bokeh speckles, floating magic motes, overexposed fog, cropped face, face at image edge, tiny distant NPC, extra fingers, broken hands, modern objects.",
+  "reference_images": [
+    "07_gui_prototype/inn_screen/assets/inn-background.jpg",
+    "user-provided style reference images #1 and #2"
+  ],
+  "date": "2026-07-02",
+  "tool": "built-in image_gen",
+  "model": "unknown",
+  "seed": "unknown",
+  "source_generated_image": "C:/Users/user/.codex/generated_images/019f1e26-d5ba-7db3-883e-b7ab17115d85/ig_0129bd0da3cf43d7016a466af094488191a89eb9007519bc73.png",
+  "review_status": "candidate_master",
+  "owner_notes": "Owner flagged the previous inn character style as problematic and clarified the desired style: Japanese visual novel / JRPG facility CG, not Western fantasy realism, while preserving Ice-region identity.",
+  "accepted_or_rejected_reason": "",
+  "agent_notes": "V02 replaces the rugged Western male innkeeper direction with a conservative Japanese JRPG-style Ice inn hostess. It is not installed as the GUI background.",
+  "crop_review_outputs": [
+    {
+      "label": "inn-overscan-hostess-v02-crop-a",
+      "crop_center": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "contact_sheet": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260702T135926Z-inn-overscan-hostess-v02-crop-a.contact-sheet.png",
+      "css_preview": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260702T135926Z-inn-overscan-hostess-v02-crop-a.css-preview.png",
+      "manifest": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260702T135926Z-inn-overscan-hostess-v02-crop-a.manifest.json",
+      "selected": true
+    },
+    {
+      "label": "inn-overscan-hostess-v02-crop-b",
+      "crop_center": {
+        "x": 0.47,
+        "y": 0.5
+      },
+      "contact_sheet": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260702T135927Z-inn-overscan-hostess-v02-crop-b.contact-sheet.png",
+      "css_preview": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260702T135927Z-inn-overscan-hostess-v02-crop-b.css-preview.png",
+      "manifest": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260702T135927Z-inn-overscan-hostess-v02-crop-b.manifest.json",
+      "selected": false
+    }
+  ],
+  "checks": {
+    "width": 1870,
+    "height": 841,
+    "format": "PNG",
+    "sha256": "b42b1a004547ad0e43fcc0303cc6fef4ca7abc677893b88733b6defef5d453a9",
+    "installed_as_gui_background": false
+  }
+}

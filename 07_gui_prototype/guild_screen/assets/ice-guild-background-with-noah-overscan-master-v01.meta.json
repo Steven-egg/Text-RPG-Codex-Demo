@@ -1,0 +1,37 @@
+{
+  "image_id": "ice-guild-background-with-noah-overscan-master-v01",
+  "display_name": "Ice-region guild liaison office",
+  "region": "ice",
+  "facility": "guild",
+  "intended_gui_path": "07_gui_prototype/guild_screen/assets/ice-guild-background-with-noah-overscan-master-v01.png",
+  "canvas": "1870x841",
+  "aspect_intent": "20:9 overscan master for later 16:9 crop",
+  "npc": {
+    "name": "Noah",
+    "gender": "female",
+    "role": "guild liaison",
+    "scale_rule": "ordinary"
+  },
+  "prompt": "Use case: stylized-concept\nAsset type: extra-wide overscan master candidate for a game GUI facility background in a JRPG static prototype\nPrimary request: Create a mature fantasy anime JRPG background for the Ice-region guild facility. This is a 20:9 overscan master, not the final crop. It will later be cropped to a 16:9 GUI background, so keep extra safe background buffer on both left and right edges.\nScene/backdrop: Interior of a frost-tide harbor guild liaison office with dark wet wooden beams, brass lanterns, sea-fogged arched windows on the left, distant cold harbor silhouettes, damp maps, quest papers, compass tools, nautical charts, ropes, wax seals, salt-frost on window edges, and a sturdy wooden desk with rolled maps. The room should feel like a cold coastal guild office, not a pure glacier or empty cave.\nSubject: Noah, adult female guild liaison, calm and capable, professional and modest. Dark hair with subtle blue highlights, navy-and-cream guild uniform with a warm fur-lined cloak collar, holding a quill or resting one hand near the map desk. She is not seductive.\nComposition/framing: extra-wide 20:9 canvas. Design the central 80% so it can crop cleanly to 16:9. Noah is medium-close half-body in the right foreground but not near the outer crop edge; her face should sit safely inside the eventual 16:9 crop, around the upper-right safe zone, with breathing room above and to the right. Keep her face and upper torso out of the lower action bar zone. Preserve readable left and middle background depth for GUI panels. Put the desk/map surface in the center-right lower area.\nConstraints: no in-image text, no readable signs, no UI panels, no logos, no runtime IDs, no watermark.",
+  "negative_prompt": "text, captions, logo, UI panels, signs with readable words, runtime IDs, cropped face, face at image edge, tiny distant NPC, full-body far shot, plain white snowfield, empty ice cave, modern objects, extra fingers, broken hands, unreadable clutter, overexposed pure white ice.",
+  "reference_images": [
+    "07_gui_prototype/guild_screen/assets/guild-background.jpg",
+    "07_gui_prototype/guild_screen/assets/ice-guild-background-with-noah-candidate-v03.png"
+  ],
+  "date": "2026-07-01",
+  "tool": "built-in image_gen",
+  "model": "unknown",
+  "seed": "unknown",
+  "source_generated_image": "C:/Users/user/.codex/generated_images/019f18b4-109e-7943-954c-a01ffaff5b16/ig_094c2ee71d3930d2016a4517de0da0819183f246c07dbc62fb.png",
+  "review_status": "candidate_master",
+  "owner_notes": "",
+  "accepted_or_rejected_reason": "",
+  "agent_notes": "Overscan master generated to test the reduced-token crop pipeline. It is intentionally not a 16:9 GUI background and is not installed as the GUI background.",
+  "checks": {
+    "width": 1870,
+    "height": 841,
+    "format": "PNG",
+    "sha256": "6388ca503df839963131ab33ef295a471930b6500be26f427c770b0fbfc40d98",
+    "installed_as_gui_background": false
+  }
+}

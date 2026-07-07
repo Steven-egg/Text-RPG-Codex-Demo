@@ -18,15 +18,15 @@
     "stance_label": "探索中"
   },
   "enemy": {
-    "enemy_id": "mon_ice_drowned_deckhand",
+    "enemy_id": "mon_earth_bark_shell",
     "name": "黑牙亡水手",
     "hp_label": "HP 155 / 155",
     "hp_percent": 100,
-    "attribute": "Ice",
+    "attribute": "Earth",
     "status_label": "asset slot placeholder",
     "asset_slot": {
       "state": "placeholder",
-      "reason": "No formal GUI monster image yet."
+      "reason": "Multiple bark-shell candidates exist; owner version pick is required before linking."
     }
   },
   "command_message": "這個敵人 entry 已存在於 CLI data；GUI 目前只保留 asset slot，不補正式圖片。",
@@ -57,7 +57,7 @@
       "disabled_reason": null,
       "primary": true,
       "payload": {
-        "enemy_id": "mon_ice_drowned_deckhand"
+        "enemy_id": "mon_earth_bark_shell"
       },
       "feedback_message": "已送出 basic_attack；static prototype 不計算戰鬥結果。"
     },
@@ -69,7 +69,7 @@
       "disabled_reason": null,
       "primary": false,
       "payload": {
-        "enemy_id": "mon_ice_drowned_deckhand"
+        "enemy_id": "mon_earth_bark_shell"
       },
       "feedback_message": "已送出 retreat；static prototype 只記錄 UIAction。"
     }

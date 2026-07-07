@@ -1,0 +1,54 @@
+{
+  "image_id": "ice-inn-background-with-hostess-cropped-candidate-v03",
+  "display_name": "Ice-region inn",
+  "region": "ice",
+  "facility": "inn",
+  "intended_gui_path": "07_gui_prototype/inn_screen/assets/ice-inn-background-with-hostess-cropped-candidate-v03.png",
+  "canvas": "1672x941",
+  "aspect_intent": "16:9 GUI cropped candidate from 20:9 overscan master",
+  "source_master": "07_gui_prototype/inn_screen/assets/ice-inn-background-with-hostess-overscan-master-v02.png",
+  "source_manifest": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260702T135926Z-inn-overscan-hostess-v02-crop-a.manifest.json",
+  "selected_crop": {
+    "label": "inn-overscan-hostess-v02-crop-a",
+    "crop_center": {
+      "x": 0.5,
+      "y": 0.5
+    },
+    "crop_zoom": 1.0,
+    "crop_box_px": {
+      "left": 188,
+      "top": 0,
+      "right": 1682,
+      "bottom": 841,
+      "width": 1494,
+      "height": 841
+    }
+  },
+  "npc": {
+    "name": "inn hostess",
+    "gender": "female",
+    "role": "innkeeper / hostess",
+    "scale_rule": "ordinary"
+  },
+  "review_status": "agent_selected_crop_candidate",
+  "owner_notes": "Owner requested fixing the inn character style to Japanese visual novel / JRPG facility CG while preserving Ice-region identity.",
+  "accepted_or_rejected_reason": "",
+  "agent_notes": "Selected crop-a because it keeps the hostess face, shoulders, and torso core clear of the dialogue-service bottom panel while preserving the frosted inn windows and staircase. This candidate is not installed as the GUI background.",
+  "comparison_outputs": {
+    "selected_candidate": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260702T135926Z-inn-overscan-hostess-v02-crop-a.candidate.png",
+    "selected_css_preview": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260702T135926Z-inn-overscan-hostess-v02-crop-a.css-preview.png",
+    "selected_contact_sheet": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260702T135926Z-inn-overscan-hostess-v02-crop-a.contact-sheet.png",
+    "selected_manifest": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260702T135926Z-inn-overscan-hostess-v02-crop-a.manifest.json",
+    "alternate_manifest": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260702T135927Z-inn-overscan-hostess-v02-crop-b.manifest.json"
+  },
+  "checks": {
+    "width": 1672,
+    "height": 941,
+    "format": "PNG",
+    "sha256": "7defbe8a612671fbbc0d72635cd6e3e7468cbc5086b7532685636b6a5b1bab17",
+    "face_passed_tool_threshold": true,
+    "torso_passed_tool_threshold": true,
+    "selected_crop_review_passed": true,
+    "installed_as_gui_background": false
+  }
+}

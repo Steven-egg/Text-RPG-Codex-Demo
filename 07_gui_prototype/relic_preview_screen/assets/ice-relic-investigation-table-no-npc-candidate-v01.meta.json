@@ -1,0 +1,43 @@
+{
+  "image_id": "ice-relic-investigation-table-no-npc-candidate-v01",
+  "display_name": "冰印調查台",
+  "region": "ice",
+  "facility": "relic_preview",
+  "intended_gui_path": "07_gui_prototype/relic_preview_screen/assets/ice-relic-investigation-table-no-npc-candidate-v01.png",
+  "canvas": "1672x941",
+  "npc": {
+    "name": "",
+    "gender": "",
+    "role": "",
+    "scale_rule": "none"
+  },
+  "prompt": "Use case: stylized-concept\nAsset type: game GUI facility background candidate for a JRPG static prototype\nPrimary request: Create a wide 16:9 mature fantasy anime JRPG background for the Ice-region relic preview / investigation facility, display name: 冰印調查台. This is a new v01 candidate, not a replacement of an existing asset.\nScene/backdrop: Frost-tide relic investigation room with no character: circular stone investigation table, glowing ice-seal runes, brass measuring tools, sea-pattern charts, rolled maps, shelves of relic cases, wet dark timber and stone, sea-fogged windows on the left, distant cold harbor silhouettes, salt frost on metal and glass. It should read as an investigation station, not a temple altar or magic shop counter.\nPrimary focus: center-right circular table and glowing ice-seal surface, with readable left-side study depth and enough space for GUI overlays.\nStyle/medium: polished 2D anime fantasy game background, painterly JRPG facility art, mature and grounded, detailed but not cluttered, matching existing fantasy facility GUI mood.\nComposition/framing: 1672x941 target aspect. No NPC. Keep the investigation table center-right/lower-middle, left side readable as harbor study depth, no oversized foreground object blocking GUI panels.\nLighting/mood: cold blue ice-seal glow plus warm brass lamps, quiet forensic relic-study atmosphere.\nConstraints: no in-image text, no readable signs, no UI panels, no logos, no runtime IDs, no watermark.",
+  "negative_prompt": "text, captions, logo, UI panels, signs with readable words, runtime IDs, character, portrait, cropped face, plain white snowfield, empty ice cave, modern objects, unreadable clutter, overexposed pure white ice, temple altar as the main read, magic shop counter as the main read, image with no usable left/middle background depth.",
+  "reference_images": [
+    "07_gui_prototype/relic_preview_screen/assets/relic-preview-background.jpg"
+  ],
+  "date": "2026-07-01",
+  "tool": "built-in image_gen",
+  "model": "unknown",
+  "seed": "unknown",
+  "source_generated_image": "C:/Users/user/.codex/generated_images/019f18b4-109e-7943-954c-a01ffaff5b16/ig_0f12f4a13897bc3f016a444cdfea348191bc427ba790c007f1.png",
+  "review_status": "candidate",
+  "owner_notes": "",
+  "accepted_or_rejected_reason": "",
+  "agent_notes": "Candidate v01 treats relic preview as a no-NPC investigation-table facility, with the ice seal table as the main center-right focus. It is not installed as the GUI background.",
+  "comparison_outputs": {
+    "before": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260630T231551Z-relic-ice-investigation-v01.before.png",
+    "after": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260630T231551Z-relic-ice-investigation-v01.candidate.png",
+    "overlay": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260630T231551Z-relic-ice-investigation-v01.overlay-55.png",
+    "contact_sheet": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260630T231551Z-relic-ice-investigation-v01.contact-sheet.png",
+    "manifest": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260630T231551Z-relic-ice-investigation-v01.manifest.json"
+  },
+  "checks": {
+    "width": 1672,
+    "height": 941,
+    "format": "PNG",
+    "sha256": "8319bb061403ab527f0a0ed2174a44bf6b651ac0260bfd7f9217614f6f0a15aa",
+    "base_candidate_dimensions_match": true,
+    "installed_as_gui_background": false
+  }
+}

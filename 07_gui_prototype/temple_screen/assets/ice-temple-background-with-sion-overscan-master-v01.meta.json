@@ -1,0 +1,61 @@
+{
+  "image_id": "ice-temple-background-with-sion-overscan-master-v01",
+  "display_name": "Ice-region temple",
+  "region": "ice",
+  "facility": "temple",
+  "intended_gui_path": "07_gui_prototype/temple_screen/assets/ice-temple-background-with-sion-overscan-master-v01.png",
+  "canvas": "1870x841",
+  "aspect_intent": "20:9 overscan master for later 16:9 crop",
+  "npc": {
+    "name": "Sion",
+    "gender": "male",
+    "role": "temple guardian priest",
+    "scale_rule": "temple_exception"
+  },
+  "prompt": "Use case: stylized-concept\nAsset type: game GUI facility background candidate for the Element Maze JRPG static prototype\nPrimary request: Create a new 20:9 overscan master image for the Ice-region temple facility. This is a review candidate master, not a final replacement asset. Temple is a scale exception: the NPC may be larger and more ceremonial than ordinary facility NPCs, but the image must still preserve left and middle background depth for GUI panels.\nScene/backdrop: Sacred frost-stone temple interior on a frost-tide coast: dark blue-gray stone, tall frost pillars, sea-fogged stained windows on the left, glimpses of a cold harbor outside, altar steps, frost tablet, candle stands, ritual brass, deep navy banners, salt frost on stone and metal. It should feel solemn and coastal, not a bright generic chapel and not an empty ice cave.\nSubject: Sion, adult male temple guardian priest, stern and ritual-bound, clearly distinct from the blacksmith Gray and the innkeeper: tall narrow build, angular older face, ash-silver hair tied in a severe low tail, dark eyebrows, calm severe gaze, long layered navy-white ceremonial robe with black gloves and brass frost-seal ornaments. He holds a small ritual vessel or folded hands near the chest, not workshop tools.\nStyle/medium: polished 2D anime fantasy game background, painterly JRPG facility art, mature and grounded, detailed but not cluttered.\nComposition/framing: 20:9 wide landscape overscan canvas, designed to crop safely down to 1672x941 16:9. Put Sion as a closer ceremonial foreground figure on the right or center-right, larger than ordinary facility NPCs but not edge-cropped. His face should sit in the upper-right safe zone with breathing room above and to the right. Keep shoulders and torso core visible after a centered or slightly-left 16:9 crop. The altar and frost tablet should remain readable in the center-left background. Preserve extra horizontal environment on both sides for CSS cover/crop adjustment.\nLighting/mood: cold divine blue window light plus warm candle and brass glow, solemn frost-tide ritual atmosphere.\nColor palette: cold blue-gray stone, navy banners, white robe, black gloves, brass amber, pale frost light.\nConstraints: no in-image text, no readable signs, no UI panels, no logos, no runtime IDs, no watermark, no captions.",
+  "negative_prompt": "duplicate male face, same body type as Gray or innkeeper, blacksmith posture, innkeeper warmth, text, captions, logo, UI panels, signs with readable words, runtime IDs, cropped face, face at image edge, tiny distant NPC, full-body far shot, plain white snowfield, empty ice cave, modern objects, extra fingers, broken hands, warped ritual tools, unreadable clutter, overexposed pure white ice, image with no usable left/middle background depth.",
+  "reference_images": [
+    "07_gui_prototype/temple_screen/assets/temple-background.jpg",
+    "07_gui_prototype/temple_screen/assets/ice-temple-background-with-sion-candidate-v01.png",
+    "07_gui_prototype/workshop_screen/assets/ice-weapon-workshop-with-gray-cropped-candidate-v04.png",
+    "07_gui_prototype/inn_screen/assets/ice-inn-background-with-innkeeper-cropped-candidate-v02.png"
+  ],
+  "date": "2026-07-02",
+  "tool": "built-in image_gen",
+  "model": "unknown",
+  "seed": "unknown",
+  "source_generated_image": "C:/Users/user/.codex/generated_images/019f1e26-d5ba-7db3-883e-b7ab17115d85/ig_04d8e01f13b6ad6f016a45a1b57f6c81918af5ca8dd7a542d4.png",
+  "review_status": "candidate_master",
+  "owner_notes": "",
+  "accepted_or_rejected_reason": "",
+  "agent_notes": "Generated as a temple scale-exception overscan master. Sion is larger and more ceremonial than ordinary facility NPCs, with left/middle altar and harbor-window depth preserved. Crop-a is the current selected crop.",
+  "crop_review_outputs": [
+    {
+      "label": "temple-overscan-sion-v01-crop-a",
+      "crop_center": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "contact_sheet": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260701T233213Z-temple-overscan-sion-v01-crop-a.contact-sheet.png",
+      "css_preview": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260701T233213Z-temple-overscan-sion-v01-crop-a.css-preview.png",
+      "manifest": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260701T233213Z-temple-overscan-sion-v01-crop-a.manifest.json"
+    },
+    {
+      "label": "temple-overscan-sion-v01-crop-b",
+      "crop_center": {
+        "x": 0.55,
+        "y": 0.5
+      },
+      "contact_sheet": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260701T233213Z-temple-overscan-sion-v01-crop-b.contact-sheet.png",
+      "css_preview": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260701T233213Z-temple-overscan-sion-v01-crop-b.css-preview.png",
+      "manifest": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260701T233213Z-temple-overscan-sion-v01-crop-b.manifest.json"
+    }
+  ],
+  "checks": {
+    "width": 1870,
+    "height": 841,
+    "format": "PNG",
+    "sha256": "73c23974bf2fb4c8bbf9d9b5d5ec5e034f8d4a5ce24f7de457d583f2a9cb4770",
+    "installed_as_gui_background": false
+  }
+}

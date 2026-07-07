@@ -1,0 +1,61 @@
+{
+  "image_id": "ice-synthesis-background-with-mira-overscan-master-v01",
+  "display_name": "Ice-region synthesis workshop",
+  "region": "ice",
+  "facility": "synthesis",
+  "intended_gui_path": "07_gui_prototype/synthesis_screen/assets/ice-synthesis-background-with-mira-overscan-master-v01.png",
+  "canvas": "1844x853",
+  "aspect_intent": "20:9-ish overscan master for later 16:9 crop",
+  "npc": {
+    "name": "Mira",
+    "gender": "female",
+    "role": "synthesis artisan",
+    "scale_rule": "ordinary"
+  },
+  "prompt": "Use case: stylized-concept\nAsset type: game GUI facility background candidate for the Element Maze JRPG static prototype\nPrimary request: Create a new 20:9 overscan master image for the Ice-region synthesis facility. This is a review candidate master, not a final replacement asset. The synthesis artisan must be visually distinct from both the Ice magic shop keeper and the Ice guild liaison.\nScene/backdrop: Interior of a frost-tide synthesis workshop: wet dark timber, brass lamps, shelves of reagents, blue crystal shards, glass vessels, rope, sea charts, alchemical clamps, small pulleys, workbench tools, sea-fogged arched windows on the left with distant cold harbor silhouettes, and salt frost on metal. Preserve readable left and middle background depth for GUI panels.\nSubject: Mira, adult female synthesis artisan and hands-on alchemist, practical and focused. Make her clearly different from the magic shop keeper and guild liaison: cool silver-gray hair or pale ash-blonde hair, short braided bun or practical pinned work braids, slate gray eyes, brass work goggles pushed up on her head, no spectacles, no long black hair, no copper auburn bob. She wears a rugged teal canvas work coat under a brown leather apron, rolled sleeves, fingerless work gloves, tool belt, small burn marks and crystal dust. She is actively shaping blue crystal shards with tongs, a small chisel, or alchemical clamps.\nStyle/medium: polished 2D anime fantasy game background, painterly JRPG facility art, mature and grounded, detailed but not cluttered.\nComposition/framing: 20:9 wide landscape overscan canvas, designed to crop safely down to 1672x941 16:9. Put Mira as a medium-close half-body figure in the right foreground, but slightly less portrait-like than the magic shop keeper. Her face should land in the upper-right safe zone with breathing room above and to the right, not touching any image edge. Keep her core shoulders and torso visible after a centered or slightly-left 16:9 crop. Hands, tools, crystals, clamps, and lower work surface may be partly hidden by GUI panels. Preserve extra horizontal environment on both sides for CSS cover/crop adjustment.\nLighting/mood: cold blue coastal light mixed with warm brass workshop lamps and cyan reagent glow, quiet winter craft atmosphere.\nColor palette: cold harbor blue, dark wet wood, teal canvas, brown leather apron, brass amber, cyan crystals, pale ash hair.\nConstraints: no in-image text, no readable signs, no UI panels, no logos, no runtime IDs, no watermark, no captions.",
+  "negative_prompt": "resemblance to the Ice magic shop keeper or guild liaison, copper auburn hair, long black hair, blue eyes, spectacles, navy-and-cream guild uniform, deep plum merchant-mage coat, seductive costume, text, captions, logo, UI panels, signs with readable words, runtime IDs, cropped face, face at image edge, tiny distant NPC, full-body far shot, plain white snowfield, empty ice cave, modern objects, extra fingers, broken hands, warped tools, unreadable clutter, overexposed pure white ice, image with no usable left/middle background depth.",
+  "reference_images": [
+    "07_gui_prototype/synthesis_screen/assets/synthesis-background.jpg",
+    "07_gui_prototype/synthesis_screen/assets/ice-synthesis-background-with-mira-candidate-v01.png",
+    "07_gui_prototype/magic_shop_screen/assets/ice-magic-shop-background-with-eve-cropped-candidate-v02.png",
+    "07_gui_prototype/guild_screen/assets/ice-guild-background-with-noah-cropped-candidate-v04.png"
+  ],
+  "date": "2026-07-01",
+  "tool": "built-in image_gen",
+  "model": "unknown",
+  "seed": "unknown",
+  "source_generated_image": "C:/Users/user/.codex/generated_images/019f1e26-d5ba-7db3-883e-b7ab17115d85/ig_064f79c6453c41f1016a45311122c881918121def6242372bf.png",
+  "review_status": "candidate_master",
+  "owner_notes": "",
+  "accepted_or_rejected_reason": "",
+  "agent_notes": "Generated after magic shop v02 approval to keep the Ice synthesis artisan visually distinct from both Eve and Noah. Mira is a silver-gray-haired hands-on crystal craftsperson with goggles, leather apron, gloves, and tool posture. No cropped candidate has been written yet. Crop-a is the current agent recommendation because face and torso core have zero blocking-mask overlap; crop-b gives more right-edge breathing room but lets the torso review box overlap the center detail mask by 0.0741.",
+  "crop_review_outputs": [
+    {
+      "label": "synthesis-overscan-mira-v01-crop-a",
+      "crop_center": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "contact_sheet": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260701T153010Z-synthesis-overscan-mira-v01-crop-a.contact-sheet.png",
+      "css_preview": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260701T153010Z-synthesis-overscan-mira-v01-crop-a.css-preview.png",
+      "manifest": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260701T153010Z-synthesis-overscan-mira-v01-crop-a.manifest.json"
+    },
+    {
+      "label": "synthesis-overscan-mira-v01-crop-b",
+      "crop_center": {
+        "x": 0.53,
+        "y": 0.5
+      },
+      "contact_sheet": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260701T153010Z-synthesis-overscan-mira-v01-crop-b.contact-sheet.png",
+      "css_preview": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260701T153010Z-synthesis-overscan-mira-v01-crop-b.css-preview.png",
+      "manifest": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260701T153010Z-synthesis-overscan-mira-v01-crop-b.manifest.json"
+    }
+  ],
+  "checks": {
+    "width": 1844,
+    "height": 853,
+    "format": "PNG",
+    "sha256": "f1ff692d100c83ea50c6e4b185f96e489bb75351304d891a5be5e14c7eb577b7",
+    "installed_as_gui_background": false
+  }
+}

@@ -1,0 +1,61 @@
+{
+  "image_id": "ice-relic-investigation-table-no-npc-overscan-master-v02",
+  "display_name": "Ice-region relic investigation table",
+  "region": "ice",
+  "facility": "relic_preview",
+  "intended_gui_path": "07_gui_prototype/relic_preview_screen/assets/ice-relic-investigation-table-no-npc-overscan-master-v02.png",
+  "canvas": "1870x841",
+  "aspect_intent": "20:9 overscan master for later 16:9 crop",
+  "npc": {
+    "name": "",
+    "gender": "",
+    "role": "",
+    "scale_rule": "none"
+  },
+  "prompt": "Use case: stylized-concept\nAsset type: game GUI facility background candidate for the Element Maze JRPG static prototype\nPrimary request: Create a new clean v02 20:9 overscan master image for the Ice-region relic preview / relic investigation facility. This is a review candidate master, not a final replacement asset. No characters. IMPORTANT: every corner of the image must be natural scene content only; absolutely no logos, watermarks, glyphs, captions, decorative text, blue marks, signatures, UI marks, or symbols floating in the image corners.\nScene/backdrop: Frost-tide relic investigation room with no NPC: wet dark timber and dark stone, sea-fogged windows on the left with distant cold harbor silhouettes, shelves of relic cases, brass measuring tools, rolled maps, sea-pattern charts without readable writing, glass cases, salt frost on metal and glass. It should read as a forensic relic-study station, not a temple altar and not a magic shop counter.\nPrimary focus: center-right circular stone investigation table with a glowing ice-seal surface, brass calipers, measuring arms, suspended lens, small sealed relic fragments, blue-white rune-like glow that is abstract and unreadable, and damp paper charts with no readable text. The table should be recognizable even when GUI panels cover parts of it.\nStyle/medium: polished 2D anime fantasy game background, painterly JRPG facility art, mature and grounded, detailed but not cluttered.\nComposition/framing: 20:9 wide landscape overscan canvas, designed to crop safely down to 1672x941 16:9. No character, no portrait, no humanoid figure. Keep the investigation table center-right/lower-middle, left side readable as harbor study depth, and right side with shelves/tablet-like relic cases. Avoid one giant foreground object blocking GUI panels. Preserve extra horizontal environment on both sides for CSS cover/crop adjustment.\nLighting/mood: cold blue ice-seal glow plus warm brass lamps, quiet forensic relic-study atmosphere, damp winter harbor interior.\nColor palette: cold blue ice glow, dark wet timber, dark stone, brass amber, parchment tan, glass cyan, salt frost white.\nConstraints: no in-image text, no readable labels, no UI panels, no logos, no runtime IDs, no watermark, no captions, no characters, no corner marks, no signatures.",
+  "negative_prompt": "portrait, person, temple altar as the main read, church nave, magic shop counter, shop shelves as main read, text, captions, logo, UI panels, signs with readable words, runtime IDs, corner marks, signatures, plain empty room, plain white snowfield, empty ice cave, modern objects, unreadable clutter, overexposed pure white ice, image with no usable left/middle background depth.",
+  "reference_images": [
+    "07_gui_prototype/relic_preview_screen/assets/relic-preview-background.jpg",
+    "07_gui_prototype/relic_preview_screen/assets/ice-relic-investigation-table-no-npc-candidate-v01.png",
+    "07_gui_prototype/temple_screen/assets/ice-temple-background-with-sion-cropped-candidate-v02.png",
+    "07_gui_prototype/magic_shop_screen/assets/ice-magic-shop-background-with-eve-cropped-candidate-v02.png"
+  ],
+  "date": "2026-07-02",
+  "tool": "built-in image_gen",
+  "model": "unknown",
+  "seed": "unknown",
+  "source_generated_image": "C:/Users/user/.codex/generated_images/019f1e26-d5ba-7db3-883e-b7ab17115d85/ig_07b3711f38d7048e016a45a94133c08191bc9349dabfe6d266.png",
+  "review_status": "candidate_master",
+  "owner_notes": "",
+  "accepted_or_rejected_reason": "",
+  "agent_notes": "Generated after rejecting an unpersisted relic attempt that had a corner mark. This v02 master has no NPC and reads as a relic investigation table rather than a temple altar or magic shop counter. Crop-b is selected.",
+  "crop_review_outputs": [
+    {
+      "label": "relic-overscan-investigation-v02-crop-a",
+      "crop_center": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "contact_sheet": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260702T000552Z-relic-overscan-investigation-v02-crop-a.contact-sheet.png",
+      "css_preview": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260702T000552Z-relic-overscan-investigation-v02-crop-a.css-preview.png",
+      "manifest": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260702T000552Z-relic-overscan-investigation-v02-crop-a.manifest.json"
+    },
+    {
+      "label": "relic-overscan-investigation-v02-crop-b",
+      "crop_center": {
+        "x": 0.53,
+        "y": 0.5
+      },
+      "contact_sheet": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260702T000552Z-relic-overscan-investigation-v02-crop-b.contact-sheet.png",
+      "css_preview": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260702T000552Z-relic-overscan-investigation-v02-crop-b.css-preview.png",
+      "manifest": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260702T000552Z-relic-overscan-investigation-v02-crop-b.manifest.json"
+    }
+  ],
+  "checks": {
+    "width": 1870,
+    "height": 841,
+    "format": "PNG",
+    "sha256": "8d87e37b02cef0f23cd82bdbf055f8da1cd4af43ae34d02bfdc3a1d59da66c75",
+    "installed_as_gui_background": false
+  }
+}

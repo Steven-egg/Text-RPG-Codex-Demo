@@ -1,0 +1,47 @@
+{
+  "image_id": "earth-weapon-workshop-background-with-gray-overscan-master-v02",
+  "display_name": "Earth-region weapon workshop",
+  "region": "earth",
+  "facility": "weapon_workshop",
+  "intended_gui_path": "07_gui_prototype/workshop_screen/assets/earth-weapon-workshop-background-with-gray-overscan-master-v02.png",
+  "canvas": "1870x841",
+  "aspect_intent": "20:9-ish overscan master for later 16:9 crop",
+  "replaces_rejected": "07_gui_prototype/workshop_screen/assets/earth-weapon-workshop-background-with-gray-overscan-master-v01.png",
+  "npc": {
+    "name": "Gray",
+    "gender": "male",
+    "role": "young weapon artisan",
+    "species_style": "elf-like fantasy character with pointed ears",
+    "scale_rule": "ordinary",
+    "canonical_status": "visual candidate using the regional facility NPC role; generated image contains no text"
+  },
+  "earth_visual_rules": {
+    "style_target": "Japanese visual novel fantasy CG, anime-style JRPG elf NPC, mature demo-facility composition, clean elegant linework, detailed painterly facility interior",
+    "regional_identity": "hot forest-quarry Earth weapon atelier with carved leyline stone, roots, moss, geodes, dark timber, weapon racks, and muted green-gold leyline light",
+    "replacement_rule": "avoid the rejected older rugged uncle / Ice Gray / demo blacksmith clone; use a younger, slimmer, silver-haired elf artisan with stone-blade craft posture",
+    "demo_style_reference": "keep right-foreground medium-close NPC, substantial work surface, dense wood/stone/metal props, warm light, and readable left/middle facility depth"
+  },
+  "prompt": "Use case: stylized-concept. Asset type: 20:9 overscan master candidate for a game GUI facility background in the Element Maze JRPG static prototype. Primary request: Create a replacement v02 Earth-region weapon workshop background in Japanese visual novel fantasy CG style, anime-style JRPG facility art, for later cropping to a 1672x941 GUI background. This replaces a rejected v01 that looked too much like the demo / Ice older blacksmith. Scene/backdrop: A hot Earth-region weapon atelier carved into an old quarry root hall, not a standard blacksmith forge. Interior has dark timber beams, carved leyline stone, living roots, moss, hanging herb bundles, racks of short curved stone-and-steel blades, vine-bound spears, mineral cores, geode polishing wheels, brass clamps, leather tool rolls, a low workbench for shaping crystal-inlaid weapons, amber resin lamps, and muted green-gold leyline glow. Keep substantial demo-like facility depth, dense props, and warm lamps, but avoid the same fireplace/anvil composition as the demo and Ice weapon workshop. Subject: Gray reimagined as a young adult male elf-like weapon artisan, visual-only candidate NPC. He is NOT an uncle and NOT the Ice/demo blacksmith type. Age mid-20s, slim athletic build, graceful angular face, pointed ears visible, no beard, no stubble, no square jaw, no rugged older face. Distinct look: short moss-silver hair with a small side undercut braid, amber-green eyes, focused clever expression, light tan skin, slightly androgynous but adult. Clothing: conservative hot-climate artisan outfit, sleeveless high-neck linen tunic, cropped dark moss-green work vest, asymmetrical leather shoulder guard on one side, wrapped forearms, tool belt with stone chisels, no heavy apron covering the whole torso, no fur, no winter layers, no heroic armor. He is medium-close half-body in the right foreground, leaning over a low workbench while carving a crystal-inlaid short blade with a fine chisel or vine-wrapped handle tool. Face in the upper-right safe zone with breathing room from the image edge; hands and weapon work surface visible. Style/medium: polished 2D anime fantasy game background, Japanese visual novel facility CG, clean elegant linework, mature JRPG texture, soft but distinctive male face, detailed but not cluttered. Composition/framing: extra-wide 20:9 landscape overscan. Design the central 80% so it can crop cleanly to 16:9. Keep Gray medium-close on the right or center-right, face around x 68%-82% and y 12%-32% of the eventual 16:9 crop, not cropped. Preserve usable left/middle space for workshop tabs and detail panels. Lower workbench, hands, blade, and tools may be partly hidden by GUI panels; face and upper torso core must remain safe. Lighting/mood: hot humid quarry atelier, amber resin lamp glow, muted green-gold leyline reflections, subtle forge heat only in background, filtered forest light from left, grounded craft atmosphere. Color palette: moss green, dark timber brown, charcoal stone, warm amber, muted leyline gold-green, clay terracotta, tan leather, silver-green hair highlight. Materials/textures: carved quarry stone, moss, roots, polished geodes, crystal-inlaid blades, vine-wrapped handles, brass clamps, dark timber, leather wraps, linen, stone dust. Constraints: no in-image text, no readable signs, no UI panels, no logos, no runtime IDs, no watermark, no captions.",
+  "negative_prompt": "older rugged uncle, Ice/demo blacksmith face, broad bearded man, wavy brown hair, heavy leather apron silhouette, standard fireplace-anvil copy, Western fantasy realism, D&D portrait, American comic face, photorealistic concept art, heroic character card, shirtless torso, exposed chest, childlike boy, long hair past shoulders, heavy winter coat, fur layers, gold dust, glitter, dense bokeh speckles, floating magic motes, pure outdoor forest landscape, empty cave, cropped face, face at image edge, tiny distant NPC, full-body far shot, extra fingers, broken hands, warped tools, modern objects, unreadable clutter, text, readable signs, UI panels, logos, runtime IDs, watermark.",
+  "reference_images": [
+    "07_gui_prototype/workshop_screen/assets/workshop-background.jpg",
+    "07_gui_prototype/workshop_screen/assets/ice-weapon-workshop-with-gray-cropped-candidate-v04.png",
+    "07_gui_prototype/workshop_screen/assets/earth-weapon-workshop-background-with-gray-cropped-candidate-v01.png"
+  ],
+  "date": "2026-07-04",
+  "tool": "built-in image_gen",
+  "model": "unknown",
+  "seed": "unknown",
+  "source_generated_image": "C:/Users/User/.codex/generated_images/019f2bcc-3017-7c53-9cf9-028ae753c082/ig_0fe079daa4b60f87016a48bee000b48191a6dc64b2845c8cc6.png",
+  "review_status": "candidate_master",
+  "owner_notes": "Owner rejected v01 because the weapon-shop man looked too similar to the demo / Ice weapon workshop NPC and requested a different face and styling.",
+  "accepted_or_rejected_reason": "",
+  "agent_notes": "Generated as a replacement for the rejected older blacksmith direction. V02 changes age, face, hair, body silhouette, clothing, and craft posture while preserving demo-style facility depth and right-foreground NPC placement. It is not installed as the GUI background.",
+  "checks": {
+    "width": 1870,
+    "height": 841,
+    "format": "PNG",
+    "sha256": "7eeee50e095a3baffac70254a33bb7e629dbd12e860d59384996d7f15ba1a837",
+    "installed_as_gui_background": false
+  }
+}

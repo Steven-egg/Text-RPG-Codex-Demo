@@ -1360,6 +1360,74 @@ select:focus-visible {
   background: url("./assets/backgrounds/cinder-seal-depths-combat-v01.png") no-repeat center center !important;
   background-size: cover !important;
 }
+[data-enemy-environment="ice-minor-a"] .battlefield-stage {
+  background: url("./assets/ice-combat-bg-minor-a-candidate-v01.png") no-repeat center center !important;
+  background-size: cover !important;
+}
+[data-enemy-environment="ice-minor-b"] .battlefield-stage {
+  background: url("./assets/ice-combat-bg-minor-b-candidate-v01.png") no-repeat center center !important;
+  background-size: cover !important;
+}
+[data-enemy-environment="ice-main-phase-1"] .battlefield-stage {
+  background: url("./assets/ice-combat-bg-main-phase-1-candidate-v01.png") no-repeat center center !important;
+  background-size: cover !important;
+}
+[data-enemy-environment="ice-main-phase-2"] .battlefield-stage {
+  background: url("./assets/ice-combat-bg-main-phase-2-candidate-v01.png") no-repeat center center !important;
+  background-size: cover !important;
+}
+[data-enemy-environment="earth-minor-a"] .battlefield-stage {
+  background: url("./assets/earth-combat-bg-minor-a-candidate-v01.png") no-repeat center center !important;
+  background-size: cover !important;
+}
+[data-enemy-environment="earth-minor-b"] .battlefield-stage {
+  background: url("./assets/earth-combat-bg-minor-b-candidate-v01.png") no-repeat center center !important;
+  background-size: cover !important;
+}
+[data-enemy-environment="earth-main-phase-1"] .battlefield-stage {
+  background: url("./assets/earth-combat-bg-main-phase-1-candidate-v01.png") no-repeat center center !important;
+  background-size: cover !important;
+}
+[data-enemy-environment="earth-main-phase-2"] .battlefield-stage {
+  background: url("./assets/earth-combat-bg-main-phase-2-candidate-v01.png") no-repeat center center !important;
+  background-size: cover !important;
+}
+[data-enemy-environment="thunder-minor-a"] .battlefield-stage {
+  background: url("./assets/thunder-combat-bg-minor-a-candidate-v01.png") no-repeat center center !important;
+  background-size: cover !important;
+}
+[data-enemy-environment="thunder-minor-b"] .battlefield-stage {
+  background: url("./assets/thunder-combat-bg-minor-b-candidate-v01.png") no-repeat center center !important;
+  background-size: cover !important;
+}
+[data-enemy-environment="thunder-main-phase-1"] .battlefield-stage {
+  background: url("./assets/thunder-combat-bg-main-phase-1-candidate-v01.png") no-repeat center center !important;
+  background-size: cover !important;
+}
+[data-enemy-environment="thunder-main-phase-2"] .battlefield-stage {
+  background: url("./assets/thunder-combat-bg-main-phase-2-candidate-v01.png") no-repeat center center !important;
+  background-size: cover !important;
+}
+[data-enemy-environment="final-minor-a"] .battlefield-stage {
+  background: url("./assets/final-combat-bg-minor-a-candidate-v01.png") no-repeat center center !important;
+  background-size: cover !important;
+}
+[data-enemy-environment="final-minor-b"] .battlefield-stage {
+  background: url("./assets/final-combat-bg-minor-b-candidate-v01.png") no-repeat center center !important;
+  background-size: cover !important;
+}
+[data-enemy-environment="final-main-phase-1"] .battlefield-stage {
+  background: url("./assets/final-combat-bg-main-phase-1-candidate-v01.png") no-repeat center center !important;
+  background-size: cover !important;
+}
+[data-enemy-environment="final-main-phase-2"] .battlefield-stage {
+  background: url("./assets/final-combat-bg-main-phase-2-candidate-v01.png") no-repeat center center !important;
+  background-size: cover !important;
+}
+[data-enemy-environment="final-main-phase-3"] .battlefield-stage {
+  background: url("./assets/final-combat-bg-main-phase-2-candidate-v02.png") no-repeat center center !important;
+  background-size: cover !important;
+}
 
 /* 隱藏 fallback 背景層與原本 silhouette */
 [data-enemy-environment="ember-quarry"] .field-layer,
@@ -1374,6 +1442,12 @@ select:focus-visible {
 [data-enemy-environment="cinder-seal-depths"] .field-layer,
 [data-enemy-environment="cinder-seal-depths"] .battlefield-art::after,
 [data-enemy-environment="cinder-seal-depths"] .enemy-silhouette {
+  display: none !important;
+}
+
+.combat-shell[data-enemy-environment]:not([data-enemy-environment="unknown"]):not([data-enemy-environment="asset-slot"]) .field-layer,
+.combat-shell[data-enemy-environment]:not([data-enemy-environment="unknown"]):not([data-enemy-environment="asset-slot"]) .battlefield-art::after,
+.combat-shell[data-enemy-environment]:not([data-enemy-environment="unknown"]):not([data-enemy-environment="asset-slot"]) .enemy-silhouette {
   display: none !important;
 }
 

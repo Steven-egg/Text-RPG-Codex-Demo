@@ -1,0 +1,95 @@
+{
+  "image_id": "earth-guild-background-with-liaison-cropped-candidate-v01",
+  "display_name": "Earth-region guild liaison office",
+  "region": "earth",
+  "facility": "guild",
+  "intended_gui_path": "07_gui_prototype/guild_screen/assets/earth-guild-background-with-liaison-cropped-candidate-v01.png",
+  "canvas": "1672x941",
+  "aspect_intent": "16:9 GUI cropped candidate from 20:9-ish overscan master",
+  "source_master": "07_gui_prototype/guild_screen/assets/earth-guild-background-with-liaison-overscan-master-v01.png",
+  "source_manifest": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260702T152146Z-earth-guild-liaison-v01-crop-a.manifest.json",
+  "npc": {
+    "name": "unnamed Earth guild liaison candidate",
+    "gender": "male",
+    "role": "guild liaison",
+    "scale_rule": "ordinary",
+    "canonical_status": "visual-only candidate; not a runtime/data name"
+  },
+  "pipeline": {
+    "mode": "overscan_master_to_16x9_candidate",
+    "crop_center": {
+      "x": 0.53,
+      "y": 0.5
+    },
+    "crop_zoom": 1.0,
+    "crop_box_px": {
+      "left": 245,
+      "top": 0,
+      "right": 1739,
+      "bottom": 841,
+      "width": 1494,
+      "height": 841
+    },
+    "crop_box_normalized": {
+      "x": 0.130946,
+      "y": 0.0,
+      "width": 0.798503,
+      "height": 1.0
+    },
+    "css_preset": "npc-facility",
+    "subject_boxes": {
+      "face": {
+        "x": 0.70,
+        "y": 0.13,
+        "width": 0.10,
+        "height": 0.19
+      },
+      "torso_core": {
+        "x": 0.67,
+        "y": 0.30,
+        "width": 0.25,
+        "height": 0.38
+      }
+    }
+  },
+  "prompt": "Cropped 16:9 candidate produced from the v01 Earth guild overscan master. See the source master metadata for the generation prompt and Earth visual rules.",
+  "negative_prompt": "See source master metadata.",
+  "reference_images": [
+    "07_gui_prototype/guild_screen/assets/guild-background.jpg",
+    "07_gui_prototype/guild_screen/assets/earth-guild-background-with-liaison-overscan-master-v01.png",
+    "07_gui_prototype/guild_screen/assets/ice-guild-background-with-noah-cropped-candidate-v04.png"
+  ],
+  "date": "2026-07-02",
+  "tool": "06_tools/gui_facility_image_compare.py",
+  "model": "unknown",
+  "seed": "unknown",
+  "source_generated_image": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260702T152146Z-earth-guild-liaison-v01-crop-a.candidate.png",
+  "review_status": "agent_selected_crop_candidate",
+  "owner_notes": "Owner asked to start Earth facility style with 1-2 representative candidates before batching Earth / Thunder / Final.",
+  "accepted_or_rejected_reason": "Selected as the first Earth guild style candidate because face and torso core pass the npc-facility CSS blocking-mask check while preserving forest-quarry interior depth.",
+  "agent_notes": "Candidate is not installed as the GUI background. The parchment shapes are treated as non-readable environmental texture; future iterations can reduce parchment density if owner wants less pseudo-writing.",
+  "comparison_outputs": {
+    "before": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260702T152146Z-earth-guild-liaison-v01-crop-a.before.png",
+    "after": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260702T152146Z-earth-guild-liaison-v01-crop-a.candidate.png",
+    "overlay": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260702T152146Z-earth-guild-liaison-v01-crop-a.overlay-55.png",
+    "css_preview": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260702T152146Z-earth-guild-liaison-v01-crop-a.css-preview.png",
+    "contact_sheet": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260702T152146Z-earth-guild-liaison-v01-crop-a.contact-sheet.png",
+    "manifest": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260702T152146Z-earth-guild-liaison-v01-crop-a.manifest.json"
+  },
+  "checks": {
+    "width": 1672,
+    "height": 941,
+    "format": "PNG",
+    "sha256": "1f22951136fcce249755f580dbe1cfa676e6924ba9c4534dd7dd84d1079dbd8f",
+    "base_candidate_dimensions_match": false,
+    "prepared_candidate_dimensions_match": true,
+    "face_inside_frame": true,
+    "face_blocking_overlap_ratio": 0.0,
+    "face_passed": true,
+    "torso_inside_frame": true,
+    "torso_blocking_overlap_ratio": 0.0,
+    "torso_passed": true,
+    "review_passed": true,
+    "installed_as_gui_background": false
+  }
+}

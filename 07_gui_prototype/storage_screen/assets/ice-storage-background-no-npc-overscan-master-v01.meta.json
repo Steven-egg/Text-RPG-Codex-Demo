@@ -1,0 +1,59 @@
+{
+  "image_id": "ice-storage-background-no-npc-overscan-master-v01",
+  "display_name": "Ice-region storage",
+  "region": "ice",
+  "facility": "storage",
+  "intended_gui_path": "07_gui_prototype/storage_screen/assets/ice-storage-background-no-npc-overscan-master-v01.png",
+  "canvas": "1870x841",
+  "aspect_intent": "20:9 overscan master for later 16:9 crop",
+  "npc": {
+    "name": "",
+    "gender": "",
+    "role": "",
+    "scale_rule": "none"
+  },
+  "prompt": "Use case: stylized-concept\nAsset type: game GUI facility background candidate for the Element Maze JRPG static prototype\nPrimary request: Create a new 20:9 overscan master image for the Ice-region storage facility. This is a review candidate master, not a final replacement asset. No characters.\nScene/backdrop: Frost-tide harbor warehouse interior with no NPC: wet dark timber beams, heavy shelves, sealed cargo crates, barrels, rope coils, pulley hooks, wrapped parcels, brass lanterns, salt frost on metal, ledger desk, labeled-looking but unreadable tags, stone-and-wood floor reflections, sea-fogged arched door or windows on the left with distant cold harbor silhouettes. Preserve readable left and middle background depth for GUI panels.\nPrimary focus: center-right stacked cargo shelves, sealed chests, rope pulleys, and a practical warehouse counter area. It should read as a storage facility, not a shop, not a guild office, and not a treasure vault. Keep the focus broad enough that GUI panels can cover parts of it while the environment still reads clearly.\nStyle/medium: polished 2D anime fantasy game background, painterly JRPG facility art, mature and grounded, detailed but not cluttered.\nComposition/framing: 20:9 wide landscape overscan canvas, designed to crop safely down to 1672x941 16:9. No character, no portrait, no humanoid figure. Keep focal cargo and tools in the center-right/lower-right and readable harbor warehouse depth on the left. Avoid one giant foreground object that would be blocked by the storage UI panels. Preserve extra horizontal environment on both sides for CSS cover/crop adjustment.\nLighting/mood: cold blue harbor light plus warm amber brass lanterns, damp winter storage atmosphere, dark wood and metal detail.\nColor palette: cold harbor blue, dark wet wood, brass amber, rope tan, iron gray, muted crate browns, salt frost white.\nConstraints: no in-image text, no readable labels, no UI panels, no logos, no runtime IDs, no watermark, no captions, no characters.",
+  "negative_prompt": "portrait, person, shop counter as main read, guild desk, treasure hoard fantasy vault, text, captions, logo, UI panels, signs with readable words, runtime IDs, plain empty room, plain white snowfield, empty ice cave, modern objects, unreadable clutter, overexposed pure white ice, image with no usable left/middle background depth.",
+  "reference_images": [
+    "07_gui_prototype/storage_screen/assets/storage-background.jpg",
+    "07_gui_prototype/storage_screen/assets/ice-storage-background-no-npc-candidate-v01.png"
+  ],
+  "date": "2026-07-02",
+  "tool": "built-in image_gen",
+  "model": "unknown",
+  "seed": "unknown",
+  "source_generated_image": "C:/Users/user/.codex/generated_images/019f1e26-d5ba-7db3-883e-b7ab17115d85/ig_05a474885c791d09016a45a585a46881918f5c5736ec5d5efd.png",
+  "review_status": "candidate_master",
+  "owner_notes": "",
+  "accepted_or_rejected_reason": "",
+  "agent_notes": "Generated as a no-NPC Ice harbor warehouse master. Crop-b is selected because it preserves more right-side cargo shelving and the left harbor window remains readable. Storage focus-box JSON is expected to be weak because the storage CSS preset covers the cargo area with three blocking panels.",
+  "crop_review_outputs": [
+    {
+      "label": "storage-overscan-no-npc-v01-crop-a",
+      "crop_center": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "contact_sheet": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260701T234918Z-storage-overscan-no-npc-v01-crop-a.contact-sheet.png",
+      "css_preview": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260701T234918Z-storage-overscan-no-npc-v01-crop-a.css-preview.png",
+      "manifest": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260701T234918Z-storage-overscan-no-npc-v01-crop-a.manifest.json"
+    },
+    {
+      "label": "storage-overscan-no-npc-v01-crop-b",
+      "crop_center": {
+        "x": 0.53,
+        "y": 0.5
+      },
+      "contact_sheet": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260701T234919Z-storage-overscan-no-npc-v01-crop-b.contact-sheet.png",
+      "css_preview": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260701T234919Z-storage-overscan-no-npc-v01-crop-b.css-preview.png",
+      "manifest": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260701T234919Z-storage-overscan-no-npc-v01-crop-b.manifest.json"
+    }
+  ],
+  "checks": {
+    "width": 1870,
+    "height": 841,
+    "format": "PNG",
+    "sha256": "f2229352de6f6942b3a4cc65e78f04be2b4a0779f5e6c36b2faffa5426d8966e",
+    "installed_as_gui_background": false
+  }
+}

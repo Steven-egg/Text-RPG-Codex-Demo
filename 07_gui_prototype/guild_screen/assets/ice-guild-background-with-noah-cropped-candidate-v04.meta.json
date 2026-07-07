@@ -1,0 +1,91 @@
+{
+  "image_id": "ice-guild-background-with-noah-cropped-candidate-v04",
+  "display_name": "Ice-region guild liaison office",
+  "region": "ice",
+  "facility": "guild",
+  "intended_gui_path": "07_gui_prototype/guild_screen/assets/ice-guild-background-with-noah-cropped-candidate-v04.png",
+  "canvas": "1672x941",
+  "source_master": "07_gui_prototype/guild_screen/assets/ice-guild-background-with-noah-overscan-master-v01.png",
+  "npc": {
+    "name": "Noah",
+    "gender": "female",
+    "role": "guild liaison",
+    "scale_rule": "ordinary"
+  },
+  "pipeline": {
+    "mode": "overscan_master_to_16x9_candidate",
+    "crop_center": {
+      "x": 0.53,
+      "y": 0.5
+    },
+    "crop_zoom": 1.0,
+    "crop_box_px": {
+      "left": 244,
+      "top": 0,
+      "right": 1738,
+      "bottom": 841,
+      "width": 1494,
+      "height": 841
+    },
+    "crop_box_normalized": {
+      "x": 0.130481,
+      "y": 0.0,
+      "width": 0.79893,
+      "height": 1.0
+    },
+    "css_preset": "npc-facility",
+    "subject_boxes": {
+      "face": {
+        "x": 0.67,
+        "y": 0.16,
+        "width": 0.12,
+        "height": 0.2
+      },
+      "torso_core": {
+        "x": 0.67,
+        "y": 0.31,
+        "width": 0.24,
+        "height": 0.42
+      }
+    }
+  },
+  "prompt": "Cropped 16:9 candidate produced from the v01 overscan master. See the source master metadata for the generation prompt.",
+  "negative_prompt": "See source master metadata.",
+  "reference_images": [
+    "07_gui_prototype/guild_screen/assets/guild-background.jpg",
+    "07_gui_prototype/guild_screen/assets/ice-guild-background-with-noah-overscan-master-v01.png"
+  ],
+  "date": "2026-07-01",
+  "tool": "06_tools/gui_facility_image_compare.py",
+  "model": "unknown",
+  "seed": "unknown",
+  "source_generated_image": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260701T134034Z-guild-overscan-noah-v01-crop-b.candidate.png",
+  "review_status": "candidate",
+  "owner_notes": "",
+  "accepted_or_rejected_reason": "",
+  "agent_notes": "Pipeline trial output. The first wide torso box failed because it included arm/desk space; this v04 check uses the torso core rule from the agreed review criteria. Face and torso core both pass the CSS blocking-mask check. It is not installed as the GUI background.",
+  "comparison_outputs": {
+    "before": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260701T134034Z-guild-overscan-noah-v01-crop-b.before.png",
+    "after": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260701T134034Z-guild-overscan-noah-v01-crop-b.candidate.png",
+    "overlay": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260701T134034Z-guild-overscan-noah-v01-crop-b.overlay-55.png",
+    "css_preview": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260701T134034Z-guild-overscan-noah-v01-crop-b.css-preview.png",
+    "contact_sheet": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260701T134034Z-guild-overscan-noah-v01-crop-b.contact-sheet.png",
+    "manifest": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260701T134034Z-guild-overscan-noah-v01-crop-b.manifest.json"
+  },
+  "checks": {
+    "width": 1672,
+    "height": 941,
+    "format": "PNG",
+    "sha256": "15e7ad50b21303a946faaec7e0b066084e772e559bb791dc7ca1948a2e51db28",
+    "base_candidate_dimensions_match": false,
+    "prepared_candidate_dimensions_match": true,
+    "face_inside_frame": true,
+    "face_blocking_overlap_ratio": 0.0,
+    "face_passed": true,
+    "torso_inside_frame": true,
+    "torso_blocking_overlap_ratio": 0.0,
+    "torso_passed": true,
+    "review_passed": true,
+    "installed_as_gui_background": false
+  }
+}

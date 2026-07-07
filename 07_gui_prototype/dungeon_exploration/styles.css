@@ -781,12 +781,80 @@ select:focus-visible {
   background: url("./assets/cinder-seal-depths-exploration-v01.png") no-repeat center center !important;
   background-size: cover !important;
 }
+[data-dungeon-id="dungeon_ice_minor_a"] .dungeon-stage {
+  background: url("./assets/ice-dungeon-explore-minor-a-candidate-v01.png") no-repeat center center !important;
+  background-size: cover !important;
+}
+[data-dungeon-id="dungeon_ice_minor_b"] .dungeon-stage {
+  background: url("./assets/ice-dungeon-explore-minor-b-candidate-v01.png") no-repeat center center !important;
+  background-size: cover !important;
+}
+[data-dungeon-id="dungeon_ice_main_phase_1"] .dungeon-stage {
+  background: url("./assets/ice-dungeon-explore-main-phase-1-candidate-v01.png") no-repeat center center !important;
+  background-size: cover !important;
+}
+[data-dungeon-id="dungeon_ice_main_phase_2"] .dungeon-stage {
+  background: url("./assets/ice-dungeon-explore-main-phase-2-candidate-v01.png") no-repeat center center !important;
+  background-size: cover !important;
+}
+[data-dungeon-id="dungeon_earth_minor_a"] .dungeon-stage {
+  background: url("./assets/earth-dungeon-explore-minor-a-candidate-v01.png") no-repeat center center !important;
+  background-size: cover !important;
+}
+[data-dungeon-id="dungeon_earth_minor_b"] .dungeon-stage {
+  background: url("./assets/earth-dungeon-explore-minor-b-candidate-v01.png") no-repeat center center !important;
+  background-size: cover !important;
+}
+[data-dungeon-id="dungeon_earth_main_phase_1"] .dungeon-stage {
+  background: url("./assets/earth-dungeon-explore-main-phase-1-candidate-v01.png") no-repeat center center !important;
+  background-size: cover !important;
+}
+[data-dungeon-id="dungeon_earth_main_phase_2"] .dungeon-stage {
+  background: url("./assets/earth-dungeon-explore-main-phase-2-candidate-v01.png") no-repeat center center !important;
+  background-size: cover !important;
+}
+[data-dungeon-id="dungeon_thunder_minor_a"] .dungeon-stage {
+  background: url("./assets/thunder-dungeon-explore-minor-a-candidate-v01.png") no-repeat center center !important;
+  background-size: cover !important;
+}
+[data-dungeon-id="dungeon_thunder_minor_b"] .dungeon-stage {
+  background: url("./assets/thunder-dungeon-explore-minor-b-candidate-v01.png") no-repeat center center !important;
+  background-size: cover !important;
+}
+[data-dungeon-id="dungeon_thunder_main_phase_1"] .dungeon-stage {
+  background: url("./assets/thunder-dungeon-explore-main-phase-1-candidate-v01.png") no-repeat center center !important;
+  background-size: cover !important;
+}
+[data-dungeon-id="dungeon_thunder_main_phase_2"] .dungeon-stage {
+  background: url("./assets/thunder-dungeon-explore-main-phase-2-candidate-v01.png") no-repeat center center !important;
+  background-size: cover !important;
+}
+[data-dungeon-id="dungeon_final_minor_a"] .dungeon-stage {
+  background: url("./assets/final-dungeon-explore-minor-a-candidate-v01.png") no-repeat center center !important;
+  background-size: cover !important;
+}
+[data-dungeon-id="dungeon_final_minor_b"] .dungeon-stage {
+  background: url("./assets/final-dungeon-explore-minor-b-candidate-v01.png") no-repeat center center !important;
+  background-size: cover !important;
+}
+[data-dungeon-id="dungeon_final_main_phase_1"] .dungeon-stage {
+  background: url("./assets/final-dungeon-explore-main-phase-1-candidate-v01.png") no-repeat center center !important;
+  background-size: cover !important;
+}
+[data-dungeon-id="dungeon_final_main_phase_3"] .dungeon-stage {
+  background: url("./assets/final-dungeon-explore-final-boss-hall-candidate-v01.png") no-repeat center center !important;
+  background-size: cover !important;
+}
 
 [data-dungeon-id="ember_quarry"] .dungeon-art,
 [data-dungeon-id="dungeon_scorched_mine"] .dungeon-art,
 [data-dungeon-id="dungeon_moss_cave"] .dungeon-art,
 [data-dungeon-id="dungeon_ash_ravine"] .dungeon-art,
 [data-dungeon-id="dungeon_cinder_seal_depths"] .dungeon-art {
+  display: none !important;
+}
+
+.exploration-shell[data-dungeon-id] .dungeon-art {
   display: none !important;
 }
 
@@ -803,6 +871,16 @@ select:focus-visible {
 [data-dungeon-id="dungeon_moss_cave"] .dungeon-stage::after,
 [data-dungeon-id="dungeon_ash_ravine"] .dungeon-stage::after,
 [data-dungeon-id="dungeon_cinder_seal_depths"] .dungeon-stage::after {
+  background:
+    linear-gradient(90deg, rgba(0, 0, 0, 0.54), transparent 18%, transparent 78%, rgba(0, 0, 0, 0.58)),
+    linear-gradient(180deg, rgba(0, 0, 0, 0.35), transparent 28%, rgba(0, 0, 0, 0.64)) !important;
+}
+
+.exploration-shell[data-dungeon-id] .dungeon-stage::before {
+  background: linear-gradient(90deg, rgba(0, 0, 0, 0.36), transparent 29%, transparent 69%, rgba(0, 0, 0, 0.4)) !important;
+}
+
+.exploration-shell[data-dungeon-id] .dungeon-stage::after {
   background:
     linear-gradient(90deg, rgba(0, 0, 0, 0.54), transparent 18%, transparent 78%, rgba(0, 0, 0, 0.58)),
     linear-gradient(180deg, rgba(0, 0, 0, 0.35), transparent 28%, rgba(0, 0, 0, 0.64)) !important;

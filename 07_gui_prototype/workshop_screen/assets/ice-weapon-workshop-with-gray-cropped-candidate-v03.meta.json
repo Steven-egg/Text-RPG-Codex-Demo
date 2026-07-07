@@ -1,0 +1,91 @@
+{
+  "image_id": "ice-weapon-workshop-with-gray-cropped-candidate-v03",
+  "display_name": "Ice-region weapon workshop",
+  "region": "ice",
+  "facility": "weapon_workshop",
+  "intended_gui_path": "07_gui_prototype/workshop_screen/assets/ice-weapon-workshop-with-gray-cropped-candidate-v03.png",
+  "canvas": "1672x941",
+  "source_master": "07_gui_prototype/workshop_screen/assets/ice-weapon-workshop-with-gray-overscan-master-v01.png",
+  "npc": {
+    "name": "Gray",
+    "gender": "male",
+    "role": "blacksmith",
+    "scale_rule": "ordinary"
+  },
+  "pipeline": {
+    "mode": "overscan_master_to_16x9_candidate",
+    "crop_center": {
+      "x": 0.53,
+      "y": 0.5
+    },
+    "crop_zoom": 1.0,
+    "crop_box_px": {
+      "left": 240,
+      "top": 0,
+      "right": 1738,
+      "bottom": 843,
+      "width": 1498,
+      "height": 843
+    },
+    "crop_box_normalized": {
+      "x": 0.128617,
+      "y": 0.0,
+      "width": 0.802787,
+      "height": 1.0
+    },
+    "css_preset": "workshop",
+    "subject_boxes": {
+      "face": {
+        "x": 0.68,
+        "y": 0.12,
+        "width": 0.13,
+        "height": 0.19
+      },
+      "torso_core": {
+        "x": 0.65,
+        "y": 0.31,
+        "width": 0.24,
+        "height": 0.3
+      }
+    }
+  },
+  "prompt": "Cropped 16:9 candidate produced from the v01 overscan master. See the source master metadata for the generation prompt.",
+  "negative_prompt": "See source master metadata.",
+  "reference_images": [
+    "07_gui_prototype/workshop_screen/assets/workshop-background.jpg",
+    "07_gui_prototype/workshop_screen/assets/ice-weapon-workshop-with-gray-overscan-master-v01.png"
+  ],
+  "date": "2026-07-01",
+  "tool": "06_tools/gui_facility_image_compare.py",
+  "model": "unknown",
+  "seed": "unknown",
+  "source_generated_image": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260701T143219Z-workshop-overscan-gray-v01-crop-a.candidate.png",
+  "review_status": "superseded",
+  "owner_notes": "",
+  "accepted_or_rejected_reason": "Superseded by ice-weapon-workshop-with-gray-cropped-candidate-v04 because human visual review found Gray's face too close to the CSS panel despite the automated box checks passing.",
+  "agent_notes": "Pipeline output for workshop_screen. Automated checks passed, but this version is not the preferred candidate after visual review. Use v04 for the safer right-shifted crop. It is not installed as the GUI background.",
+  "comparison_outputs": {
+    "before": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260701T143219Z-workshop-overscan-gray-v01-crop-a.before.png",
+    "after": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260701T143219Z-workshop-overscan-gray-v01-crop-a.candidate.png",
+    "overlay": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260701T143219Z-workshop-overscan-gray-v01-crop-a.overlay-55.png",
+    "css_preview": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260701T143219Z-workshop-overscan-gray-v01-crop-a.css-preview.png",
+    "contact_sheet": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260701T143219Z-workshop-overscan-gray-v01-crop-a.contact-sheet.png",
+    "manifest": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260701T143219Z-workshop-overscan-gray-v01-crop-a.manifest.json"
+  },
+  "checks": {
+    "width": 1672,
+    "height": 941,
+    "format": "PNG",
+    "sha256": "0703bd2805fae2f6dd8cfb37fa08b110ccbb3a440f3ba3a41e99bec2437adb38",
+    "base_candidate_dimensions_match": false,
+    "prepared_candidate_dimensions_match": true,
+    "face_inside_frame": true,
+    "face_blocking_overlap_ratio": 0.0,
+    "face_passed": true,
+    "torso_inside_frame": true,
+    "torso_blocking_overlap_ratio": 0.125,
+    "torso_passed": true,
+    "review_passed": true,
+    "installed_as_gui_background": false
+  }
+}

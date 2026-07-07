@@ -1,0 +1,92 @@
+{
+  "image_id": "ice-magic-shop-background-with-eve-cropped-candidate-v02",
+  "display_name": "Ice-region magic shop",
+  "region": "ice",
+  "facility": "magic_shop",
+  "intended_gui_path": "07_gui_prototype/magic_shop_screen/assets/ice-magic-shop-background-with-eve-cropped-candidate-v02.png",
+  "canvas": "1672x941",
+  "source_master": "07_gui_prototype/magic_shop_screen/assets/ice-magic-shop-background-with-eve-overscan-master-v02.png",
+  "npc": {
+    "name": "Eve",
+    "gender": "female",
+    "role": "magic shop keeper",
+    "scale_rule": "ordinary"
+  },
+  "pipeline": {
+    "mode": "overscan_master_to_16x9_candidate",
+    "crop_center": {
+      "x": 0.53,
+      "y": 0.5
+    },
+    "crop_zoom": 1.0,
+    "crop_box_px": {
+      "left": 221,
+      "top": 0,
+      "right": 1735,
+      "bottom": 852,
+      "width": 1514,
+      "height": 852
+    },
+    "crop_box_normalized": {
+      "x": 0.119718,
+      "y": 0.0,
+      "width": 0.820152,
+      "height": 1.0
+    },
+    "css_preset": "wide-shop",
+    "subject_boxes": {
+      "face": {
+        "x": 0.74,
+        "y": 0.12,
+        "width": 0.1,
+        "height": 0.18
+      },
+      "torso_core": {
+        "x": 0.66,
+        "y": 0.31,
+        "width": 0.27,
+        "height": 0.36
+      }
+    }
+  },
+  "prompt": "Cropped 16:9 candidate produced from the v02 overscan master. See the source master metadata for the generation prompt.",
+  "negative_prompt": "See source master metadata.",
+  "reference_images": [
+    "07_gui_prototype/magic_shop_screen/assets/magic-shop-background.jpg",
+    "07_gui_prototype/magic_shop_screen/assets/ice-magic-shop-background-with-eve-overscan-master-v02.png",
+    "07_gui_prototype/guild_screen/assets/ice-guild-background-with-noah-cropped-candidate-v04.png"
+  ],
+  "date": "2026-07-01",
+  "tool": "06_tools/gui_facility_image_compare.py",
+  "model": "unknown",
+  "seed": "unknown",
+  "source_generated_image": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260701T151227Z-magic-shop-overscan-eve-v02-crop-b.candidate.png",
+  "review_status": "user_approved_crop_candidate",
+  "owner_notes": "User approved this v02 direction after noting that the earlier magic shop candidate looked too similar to the Ice guild candidate. Shared Ice-region clothing context is acceptable, but Eve should keep distinct hair color, eye color, hairstyle, and merchant-mage silhouette.",
+  "accepted_or_rejected_reason": "Approved as the magic shop cropped candidate because Eve is visually distinct from the guild candidate while preserving the Ice harbor magic shop context; face and torso core remain clear of CSS blocking panels.",
+  "agent_notes": "Selected crop-b from the v02 overscan master. The crop keeps Eve's face, shoulders, and torso core visually safe, while lower book/hands/work surface may be covered by GUI panels. It is not installed as the GUI background.",
+  "comparison_outputs": {
+    "before": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260701T151227Z-magic-shop-overscan-eve-v02-crop-b.before.png",
+    "after": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260701T151227Z-magic-shop-overscan-eve-v02-crop-b.candidate.png",
+    "overlay": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260701T151227Z-magic-shop-overscan-eve-v02-crop-b.overlay-55.png",
+    "css_preview": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260701T151227Z-magic-shop-overscan-eve-v02-crop-b.css-preview.png",
+    "contact_sheet": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260701T151227Z-magic-shop-overscan-eve-v02-crop-b.contact-sheet.png",
+    "manifest": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260701T151227Z-magic-shop-overscan-eve-v02-crop-b.manifest.json"
+  },
+  "checks": {
+    "width": 1672,
+    "height": 941,
+    "format": "PNG",
+    "sha256": "57a5a5c8a0d6d93796991fb988ef410153dd2caba53a06bf03dae1ca73150d47",
+    "base_candidate_dimensions_match": false,
+    "prepared_candidate_dimensions_match": true,
+    "face_inside_frame": true,
+    "face_blocking_overlap_ratio": 0.0,
+    "face_passed": true,
+    "torso_inside_frame": true,
+    "torso_blocking_overlap_ratio": 0.0,
+    "torso_passed": true,
+    "review_passed": true,
+    "installed_as_gui_background": false
+  }
+}

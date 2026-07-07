@@ -1,0 +1,61 @@
+{
+  "image_id": "ice-travel-shop-background-with-terry-overscan-master-v04",
+  "display_name": "Ice-region travel shop",
+  "region": "ice",
+  "facility": "travel_shop",
+  "intended_gui_path": "07_gui_prototype/shop_screen/assets/ice-travel-shop-background-with-terry-overscan-master-v04.png",
+  "canvas": "1870x841",
+  "aspect_intent": "20:9 overscan master for later 16:9 crop",
+  "npc": {
+    "name": "Terry",
+    "gender": "male",
+    "role": "travel shop keeper",
+    "scale_rule": "ordinary"
+  },
+  "prompt": "Create a new 20:9 wide landscape overscan master image for the Ice-region travel shop / item shop facility. This is a review candidate master, not a final replacement asset. The previous Terry candidate still looked like a rugged male character card; this version must match the user's preferred Japanese fantasy visual novel / JRPG facility CG style while staying in the Ice region. Style target: Japanese visual novel fantasy CG, anime-style JRPG shop NPC, soft facial features, clean elegant linework, detailed painterly item-shop interior background, warm lantern light mixed with cold blue window light. Scene/backdrop: a refined frost-tide harbor item shop interior with polished dark wood counter, shelves of medicine bottles, rope coils, folded maps, travel satchels, snow boots, brass lanterns, supply boxes, salt-frosted arched windows with blue harbor silhouettes outside. Subject: Terry, adult male JRPG item shop clerk, gentle and approachable, practical but not rugged, slim-to-average build, soft anime face, rounder jaw, warm hazel or green eyes, neat short ash-brown hair, mild tired smile, conservative Ice-region shop uniform with cream shirt, dark teal vest/fitted coat, navy scarf/sash, brass keys and supply pouch, subtle wool/fur trim. Composition: Terry on right or center-right behind/beside a shop counter, medium half-body, face in upper-right safe zone, preserve left/middle shelves and supplies.",
+  "negative_prompt": "Western fantasy realism, rugged Western ranger, square heroic jaw, bearded hard-man portrait, D&D merchant, American comic-book face, superhero lighting, heroic character card, photorealistic concept art, overly gritty shop, gold dust, glitter, dense bokeh speckles, floating magic motes, overexposed fog, cropped face, face at image edge, tiny distant NPC, extra fingers, broken hands, warped bottles, modern objects.",
+  "reference_images": [
+    "07_gui_prototype/shop_screen/bg-npc.jpg",
+    "user-provided style reference images #1 and #2"
+  ],
+  "date": "2026-07-02",
+  "tool": "built-in image_gen",
+  "model": "unknown",
+  "seed": "unknown",
+  "source_generated_image": "C:/Users/user/.codex/generated_images/019f1e26-d5ba-7db3-883e-b7ab17115d85/ig_0129bd0da3cf43d7016a466b851fd881919d54074816606262.png",
+  "review_status": "candidate_master",
+  "owner_notes": "Owner flagged the previous Terry character style as problematic and clarified the desired style: Japanese visual novel / JRPG facility CG, not Western fantasy realism, while preserving Ice-region identity.",
+  "accepted_or_rejected_reason": "",
+  "agent_notes": "V04 softens Terry into a Japanese JRPG item-shop NPC while keeping the Ice harbor supply-shop setting. It is not installed as the GUI background.",
+  "crop_review_outputs": [
+    {
+      "label": "travel-shop-overscan-terry-v04-crop-a",
+      "crop_center": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "contact_sheet": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260702T135927Z-travel-shop-overscan-terry-v04-crop-a.contact-sheet.png",
+      "css_preview": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260702T135927Z-travel-shop-overscan-terry-v04-crop-a.css-preview.png",
+      "manifest": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260702T135927Z-travel-shop-overscan-terry-v04-crop-a.manifest.json",
+      "selected": false
+    },
+    {
+      "label": "travel-shop-overscan-terry-v04-crop-b",
+      "crop_center": {
+        "x": 0.47,
+        "y": 0.5
+      },
+      "contact_sheet": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260702T135927Z-travel-shop-overscan-terry-v04-crop-b.contact-sheet.png",
+      "css_preview": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260702T135927Z-travel-shop-overscan-terry-v04-crop-b.css-preview.png",
+      "manifest": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260702T135927Z-travel-shop-overscan-terry-v04-crop-b.manifest.json",
+      "selected": true
+    }
+  ],
+  "checks": {
+    "width": 1870,
+    "height": 841,
+    "format": "PNG",
+    "sha256": "5d4679b1d82d3a70c4a1aaed949cd5157bf6d2aee45575be17cca844549dce46",
+    "installed_as_gui_background": false
+  }
+}

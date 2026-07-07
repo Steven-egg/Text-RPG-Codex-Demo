@@ -8,7 +8,7 @@ what the next boundary is.
 
 - Work directory: `C:\Users\user\OneDrive\文字冒險遊戲`
 - Latest local checkpoint recorded for this handoff:
-  `510db7c [antig] refactor(runtime): extract town facilities domain`.
+  `029c10b 2026-06-30 [antig] refactor(runtime): extract dungeon domain`.
 - For the full stable capsule details (CLI runtime authority, Relic v1
   flow, naming passes, and bridge parity), see [README.md](../README.md#current-stable-capsule).
 - Phase 3 facilities extraction is landed: town facility CLI behavior now lives
@@ -37,6 +37,13 @@ For GUI static prototype tasks, also read:
 
 - `.codex/skills/element-maze-gui-static-prototype/SKILL.md`
 
+For monster asset candidate generation, also read:
+
+- `C:\Users\User\.codex\skills\.system\imagegen\SKILL.md`
+- `04_data/data/monsters.py`
+- `04_data/data/dungeons.py`
+- `01_content/blueprints/naming-lexicon-v0.1.md`
+
 Read Task Zone docs only when the current task needs them. Do not load Cold Zone
 files during ordinary startup.
 
@@ -52,6 +59,23 @@ Current decisions:
   counts, and relic progression boundaries), see [README.md](../README.md#content-skeleton).
 - This is planning only. It does not approve runtime, data, schema, save, GUI,
   bridge, combat, class, relic, or asset-pipeline work.
+
+## Current Asset Candidate Status
+
+Monster image generation is complete and owner-finalized. This is not runtime,
+data, schema, save, combat, bridge, or formal asset-pipeline approval.
+
+- Combat monster assets now live under:
+  `07_gui_prototype/combat_screen/assets/monsters/{fire,ice,earth,thunder,final}/`
+- The old raw / transparent monster folders were removed or superseded.
+- `fire/` is the formal replacement for the old transparent Fire / demo assets.
+- No further monster image generation is planned.
+- `OLD/` folders and source / check files are owner-side asset history; do not
+  link, delete, move, or clean them unless the owner approves that exact asset
+  surface.
+- Next smallest GUI step: update `07_gui_prototype/combat_screen/combat-screen.js`
+  imageSrc mappings to point at the finalized element folders. This remains
+  static prototype display-layer work only.
 
 ## Task Zone Routing
 
@@ -95,8 +119,7 @@ slice. It is not a permanent ban or demo freeze.
   landed extraction.
 - Formal class transfer, class specialization gameplay, relic effects, endgame
   systems, or formal settings persistence.
-- GUI bridge expansion, GUI visual implementation, image generation, or formal
-  asset pipeline.
+- GUI bridge expansion, new GUI image generation, or formal asset pipeline.
 
 ## Next-Step Boundary
 
@@ -104,6 +127,8 @@ No implementation is pre-approved.
 
 Small safe next steps:
 
+- link finalized combat monster images in the GUI static prototype after exact
+  `07_gui_prototype/combat_screen/combat-screen.js` approval
 - produce a `dungeon.py` domain extraction read-only planning gate
 - produce a dead-code cleanup gate for the unused legacy `buy_menu`
 - produce an AI tooling / validation pipeline audit for future small tools

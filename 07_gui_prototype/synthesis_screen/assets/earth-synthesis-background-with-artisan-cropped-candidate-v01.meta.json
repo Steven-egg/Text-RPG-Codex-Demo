@@ -1,0 +1,95 @@
+{
+  "image_id": "earth-synthesis-background-with-artisan-cropped-candidate-v01",
+  "display_name": "Earth-region synthesis workshop",
+  "region": "earth",
+  "facility": "synthesis",
+  "intended_gui_path": "07_gui_prototype/synthesis_screen/assets/earth-synthesis-background-with-artisan-cropped-candidate-v01.png",
+  "canvas": "1672x941",
+  "aspect_intent": "16:9 GUI cropped candidate from 20:9-ish overscan master",
+  "source_master": "07_gui_prototype/synthesis_screen/assets/earth-synthesis-background-with-artisan-overscan-master-v01.png",
+  "source_manifest": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260702T152333Z-earth-synthesis-artisan-v01-crop-b.manifest.json",
+  "npc": {
+    "name": "unnamed Earth synthesis artisan candidate",
+    "gender": "female",
+    "role": "synthesis artisan",
+    "scale_rule": "ordinary",
+    "canonical_status": "visual-only candidate; not a runtime/data name"
+  },
+  "pipeline": {
+    "mode": "overscan_master_to_16x9_candidate",
+    "crop_center": {
+      "x": 0.5,
+      "y": 0.5
+    },
+    "crop_zoom": 1.0,
+    "crop_box_px": {
+      "left": 186,
+      "top": 0,
+      "right": 1682,
+      "bottom": 842,
+      "width": 1496,
+      "height": 842
+    },
+    "crop_box_normalized": {
+      "x": 0.099572,
+      "y": 0.0,
+      "width": 0.800857,
+      "height": 1.0
+    },
+    "css_preset": "synthesis",
+    "subject_boxes": {
+      "face": {
+        "x": 0.72,
+        "y": 0.17,
+        "width": 0.10,
+        "height": 0.16
+      },
+      "torso_core": {
+        "x": 0.67,
+        "y": 0.30,
+        "width": 0.27,
+        "height": 0.35
+      }
+    }
+  },
+  "prompt": "Cropped 16:9 candidate produced from the v01 Earth synthesis overscan master. See the source master metadata for the generation prompt and Earth visual rules.",
+  "negative_prompt": "See source master metadata.",
+  "reference_images": [
+    "07_gui_prototype/synthesis_screen/assets/synthesis-background.jpg",
+    "07_gui_prototype/synthesis_screen/assets/earth-synthesis-background-with-artisan-overscan-master-v01.png",
+    "07_gui_prototype/synthesis_screen/assets/ice-synthesis-background-with-mira-cropped-candidate-v02.png"
+  ],
+  "date": "2026-07-02",
+  "tool": "06_tools/gui_facility_image_compare.py",
+  "model": "unknown",
+  "seed": "unknown",
+  "source_generated_image": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260702T152333Z-earth-synthesis-artisan-v01-crop-b.candidate.png",
+  "review_status": "agent_selected_crop_candidate",
+  "owner_notes": "Owner asked to start Earth facility style with 1-2 representative candidates before batching Earth / Thunder / Final.",
+  "accepted_or_rejected_reason": "Selected as the first Earth synthesis style candidate because face and torso core pass the synthesis CSS blocking-mask check while preserving root, quarry, reagent, and leyline workbench context.",
+  "agent_notes": "Candidate is not installed as the GUI background. The crop keeps the artisan expressive and conservative, with hands/tools/workbench available for lower-panel occlusion if needed.",
+  "comparison_outputs": {
+    "before": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260702T152333Z-earth-synthesis-artisan-v01-crop-b.before.png",
+    "after": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260702T152333Z-earth-synthesis-artisan-v01-crop-b.candidate.png",
+    "overlay": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260702T152333Z-earth-synthesis-artisan-v01-crop-b.overlay-55.png",
+    "css_preview": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260702T152333Z-earth-synthesis-artisan-v01-crop-b.css-preview.png",
+    "contact_sheet": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260702T152333Z-earth-synthesis-artisan-v01-crop-b.contact-sheet.png",
+    "manifest": "C:/Users/user/AppData/Local/Temp/element-maze-gui-candidate-review/20260702T152333Z-earth-synthesis-artisan-v01-crop-b.manifest.json"
+  },
+  "checks": {
+    "width": 1672,
+    "height": 941,
+    "format": "PNG",
+    "sha256": "d38c18fef02907c761c62451d55be6d38ce1dbfbba34f1b93909c57abb4202ea",
+    "base_candidate_dimensions_match": false,
+    "prepared_candidate_dimensions_match": true,
+    "face_inside_frame": true,
+    "face_blocking_overlap_ratio": 0.0,
+    "face_passed": true,
+    "torso_inside_frame": true,
+    "torso_blocking_overlap_ratio": 0.0,
+    "torso_passed": true,
+    "review_passed": true,
+    "installed_as_gui_background": false
+  }
+}

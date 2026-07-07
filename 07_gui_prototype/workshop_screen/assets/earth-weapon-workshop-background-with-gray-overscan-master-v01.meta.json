@@ -1,0 +1,47 @@
+{
+  "image_id": "earth-weapon-workshop-background-with-gray-overscan-master-v01",
+  "display_name": "Earth-region weapon workshop",
+  "region": "earth",
+  "facility": "weapon_workshop",
+  "intended_gui_path": "07_gui_prototype/workshop_screen/assets/earth-weapon-workshop-background-with-gray-overscan-master-v01.png",
+  "canvas": "1870x841",
+  "aspect_intent": "20:9-ish overscan master for later 16:9 crop",
+  "npc": {
+    "name": "Gray",
+    "gender": "male",
+    "role": "weaponsmith",
+    "species_style": "elf-like fantasy character with pointed ears",
+    "scale_rule": "ordinary",
+    "canonical_status": "visual candidate using the regional facility NPC role; generated image contains no text"
+  },
+  "earth_visual_rules": {
+    "style_target": "Japanese visual novel fantasy CG, anime-style JRPG elf NPC, mature demo-facility composition, clean elegant linework, detailed painterly facility interior",
+    "regional_identity": "hot forest-quarry Earth region with carved leyline stone, roots, moss, geodes, dark timber, metalwork, and muted green-gold leyline light",
+    "clothing_rule": "warm-climate conservative forge clothing: high-coverage sleeveless work shirt, leather apron, forearm wraps, tool belt, no heavy coat, no winter fur",
+    "npc_difference_rule": "male NPC must be distinct from the Earth guild liaison: stronger build, forge posture, sharper craftsman expression, ash-brown swept hair, light stubble only",
+    "demo_style_reference": "right-foreground medium-close NPC, substantial work surface, dense wood/stone/metal props, warm light, and readable left/middle facility depth"
+  },
+  "prompt": "Use case: stylized-concept. Asset type: 20:9 overscan master candidate for a game GUI facility background in the Element Maze JRPG static prototype. Primary request: Create an Earth-region weapon workshop / forge background in Japanese visual novel fantasy CG style, anime-style JRPG facility art, for later cropping to a 1672x941 GUI background. Scene/backdrop: A hot Earth-region quarry forge built into carved leyline stone and dark timber under a forest canopy. Interior has a stone anvil, green-gold leyline furnace, mineral ingots, geode cores, vine-bound weapon racks, root-fiber tool wraps, blackened brass clamps, clay crucibles, cooling troughs, mossy stone walls, hanging dried herbs for tempering oil, and amber resin lamps. The forge should feel hot, smoky, and practical, with forest-quarry identity, not a winter forge, not a pure cave, and not a flat wall. Preserve readable left and middle background depth for GUI panels. Subject: Gray, adult male elf-like weaponsmith, visual-only candidate NPC. Make him clearly distinct from the Earth guild liaison: late 30s, lean strong build, angular but soft Japanese VN face, pointed ears visible, tan skin, short swept-back ash-brown hair tied in a small low knot, clean-shaven or very light stubble only, focused craftsman expression. He wears conservative hot-climate forge clothing: sleeveless dark linen work shirt with high chest coverage, moss-brown leather apron, forearm wraps, tool belt, small brass and stone clips, no heavy coat, no winter fur, no heroic armor. He is medium-close half-body in the right foreground, one hand holding tongs or a half-finished blade on the anvil, face in the upper-right safe zone with breathing room from the image edge, hands and forge tool surface visible. Style/medium: polished 2D anime fantasy game background, Japanese visual novel facility CG, clean elegant linework, mature painterly JRPG texture, soft but distinct male facial features, detailed but not cluttered. Composition/framing: extra-wide 20:9 landscape overscan. Design the central 80% so it can crop cleanly to 16:9. Keep Gray medium-close on the right or center-right, face around x 68%-82% and y 12%-32% of the eventual 16:9 crop, not cropped. Preserve usable left/middle space for workshop tabs and detail panels. Lower anvil, hands, blade, and tools may be partly hidden by GUI panels; face and core torso must remain safe. Lighting/mood: hot practical quarry forge, amber resin lamps, green-gold leyline furnace glow, warm smoke, cool filtered forest light from left windows, grounded workshop atmosphere. Color palette: dark timber brown, moss green, black iron, warm amber, muted gold-green, clay terracotta, charcoal, tan leather. Materials/textures: carved quarry stone, moss, roots, hot metal, brass clamps, clay crucibles, dark timber, leather apron, linen, mineral crystals, geodes, tool scratches, soot. Constraints: no in-image text, no readable signs, no UI panels, no logos, no runtime IDs, no watermark, no captions.",
+  "negative_prompt": "resemblance to the Earth guild liaison, gentle office-worker posture, Western fantasy realism, D&D portrait, American comic face, rugged photorealistic portrait, square heroic jaw, heavy beard, heroic character card, photorealistic concept art, sexy costume, shirtless torso, exposed chest, childlike boy, long hair past shoulders, heavy winter coat, fur layers, gold dust, glitter, dense bokeh speckles, floating magic motes, pure outdoor forest landscape, empty cave, cropped face, face at image edge, tiny distant NPC, full-body far shot, extra fingers, broken hands, warped tools, modern objects, unreadable clutter, text, readable signs, UI panels, logos, runtime IDs, watermark.",
+  "reference_images": [
+    "07_gui_prototype/workshop_screen/assets/workshop-background.jpg",
+    "07_gui_prototype/workshop_screen/assets/ice-weapon-workshop-with-gray-cropped-candidate-v04.png",
+    "07_gui_prototype/guild_screen/assets/earth-guild-background-with-liaison-cropped-candidate-v01.png"
+  ],
+  "date": "2026-07-04",
+  "tool": "built-in image_gen",
+  "model": "unknown",
+  "seed": "unknown",
+  "source_generated_image": "C:/Users/User/.codex/generated_images/019f2bcc-3017-7c53-9cf9-028ae753c082/ig_0c66cdcfd2810de9016a48b4f922548191bd7ad35d41cbb963.png",
+  "review_status": "rejected_candidate_master",
+  "owner_notes": "Owner reminded the agent to inspect the demo facility NPC look before continuing Earth facility generation.",
+  "accepted_or_rejected_reason": "Owner rejected this direction because the weapon-shop man reads too similar to the demo / Ice weapon workshop NPC, with nearly the same older rugged blacksmith silhouette.",
+  "agent_notes": "Rejected visual direction. Keep only as a counterexample for future Earth weapon workshop attempts: avoid older rugged uncle, broad Ice Gray-like face/body, similar apron silhouette, and near-identical forge pose. It is not installed as the GUI background.",
+  "checks": {
+    "width": 1870,
+    "height": 841,
+    "format": "PNG",
+    "sha256": "c5b647d5bb08d920ffc189d93a0d86e4c52a9cfe9325d68a69a249a539d8d581",
+    "installed_as_gui_background": false
+  }
+}
