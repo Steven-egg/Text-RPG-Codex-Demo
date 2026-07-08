@@ -7,7 +7,7 @@ screen-level verification, and historical MVP notes live in Task Zone files.
 ## Current Stable Capsule
 
 - Latest local checkpoint recorded for this handoff:
-  `029c10b 2026-06-30 [antig] refactor(runtime): extract dungeon domain`.
+  `9e0a1b2 2026-07-08 [owner] chore(gui): checkpoint finalized GUI asset links`.
 - Element Maze is an expandable playable demo, not a closed demo.
 - The Python CLI runtime remains the gameplay authority.
 - Act 1 is playable through the main loop.
@@ -42,6 +42,10 @@ screen-level verification, and historical MVP notes live in Task Zone files.
   lives in `03_engine/engine/facilities.py`, pure payment / quest helper logic
   lives in `03_engine/engine/state.py`, and `game.py` keeps facade re-exports
   for GUI bridge compatibility.
+- GUI finalized asset links are stable: combat monster runtime/live coverage is
+  verified at 93/93, `mon_earth_bark_shell` renders in live GUI combat, combat
+  backgrounds are organized by region, and facility backgrounds use the shared
+  `07_gui_prototype/shared/facility-backgrounds.js` helper.
 
 See `git status --short` before editing. The workspace may contain owner-side
 document cleanup or archive changes.
@@ -73,14 +77,18 @@ Current macro decisions:
   navigation, interaction, and UIAction logging only.
 - Runtime-connected GUI work is opt-in and limited to already approved local
   live bridge slices.
-- GUI monster image generation is complete and owner-finalized. Combat monster
-  assets now live under
+- GUI monster image generation and finalized asset linking are complete and
+  owner-finalized. Combat monster assets now live under
   `07_gui_prototype/combat_screen/assets/monsters/{fire,ice,earth,thunder,final}/`.
   The old raw / transparent monster folders were removed or superseded, and
   `fire/` is the formal replacement for the old transparent Fire / demo assets.
-- No further monster image generation is planned. The next smallest GUI step is
-  static combat screen image path linking: update `combat-screen.js` imageSrc
-  mappings to point at the finalized element folders.
+- Combat screen image mappings now point at finalized element folders, including
+  `mon_earth_bark_shell`; combat monster runtime/live coverage is verified at
+  93/93 with no missing mapped monster image files.
+- Combat backgrounds now live under regional background folders, facility
+  backgrounds use the shared facility-backgrounds helper, and OLD / source /
+  check asset history is preserved as unlinked history only.
+- No further monster image generation or asset-linking pass is planned.
 - Detailed GUI bridge and screen status lives in Task Zone files, not this
   README.
 
@@ -221,10 +229,11 @@ Allowed as planning only:
 - produce a `dungeon.py` domain extraction read-only planning gate
 - produce a dead-code cleanup gate for the unused legacy `buy_menu`
 - produce an AI tooling / validation pipeline audit for future small tools
+- produce a GUI static CSS audit for shared tokens and repeated button / panel /
+  card / background patterns
 - refine `01_content/world-content-skeleton-v0.1.md`
 - route old Hot Zone details into Task / Cold Zone
-- link finalized combat monster images in the GUI static prototype after exact
-  `07_gui_prototype/combat_screen/combat-screen.js` approval
+- produce a Hot Zone / branch-closure read-only sync check before future handoff
 - produce a read-only implementation gate for one exact future slice
 
 Still closed until a later exact-scope approval:
