@@ -79,8 +79,8 @@ data, schema, save, combat, bridge, or formal asset-pipeline approval.
 
 ## Task Zone Routing
 
-- Task coordination board:
-  `../task.md`
+- Archived task-chain record:
+  `archive/task.md`
 - World content detailed baselines:
   `01_content/world-content-baselines-v0.1.md`
 - GUI live bridge details and landed MVP status notes:

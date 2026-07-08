@@ -44,10 +44,10 @@ lifecycle, or task routing.
 
 Open these only for matching tasks.
 
-### Task Board & Coordination
+### Archived Task-Chain Record
 
-- `task.md`
-  - Long task board for docs drift control, asset inventory, and runtime slimming coordination. Open this when continuing the weekend task chain.
+- `01_content/archive/task.md`
+  - Historical weekend / weekday task-chain board for docs drift control, asset inventory, and runtime slimming coordination. Open only when historical task-chain context is explicitly needed; do not treat it as current project status.
 
 ### World / Content Planning
 

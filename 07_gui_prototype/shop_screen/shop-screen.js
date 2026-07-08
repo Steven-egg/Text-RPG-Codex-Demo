@@ -1,3 +1,4 @@
+import { applyFacilityBackground } from "../shared/facility-backgrounds.js";
 import { runtimeClient } from "../shared/runtime-client.js";
 
 const fixtureSelect = document.querySelector("#fixture-select");
@@ -29,6 +30,14 @@ const state = {
 
 const townHubRoute = "../town_hub/index.html";
 const navigationDelayMs = 120;
+
+const shopBackgroundByRegion = {
+  fire: "./bg-npc.jpg",
+  ice: "./assets/ice-travel-shop-background-with-terry-overscan-master-v03.png",
+  earth: "./assets/earth-travel-shop-background-with-rabi-cropped-candidate-v01.png",
+  thunder: "./assets/thunder-travel-shop-background-with-rabi-candidate-v01.png",
+  final: "./assets/final-travel-shop-with-rabi-candidate-v01.png",
+};
 
 fixtureSelect.addEventListener("change", () => {
   loadFixture(fixtureSelect.value);
@@ -104,6 +113,7 @@ async function loadFixture(path) {
 
 function render() {
   const { model } = state;
+  applyFacilityBackground({ model, shell: shellEl, backgrounds: shopBackgroundByRegion });
   titleEl.textContent = model.title ?? "";
   subtitleEl.textContent = model.subtitle ?? "";
   npcNameEl.textContent = model.npc?.name ?? "";

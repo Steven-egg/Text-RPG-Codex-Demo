@@ -1,22 +1,28 @@
-# Weekend / Weekday Task Board: Docs, Asset Inventory, Runtime Slimming
+# Archived Weekend / Weekday Task Board: Docs, Asset Inventory, Runtime Slimming
 
-Purpose: let desktop Codex, desktop Antigravity, and the owner continue the
-same long task chain without a long spoken handoff.
+Archived status: this was a cross-session task-chain board for an earlier docs,
+asset inventory, and runtime slimming sequence. It is retained for history only.
+Do not treat it as the current task board or current project status.
 
-Start prompt:
+Original purpose: let desktop Codex, desktop Antigravity, and the owner continue
+the same long task chain without a long spoken handoff.
+
+Original start prompt, historical:
 
 ```text
-Read AGENTS.md Hot Zone first, then read task.md.
+Read AGENTS.md Hot Zone first. Read `01_content/archive/task.md` only when
+historical task-chain context is explicitly needed.
 Antigravity drafts or implements the next approved slice.
 Codex reviews scope, drift risk, diffs, and merge readiness.
 The owner decides direction changes and approves any implementation surface.
 Do not push. Do not read or write save.json.
 ```
 
-Weekday / cross-machine short prompt:
+Original weekday / cross-machine short prompt, historical:
 
 ```text
-Read AGENTS.md Hot Zone first, then read task.md.
+Read AGENTS.md Hot Zone first. Read `01_content/archive/task.md` only when
+historical task-chain context is explicitly needed.
 Use live git status/log on this machine; do not trust another machine's local
 working tree as current.
 Continue only the smallest approved slice.

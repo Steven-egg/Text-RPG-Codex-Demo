@@ -1,3 +1,4 @@
+import { applyFacilityBackground } from "../shared/facility-backgrounds.js";
 import { runtimeClient } from "../shared/runtime-client.js";
 
 const fixtureSelect = document.querySelector("#fixture-select");
@@ -23,6 +24,14 @@ const state = {
 };
 
 const navigationDelayMs = 120;
+
+const relicBackgroundByRegion = {
+  fire: "./assets/relic-preview-background.jpg",
+  ice: "./assets/ice-relic-investigation-table-no-npc-cropped-candidate-v02.png",
+  earth: "./assets/earth-relic-investigation-table-no-npc-candidate-v01.png",
+  thunder: "./assets/thunder-relic-investigation-table-no-npc-candidate-v01.png",
+  final: "./assets/final-relic-investigation-table-no-npc-candidate-v01.png",
+};
 
 fixtureSelect.addEventListener("change", () => {
   loadFixture(fixtureSelect.value);
@@ -148,6 +157,7 @@ async function handleBackToTown() {
 
 function render() {
   const { model } = state;
+  applyFacilityBackground({ model, shell: shellEl, backgrounds: relicBackgroundByRegion });
   titleEl.textContent = model.title ?? "";
   subtitleEl.textContent = model.subtitle ?? "";
   

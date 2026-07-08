@@ -1,3 +1,4 @@
+import { applyFacilityBackground } from "../shared/facility-backgrounds.js";
 import { runtimeClient } from "../shared/runtime-client.js";
 
 const fixtureSelect = document.querySelector("#fixture-select");
@@ -45,6 +46,15 @@ const state = {
 
 const townHubRoute = "../town_hub/index.html";
 const navigationDelayMs = 120;
+
+const guildBackgroundByRegion = {
+  fire: "./assets/guild-background.jpg",
+  border_fire: "./assets/guild-background.jpg",
+  ice: "./assets/ice-guild-background-with-noah-cropped-candidate-v04.png",
+  earth: "./assets/earth-guild-background-with-liaison-cropped-candidate-v01.png",
+  thunder: "./assets/thunder-guild-background-with-liaison-candidate-v01.png",
+  final: "./assets/final-guild-command-post-with-commander-candidate-v01.png",
+};
 
 modeTasksBtn.addEventListener("click", () => {
   switchMode("tasks");
@@ -270,6 +280,13 @@ function renderResourceStrip(strip) {
 
 function render() {
   const { model } = state;
+  applyFacilityBackground({
+    model,
+    shell: shellEl,
+    selectedRegionId: state.selectedFilterId,
+    backgrounds: guildBackgroundByRegion,
+  });
+
   titleEl.textContent = model.title ?? "";
   subtitleEl.textContent = model.subtitle ?? "";
   npcNameEl.textContent = model.npc?.name ?? "";

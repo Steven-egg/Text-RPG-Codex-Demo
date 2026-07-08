@@ -1,3 +1,4 @@
+import { applyFacilityBackground } from "../shared/facility-backgrounds.js";
 import { runtimeClient } from "../shared/runtime-client.js";
 
 const fixtureSelect = document.querySelector("#fixture-select");
@@ -36,6 +37,14 @@ const state = {
 
 const townHubRoute = "../town_hub/index.html";
 const navigationDelayMs = 120;
+
+const magicShopBackgroundByRegion = {
+  fire: "./assets/magic-shop-background.jpg",
+  ice: "./assets/ice-magic-shop-background-with-eve-overscan-master-v01.png",
+  earth: "./assets/earth-magic-shop-background-with-eve-cropped-candidate-v01.png",
+  thunder: "./assets/thunder-magic-shop-background-with-eve-candidate-v01.png",
+  final: "./assets/final-magic-shop-with-eve-candidate-v01.png",
+};
 
 // Emoji dictionary for spellbooks
 const emojiMap = {
@@ -208,6 +217,7 @@ function ensureSelectionVisible() {
 
 function render() {
   const { model } = state;
+  applyFacilityBackground({ model, shell: shellEl, backgrounds: magicShopBackgroundByRegion });
   titleEl.textContent = model.title ?? "";
   subtitleEl.textContent = model.subtitle ?? "";
 

@@ -1,3 +1,4 @@
+import { applyFacilityBackground } from "../shared/facility-backgrounds.js";
 import { runtimeClient } from "../shared/runtime-client.js";
 
 const fixtureSelect = document.querySelector("#fixture-select");
@@ -55,6 +56,14 @@ const state = {
 const townHubRoute = "../town_hub/index.html";
 const navigationDelayMs = 120;
 const warehouseCapacityLimit = 10; // Fixed storage capacity rows
+
+const storageBackgroundByRegion = {
+  fire: "./assets/storage-background.jpg",
+  ice: "./assets/ice-storage-background-no-npc-candidate-v01.png",
+  earth: "./assets/earth-storage-background-no-npc-candidate-v01.png",
+  thunder: "./assets/thunder-storage-background-no-npc-candidate-v01.png",
+  final: "./assets/final-storage-no-npc-candidate-v01.png",
+};
 
 // Emoji dictionary for list items
 const emojiMap = {
@@ -238,6 +247,7 @@ async function loadStaticFallback(path, liveError) {
 
 function render() {
   const { model } = state;
+  applyFacilityBackground({ model, shell: shellEl, backgrounds: storageBackgroundByRegion });
   titleEl.textContent = model.title ?? "";
   subtitleEl.textContent = model.subtitle ?? "";
 

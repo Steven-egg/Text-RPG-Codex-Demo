@@ -1,3 +1,4 @@
+import { rememberCurrentRegion, routeWithFacilityRegion } from "../shared/facility-backgrounds.js";
 import { runtimeClient } from "../shared/runtime-client.js";
 
 const fixtureSelect = document.querySelector("#fixture-select");
@@ -188,6 +189,7 @@ async function loadStaticFallback(path, liveError) {
 
 function render() {
   const { model } = state;
+  rememberCurrentRegion(model);
   shellEl.dataset.currentRegionId = model.current_region_id ?? "border_fire";
   if (model.town_asset) {
     facilitySceneEl.style.backgroundImage = `url("${model.town_asset}")`;
@@ -457,7 +459,7 @@ function navigateAfterAction(action) {
     }
 
     window.setTimeout(() => {
-      window.location.href = runtimeClient.withLiveMode(route);
+      window.location.href = routeWithFacilityRegion(runtimeClient.withLiveMode(route), state.model);
     }, navigationDelayMs);
     return;
   }

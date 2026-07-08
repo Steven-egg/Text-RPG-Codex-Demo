@@ -36,6 +36,7 @@
   --shop-bg-size: 90% auto;
   --shop-bg-x: 225%;
   --shop-bg-y: 50%;
+  --facility-background-image: url('./bg-npc.jpg');
 }
 
 * {
@@ -58,7 +59,7 @@ body {
     linear-gradient(135deg, rgba(147, 51, 234, 0.04), transparent 40%),
     linear-gradient(225deg, rgba(30, 64, 175, 0.05), transparent 45%),
     #0c0d10;
-  background-image: url('./bg-npc.jpg');
+  background-image: var(--facility-background-image);
   background-size: var(--shop-bg-size);
   background-position: var(--shop-bg-x) var(--shop-bg-y);
   background-attachment: fixed;

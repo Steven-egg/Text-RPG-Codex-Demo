@@ -2,6 +2,7 @@
  * ELM FORGE - Workshop Screen Prototype Logic
  * Programmatic GUI -> Asset-driven. Built purely on static fixtures.
  */
+import { applyFacilityBackground } from "../shared/facility-backgrounds.js";
 import { runtimeClient } from "../shared/runtime-client.js";
 
 // 全域狀態變數
@@ -9,6 +10,29 @@ let currentFixtureData = null;
 let currentTab = 'weapon'; // 'weapon', 'armor', 'upgrade', 'owned'
 let selectedItemId = null;
 let uiActionLogs = [];
+
+const workshopBackgroundByRegion = {
+  fire: {
+    "--facility-background-image": "./assets/workshop-background.jpg",
+    "--facility-background-image-2": "./assets/workshop-background-02.jpg",
+  },
+  ice: {
+    "--facility-background-image": "./assets/ice-weapon-workshop-with-gray-candidate-v02.png",
+    "--facility-background-image-2": "./assets/ice-armor-workshop-with-brin-cropped-candidate-v03.png",
+  },
+  earth: {
+    "--facility-background-image": "./assets/earth-weapon-workshop-background-with-gray-cropped-candidate-v02.png",
+    "--facility-background-image-2": "./assets/earth-armor-workshop-background-with-bryn-cropped-candidate-v01.png",
+  },
+  thunder: {
+    "--facility-background-image": "./assets/thunder-weapon-workshop-background-with-gray-candidate-v01.png",
+    "--facility-background-image-2": "./assets/thunder-armor-workshop-background-with-bryn-candidate-v01.png",
+  },
+  final: {
+    "--facility-background-image": "./assets/final-weapon-workshop-with-gray-candidate-v01.png",
+    "--facility-background-image-2": "./assets/final-armor-workshop-with-bryn-candidate-v01.png",
+  },
+};
 
 // DOM 元素引用
 const playerNameEl = document.getElementById('player-name');
@@ -213,6 +237,11 @@ function switchTab(category, forceRefresh = false) {
   if (currentTab === category && !forceRefresh) return;
 
   currentTab = category;
+  applyFacilityBackground({
+    model: currentFixtureData,
+    shell: document.body,
+    backgrounds: workshopBackgroundByRegion,
+  });
   logUIAction('select_tab', { tab_id: category });
 
   // 更新 Tab 按鈕樣式

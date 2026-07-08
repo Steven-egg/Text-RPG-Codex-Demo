@@ -1,3 +1,4 @@
+import { applyFacilityBackground } from "../shared/facility-backgrounds.js";
 import { runtimeClient } from "../shared/runtime-client.js";
 
 const fixtureSelect = document.querySelector("#fixture-select");
@@ -28,6 +29,14 @@ const state = {
   model: null,
   actionLog: [],
   uiState: "welcome", // welcome, confirm, rested
+};
+
+const innBackgroundByRegion = {
+  fire: "./assets/inn-background.jpg",
+  ice: "./assets/ice-inn-background-with-hostess-cropped-candidate-v03.png",
+  earth: "./assets/earth-inn-background-with-innkeeper-candidate-v01.png",
+  thunder: "./assets/thunder-inn-background-with-innkeeper-candidate-v01.png",
+  final: "./assets/final-inn-with-innkeeper-candidate-v01.png",
 };
 
 const navigationDelayMs = 120;
@@ -153,6 +162,7 @@ async function loadStaticFallback(path, liveError) {
 
 function render() {
   const { model } = state;
+  applyFacilityBackground({ model, shell: shellEl, backgrounds: innBackgroundByRegion });
   titleEl.textContent = model.title ?? "";
   subtitleEl.textContent = model.subtitle ?? "";
   

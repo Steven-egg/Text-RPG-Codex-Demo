@@ -33,7 +33,7 @@
 | 歸檔檔案路徑 (Archived Path) | 生命週期狀態 (Status) | 歸檔原因 (Reason) | 當前替代 SSOT / 活躍路徑 | 刪除安全說明 (Deletion Safety) | Git 歷史註記 |
 |---|---|---|---|---|---|
 | `archive/codex-antigravity-collaboration-workflow-v0.1.md` | retired | 舊版的 AI 協作工作流規範，其核心控制和防漂移原則已融入 `AGENTS.md`。 | `AGENTS.md` (session 路由規則) | owner 同意後可安全物理刪除 | 歷史版本可隨時從 git 還原 |
-| `archive/codex-session-snapshot.md` | retired | 早期代碼整合階段的會話快照日誌，已被最新的 `task.md` 與交接文檔取代，屬於歷史殘留。 | `task.md` 與 `codex-handoff-short.md` | owner 同意後可安全物理刪除 | 歷史版本可隨時從 git 還原 |
+| `archive/codex-session-snapshot.md` | retired | 早期代碼整合階段的會話快照日誌，已被後續交接文檔取代，屬於歷史殘留。 | `codex-handoff-short.md` | owner 同意後可安全物理刪除 | 歷史版本可隨時從 git 還原 |
 | `archive/combat-growth-layering-plan.md` | conditional historical | 戰鬥數值成長與階層化規劃。目前雖無運行時實作，但其內含的設計思路未來可能有參考價值，因此物理存檔以供日後備查。 | `world-content-baselines-v0.1.md` (部分宏觀層面) | 建議保留於 archive 中作歷史參考 | 歷史版本可隨時從 git 還原 |
 | `archive/demo-playtest-notes.md` | historical | 火區 demo 的舊測試反饋記錄，相關問題已在代碼與數據層中修復。 | 無（問題已解決） | owner 同意後可安全物理刪除 | 歷史版本可隨時從 git 還原 |
 | `archive/facility-npc-display-baseline-v0.1.md` | superseded | 舊的設施與 NPC 顯示基準，相關的資料對應與顯示邏輯已被運行時數據覆蓋。 | `04_data/data/display_names.py` | owner 同意後可安全物理刪除 | 歷史版本可隨時從 git 還原 |

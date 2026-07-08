@@ -1,3 +1,4 @@
+import { applyFacilityBackground } from "../shared/facility-backgrounds.js";
 import { runtimeClient } from "../shared/runtime-client.js";
 
 const fixtureSelect = document.querySelector("#fixture-select");
@@ -26,6 +27,14 @@ const promotionsModalEl = document.querySelector("#promotions-modal");
 const state = {
   model: null,
   actionLog: [],
+};
+
+const templeBackgroundByRegion = {
+  fire: "./assets/temple-background.jpg",
+  ice: "./assets/ice-temple-background-with-sion-candidate-v01.png",
+  earth: "./assets/earth-temple-background-with-sion-candidate-v01.png",
+  thunder: "./assets/thunder-temple-background-with-sion-candidate-v01.png",
+  final: "./assets/final-temple-with-sion-candidate-v01.png",
 };
 
 const navigationDelayMs = 120;
@@ -185,6 +194,7 @@ async function handleBackToTown() {
 
 function render() {
   const { model } = state;
+  applyFacilityBackground({ model, shell: shellEl, backgrounds: templeBackgroundByRegion });
   titleEl.textContent = model.title ?? "";
   subtitleEl.textContent = model.subtitle ?? "";
   

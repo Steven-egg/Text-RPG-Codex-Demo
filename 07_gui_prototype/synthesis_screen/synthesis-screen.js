@@ -1,3 +1,4 @@
+import { applyFacilityBackground } from "../shared/facility-backgrounds.js";
 import { runtimeClient } from "../shared/runtime-client.js";
 
 const fixtureSelect = document.querySelector("#fixture-select");
@@ -29,6 +30,14 @@ const state = {
 
 const townHubRoute = "../town_hub/index.html";
 const navigationDelayMs = 120;
+
+const synthesisBackgroundByRegion = {
+  fire: "./assets/synthesis-background.jpg",
+  ice: "./assets/ice-synthesis-background-with-mira-candidate-v01.png",
+  earth: "./assets/earth-synthesis-background-with-elf-artisan-cropped-candidate-v02.png",
+  thunder: "./assets/thunder-synthesis-background-with-mira-candidate-v01.png",
+  final: "./assets/final-synthesis-workshop-with-mira-candidate-v01.png",
+};
 
 if (runtimeClient.isLiveMode()) {
   const switcher = document.querySelector(".fixture-switcher");
@@ -154,6 +163,7 @@ async function loadStaticFallback(path) {
 
 function render() {
   const { model } = state;
+  applyFacilityBackground({ model, shell: shellEl, backgrounds: synthesisBackgroundByRegion });
   titleEl.textContent = model.title ?? "";
   subtitleEl.textContent = model.subtitle ?? "";
   npcNameEl.textContent = model.npc?.name ?? "";

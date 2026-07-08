@@ -86,8 +86,8 @@ Current macro decisions:
 
 Task Zone pointers:
 
-- Task coordination board:
-  `task.md`
+- Archived task-chain record:
+  `01_content/archive/task.md`
 - World content detailed baselines:
   `01_content/world-content-baselines-v0.1.md`
 - GUI live bridge plan and landed live-slice notes:
