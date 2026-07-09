@@ -89,6 +89,15 @@ body {
   color: var(--paper-body);
 }
 
+body[data-region="ice"],
+body[data-region="earth"],
+body[data-region="thunder"],
+body[data-region="final"] {
+  --shop-bg-x: center;
+  --shop-bg-y: center;
+  --facility-background-position: center center;
+}
+
 button,
 select {
   font: inherit;
@@ -218,8 +227,8 @@ h1 {
 
 button:focus-visible,
 select:focus-visible {
-  outline: 2px solid var(--gold);
-  outline-offset: 2px;
+  outline: 3px solid var(--gold);
+  outline-offset: 3px;
 }
 
 .resource-strip {
