@@ -8,7 +8,7 @@ what the next boundary is.
 
 - Work directory: `C:\Users\user\OneDrive\文字冒險遊戲`
 - Latest local checkpoint recorded for this handoff:
-  `a154c4c 2026-07-08 [codex] docs(handoff): sync finalized GUI asset links checkpoint`.
+  `7c71481 2026-07-09 [antig] fix(gui): close facility CSS short-viewport convergence`.
 - For the full stable capsule details (CLI runtime authority, Relic v1
   flow, naming passes, and bridge parity), see [README.md](../README.md#current-stable-capsule).
 - Phase 3 facilities extraction is landed: town facility CLI behavior now lives
@@ -19,12 +19,12 @@ what the next boundary is.
   verified at 93/93, `mon_earth_bark_shell` renders in live GUI combat, combat
   backgrounds are organized by region, and facility backgrounds use the shared
   `07_gui_prototype/shared/facility-backgrounds.js` helper.
-- Current local GUI static CSS pass is uncommitted and CSS-only: shop / guild
+- Facility CSS convergence is landed and CSS-only: shop / guild
   facility background sizing uses a facility background token alias with `cover`
   fallback for cross-viewport edge safety, shop / magic shop / synthesis
   typography is tokenized locally, and the facility-family short-viewport CSS
-  convergence pass has Chrome Headless visual verification reported for shop,
-  guild, magic shop, and synthesis.
+  convergence pass has Antigravity-reported Chrome Headless visual verification
+  for shop, guild, magic shop, and synthesis.
 - Note: Element Maze is an expandable playable demo, not a closed demo.
   Narrow MVP language controls current-round risk; it does not close
   future extension points.
@@ -85,7 +85,7 @@ formal asset-pipeline approval.
   93/93 with no missing mapped monster image files.
 - Combat backgrounds now live under regional background folders, and facility
   backgrounds use `07_gui_prototype/shared/facility-backgrounds.js`.
-- Current local GUI static CSS pass is limited to
+- Facility CSS convergence landed in
   `07_gui_prototype/{shop_screen,guild_screen,magic_shop_screen,synthesis_screen}/`
   CSS, with Antigravity-reported Chrome Headless browser screenshot / viewport
   visual verification for the facility-family CSS convergence pass.
