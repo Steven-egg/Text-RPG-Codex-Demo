@@ -767,6 +767,7 @@ Validated during this session:
 - Magic Shop Screen live handoff now has a narrow `learn_magic_book` bridge through `b59fe43`; JavaScript dispatches UIAction and renders returned ScreenModel, while static fixtures remain fallback.
 - Town Hub `magic_shop` facility node correctly routes to Magic Shop Screen static prototype.
 - Magic Shop Screen requirements rendering and Eve's portrait card pass layout checks with zero console errors.
+- Facility-family CSS convergence pass has Antigravity-reported Chrome Headless visual verification for Shop, Guild, Magic Shop, and Synthesis at desktop / laptop / short-view viewports, including 1920x1080, 1440x900, and 1366x768. The pass reports no cut-off primary buttons, missing critical text, or lost facility detail content after the CSS-only short-viewport fixes.
 
 ## Recommended Next Step
 

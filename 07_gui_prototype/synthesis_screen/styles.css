@@ -25,6 +25,21 @@
   --danger: #d66b5f;
   --focus: #f1ca64;
   --shadow: 0 18px 48px rgba(0, 0, 0, 0.35);
+  --facility-type-label: 0.72rem;
+  --facility-type-title: clamp(2.2rem, 4.1vw, 4.65rem);
+  --facility-type-subtitle: clamp(1rem, 1.32vw, 1.18rem);
+  --facility-type-header-meta: 0.78rem;
+  --facility-type-tab-title: 0.88rem;
+  --facility-type-tab-count: 0.74rem;
+  --facility-type-list-meta: 0.84rem;
+  --facility-type-status: 0.74rem;
+  --facility-type-detail-title: clamp(1.75rem, 2.8vw, 2.55rem);
+  --facility-type-npc-name: 1.42rem;
+  --facility-type-requirement-body: 0.86rem;
+  --facility-type-feedback-label: 0.76rem;
+  --facility-type-feedback-body: 0.88rem;
+  --facility-type-button: 0.92rem;
+  --facility-type-log: 0.78rem;
 }
 
 body.facility-body {
@@ -93,7 +108,7 @@ button {
   height: calc(100vh - 32px);
   margin: 16px auto;
   display: grid;
-  grid-template-rows: auto minmax(570px, 1fr) auto auto;
+  grid-template-rows: auto minmax(0, 1fr) auto auto;
   gap: 12px;
   overflow: hidden;
   background: var(--facility-shell-wash);
@@ -172,7 +187,7 @@ button {
 .panel-label {
   margin: 0 0 8px;
   color: var(--gold);
-  font-size: 0.72rem;
+  font-size: var(--facility-type-label);
   font-weight: 900;
   letter-spacing: 0;
   text-transform: uppercase;
@@ -189,7 +204,7 @@ strong {
 
 h1 {
   margin: 0;
-  font-size: clamp(2.2rem, 4.1vw, 4.65rem);
+  font-size: var(--facility-type-title);
   line-height: 0.95;
   letter-spacing: 0.05em;
   font-family: 'Noto Serif TC', serif;
@@ -203,7 +218,7 @@ h1 {
   margin: 10px 0 0;
   max-width: 82ch;
   color: var(--paper-muted);
-  font-size: clamp(1rem, 1.32vw, 1.18rem);
+  font-size: var(--facility-type-subtitle);
   line-height: 1.45;
 }
 
@@ -215,7 +230,7 @@ h1 {
 
 .fixture-switcher label {
   color: var(--paper-muted);
-  font-size: 0.78rem;
+  font-size: var(--facility-type-header-meta);
   font-weight: 800;
 }
 
@@ -323,12 +338,12 @@ select:focus-visible {
 }
 
 .category-tab strong {
-  font-size: 0.88rem;
+  font-size: var(--facility-type-tab-title);
 }
 
 .category-tab span {
   color: var(--paper-muted);
-  font-size: 0.74rem;
+  font-size: var(--facility-type-tab-count);
 }
 
 .category-tab.is-selected,
@@ -385,7 +400,7 @@ select:focus-visible {
 .recipe-summary,
 .recipe-meta {
   color: var(--paper-muted);
-  font-size: 0.84rem;
+  font-size: var(--facility-type-list-meta);
   line-height: 1.35;
 }
 
@@ -394,7 +409,7 @@ select:focus-visible {
   border: 1px solid rgba(239, 231, 213, 0.22);
   border-radius: 999px;
   padding: 5px 9px;
-  font-size: 0.74rem;
+  font-size: var(--facility-type-status);
   font-weight: 900;
   white-space: nowrap;
 }
@@ -424,7 +439,7 @@ select:focus-visible {
 .recipe-detail-area {
   padding: 0;
   display: grid;
-  grid-template-rows: minmax(320px, 1.12fr) minmax(220px, 0.72fr);
+  grid-template-rows: minmax(180px, 1.12fr) minmax(120px, 0.72fr);
   gap: 12px;
   overflow: visible;
   background: transparent;
@@ -462,7 +477,7 @@ select:focus-visible {
 
 .recipe-detail h2 {
   margin: 0;
-  font-size: clamp(1.75rem, 2.8vw, 2.55rem);
+  font-size: var(--facility-type-detail-title);
   line-height: 1.08;
 }
 
@@ -567,7 +582,7 @@ select:focus-visible {
 
 .npc-copy h2 {
   margin: 0;
-  font-size: 1.42rem;
+  font-size: var(--facility-type-npc-name);
   line-height: 1.12;
 }
 
@@ -623,7 +638,7 @@ select:focus-visible {
 .requirement-status {
   border: 1px solid var(--line);
   border-radius: 6px;
-  font-size: 0.72rem;
+  font-size: var(--facility-type-label);
   font-weight: 900;
 }
 
@@ -646,7 +661,7 @@ select:focus-visible {
 
 .requirement-copy span {
   color: var(--paper-muted);
-  font-size: 0.86rem;
+  font-size: var(--facility-type-requirement-body);
   line-height: 1.35;
 }
 
@@ -678,7 +693,7 @@ select:focus-visible {
 
 .feedback-bar .panel-label {
   color: var(--gold);
-  font-size: 0.76rem;
+  font-size: var(--facility-type-feedback-label);
   margin-bottom: 6px;
   font-family: 'Noto Serif TC', serif;
   letter-spacing: 0.08em;
@@ -696,7 +711,7 @@ select:focus-visible {
 .feedback-bar p:last-child {
   margin: 0;
   color: var(--paper);
-  font-size: 0.88rem;
+  font-size: var(--facility-type-feedback-body);
   line-height: 1.5;
   font-family: 'Noto Serif TC', serif;
   white-space: normal;
@@ -709,7 +724,7 @@ select:focus-visible {
   padding: 11px 14px;
   font-weight: 900;
   font-family: 'Noto Serif TC', serif;
-  font-size: 0.92rem;
+  font-size: var(--facility-type-button);
   border-radius: 4px;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -793,7 +808,7 @@ select:focus-visible {
   overflow: auto;
   color: var(--paper-muted);
   font-family: "Cascadia Mono", Consolas, monospace;
-  font-size: 0.78rem;
+  font-size: var(--facility-type-log);
 }
 
 .recipe-list,

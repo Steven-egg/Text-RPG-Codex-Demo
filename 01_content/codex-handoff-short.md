@@ -8,7 +8,7 @@ what the next boundary is.
 
 - Work directory: `C:\Users\user\OneDrive\文字冒險遊戲`
 - Latest local checkpoint recorded for this handoff:
-  `9e0a1b2 2026-07-08 [owner] chore(gui): checkpoint finalized GUI asset links`.
+  `a154c4c 2026-07-08 [codex] docs(handoff): sync finalized GUI asset links checkpoint`.
 - For the full stable capsule details (CLI runtime authority, Relic v1
   flow, naming passes, and bridge parity), see [README.md](../README.md#current-stable-capsule).
 - Phase 3 facilities extraction is landed: town facility CLI behavior now lives
@@ -19,6 +19,12 @@ what the next boundary is.
   verified at 93/93, `mon_earth_bark_shell` renders in live GUI combat, combat
   backgrounds are organized by region, and facility backgrounds use the shared
   `07_gui_prototype/shared/facility-backgrounds.js` helper.
+- Current local GUI static CSS pass is uncommitted and CSS-only: shop / guild
+  facility background sizing uses a facility background token alias with `cover`
+  fallback for cross-viewport edge safety, shop / magic shop / synthesis
+  typography is tokenized locally, and the facility-family short-viewport CSS
+  convergence pass has Chrome Headless visual verification reported for shop,
+  guild, magic shop, and synthesis.
 - Note: Element Maze is an expandable playable demo, not a closed demo.
   Narrow MVP language controls current-round risk; it does not close
   future extension points.
@@ -79,6 +85,10 @@ formal asset-pipeline approval.
   93/93 with no missing mapped monster image files.
 - Combat backgrounds now live under regional background folders, and facility
   backgrounds use `07_gui_prototype/shared/facility-backgrounds.js`.
+- Current local GUI static CSS pass is limited to
+  `07_gui_prototype/{shop_screen,guild_screen,magic_shop_screen,synthesis_screen}/`
+  CSS, with Antigravity-reported Chrome Headless browser screenshot / viewport
+  visual verification for the facility-family CSS convergence pass.
 - No further monster image generation or asset-linking pass is planned.
 - `OLD/` folders and source / check files are owner-side asset history; do not
   link, delete, move, or clean them unless the owner approves that exact asset
@@ -137,8 +147,10 @@ Small safe next steps:
 - produce a `dungeon.py` domain extraction read-only planning gate
 - produce a dead-code cleanup gate for the unused legacy `buy_menu`
 - produce an AI tooling / validation pipeline audit for future small tools
-- produce a GUI static CSS audit for shared tokens and repeated button / panel /
-  card / background patterns
+- produce a commit package or branch-closure summary for the current facility
+  CSS convergence after owner review
+- produce a read-only gate for the next exact GUI static CSS slice, such as
+  button state tokens or panel / card pattern convergence
 - refine `01_content/world-content-skeleton-v0.1.md`
 - keep Hot Zone docs short and move historical detail to Task / Cold Zone
 - produce a Hot Zone / branch-closure read-only sync check before future handoff

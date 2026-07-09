@@ -7,7 +7,7 @@ screen-level verification, and historical MVP notes live in Task Zone files.
 ## Current Stable Capsule
 
 - Latest local checkpoint recorded for this handoff:
-  `9e0a1b2 2026-07-08 [owner] chore(gui): checkpoint finalized GUI asset links`.
+  `a154c4c 2026-07-08 [codex] docs(handoff): sync finalized GUI asset links checkpoint`.
 - Element Maze is an expandable playable demo, not a closed demo.
 - The Python CLI runtime remains the gameplay authority.
 - Act 1 is playable through the main loop.
@@ -46,6 +46,12 @@ screen-level verification, and historical MVP notes live in Task Zone files.
   verified at 93/93, `mon_earth_bark_shell` renders in live GUI combat, combat
   backgrounds are organized by region, and facility backgrounds use the shared
   `07_gui_prototype/shared/facility-backgrounds.js` helper.
+- Current local GUI static CSS pass is uncommitted: shop / guild facility
+  background sizing now uses a facility background token alias with `cover`
+  fallback for cross-viewport edge safety, shop / magic shop / synthesis
+  typography is tokenized locally, and the facility-family short-viewport CSS
+  convergence pass has Chrome Headless visual verification reported for shop,
+  guild, magic shop, and synthesis.
 
 See `git status --short` before editing. The workspace may contain owner-side
 document cleanup or archive changes.
@@ -88,6 +94,10 @@ Current macro decisions:
 - Combat backgrounds now live under regional background folders, facility
   backgrounds use the shared facility-backgrounds helper, and OLD / source /
   check asset history is preserved as unlinked history only.
+- Current local GUI static CSS pass is limited to CSS in
+  `07_gui_prototype/{shop_screen,guild_screen,magic_shop_screen,synthesis_screen}/`.
+  Antigravity reported Chrome Headless browser screenshot / viewport visual
+  verification for the facility-family CSS convergence pass.
 - No further monster image generation or asset-linking pass is planned.
 - Detailed GUI bridge and screen status lives in Task Zone files, not this
   README.
@@ -229,8 +239,10 @@ Allowed as planning only:
 - produce a `dungeon.py` domain extraction read-only planning gate
 - produce a dead-code cleanup gate for the unused legacy `buy_menu`
 - produce an AI tooling / validation pipeline audit for future small tools
-- produce a GUI static CSS audit for shared tokens and repeated button / panel /
-  card / background patterns
+- produce a commit package or branch-closure summary for the current facility
+  CSS convergence after owner review
+- produce a read-only gate for the next exact GUI static CSS slice, such as
+  button state tokens or panel / card pattern convergence
 - refine `01_content/world-content-skeleton-v0.1.md`
 - route old Hot Zone details into Task / Cold Zone
 - produce a Hot Zone / branch-closure read-only sync check before future handoff

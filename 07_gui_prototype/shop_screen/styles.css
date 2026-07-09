@@ -26,6 +26,26 @@
   /* Focus gold */
   --amber-glow: rgba(212, 175, 55, 0.18);
   --shadow: 0 16px 40px rgba(0, 0, 0, 0.85);
+  --facility-type-label: 0.72rem;
+  --facility-type-title: clamp(2rem, 3.2vw, 3rem);
+  --facility-type-tab-icon: 0.9rem;
+  --facility-type-tab-title: 0.82rem;
+  --facility-type-tab-count: 0.72rem;
+  --facility-type-list-title: 1.05rem;
+  --facility-type-list-summary: 0.8rem;
+  --facility-type-list-meta: 0.76rem;
+  --facility-type-status: 0.68rem;
+  --facility-type-detail-title: clamp(1.65rem, 2.6vw, 2.3rem);
+  --facility-type-detail-subtitle: 0.85rem;
+  --facility-type-detail-body: 0.9rem;
+  --facility-type-detail-effect: 0.88rem;
+  --facility-type-detail-meta: 0.82rem;
+  --facility-type-requirement-title: 0.85rem;
+  --facility-type-requirement-body: 0.8rem;
+  --facility-type-feedback-label: 0.76rem;
+  --facility-type-feedback-body: 0.88rem;
+  --facility-type-button: 0.92rem;
+  --facility-type-log: 0.78rem;
 
   /* Precise JRPG column setup */
   --catalog-col: clamp(460px, 28vw, 540px);
@@ -33,10 +53,12 @@
   --npc-col: minmax(300px, 1fr);
   --footer-npc-reserve: 0px;
   --footer-action-col: clamp(260px, 20vw, 320px);
-  --shop-bg-size: 90% auto;
+  --shop-bg-size: cover;
   --shop-bg-x: 225%;
   --shop-bg-y: 50%;
   --facility-background-image: url('./bg-npc.jpg');
+  --facility-background-size: var(--shop-bg-size);
+  --facility-background-position: var(--shop-bg-x) var(--shop-bg-y);
 }
 
 * {
@@ -60,8 +82,8 @@ body {
     linear-gradient(225deg, rgba(30, 64, 175, 0.05), transparent 45%),
     #0c0d10;
   background-image: var(--facility-background-image);
-  background-size: var(--shop-bg-size);
-  background-position: var(--shop-bg-x) var(--shop-bg-y);
+  background-size: var(--facility-background-size, var(--shop-bg-size));
+  background-position: var(--facility-background-position, var(--shop-bg-x) var(--shop-bg-y));
   background-attachment: fixed;
   background-repeat: no-repeat;
   color: var(--paper-body);
@@ -155,7 +177,7 @@ button {
 .panel-label {
   margin: 0 0 8px;
   color: var(--paper);
-  font-size: 0.72rem;
+  font-size: var(--facility-type-label);
   font-weight: 700;
   letter-spacing: 0.15em;
   text-transform: uppercase;
@@ -179,7 +201,7 @@ strong {
 
 h1 {
   margin: 0;
-  font-size: clamp(2rem, 3.2vw, 3rem);
+  font-size: var(--facility-type-title);
   line-height: 1.1;
   letter-spacing: 0.08em;
   color: var(--paper);
@@ -301,19 +323,19 @@ select:focus-visible {
 }
 
 .category-tab-icon {
-  font-size: 0.9rem;
+  font-size: var(--facility-type-tab-icon);
   opacity: 0.85;
 }
 
 .category-tab strong {
-  font-size: 0.82rem;
+  font-size: var(--facility-type-tab-title);
   font-weight: 700;
   font-family: 'Noto Serif TC', serif;
 }
 
 .category-tab-count {
   color: var(--paper-muted);
-  font-size: 0.72rem;
+  font-size: var(--facility-type-tab-count);
   opacity: 0.8;
 }
 
@@ -383,7 +405,7 @@ select:focus-visible {
 .item-title {
   color: var(--paper-body);
   font-weight: 700;
-  font-size: 1.05rem;
+  font-size: var(--facility-type-list-title);
   line-height: 1.2;
   font-family: 'Noto Serif TC', serif;
 }
@@ -394,13 +416,13 @@ select:focus-visible {
 
 .item-summary {
   color: var(--paper-muted);
-  font-size: 0.8rem;
+  font-size: var(--facility-type-list-summary);
   line-height: 1.4;
 }
 
 .item-meta {
   color: var(--paper-muted);
-  font-size: 0.76rem;
+  font-size: var(--facility-type-list-meta);
   opacity: 0.8;
 }
 
@@ -410,7 +432,7 @@ select:focus-visible {
   border: 1px solid rgba(194, 166, 115, 0.25);
   border-radius: 2px;
   padding: 3px 8px;
-  font-size: 0.68rem;
+  font-size: var(--facility-type-status);
   font-weight: 700;
   letter-spacing: 0.05em;
   text-transform: uppercase;
@@ -475,7 +497,7 @@ select:focus-visible {
 
 .item-detail h2 {
   margin: 0;
-  font-size: clamp(1.65rem, 2.6vw, 2.3rem);
+  font-size: var(--facility-type-detail-title);
   line-height: 1.1;
   font-family: 'Noto Serif TC', serif;
   font-weight: 700;
@@ -487,7 +509,7 @@ select:focus-visible {
   margin: 0;
   color: var(--paper-muted);
   font-weight: 700;
-  font-size: 0.85rem;
+  font-size: var(--facility-type-detail-subtitle);
   letter-spacing: 0.02em;
   padding-bottom: 8px;
   border-bottom: 1px double var(--line);
@@ -496,7 +518,7 @@ select:focus-visible {
 .detail-description {
   margin: 0;
   color: var(--paper-body);
-  font-size: 0.9rem;
+  font-size: var(--facility-type-detail-body);
   line-height: 1.6;
 }
 
@@ -506,14 +528,14 @@ select:focus-visible {
   border-radius: 2px;
   padding: 10px 14px;
   background: rgba(194, 166, 115, 0.04);
-  font-size: 0.88rem;
+  font-size: var(--facility-type-detail-effect);
   color: var(--paper-body);
 }
 
 .detail-context {
   margin: 0;
   color: var(--paper-muted);
-  font-size: 0.82rem;
+  font-size: var(--facility-type-detail-meta);
   font-style: italic;
   line-height: 1.5;
 }
@@ -524,7 +546,7 @@ select:focus-visible {
   padding-left: 10px;
   color: var(--danger);
   font-weight: 700;
-  font-size: 0.85rem;
+  font-size: var(--facility-type-detail-subtitle);
   font-family: 'Noto Serif TC', serif;
 }
 
@@ -588,7 +610,7 @@ select:focus-visible {
 .npc-portrait {
   width: 100%;
   height: 100%;
-  min-height: 520px;
+  min-height: 280px;
   align-self: stretch;
   border: none;
   border-radius: 4px;
@@ -654,7 +676,7 @@ select:focus-visible {
 .requirement-status {
   border: 1px solid var(--line);
   border-radius: 2px;
-  font-size: 0.72rem;
+  font-size: var(--facility-type-label);
   font-weight: 700;
   font-family: 'Noto Serif TC', serif;
 }
@@ -676,12 +698,12 @@ select:focus-visible {
 .requirement-copy strong {
   color: var(--paper-body);
   font-family: 'Noto Serif TC', serif;
-  font-size: 0.85rem;
+  font-size: var(--facility-type-requirement-title);
 }
 
 .requirement-copy span {
   color: var(--paper-muted);
-  font-size: 0.8rem;
+  font-size: var(--facility-type-requirement-body);
   line-height: 1.35;
 }
 
@@ -724,7 +746,7 @@ select:focus-visible {
 
 .feedback-bar .panel-label {
   color: var(--paper);
-  font-size: 0.76rem;
+  font-size: var(--facility-type-feedback-label);
   margin-bottom: 6px;
   font-family: 'Noto Serif TC', serif;
   letter-spacing: 0.08em;
@@ -741,7 +763,7 @@ select:focus-visible {
 .feedback-bar p:last-child {
   margin: 0;
   color: var(--paper-body);
-  font-size: 0.88rem;
+  font-size: var(--facility-type-feedback-body);
   line-height: 1.5;
   font-family: 'Noto Serif TC', serif;
   white-space: normal;
@@ -759,7 +781,7 @@ select:focus-visible {
   text-align: center;
   font-weight: 700;
   font-family: 'Noto Serif TC', serif;
-  font-size: 0.92rem;
+  font-size: var(--facility-type-button);
   letter-spacing: 0.05em;
   border-radius: 4px;
 }
@@ -842,7 +864,7 @@ select:focus-visible {
   overflow: auto;
   color: var(--paper-muted);
   font-family: "Cascadia Mono", Consolas, monospace;
-  font-size: 0.78rem;
+  font-size: var(--facility-type-log);
 }
 
 .item-list,
