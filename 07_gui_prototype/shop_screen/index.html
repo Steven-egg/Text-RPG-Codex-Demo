@@ -13,7 +13,6 @@
     <div class="shop-shell" data-load-state="loading">
       <header class="shop-header">
         <div class="title-copy">
-          <p class="screen-label">設施畫面</p>
           <h1 id="screen-title">Loading</h1>
           <p id="screen-subtitle" class="subtitle"></p>
         </div>
@@ -62,12 +61,24 @@
       </aside>
 
       <footer class="shop-footer">
-        <button id="back-action" class="secondary-action" type="button">返回城鎮</button>
-        <section class="feedback-bar" aria-live="polite">
-          <p class="panel-label" id="feedback-speaker">提示</p>
-          <p id="feedback-message"></p>
+        <div class="footer-left-action">
+          <button id="back-action" class="secondary-action" type="button">
+            <svg class="btn-icon-svg" viewBox="0 0 24 24"><path d="M2 22h20v-2h-2v-4h-2v4h-4v-6h-4v6H6v-4H4v4H2v2zm3-8h2v-2H5v2zm12 0h2v-2h-2v2zM11 4.5l-5 5V12h10V9.5l-5-5z" fill="currentColor"/></svg>
+            <span class="btn-text">返回城鎮</span>
+          </button>
+        </div>
+        <section class="dialogue-box">
+          <div class="speaker-name" id="feedback-speaker">提示</div>
+          <div class="dialogue-content-area">
+            <p id="feedback-message" class="speech-bubble"></p>
+          </div>
         </section>
-        <button id="primary-action" class="primary-action" type="button"></button>
+        <div class="footer-right-action">
+          <button id="primary-action" class="primary-action" type="button">
+            <svg class="btn-icon-svg" viewBox="0 0 24 24"><path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z" fill="currentColor"/></svg>
+            <span class="btn-text">購買項目</span>
+          </button>
+        </div>
       </footer>
 
       <details class="action-log-panel">

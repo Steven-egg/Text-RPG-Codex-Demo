@@ -155,10 +155,59 @@ async function handleBackToTown() {
   }
 }
 
+function cleanTitle(title) {
+  if (!title) return "";
+  let cleaned = title;
+  const replacements = [
+    [" / CLI 任務骨架", ""],
+    [" / 委託板 (Live)", ""],
+    [" (Relic Altar)", ""],
+    [" (Temple & Church)", ""],
+    [" (Ember Inn)", ""],
+    [" (Live)", ""],
+    [" (Shop)", ""],
+    [" (Guild)", ""],
+    [" (Magic Shop)", ""],
+    [" (Synthesis)", ""],
+    [" (Inn)", ""],
+    [" (Storage)", ""],
+    [" (Temple)", ""],
+    [" (Workshop)", ""],
+    [" (Relic Preview)", ""]
+  ];
+  for (const [target, replacement] of replacements) {
+    cleaned = cleaned.replace(target, replacement);
+  }
+  return cleaned.trim();
+}
+
+function getElementIcon(elementId) {
+  switch (elementId) {
+    case "fire":
+      return `<svg class="element-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M13.2 2.2c.5 3-1.5 4.5-3 6.2-1.5 1.7-2.7 3.3-2.7 5.8A4.6 4.6 0 0 0 12.1 19c2.7 0 4.9-2.1 4.9-4.9 0-2.6-1.5-5.1-3.8-7.2.2 2-1 3.1-2 4.1.3-3.4 2.8-5 2-8.8Z"/></svg>`;
+    case "ice":
+      return `<svg class="element-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 3v18M4.2 7.5l15.6 9M4.2 16.5l15.6-9M12 3l-2 2M12 3l2 2M12 21l-2-2M12 21l2-2"/></svg>`;
+    case "water":
+      return `<svg class="element-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.7 6.3 8.4a8 8 0 1 0 11.4 0L12 2.7Zm0 15.8a4.5 4.5 0 0 1-4.5-4.5c0-1.5.8-2.8 1.7-4l1.1-1.3c-.3 2.9 1.5 5.7 4.4 6.3-.5 2-1.4 3.5-2.7 3.5Z"/></svg>`;
+    case "wind":
+      return `<svg class="element-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 8h10a2.5 2.5 0 1 0-2.5-2.5M3 12h15a2 2 0 1 1-2 2M5 16h8"/></svg>`;
+    case "earth":
+      return `<svg class="element-icon" viewBox="0 0 24 24" fill="currentColor" fill-rule="evenodd"><path d="M12 3 2.5 20h19L12 3Zm0 6 4.2 7.5H7.8L12 9Z"/></svg>`;
+    case "thunder":
+      return `<svg class="element-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M13.5 2 5 13h6l-1 9 9-13h-6l.5-7Z"/></svg>`;
+    case "light":
+      return `<svg class="element-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M5 12H2M22 12h-3M4.9 4.9 7 7M17 17l2.1 2.1M19.1 4.9 17 7M7 17l-2.1 2.1"/></svg>`;
+    case "dark":
+      return `<svg class="element-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12.3 2A10 10 0 0 0 2 12.3a1 1 0 0 0 1.2 1.2A8 8 0 1 1 13.5 3.3a1 1 0 0 0-1.2-1.3Z"/></svg>`;
+    default:
+      return `<svg class="element-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="8"/></svg>`;
+  }
+}
+
 function render() {
   const { model } = state;
   applyFacilityBackground({ model, shell: shellEl, backgrounds: relicBackgroundByRegion });
-  titleEl.textContent = model.title ?? "";
+  titleEl.textContent = cleanTitle(model.title);
   subtitleEl.textContent = model.subtitle ?? "";
   
   renderResources(model.resource_strip ?? []);
@@ -194,7 +243,14 @@ function renderSlots(slots) {
 
       const label = document.createElement("span");
       label.className = "slot-label";
-      label.textContent = slot.label ?? "";
+      const cleanLabel = (slot.label ?? "")
+        .replace(/[\uE000-\uF8FF]/g, "")
+        .replace(/[\p{Extended_Pictographic}\p{Emoji_Presentation}\p{Symbol}]/gu, "")
+        .trim();
+      label.innerHTML = `
+        ${getElementIcon(slot.element_id)}
+        <span class="label-text">${cleanLabel}</span>
+      `;
 
       const meta = document.createElement("span");
       meta.className = "slot-meta";

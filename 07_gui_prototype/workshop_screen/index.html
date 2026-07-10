@@ -107,17 +107,22 @@
 
     <!-- 底部動作控制與 NPC 提示列 -->
     <footer class="action-footer">
-      <div class="footer-left">
+      <div class="footer-left-action">
         <button class="action-btn back-btn" id="back-to-town">
-          <span class="btn-icon">↩</span> 返回城鎮
+          <svg class="btn-icon-svg" viewBox="0 0 24 24"><path d="M2 22h20v-2h-2v-4h-2v4h-4v-6h-4v6H6v-4H4v4H2v2zm3-8h2v-2H5v2zm12 0h2v-2h-2v2zM11 4.5l-5 5V12h10V9.5l-5-5z" fill="currentColor"/></svg>
+          <span class="btn-text">返回城鎮</span>
         </button>
       </div>
-      <div class="footer-center panel-border">
-        <p class="feedback-msg" id="feedback-bar">工坊設備已就緒，請選擇項目。</p>
-      </div>
-      <div class="footer-right">
+      <section class="dialogue-box">
+        <div class="speaker-name" id="feedback-speaker">葛雷</div>
+        <div class="dialogue-content-area">
+          <p class="speech-bubble" id="feedback-bar">工坊設備已就緒，請選擇項目。</p>
+        </div>
+      </section>
+      <div class="footer-right-action">
         <button class="action-btn primary-btn" id="primary-action" disabled>
-          選擇項目
+          <svg class="btn-icon-svg" viewBox="0 0 24 24"><path d="M22.7 19l-9.1-9.1c.9-2.3.4-5-1.5-6.9-2-2-5-2.4-7.4-1.3L9 6 6 9 1.6 4.3C.5 6.7.9 9.8 2.9 11.8c1.9 1.9 4.6 2.4 6.9 1.5l9.1 9.1c.4.4 1 .4 1.4 0l2.3-2.3c.5-.4.5-1.1.1-1.1z" fill="currentColor"/></svg>
+          <span class="btn-text">選擇項目</span>
         </button>
       </div>
     </footer>

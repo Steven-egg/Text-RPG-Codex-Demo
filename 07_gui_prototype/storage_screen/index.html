@@ -13,7 +13,6 @@
     <div class="storage-shell" data-load-state="loading">
       <header class="storage-header">
         <div class="title-copy">
-          <p class="screen-label">設施畫面</p>
           <h1 id="screen-title">Loading</h1>
           <p id="screen-subtitle" class="subtitle"></p>
         </div>
@@ -118,14 +117,25 @@
         </section>
       </main>
 
-      <!-- Bottom Bar -->
       <footer class="storage-footer">
-        <button id="back-action" class="secondary-action" type="button">返回城鎮</button>
-        <section class="feedback-bar" aria-live="polite">
-          <p class="panel-label" id="feedback-speaker">系統提示</p>
-          <p id="feedback-message">選擇左側背包物品 (存入) 或右側倉庫物品 (取出) 來進行轉移整理。</p>
+        <div class="footer-left-action">
+          <button id="back-action" class="secondary-action" type="button">
+            <svg class="btn-icon-svg" viewBox="0 0 24 24"><path d="M2 22h20v-2h-2v-4h-2v4h-4v-6h-4v6H6v-4H4v4H2v2zm3-8h2v-2H5v2zm12 0h2v-2h-2v2zM11 4.5l-5 5V12h10V9.5l-5-5z" fill="currentColor"/></svg>
+            <span class="btn-text">返回城鎮</span>
+          </button>
+        </div>
+        <section class="dialogue-box">
+          <div class="speaker-name" id="feedback-speaker">系統提示</div>
+          <div class="dialogue-content-area">
+            <p id="feedback-message" class="speech-bubble">選擇左側背包物品 (存入) 或右側倉庫物品 (取出) 來進行轉移整理。</p>
+          </div>
         </section>
-        <button id="primary-action" class="primary-action" type="button">解鎖倉庫</button>
+        <div class="footer-right-action">
+          <button id="primary-action" class="primary-action" type="button">
+            <svg class="btn-icon-svg" viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm-5 12H9v-2h6v2zm5-5H4V8h16v3z" fill="currentColor"/></svg>
+            <span class="btn-text">解鎖倉庫</span>
+          </button>
+        </div>
       </footer>
 
       <!-- Collapsible UIAction Log Panel (Compact details footer) -->

@@ -161,10 +161,36 @@ async function loadStaticFallback(path) {
   }
 }
 
+function cleanTitle(title) {
+  if (!title) return "";
+  let cleaned = title;
+  const replacements = [
+    [" / CLI 任務骨架", ""],
+    [" / 委託板 (Live)", ""],
+    [" (Relic Altar)", ""],
+    [" (Temple & Church)", ""],
+    [" (Ember Inn)", ""],
+    [" (Live)", ""],
+    [" (Shop)", ""],
+    [" (Guild)", ""],
+    [" (Magic Shop)", ""],
+    [" (Synthesis)", ""],
+    [" (Inn)", ""],
+    [" (Storage)", ""],
+    [" (Temple)", ""],
+    [" (Workshop)", ""],
+    [" (Relic Preview)", ""]
+  ];
+  for (const [target, replacement] of replacements) {
+    cleaned = cleaned.replace(target, replacement);
+  }
+  return cleaned.trim();
+}
+
 function render() {
   const { model } = state;
   applyFacilityBackground({ model, shell: shellEl, backgrounds: synthesisBackgroundByRegion });
-  titleEl.textContent = model.title ?? "";
+  titleEl.textContent = cleanTitle(model.title);
   subtitleEl.textContent = model.subtitle ?? "";
   npcNameEl.textContent = model.npc?.name ?? "";
   npcRoleEl.textContent = model.npc?.role ?? "";
@@ -376,7 +402,11 @@ function renderPrimaryAction(action) {
     disabled_reason: "沒有可執行的合成操作",
     payload: {},
   };
-  primaryActionEl.textContent = normalized.label ?? normalized.action_id ?? "合成";
+  const label = normalized.label ?? normalized.action_id ?? "合成";
+  primaryActionEl.innerHTML = `
+    <svg class="btn-icon-svg" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-4 6h-2v2h2v2h-2v2h-2v-2H9v-2h2V9H9V7h2V5h2v2h2v2z" fill="currentColor"/></svg>
+    <span class="btn-text">${label}</span>
+  `;
   primaryActionEl.dataset.actionId = normalized.action_id ?? "craft_recipe";
   primaryActionEl.dataset.payload = JSON.stringify(normalized.payload ?? {});
   primaryActionEl.dataset.disabledReason = normalized.disabled_reason ?? "";
@@ -386,7 +416,11 @@ function renderPrimaryAction(action) {
 
 function renderFeedback(message) {
   const feedback = typeof message === "string" ? { text: message } : message;
-  feedbackMessageEl.textContent = feedback?.speaker ? `${feedback.speaker}：${feedback.text}` : (feedback?.text ?? "");
+  const feedbackSpeakerEl = document.querySelector("#feedback-speaker");
+  if (feedbackSpeakerEl) {
+    feedbackSpeakerEl.textContent = feedback?.speaker ?? (state.model?.npc?.name ?? "米菈");
+  }
+  feedbackMessageEl.textContent = feedback?.text ?? "";
 }
 
 function renderActionLog() {

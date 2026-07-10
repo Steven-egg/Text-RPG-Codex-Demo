@@ -111,10 +111,36 @@ async function loadFixture(path) {
   }
 }
 
+function cleanTitle(title) {
+  if (!title) return "";
+  let cleaned = title;
+  const replacements = [
+    [" / CLI 任務骨架", ""],
+    [" / 委託板 (Live)", ""],
+    [" (Relic Altar)", ""],
+    [" (Temple & Church)", ""],
+    [" (Ember Inn)", ""],
+    [" (Live)", ""],
+    [" (Shop)", ""],
+    [" (Guild)", ""],
+    [" (Magic Shop)", ""],
+    [" (Synthesis)", ""],
+    [" (Inn)", ""],
+    [" (Storage)", ""],
+    [" (Temple)", ""],
+    [" (Workshop)", ""],
+    [" (Relic Preview)", ""]
+  ];
+  for (const [target, replacement] of replacements) {
+    cleaned = cleaned.replace(target, replacement);
+  }
+  return cleaned.trim();
+}
+
 function render() {
   const { model } = state;
   applyFacilityBackground({ model, shell: shellEl, backgrounds: shopBackgroundByRegion });
-  titleEl.textContent = model.title ?? "";
+  titleEl.textContent = cleanTitle(model.title);
   subtitleEl.textContent = model.subtitle ?? "";
   npcNameEl.textContent = model.npc?.name ?? "";
   npcRoleEl.textContent = model.npc?.role ?? "";
@@ -311,7 +337,6 @@ function renderRequirements(rows) {
     }),
   );
 }
-
 function renderPrimaryAction(action) {
   const normalized = action ?? {
     action_id: "buy_item",
@@ -320,7 +345,11 @@ function renderPrimaryAction(action) {
     disabled_reason: "沒有可執行的操作",
     payload: {},
   };
-  primaryActionEl.textContent = normalized.label ?? "購買商品";
+  const label = normalized.label ?? "購買商品";
+  primaryActionEl.innerHTML = `
+    <svg class="btn-icon-svg" viewBox="0 0 24 24"><path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z" fill="currentColor"/></svg>
+    <span class="btn-text">${label}</span>
+  `;
   primaryActionEl.dataset.actionId = normalized.action_id ?? "buy_item";
   primaryActionEl.dataset.payload = JSON.stringify(normalized.payload ?? {});
   primaryActionEl.dataset.disabledReason = normalized.disabled_reason ?? "";
@@ -329,7 +358,7 @@ function renderPrimaryAction(action) {
 }
 
 function renderFeedback(speaker, message) {
-  feedbackSpeakerEl.textContent = `${speaker} 提示`;
+  feedbackSpeakerEl.textContent = speaker;
   feedbackMessageEl.textContent = message;
 }
 

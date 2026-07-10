@@ -13,7 +13,6 @@
     <div class="synthesis-shell" data-load-state="loading">
       <header class="synthesis-header">
         <div class="title-copy">
-          <p class="screen-label">設施畫面</p>
           <h1 id="screen-title">Loading</h1>
           <p id="screen-subtitle" class="subtitle"></p>
         </div>
@@ -63,12 +62,24 @@
       </main>
 
       <footer class="synthesis-footer">
-        <button id="back-action" class="secondary-action" type="button">返回城鎮</button>
-        <section class="feedback-bar" aria-live="polite">
-          <p class="panel-label">米菈提示</p>
-          <p id="feedback-message"></p>
+        <div class="footer-left-action">
+          <button id="back-action" class="secondary-action" type="button">
+            <svg class="btn-icon-svg" viewBox="0 0 24 24"><path d="M2 22h20v-2h-2v-4h-2v4h-4v-6h-4v6H6v-4H4v4H2v2zm3-8h2v-2H5v2zm12 0h2v-2h-2v2zM11 4.5l-5 5V12h10V9.5l-5-5z" fill="currentColor"/></svg>
+            <span class="btn-text">返回城鎮</span>
+          </button>
+        </div>
+        <section class="dialogue-box">
+          <div class="speaker-name" id="feedback-speaker">米菈</div>
+          <div class="dialogue-content-area">
+            <p id="feedback-message" class="speech-bubble"></p>
+          </div>
         </section>
-        <button id="primary-action" class="primary-action" type="button"></button>
+        <div class="footer-right-action">
+          <button id="primary-action" class="primary-action" type="button">
+            <svg class="btn-icon-svg" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-4 6h-2v2h2v2h-2v2h-2v-2H9v-2h2V9H9V7h2V5h2v2h2v2z" fill="currentColor"/></svg>
+            <span class="btn-text">開始合成</span>
+          </button>
+        </div>
       </footer>
 
       <details class="action-log-panel">

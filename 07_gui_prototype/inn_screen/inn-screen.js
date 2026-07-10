@@ -66,20 +66,7 @@ choiceNoEl.addEventListener("click", () => {
   cancelRest();
 });
 
-// Keyboard listener for JRPG-CLI alignment (Y/N/Enter)
-document.addEventListener("keydown", (e) => {
-  if (state.uiState === "confirm") {
-    if (e.key === "y" || e.key === "Y") {
-      triggerRest();
-    } else if (e.key === "n" || e.key === "N") {
-      cancelRest();
-    }
-  } else if (state.uiState === "rested") {
-    if (e.key === "Enter" || e.key === " ") {
-      resetToWelcome();
-    }
-  }
-});
+
 
 backToTownBtnEl.addEventListener("click", () => {
   if (runtimeClient.isLiveMode()) {
@@ -160,10 +147,36 @@ async function loadStaticFallback(path, liveError) {
   }
 }
 
+function cleanTitle(title) {
+  if (!title) return "";
+  let cleaned = title;
+  const replacements = [
+    [" / CLI 任務骨架", ""],
+    [" / 委託板 (Live)", ""],
+    [" (Relic Altar)", ""],
+    [" (Temple & Church)", ""],
+    [" (Ember Inn)", ""],
+    [" (Live)", ""],
+    [" (Shop)", ""],
+    [" (Guild)", ""],
+    [" (Magic Shop)", ""],
+    [" (Synthesis)", ""],
+    [" (Inn)", ""],
+    [" (Storage)", ""],
+    [" (Temple)", ""],
+    [" (Workshop)", ""],
+    [" (Relic Preview)", ""]
+  ];
+  for (const [target, replacement] of replacements) {
+    cleaned = cleaned.replace(target, replacement);
+  }
+  return cleaned.trim();
+}
+
 function render() {
   const { model } = state;
   applyFacilityBackground({ model, shell: shellEl, backgrounds: innBackgroundByRegion });
-  titleEl.textContent = model.title ?? "";
+  titleEl.textContent = cleanTitle(model.title);
   subtitleEl.textContent = model.subtitle ?? "";
   
   renderResources(model.resource_strip ?? []);
@@ -359,22 +372,9 @@ async function handleRest() {
 }
 
 function enterRestedState() {
-  state.uiState = "rested";
-  confirmRestBtnEl.disabled = true;
-  backToTownBtnEl.disabled = true;
-
-  const hint = document.createElement("div");
-  hint.className = "continue-hint";
-  hint.style.fontSize = "11px";
-  hint.style.color = "var(--gold-color)";
-  hint.style.marginTop = "8px";
-  hint.style.cursor = "pointer";
-  hint.textContent = "按 Enter 鍵或點選此處繼續...";
-  feedbackMessageEl.appendChild(hint);
-
-  hint.addEventListener("click", () => {
-    resetToWelcome();
-  });
+  state.uiState = "welcome";
+  confirmRestBtnEl.disabled = false;
+  backToTownBtnEl.disabled = false;
 }
 
 function resetToWelcome() {

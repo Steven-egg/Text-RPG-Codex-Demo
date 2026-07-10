@@ -245,10 +245,44 @@ async function loadStaticFallback(path, liveError) {
   }
 }
 
+function cleanTitle(title) {
+  if (!title) return "";
+  let cleaned = title;
+  const replacements = [
+    [" / CLI 任務骨架", ""],
+    [" / 委託板 (Live)", ""],
+    [" (Relic Altar)", ""],
+    [" (Temple & Church)", ""],
+    [" (Ember Inn)", ""],
+    [" (Live)", ""],
+    [" (Shop)", ""],
+    [" (Guild)", ""],
+    [" (Magic Shop)", ""],
+    [" (Synthesis)", ""],
+    [" (Inn)", ""],
+    [" (Storage)", ""],
+    [" (Temple)", ""],
+    [" (Workshop)", ""],
+    [" (Relic Preview)", ""]
+  ];
+  for (const [target, replacement] of replacements) {
+    cleaned = cleaned.replace(target, replacement);
+  }
+  return cleaned.trim();
+}
+
+function setPrimaryAction(label, enabled) {
+  primaryActionEl.innerHTML = `
+    <svg class="btn-icon-svg" viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm-5 12H9v-2h6v2zm5-5H4V8h16v3z" fill="currentColor"/></svg>
+    <span class="btn-text">${label}</span>
+  `;
+  primaryActionEl.setAttribute("aria-disabled", String(!enabled));
+}
+
 function render() {
   const { model } = state;
   applyFacilityBackground({ model, shell: shellEl, backgrounds: storageBackgroundByRegion });
-  titleEl.textContent = model.title ?? "";
+  titleEl.textContent = cleanTitle(model.title);
   subtitleEl.textContent = model.subtitle ?? "";
 
   renderResources(model.resource_strip ?? []);
@@ -591,17 +625,15 @@ function renderFooterActions() {
 
   if (locked) {
     const action = model.primary_actions?.["unlock_storage"] ?? {};
-    primaryActionEl.textContent = action.label ?? "解鎖倉庫 (500G)";
+    setPrimaryAction(action.label ?? "解鎖倉庫 (500G)", action.enabled);
     primaryActionEl.dataset.actionId = "unlock_storage";
     primaryActionEl.dataset.disabledReason = action.disabled_reason ?? "";
-    primaryActionEl.setAttribute("aria-disabled", String(!action.enabled));
     primaryActionEl.dataset.payload = JSON.stringify(action.payload ?? {});
   } else {
     const action = model.primary_actions?.["upgrade_storage"] ?? {};
-    primaryActionEl.textContent = action.label ?? "升級倉庫容量 (未開放)";
+    setPrimaryAction(action.label ?? "升級倉庫容量 (未開放)", false);
     primaryActionEl.dataset.actionId = "upgrade_storage";
     primaryActionEl.dataset.disabledReason = action.disabled_reason ?? "預留功能未開放";
-    primaryActionEl.setAttribute("aria-disabled", "true");
     primaryActionEl.dataset.payload = "{}";
   }
 }
@@ -901,7 +933,7 @@ function logSystem(message) {
 }
 
 function renderFeedback(speaker, message) {
-  feedbackSpeakerEl.textContent = `${speaker} 提示`;
+  feedbackSpeakerEl.textContent = speaker;
   feedbackMessageEl.textContent = message;
 }
 

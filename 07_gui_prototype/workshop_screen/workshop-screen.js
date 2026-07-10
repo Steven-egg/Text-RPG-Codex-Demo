@@ -83,24 +83,19 @@ document.addEventListener('DOMContentLoaded', () => {
   // 3. 綁定返回按鈕
   backToTownBtn.addEventListener('click', () => {
     logUIAction('back_to_town_hub', {});
-    feedbackBar.textContent = '正在返回邊境城鎮艾爾姆...';
-    feedbackBar.style.color = 'var(--info-blue)';
+    renderFeedback("系統", "正在返回邊境城鎮艾爾姆...");
 
     if (runtimeClient.isLiveMode()) {
       runtimeClient.dispatchAction("workshop_screen", "back_to_town_hub", {})
         .then((result) => {
-          setTimeout(() => {
-            window.location.href = runtimeClient.nextRoute(result, '../town_hub/index.html');
-          }, 800);
+          window.location.href = runtimeClient.nextRoute(result, '../town_hub/index.html');
         })
         .catch((err) => {
           console.error(err);
           window.location.href = '../town_hub/index.html?mode=live';
         });
     } else {
-      setTimeout(() => {
-        window.location.href = '../town_hub/index.html';
-      }, 800);
+      window.location.href = '../town_hub/index.html';
     }
   });
 
@@ -151,11 +146,9 @@ async function loadLiveScreen() {
     switchTab(currentTab, true);
 
     if (model.feedback_message) {
-      feedbackBar.textContent = model.feedback_message.text;
-      feedbackBar.style.color = model.feedback_message.tone === 'success' ? 'var(--success-color)' : 'var(--gold-bright)';
+      renderFeedback(model.feedback_message.speaker ?? (model.npc?.name ?? "葛雷"), model.feedback_message.text, model.feedback_message.tone);
     } else {
-      feedbackBar.textContent = '工坊設備已就緒，請選擇項目。';
-      feedbackBar.style.color = 'var(--gold-bright)';
+      renderFeedback(model.npc?.name ?? "葛雷", "工坊設備已就緒，請選擇項目。");
     }
   } catch (error) {
     console.error(error);
@@ -167,8 +160,7 @@ async function loadLiveScreen() {
       dispatched: false,
       reason: "fallback_to_fixture"
     });
-    feedbackBar.textContent = `Live 連線失敗，載入靜態 Fixture: ${reason}`;
-    feedbackBar.style.color = 'var(--danger-color)';
+    renderFeedback("系統", `Live 連線失敗，載入靜態 Fixture: ${reason}`, 'danger');
     loadStaticFallback('workshop-default.json');
   }
 }
@@ -197,13 +189,11 @@ function loadStaticFallback(fileName) {
       // 切換並渲染當前 Tab
       switchTab(currentTab, true);
       
-      feedbackBar.textContent = '工坊設備已就緒，請選擇項目。';
-      feedbackBar.style.color = 'var(--gold-bright)';
+      renderFeedback("葛雷", "工坊設備已就緒，請選擇項目。");
     })
     .catch(err => {
       console.error(err);
-      feedbackBar.textContent = `讀取 Fixture 失敗: ${err.message}`;
-      feedbackBar.style.color = 'var(--danger-color)';
+      renderFeedback("系統", `讀取 Fixture 失敗: ${err.message}`, 'danger');
     });
 }
 
@@ -605,8 +595,7 @@ function updateDetailView(item) {
   if (!item) {
     itemDetailView.innerHTML = '<p class="placeholder-text">請選擇左側的品項查看詳情</p>';
     itemRequirementView.innerHTML = '<p class="placeholder-text">請選擇左側品項以確認交易需求</p>';
-    primaryActionBtn.textContent = '選擇項目';
-    primaryActionBtn.disabled = true;
+    setPrimaryActionText('選擇項目', true);
     return;
   }
 
@@ -698,8 +687,7 @@ function renderRequirementsView(item) {
           <p style="font-size: 11px; color: var(--text-muted);">正在裝備欄位 [${item.equippedSlot.toUpperCase()}] 中發揮效果。</p>
         </div>
       `;
-      primaryActionBtn.textContent = '裝備中';
-      primaryActionBtn.disabled = true;
+      setPrimaryActionText('裝備中', true);
       primaryActionBtn.removeAttribute('data-disabled-reason');
     } else if (!jobCompatible) {
       itemRequirementView.innerHTML = `
@@ -708,8 +696,7 @@ function renderRequirementsView(item) {
           <p style="font-size: 11px; color: var(--text-muted);">目前職業 [${currentJob}] 無法裝備此裝備。</p>
         </div>
       `;
-      primaryActionBtn.textContent = '裝備此裝備';
-      primaryActionBtn.disabled = true;
+      setPrimaryActionText('裝備此裝備', true);
       primaryActionBtn.setAttribute('data-disabled-reason', 'job_incompatible');
     } else {
       itemRequirementView.innerHTML = `
@@ -718,8 +705,7 @@ function renderRequirementsView(item) {
           <p style="font-size: 11px; color: var(--text-muted);">點擊按鈕將其裝備至冒險者的對應插槽。</p>
         </div>
       `;
-      primaryActionBtn.textContent = '裝備此裝備';
-      primaryActionBtn.disabled = false;
+      setPrimaryActionText('裝備此裝備', false);
       primaryActionBtn.removeAttribute('data-disabled-reason');
     }
     return;
@@ -814,12 +800,11 @@ function renderRequirementsView(item) {
     
     warningHtml = `<div class="req-warning-box">${friendlyReason}</div>`;
     
-    feedbackBar.textContent = friendlyReason;
-    feedbackBar.style.color = 'var(--danger-color)';
+    const npcName = (currentTab === 'weapon' || currentTab === 'upgrade') ? '葛雷' : '布琳';
+    renderFeedback(npcName, friendlyReason, 'danger');
   } else {
     const npcName = (currentTab === 'weapon' || currentTab === 'upgrade') ? '葛雷' : '布琳';
-    feedbackBar.textContent = `[${npcName}] 鍛造設備已就緒，隨時可以進行交易或強化！`;
-    feedbackBar.style.color = 'var(--success-color)';
+    renderFeedback(npcName, "鍛造設備已就緒，隨時可以進行交易或強化！", 'success');
   }
 
   itemRequirementView.innerHTML = `
@@ -830,21 +815,14 @@ function renderRequirementsView(item) {
   `;
 
   // 3. 設定右下按鈕文字與狀態
-  if (currentTab === 'upgrade') {
-    primaryActionBtn.textContent = '⚒ 進行裝備強化';
-  } else {
-    primaryActionBtn.textContent = '💰 購買並放入背包';
-  }
+  const btnText = (currentTab === 'upgrade') ? '⚒ 進行裝備強化' : '💰 購買並放入背包';
+  setPrimaryActionText(btnText, !checkRes.satisfied);
 
-  // 啟用或置灰
   if (checkRes.satisfied) {
-    primaryActionBtn.removeAttribute('disabled');
     primaryActionBtn.style.cursor = 'pointer';
+    primaryActionBtn.removeAttribute('data-disabled-reason');
   } else {
-    primaryActionBtn.setAttribute('disabled', 'true');
     primaryActionBtn.style.cursor = 'not-allowed';
-    
-    // 將 blocked_reason 屬性存入按鈕 datasets 中，供按鈕 hover 或 forced click 使用
     primaryActionBtn.setAttribute('data-disabled-reason', checkRes.disabledReason);
   }
 }
@@ -889,18 +867,18 @@ function handlePrimaryAction() {
             switchTab(currentTab, true);
           }
 
+          const npcName = (currentTab === 'weapon' || currentTab === 'upgrade') ? '葛雷' : '布琳';
           if (result.screen_model && result.screen_model.feedback_message) {
-            feedbackBar.textContent = `[換裝成功] ` + result.screen_model.feedback_message.text;
+            renderFeedback(npcName, `[換裝成功] ` + result.screen_model.feedback_message.text, 'success');
           } else {
-            feedbackBar.textContent = `[換裝成功] 成功裝備了 ${item.name}！`;
+            renderFeedback(npcName, `[換裝成功] 成功裝備了 ${item.name}！`, 'success');
           }
-          feedbackBar.style.color = 'var(--success-color)';
         })
         .catch((err) => {
           console.error(err);
           const reason = runtimeClient.errorMessage(err);
-          feedbackBar.textContent = `換裝失敗: ${reason}`;
-          feedbackBar.style.color = 'var(--danger-color)';
+          const npcName = (currentTab === 'weapon' || currentTab === 'upgrade') ? '葛雷' : '布琳';
+          renderFeedback(npcName, `換裝失敗: ${reason}`, 'danger');
           logUIAction('blocked_action', {
             action: actionToDispatch,
             item_id: selectedItemId,
@@ -913,8 +891,8 @@ function handlePrimaryAction() {
       logUIAction(actionToDispatch, {
         item_id: selectedItemId
       });
-      feedbackBar.textContent = `[靜態反饋] 已模擬裝備 ${item.name}。`;
-      feedbackBar.style.color = 'var(--success-color)';
+      const npcName = (currentTab === 'weapon' || currentTab === 'upgrade') ? '葛雷' : '布琳';
+      renderFeedback(npcName, `[靜態反饋] 已模擬裝備 ${item.name}。`, 'success');
     }
     return;
   }
@@ -957,18 +935,18 @@ function handlePrimaryAction() {
           switchTab(currentTab, true);
         }
 
+        const npcName = (currentTab === 'weapon' || currentTab === 'upgrade') ? '葛雷' : '布琳';
         if (result.screen_model && result.screen_model.feedback_message) {
-          feedbackBar.textContent = `[交易成功] ` + result.screen_model.feedback_message.text;
+          renderFeedback(npcName, `[交易成功] ` + result.screen_model.feedback_message.text, 'success');
         } else {
-          feedbackBar.textContent = `[交易成功] 成功處理了 ${item.name}。`;
+          renderFeedback(npcName, `[交易成功] 成功處理了 ${item.name}。`, 'success');
         }
-        feedbackBar.style.color = 'var(--success-color)';
       })
       .catch((err) => {
         console.error(err);
         const reason = runtimeClient.errorMessage(err);
-        feedbackBar.textContent = `交易失敗: ${reason}`;
-        feedbackBar.style.color = 'var(--danger-color)';
+        const npcName = (currentTab === 'weapon' || currentTab === 'upgrade') ? '葛雷' : '布琳';
+        renderFeedback(npcName, `交易失敗: ${reason}`, 'danger');
         logUIAction('blocked_action', {
           action: actionToDispatch,
           ...payload,
@@ -988,8 +966,7 @@ function handlePrimaryAction() {
       output: item.output_id
     });
     
-    feedbackBar.textContent = `[強化成功] 葛雷擦亮了冷卻後的護手：「${item.name} 已完成！感受更強大的附魔屬性吧。」`;
-    feedbackBar.style.color = 'var(--success-color)';
+    renderFeedback('葛雷', `[強化成功] 葛雷擦亮了冷卻後的護手：「${item.name} 已完成！感受更強大的附魔屬性吧。」`, 'success');
     
   } else {
     logUIAction('buy_equipment', {
@@ -998,8 +975,7 @@ function handlePrimaryAction() {
     });
     
     const npcName = (currentTab === 'weapon') ? '葛雷' : '布琳';
-    feedbackBar.textContent = `[交易成功] ${npcName} 將 ${item.name} 妥善包裝好放入你的背包：「金幣收下了，祝你在焦石礦坑好運！」`;
-    feedbackBar.style.color = 'var(--success-color)';
+    renderFeedback(npcName, `[交易成功] ${npcName} 將 ${item.name} 妥善包裝好放入你的背包：「金幣收下了，祝你在焦石礦坑好運！」`, 'success');
   }
 }
 
@@ -1063,4 +1039,33 @@ function renderDebugLog() {
     
     debugLogView.appendChild(row);
   });
+}
+
+function renderFeedback(speaker, message, tone = 'gold-bright') {
+  const speakerEl = document.getElementById("feedback-speaker");
+  if (speakerEl) {
+    speakerEl.textContent = speaker;
+  }
+  // Strip any leading bracketed speaker name like [葛雷]
+  let cleanedMessage = message;
+  if (speaker && message.startsWith(`[${speaker}]`)) {
+    cleanedMessage = message.substring(speaker.length + 2).trim();
+  }
+  feedbackBar.textContent = cleanedMessage;
+  if (tone === 'success') {
+    feedbackBar.style.color = 'var(--success-color)';
+  } else if (tone === 'danger') {
+    feedbackBar.style.color = 'var(--danger-color)';
+  } else {
+    feedbackBar.style.color = 'var(--gold-bright)';
+  }
+}
+
+function setPrimaryActionText(text, disabled = false) {
+  primaryActionBtn.disabled = disabled;
+  const cleanedText = text.replace(/[⚒💰\s]/g, "").trim();
+  primaryActionBtn.innerHTML = `
+    <svg class="btn-icon-svg" viewBox="0 0 24 24"><path d="M22.7 19l-9.1-9.1c.9-2.3.4-5-1.5-6.9-2-2-5-2.4-7.4-1.3L9 6 6 9 1.6 4.3C.5 6.7.9 9.8 2.9 11.8c1.9 1.9 4.6 2.4 6.9 1.5l9.1 9.1c.4.4 1 .4 1.4 0l2.3-2.3c.5-.4.5-1.1.1-1.1z" fill="currentColor"/></svg>
+    <span class="btn-text">${cleanedText}</span>
+  `;
 }

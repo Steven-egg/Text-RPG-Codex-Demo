@@ -14,7 +14,6 @@
       <!-- Top Header -->
       <header class="magic-shop-header">
         <div class="title-copy">
-          <p class="screen-label">設施畫面</p>
           <h1 id="screen-title">Loading</h1>
           <p id="screen-subtitle" class="subtitle"></p>
         </div>
@@ -93,12 +92,24 @@
 
       <!-- Bottom Footer Bar -->
       <footer class="magic-shop-footer">
-        <button id="back-action" class="secondary-action" type="button">返回城鎮</button>
-        <section class="feedback-bar" aria-live="polite">
-          <p class="panel-label" id="feedback-speaker">伊芙 提示</p>
-          <p id="feedback-message">「願星辰指引你的靈魂，冒險者。選中魔法書可開始研讀。」</p>
+        <div class="footer-left-action">
+          <button id="back-action" class="secondary-action" type="button">
+            <svg class="btn-icon-svg" viewBox="0 0 24 24"><path d="M2 22h20v-2h-2v-4h-2v4h-4v-6h-4v6H6v-4H4v4H2v2zm3-8h2v-2H5v2zm12 0h2v-2h-2v2zM11 4.5l-5 5V12h10V9.5l-5-5z" fill="currentColor"/></svg>
+            <span class="btn-text">返回城鎮</span>
+          </button>
+        </div>
+        <section class="dialogue-box">
+          <div class="speaker-name" id="feedback-speaker">伊芙</div>
+          <div class="dialogue-content-area">
+            <p id="feedback-message" class="speech-bubble">「願星辰指引你的靈魂，冒險者。選中魔法書可開始研讀。」</p>
+          </div>
         </section>
-        <button id="primary-action" class="primary-action" type="button">學習魔法</button>
+        <div class="footer-right-action">
+          <button id="primary-action" class="primary-action" type="button">
+            <svg class="btn-icon-svg" viewBox="0 0 24 24"><path d="M12 11.55C9.64 9.35 6.48 8 3 8v11c3.48 0 6.64 1.35 9 3.55 2.36-2.2 5.52-3.55 9-3.55V8c-3.48 0-6.64 1.35-9 3.55zM12 8c1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3 1.34 3 3 3z" fill="currentColor"/></svg>
+            <span class="btn-text">學習魔法</span>
+          </button>
+        </div>
       </footer>
 
       <!-- Collapsible UIAction Log Panel -->

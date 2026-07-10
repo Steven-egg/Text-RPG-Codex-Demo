@@ -13,7 +13,6 @@
     <div class="guild-shell" data-load-state="loading">
       <header class="guild-header">
         <div class="title-copy">
-          <p class="screen-label">設施畫面</p>
           <h1 id="screen-title">Loading</h1>
           <p id="screen-subtitle" class="subtitle"></p>
         </div>
@@ -95,12 +94,24 @@
       </main>
 
       <footer class="guild-footer">
-        <button id="back-action" class="secondary-action" type="button">返回城鎮</button>
-        <section class="feedback-bar" aria-live="polite">
-          <p class="panel-label">工會提示</p>
-          <p id="feedback-message"></p>
+        <div class="footer-left-action">
+          <button id="back-action" class="secondary-action" type="button">
+            <svg class="btn-icon-svg" viewBox="0 0 24 24"><path d="M2 22h20v-2h-2v-4h-2v4h-4v-6h-4v6H6v-4H4v4H2v2zm3-8h2v-2H5v2zm12 0h2v-2h-2v2zM11 4.5l-5 5V12h10V9.5l-5-5z" fill="currentColor"/></svg>
+            <span class="btn-text">返回城鎮</span>
+          </button>
+        </div>
+        <section class="dialogue-box">
+          <div class="speaker-name" id="feedback-speaker">諾亞</div>
+          <div class="dialogue-content-area">
+            <p id="feedback-message" class="speech-bubble"></p>
+          </div>
         </section>
-        <button id="primary-action" class="primary-action" type="button"></button>
+        <div class="footer-right-action">
+          <button id="primary-action" class="primary-action" type="button">
+            <svg class="btn-icon-svg" viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z" fill="currentColor"/></svg>
+            <span class="btn-text">進行操作</span>
+          </button>
+        </div>
       </footer>
 
       <section class="action-log-panel">

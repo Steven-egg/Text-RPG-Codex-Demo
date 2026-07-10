@@ -46,14 +46,15 @@ const magicShopBackgroundByRegion = {
   final: "./assets/final-magic-shop-with-eve-candidate-v01.png",
 };
 
-// Emoji dictionary for spellbooks
-const emojiMap = {
-  book_spark: "🔥",
-  book_ice_needle: "❄",
-  book_minor_heal: "✨",
-  book_guardian_rune: "🛡",
-  book_quickstep: "💨",
-  book_cinder_mark: "🌟",
+const defaultSpellbookIcon = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H11v16H6.5A2.5 2.5 0 0 0 4 21.5v-16ZM20 5.5A2.5 2.5 0 0 0 17.5 3H13v16h4.5a2.5 2.5 0 0 1 2.5 2.5v-16Z"/></svg>`;
+
+const spellbookIconMap = {
+  book_spark: `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M13.2 2.2c.5 3-1.5 4.5-3 6.2-1.5 1.7-2.7 3.3-2.7 5.8A4.6 4.6 0 0 0 12.1 19c2.7 0 4.9-2.1 4.9-4.9 0-2.6-1.5-5.1-3.8-7.2.2 2-1 3.1-2 4.1.3-3.4 2.8-5 2-8.8Z"/></svg>`,
+  book_ice_needle: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 3v18M4.2 7.5l15.6 9M4.2 16.5l15.6-9M12 3l-2 2M12 3l2 2M12 21l-2-2M12 21l2-2"/></svg>`,
+  book_minor_heal: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="8"/><path d="M12 8v8M8 12h8"/></svg>`,
+  book_guardian_rune: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M12 3 5 6v5c0 4.8 2.9 8.1 7 10 4.1-1.9 7-5.2 7-10V6l-7-3Z"/><path d="m9 12 2 2 4-5"/></svg>`,
+  book_quickstep: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h8M2 12h10M5 17h7M13 6l5 6-5 6"/></svg>`,
+  book_cinder_mark: `<svg viewBox="0 0 24 24" fill="currentColor"><path d="m12 2 1.8 6.2L20 10l-6.2 1.8L12 18l-1.8-6.2L4 10l6.2-1.8L12 2Zm6 14 .8 2.2L21 19l-2.2.8L18 22l-.8-2.2L15 19l2.2-.8L18 16Z"/></svg>`,
 };
 
 fixtureSelect.addEventListener("change", () => {
@@ -215,10 +216,44 @@ function ensureSelectionVisible() {
   }
 }
 
+function cleanTitle(title) {
+  if (!title) return "";
+  let cleaned = title;
+  const replacements = [
+    [" / CLI 任務骨架", ""],
+    [" / 委託板 (Live)", ""],
+    [" (Relic Altar)", ""],
+    [" (Temple & Church)", ""],
+    [" (Ember Inn)", ""],
+    [" (Live)", ""],
+    [" (Shop)", ""],
+    [" (Guild)", ""],
+    [" (Magic Shop)", ""],
+    [" (Synthesis)", ""],
+    [" (Inn)", ""],
+    [" (Storage)", ""],
+    [" (Temple)", ""],
+    [" (Workshop)", ""],
+    [" (Relic Preview)", ""]
+  ];
+  for (const [target, replacement] of replacements) {
+    cleaned = cleaned.replace(target, replacement);
+  }
+  return cleaned.trim();
+}
+
+function setPrimaryAction(label, enabled) {
+  primaryActionEl.innerHTML = `
+    <svg class="btn-icon-svg" viewBox="0 0 24 24"><path d="M12 11.55C9.64 9.35 6.48 8 3 8v11c3.48 0 6.64 1.35 9 3.55 2.36-2.2 5.52-3.55 9-3.55V8c-3.48 0-6.64 1.35-9 3.55zM12 8c1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3 1.34 3 3 3z" fill="currentColor"/></svg>
+    <span class="btn-text">${label}</span>
+  `;
+  primaryActionEl.setAttribute("aria-disabled", String(!enabled));
+}
+
 function render() {
   const { model } = state;
   applyFacilityBackground({ model, shell: shellEl, backgrounds: magicShopBackgroundByRegion });
-  titleEl.textContent = model.title ?? "";
+  titleEl.textContent = cleanTitle(model.title);
   subtitleEl.textContent = model.subtitle ?? "";
 
   renderResources();
@@ -310,7 +345,16 @@ function renderSpellbookList() {
 
     const name = document.createElement("span");
     name.className = "item-title";
-    name.textContent = `${emojiMap[row.book_id] ?? "📖"} ${row.title ?? ""}`;
+
+    const icon = document.createElement("span");
+    icon.className = "spellbook-icon";
+    icon.setAttribute("aria-hidden", "true");
+    icon.innerHTML = spellbookIconMap[row.book_id] ?? defaultSpellbookIcon;
+
+    const nameText = document.createElement("span");
+    nameText.className = "item-title-text";
+    nameText.textContent = row.title ?? "";
+    name.append(icon, nameText);
 
     const summary = document.createElement("span");
     summary.className = "item-summary";
@@ -350,16 +394,13 @@ function renderDetailsPanel() {
   const { model, selectedBookId } = state;
   itemDetailContentEl.replaceChildren();
   requirementListEl.replaceChildren();
-  
   const book = model.list_rows?.find(r => r.book_id === selectedBookId);
   const detail = model.book_details?.[selectedBookId];
 
   if (!book || !detail) {
     detailStatusBadgeEl.style.display = "none";
     detailPriceTextEl.textContent = "--";
-    primaryActionEl.setAttribute("aria-disabled", "true");
-    primaryActionEl.textContent = "解讀術式中";
-    
+    setPrimaryAction("解讀術式中", false);
     const empty = document.createElement("div");
     empty.className = "empty-state";
     empty.textContent = "選擇左側魔法書查看術式詳情";
@@ -438,13 +479,10 @@ function renderDetailsPanel() {
       requirementListEl.appendChild(el);
     });
   }
-
   // Footer learn spell button state
   const action = model.primary_actions?.[selectedBookId] ?? {};
-  primaryActionEl.textContent = action.label ?? "學習魔法";
-  
   const canLearn = action.enabled && book.enabled;
-  primaryActionEl.setAttribute("aria-disabled", String(!canLearn));
+  setPrimaryAction(action.label ?? "學習魔法", canLearn);
 }
 
 function renderNpcRegion() {
@@ -646,7 +684,7 @@ function logSystem(message) {
 }
 
 function renderFeedback(speaker, message) {
-  feedbackSpeakerEl.textContent = `${speaker} 提示`;
+  feedbackSpeakerEl.textContent = speaker;
   feedbackMessageEl.textContent = message;
 }
 
@@ -693,8 +731,7 @@ function renderLoadError(error) {
   
   detailStatusBadgeEl.style.display = "none";
   detailPriceTextEl.textContent = "--";
-  primaryActionEl.setAttribute("aria-disabled", "true");
-  primaryActionEl.textContent = "解讀術式中";
+  setPrimaryAction("解讀術式中", false);
   
   const errorEl = document.createElement("div");
   errorEl.className = "load-error";

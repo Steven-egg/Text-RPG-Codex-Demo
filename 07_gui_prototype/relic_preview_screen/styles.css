@@ -2,6 +2,10 @@
    Facility Background Interface
    ========================================== */
 :root {
+  --facility-font-title: 'Outfit', 'Noto Serif TC', serif;
+  --facility-font-ui: Inter, "Noto Sans TC", "Microsoft JhengHei", "PingFang TC", Arial, sans-serif;
+  --facility-font-mono: "Cascadia Mono", Consolas, monospace;
+
   --facility-background-image: url('./assets/relic-preview-background.jpg');
   --facility-background-position: center;
   --facility-background-size: cover;
@@ -57,7 +61,7 @@ body {
   padding: 0;
   background-color: var(--bg-color);
   color: var(--text-primary);
-  font-family: 'Outfit', 'Noto Serif TC', serif;
+  font-family: var(--facility-font-ui);
   overflow-x: hidden;
 }
 
@@ -104,7 +108,7 @@ body {
   line-height: 1.1;
   letter-spacing: 0.08em;
   color: var(--text-primary);
-  font-family: 'Noto Serif TC', serif;
+  font-family: var(--facility-font-title);
   font-weight: 900;
   text-shadow:
     0 2px 4px rgba(0, 0, 0, 0.95),
@@ -146,6 +150,7 @@ body {
 }
 
 .panel-label {
+  font-family: var(--facility-font-title);
   font-size: 16.5px;
   color: var(--text-secondary);
   text-transform: uppercase;
@@ -204,7 +209,7 @@ body {
 .focus-detail h2, .tablet-detail h3 {
   margin: 0;
   font-size: 2rem;
-  font-family: 'Noto Serif TC', serif;
+  font-family: var(--facility-font-title);
   font-weight: 700;
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
 }
@@ -264,7 +269,7 @@ body {
   border: 1px solid var(--border-color);
   padding: 11px 14px;
   font-weight: 700;
-  font-family: 'Noto Serif TC', serif;
+  font-family: var(--facility-font-ui);
   font-size: 1.38rem;
   border-radius: 4px;
   cursor: pointer;
@@ -278,7 +283,7 @@ body {
   border: 1px solid var(--border-color);
   padding: 11px 14px;
   font-weight: 700;
-  font-family: 'Noto Serif TC', serif;
+  font-family: var(--facility-font-ui);
   font-size: 0.92rem;
   border-radius: 4px;
   cursor: pointer;
@@ -361,6 +366,39 @@ body {
 .slot-label {
   font-size: 19.5px;
   font-weight: bold;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.element-icon {
+  width: 20px;
+  height: 20px;
+  flex: 0 0 20px;
+}
+
+.slot-btn[data-element-id="fire"] .element-icon {
+  color: #d98262;
+}
+
+.slot-btn[data-element-id="ice"] .element-icon {
+  color: #8fbfc9;
+}
+
+.slot-btn[data-element-id="water"] .element-icon {
+  color: #7ea8bb;
+}
+
+.slot-btn[data-element-id="earth"] .element-icon {
+  color: #9a9564;
+}
+
+.slot-btn[data-element-id="thunder"] .element-icon {
+  color: #c9b25f;
+}
+
+.slot-btn[data-element-id="wind"] .element-icon {
+  color: #91aa94;
 }
 
 .slot-meta {
@@ -379,7 +417,7 @@ body {
   border-radius: 4px;
   border: 1px solid var(--border-color);
   min-height: 120px;
-  font-family: 'Noto Serif TC', serif;
+  font-family: var(--facility-font-ui);
   letter-spacing: 0.05em;
   box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
 }
@@ -418,4 +456,164 @@ body {
 /* Action Log Panel */
 .action-log-panel {
   display: none !important;
+}
+
+/* ==========================================================================
+   JRPG Unified Footer Bar & Buttons (Convergence Baseline)
+   ========================================================================== */
+.relic-footer {
+  grid-column: 1 / 4;
+  grid-row: 3;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  height: 112px !important;
+  min-height: 112px !important;
+  max-height: 112px !important;
+  padding: 12px 16px !important;
+  display: grid !important;
+  grid-template-columns: clamp(260px, 20vw, 320px) minmax(0, 1fr) clamp(260px, 20vw, 320px) !important;
+  gap: 12px !important;
+  align-items: stretch !important;
+  overflow: visible !important;
+  margin-bottom: 4px !important;
+  box-sizing: border-box !important;
+  background: rgba(12, 14, 20, 0.9) !important;
+  border: 1px solid var(--border-color, rgba(194, 166, 115, 0.25)) !important;
+  border-radius: 4px !important;
+  backdrop-filter: blur(14px) !important;
+  -webkit-backdrop-filter: blur(14px) !important;
+}
+
+.footer-left-action,
+.footer-right-action {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  height: 100% !important;
+}
+
+.action-btn,
+.primary-action,
+.back-btn {
+  height: 100% !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  padding: 11px 14px !important;
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 10px !important;
+  font-weight: 700 !important;
+  font-family: var(--facility-font-ui) !important;
+  font-size: 0.95rem !important;
+  letter-spacing: 0.05em !important;
+  border-radius: 4px !important;
+  border: 1px solid var(--border-color, rgba(194, 166, 115, 0.25)) !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  box-sizing: border-box !important;
+}
+
+.btn-icon-svg {
+  width: 20px !important;
+  height: 20px !important;
+  fill: currentColor !important;
+  flex-shrink: 0 !important;
+}
+
+.primary-action {
+  border-color: rgba(241, 196, 15, 0.65) !important;
+  background: linear-gradient(180deg, #3a2e1c 0%, #1f160a 100%) !important;
+  color: #e2d9c5 !important;
+  text-shadow: 0 0 4px rgba(255, 215, 0, 0.6) !important;
+}
+
+.primary-action:hover:not([aria-disabled="true"]):not(:disabled) {
+  border-color: #ebd19b !important;
+  background: linear-gradient(180deg, #4d3d25 0%, #2e200e 100%) !important;
+  box-shadow: 0 0 16px rgba(255, 215, 0, 0.28) !important;
+}
+
+.back-btn {
+  border-color: var(--border-color, rgba(194, 166, 115, 0.25)) !important;
+  background: rgba(30, 34, 42, 0.6) !important;
+  color: #e2d9c5 !important;
+}
+
+.back-btn:hover:not(:disabled) {
+  border-color: rgba(241, 196, 15, 0.5) !important;
+  background: rgba(45, 50, 60, 0.8) !important;
+  color: #fff !important;
+}
+
+.action-btn:disabled,
+.primary-action:disabled,
+.back-btn:disabled,
+.primary-action[aria-disabled="true"] {
+  border-color: rgba(163, 151, 130, 0.18) !important;
+  background: rgba(20, 20, 20, 0.6) !important;
+  color: rgba(163, 151, 130, 0.4) !important;
+  opacity: 0.55 !important;
+  cursor: not-allowed !important;
+  box-shadow: none !important;
+  text-shadow: none !important;
+}
+
+/* JRPG Dialogue Box styling */
+.dialogue-box {
+  background: linear-gradient(180deg, rgba(15, 17, 21, 0.95) 0%, rgba(8, 9, 11, 0.98) 100%) !important;
+  border: 1px solid var(--border-color, rgba(194, 166, 115, 0.25)) !important;
+  border-radius: 4px !important;
+  padding: 14px 22px !important;
+  box-sizing: border-box !important;
+  position: relative !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+  min-height: 0 !important;
+  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.8) !important;
+  min-width: 0 !important;
+  overflow: visible !important;
+}
+
+.speaker-name {
+  position: absolute !important;
+  top: -18px !important;
+  left: 20px !important;
+  background: #0d0f12 !important;
+  border: 1px solid #ebd19b !important;
+  color: #ebd19b !important;
+  font-size: 1.14rem !important;
+  font-weight: 800 !important;
+  padding: 4px 16px !important;
+  border-radius: 4px !important;
+  letter-spacing: 0.08em !important;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.6) !important;
+  font-family: var(--facility-font-title, 'Outfit', serif) !important;
+  z-index: 100 !important;
+  white-space: nowrap !important;
+}
+
+.dialogue-content-area {
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: flex-start !important;
+  min-width: 0 !important;
+  padding-top: 14px !important;
+  max-height: 72px !important;
+  overflow-y: auto !important;
+  scrollbar-width: thin !important;
+}
+
+.speech-bubble {
+  margin: 0 !important;
+  font-size: 1.32rem !important;
+  line-height: 1.4 !important;
+  color: #e2d9c5 !important;
+  font-family: var(--facility-font-ui) !important;
+  white-space: normal !important;
 }

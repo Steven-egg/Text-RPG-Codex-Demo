@@ -278,6 +278,32 @@ function renderResourceStrip(strip) {
   );
 }
 
+function cleanTitle(title) {
+  if (!title) return "";
+  let cleaned = title;
+  const replacements = [
+    [" / CLI 任務骨架", ""],
+    [" / 委託板 (Live)", ""],
+    [" (Relic Altar)", ""],
+    [" (Temple & Church)", ""],
+    [" (Ember Inn)", ""],
+    [" (Live)", ""],
+    [" (Shop)", ""],
+    [" (Guild)", ""],
+    [" (Magic Shop)", ""],
+    [" (Synthesis)", ""],
+    [" (Inn)", ""],
+    [" (Storage)", ""],
+    [" (Temple)", ""],
+    [" (Workshop)", ""],
+    [" (Relic Preview)", ""]
+  ];
+  for (const [target, replacement] of replacements) {
+    cleaned = cleaned.replace(target, replacement);
+  }
+  return cleaned.trim();
+}
+
 function render() {
   const { model } = state;
   applyFacilityBackground({
@@ -287,7 +313,7 @@ function render() {
     backgrounds: guildBackgroundByRegion,
   });
 
-  titleEl.textContent = model.title ?? "";
+  titleEl.textContent = cleanTitle(model.title);
   subtitleEl.textContent = model.subtitle ?? "";
   npcNameEl.textContent = model.npc?.name ?? "";
   npcRoleEl.textContent = model.npc?.role ?? "";
@@ -597,11 +623,19 @@ function renderConditions(rows) {
 
 function renderFeedback(message) {
   const feedback = typeof message === "string" ? { text: message } : message;
-  feedbackMessageEl.textContent = feedback?.speaker ? `${feedback.speaker}：${feedback.text}` : (feedback?.text ?? "");
+  const feedbackSpeakerEl = document.querySelector("#feedback-speaker");
+  if (feedbackSpeakerEl) {
+    feedbackSpeakerEl.textContent = feedback?.speaker ?? (state.model?.npc?.name ?? "諾亞");
+  }
+  feedbackMessageEl.textContent = feedback?.text ?? "";
 }
 
 function renderPrimaryAction(action) {
-  primaryActionEl.textContent = action.label ?? action.action_id ?? "不可用";
+  const label = action.label ?? action.action_id ?? "不可用";
+  primaryActionEl.innerHTML = `
+    <svg class="btn-icon-svg" viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z" fill="currentColor"/></svg>
+    <span class="btn-text">${label}</span>
+  `;
   primaryActionEl.dataset.actionId = action.action_id ?? "unavailable";
   primaryActionEl.dataset.payload = JSON.stringify(action.payload ?? {});
   primaryActionEl.dataset.disabledReason = action.disabled_reason ?? "";

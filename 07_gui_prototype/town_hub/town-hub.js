@@ -458,9 +458,13 @@ function navigateAfterAction(action) {
       return;
     }
 
-    window.setTimeout(() => {
+    if (facilityId === "workshop") {
       window.location.href = routeWithFacilityRegion(runtimeClient.withLiveMode(route), state.model);
-    }, navigationDelayMs);
+    } else {
+      window.setTimeout(() => {
+        window.location.href = routeWithFacilityRegion(runtimeClient.withLiveMode(route), state.model);
+      }, navigationDelayMs);
+    }
     return;
   }
 

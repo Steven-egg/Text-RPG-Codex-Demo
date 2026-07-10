@@ -13,7 +13,6 @@
     <div class="relic-shell" data-load-state="loading">
       <header class="title-area">
         <div class="title-copy">
-          <p class="screen-label">聖物與遺物祭壇</p>
           <h1 id="screen-title">Loading</h1>
           <p id="screen-subtitle" class="subtitle"></p>
         </div>
@@ -43,8 +42,6 @@
             <div class="focus-orb-area">
               <div id="orb-visual" class="orb-visual" data-element="none"></div>
             </div>
-            <p id="focus-feedback" class="focus-feedback"></p>
-            <button id="attune-relic-btn" class="primary-action-btn" type="button">注入魔能進行共鳴 (Attune)</button>
           </div>
         </section>
 
@@ -62,7 +59,24 @@
       </main>
 
       <footer class="relic-footer">
-        <button id="back-to-town" class="back-btn" type="button">返回城鎮</button>
+        <div class="footer-left-action">
+          <button id="back-to-town" class="back-btn" type="button">
+            <svg class="btn-icon-svg" viewBox="0 0 24 24"><path d="M2 22h20v-2h-2v-4h-2v4h-4v-6h-4v6H6v-4H4v4H2v2zm3-8h2v-2H5v2zm12 0h2v-2h-2v2zM11 4.5l-5 5V12h10V9.5l-5-5z" fill="currentColor"/></svg>
+            <span class="btn-text">返回城鎮</span>
+          </button>
+        </div>
+        <section class="dialogue-box">
+          <div class="speaker-name" hidden>聖物祭壇</div>
+          <div class="dialogue-content-area">
+            <p id="focus-feedback" class="speech-bubble"></p>
+          </div>
+        </section>
+        <div class="footer-right-action">
+          <button id="attune-relic-btn" class="primary-action" type="button" disabled>
+            <svg class="btn-icon-svg" viewBox="0 0 24 24"><path d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71z" fill="currentColor"/></svg>
+            <span class="btn-text">進行共鳴</span>
+          </button>
+        </div>
       </footer>
 
       <section class="action-log-panel">
