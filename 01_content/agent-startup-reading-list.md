@@ -34,7 +34,7 @@ prototype skill:
 - Codex: `.codex/skills/element-maze-gui-static-prototype/SKILL.md`
 - Antigravity: `.antigravity/skills/element-maze-gui-static-prototype/SKILL.md`
 
-Do not read `01_content/gui-html-static-prototype-progress-v1.md`,
+Do not read `01_content/gui-static-current-state-v1.md`,
 `01_content/gui-runtime-bridge-plan-v1.md`, or
 `01_content/gui-planning-index.md` during ordinary startup unless the task needs
 screen-level detail, bridge planning, GUI planning, drift audit, document
@@ -72,9 +72,9 @@ Open these only for matching tasks.
 
 ### GUI Static Prototype
 
-- `01_content/gui-html-static-prototype-progress-v1.md`
-  - Current static prototype handoff and screen-level verification. Read
-    targeted sections only.
+- `01_content/gui-static-current-state-v1.md`
+  - Compact current static prototype state and boundaries. Read only when the
+    task needs GUI status.
 - `01_content/gui-planning-index.md`
   - GUI document lifecycle, planning routing, drift audit, and archive candidate
     index.
@@ -88,8 +88,10 @@ Open these only for matching tasks.
 ### GUI Runtime Bridge
 
 - `01_content/gui-runtime-bridge-plan-v1.md`
-  - Runtime-connected prototype plan, approved surfaces, and landed live-slice
-    status notes.
+  - Compact runtime-connected prototype boundary and planning gate.
+- `01_content/archive/gui-html-static-prototype-progress-v1.md`
+  - Historical static prototype verification log; read only for named history
+    or verification-trace work.
 - `01_content/blueprints/gui-runtime-bridge-preflight-v1.md`
   - Read only when a bridge preflight or runtime-connected planning task
     requires it.

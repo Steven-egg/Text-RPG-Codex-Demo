@@ -9,7 +9,7 @@ description: Project-specific GUI static prototype boundaries for Element Maze. 
 
 This skill is the source for GUI static prototype boundaries. It is not a progress
 log. For current screen details, read targeted sections of
-`01_content/gui-html-static-prototype-progress-v1.md` only when the task needs them.
+`01_content/gui-static-current-state-v1.md` only when the task needs them.
 
 Default to Traditional Chinese output unless the user asks otherwise.
 
@@ -21,10 +21,11 @@ GUI static prototypes live in:
 07_gui_prototype/
 ```
 
-This skill is not the project status SSOT. Current landed screens, planned
-screens, and detailed progress live in README / handoff / GUI planning or
-progress docs. Read those only when the task needs current screen status or drift
-context.
+This skill is not the project status SSOT. Current static GUI state lives in
+`01_content/gui-static-current-state-v1.md`; historical verification lives in
+`01_content/archive/gui-html-static-prototype-progress-v1.md`. Read the current
+state only when the task needs status, and read the archive only for named
+historical or verification-trace work.
 
 ## Allowed Surface
 

@@ -13,7 +13,8 @@ For GUI Task Zone work, start with the smallest matching route:
 | Task | Read |
 |---|---|
 | Static prototype screen work | Current agent GUI static prototype skill, then only the relevant `07_gui_prototype/<screen>/` files. |
-| Static prototype handoff / screen verification | Targeted sections of `01_content/gui-html-static-prototype-progress-v1.md`. |
+| Static prototype current state | `01_content/gui-static-current-state-v1.md`. |
+| Historical static verification | `01_content/archive/gui-html-static-prototype-progress-v1.md`, only when history is needed. |
 | GUI planning / drift audit / document routing | This file. |
 | Facility-family responsibility planning | `01_content/blueprints/gui-facility-shell-baseline-v0.1.md`. |
 | Facility visual comparison | `01_content/blueprints/facilities-visual-integration-spec-v0.1.md`; currently paused and not implementation approval. |
@@ -23,8 +24,8 @@ For GUI Task Zone work, start with the smallest matching route:
 | Runtime bridge preflight | `01_content/blueprints/gui-runtime-bridge-preflight-v1.md`. |
 | Historical decision trace | `01_content/archive/codex-session-snapshot.md` or named historical docs only when truly needed. |
 
-Do not full-load `01_content/gui-html-static-prototype-progress-v1.md` or broad
-historical GUI docs during ordinary startup.
+Do not full-load current-state or historical GUI documents during ordinary
+startup. Read only the route and screen files needed for the task.
 
 ## 1. Current GUI State
 
@@ -72,9 +73,11 @@ Current newest live bridge state:
 - This does not open full inventory / equipment management or broader facility
   framework work.
 
-Detailed live bridge notes live in `01_content/gui-runtime-bridge-plan-v1.md`.
-Screen-level static verification lives in
-`01_content/gui-html-static-prototype-progress-v1.md`.
+Active live bridge boundary and planning live in
+`01_content/gui-runtime-bridge-plan-v1.md`; historical detail is archived.
+Current static GUI state lives in `01_content/gui-static-current-state-v1.md`.
+Historical static verification lives in
+`01_content/archive/gui-html-static-prototype-progress-v1.md`.
 
 ## 2. Document Lifecycle
 
@@ -108,11 +111,14 @@ Lifecycle labels:
 | `01_content/blueprints/gui-facility-shell-baseline-v0.1.md` | core | Facility-family Mockup-to-HTML four-layer responsibility and configuration baseline. |
 | `01_content/blueprints/gui-family-classification-visual-token-audit-v0.1.md` | core | Formal 14-screen family classification, Global Visual Tokens V0.1 planning baseline, drift register, and normalization gate. |
 | `01_content/blueprints/facilities-visual-integration-spec-v0.1.md` | conditional | Paused Draft facility CSS and visual comparison reference; not implementation approval. |
-| `01_content/gui-html-static-prototype-progress-v1.md` | core | Static prototype handoff, built screens, and targeted verification notes. |
-| `01_content/gui-runtime-bridge-plan-v1.md` | core | Runtime bridge plan, approved surfaces, and landed live-slice status notes. |
+| `01_content/gui-static-current-state-v1.md` | core | Compact active static prototype state and boundaries. |
+| `01_content/archive/gui-html-static-prototype-progress-v1.md` | historical | Historical screen progress and verification log. |
+| `01_content/gui-runtime-bridge-plan-v1.md` | core | Compact active runtime bridge boundary and planning gate. |
 | `01_content/blueprints/gui-screen-map.md` | core | Screen, flow, UIAction, and ScreenModel map. |
 | `01_content/blueprints/ui-flow-blueprint.md` | core | CLI thin-layer to GUI flow mapping. |
-| `01_content/blueprints/gui-runtime-bridge-preflight-v1.md` | conditional | Runtime bridge preflight; read only for bridge planning. |
+| `01_content/blueprints/gui-runtime-bridge-preflight-v1.md` | conditional | Short preflight for an explicitly approved bridge slice. |
+| `01_content/archive/gui-runtime-bridge-plan-v1.md` | historical | Former long-form bridge plan and slice history. |
+| `01_content/archive/gui-runtime-bridge-preflight-v1.md` | historical | Former detailed bridge preflight and endpoint/action record. |
 | `01_content/blueprints/gui-bridge-vertical-slice-contract-audit-v1.md` | conditional | Bridge contract audit. |
 | `01_content/blueprints/gui-dynamic-traversal-continuity-v1-spec.md` | conditional | Traversal continuity semantics; not implementation approval by itself. |
 

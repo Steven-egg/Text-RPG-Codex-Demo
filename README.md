@@ -111,7 +111,7 @@ Task Zone pointers:
 - GUI live bridge plan and landed live-slice notes:
   `01_content/gui-runtime-bridge-plan-v1.md`
 - GUI static prototype handoff and screen verification:
-  `01_content/gui-html-static-prototype-progress-v1.md`
+  `01_content/gui-static-current-state-v1.md`
 - GUI document routing and lifecycle:
   `01_content/gui-planning-index.md`
 - Facility-family responsibility baseline:
@@ -206,9 +206,12 @@ required unless runtime, data, schema, save, combat, or bridge behavior changes.
   rules.
 - `01_content/codex-handoff-short.md`: short new-session handoff.
 - `01_content/world-content-skeleton-v0.1.md`: current macro content skeleton.
-- `01_content/gui-runtime-bridge-plan-v1.md`: GUI live bridge details.
-- `01_content/gui-html-static-prototype-progress-v1.md`: static prototype
-  screen-level details.
+- `01_content/gui-runtime-bridge-plan-v1.md`: active GUI live bridge boundary
+  and planning gate; historical detail is archived separately.
+- `01_content/gui-static-current-state-v1.md`: compact current static prototype
+  state and boundaries.
+- `01_content/archive/gui-html-static-prototype-progress-v1.md`: historical
+  static prototype screen and verification log.
 - `01_content/blueprints/game-design.md`: content-design SSOT.
 - `02_schema/*.schema.md`: data contracts.
 - `04_data/data/*.py`: runtime data SSOT.

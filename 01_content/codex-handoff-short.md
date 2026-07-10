@@ -1,182 +1,54 @@
 # Codex Handoff Short
 
-Purpose: compact new-session handoff for Codex. Keep this file short. It should
-tell a new session what is stable, what is forbidden, where details live, and
-what the next boundary is.
+Purpose: compact handoff for continuing Codex work. Keep current status here;
+details belong to their owning SSOT.
 
-## Stable State
+## Current State
 
-- Work directory: `C:\Users\user\OneDrive\文字冒險遊戲`
+- Work directory: `C:\Users\User\OneDrive\文字冒險遊戲`
 - Latest local checkpoint recorded for this handoff:
   `7c71481 2026-07-09 [antig] fix(gui): close facility CSS short-viewport convergence`.
-- For the full stable capsule details (CLI runtime authority, Relic v1
-  flow, naming passes, and bridge parity), see [README.md](../README.md#current-stable-capsule).
-- Phase 3 facilities extraction is landed: town facility CLI behavior now lives
-  in `03_engine/engine/facilities.py`, pure payment / quest helpers live in
-  `03_engine/engine/state.py`, and `game.py` keeps facade re-exports for GUI
-  bridge compatibility.
-- GUI finalized asset links are landed: combat monster runtime/live coverage is
-  verified at 93/93, `mon_earth_bark_shell` renders in live GUI combat, combat
-  backgrounds are organized by region, and facility backgrounds use the shared
-  `07_gui_prototype/shared/facility-backgrounds.js` helper.
-- Facility CSS convergence is landed and CSS-only: shop / guild
-  facility background sizing uses a facility background token alias with `cover`
-  fallback for cross-viewport edge safety, shop / magic shop / synthesis
-  typography is tokenized locally, and the facility-family short-viewport CSS
-  convergence pass has Antigravity-reported Chrome Headless visual verification
-  for shop, guild, magic shop, and synthesis.
-- Note: Element Maze is an expandable playable demo, not a closed demo.
-  Narrow MVP language controls current-round risk; it does not close
-  future extension points.
+- Python CLI runtime remains gameplay authority.
+- `07_gui_prototype/` remains the default static GUI surface.
+- Facility CSS convergence and finalized GUI asset linking are landed.
 
-See `git status --short` before editing. There may be owner-side docs/archive
-cleanup in the worktree.
-
-## Hot Zone Startup
-
-Minimum Codex startup read order:
+## Minimum Read List
 
 1. `AGENTS.md`
 2. `01_content/agent-startup-reading-list.md`
 3. `.codex/skills/element-maze-session-ops/SKILL.md`
 4. `README.md`
-5. `01_content/codex-handoff-short.md`
-6. `01_content/world-content-skeleton-v0.1.md`
+5. `01_content/world-content-skeleton-v0.1.md`
 
-For GUI static prototype tasks, also read:
+For static GUI work, also read:
 
 - `.codex/skills/element-maze-gui-static-prototype/SKILL.md`
+- `01_content/gui-static-current-state-v1.md`
+- only the relevant `07_gui_prototype/<screen>/` files
 
-For monster asset candidate generation, also read:
+For runtime-connected GUI work, first read:
 
-- `C:\Users\User\.codex\skills\.system\imagegen\SKILL.md`
-- `04_data/data/monsters.py`
-- `04_data/data/dungeons.py`
-- `01_content/blueprints/naming-lexicon-v0.1.md`
+- `01_content/gui-runtime-bridge-plan-v1.md`
 
-Read Task Zone docs only when the current task needs them. Do not load Cold Zone
-files during ordinary startup.
+Then stop at a read-only planning gate.
 
-## Current Content Planning
+## Boundaries
 
-Macro content skeleton:
+- Do not manually read or edit `save.json`.
+- Do not modify runtime, data, schema, save, combat formulas, or gameplay
+  authority from a static GUI task.
+- Do not connect the Python runtime for static prototype work.
+- Do not treat fixtures as gameplay SSOT.
+- Do not start a formal asset pipeline.
+- Do not stage, commit, push, create branches, or archive files unless explicitly
+  requested.
 
-- `01_content/world-content-skeleton-v0.1.md`
+## Next Boundary
 
-Current decisions:
+No implementation target is pre-approved. Continue only after the owner names
+one exact slice. Keep future GUI static changes inside the declared prototype
+surface and preserve fixture fallback plus UIAction logging.
 
-- For the full content decisions (core elements, region town/dungeon
-  counts, and relic progression boundaries), see [README.md](../README.md#content-skeleton).
-- This is planning only. It does not approve runtime, data, schema, save, GUI,
-  bridge, combat, class, relic, or asset-pipeline work.
+Historical screen progress and verification are archived at:
 
-## Current Asset Candidate Status
-
-Monster image generation and finalized asset linking are complete and
-owner-finalized. This is not runtime, data, schema, save, combat, bridge, or
-formal asset-pipeline approval.
-
-- Combat monster assets now live under:
-  `07_gui_prototype/combat_screen/assets/monsters/{fire,ice,earth,thunder,final}/`
-- The old raw / transparent monster folders were removed or superseded.
-- `fire/` is the formal replacement for the old transparent Fire / demo assets.
-- Combat screen image mappings now point at finalized element folders, including
-  `mon_earth_bark_shell`; combat monster runtime/live coverage is verified at
-  93/93 with no missing mapped monster image files.
-- Combat backgrounds now live under regional background folders, and facility
-  backgrounds use `07_gui_prototype/shared/facility-backgrounds.js`.
-- Facility CSS convergence landed in
-  `07_gui_prototype/{shop_screen,guild_screen,magic_shop_screen,synthesis_screen}/`
-  CSS, with Antigravity-reported Chrome Headless browser screenshot / viewport
-  visual verification for the facility-family CSS convergence pass.
-- No further monster image generation or asset-linking pass is planned.
-- `OLD/` folders and source / check files are owner-side asset history; do not
-  link, delete, move, or clean them unless the owner approves that exact asset
-  surface.
-
-## Task Zone Routing
-
-- Archived task-chain record:
-  `archive/task.md`
-- World content detailed baselines:
-  `01_content/world-content-baselines-v0.1.md`
-- GUI live bridge details and landed MVP status notes:
-  `01_content/gui-runtime-bridge-plan-v1.md`
-- GUI static prototype screen-level progress and verification:
-  `01_content/gui-html-static-prototype-progress-v1.md`
-- GUI planning / document lifecycle / archive candidate routing:
-  `01_content/gui-planning-index.md`
-- Facility-family Mockup-to-HTML responsibility baseline:
-  `01_content/blueprints/gui-facility-shell-baseline-v0.1.md`
-- Runtime bridge approval route:
-  read `01_content/gui-runtime-bridge-plan-v1.md` and stop at a read-only
-  planning gate before implementation.
-- GUI static prototype work:
-  read `.codex/skills/element-maze-gui-static-prototype/SKILL.md` and only the
-  relevant `07_gui_prototype/<screen>/` files.
-- Content-design background:
-  `01_content/blueprints/game-design.md`, `01_content/blueprints/full-act-structure.md`, and
-  `01_content/archive/act-2-content-plan.md` are Cold / Task Zone references. Open them
-  only for named content-design or history tasks.
-
-## Explicitly Not Open
-
-Interpretation rule: `Explicitly Not Open` means not approved in the current
-slice. It is not a permanent ban or demo freeze.
-
-- Runtime/data/schema/save/combat changes.
-- Manual `save.json` work.
-- New quest data or broad quest framework changes.
-- Full inventory / equipment management.
-- Storage capacity upgrade.
-- Shop sell, equipment sell, generic sell, generic unequip, comparison, or
-  generic workshop framework.
-- New or expanded shop, magic shop, synthesis, guild, quest, boss, dungeon,
-  magic, skill, target-selection, or facility gameplay framework beyond the
-  landed extraction.
-- Formal class transfer, class specialization gameplay, relic effects, endgame
-  systems, or formal settings persistence.
-- GUI bridge expansion, new GUI image generation, or formal asset pipeline.
-
-## Next-Step Boundary
-
-No implementation is pre-approved.
-
-Small safe next steps:
-
-- produce a `dungeon.py` domain extraction read-only planning gate
-- produce a dead-code cleanup gate for the unused legacy `buy_menu`
-- produce an AI tooling / validation pipeline audit for future small tools
-- produce a commit package or branch-closure summary for the current facility
-  CSS convergence after owner review
-- produce a read-only gate for the next exact GUI static CSS slice, such as
-  button state tokens or panel / card pattern convergence
-- refine `01_content/world-content-skeleton-v0.1.md`
-- keep Hot Zone docs short and move historical detail to Task / Cold Zone
-- produce a Hot Zone / branch-closure read-only sync check before future handoff
-- produce a read-only planning gate for one exact future slice
-
-For docs-only sync, restrict changes to explicitly approved markdown surfaces and
-do not touch runtime, JavaScript, data, schema, save, or combat formulas.
-
-For future runtime/data/schema/save/combat or broader GUI live bridge work, start
-with a single-slice read-only planning gate and name the exact files likely to be
-touched.
-
-## Verification
-
-Latest detailed verification history lives in Task Zone files. For docs-only
-cleanup, status/diff review is enough. Runtime smoke is required only when
-runtime, data, schema, save, combat, or bridge behavior changes.
-
-Latest facilities extraction checkpoint verification:
-
-- `python 06_tools\validate_data.py`
-- `python element_maze.py --smoke-test`
-- all current `06_tools\smoke_test_*.py` bridge smoke tests
-- `python 06_tools\smoke_test_temple_bridge.py`
-- `git diff --check`
-
-Manual owner playtest after `56731f1` confirmed Demon King defeat completes
-Final Q5, grants Guild reputation +500, shows the ending panel and
-`MAIN STORY CLEAR` panel, then returns to the title screen.
+`01_content/archive/gui-html-static-prototype-progress-v1.md`

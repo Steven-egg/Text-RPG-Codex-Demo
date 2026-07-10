@@ -45,7 +45,7 @@ For ordinary GUI static sprint work, do not default to full catch-up. Read only:
 2. The relevant `07_gui_prototype/<screen>/` files for the touched screen(s).
 3. Targeted handoff/progress sections only when screen-level detail, verification history, drift audit, or task routing needs them.
 
-For GUI planning, drift audit, or task routing, read `01_content/gui-planning-index.md` only as a Task Zone index. Do not full-load `gui-html-static-prototype-progress-v1.md` or `gui-planning-index.md` at every startup. Prefer the minimum necessary extra files. Do not read broad historical files unless the task requires history.
+For GUI planning, drift audit, or task routing, read `01_content/gui-planning-index.md` only as a Task Zone index. Do not full-load `gui-static-current-state-v1.md`, `gui-planning-index.md`, or the archived progress log at every startup. Prefer the minimum necessary extra files. Do not read broad historical files unless the task requires history.
 
 ## Planning, Reporting, And Next Steps
 

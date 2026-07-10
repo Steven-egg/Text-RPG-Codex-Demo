@@ -58,9 +58,11 @@ does not imply runtime bridge approval.
 
 ## 5. Reading Discipline
 
-Do not full-load `01_content/gui-html-static-prototype-progress-v1.md` at every
-startup. It is the detailed GUI handoff and verification log; read targeted sections
-when a GUI task requires them.
+Do not full-load `01_content/gui-static-current-state-v1.md` at every startup.
+It is the compact active GUI state; read it only when the task needs GUI status.
+The historical verification log is
+`01_content/archive/gui-html-static-prototype-progress-v1.md` and is not a
+normal startup read.
 
 Do not full-load `01_content/gui-planning-index.md` at every startup. It is a Task
 Zone navigation index; read it only for GUI planning, drift audit, or task routing.
