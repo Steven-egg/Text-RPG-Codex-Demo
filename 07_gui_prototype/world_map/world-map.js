@@ -344,13 +344,6 @@ function renderLocations(locations) {
 
       button.append(emblem, title, meta);
 
-      if (location.preview_role === "town" && location.region_id && location.region_id !== "border_fire") {
-        const landmark = document.createElement("span");
-        landmark.className = "region-map-landmark";
-        landmark.setAttribute("aria-hidden", "true");
-        landmark.textContent = "地圖";
-        button.append(landmark);
-      }
 
       if (!location.unlocked) {
         const lock = document.createElement("span");

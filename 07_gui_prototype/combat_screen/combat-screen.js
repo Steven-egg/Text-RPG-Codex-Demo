@@ -471,7 +471,7 @@ const COMBAT_ENEMY_VISUALS = Object.freeze({
     role: "ground",
   },
   mon_final_demon_shade: {
-    imageSrc: "./assets/monsters/final/mon-final-demon-shade-regenerated-v01.png",
+    imageSrc: "./assets/monsters/final/mon-final-demon-shade-regenerated-v02.png",
     environment: "final-main-phase-2",
     role: "ground",
   },

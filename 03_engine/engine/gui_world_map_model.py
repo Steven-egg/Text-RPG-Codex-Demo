@@ -185,7 +185,7 @@ DUNGEON_PREVIEW_ASSETS = {
     "dungeon_final_minor_a": "../dungeon_exploration/assets/final-dungeon-explore-minor-a-candidate-v01.png",
     "dungeon_final_minor_b": "../dungeon_exploration/assets/final-dungeon-explore-minor-b-candidate-v01.png",
     "dungeon_final_main_phase_1": "../dungeon_exploration/assets/final-dungeon-explore-main-phase-1-candidate-v01.png",
-    "dungeon_final_main_phase_2": "../dungeon_exploration/assets/final-dungeon-explore-main-phase-1-candidate-v01.png",
+    "dungeon_final_main_phase_2": "../dungeon_exploration/assets/final-dungeon-explore-main-phase-2-candidate-v01.png",
     "dungeon_final_main_phase_3": "../dungeon_exploration/assets/final-dungeon-explore-final-boss-hall-candidate-v01.png",
 }
 
@@ -239,11 +239,17 @@ REGION_TOWN_ASSETS = {
 REGION_TOWN_POSITIONS = {
     "border_fire": {"x": 35, "y": 22},
     "ice": {"x": 21, "y": 77},
-    "earth": {"x": 24, "y": 72},
-    "thunder": {"x": 28, "y": 70},
-    "final": {"x": 22, "y": 76},
+    "earth": {"x": 41, "y": 48},
+    "thunder": {"x": 18, "y": 55},
+    "final": {"x": 18, "y": 58},
 }
-REGION_GATE_POSITION = {"x": 82, "y": 78}
+REGION_GATE_POSITIONS = {
+    "border_fire": {"x": 82, "y": 78},
+    "ice": {"x": 47, "y": 92},
+    "earth": {"x": 47, "y": 92},
+    "thunder": {"x": 52, "y": 88},
+    "final": {"x": 48, "y": 90},
+}
 REGION_DUNGEON_LAYOUTS = {
     "border_fire": [
         {"node_id": "dungeon_moss_cave", "dungeon_ids": ["dungeon_moss_cave"], "position": {"x": 24, "y": 48}, "preview_role": "cave"},
@@ -265,7 +271,7 @@ REGION_DUNGEON_LAYOUTS = {
     ],
     "earth": [
         {"node_id": "dungeon_earth_minor_a", "dungeon_ids": ["dungeon_earth_minor_a"], "position": {"x": 28, "y": 38}, "preview_role": "forest"},
-        {"node_id": "dungeon_earth_minor_b", "dungeon_ids": ["dungeon_earth_minor_b"], "position": {"x": 63, "y": 74}, "preview_role": "quarry"},
+        {"node_id": "dungeon_earth_minor_b", "dungeon_ids": ["dungeon_earth_minor_b"], "position": {"x": 50, "y": 79}, "preview_role": "quarry"},
         {
             "node_id": "dungeon_earth_main",
             "dungeon_ids": ["dungeon_earth_main_phase_1", "dungeon_earth_main_phase_2"],
@@ -277,23 +283,23 @@ REGION_DUNGEON_LAYOUTS = {
     ],
     "thunder": [
         {"node_id": "dungeon_thunder_minor_a", "dungeon_ids": ["dungeon_thunder_minor_a"], "position": {"x": 28, "y": 38}, "preview_role": "tower"},
-        {"node_id": "dungeon_thunder_minor_b", "dungeon_ids": ["dungeon_thunder_minor_b"], "position": {"x": 63, "y": 73}, "preview_role": "tower"},
+        {"node_id": "dungeon_thunder_minor_b", "dungeon_ids": ["dungeon_thunder_minor_b"], "position": {"x": 64, "y": 55}, "preview_role": "tower"},
         {
             "node_id": "dungeon_thunder_main",
             "dungeon_ids": ["dungeon_thunder_main_phase_1", "dungeon_thunder_main_phase_2"],
-            "position": {"x": 76, "y": 33},
+            "position": {"x": 58, "y": 28},
             "preview_role": "tower",
             "label": "雷霆陣列",
             "main_dungeon": True,
         },
     ],
     "final": [
-        {"node_id": "dungeon_final_minor_a", "dungeon_ids": ["dungeon_final_minor_a"], "position": {"x": 29, "y": 39}, "preview_role": "ruins"},
-        {"node_id": "dungeon_final_minor_b", "dungeon_ids": ["dungeon_final_minor_b"], "position": {"x": 63, "y": 72}, "preview_role": "ruins"},
+        {"node_id": "dungeon_final_minor_a", "dungeon_ids": ["dungeon_final_minor_a"], "position": {"x": 38, "y": 20}, "preview_role": "ruins"},
+        {"node_id": "dungeon_final_minor_b", "dungeon_ids": ["dungeon_final_minor_b"], "position": {"x": 51, "y": 55}, "preview_role": "ruins"},
         {
             "node_id": "dungeon_final_main",
             "dungeon_ids": ["dungeon_final_main_phase_1", "dungeon_final_main_phase_2", "dungeon_final_main_phase_3"],
-            "position": {"x": 77, "y": 33},
+            "position": {"x": 64, "y": 14},
             "preview_role": "fortress",
             "label": "魔王城",
             "main_dungeon": True,
@@ -713,7 +719,7 @@ def world_map_model(state: dict[str, Any], selected_region_id: str | None = None
         "label": "區域傳送陣",
         "description": "前往其他區域的傳送陣。" if region_id != "border_fire" else "完成烈焰印記路線後，可用於前往寒冰等其他區域的傳送陣。",
         "detail_note": "隨時可以返回烈焰邊境；後續區域在完成對應劇情後開放。" if region_id != "border_fire" else "此階段僅支援前往寒冰區域；其他區域在後續版本開放。",
-        "position": REGION_GATE_POSITION,
+        "position": REGION_GATE_POSITIONS[region_id],
         "tone": "gate",
         "icon_token": "門",
         "unlocked": gate_unlocked,
@@ -744,7 +750,7 @@ def world_map_model(state: dict[str, Any], selected_region_id: str | None = None
             "status": "open" if gate_unlocked else "locked",
             "points": [
                 [previous_position["x"], previous_position["y"]],
-                [REGION_GATE_POSITION["x"], REGION_GATE_POSITION["y"]],
+                [REGION_GATE_POSITIONS[region_id]["x"], REGION_GATE_POSITIONS[region_id]["y"]],
             ],
         }
     )

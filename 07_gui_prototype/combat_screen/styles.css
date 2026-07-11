@@ -1421,11 +1421,11 @@ select:focus-visible {
   background-size: cover !important;
 }
 [data-enemy-environment="final-main-phase-2"] .battlefield-stage {
-  background: url("./assets/backgrounds/final/final-combat-bg-main-phase-2-candidate-v01.png") no-repeat center center !important;
+  background: url("./assets/backgrounds/final/final-combat-bg-main-phase-2-candidate-v03.png") no-repeat center center !important;
   background-size: cover !important;
 }
 [data-enemy-environment="final-main-phase-3"] .battlefield-stage {
-  background: url("./assets/backgrounds/final/final-combat-bg-main-phase-2-candidate-v02.png") no-repeat center center !important;
+  background: url("./assets/backgrounds/final/final-combat-bg-main-phase-2-candidate-v01.png") no-repeat center center !important;
   background-size: cover !important;
 }
 

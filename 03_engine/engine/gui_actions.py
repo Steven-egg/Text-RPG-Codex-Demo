@@ -57,7 +57,7 @@ from .gui_world_map_model import (
     REGION_MAP_ASSETS,
     REGION_TOWN_ASSETS,
     REGION_TOWN_POSITIONS,
-    REGION_GATE_POSITION,
+    REGION_GATE_POSITIONS,
     REGION_DUNGEON_LAYOUTS,
     region_town_location_id,
     region_route_status,

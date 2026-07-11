@@ -841,6 +841,10 @@ select:focus-visible {
   background: url("./assets/final-dungeon-explore-main-phase-1-candidate-v01.png") no-repeat center center !important;
   background-size: cover !important;
 }
+[data-dungeon-id="dungeon_final_main_phase_2"] .dungeon-stage {
+  background: url("./assets/final-dungeon-explore-main-phase-2-candidate-v01.png") no-repeat center center !important;
+  background-size: cover !important;
+}
 [data-dungeon-id="dungeon_final_main_phase_3"] .dungeon-stage {
   background: url("./assets/final-dungeon-explore-final-boss-hall-candidate-v01.png") no-repeat center center !important;
   background-size: cover !important;
