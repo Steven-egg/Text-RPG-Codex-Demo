@@ -19,6 +19,8 @@ const locationLayerEl = document.querySelector("#location-layer");
 const locationTitleEl = document.querySelector("#location-title");
 const locationFavoriteEl = document.querySelector("#location-favorite");
 const locationPreviewEl = document.querySelector("#location-preview");
+const previousDungeonEl = document.querySelector("#previous-dungeon");
+const nextDungeonEl = document.querySelector("#next-dungeon");
 const locationDescriptionEl = document.querySelector("#location-description");
 const locationStatsEl = document.querySelector("#location-stats");
 const feedbackMessageEl = document.querySelector("#feedback-message");
@@ -29,6 +31,7 @@ const clearLogEl = document.querySelector("#clear-log");
 const state = {
   model: null,
   selectedLocationId: null,
+  selectedMainDungeonPhaseIndex: null,
   actionLog: [],
   settings: {
     reducedMotion: window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false,
@@ -63,6 +66,14 @@ closeMenuEl.addEventListener("click", () => {
 
 closeDetailEl.addEventListener("click", () => {
   setDetailOpen(false);
+});
+
+previousDungeonEl.addEventListener("click", () => {
+  cycleMainDungeon(-1);
+});
+
+nextDungeonEl.addEventListener("click", () => {
+  cycleMainDungeon(1);
 });
 
 document.addEventListener("keydown", (event) => {
@@ -118,6 +129,7 @@ async function loadFixture(path) {
     const model = await response.json();
     state.model = model;
     state.selectedLocationId = null;
+    state.selectedMainDungeonPhaseIndex = null;
     state.actionLog = [];
     setMenuOpen(false, false);
     setDetailOpen(false);
@@ -136,6 +148,7 @@ async function loadLiveScreen(path) {
     const model = await runtimeClient.getScreen("world_map");
     state.model = model;
     state.selectedLocationId = model.selected_location_id ?? model.locations?.[0]?.location_id ?? null;
+    state.selectedMainDungeonPhaseIndex = null;
     state.actionLog = [];
     setMenuOpen(false, false);
     setDetailOpen(false);
@@ -160,6 +173,7 @@ async function loadStaticFallback(path, liveError) {
     const model = await response.json();
     state.model = model;
     state.selectedLocationId = model.selected_location_id ?? model.locations?.[0]?.location_id ?? null;
+    state.selectedMainDungeonPhaseIndex = null;
     state.actionLog = [];
     setMenuOpen(false, false);
     setDetailOpen(false);
@@ -364,6 +378,7 @@ function renderSelectedLocation() {
     locationDescriptionEl.textContent = "請先選擇地圖上的點位。";
     locationFavoriteEl.textContent = "";
     locationPreviewEl.dataset.previewRole = "";
+    renderDungeonControls(null);
     locationStatsEl.replaceChildren();
     feedbackMessageEl.textContent = "";
     renderPrimaryAction({
@@ -383,6 +398,7 @@ function renderSelectedLocation() {
     previewRole = "cinder";
   }
   locationPreviewEl.dataset.previewRole = previewRole;
+  renderDungeonControls(location);
   locationDescriptionEl.textContent = location.description ?? "";
   feedbackMessageEl.textContent = location.detail_note ?? "";
 
@@ -412,6 +428,66 @@ function renderPrimaryAction(action = {}) {
   confirmActionEl.dataset.disabled = String(!action.enabled);
 }
 
+function getMainDungeonPhases(location) {
+  return Array.isArray(location?.main_dungeon?.phases) ? location.main_dungeon.phases : [];
+}
+
+function getSelectedMainDungeonPhase(location) {
+  const phases = getMainDungeonPhases(location);
+  if (phases.length === 0) {
+    return null;
+  }
+
+  const phaseIndex = state.selectedMainDungeonPhaseIndex ?? location.main_dungeon.current_phase_index;
+  return phases.find((phase) => phase.phase_index === phaseIndex) ?? null;
+}
+
+function renderDungeonControls(location) {
+  const phases = getMainDungeonPhases(location);
+  const selectedPhase = getSelectedMainDungeonPhase(location);
+  const currentIndex = phases.findIndex((phase) => phase.phase_index === selectedPhase?.phase_index);
+  const canSwitch = phases.length > 1 && currentIndex >= 0;
+  previousDungeonEl.hidden = !canSwitch;
+  nextDungeonEl.hidden = !canSwitch;
+
+  if (!canSwitch) {
+    return;
+  }
+
+  previousDungeonEl.disabled = currentIndex <= 0 || !phases[currentIndex - 1].replayable;
+  nextDungeonEl.disabled = currentIndex >= phases.length - 1 || !phases[currentIndex + 1].unlocked;
+}
+
+function cycleMainDungeon(direction) {
+  const location = getSelectedLocation();
+  const phases = getMainDungeonPhases(location);
+  const selectedPhase = getSelectedMainDungeonPhase(location);
+  const currentIndex = phases.findIndex((phase) => phase.phase_index === selectedPhase?.phase_index);
+  if (currentIndex < 0) {
+    return;
+  }
+
+  const targetPhase = phases[currentIndex + direction];
+  if (!targetPhase || (direction < 0 ? !targetPhase.replayable : !targetPhase.unlocked)) {
+    return;
+  }
+
+  state.selectedMainDungeonPhaseIndex = targetPhase.phase_index;
+  pushActionLog({
+    action_id: "switch_main_dungeon_phase",
+    payload: {
+      group_id: location.main_dungeon.group_id,
+      from_dungeon_id: selectedPhase.dungeon_id,
+      to_dungeon_id: targetPhase.dungeon_id,
+      direction: direction < 0 ? "previous" : "next",
+    },
+    source: "dungeon_nav_button",
+    dispatched: true,
+  });
+  renderSelectedLocation();
+  setDetailOpen(true);
+}
+
 function renderActionLog() {
   if (state.actionLog.length === 0) {
     const empty = document.createElement("li");
@@ -434,9 +510,11 @@ function renderActionLog() {
 
 function selectLocation(locationId, shouldLog) {
   const alreadySelected = state.selectedLocationId === locationId;
+  const location = state.model?.locations?.find((item) => item.location_id === locationId);
 
   if (!alreadySelected) {
     state.selectedLocationId = locationId;
+    state.selectedMainDungeonPhaseIndex = location?.main_dungeon?.current_phase_index ?? null;
   }
   if (shouldLog) {
     pushActionLog({
@@ -596,6 +674,7 @@ async function dispatchRuntimeAction(action, source) {
     if (result.screen_model) {
       state.model = result.screen_model;
       state.selectedLocationId = result.screen_model.selected_location_id ?? state.selectedLocationId;
+      state.selectedMainDungeonPhaseIndex = null;
       render();
       if (result.screen_model.utility_preview) {
         renderUtilityPreview(result.screen_model.utility_preview);
@@ -670,7 +749,9 @@ function logSystem(message, options = {}) {
 }
 
 function getSelectedLocation() {
-  return state.model?.locations?.find((location) => location.location_id === state.selectedLocationId) ?? null;
+  const location = state.model?.locations?.find((item) => item.location_id === state.selectedLocationId) ?? null;
+  const phase = getSelectedMainDungeonPhase(location);
+  return phase ? { ...location, ...phase, location_id: location.location_id } : location;
 }
 
 function getLocationButtons() {

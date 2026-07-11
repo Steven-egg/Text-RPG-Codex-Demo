@@ -50,7 +50,27 @@
             </div>
           </div>
 
-          <div id="location-preview" class="location-preview" aria-hidden="true"></div>
+          <div class="location-preview-row">
+            <div id="location-preview" class="location-preview" aria-hidden="true"></div>
+            <button
+              id="previous-dungeon"
+              class="dungeon-nav-button dungeon-nav-previous"
+              type="button"
+              aria-label="上一個 Main Dungeon 關卡"
+              hidden
+            >
+              ‹
+            </button>
+            <button
+              id="next-dungeon"
+              class="dungeon-nav-button dungeon-nav-next"
+              type="button"
+              aria-label="下一個 Main Dungeon 關卡"
+              hidden
+            >
+              ›
+            </button>
+          </div>
           <p id="location-description" class="location-description"></p>
           <div id="location-stats" class="location-stats"></div>
           <p id="feedback-message" class="feedback-message"></p>

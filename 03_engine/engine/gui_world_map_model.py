@@ -227,6 +227,7 @@ REGION_DUNGEON_LAYOUTS = {
             "position": {"x": 77, "y": 33},
             "preview_role": "fortress",
             "label": "Ice Main Dungeon",
+            "main_dungeon": True,
         },
     ],
     "earth": [
@@ -238,6 +239,7 @@ REGION_DUNGEON_LAYOUTS = {
             "position": {"x": 76, "y": 34},
             "preview_role": "forest",
             "label": "Earth Main Dungeon",
+            "main_dungeon": True,
         },
     ],
     "thunder": [
@@ -249,6 +251,7 @@ REGION_DUNGEON_LAYOUTS = {
             "position": {"x": 76, "y": 33},
             "preview_role": "tower",
             "label": "Thunder Main Dungeon",
+            "main_dungeon": True,
         },
     ],
     "final": [
@@ -260,6 +263,7 @@ REGION_DUNGEON_LAYOUTS = {
             "position": {"x": 77, "y": 33},
             "preview_role": "fortress",
             "label": "Final Main Dungeon",
+            "main_dungeon": True,
         },
     ],
 }
@@ -342,6 +346,60 @@ def active_dungeon_id_for_slot(state: dict[str, Any], slot: dict[str, Any]) -> s
         if game.is_unlocked(state, dungeon.get("unlock")):
             return dungeon_id
     return dungeon_ids[0]
+
+
+def main_dungeon_model(state: dict[str, Any], slot: dict[str, Any], region_id: str) -> dict[str, Any] | None:
+    """Return the display/action contract for a multi-phase world-map node."""
+    dungeon_ids = slot.get("dungeon_ids", [])
+    if not slot.get("main_dungeon"):
+        return None
+
+    active_dungeon_id = active_dungeon_id_for_slot(state, slot)
+    phases = []
+    for phase_index, phase_dungeon_id in enumerate(dungeon_ids, start=1):
+        phase_dungeon = DUNGEONS[phase_dungeon_id]
+        phase_unlocked = game.is_unlocked(state, phase_dungeon.get("unlock"))
+        locked_reason = None if phase_unlocked else "Dungeon is locked by runtime progression."
+        phases.append(
+            {
+                "phase_index": phase_index,
+                "dungeon_id": phase_dungeon_id,
+                "label": phase_dungeon["name"],
+                "description": (
+                    f"{REGION_LABELS[region_id]} main dungeon phase {phase_index}: "
+                    f"{phase_dungeon['recommended']} / {phase_dungeon['steps']} steps / "
+                    f"{len(phase_dungeon.get('monsters', []))} encounter entries."
+                ),
+                "detail_note": "This phase reuses the runtime-confirmed travel action for the shared main-dungeon node.",
+                "unlocked": phase_unlocked,
+                "replayable": phase_unlocked,
+                "recommended_level": phase_dungeon["recommended"],
+                "steps": f"{phase_dungeon['steps']}",
+                "attribute": phase_dungeon.get("element", REGION_LABELS[region_id]),
+                "clear_state": "Cleared" if phase_dungeon_id in state.get("cleared_dungeons", []) else "Uncleared",
+                "exploration_rating": "runtime",
+                "boss": boss_label(phase_dungeon.get("boss")),
+                "primary_action": {
+                    "action_id": "confirm_travel",
+                    "label": "Travel",
+                    "enabled": phase_unlocked,
+                    "disabled_reason": locked_reason,
+                    "payload": {
+                        "dungeon_id": phase_dungeon_id,
+                        "location_id": slot["node_id"],
+                        "region_id": region_id,
+                    },
+                },
+            }
+        )
+
+    return {
+        "group_id": slot["node_id"],
+        "current_phase_index": next(
+            phase["phase_index"] for phase in phases if phase["dungeon_id"] == active_dungeon_id
+        ),
+        "phases": phases,
+    }
 
 
 def region_gate_options_model(state: dict[str, Any], source_region_id: str) -> list[dict[str, Any]]:
@@ -545,6 +603,7 @@ def world_map_model(state: dict[str, Any], selected_region_id: str | None = None
         dungeon_id = active_dungeon_id_for_slot(state, slot)
         dungeon = DUNGEONS[dungeon_id]
         node_id = slot["node_id"]
+        main_dungeon = main_dungeon_model(state, slot, region_id)
         dungeon_unlocked = game.is_unlocked(state, dungeon.get("unlock"))
         locked_reason = None if dungeon_unlocked else "Dungeon is locked by runtime progression."
         if dungeon_unlocked:
@@ -556,6 +615,7 @@ def world_map_model(state: dict[str, Any], selected_region_id: str | None = None
                 "region_id": region_id,
                 "dungeon_id": dungeon_id,
                 "dungeon_ids": slot.get("dungeon_ids", []),
+                "main_dungeon": main_dungeon,
                 "label": slot.get("label", dungeon["name"]),
                 "description": (
                     f"{region_label} dungeon from runtime data: {dungeon['recommended']} / "

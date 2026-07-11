@@ -749,6 +749,58 @@ select:focus-visible {
     linear-gradient(20deg, rgba(121, 146, 79, 0.42), rgba(12, 18, 19, 0.88));
 }
 
+.location-preview-row {
+  position: relative;
+  min-height: 0;
+  height: 100%;
+}
+
+.location-preview-row .location-preview {
+  min-width: 0;
+}
+
+.dungeon-nav-button {
+  position: absolute;
+  top: 50%;
+  z-index: 2;
+  width: 32px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(239, 231, 211, 0.32);
+  border-radius: 7px;
+  background: rgba(10, 15, 14, 0.72);
+  color: rgba(239, 231, 211, 0.86);
+  cursor: pointer;
+  font-size: 1.45rem;
+  font-weight: 900;
+  line-height: 1;
+  transform: translateY(-50%);
+}
+
+.dungeon-nav-previous {
+  left: 6px;
+}
+
+.dungeon-nav-next {
+  right: 6px;
+}
+
+.dungeon-nav-button:hover:not(:disabled) {
+  border-color: rgba(208, 168, 76, 0.86);
+  background: rgba(208, 168, 76, 0.18);
+  color: #fff;
+}
+
+.dungeon-nav-button[hidden] {
+  display: none;
+}
+
+.dungeon-nav-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.28;
+}
+
 .location-preview[data-preview-role="town"] {
   background-image: url('../town_hub/assets/town-hub-environment-v01.jpg');
   background-size: 220%; /* 放大圖片至 2.2 倍，達成視角縮減與微縮感 */
