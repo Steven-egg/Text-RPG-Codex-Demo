@@ -68,15 +68,15 @@ body {
 .relic-shell {
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 40px);
-  padding: 20px;
+  height: calc(100dvh - 12px);
+  padding: 20px 20px 0;
   box-sizing: border-box;
   background: var(--facility-shell-wash);
   overflow: hidden;
 }
 
 .title-area {
-  min-height: 80px;
+  min-height: 88px;
   padding: 12px 0;
   display: flex;
   justify-content: space-between;
@@ -104,7 +104,7 @@ body {
 
 .title-copy h1 {
   margin: 0;
-  font-size: clamp(1.8rem, 3vw, 2.8rem);
+  font-size: clamp(2.1rem, 3.4vw, 3rem);
   line-height: 1.1;
   letter-spacing: 0.08em;
   color: var(--text-primary);

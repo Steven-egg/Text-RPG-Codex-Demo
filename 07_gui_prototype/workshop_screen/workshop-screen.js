@@ -792,11 +792,11 @@ function renderRequirementsView(item) {
   let warningHtml = '';
   if (!checkRes.satisfied) {
     let friendlyReason = '';
-    if (checkRes.disabledReason === 'recipe_locked') friendlyReason = '🚫 配方鎖定：需先完成前置任務。';
-    else if (checkRes.disabledReason === 'job_incompatible') friendlyReason = '🚫 職業不合：目前職業無法使用此裝備。';
-    else if (checkRes.disabledReason === 'gold_deficient') friendlyReason = '🚫 金幣不足：冒險者持有金幣無法支付費用。';
-    else if (checkRes.disabledReason === 'missing_base_item') friendlyReason = '🚫 缺少基底：背包或裝備欄中缺少此強化基底裝備。';
-    else if (checkRes.disabledReason === 'materials_deficient') friendlyReason = '🚫 素材不足：缺少所需的鍛造/合成素材。';
+    if (checkRes.disabledReason === 'recipe_locked') friendlyReason = '配方鎖定：需先完成前置任務。';
+    else if (checkRes.disabledReason === 'job_incompatible') friendlyReason = '職業不合：目前職業無法使用此裝備。';
+    else if (checkRes.disabledReason === 'gold_deficient') friendlyReason = '金幣不足：冒險者持有金幣無法支付費用。';
+    else if (checkRes.disabledReason === 'missing_base_item') friendlyReason = '缺少基底：背包或裝備欄中缺少此強化基底裝備。';
+    else if (checkRes.disabledReason === 'materials_deficient') friendlyReason = '素材不足：缺少所需的鍛造/合成素材。';
     
     warningHtml = `<div class="req-warning-box">${friendlyReason}</div>`;
     

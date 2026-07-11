@@ -1026,32 +1026,32 @@ body.facility-body::after {
 }
 
 .game-container {
-  width: min(1540px, calc(100vw - 32px));
-  height: calc(100vh - 32px);
+  width: min(1880px, calc(100vw - 24px));
+  height: calc(100dvh - 24px);
   max-width: none;
   max-height: none;
-  margin: 16px auto;
+  margin: 12px auto;
   padding: 0;
   gap: 12px;
 }
 
 .game-header {
-  min-height: 96px;
+  min-height: 88px;
   height: auto;
   align-items: center;
-  padding: 12px 0 0;
+  padding: 12px 0;
 }
 
 .title-zone {
-  padding: 8px 72px 8px 18px;
+  padding: 8px 60px 8px 16px;
   background: linear-gradient(90deg, rgba(8, 9, 11, 0.94) 0%, rgba(13, 15, 18, 0.82) 62%, rgba(13, 15, 18, 0) 100%);
   border-left-width: 3px;
   border-radius: 4px 0 0 4px;
 }
 
 .title-zone .main-title {
-  font-size: clamp(2.5rem, 4.4vw, 4.55rem);
-  line-height: 0.95;
+  font-size: clamp(2.1rem, 3.4vw, 3rem);
+  line-height: 1.05;
   letter-spacing: 0.06em;
 }
 
@@ -1593,8 +1593,8 @@ body.facility-body::after {
   min-width: 0 !important;
   padding-top: 14px !important;
   max-height: 72px !important;
-  overflow-y: auto !important;
-  scrollbar-width: thin !important;
+  overflow: hidden !important;
+  scrollbar-width: none !important;
 }
 
 .speech-bubble {

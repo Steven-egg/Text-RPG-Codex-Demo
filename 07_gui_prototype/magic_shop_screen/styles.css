@@ -135,7 +135,7 @@ button {
 .magic-shop-header {
   grid-column: 1;
   grid-row: 1;
-  min-height: 80px;
+  min-height: 88px;
   padding: 12px 0;
   display: flex;
   align-items: center;
@@ -190,7 +190,7 @@ span {
 
 h1 {
   margin: 0;
-  font-size: clamp(2rem, 3.2vw, 2.75rem);
+  font-size: clamp(2.1rem, 3.4vw, 3rem);
   line-height: 1.05;
   letter-spacing: 0;
   color: var(--paper);

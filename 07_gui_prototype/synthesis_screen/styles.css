@@ -108,9 +108,9 @@ button {
 }
 
 .synthesis-shell {
-  width: min(1540px, calc(100vw - 32px));
-  height: calc(100vh - 32px);
-  margin: 16px auto;
+  width: min(1880px, calc(100vw - 24px));
+  height: calc(100dvh - 24px);
+  margin: 12px auto;
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   grid-template-rows: auto minmax(0, 1fr) auto auto;
@@ -157,7 +157,7 @@ button {
 .synthesis-header {
   grid-column: 1;
   grid-row: 1;
-  min-height: 80px;
+  min-height: 88px;
   padding: 12px 0;
   display: flex;
   align-items: center;
@@ -212,7 +212,7 @@ strong {
 
 h1 {
   margin: 0;
-  font-size: clamp(2rem, 3.2vw, 2.75rem);
+  font-size: clamp(2.1rem, 3.4vw, 3rem);
   line-height: 1.05;
   letter-spacing: 0;
   font-family: var(--facility-font-title);
