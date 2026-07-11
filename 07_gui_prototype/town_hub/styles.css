@@ -501,6 +501,168 @@ button:focus-visible {
 }
 
 /* ==========================================
+   各區域城鎮背景的設施座標覆寫 (地區特化對齊)
+   ========================================== */
+
+/* --- 冰雪區域: 霜潮港 (ice) --- */
+.town-hub-shell[data-current-region-id="ice"] .facility-node[data-anchor="top_center_guild_hall"] {
+  left: 47%;
+  bottom: 72%;
+}
+.town-hub-shell[data-current-region-id="ice"] .facility-node[data-anchor="left_inn"] {
+  left: 24%;
+  bottom: 64%;
+}
+.town-hub-shell[data-current-region-id="ice"] .facility-node[data-anchor="bottom_left_alchemy"] {
+  left: 13%;
+  bottom: 43%;
+}
+.town-hub-shell[data-current-region-id="ice"] .facility-node[data-anchor="bottom_center_temple"] {
+  left: 30%;
+  bottom: 23%;
+}
+.town-hub-shell[data-current-region-id="ice"] .facility-node[data-anchor="mid_left_market"] {
+  left: 72%;
+  bottom: 42%;
+}
+.town-hub-shell[data-current-region-id="ice"] .facility-node[data-anchor="right_workshop_group"] {
+  left: 71%;
+  bottom: 67%;
+}
+.town-hub-shell[data-current-region-id="ice"] .facility-node[data-anchor="right_arcane_shop"] {
+  left: 88%;
+  bottom: 32%;
+}
+.town-hub-shell[data-current-region-id="ice"] .facility-node[data-anchor="far_bottom_right_depot"] {
+  left: 69%;
+  bottom: 20%;
+}
+.town-hub-shell[data-current-region-id="ice"] .facility-node[data-anchor="bottom_right_archive"] {
+  left: 50%;
+  bottom: 43%;
+}
+
+/* --- 大地區域: 根環營地 (earth) --- */
+.town-hub-shell[data-current-region-id="earth"] .facility-node[data-anchor="top_center_guild_hall"] {
+  left: 47%;
+  bottom: 72%;
+}
+.town-hub-shell[data-current-region-id="earth"] .facility-node[data-anchor="left_inn"] {
+  left: 24%;
+  bottom: 64%;
+}
+.town-hub-shell[data-current-region-id="earth"] .facility-node[data-anchor="bottom_left_alchemy"] {
+  left: 13%;
+  bottom: 43%;
+}
+.town-hub-shell[data-current-region-id="earth"] .facility-node[data-anchor="bottom_center_temple"] {
+  /* 轉職神殿 (TMP) 移到右下紫色建物 */
+  left: 88%;
+  bottom: 32%;
+}
+.town-hub-shell[data-current-region-id="earth"] .facility-node[data-anchor="mid_left_market"] {
+  /* 行商鋪 (SHP) 移到下方中右側 */
+  left: 69%;
+  bottom: 20%;
+}
+.town-hub-shell[data-current-region-id="earth"] .facility-node[data-anchor="right_workshop_group"] {
+  left: 71%;
+  bottom: 67%;
+}
+.town-hub-shell[data-current-region-id="earth"] .facility-node[data-anchor="right_arcane_shop"] {
+  /* 魔法商店 (ARC) 移到左下教堂型建物 */
+  left: 30%;
+  bottom: 23%;
+}
+.town-hub-shell[data-current-region-id="earth"] .facility-node[data-anchor="far_bottom_right_depot"] {
+  /* 城鎮倉庫 (STO) 移到中右側綠屋頂 */
+  left: 72%;
+  bottom: 42%;
+}
+.town-hub-shell[data-current-region-id="earth"] .facility-node[data-anchor="bottom_right_archive"] {
+  left: 50%;
+  bottom: 43%;
+}
+
+/* --- 雷脊前哨 (thunder) --- */
+.town-hub-shell[data-current-region-id="thunder"] .facility-node[data-anchor="top_center_guild_hall"] {
+  left: 51%;
+  bottom: 74%;
+}
+.town-hub-shell[data-current-region-id="thunder"] .facility-node[data-anchor="far_bottom_right_depot"] {
+  left: 64%;
+  bottom: 67%;
+}
+.town-hub-shell[data-current-region-id="thunder"] .facility-node[data-anchor="right_workshop_group"] {
+  left: 75%;
+  bottom: 58%;
+}
+.town-hub-shell[data-current-region-id="thunder"] .facility-node[data-anchor="right_arcane_shop"] {
+  left: 88%;
+  bottom: 49%;
+}
+.town-hub-shell[data-current-region-id="thunder"] .facility-node[data-anchor="mid_left_market"] {
+  left: 67%;
+  bottom: 35%;
+}
+.town-hub-shell[data-current-region-id="thunder"] .facility-node[data-anchor="bottom_left_alchemy"] {
+  left: 33%;
+  bottom: 40%;
+}
+.town-hub-shell[data-current-region-id="thunder"] .facility-node[data-anchor="bottom_center_temple"] {
+  left: 34%;
+  bottom: 65%;
+}
+.town-hub-shell[data-current-region-id="thunder"] .facility-node[data-anchor="left_inn"] {
+  left: 14%;
+  bottom: 44%;
+}
+.town-hub-shell[data-current-region-id="thunder"] .facility-node[data-anchor="bottom_right_archive"] {
+  left: 47%;
+  bottom: 46%;
+}
+
+/* --- 魔王城前線 (final) --- */
+.town-hub-shell[data-current-region-id="final"] .facility-node[data-anchor="top_center_guild_hall"] {
+  left: 48%;
+  bottom: 74%;
+}
+.town-hub-shell[data-current-region-id="final"] .facility-node[data-anchor="left_inn"] {
+  left: 15%;
+  bottom: 49%;
+}
+.town-hub-shell[data-current-region-id="final"] .facility-node[data-anchor="mid_left_market"] {
+  left: 28%;
+  bottom: 62%;
+}
+.town-hub-shell[data-current-region-id="final"] .facility-node[data-anchor="bottom_left_alchemy"] {
+  /* 鍊成工房 (ALC) 移到右下藍色帳篷 */
+  left: 66%;
+  bottom: 25%;
+}
+.town-hub-shell[data-current-region-id="final"] .facility-node[data-anchor="bottom_center_temple"] {
+  left: 31%;
+  bottom: 22%;
+}
+.town-hub-shell[data-current-region-id="final"] .facility-node[data-anchor="right_workshop_group"] {
+  left: 71%;
+  bottom: 62%;
+}
+.town-hub-shell[data-current-region-id="final"] .facility-node[data-anchor="right_arcane_shop"] {
+  left: 67%;
+  bottom: 48%;
+}
+.town-hub-shell[data-current-region-id="final"] .facility-node[data-anchor="far_bottom_right_depot"] {
+  /* 城鎮倉庫 (STO) 移到最右側帳篷區 */
+  left: 89%;
+  bottom: 42%;
+}
+.town-hub-shell[data-current-region-id="final"] .facility-node[data-anchor="bottom_right_archive"] {
+  left: 50%;
+  bottom: 43%;
+}
+
+/* ==========================================
    頁面底端整合式偵錯主控台 (Debug Panel)
    ========================================== */
 .debug-container {

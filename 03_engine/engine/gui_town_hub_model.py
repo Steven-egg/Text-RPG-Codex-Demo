@@ -187,8 +187,8 @@ def town_hub_model(state: dict[str, Any], selected_region_id: str | None = None)
     return {
         "screen_id": "town_hub",
         "layout_family": "hub",
-        "title": f"{town_name} (Live)",
-        "subtitle": "Live Town Hub uses shared facilities while carrying region context from CLI data.",
+        "title": f"{town_name}",
+        "subtitle": "薄霧散去，街道重新亮起微光。旅人們在廣場邊低聲交談。",
         "current_region_id": region_id,
         "selected_region_id": region_id,
         "current_region_label": region_label,
@@ -197,16 +197,15 @@ def town_hub_model(state: dict[str, Any], selected_region_id: str | None = None)
         "region_options": region_options_model(state, region_id),
         "resource_strip": resource_strip(state),
         "town_guidance": [
-            f"Current region: {region_label} / {town_name}.",
-            "Facilities are shared live shells for this slice; region-specific facility content is deferred.",
+            "選擇設施進行整備，或前往世界地圖繼續冒險。",
         ],
         "selected_facility_id": "guild",
         "facility_nodes": facility_nodes(state),
         "navigation_actions": [
             {
                 "action_id": "open_world_map",
-                "label": "Open World Map",
-                "description": "Return to the five-region live world map.",
+                "label": "前往世界地圖",
+                "description": "離開城鎮，選擇下一個目的地。",
                 "enabled": True,
                 "payload": {"region_id": region_id},
             },

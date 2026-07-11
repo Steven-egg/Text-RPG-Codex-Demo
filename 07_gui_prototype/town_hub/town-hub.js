@@ -190,32 +190,65 @@ async function loadStaticFallback(path, liveError) {
 function render() {
   const { model } = state;
   rememberCurrentRegion(model);
-  shellEl.dataset.currentRegionId = model.current_region_id ?? "border_fire";
-  if (model.town_asset) {
-    facilitySceneEl.style.backgroundImage = `url("${model.town_asset}")`;
+
+  const regionParam = new URLSearchParams(window.location.search).get("region");
+  const rawRegion = model.current_region_id ?? regionParam ?? "border_fire";
+  const regionMap = {
+    "fire": "border_fire",
+    "border_fire": "border_fire",
+    "ice": "ice",
+    "earth": "earth",
+    "thunder": "thunder",
+    "final": "final"
+  };
+  const activeRegion = regionMap[rawRegion] ?? "border_fire";
+  shellEl.dataset.currentRegionId = activeRegion;
+
+  let townAsset = model.town_asset;
+  if (!townAsset) {
+    const assetMap = {
+      "border_fire": "./assets/town-hub-environment-v01.jpg",
+      "ice": "./assets/ice-town-hub-placeholder-candidate-v01.png",
+      "earth": "./assets/earth-town-hub-placeholder-candidate-v01.png",
+      "thunder": "./assets/thunder-town-hub-placeholder-candidate-v01.png",
+      "final": "./assets/final-town-hub-placeholder-candidate-v02.png"
+    };
+    townAsset = assetMap[activeRegion];
+  }
+  if (townAsset) {
+    facilitySceneEl.style.backgroundImage = `url("${townAsset}")`;
   }
 
   // 動態處理並剝離 (Live) 大字標題，改成精緻的小徽章
   let displayTitle = model.title ?? "";
-  let isLive = false;
   if (displayTitle.includes("(Live)")) {
     displayTitle = displayTitle.replace("(Live)", "").trim();
-    isLive = true;
   }
   titleEl.textContent = displayTitle;
 
+  // 根據使用者要求，隱藏 live 偵錯徽章
   if (liveStatusBadgeEl) {
-    liveStatusBadgeEl.style.display = isLive ? "inline-block" : "none";
+    liveStatusBadgeEl.style.display = "none";
   }
 
-  // 動態過濾並替換工程用語
+  // 動態過濾並替換工程與測試用語
   let displaySubtitle = model.subtitle ?? "";
-  if (
+  const isTechnicalSubtitle = 
     displaySubtitle.includes("Python") ||
     displaySubtitle.includes("遊戲引擎") ||
     displaySubtitle.includes("同步") ||
-    displaySubtitle.includes("engine")
-  ) {
+    displaySubtitle.includes("engine") ||
+    displaySubtitle.includes("Live") ||
+    displaySubtitle.includes("live") ||
+    displaySubtitle.includes("shared") ||
+    displaySubtitle.includes("facilities") ||
+    displaySubtitle.includes("context") ||
+    displaySubtitle.includes("CLI") ||
+    displaySubtitle.includes("data") ||
+    displaySubtitle.includes("slice") ||
+    displaySubtitle.includes("fixture");
+
+  if (isTechnicalSubtitle) {
     displaySubtitle = "薄霧散去，街道重新亮起微光。旅人們在廣場邊低聲交談。";
   }
   subtitleEl.textContent = displaySubtitle;
@@ -324,18 +357,35 @@ function renderFacilities(nodes) {
 }
 
 function renderGuidance(lines) {
-  const cleanedLines = lines.map((line) => {
-    if (
-      line.includes("Live 模式") ||
+  const defaultTip = "選擇設施進行整備，或前往世界地圖繼續冒險。";
+  let cleanedLines = lines.map((line) => {
+    const isTechnicalGuidance = 
+      line.includes("Live") ||
+      line.includes("live") ||
       line.includes("Python") ||
-      line.includes("核心驗證") ||
-      line.includes("引擎同步") ||
-      line.includes("動態更新")
-    ) {
-      return "選擇設施進行整備，或前往世界地圖繼續冒險。";
-    }
-    return line;
+      line.includes("核心") ||
+      line.includes("驗證") ||
+      line.includes("引擎") ||
+      line.includes("同步") ||
+      line.includes("更新") ||
+      line.includes("region") ||
+      line.includes("facility") ||
+      line.includes("shell") ||
+      line.includes("slice") ||
+      line.includes("deferred") ||
+      line.includes("CLI") ||
+      line.includes("data") ||
+      line.includes("Current region") ||
+      line.includes("current region");
+    
+    return isTechnicalGuidance ? defaultTip : line;
   });
+
+  // 去重並過濾重複的預設提示
+  cleanedLines = [...new Set(cleanedLines)];
+  if (cleanedLines.length === 0) {
+    cleanedLines = [defaultTip];
+  }
 
   guidanceEl.replaceChildren(
     ...cleanedLines.map((line) => {
