@@ -38,6 +38,10 @@ expansion. Runtime bridge planning and approved-slice details remain in
 - Facility-family CSS convergence is landed for the current prototype screens.
 - Finalized GUI asset links and the current narrow bridge slices are already
   recorded in `README.md` and the runtime bridge plan.
+- World Map localization and preview-image mapping are landed: the render layer
+  consumes localized presentation fields and `preview_image` paths for static
+  fixtures and the narrow live bridge; Main Dungeon phase previews remain
+  data-driven.
 - No new GUI implementation target is pre-approved; request an exact small
   surface before editing.
 

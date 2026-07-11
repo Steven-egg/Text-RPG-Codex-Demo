@@ -1,90 +1,94 @@
 {
   "screen_id": "world_map",
   "layout_family": "navigation_map",
-  "title": "World Map",
-  "subtitle": "Live region routing: Border / Fire map view.",
+  "title": "世界地圖",
+  "subtitle": "冒險地圖： 烈焰邊境 。",
   "selected_location_id": "dungeon_moss_cave",
   "current_location_id": "border_town",
   "current_region_id": "border_fire",
-  "current_region_label": "Border / Fire",
+  "current_region_label": "烈焰邊境",
   "current_town_name": "邊境城鎮艾爾姆",
   "map_asset": "./assets/world-map-environment-v01.jpg",
   "town_asset": "../town_hub/assets/town-hub-environment-v01.jpg",
   "region_gate": {
     "location_id": "region_gate_ice",
     "region_id": "border_fire",
-    "label": "Region Gate",
-    "description": "A route marker for leaving the fire border after the Fire Seal route is complete.",
-    "detail_note": "Only Ice is enabled in this runtime bridge slice; later regions remain locked placeholders.",
+    "label": "區域傳送陣",
+    "description": "完成烈焰印記路線後，可用於前往寒冰等其他區域的傳送陣。",
+    "detail_note": "此階段僅支援前往寒冰區域；其他區域在後續版本開放。",
     "position": {
       "x": 82,
       "y": 78
     },
     "tone": "gate",
-    "icon_token": "GATE",
+    "icon_token": "門",
     "unlocked": false,
-    "locked_reason": "Ice route unlocks after the Fire Seal route is complete.",
+    "locked_reason": "寒冰區域將在烈焰之印路線完成後解鎖。",
     "favorite": false,
-    "status_label": "Locked",
-    "recommended_level": "Route",
+    "status_label": "鎖定中",
+    "recommended_level": "傳送門",
     "steps": "0",
-    "attribute": "New Region",
-    "clear_state": "Locked",
-    "exploration_rating": "route",
+    "attribute": "新區域",
+    "clear_state": "未開放",
+    "exploration_rating": "區域移動",
     "boss": "-",
     "preview_role": "gate",
     "options": [
       {
         "region_id": "ice",
-        "label": "Ice",
-        "name": "Ice Region",
+        "label": "寒冰區域",
+        "name": "寒冰區域",
         "town_name": "霜潮港",
         "enabled": false,
         "unlocked": false,
-        "disabled_reason": "Ice route unlocks after the Fire Seal route is complete.",
+        "disabled_reason": "寒冰區域將在烈焰之印路線完成後解鎖。",
         "action_id": "travel_region",
         "payload": {
           "region_id": "ice"
-        }
+        },
+        "status_label": "已鎖定"
       },
       {
         "region_id": "earth",
-        "label": "Earth",
-        "name": "Earth Region",
+        "label": "大地區域",
+        "name": "大地區域",
         "town_name": "根環營地",
         "enabled": false,
         "unlocked": false,
-        "disabled_reason": "This region is not open in the current runtime bridge slice.",
+        "disabled_reason": "此區域在目前核心進度中尚未開放。",
         "action_id": "travel_region",
         "payload": {
           "region_id": "earth"
-        }
+        },
+        "status_label": "已鎖定"
       },
       {
         "region_id": "thunder",
-        "label": "Thunder",
-        "name": "Thunder Region",
+        "label": "風雷區域",
+        "name": "風雷區域",
         "town_name": "雷脊前哨",
         "enabled": false,
         "unlocked": false,
-        "disabled_reason": "This region is not open in the current runtime bridge slice.",
+        "disabled_reason": "此區域在目前核心進度中尚未開放。",
         "action_id": "travel_region",
         "payload": {
           "region_id": "thunder"
-        }
+        },
+        "status_label": "已鎖定"
       },
       {
         "region_id": "final",
-        "label": "Final",
-        "name": "Final Region",
+        "label": "終焉之地",
+        "name": "終焉之地",
         "town_name": "魔王城前線",
         "enabled": false,
         "unlocked": false,
-        "disabled_reason": "This region is not open in the current runtime bridge slice.",
+        "disabled_reason": "此區域在目前核心進度中尚未開放。",
         "action_id": "travel_region",
         "payload": {
           "region_id": "final"
-        }
+        },
+        "status_label": "已鎖定"
       }
     ],
     "primary_action": {
@@ -95,13 +99,14 @@
       "payload": {
         "source_region_id": "border_fire"
       }
-    }
+    },
+    "preview_image": "../dungeon_exploration/assets/final-dungeon-explore-minor-a-candidate-v01.png"
   },
   "region_options": [
     {
       "region_id": "border_fire",
-      "label": "Border / Fire",
-      "name": "Border / Fire Route",
+      "label": "烈焰邊境",
+      "name": "烈焰邊境",
       "town_name": "邊境城鎮艾爾姆",
       "unlocked": true,
       "route_enabled": true,
@@ -109,12 +114,13 @@
       "unlock_key": null,
       "dungeon_count": 4,
       "quest_count": 8,
-      "disabled_reason": null
+      "disabled_reason": null,
+      "status_label": "已鎖定"
     },
     {
       "region_id": "ice",
-      "label": "Ice",
-      "name": "Ice Region",
+      "label": "寒冰區域",
+      "name": "寒冰區域",
       "town_name": "霜潮港",
       "unlocked": false,
       "route_enabled": false,
@@ -122,12 +128,13 @@
       "unlock_key": "unlock_ice_region",
       "dungeon_count": 4,
       "quest_count": 5,
-      "disabled_reason": "Ice route unlocks after the Fire Seal route is complete."
+      "disabled_reason": "寒冰區域將在烈焰之印路線完成後解鎖。",
+      "status_label": "已鎖定"
     },
     {
       "region_id": "earth",
-      "label": "Earth",
-      "name": "Earth Region",
+      "label": "大地區域",
+      "name": "大地區域",
       "town_name": "根環營地",
       "unlocked": false,
       "route_enabled": false,
@@ -135,12 +142,13 @@
       "unlock_key": "unlock_earth_region_preview",
       "dungeon_count": 4,
       "quest_count": 5,
-      "disabled_reason": "This region is not open in the current runtime bridge slice."
+      "disabled_reason": "此區域在目前核心進度中尚未開放。",
+      "status_label": "已鎖定"
     },
     {
       "region_id": "thunder",
-      "label": "Thunder",
-      "name": "Thunder Region",
+      "label": "風雷區域",
+      "name": "風雷區域",
       "town_name": "雷脊前哨",
       "unlocked": false,
       "route_enabled": false,
@@ -148,12 +156,13 @@
       "unlock_key": "unlock_thunder_region_preview",
       "dungeon_count": 4,
       "quest_count": 5,
-      "disabled_reason": "This region is not open in the current runtime bridge slice."
+      "disabled_reason": "此區域在目前核心進度中尚未開放。",
+      "status_label": "已鎖定"
     },
     {
       "region_id": "final",
-      "label": "Final",
-      "name": "Final Region",
+      "label": "終焉之地",
+      "name": "終焉之地",
       "town_name": "魔王城前線",
       "unlocked": false,
       "route_enabled": false,
@@ -161,7 +170,8 @@
       "unlock_key": "unlock_final_region_preview",
       "dungeon_count": 5,
       "quest_count": 5,
-      "disabled_reason": "This region is not open in the current runtime bridge slice."
+      "disabled_reason": "此區域在目前核心進度中尚未開放。",
+      "status_label": "已鎖定"
     }
   ],
   "player": {
@@ -305,28 +315,28 @@
       "location_id": "border_town",
       "region_id": "border_fire",
       "label": "邊境城鎮艾爾姆",
-      "description": "Border / Fire town hub. Facilities reuse the shared live Town Hub shell for now.",
-      "detail_note": "Live region context is carried by the runtime bridge; facilities remain shared for this slice.",
+      "description": "邊境城鎮艾爾姆：烈焰邊境的中心城鎮。設施目前共用城鎮中心區域。",
+      "detail_note": "區域內容與據點設施由遊戲核心橋接支援。",
       "position": {
         "x": 35,
         "y": 22
       },
       "tone": "town",
-      "icon_token": "TOWN",
+      "icon_token": "鎮",
       "unlocked": true,
       "locked_reason": null,
       "favorite": true,
-      "status_label": "Town Hub",
-      "recommended_level": "Hub",
-      "steps": "0",
-      "attribute": "Border / Fire",
-      "clear_state": "Available",
-      "exploration_rating": "safe",
+      "status_label": "城鎮中心",
+      "recommended_level": "安全據點",
+      "steps": "0 步",
+      "attribute": "烈焰邊境",
+      "clear_state": "可返回",
+      "exploration_rating": "安全",
       "boss": "-",
       "preview_role": "town",
       "primary_action": {
         "action_id": "back_to_town_hub",
-        "label": "Enter town",
+        "label": "進入城鎮",
         "enabled": true,
         "disabled_reason": null,
         "payload": {
@@ -334,7 +344,8 @@
           "location_id": "border_town",
           "town_name": "邊境城鎮艾爾姆"
         }
-      }
+      },
+      "preview_image": "../town_hub/assets/town-hub-environment-v01.jpg"
     },
     {
       "location_id": "dungeon_moss_cave",
@@ -344,28 +355,28 @@
         "dungeon_moss_cave"
       ],
       "label": "青苔洞窟",
-      "description": "Border / Fire dungeon from runtime data: Lv1-3 / 12 steps / 3 encounter entries.",
-      "detail_note": "This map node dispatches the active runtime dungeon_id to Python.",
+      "description": "烈焰邊境 迷宮（核心資料）：推薦等級 Lv1-3 / 探索步數 12 步 / 魔物種類 3 種。",
+      "detail_note": "此點位將傳送當前迷宮 ID 至遊戲核心處理。",
       "position": {
         "x": 24,
         "y": 48
       },
       "tone": "fire",
-      "icon_token": "F",
+      "icon_token": "火",
       "unlocked": true,
       "locked_reason": null,
       "favorite": true,
-      "status_label": "Playable",
+      "status_label": "可探索",
       "recommended_level": "Lv1-3",
-      "steps": "12",
+      "steps": "12 步",
       "attribute": "自然/無",
-      "clear_state": "Uncleared",
-      "exploration_rating": "runtime",
+      "clear_state": "未通關",
+      "exploration_rating": "核心驗證",
       "boss": "-",
       "preview_role": "cave",
       "primary_action": {
         "action_id": "confirm_travel",
-        "label": "Travel",
+        "label": "確認前往",
         "enabled": true,
         "disabled_reason": null,
         "payload": {
@@ -373,7 +384,8 @@
           "location_id": "dungeon_moss_cave",
           "region_id": "border_fire"
         }
-      }
+      },
+      "preview_image": "../dungeon_exploration/assets/moss-cave-exploration-v01.png"
     },
     {
       "location_id": "dungeon_scorched_mine",
@@ -383,28 +395,28 @@
         "dungeon_scorched_mine"
       ],
       "label": "焦石礦坑",
-      "description": "Border / Fire dungeon from runtime data: Lv4-6 / 18 steps / 3 encounter entries.",
-      "detail_note": "This map node dispatches the active runtime dungeon_id to Python.",
+      "description": "烈焰邊境 迷宮（核心資料）：推薦等級 Lv4-6 / 探索步數 18 步 / 魔物種類 3 種。",
+      "detail_note": "此點位將傳送當前迷宮 ID 至遊戲核心處理。",
       "position": {
         "x": 49,
         "y": 42
       },
       "tone": "fire",
-      "icon_token": "F",
+      "icon_token": "火",
       "unlocked": true,
       "locked_reason": null,
       "favorite": true,
-      "status_label": "Playable",
+      "status_label": "可探索",
       "recommended_level": "Lv4-6",
-      "steps": "18",
+      "steps": "18 步",
       "attribute": "火",
-      "clear_state": "Uncleared",
-      "exploration_rating": "runtime",
+      "clear_state": "未通關",
+      "exploration_rating": "核心驗證",
       "boss": "山寨頭目葛倫",
       "preview_role": "quarry",
       "primary_action": {
         "action_id": "confirm_travel",
-        "label": "Travel",
+        "label": "確認前往",
         "enabled": true,
         "disabled_reason": null,
         "payload": {
@@ -412,7 +424,8 @@
           "location_id": "dungeon_scorched_mine",
           "region_id": "border_fire"
         }
-      }
+      },
+      "preview_image": "../dungeon_exploration/assets/ember-quarry-exploration-v01.png"
     },
     {
       "location_id": "dungeon_ash_ravine",
@@ -422,36 +435,37 @@
         "dungeon_ash_ravine"
       ],
       "label": "灰燼裂谷",
-      "description": "Border / Fire dungeon from runtime data: Lv7-9 / 18 steps / 3 encounter entries.",
-      "detail_note": "This map node dispatches the active runtime dungeon_id to Python.",
+      "description": "烈焰邊境 迷宮（核心資料）：推薦等級 Lv7-9 / 探索步數 18 步 / 魔物種類 3 種。",
+      "detail_note": "此點位將傳送當前迷宮 ID 至遊戲核心處理。",
       "position": {
         "x": 48,
         "y": 67
       },
       "tone": "fire",
-      "icon_token": "F",
+      "icon_token": "火",
       "unlocked": false,
-      "locked_reason": "Dungeon is locked by runtime progression.",
+      "locked_reason": "此迷宮因核心劇情進度尚未解鎖。",
       "favorite": true,
-      "status_label": "Locked",
+      "status_label": "尚未解鎖",
       "recommended_level": "Lv7-9",
-      "steps": "18",
+      "steps": "18 步",
       "attribute": "火",
-      "clear_state": "Uncleared",
-      "exploration_rating": "runtime",
+      "clear_state": "未通關",
+      "exploration_rating": "核心驗證",
       "boss": "灰燼守衛",
       "preview_role": "valley",
       "primary_action": {
         "action_id": "confirm_travel",
-        "label": "Travel",
+        "label": "確認前往",
         "enabled": false,
-        "disabled_reason": "Dungeon is locked by runtime progression.",
+        "disabled_reason": "此迷宮因核心劇情進度尚未解鎖。",
         "payload": {
           "dungeon_id": "dungeon_ash_ravine",
           "location_id": "dungeon_ash_ravine",
           "region_id": "border_fire"
         }
-      }
+      },
+      "preview_image": "../dungeon_exploration/assets/ash-ravine-exploration-v01.png"
     },
     {
       "location_id": "dungeon_cinder_seal_depths",
@@ -461,28 +475,28 @@
         "dungeon_cinder_seal_depths"
       ],
       "label": "燼印深窟",
-      "description": "Border / Fire dungeon from runtime data: Lv9-11 / 18 steps / 3 encounter entries.",
-      "detail_note": "This map node dispatches the active runtime dungeon_id to Python.",
+      "description": "烈焰邊境 迷宮（核心資料）：推薦等級 Lv9-11 / 探索步數 18 步 / 魔物種類 3 種。",
+      "detail_note": "此點位將傳送當前迷宮 ID 至遊戲核心處理。",
       "position": {
         "x": 64,
         "y": 82
       },
       "tone": "fire",
-      "icon_token": "F",
+      "icon_token": "火",
       "unlocked": true,
       "locked_reason": null,
       "favorite": true,
-      "status_label": "Playable",
+      "status_label": "可探索",
       "recommended_level": "Lv9-11",
-      "steps": "18",
+      "steps": "18 步",
       "attribute": "火",
-      "clear_state": "Uncleared",
-      "exploration_rating": "runtime",
+      "clear_state": "未通關",
+      "exploration_rating": "核心驗證",
       "boss": "燼印鎮衛",
       "preview_role": "cinder",
       "primary_action": {
         "action_id": "confirm_travel",
-        "label": "Travel",
+        "label": "確認前往",
         "enabled": true,
         "disabled_reason": null,
         "payload": {
@@ -490,83 +504,88 @@
           "location_id": "dungeon_cinder_seal_depths",
           "region_id": "border_fire"
         }
-      }
+      },
+      "preview_image": "../dungeon_exploration/assets/cinder-seal-depths-exploration-v01.png"
     },
     {
       "location_id": "region_gate_ice",
       "region_id": "border_fire",
-      "label": "Region Gate",
-      "description": "A route marker for leaving the fire border after the Fire Seal route is complete.",
-      "detail_note": "Only Ice is enabled in this runtime bridge slice; later regions remain locked placeholders.",
+      "label": "區域傳送陣",
+      "description": "完成烈焰印記路線後，可用於前往寒冰等其他區域的傳送陣。",
+      "detail_note": "此階段僅支援前往寒冰區域；其他區域在後續版本開放。",
       "position": {
         "x": 82,
         "y": 78
       },
       "tone": "gate",
-      "icon_token": "GATE",
+      "icon_token": "門",
       "unlocked": false,
-      "locked_reason": "Ice route unlocks after the Fire Seal route is complete.",
+      "locked_reason": "寒冰區域將在烈焰之印路線完成後解鎖。",
       "favorite": false,
-      "status_label": "Locked",
-      "recommended_level": "Route",
+      "status_label": "鎖定中",
+      "recommended_level": "傳送門",
       "steps": "0",
-      "attribute": "New Region",
-      "clear_state": "Locked",
-      "exploration_rating": "route",
+      "attribute": "新區域",
+      "clear_state": "未開放",
+      "exploration_rating": "區域移動",
       "boss": "-",
       "preview_role": "gate",
       "options": [
         {
           "region_id": "ice",
-          "label": "Ice",
-          "name": "Ice Region",
+          "label": "寒冰區域",
+          "name": "寒冰區域",
           "town_name": "霜潮港",
           "enabled": false,
           "unlocked": false,
-          "disabled_reason": "Ice route unlocks after the Fire Seal route is complete.",
+          "disabled_reason": "寒冰區域將在烈焰之印路線完成後解鎖。",
           "action_id": "travel_region",
           "payload": {
             "region_id": "ice"
-          }
+          },
+          "status_label": "已鎖定"
         },
         {
           "region_id": "earth",
-          "label": "Earth",
-          "name": "Earth Region",
+          "label": "大地區域",
+          "name": "大地區域",
           "town_name": "根環營地",
           "enabled": false,
           "unlocked": false,
-          "disabled_reason": "This region is not open in the current runtime bridge slice.",
+          "disabled_reason": "此區域在目前核心進度中尚未開放。",
           "action_id": "travel_region",
           "payload": {
             "region_id": "earth"
-          }
+          },
+          "status_label": "已鎖定"
         },
         {
           "region_id": "thunder",
-          "label": "Thunder",
-          "name": "Thunder Region",
+          "label": "風雷區域",
+          "name": "風雷區域",
           "town_name": "雷脊前哨",
           "enabled": false,
           "unlocked": false,
-          "disabled_reason": "This region is not open in the current runtime bridge slice.",
+          "disabled_reason": "此區域在目前核心進度中尚未開放。",
           "action_id": "travel_region",
           "payload": {
             "region_id": "thunder"
-          }
+          },
+          "status_label": "已鎖定"
         },
         {
           "region_id": "final",
-          "label": "Final",
-          "name": "Final Region",
+          "label": "終焉之地",
+          "name": "終焉之地",
           "town_name": "魔王城前線",
           "enabled": false,
           "unlocked": false,
-          "disabled_reason": "This region is not open in the current runtime bridge slice.",
+          "disabled_reason": "此區域在目前核心進度中尚未開放。",
           "action_id": "travel_region",
           "payload": {
             "region_id": "final"
-          }
+          },
+          "status_label": "已鎖定"
         }
       ],
       "primary_action": {
@@ -577,7 +596,8 @@
         "payload": {
           "source_region_id": "border_fire"
         }
-      }
+      },
+      "preview_image": "../dungeon_exploration/assets/final-dungeon-explore-minor-a-candidate-v01.png"
     }
   ]
 }

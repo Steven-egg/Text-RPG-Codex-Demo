@@ -348,14 +348,14 @@ function renderLocations(locations) {
         const landmark = document.createElement("span");
         landmark.className = "region-map-landmark";
         landmark.setAttribute("aria-hidden", "true");
-        landmark.textContent = "MAP";
+        landmark.textContent = "地圖";
         button.append(landmark);
       }
 
       if (!location.unlocked) {
         const lock = document.createElement("span");
         lock.className = "node-lock";
-        lock.textContent = "LOCK";
+        lock.textContent = "鎖定";
         button.append(lock);
       }
 
@@ -398,6 +398,21 @@ function renderSelectedLocation() {
     previewRole = "cinder";
   }
   locationPreviewEl.dataset.previewRole = previewRole;
+
+  if (location.preview_image) {
+    locationPreviewEl.style.backgroundImage = `url("${location.preview_image}")`;
+    if (previewRole === "town") {
+      locationPreviewEl.style.backgroundSize = "220%";
+      locationPreviewEl.style.backgroundPosition = "50% 58%";
+    } else {
+      locationPreviewEl.style.backgroundSize = "cover";
+      locationPreviewEl.style.backgroundPosition = "center";
+    }
+  } else {
+    locationPreviewEl.style.backgroundImage = "";
+    locationPreviewEl.style.backgroundSize = "";
+    locationPreviewEl.style.backgroundPosition = "";
+  }
   renderDungeonControls(location);
   locationDescriptionEl.textContent = location.description ?? "";
   feedbackMessageEl.textContent = location.detail_note ?? "";
@@ -900,13 +915,13 @@ function renderRegionGatePanel() {
 
       const meta = document.createElement("span");
       meta.className = "meta";
-      meta.textContent = option.enabled ? "open" : "locked";
+      meta.textContent = option.status_label ?? (option.enabled ? "已開放" : "已鎖定");
 
       const desc = document.createElement("span");
       desc.className = "utility-list-item-desc";
       desc.textContent = option.enabled
         ? option.town_name ?? option.name ?? ""
-        : option.disabled_reason ?? "locked";
+        : option.disabled_reason ?? "已鎖定";
 
       header.append(name, meta);
       button.append(header, desc);

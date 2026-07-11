@@ -11,6 +11,9 @@ details belong to their owning SSOT.
 - Python CLI runtime remains gameplay authority.
 - `07_gui_prototype/` remains the default static GUI surface.
 - Facility CSS convergence and finalized GUI asset linking are landed.
+- World Map now has Traditional Chinese player-facing presentation text and
+  data-driven preview image paths for towns, normal dungeons, Main Dungeon
+  phases, and static fixture fallback. Runtime IDs remain unchanged.
 
 ## Minimum Read List
 
@@ -45,9 +48,9 @@ Then stop at a read-only planning gate.
 
 ## Next Boundary
 
-No implementation target is pre-approved. Continue only after the owner names
-one exact slice. Keep future GUI static changes inside the declared prototype
-surface and preserve fixture fallback plus UIAction logging.
+No implementation target is pre-approved. Keep future World Map work within the
+localized presentation and preview-mapping contract; preserve fixture fallback,
+UIAction logging, and runtime ID stability.
 
 Historical screen progress and verification are archived at:
 

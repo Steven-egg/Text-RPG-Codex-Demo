@@ -52,6 +52,10 @@ screen-level verification, and historical MVP notes live in Task Zone files.
   typography is tokenized locally, and the facility-family short-viewport CSS
   convergence pass has Antigravity-reported Chrome Headless visual verification
   for shop, guild, magic shop, and synthesis.
+- World Map localization and preview mapping are converged: player-facing map
+  copy uses Traditional Chinese, while runtime IDs remain stable; live models
+  and static fixtures provide data-driven preview image paths for towns,
+  dungeons, and Main Dungeon phases through Final.
 
 See `git status --short` before editing. The workspace may contain owner-side
 document cleanup or archive changes.
@@ -98,6 +102,10 @@ Current macro decisions:
   `07_gui_prototype/{shop_screen,guild_screen,magic_shop_screen,synthesis_screen}/`.
   Antigravity reported Chrome Headless browser screenshot / viewport visual
   verification for the facility-family CSS convergence pass.
+- World Map now renders localized Traditional Chinese presentation text and
+  data-driven per-dungeon / per-phase preview images in both live mode and
+  static fixture fallback. Main Dungeon map nodes use their localized shared
+  dungeon names rather than English placeholder labels.
 - No further monster image generation or asset-linking pass is planned.
 - Detailed GUI bridge and screen status lives in Task Zone files, not this
   README.

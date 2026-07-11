@@ -117,6 +117,7 @@ WORLD_MAP_PREVIEW_LOCATIONS = [
         "locked_reason": "尚未取得北境通行線索",
         "attribute": "冰 / 山脈",
         "preview_role": "frost",
+        "preview_image": "../dungeon_exploration/assets/ice-dungeon-explore-minor-a-candidate-v01.png",
     },
     {
         "location_id": "mist_forest",
@@ -129,6 +130,7 @@ WORLD_MAP_PREVIEW_LOCATIONS = [
         "locked_reason": "需要完成青苔洞窟後續調查",
         "attribute": "自然 / 幻霧",
         "preview_role": "forest",
+        "preview_image": "../dungeon_exploration/assets/earth-dungeon-explore-minor-a-candidate-v01.png",
     },
     {
         "location_id": "moon_tower",
@@ -141,6 +143,7 @@ WORLD_MAP_PREVIEW_LOCATIONS = [
         "locked_reason": "需要影月塔入口鑰印",
         "attribute": "秘法 / 月影",
         "preview_role": "tower",
+        "preview_image": "../dungeon_exploration/assets/thunder-dungeon-explore-minor-a-candidate-v01.png",
     },
     {
         "location_id": "drowned_ruins",
@@ -153,16 +156,46 @@ WORLD_MAP_PREVIEW_LOCATIONS = [
         "locked_reason": "尚未取得潮汐時刻表",
         "attribute": "水 / 遺跡",
         "preview_role": "ruins",
+        "preview_image": "../dungeon_exploration/assets/final-dungeon-explore-minor-a-candidate-v01.png",
     },
 ]
 
+DUNGEON_PREVIEW_ASSETS = {
+    # Border / Fire
+    "dungeon_moss_cave": "../dungeon_exploration/assets/moss-cave-exploration-v01.png",
+    "dungeon_scorched_mine": "../dungeon_exploration/assets/ember-quarry-exploration-v01.png",
+    "dungeon_ash_ravine": "../dungeon_exploration/assets/ash-ravine-exploration-v01.png",
+    "dungeon_cinder_seal_depths": "../dungeon_exploration/assets/cinder-seal-depths-exploration-v01.png",
+    # Ice
+    "dungeon_ice_minor_a": "../dungeon_exploration/assets/ice-dungeon-explore-minor-a-candidate-v01.png",
+    "dungeon_ice_minor_b": "../dungeon_exploration/assets/ice-dungeon-explore-minor-b-candidate-v01.png",
+    "dungeon_ice_main_phase_1": "../dungeon_exploration/assets/ice-dungeon-explore-main-phase-1-candidate-v01.png",
+    "dungeon_ice_main_phase_2": "../dungeon_exploration/assets/ice-dungeon-explore-main-phase-2-candidate-v01.png",
+    # Earth
+    "dungeon_earth_minor_a": "../dungeon_exploration/assets/earth-dungeon-explore-minor-a-candidate-v01.png",
+    "dungeon_earth_minor_b": "../dungeon_exploration/assets/earth-dungeon-explore-minor-b-candidate-v01.png",
+    "dungeon_earth_main_phase_1": "../dungeon_exploration/assets/earth-dungeon-explore-main-phase-1-candidate-v01.png",
+    "dungeon_earth_main_phase_2": "../dungeon_exploration/assets/earth-dungeon-explore-main-phase-2-candidate-v01.png",
+    # Thunder
+    "dungeon_thunder_minor_a": "../dungeon_exploration/assets/thunder-dungeon-explore-minor-a-candidate-v01.png",
+    "dungeon_thunder_minor_b": "../dungeon_exploration/assets/thunder-dungeon-explore-minor-b-candidate-v01.png",
+    "dungeon_thunder_main_phase_1": "../dungeon_exploration/assets/thunder-dungeon-explore-main-phase-1-candidate-v01.png",
+    "dungeon_thunder_main_phase_2": "../dungeon_exploration/assets/thunder-dungeon-explore-main-phase-2-candidate-v01.png",
+    # Final
+    "dungeon_final_minor_a": "../dungeon_exploration/assets/final-dungeon-explore-minor-a-candidate-v01.png",
+    "dungeon_final_minor_b": "../dungeon_exploration/assets/final-dungeon-explore-minor-b-candidate-v01.png",
+    "dungeon_final_main_phase_1": "../dungeon_exploration/assets/final-dungeon-explore-main-phase-1-candidate-v01.png",
+    "dungeon_final_main_phase_2": "../dungeon_exploration/assets/final-dungeon-explore-main-phase-1-candidate-v01.png",
+    "dungeon_final_main_phase_3": "../dungeon_exploration/assets/final-dungeon-explore-final-boss-hall-candidate-v01.png",
+}
+
 REGION_ORDER = ["border_fire", "ice", "earth", "thunder", "final"]
 REGION_LABELS = {
-    "border_fire": "Border / Fire",
-    "ice": "Ice",
-    "earth": "Earth",
-    "thunder": "Thunder",
-    "final": "Final",
+    "border_fire": "烈焰邊境",
+    "ice": "寒冰區域",
+    "earth": "大地區域",
+    "thunder": "風雷區域",
+    "final": "終焉之地",
 }
 REGION_TONES = {
     "border_fire": "fire",
@@ -172,11 +205,11 @@ REGION_TONES = {
     "final": "bone",
 }
 REGION_TOKENS = {
-    "border_fire": "F",
-    "ice": "I",
-    "earth": "E",
-    "thunder": "T",
-    "final": "X",
+    "border_fire": "火",
+    "ice": "冰",
+    "earth": "地",
+    "thunder": "雷",
+    "final": "終",
 }
 REGION_X = {
     "border_fire": 12,
@@ -226,7 +259,7 @@ REGION_DUNGEON_LAYOUTS = {
             "dungeon_ids": ["dungeon_ice_main_phase_1", "dungeon_ice_main_phase_2"],
             "position": {"x": 77, "y": 33},
             "preview_role": "fortress",
-            "label": "Ice Main Dungeon",
+            "label": "霜鐵古城",
             "main_dungeon": True,
         },
     ],
@@ -238,7 +271,7 @@ REGION_DUNGEON_LAYOUTS = {
             "dungeon_ids": ["dungeon_earth_main_phase_1", "dungeon_earth_main_phase_2"],
             "position": {"x": 76, "y": 34},
             "preview_role": "forest",
-            "label": "Earth Main Dungeon",
+            "label": "地脈石城",
             "main_dungeon": True,
         },
     ],
@@ -250,7 +283,7 @@ REGION_DUNGEON_LAYOUTS = {
             "dungeon_ids": ["dungeon_thunder_main_phase_1", "dungeon_thunder_main_phase_2"],
             "position": {"x": 76, "y": 33},
             "preview_role": "tower",
-            "label": "Thunder Main Dungeon",
+            "label": "雷霆陣列",
             "main_dungeon": True,
         },
     ],
@@ -262,7 +295,7 @@ REGION_DUNGEON_LAYOUTS = {
             "dungeon_ids": ["dungeon_final_main_phase_1", "dungeon_final_main_phase_2", "dungeon_final_main_phase_3"],
             "position": {"x": 77, "y": 33},
             "preview_role": "fortress",
-            "label": "Final Main Dungeon",
+            "label": "魔王城",
             "main_dungeon": True,
         },
     ],
@@ -293,14 +326,14 @@ def normalize_region_id(state: dict[str, Any], requested_region_id: str | None =
 
 def region_locked_reason(region_id: str) -> str:
     if region_id == "ice":
-        return "Ice route unlocks after the Fire Seal route is complete."
+        return "寒冰區域將在烈焰之印路線完成後解鎖。"
     if region_id == "earth":
-        return "Earth route unlocks after completing Ice Region quests."
+        return "大地區域將在完成寒冰區域任務後解鎖。"
     if region_id == "thunder":
-        return "Thunder route unlocks after completing Earth Region quests."
+        return "風雷區域將在完成大地區域任務後解鎖。"
     if region_id == "final":
-        return "Final Region requires all four enshrined elemental seals."
-    return f"{REGION_LABELS.get(region_id, region_id)} region is not unlocked yet."
+        return "終焉之地需要供奉全部四顆元素印記。"
+    return f"{REGION_LABELS.get(region_id, region_id)} 區域尚未解鎖。"
 
 
 def region_options_model(state: dict[str, Any], selected_region_id: str | None = None) -> list[dict[str, Any]]:
@@ -359,29 +392,29 @@ def main_dungeon_model(state: dict[str, Any], slot: dict[str, Any], region_id: s
     for phase_index, phase_dungeon_id in enumerate(dungeon_ids, start=1):
         phase_dungeon = DUNGEONS[phase_dungeon_id]
         phase_unlocked = game.is_unlocked(state, phase_dungeon.get("unlock"))
-        locked_reason = None if phase_unlocked else "Dungeon is locked by runtime progression."
+        locked_reason = None if phase_unlocked else "此迷宮階段因核心劇情進度尚未解鎖。"
         phases.append(
             {
                 "phase_index": phase_index,
                 "dungeon_id": phase_dungeon_id,
                 "label": phase_dungeon["name"],
                 "description": (
-                    f"{REGION_LABELS[region_id]} main dungeon phase {phase_index}: "
-                    f"{phase_dungeon['recommended']} / {phase_dungeon['steps']} steps / "
-                    f"{len(phase_dungeon.get('monsters', []))} encounter entries."
+                    f"{REGION_LABELS[region_id]}主線迷宮 階段 {phase_index}：推薦等級 {phase_dungeon['recommended']} / 探索步數 {phase_dungeon['steps']} 步 / 魔物種類 {len(phase_dungeon.get('monsters', []))} 種。"
                 ),
-                "detail_note": "This phase reuses the runtime-confirmed travel action for the shared main-dungeon node.",
+                "detail_note": "本階段使用由遊戲核心驗證的旅行動作。",
                 "unlocked": phase_unlocked,
                 "replayable": phase_unlocked,
                 "recommended_level": phase_dungeon["recommended"],
                 "steps": f"{phase_dungeon['steps']}",
                 "attribute": phase_dungeon.get("element", REGION_LABELS[region_id]),
-                "clear_state": "Cleared" if phase_dungeon_id in state.get("cleared_dungeons", []) else "Uncleared",
-                "exploration_rating": "runtime",
+                "clear_state": "已通關" if phase_dungeon_id in state.get("cleared_dungeons", []) else "未通關",
+                "exploration_rating": "核心驗證",
                 "boss": boss_label(phase_dungeon.get("boss")),
+                "preview_role": slot.get("preview_role", "dungeon"),
+                "preview_image": DUNGEON_PREVIEW_ASSETS.get(phase_dungeon_id),
                 "primary_action": {
                     "action_id": "confirm_travel",
-                    "label": "Travel",
+                    "label": "確認前往",
                     "enabled": phase_unlocked,
                     "disabled_reason": locked_reason,
                     "payload": {
@@ -571,25 +604,26 @@ def world_map_model(state: dict[str, Any], selected_region_id: str | None = None
             "location_id": town_id,
             "region_id": region_id,
             "label": town_name,
-            "description": f"{region_label} town hub. Facilities reuse the shared live Town Hub shell for now.",
-            "detail_note": "Live region context is carried by the runtime bridge; facilities remain shared for this slice.",
+            "description": f"{town_name}：{region_label}的中心城鎮。設施目前共用城鎮中心區域。",
+            "detail_note": "區域內容與據點設施由遊戲核心橋接支援。",
             "position": REGION_TOWN_POSITIONS[region_id],
             "tone": "town",
-            "icon_token": "TOWN",
+            "icon_token": "鎮",
             "unlocked": True,
             "locked_reason": None,
             "favorite": region_id == "border_fire",
-            "status_label": "Town Hub",
-            "recommended_level": "Hub",
-            "steps": "0",
+            "status_label": "城鎮中心",
+            "recommended_level": "安全據點",
+            "steps": "0 步",
             "attribute": region_label,
-            "clear_state": "Available",
-            "exploration_rating": "safe",
+            "clear_state": "可返回",
+            "exploration_rating": "安全",
             "boss": "-",
             "preview_role": "town",
+            "preview_image": REGION_TOWN_ASSETS.get(region_id),
             "primary_action": {
                 "action_id": "back_to_town_hub",
-                "label": "Enter town",
+                "label": "進入城鎮",
                 "enabled": True,
                 "disabled_reason": None,
                 "payload": {"region_id": region_id, "location_id": town_id, "town_name": town_name},
@@ -605,7 +639,7 @@ def world_map_model(state: dict[str, Any], selected_region_id: str | None = None
         node_id = slot["node_id"]
         main_dungeon = main_dungeon_model(state, slot, region_id)
         dungeon_unlocked = game.is_unlocked(state, dungeon.get("unlock"))
-        locked_reason = None if dungeon_unlocked else "Dungeon is locked by runtime progression."
+        locked_reason = None if dungeon_unlocked else "此迷宮因核心劇情進度尚未解鎖。"
         if dungeon_unlocked:
             unlocked_location_ids.add(node_id)
 
@@ -618,27 +652,27 @@ def world_map_model(state: dict[str, Any], selected_region_id: str | None = None
                 "main_dungeon": main_dungeon,
                 "label": slot.get("label", dungeon["name"]),
                 "description": (
-                    f"{region_label} dungeon from runtime data: {dungeon['recommended']} / "
-                    f"{dungeon['steps']} steps / {len(dungeon.get('monsters', []))} encounter entries."
+                    f"{region_label} 迷宮（核心資料）：推薦等級 {dungeon['recommended']} / 探索步數 {dungeon['steps']} 步 / 魔物種類 {len(dungeon.get('monsters', []))} 種。"
                 ),
-                "detail_note": "This map node dispatches the active runtime dungeon_id to Python.",
+                "detail_note": "此點位將傳送當前迷宮 ID 至遊戲核心處理。",
                 "position": slot["position"],
                 "tone": REGION_TONES[region_id],
                 "icon_token": REGION_TOKENS[region_id],
                 "unlocked": dungeon_unlocked,
                 "locked_reason": locked_reason,
                 "favorite": region_id == "border_fire",
-                "status_label": "Playable" if dungeon_unlocked else "Locked",
+                "status_label": "可探索" if dungeon_unlocked else "尚未解鎖",
                 "recommended_level": dungeon["recommended"],
-                "steps": f"{dungeon['steps']}",
+                "steps": f"{dungeon['steps']} 步",
                 "attribute": dungeon.get("element", region_label),
-                "clear_state": "Cleared" if dungeon_id in state.get("cleared_dungeons", []) else "Uncleared",
-                "exploration_rating": "runtime",
+                "clear_state": "已通關" if dungeon_id in state.get("cleared_dungeons", []) else "未通關",
+                "exploration_rating": "核心驗證",
                 "boss": boss_label(dungeon.get("boss")),
                 "preview_role": slot.get("preview_role", "dungeon"),
+                "preview_image": DUNGEON_PREVIEW_ASSETS.get(dungeon_id),
                 "primary_action": {
                     "action_id": "confirm_travel",
-                    "label": "Travel",
+                    "label": "確認前往",
                     "enabled": dungeon_unlocked,
                     "disabled_reason": locked_reason,
                     "payload": {"dungeon_id": dungeon_id, "location_id": node_id, "region_id": region_id},
@@ -659,6 +693,10 @@ def world_map_model(state: dict[str, Any], selected_region_id: str | None = None
         previous_position = slot["position"]
 
     gate_options = region_gate_options_model(state, region_id)
+    # Add status_label in Traditional Chinese to gate_options
+    for opt in gate_options:
+        opt["status_label"] = "已開放" if opt["enabled"] else "已鎖定"
+
     if region_id == "border_fire":
         ice_enabled = any(option["region_id"] == "ice" and option["enabled"] for option in gate_options)
         gate_unlocked = ice_enabled
@@ -672,27 +710,28 @@ def world_map_model(state: dict[str, Any], selected_region_id: str | None = None
     region_gate = {
         "location_id": gate_location_id,
         "region_id": region_id,
-        "label": "Region Gate",
-        "description": "A route marker for leaving this region." if region_id != "border_fire" else "A route marker for leaving the fire border after the Fire Seal route is complete.",
-        "detail_note": "Returning to Border is always enabled; later regions remain locked placeholders." if region_id != "border_fire" else "Only Ice is enabled in this runtime bridge slice; later regions remain locked placeholders.",
+        "label": "區域傳送陣",
+        "description": "前往其他區域的傳送陣。" if region_id != "border_fire" else "完成烈焰印記路線後，可用於前往寒冰等其他區域的傳送陣。",
+        "detail_note": "隨時可以返回烈焰邊境；後續區域在完成對應劇情後開放。" if region_id != "border_fire" else "此階段僅支援前往寒冰區域；其他區域在後續版本開放。",
         "position": REGION_GATE_POSITION,
         "tone": "gate",
-        "icon_token": "GATE",
+        "icon_token": "門",
         "unlocked": gate_unlocked,
         "locked_reason": gate_locked_reason,
         "favorite": False,
-        "status_label": "Open" if gate_unlocked else "Locked",
-        "recommended_level": "Route",
-        "steps": "0",
-        "attribute": "Return Region" if region_id != "border_fire" else "New Region",
-        "clear_state": "Available" if gate_unlocked else "Locked",
-        "exploration_rating": "route",
+        "status_label": "已開啟" if gate_unlocked else "鎖定中",
+        "recommended_level": "傳送門",
+        "steps": "0 步",
+        "attribute": "返回區域" if region_id != "border_fire" else "新區域",
+        "clear_state": "可前往" if gate_unlocked else "未開放",
+        "exploration_rating": "區域移動",
         "boss": "-",
         "preview_role": "gate",
+        "preview_image": "../dungeon_exploration/assets/final-dungeon-explore-minor-a-candidate-v01.png", # Use ruins as gate preview
         "options": gate_options,
         "primary_action": {
             "action_id": "open_region_gate",
-            "label": "Choose Region",
+            "label": "選擇區域",
             "enabled": True,
             "disabled_reason": None,
             "payload": {"source_region_id": region_id},
@@ -717,8 +756,8 @@ def world_map_model(state: dict[str, Any], selected_region_id: str | None = None
     return {
         "screen_id": "world_map",
         "layout_family": "navigation_map",
-        "title": "World Map",
-        "subtitle": f"Live region routing: {region_label} map view.",
+        "title": "世界地圖",
+        "subtitle": f"冒險地圖：{region_label}。",
         "selected_location_id": selected_location_id,
         "current_location_id": town_id,
         "current_region_id": region_id,
@@ -730,12 +769,12 @@ def world_map_model(state: dict[str, Any], selected_region_id: str | None = None
         "region_options": region_options_model(state, region_id),
         "player": player_model(state),
         "menu_actions": [
-            {"action_id": "view_status", "label": "Status", "description": "Open live player status preview.", "enabled": True, "payload": {}},
-            {"action_id": "open_bestiary", "label": "Bestiary", "description": "Open live bestiary preview.", "enabled": True, "payload": {}},
-            {"action_id": "open_inventory", "label": "Inventory", "description": "Open live inventory preview.", "enabled": True, "payload": {}},
-            {"action_id": "save_game", "label": "Save", "description": "Save through the Python runtime.", "enabled": True, "payload": {}},
-            {"action_id": "open_settings", "label": "Settings", "description": "Open settings placeholder.", "enabled": True, "payload": {}},
-            {"action_id": "back_to_start_screen", "label": "Title", "description": "Return to start screen.", "enabled": True, "payload": {}},
+            {"action_id": "view_status", "label": "查看狀態", "description": "查看冒險者的能力數值與目前裝備。", "enabled": True, "payload": {}},
+            {"action_id": "open_bestiary", "label": "怪物圖鑑", "description": "查看冒險中已登錄的魔物資訊。", "enabled": True, "payload": {}},
+            {"action_id": "open_inventory", "label": "背包 / 裝備", "description": "查看背包內持有的道具、裝備與素材。", "enabled": True, "payload": {}},
+            {"action_id": "save_game", "label": "存檔", "description": "透過遊戲核心寫入目前的進度。", "enabled": True, "payload": {}},
+            {"action_id": "open_settings", "label": "設定", "description": "調整遊戲設定。", "enabled": True, "payload": {}},
+            {"action_id": "back_to_start_screen", "label": "回到標題", "description": "返回遊戲開始標題畫面。", "enabled": True, "payload": {}},
         ],
         "route_segments": route_segments,
         "locations": locations,
