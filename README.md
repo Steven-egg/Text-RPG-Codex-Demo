@@ -6,8 +6,11 @@ screen-level verification, and historical MVP notes live in Task Zone files.
 
 ## Current Stable Capsule
 
-- Latest local checkpoint recorded for this handoff:
-  `7c71481 2026-07-09 [antig] fix(gui): close facility CSS short-viewport convergence`.
+- Latest committed checkpoint:
+  `45cbbad 2026-07-12 [codex] feat(combat): rework attributes and status effects`.
+- The current combat-planning slice sets Cleric damage-over-time / regeneration
+  durations to five turns and adds `06_tools/test_combat_balance.py` as a
+  deterministic measurement harness.
 - Element Maze is an expandable playable demo, not a closed demo.
 - The Python CLI runtime remains the gameplay authority.
 - Act 1 is playable through the main loop.
@@ -35,6 +38,10 @@ screen-level verification, and historical MVP notes live in Task Zone files.
 - Relic resonance, active effects, passive effects, stat bonuses, resistance,
   skill links, and combat behavior remain future runtime / facility planning
   gates.
+- Owner-approved player-side combat direction now lives in
+  `01_content/combat-progression-design-v1.md`. It records planning only;
+  race statuses, equipment effects, relic passives, growth review, and monster
+  balance still require their own implementation gates.
 - Basic facility CLI-parity bridge coverage is complete through Guild material
   buyback.
 - The maintainability checkpoint is stable: shared GUI presentation helpers and
@@ -116,6 +123,8 @@ Task Zone pointers:
   `01_content/archive/task.md`
 - World content detailed baselines:
   `01_content/world-content-baselines-v0.1.md`
+- Combat progression design and implementation order:
+  `01_content/combat-progression-design-v1.md`
 - GUI live bridge plan and landed live-slice notes:
   `01_content/gui-runtime-bridge-plan-v1.md`
 - GUI static prototype handoff and screen verification:
@@ -214,6 +223,8 @@ required unless runtime, data, schema, save, combat, or bridge behavior changes.
   rules.
 - `01_content/codex-handoff-short.md`: short new-session handoff.
 - `01_content/world-content-skeleton-v0.1.md`: current macro content skeleton.
+- `01_content/combat-progression-design-v1.md`: owner-approved player-side
+  combat progression design and future implementation order.
 - `01_content/gui-runtime-bridge-plan-v1.md`: active GUI live bridge boundary
   and planning gate; historical detail is archived separately.
 - `01_content/gui-static-current-state-v1.md`: compact current static prototype
@@ -258,6 +269,8 @@ Allowed as planning only:
 - route old Hot Zone details into Task / Cold Zone
 - produce a Hot Zone / branch-closure read-only sync check before future handoff
 - produce a read-only implementation gate for one exact future slice
+- produce the read-only implementation gate for Combat Progression v1 slice 1
+  (races, status damage, and Warrior Physical Charge)
 
 Still closed until a later exact-scope approval:
 

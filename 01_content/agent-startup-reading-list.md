@@ -55,6 +55,11 @@ Open these only for matching tasks.
   - Hot Zone macro skeleton and current content-count decisions.
 - `01_content/world-content-baselines-v0.1.md`
   - Task Zone detailed content baseline specifications for jobs, promotions, quests, and facilities.
+- `01_content/combat-progression-design-v1.md`
+  - Owner-approved player-side combat progression planning: job roles,
+    equipment direction, race-aware statuses, relic passive choices, expected
+    level bands, and the future implementation order. Read for combat,
+    equipment, relic, growth, or monster-balance planning.
 - `01_content/blueprints/regional-data-template-v0.1.md`
   - Task Zone template for reusable region data slots, ID naming, material
     timing, quest turn-in safety, and candidate-content handoff.
