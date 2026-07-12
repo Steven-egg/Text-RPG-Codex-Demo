@@ -10,7 +10,6 @@ SKILLS = {
         "stat": "attack",
         "element": "物理",
         "multiplier": 1.25,
-        "accuracy": 0,
         "desc": "物理傷害，倍率 1.25。",
     },
     "skill_arcane_bolt": {
@@ -20,7 +19,6 @@ SKILLS = {
         "stat": "magic",
         "element": "無",
         "multiplier": 1.2,
-        "accuracy": 4,
         "desc": "無屬性魔法傷害，倍率 1.2。",
     },
     "skill_backstab": {
@@ -30,8 +28,8 @@ SKILLS = {
         "stat": "attack",
         "element": "物理",
         "multiplier": 1.15,
-        "accuracy": 6,
         "crit_bonus": 10,
+        "on_hit": {"status": "bleed", "duration": 3, "chance": 70, "multiplier": 0.45, "damage_type": "physical"},
         "desc": "高命中物理傷害，暴擊 +10%。",
     },
     "skill_blessed_touch": {
@@ -39,7 +37,37 @@ SKILLS = {
         "mp": 5,
         "kind": "heal",
         "amount": 30,
+        "multiplier": 1.5,
         "desc": "回復 HP 30。",
+    },
+    "skill_toxic_edge": {
+        "name": "毒刃",
+        "mp": 5,
+        "kind": "damage",
+        "stat": "attack",
+        "element": "物理",
+        "multiplier": 0.9,
+        "on_hit": {"status": "poison", "duration": 3, "chance": 65, "multiplier": 0.35, "damage_type": "physical"},
+        "desc": "造成物理傷害，並有機率附加毒傷。",
+    },
+    "skill_sanctified_decay": {
+        "name": "聖蝕",
+        "mp": 7,
+        "kind": "dot",
+        "stat": "magic",
+        "element": "無",
+        "duration": 3,
+        "multiplier": 0.55,
+        "desc": "必定施加持續魔法傷害 3 回合。",
+    },
+    "skill_regeneration": {
+        "name": "再生祈禱",
+        "mp": 8,
+        "kind": "regen",
+        "duration": 3,
+        "amount": 6,
+        "multiplier": 0.45,
+        "desc": "必定施加持續回復 3 回合。",
     },
     "skill_spark": {
         "name": "火花術",
@@ -48,7 +76,6 @@ SKILLS = {
         "stat": "magic",
         "element": "火",
         "multiplier": 1.25,
-        "accuracy": 2,
         "desc": "火屬性小傷害。",
     },
     "skill_ice_needle": {
@@ -58,7 +85,6 @@ SKILLS = {
         "stat": "magic",
         "element": "冰",
         "multiplier": 1.35,
-        "accuracy": 2,
         "desc": "冰屬性小傷害，對火屬敵人有效。",
     },
     "skill_minor_heal": {
@@ -100,7 +126,6 @@ SKILLS = {
         "stat": "magic",
         "element": "冰",
         "multiplier": 1.4,
-        "accuracy": 0,
         "desc": "冰屬性魔法傷害。",
     },
     "skill_ice_02": {
@@ -125,7 +150,6 @@ SKILLS = {
         "stat": "attack",
         "element": "冰",
         "multiplier": 1.3,
-        "accuracy": 0,
         "desc": "冰屬性物理傷害。",
     },
     "skill_ice_05": {
@@ -144,7 +168,6 @@ SKILLS = {
         "stat": "magic",
         "element": "自然",
         "multiplier": 1.5,
-        "accuracy": 0,
         "desc": "土屬性魔法傷害。",
     },
     "skill_earth_02": {
@@ -154,7 +177,6 @@ SKILLS = {
         "stat": "magic",
         "element": "自然",
         "multiplier": 1.6,
-        "accuracy": 0,
         "desc": "土屬性重度魔法傷害。",
     },
     "skill_earth_03": {
@@ -179,7 +201,6 @@ SKILLS = {
         "stat": "attack",
         "element": "自然",
         "multiplier": 1.45,
-        "accuracy": 0,
         "desc": "土屬性物理傷害。",
     },
     "skill_earth_06": {
@@ -189,7 +210,6 @@ SKILLS = {
         "stat": "attack",
         "element": "自然",
         "multiplier": 1.35,
-        "accuracy": 0,
         "desc": "土屬性物理傷害，附帶劇毒效果。",
     },
     # === Thunder Region Skills ===
@@ -200,7 +220,6 @@ SKILLS = {
         "stat": "magic",
         "element": "雷",
         "multiplier": 1.6,
-        "accuracy": 0,
         "desc": "雷屬性魔法傷害。",
     },
     "skill_thunder_02": {
@@ -210,7 +229,6 @@ SKILLS = {
         "stat": "magic",
         "element": "雷",
         "multiplier": 1.85,
-        "accuracy": 0,
         "desc": "雷屬性高階魔法傷害。",
     },
     "skill_thunder_03": {
@@ -235,7 +253,6 @@ SKILLS = {
         "stat": "attack",
         "element": "雷",
         "multiplier": 1.6,
-        "accuracy": 0,
         "desc": "雷屬性物理斬擊傷害。",
     },
     "skill_thunder_06": {
@@ -254,7 +271,6 @@ SKILLS = {
         "stat": "magic",
         "element": "無",
         "multiplier": 1.9,
-        "accuracy": 0,
         "desc": "虛空屬性高階魔法傷害。",
     },
     "skill_final_02": {
@@ -264,7 +280,6 @@ SKILLS = {
         "stat": "magic",
         "element": "無",
         "multiplier": 2.3,
-        "accuracy": 0,
         "desc": "深淵禁忌魔法，大範圍高階魔法傷害。",
     },
     "skill_final_03": {
@@ -289,7 +304,6 @@ SKILLS = {
         "stat": "attack",
         "element": "物理",
         "multiplier": 2.0,
-        "accuracy": 0,
         "desc": "深淵物理霸斬傷害。",
     },
     "skill_final_06": {

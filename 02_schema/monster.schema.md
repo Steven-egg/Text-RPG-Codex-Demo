@@ -16,7 +16,6 @@ MONSTERS = {
         "attack": int,
         "defense": int,
         "agility": int,
-        "accuracy": int,
         "crit": int,
         "element": str,
         "exp": int,
@@ -35,7 +34,9 @@ MONSTERS = {
 - `attack`
 - `defense`
 - `agility`
-- `accuracy`
+- `magic_attack`: optional int; absent defaults to `attack`.
+- `magic_defense`: optional int; absent defaults to `defense`.
+- `physical_status_resist`: optional int; reduces physical status application chance.
 - `crit`
 - `element`
 - `exp`

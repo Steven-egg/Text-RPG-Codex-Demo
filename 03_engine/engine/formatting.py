@@ -42,7 +42,8 @@ def equipment_summary(item_id: str) -> str:
         ("magic_attack", "魔攻"),
         ("defense", "防禦"),
         ("agility", "敏捷"),
-        ("accuracy", "命中"),
+        ("effect_accuracy", "效果命中"),
+        ("magic_defense", "魔防"),
         ("crit", "暴擊"),
         ("fire_resist", "火抗"),
         ("trap_evasion", "陷阱迴避"),
@@ -50,7 +51,7 @@ def equipment_summary(item_id: str) -> str:
     ]:
         if key in eq.get("stats", {}):
             value = eq["stats"][key]
-            suffix = "%" if key in {"accuracy", "crit", "fire_resist", "trap_evasion", "rare_drop"} else ""
+            suffix = "%" if key in {"effect_accuracy", "crit", "fire_resist", "ice_resist", "earth_resist", "thunder_resist", "trap_evasion", "rare_drop"} else ""
             stats.append(f"{label} {value:+}{suffix}")
     return "，".join(stats) if stats else eq.get("desc", "")
 

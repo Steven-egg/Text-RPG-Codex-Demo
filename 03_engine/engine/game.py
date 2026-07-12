@@ -272,8 +272,11 @@ def buff_summary(buffs: dict) -> str:
         "defense_down": "防禦下降",
         "quickstep": "迅步",
         "cinder_mark": "燼印",
+        "bleed": "流血",
+        "poison": "中毒",
+        "regeneration": "再生",
     }
-    active = [f"{labels.get(key, key)} {turns}" for key, turns in buffs.items() if turns > 0]
+    active = [f"{labels.get(key, key)} {turns}" for key, turns in buffs.items() if not key.startswith("_") and isinstance(turns, int) and turns > 0]
     return "、".join(active) if active else "無"
 
 def combat_panel_lines(
@@ -550,41 +553,78 @@ def backpack_menu(state: dict, allow_storage: bool = False) -> None:
             equipment_menu(state)
         elif allow_storage and choice == 3:
             storage_menu(state)
+ELEMENT_ALIASES = {
+    "fire": "fire", "Fire": "fire", "火": "fire",
+    "ice": "ice", "Ice": "ice", "冰": "ice",
+    "earth": "earth", "Earth": "earth", "地": "earth", "自然": "earth",
+    "thunder": "thunder", "Thunder": "thunder", "雷": "thunder",
+    "physical": "physical", "物理": "physical", "none": "none", "無": "none", "Final": "final",
+}
+ELEMENT_COUNTERS = {"ice": "fire", "fire": "earth", "earth": "thunder", "thunder": "ice"}
+ELEMENT_RESIST_KEYS = {"fire": "fire_resist", "ice": "ice_resist", "earth": "earth_resist", "thunder": "thunder_resist"}
+
+
+def normalized_element(element: str | None) -> str:
+    return ELEMENT_ALIASES.get(element or "", element or "none")
+
+
 def element_multiplier(attack_element: str, target_element: str, enemy_buffs: dict | None = None) -> float:
-    multiplier = 1.0
-    if attack_element == "冰" and target_element == "火":
-        multiplier = 1.2
-    elif attack_element == "火" and target_element == "自然":
-        multiplier = 1.1
-    elif attack_element == "火" and target_element == "火":
-        multiplier = 0.75
-    if enemy_buffs and enemy_buffs.get("cinder_mark", 0) > 0 and attack_element == "火":
+    attack = normalized_element(attack_element)
+    target = normalized_element(target_element)
+    multiplier = 1.25 if ELEMENT_COUNTERS.get(attack) == target else 0.80 if ELEMENT_COUNTERS.get(target) == attack else 1.0
+    if enemy_buffs and enemy_buffs.get("cinder_mark", 0) > 0 and attack == "fire":
         multiplier *= 1.15
     return multiplier
 
-def hit_roll(attacker_accuracy: int, target_agility: int, skill_bonus: int = 0) -> bool:
-    return True
+
+def elemental_resistance(target: dict, attack_element: str) -> int:
+    return max(0, min(75, target.get(ELEMENT_RESIST_KEYS.get(normalized_element(attack_element), ""), 0)))
+
+
+def direct_damage_roll(agility: int) -> float:
+    agility = max(0, agility)
+    low = 0.85 + min(agility, 30) * 0.005
+    if random.randint(1, 100) <= min(agility, 30):
+        return random.uniform(1.06, 1.20)
+    return random.uniform(low, 1.05)
+
+
+def adjusted_defense(target: dict, buffs: dict, damage_type: str) -> int:
+    key = "magic_defense" if damage_type == "magic" else "defense"
+    defense = target.get(key, target.get("defense", 0))
+    if damage_type == "physical":
+        if buffs.get("defense_up", 0) > 0:
+            defense = math.ceil(defense * 1.15)
+        if buffs.get("defense_down", 0) > 0:
+            defense = max(1, math.floor(defense * 0.8))
+    return defense
+
+
+def calc_typed_damage(power: int, multiplier: float, target: dict, target_buffs: dict, damage_type: str, element: str, *, agility: int = 0, crit_chance: int = 0, direct: bool = False) -> tuple[int, bool]:
+    defense = adjusted_defense(target, target_buffs, damage_type)
+    base = max(1, power * multiplier - defense * 0.6)
+    base *= element_multiplier(element, target.get("element", ""), target_buffs)
+    base *= 1 - elemental_resistance(target, element) / 100
+    is_crit = False
+    if direct:
+        base *= direct_damage_roll(agility)
+        is_crit = random.randint(1, 100) <= max(0, crit_chance)
+        if is_crit:
+            base *= 1.5
+    return max(1, math.ceil(base)), is_crit
+
 
 def calc_player_damage(state: dict, enemy: dict, skill: dict | None, player_buffs: dict, enemy_buffs: dict) -> tuple[int, bool]:
     stats = get_stats(state, player_buffs)
-    if skill and skill.get("stat") == "magic":
-        power = stats["attack"] + stats["magic_attack"]
-    else:
-        power = stats["attack"]
+    is_magic = bool(skill and skill.get("stat") == "magic")
+    power = stats["magic_attack"] if is_magic else stats["attack"]
     multiplier = skill.get("multiplier", 1.0) if skill else 1.0
-    enemy_defense = enemy["defense"]
-    if enemy_buffs.get("defense_up", 0) > 0:
-        enemy_defense = math.ceil(enemy_defense * 1.15)
-    if enemy_buffs.get("defense_down", 0) > 0:
-        enemy_defense = max(1, math.floor(enemy_defense * 0.8))
-    base = max(1, power * multiplier - enemy_defense * 0.6)
     attack_element = skill.get("element", "物理") if skill else "物理"
-    base *= element_multiplier(attack_element, enemy["element"], enemy_buffs)
     crit_chance = stats["crit"] + (skill.get("crit_bonus", 0) if skill else 0)
-    is_crit = random.randint(1, 100) <= crit_chance
-    if is_crit:
-        base *= 1.5
-    return max(1, math.ceil(base)), is_crit
+    return calc_typed_damage(
+        power, multiplier, enemy, enemy_buffs, "magic" if is_magic else "physical", attack_element,
+        agility=stats["agility"], crit_chance=crit_chance, direct=True,
+    )
 
 def can_sleeve_blade_followup(state: dict, skill: dict | None) -> bool:
     return (
@@ -595,22 +635,17 @@ def can_sleeve_blade_followup(state: dict, skill: dict | None) -> bool:
 
 def calc_sleeve_blade_followup_damage(state: dict, enemy: dict, player_buffs: dict, enemy_buffs: dict) -> int:
     stats = get_stats(state, player_buffs)
-    enemy_defense = enemy["defense"]
-    if enemy_buffs.get("defense_up", 0) > 0:
-        enemy_defense = math.ceil(enemy_defense * 1.15)
-    if enemy_buffs.get("defense_down", 0) > 0:
-        enemy_defense = max(1, math.floor(enemy_defense * 0.8))
-    base = max(1, stats["attack"] * SLEEVE_BLADE_FOLLOWUP_MULTIPLIER - enemy_defense * 0.6)
-    return max(1, math.ceil(base))
+    damage, _ = calc_typed_damage(stats["attack"], SLEEVE_BLADE_FOLLOWUP_MULTIPLIER, enemy, enemy_buffs, "physical", "物理")
+    return damage
 
 def calc_enemy_damage(enemy: dict, state: dict, multiplier: float, element: str, player_buffs: dict, defending: bool) -> int:
     stats = get_stats(state, player_buffs)
-    base = max(1, enemy["attack"] * multiplier - stats["defense"] * 0.6)
-    if element == "火":
-        base *= 1 - stats["fire_resist"] / 100
+    is_magic = normalized_element(element) in ELEMENT_RESIST_KEYS
+    power = enemy.get("magic_attack", enemy["attack"]) if is_magic else enemy["attack"]
+    damage, _ = calc_typed_damage(power, multiplier, stats, player_buffs, "magic" if is_magic else "physical", element)
     if defending:
-        base *= 0.6
-    return max(1, math.ceil(base))
+        damage = max(1, math.ceil(damage * 0.6))
+    return damage
 
 def combat(state: dict, enemy_id: str, boss: bool = False, run_log: dict | None = None):
     enemy = deepcopy(MONSTERS[enemy_id])
@@ -718,7 +753,9 @@ def combat(state: dict, enemy_id: str, boss: bool = False, run_log: dict | None 
             boss_marker,
         )
 
-        effect_events = tick_effects(state, player_buffs, enemy_buffs)
+        effect_result = tick_effects(state, player_buffs, enemy_buffs, enemy)
+        effect_events, dot_damage = effect_result
+        enemy_hp -= dot_damage
         turn_events.extend(enemy_events)
         turn_events.extend(effect_events)
         record_battle_events(battle_log, turn, turn_events)
@@ -761,10 +798,6 @@ def combat(state: dict, enemy_id: str, boss: bool = False, run_log: dict | None 
     return True
 
 def player_attack(state: dict, enemy: dict, enemy_hp: int, skill: dict | None, player_buffs: dict, enemy_buffs: dict):
-    stats = get_stats(state, player_buffs)
-    skill_bonus = skill.get("accuracy", 0) if skill else 0
-    if not hit_roll(stats["accuracy"], enemy["agility"], skill_bonus):
-        return CombatActionResult(events=["攻擊落空。"], summary=["攻擊落空。"])
     damage, is_crit = calc_player_damage(state, enemy, skill, player_buffs, enemy_buffs)
     label = skill["name"] if skill else "普通攻擊"
     crit_text = " 暴擊！" if is_crit else ""
@@ -775,7 +808,33 @@ def player_attack(state: dict, enemy: dict, enemy_hp: int, skill: dict | None, p
         damage += followup_damage
         events.append(f"影袖副刃順勢劃出追擊，造成 {followup_damage} 傷害。")
         summary.append(f"影袖副刃追擊 {followup_damage} 傷害。")
+    if skill and skill.get("on_hit"):
+        effect_events = apply_weapon_effect(state, enemy, skill["on_hit"], enemy_buffs)
+        events.extend(effect_events)
+        summary.extend(effect_events)
     return CombatActionResult(damage=damage, events=events, summary=summary)
+
+
+def apply_dot(enemy_buffs: dict, status: str, duration: int, multiplier: float, damage_type: str, element: str) -> None:
+    enemy_buffs[status] = duration
+    enemy_buffs.setdefault("_dot_data", {})[status] = {
+        "multiplier": multiplier,
+        "damage_type": damage_type,
+        "element": element,
+    }
+
+
+def apply_weapon_effect(state: dict, enemy: dict, effect: dict, enemy_buffs: dict) -> list[str]:
+    stats = get_stats(state)
+    chance = max(35, min(95, effect.get("chance", 0) + stats.get("effect_accuracy", 0) - enemy.get("physical_status_resist", 0)))
+    status = effect["status"]
+    if random.randint(1, 100) > chance:
+        return [f"{status} 附加失敗（效果命中 {chance}%）。"]
+    if status == "defense_down":
+        enemy_buffs[status] = effect["duration"]
+        return [f"{status} 附加成功（效果命中 {chance}%）。"]
+    apply_dot(enemy_buffs, status, effect["duration"], effect["multiplier"], effect.get("damage_type", "physical"), effect.get("element", "物理"))
+    return [f"{status} 附加成功（效果命中 {chance}%）。"]
 
 def skill_menu(state: dict, enemy: dict, player_buffs: dict, enemy_buffs: dict):
     skills = state["learned_skills"]
@@ -806,7 +865,8 @@ def skill_menu(state: dict, enemy: dict, player_buffs: dict, enemy_buffs: dict):
         return player_attack(state, enemy, enemy["hp"], skill, player_buffs, enemy_buffs)
     if skill["kind"] == "heal":
         before = state["current_hp"]
-        state["current_hp"] = min(stats["max_hp"], state["current_hp"] + skill["amount"])
+        amount = skill["amount"] + math.floor(stats["magic_attack"] * skill.get("multiplier", 0))
+        state["current_hp"] = min(stats["max_hp"], state["current_hp"] + amount)
         healed = state["current_hp"] - before
         line = f"你使用{skill['name']}，回復 {healed} HP。"
         return CombatActionResult(events=[line], summary=[line])
@@ -817,6 +877,15 @@ def skill_menu(state: dict, enemy: dict, player_buffs: dict, enemy_buffs: dict):
     if skill["kind"] == "debuff":
         enemy_buffs[skill["debuff"]] = skill["duration"]
         line = f"你使用{skill['name']}。{skill['desc']}"
+        return CombatActionResult(events=[line], summary=[line])
+    if skill["kind"] == "dot":
+        apply_dot(enemy_buffs, skill["name"], skill["duration"], skill["multiplier"], "magic", skill.get("element", "無"))
+        line = f"{skill['name']} 必定附加，持續 {skill['duration']} 回合。"
+        return CombatActionResult(events=[line], summary=[line])
+    if skill["kind"] == "regen":
+        player_buffs["regeneration"] = skill["duration"]
+        player_buffs["_regen_data"] = {"amount": skill["amount"], "multiplier": skill["multiplier"]}
+        line = f"{skill['name']} 必定附加，持續 {skill['duration']} 回合。"
         return CombatActionResult(events=[line], summary=[line])
     return CombatActionResult()
 
@@ -1043,23 +1112,48 @@ def dispatch_enemy_turn(
         )
     return boss_marker, monster_action(enemy_id, enemy, state, player_buffs, defending)
 
-def tick_effects(state: dict, player_buffs: dict, enemy_buffs: dict) -> list[str]:
+def tick_effects(state: dict, player_buffs: dict, enemy_buffs: dict, enemy: dict | None = None):
     events = []
+    enemy_dot_damage = 0
     if state.pop("_clear_burn", False):
         player_buffs.pop("burn", None)
     if player_buffs.get("burn", 0) > 0:
         damage = max(1, math.ceil(get_stats(state)["max_hp"] * 0.05))
         state["current_hp"] -= damage
         events.append(f"灼傷造成 {damage} 傷害。")
+    if player_buffs.get("regeneration", 0) > 0:
+        regen = player_buffs.get("_regen_data", {})
+        stats = get_stats(state)
+        amount = regen.get("amount", 0) + math.floor(stats["magic_attack"] * regen.get("multiplier", 0))
+        healed = min(amount, stats["max_hp"] - state["current_hp"])
+        state["current_hp"] += max(0, healed)
+        events.append(f"再生回復 {max(0, healed)} HP。")
+    if enemy is not None:
+        for status, dot in list(enemy_buffs.get("_dot_data", {}).items()):
+            if enemy_buffs.get(status, 0) <= 0:
+                continue
+            stats = get_stats(state)
+            power = stats["magic_attack"] if dot["damage_type"] == "magic" else stats["attack"]
+            damage, _ = calc_typed_damage(
+                power, dot["multiplier"], enemy, enemy_buffs, dot["damage_type"], dot["element"],
+            )
+            enemy_dot_damage += damage
+            events.append(f"{status} 造成 {damage} 傷害。")
     for buffs in (player_buffs, enemy_buffs):
         expired = []
         for key in list(buffs.keys()):
+            if key.startswith("_"):
+                continue
             buffs[key] -= 1
             if buffs[key] <= 0:
                 expired.append(key)
         for key in expired:
             del buffs[key]
-    return events
+            if buffs is enemy_buffs:
+                buffs.get("_dot_data", {}).pop(key, None)
+            if buffs is player_buffs and key == "regeneration":
+                buffs.pop("_regen_data", None)
+    return (events, enemy_dot_damage) if enemy is not None else events
 
 CLI_REGION_ORDER = ["border_fire", "ice", "earth", "thunder", "final"]
 CLI_REGION_ROUTE_ENABLED = {"border_fire", "ice", "earth", "thunder", "final"}

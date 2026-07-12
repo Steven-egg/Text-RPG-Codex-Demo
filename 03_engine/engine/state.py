@@ -213,8 +213,13 @@ def get_stats(state: dict, buffs: dict | None = None) -> dict:
     for key, value in job["extra_every_3"].items():
         stats[key] = stats.get(key, 0) + value * extra_count
 
-    stats["magic_attack"] = 0
+    stats.setdefault("magic_attack", 0)
+    stats.setdefault("magic_defense", 0)
+    stats.setdefault("effect_accuracy", 0)
     stats["fire_resist"] = 0
+    stats["ice_resist"] = 0
+    stats["earth_resist"] = 0
+    stats["thunder_resist"] = 0
     stats["trap_evasion"] = 0
     stats["rare_drop"] = 0
 
@@ -232,7 +237,8 @@ def get_stats(state: dict, buffs: dict | None = None) -> dict:
         if buffs.get("quickstep", 0) > 0:
             stats["agility"] = math.ceil(stats["agility"] * 1.25)
 
-    stats["fire_resist"] = min(stats.get("fire_resist", 0), 75)
+    for key in ("fire_resist", "ice_resist", "earth_resist", "thunder_resist"):
+        stats[key] = max(0, min(stats.get(key, 0), 75))
     return stats
 
 
@@ -386,10 +392,12 @@ def player_resource_lines(state: dict) -> list[str]:
         player_summary_line(state),
         f"工會積分 {state['guild_points']} / 經驗 {state['exp']}/{exp_to_next(state['level'])}",
         (
-            f"攻擊 {stats['attack']} / 魔攻 {stats['magic_attack']} / 防禦 {stats['defense']} / "
-            f"敏捷 {stats['agility']} / 暴擊 {stats['crit']}% / 火抗 {stats['fire_resist']}%"
+            f"攻擊 {stats['attack']} / 魔攻 {stats['magic_attack']} / 防禦 {stats['defense']} / 魔防 {stats['magic_defense']} / "
+            f"敏捷 {stats['agility']} / 暴擊 {stats['crit']}% / 效果命中 {stats['effect_accuracy']}%"
         ),
-    ]
+        ] + [
+            f"火抗 {stats['fire_resist']}% / 冰抗 {stats['ice_resist']}% / 地抗 {stats['earth_resist']}% / 雷抗 {stats['thunder_resist']}%"
+        ]
 
 
 def add_gold(state: dict, amount: int, run_log: dict | None = None) -> None:

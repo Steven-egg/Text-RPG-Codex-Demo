@@ -42,7 +42,7 @@ EQUIPMENT = {
 - `slot` 必須符合 `state["equipment"]` 支援欄位。
 - `jobs` 內的 job id 必須存在於 `JOBS`。
 - `price` 可為 `0`，通常代表任務、合成或關鍵裝備。
-- `stats` key 目前支援：`attack`、`magic_attack`、`defense`、`agility`、`accuracy`、`crit`、`fire_resist`、`trap_evasion`、`rare_drop`。
+- `stats` key 目前支援：`attack`、`magic_attack`、`defense`、`magic_defense`、`agility`、`effect_accuracy`、`crit`、`fire_resist`、`ice_resist`、`earth_resist`、`thunder_resist`、`trap_evasion`、`rare_drop`。
 - `region` 若存在，必須為合法的區域 ID（例如 `border_fire`、`ice`、`earth`、`thunder`、`final` 之一）。
 
 ## 引用規則

@@ -17,8 +17,36 @@
     "stat": "attack" | "magic",
     "element": str,
     "multiplier": float,
-    "accuracy": int,
     "crit_bonus": int,  # optional
+    "desc": str,
+}
+```
+
+### dot
+
+```python
+{
+    "name": str,
+    "mp": int,
+    "kind": "dot",
+    "stat": "magic",
+    "element": str,
+    "duration": int,
+    "multiplier": float,
+    "desc": str,
+}
+```
+
+### regen
+
+```python
+{
+    "name": str,
+    "mp": int,
+    "kind": "regen",
+    "duration": int,
+    "amount": int,
+    "multiplier": float,
     "desc": str,
 }
 ```
@@ -64,7 +92,7 @@
 ## 必填欄位
 
 - 全類型共通：`name`、`mp`、`kind`、`desc`
-- `damage`：`stat`、`element`、`multiplier`、`accuracy`
+- `damage`：`stat`、`element`、`multiplier`；可選 `on_hit` 用於物理附加效果。
 - `heal`：`amount`
 - `buff`：`buff`、`duration`
 - `debuff`：`debuff`、`duration`
@@ -87,4 +115,4 @@
 
 ## 未來注意事項
 
-目前玩家攻擊與傷害技能已設計為 100% 命中，`accuracy` 欄位暫時保留作為未來規則或 UI 資料。
+目前直接攻擊與魔法效果皆為 100% 命中；物理附加效果使用角色 `effect_accuracy` 與目標 `physical_status_resist` 判定。

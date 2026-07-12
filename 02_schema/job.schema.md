@@ -27,7 +27,9 @@ JOBS = {
 - `base.attack`
 - `base.defense`
 - `base.agility`
-- `base.accuracy`
+- `base.magic_attack`
+- `base.magic_defense`
+- `base.effect_accuracy`
 - `base.crit`
 - `growth.max_hp`
 - `growth.max_mp`
@@ -44,7 +46,7 @@ JOBS = {
 ## 型別與規則
 
 - 所有 stat 數值皆為 `int`。
-- `accuracy`、`crit` 是百分比數字，例如 `90` 代表 90%。
+- `effect_accuracy`、`crit` 是百分比數字；效果命中僅用於物理附加狀態，直接攻擊與魔法效果皆為必中。
 - `base_skills` 內的 skill id 必須存在於 `SKILLS`。
 
 ## 未來注意事項

@@ -53,20 +53,24 @@ except Exception as exc:  # pragma: no cover - protects CLI diagnostics.
 
 VALID_SLOTS = {"weapon", "head", "body", "accessory", "special"}
 VALID_ITEM_KINDS = {"consumable", "special", "battle"}
-VALID_SKILL_KINDS = {"damage", "heal", "buff", "debuff"}
+VALID_SKILL_KINDS = {"damage", "heal", "buff", "debuff", "dot", "regen"}
 VALID_DAMAGE_STATS = {"attack", "magic"}
 VALID_EQUIPMENT_STATS = {
     "attack",
     "magic_attack",
     "defense",
+    "magic_defense",
     "agility",
-    "accuracy",
+    "effect_accuracy",
     "crit",
     "fire_resist",
+    "ice_resist",
+    "earth_resist",
+    "thunder_resist",
     "trap_evasion",
     "rare_drop",
 }
-VALID_EFFECT_KEYS = {"defense_up", "defense_down", "quickstep", "cinder_mark", "burn"}
+VALID_EFFECT_KEYS = {"defense_up", "defense_down", "quickstep", "cinder_mark", "burn", "bleed", "poison", "regeneration"}
 VALID_PROMOTION_STATUSES = {"preview"}
 VALID_PROMOTION_REQUIREMENT_KINDS = {"level", "unlock", "quest", "flag", "item"}
 VALID_JOB_SPECIALIZATION_STATUSES = {"preview"}
@@ -91,8 +95,8 @@ def is_non_negative_int(value: Any) -> bool:
 
 
 def check_jobs(errors: list[str]) -> None:
-    required_base = {"max_hp", "max_mp", "attack", "defense", "agility", "accuracy", "crit"}
-    required_growth = {"max_hp", "max_mp", "attack", "defense", "agility"}
+    required_base = {"max_hp", "max_mp", "attack", "magic_attack", "defense", "magic_defense", "agility", "effect_accuracy", "crit"}
+    required_growth = {"max_hp", "max_mp", "attack", "magic_attack", "defense", "magic_defense", "agility"}
     for job_id, job in JOBS.items():
         require_keys(errors, f"JOBS.{job_id}", job, {"base", "growth", "extra_every_3", "base_skills"})
         base = job.get("base", {})
@@ -332,9 +336,14 @@ def check_skills(errors: list[str]) -> None:
         if not is_non_negative_int(skill.get("mp")):
             error(errors, f"SKILLS.{skill_id}.mp", "must be a non-negative int")
         if kind == "damage":
-            require_keys(errors, f"SKILLS.{skill_id}", skill, {"stat", "element", "multiplier", "accuracy"})
+            require_keys(errors, f"SKILLS.{skill_id}", skill, {"stat", "element", "multiplier"})
             if skill.get("stat") not in VALID_DAMAGE_STATS:
                 error(errors, f"SKILLS.{skill_id}.stat", f"uses unsupported damage stat: {skill.get('stat')}")
+            on_hit = skill.get("on_hit")
+            if on_hit:
+                require_keys(errors, f"SKILLS.{skill_id}.on_hit", on_hit, {"status", "duration", "chance", "multiplier", "damage_type"})
+                if on_hit.get("status") not in VALID_EFFECT_KEYS:
+                    error(errors, f"SKILLS.{skill_id}.on_hit.status", "uses unsupported effect key")
         elif kind == "heal":
             require_keys(errors, f"SKILLS.{skill_id}", skill, {"amount"})
         elif kind == "buff":
@@ -345,6 +354,12 @@ def check_skills(errors: list[str]) -> None:
             require_keys(errors, f"SKILLS.{skill_id}", skill, {"debuff", "duration"})
             if skill.get("debuff") not in VALID_EFFECT_KEYS:
                 error(errors, f"SKILLS.{skill_id}.debuff", f"uses unsupported effect key: {skill.get('debuff')}")
+        elif kind == "dot":
+            require_keys(errors, f"SKILLS.{skill_id}", skill, {"stat", "element", "duration", "multiplier"})
+            if skill.get("stat") != "magic":
+                error(errors, f"SKILLS.{skill_id}.stat", "magic dot must use magic stat")
+        elif kind == "regen":
+            require_keys(errors, f"SKILLS.{skill_id}", skill, {"duration", "amount", "multiplier"})
 
 
 def check_magic_books(errors: list[str]) -> None:
@@ -392,7 +407,7 @@ def check_recipes(errors: list[str]) -> None:
 
 
 def check_monsters(errors: list[str]) -> None:
-    required = {"name", "level", "hp", "attack", "defense", "agility", "accuracy", "crit", "element", "exp", "gold", "drops"}
+    required = {"name", "level", "hp", "attack", "defense", "agility", "crit", "element", "exp", "gold", "drops"}
     for monster_id, monster in MONSTERS.items():
         require_keys(errors, f"MONSTERS.{monster_id}", monster, required)
         gold = monster.get("gold")
