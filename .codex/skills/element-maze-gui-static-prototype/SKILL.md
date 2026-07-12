@@ -143,6 +143,18 @@ Screen URL pattern:
 http://localhost:8000/<screen_folder>/index.html
 ```
 
+### Codex Local Server Check
+
+For a Codex-managed localhost check, do not use `Get-NetTCPConnection` as the
+preflight: its Windows CIM query can be denied by the Codex sandbox even when
+the server is healthy. Start the intended local server, then verify the exact
+page or API URL with an HTTP request and require a `200` response. This is a
+Codex environment diagnostic rule, not a project runtime requirement.
+
+- Static prototype: `http://127.0.0.1:8000/<screen_folder>/index.html`
+- Runtime bridge (only in its separately approved mode):
+  `http://127.0.0.1:8010/<screen_folder>/index.html?mode=live`
+
 ## Preflight Gate
 
 For a one-off GUI prototype task outside a declared sprint:

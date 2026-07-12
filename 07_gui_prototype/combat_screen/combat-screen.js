@@ -223,7 +223,7 @@ const COMBAT_ENEMY_VISUALS = Object.freeze({
   mon_earth_spore_moth: {
     imageSrc: "./assets/monsters/earth/mon-earth-spore-moth-v01.png",
     environment: "earth-minor-a",
-    role: "flying",
+    role: "flying-tall",
   },
   mon_earth_bark_shell: {
     imageSrc: "./assets/monsters/earth/mon-earth-bark-shell-v02.png",
@@ -283,7 +283,7 @@ const COMBAT_ENEMY_VISUALS = Object.freeze({
   mon_earth_heartwood_shade: {
     imageSrc: "./assets/monsters/earth/mon-earth-heartwood-shade-v01.png",
     environment: "earth-main-phase-2",
-    role: "floating",
+    role: "ground",
   },
   mon_earth_deep_core_sentry: {
     imageSrc: "./assets/monsters/earth/mon-earth-deep-core-sentry-v01.png",
@@ -318,7 +318,7 @@ const COMBAT_ENEMY_VISUALS = Object.freeze({
   mon_thunder_glasswing: {
     imageSrc: "./assets/monsters/thunder/mon-thunder-glasswing-v03.png",
     environment: "thunder-minor-a",
-    role: "flying",
+    role: "flying-tall",
   },
   boss_thunder_plateau_beacon: {
     imageSrc: "./assets/monsters/thunder/boss-thunder-plateau-beacon-v03.png",
@@ -408,7 +408,7 @@ const COMBAT_ENEMY_VISUALS = Object.freeze({
   mon_final_storm_echo: {
     imageSrc: "./assets/monsters/final/mon-final-storm-echo-regenerated-v01.png",
     environment: "final-minor-a",
-    role: "flying",
+    role: "flying-tall",
   },
   boss_final_echo_vanguard: {
     imageSrc: "./assets/monsters/final/boss-final-echo-vanguard-regenerated-v01.png",
@@ -502,6 +502,99 @@ const COMBAT_ENEMY_VISUALS = Object.freeze({
   },
 });
 
+const GROUNDED_ENEMY_ROLES = new Set([
+  "small-ground",
+  "ground",
+  "low-wide",
+  "boss",
+  "boss-heavy",
+  "boss-tall",
+]);
+const alphaBottomInsetCache = new Map();
+const desktopCombatMedia = window.matchMedia("(min-width: 1181px)");
+let activeEnemyVisual = null;
+
+function numericVisualOffset(value) {
+  return Number.isFinite(value) ? value : 0;
+}
+
+function alphaBottomInsetRatio(image) {
+  const cacheKey = image.currentSrc || image.src;
+  if (alphaBottomInsetCache.has(cacheKey)) {
+    return alphaBottomInsetCache.get(cacheKey);
+  }
+
+  const width = image.naturalWidth;
+  const height = image.naturalHeight;
+  if (!width || !height) {
+    return 0;
+  }
+
+  try {
+    const canvas = document.createElement("canvas");
+    canvas.width = width;
+    canvas.height = height;
+    const context = canvas.getContext("2d", { willReadFrequently: true });
+    if (!context) {
+      return 0;
+    }
+    context.drawImage(image, 0, 0);
+    const pixels = context.getImageData(0, 0, width, height).data;
+    let bottomContentRow = height - 1;
+
+    searchRows:
+    for (let y = height - 1; y >= 0; y -= 1) {
+      const rowEnd = (y + 1) * width * 4;
+      for (let index = y * width * 4 + 3; index < rowEnd; index += 4) {
+        if (pixels[index] > 8) {
+          bottomContentRow = y;
+          break searchRows;
+        }
+      }
+    }
+
+    const ratio = (height - 1 - bottomContentRow) / height;
+    alphaBottomInsetCache.set(cacheKey, ratio);
+    return ratio;
+  } catch {
+    return 0;
+  }
+}
+
+function applyEnemyImagePlacement() {
+  if (!enemyImageEl) {
+    return;
+  }
+
+  const visual = activeEnemyVisual;
+  enemyImageEl.style.setProperty("--enemy-art-offset-x", `${numericVisualOffset(visual?.offsetX)}px`);
+  enemyImageEl.style.setProperty("--enemy-art-offset-y", `${numericVisualOffset(visual?.offsetY)}px`);
+  enemyImageEl.style.setProperty("--enemy-ground-anchor-y", "0px");
+
+  if (!visual || !GROUNDED_ENEMY_ROLES.has(visual.role) || !desktopCombatMedia.matches || !enemyImageEl.complete) {
+    return;
+  }
+
+  requestAnimationFrame(() => {
+    const renderedHeight = enemyImageEl.getBoundingClientRect().height;
+    const anchorOffset = Math.round(renderedHeight * alphaBottomInsetRatio(enemyImageEl));
+    enemyImageEl.style.setProperty("--enemy-ground-anchor-y", `${anchorOffset}px`);
+
+    if (isDebug) {
+      requestAnimationFrame(() => {
+        const rect = enemyImageEl.getBoundingClientRect();
+        const bottomContentY = rect.bottom - anchorOffset;
+        const msg = `[LAYOUT_DEBUG] enemy=${visual?.imageSrc} rect_bottom=${rect.bottom.toFixed(1)} anchorOffset=${anchorOffset} bottomContentY=${bottomContentY.toFixed(1)} window_height=${window.innerHeight}`;
+        if (subtitleEl) {
+          subtitleEl.textContent = msg;
+          subtitleEl.style.display = "block";
+        }
+        console.log(msg);
+      });
+    }
+  });
+}
+
 const DEBUG_ENEMY_NAMES = Object.freeze({
   mon_cinder_bat: "焦翼蝠",
   mon_lava_imp: "熔岩小鬼",
@@ -555,6 +648,7 @@ window.addEventListener("resize", () => {
   if (state.activeSubmenu) {
     positionSubmenu();
   }
+  applyEnemyImagePlacement();
 });
 
 loadFixture(fixtureSelect.value);
@@ -694,20 +788,26 @@ function renderBattlefield(model) {
 
   const enemyVisual = COMBAT_ENEMY_VISUALS[enemy.enemy_id];
   if (enemyVisual) {
+    activeEnemyVisual = enemyVisual;
     shellEl.dataset.enemyId = enemy.enemy_id;
     shellEl.dataset.enemyEnvironment = enemyVisual.environment;
     shellEl.dataset.enemyVisualRole = enemyVisual.role;
     if (enemyImageEl) {
+      enemyImageEl.onload = applyEnemyImagePlacement;
       enemyImageEl.src = enemyVisual.imageSrc;
       enemyImageEl.style.display = "block";
+      applyEnemyImagePlacement();
     }
   } else {
+    activeEnemyVisual = null;
     shellEl.dataset.enemyId = enemy.enemy_id ?? "unknown";
     shellEl.dataset.enemyEnvironment = enemy.asset_slot?.state === "placeholder" ? "asset-slot" : "unknown";
     shellEl.dataset.enemyVisualRole = "placeholder";
     if (enemyImageEl) {
+      enemyImageEl.onload = null;
       enemyImageEl.removeAttribute("src");
       enemyImageEl.style.display = "none";
+      applyEnemyImagePlacement();
     }
   }
 

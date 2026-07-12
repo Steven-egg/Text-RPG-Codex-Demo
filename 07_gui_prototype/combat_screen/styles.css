@@ -375,12 +375,13 @@ select:focus-visible {
 }
 
 .enemy-focus-card {
-  top: 64px; /* 稍微向上，縮短與上方回合標籤的距離 */
-  left: 50%;
-  width: min(450px, calc(100% - 640px));
-  min-width: 360px;
+  position: relative;
+  z-index: auto;
+  inset: auto;
+  width: auto;
+  min-width: 0;
   text-align: center;
-  transform: translateX(-50%);
+  transform: none;
 }
 
 .player-focus-card {
@@ -1290,7 +1291,6 @@ select:focus-visible {
     min-height: 680px;
   }
 
-  .enemy-focus-card,
   .player-focus-card {
     position: relative;
     inset: auto;
@@ -1491,6 +1491,7 @@ select:focus-visible {
 
 /* 顯示特定 visual-role 的地面陰影 */
 [data-enemy-visual-role="flying"] .enemy-image-layer::after,
+[data-enemy-visual-role="flying-tall"] .enemy-image-layer::after,
 [data-enemy-visual-role="small-ground"] .enemy-image-layer::after,
 [data-enemy-visual-role="ground"] .enemy-image-layer::after,
 [data-enemy-visual-role="boss"] .enemy-image-layer::after,
@@ -1531,7 +1532,25 @@ select:focus-visible {
   max-width: 100%;
   max-height: 100%;
   object-fit: contain;
+  transform: translate(
+    var(--enemy-art-offset-x, 0px),
+    calc(var(--enemy-ground-anchor-y, 0px) + var(--enemy-art-offset-y, 0px))
+  );
   filter: drop-shadow(0 12px 24px rgba(0, 0, 0, 0.48));
+}
+
+[data-enemy-visual-role="flying-tall"] .enemy-image-layer {
+  left: 50% !important;
+  top: 44% !important;
+  transform: translate(-34%, -50%) !important;
+  width: clamp(560px, 54vw, 760px) !important;
+  height: clamp(480px, 64vh, 640px) !important;
+}
+
+[data-enemy-visual-role="flying-tall"] .enemy-image-layer::after {
+  width: 150px !important;
+  height: 20px !important;
+  bottom: -38px !important;
 }
 
 [data-enemy-visual-role="small-ground"] .enemy-image-layer {
@@ -1639,6 +1658,15 @@ select:focus-visible {
     height: clamp(230px, 24vw, 350px) !important;
   }
 
+  [data-enemy-visual-role="flying-tall"] .enemy-image-layer {
+    left: auto !important;
+    right: 4% !important;
+    top: 32% !important;
+    transform: translate(12%, -10%) !important;
+    width: clamp(440px, 54vw, 680px) !important;
+    height: clamp(360px, 52vw, 540px) !important;
+  }
+
   [data-enemy-visual-role="small-ground"] .enemy-image-layer {
     left: auto !important;
     right: 6% !important;
@@ -1704,6 +1732,14 @@ select:focus-visible {
 }
 
 @media (max-width: 560px) {
+  [data-enemy-visual-role="flying-tall"] .enemy-image-layer {
+    right: -35% !important;
+    top: 36% !important;
+    transform: none !important;
+    width: 520px !important;
+    height: 440px !important;
+  }
+
   [data-enemy-visual-role="small-ground"] .enemy-image-layer {
     right: -25% !important;
     top: 40% !important;
@@ -1763,6 +1799,10 @@ select:focus-visible {
 
 /* 桌面版背景舞台真正滿版 (fixed)，同時戰鬥紀錄自適應高度與展開 */
 @media (min-width: 1181px) {
+  .combat-shell {
+    --combat-ground-baseline: clamp(190px, 22vh, 250px);
+  }
+
   .battlefield-stage {
     position: fixed !important;
     inset: 0 !important;
@@ -1771,24 +1811,65 @@ select:focus-visible {
     z-index: -10 !important; /* 置於最底層 */
   }
 
+  /* Grounded roles share one visual floor based on their non-transparent bottom edge. */
+  [data-enemy-visual-role="small-ground"] .enemy-image-layer,
+  [data-enemy-visual-role="ground"] .enemy-image-layer,
+  [data-enemy-visual-role="low-wide"] .enemy-image-layer,
+  [data-enemy-visual-role="boss"] .enemy-image-layer,
+  [data-enemy-visual-role="boss-heavy"] .enemy-image-layer,
+  [data-enemy-visual-role="boss-tall"] .enemy-image-layer {
+    top: auto !important;
+    bottom: var(--combat-ground-baseline) !important;
+    transform: translate(-34%, 0px) !important;
+    align-items: flex-end !important;
+  }
+
+  /* Keep the battlefield clear of the right information rail at all desktop widths. */
+  .enemy-image-layer {
+    width: clamp(400px, 40vw, 680px) !important;
+    height: clamp(300px, 30vh, 520px) !important;
+    margin-left: clamp(-180px, -10vw, -120px) !important;
+  }
+
+  /* Desktop right rail: cards stack naturally rather than relying on fixed offsets. */
   .combat-side-panel {
     position: absolute !important;
-    top: 138px !important;
+    z-index: 6 !important;
+    top: 54px !important;
     right: 18px !important;
+    left: auto !important;
+    width: min(380px, calc(100vw - 36px)) !important;
     bottom: auto !important; /* 解除高度拉伸 */
     height: auto !important; /* 內容驅動高度 */
-    width: min(330px, calc(100% - 36px)) !important;
-    display: grid !important;
-    grid-template-rows: minmax(0, 1fr) !important;
+    min-height: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 12px !important;
   }
 
-  /* 普通／收合狀態的戰鬥紀錄面板略微縮短 */
+  .enemy-focus-card {
+    position: relative !important;
+    z-index: auto !important;
+    width: auto !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    flex: 0 0 auto;
+  }
+
+  /* The log alone owns the variable-height portion of the rail. */
   .combat-shell[data-log-expanded="false"] .combat-side-panel {
-    max-height: 290px !important;
+    max-height: none !important;
   }
 
-  /* 展開狀態維持原樣高度 */
   .combat-shell[data-log-expanded="true"] .combat-side-panel {
-    max-height: 480px !important;
+    max-height: none !important;
+  }
+
+  .combat-shell[data-log-expanded="false"] .battle-log-card {
+    height: min(290px, calc(100dvh - 300px)) !important;
+  }
+
+  .combat-shell[data-log-expanded="true"] .battle-log-card {
+    height: min(480px, calc(100dvh - 300px)) !important;
   }
 }
