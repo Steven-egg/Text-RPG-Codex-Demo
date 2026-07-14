@@ -41,6 +41,7 @@ SHOP_INVENTORY = {
         "armor_ice_head_01",
         "armor_ice_body_01",
         "armor_ice_rogue_body_01",
+        "armor_ice_rogue_sleeve_blade",
         # === Earth Region Armors ===
         "armor_earth_head_01",
         "armor_earth_body_01",

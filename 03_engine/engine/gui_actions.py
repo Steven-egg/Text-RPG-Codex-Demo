@@ -299,6 +299,8 @@ class GuiRuntimeSession:
             return self.temple_pray(payload, screen_id=screen_id)
         if action_id == "attune_relic":
             return self.attune_relic(payload, screen_id=screen_id)
+        if action_id == "select_relic_passive":
+            return self.select_relic_passive(payload, screen_id=screen_id)
         if action_id == "travel_region":
             return self.travel_region(payload)
         if action_id == "open_world_map":
@@ -605,7 +607,10 @@ class GuiRuntimeSession:
             combat["turn"],
             combat.get("boss_marker", False),
         )
-        effect_events = game.tick_effects(state, player_buffs, enemy_buffs)
+        # Pass the live enemy so periodic enemy DoT effects are resolved and
+        # included in the bridge battle log just like the CLI combat path.
+        effect_events, dot_damage = game.tick_effects(state, player_buffs, enemy_buffs, enemy)
+        combat["enemy_hp"] -= dot_damage
         turn_events.extend(enemy_events)
         turn_events.extend(effect_events)
         game.record_battle_events(combat["battle_log"], combat["turn"], turn_events)
@@ -613,6 +618,8 @@ class GuiRuntimeSession:
         combat["last_action_summary"] = " / ".join(summary[:2]) if summary else "回合結束。"
         combat["turn"] += 1
 
+        if combat["enemy_hp"] <= 0:
+            return self.resolve_victory(effect_events + [f"{enemy['name']}倒下了。"])
         if state.get("current_hp", 0) <= 0:
             return self.resolve_defeat("You were defeated in combat.")
 
@@ -696,12 +703,15 @@ class GuiRuntimeSession:
             combat["turn"],
             combat.get("boss_marker", False),
         )
-        effect_events = game.tick_effects(state, combat["player_buffs"], combat["enemy_buffs"])
+        effect_events, dot_damage = game.tick_effects(state, combat["player_buffs"], combat["enemy_buffs"], enemy)
+        combat["enemy_hp"] -= dot_damage
         turn_events = list(action_result.events) + enemy_events + effect_events
         game.record_battle_events(combat["battle_log"], combat["turn"], turn_events)
         summary = game.combat_summary_lines(action_result.summary, enemy_events, effect_events)
         combat["last_action_summary"] = " / ".join(summary[:2]) if summary else "逃跑失敗。"
         combat["turn"] += 1
+        if combat["enemy_hp"] <= 0:
+            return self.resolve_victory(effect_events + [f"{enemy['name']}倒下了。"])
         if state.get("current_hp", 0) <= 0:
             return self.resolve_defeat("You were defeated while retreating.")
         return self._live_response("retreat", combat["last_action_summary"], screen_model=combat_screen_model(self))
@@ -1600,6 +1610,22 @@ class GuiRuntimeSession:
             "attune_relic",
             result["message"],
             screen_model=self.relic_preview_screen_model()
+        )
+
+    def select_relic_passive(self, payload: dict[str, Any], screen_id: str | None = None) -> dict[str, Any]:
+        state = self.require_state()
+        relic_identifier = payload.get("relic_id") or payload.get("relic_name") or payload.get("element_id")
+        result = game.select_relic_passive(
+            state,
+            str(relic_identifier) if relic_identifier else None,
+            payload.get("choice_id"),
+        )
+        if result["status"] == "blocked":
+            raise GuiActionError(result["message"], status=409, result_status="blocked", blocked_reason=result["message"])
+        return self._live_response(
+            "select_relic_passive",
+            result["message"],
+            screen_model=self.relic_preview_screen_model(),
         )
 
     def screen_model(self, screen_id: str) -> dict[str, Any]:

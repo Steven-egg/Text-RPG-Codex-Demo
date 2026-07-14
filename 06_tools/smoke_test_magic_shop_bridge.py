@@ -90,16 +90,16 @@ def run_smoke_test():
         if b.get("region", "border_fire") == "border_fire"
     }
     assert row_book_ids == expected_books
-    assert len(row_book_ids) == 6
     print("All MAGIC_BOOKS covered in model rows.")
 
-    # Verify category counts (Damage=2, Heal=1, Buff=2, Special=1, All=6)
+    # Verify category counts against the currently exposed book rows so valid
+    # content reductions do not leave stale fixed totals in this bridge smoke.
     category_tabs = {tab["id"]: tab for tab in model["category_tabs"]}
-    assert category_tabs["all"]["count"] == 6
-    assert category_tabs["damage"]["count"] == 2
-    assert category_tabs["heal"]["count"] == 1
-    assert category_tabs["buff"]["count"] == 2
-    assert category_tabs["special"]["count"] == 1
+    assert category_tabs["all"]["count"] == len(rows)
+    for category_id in ("damage", "heal", "buff", "special"):
+        assert category_tabs[category_id]["count"] == sum(
+            row["category"] == category_id for row in rows
+        )
     print("Category counts verified.")
 
     # Verify book_cinder_mark is debuff/特殊魔法

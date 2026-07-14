@@ -7,10 +7,18 @@ details belong to their owning SSOT.
 
 - Work directory: `C:\Users\User\OneDrive\文字冒險遊戲`
 - Latest committed checkpoint:
-  `45cbbad 2026-07-12 [codex] feat(combat): rework attributes and status effects`.
-- The current combat-planning slice changes Cleric damage-over-time /
-  regeneration durations from three to five turns and adds
-  `06_tools/test_combat_balance.py` as a deterministic balance harness.
+  `6b75e38 2026-07-12 [codex] feat(combat): add progression balance harness`.
+- The working tree contains the owner-verified Combat Progression v1 Slice 1
+  implementation: mandatory monster races, race-aware Bleed / Poison,
+  defense-bypassing physical status damage, and Swordfighter Physical Charge.
+- The same uncommitted slice fixes the live GUI combat bridge so DoT damage
+  reduces enemy HP, produces readable localized battle-log rows, and resolves
+  victory when DoT defeats an enemy. Focused bridge regression coverage is in
+  `06_tools/smoke_test_combat_bridge.py`; foundation coverage is in
+  `06_tools/test_combat_progression_foundation.py`.
+- Owner manual verification passed for Physical Charge, race immunity, and
+  GUI live DoT logging. Automated verification passed: data validation,
+  combat foundation checks, combat bridge smoke, and CLI smoke test.
 - The owner-approved player-side design is recorded at
   `01_content/combat-progression-design-v1.md`; it is planning only and does
   not authorize the future runtime/data/schema slices.
@@ -20,6 +28,19 @@ details belong to their owning SSOT.
 - World Map now has Traditional Chinese player-facing presentation text and
   data-driven preview image paths for towns, normal dungeons, Main Dungeon
   phases, and static fixture fallback. Runtime IDs remain unchanged.
+- The uncommitted Combat Progression v1 player-content work also includes the
+  smallest Slice 2 Cleric change: Ice / Earth / Thunder / Final Cleric weapons
+  now use mixed attack and magic-attack stats (8/22, 12/30, 16/40, 24/60).
+- The uncommitted Rogue Ice pseudo-offhand slice makes the existing
+  `armor_rogue_sleeve_blade` normal-attack follow-up data-driven and adds
+  `armor_ice_rogue_sleeve_blade` (霜痕袖刃): head-slot Rogue equipment with a
+  0.35x follow-up and a 30% Bleed attempt. Data validation, foundation,
+  balance harness, CLI smoke, combat bridge, regional facility visibility, and
+  magic-shop bridge smoke all passed.
+- The next planned gate is Relic Passive v1. Its spec now locks one free-choice
+  selection per enshrined relic, direct/DoT terminology, the four thematic
+  roles, and the revised +8% / +15% / +20% / +5% values in
+  `01_content/combat-progression-design-v1.md`. It remains unimplemented.
 
 ## Minimum Read List
 
@@ -60,10 +81,12 @@ Then stop at a read-only planning gate.
 ## Next Boundary
 
 No implementation target is pre-approved. The smallest next convergence item is
-a read-only implementation gate for Combat Progression v1 slice 1: monster race
-data/validation, separate status-damage handling, and Warrior Physical Charge.
-Do not broaden that gate into equipment, relic, growth, monster balancing, GUI,
-or save changes without another exact-scope approval.
+a read-only implementation gate for Relic Passive v1: declarative choice data,
+durable `relic_choices` compatibility defaults, existing Temple/relic selection
+and free-respec flow, stat/combat integration, and the narrow live relic-preview
+bridge surface. Do not implement until the owner approves that exact surface.
+Do not broaden it into monster balancing, growth, equipment expansion, battle
+items, generic damage reduction, static GUI expansion, or manual save work.
 
 Historical screen progress and verification are archived at:
 

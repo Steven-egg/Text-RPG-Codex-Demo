@@ -34,7 +34,6 @@ def get_magic_book_description(book_id: str, name: str, skill_desc: str) -> str:
         "book_spark": "凝聚精純的初階火元素術式，從法杖前端射出燃燒的火花。是法師探險時最可靠的基礎進攻魔法。",
         "book_ice_needle": "凝聚周遭的水元素並凝結成銳利的冰針，能有效穿透敌人的防線。對付焦石礦坑與燼印深窟的火系魔物效果卓越。",
         "book_minor_heal": "吟唱光之神聖禱詞，降下溫和的魔法微光撫平傷口。牧師最基礎的治療法術。",
-        "book_guardian_rune": "以魔力在前方空域構築虛擬的幾何土盾，暫時提升受術者的防禦耐性。",
         "book_quickstep": "為雙足加持微弱風行之術，能更容易閃避敵人攻擊，或在戰場上搶先做出應對。",
         "book_cinder_mark": "釋放火山微粒覆蓋於敵方目標身上，留下容易被高熱點燃的隱密標記。火花術的絕佳增傷搭配。"
     }

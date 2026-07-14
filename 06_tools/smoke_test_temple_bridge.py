@@ -147,6 +147,27 @@ def run_smoke_test():
     assert thunder_slot["active"] is False
     print("Regional seal enshrinement and Final gate verified.")
 
+    # 7. Test passive selection and free replacement through the existing relic bridge.
+    res_passive = session.dispatch(
+        "select_relic_passive",
+        {"relic_id": "relic_fire_seal", "choice_id": "fire_direct_damage"},
+        screen_id="relic_preview_screen",
+    )
+    assert res_passive["ok"] is True
+    fire_slot = next(s for s in res_passive["screen_model"]["slots"] if s["element_id"] == "fire")
+    assert fire_slot["active"] is True
+    assert fire_slot["selected_passive_id"] == "fire_direct_damage"
+    assert len(fire_slot["passive_choices"]) == 4
+
+    res_respec = session.dispatch(
+        "select_relic_passive",
+        {"relic_id": "relic_fire_seal", "choice_id": "fire_all_resist"},
+        screen_id="relic_preview_screen",
+    )
+    fire_slot = next(s for s in res_respec["screen_model"]["slots"] if s["element_id"] == "fire")
+    assert fire_slot["selected_passive_id"] == "fire_all_resist"
+    print("Relic passive bridge selection and free respec verified.")
+
     print("Temple and Relic Preview bridge smoke test ok!")
 
 

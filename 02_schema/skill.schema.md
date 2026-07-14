@@ -17,6 +17,7 @@
     "stat": "attack" | "magic",
     "element": str,
     "multiplier": float,
+    "charge_bonus_per_stack": float,  # optional; physical Warrior skill only
     "crit_bonus": int,  # optional
     "desc": str,
 }
@@ -100,6 +101,12 @@
 ## 選填欄位
 
 - `damage.crit_bonus`
+- `damage.charge_bonus_per_stack`: positive per-stack multiplier bonus for a Warrior physical skill. The skill consumes all current Physical Charge stacks.
+
+Physical status `on_hit` effects use `effect_accuracy` and the target's
+`physical_status_resist`. Bleeding lasts three turns and poison lasts five.
+Race-invalid statuses cannot be applied. Their periodic damage uses a separate
+status-damage path and ignores physical defense.
 
 ## 引用規則
 

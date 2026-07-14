@@ -18,6 +18,11 @@ EQUIPMENT = {
         "stats": dict[stat_key, int],
         "desc": str,
         "unlock": str,  # optional
+        "normal_attack_followup": {  # optional; head-slot pseudo-offhands only
+            "multiplier": float,
+            "element": str,
+            "on_hit": {"status": str, "duration": int, "chance": int, "multiplier": float, "damage_type": str},  # optional
+        },
     }
 }
 ```
@@ -36,6 +41,11 @@ EQUIPMENT = {
 
 - `unlock`
 - `region`
+- `normal_attack_followup`
+
+`normal_attack_followup` is valid only on `head` equipment. It triggers after a
+normal attack that does not defeat the target. Its optional `on_hit` uses the
+existing physical-status accuracy, race-effectiveness, duration, and damage rules.
 
 ## 型別與規則
 

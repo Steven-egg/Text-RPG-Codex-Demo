@@ -112,12 +112,30 @@ def verify_action_loop_victory() -> None:
     print("[Pass] Boss victory resolved through the live combat action loop.")
 
 
+def verify_dot_log_and_victory() -> None:
+    session = GuiRuntimeSession()
+    session.new_game(name="DoT Bridge Tester", job_id="rogue")
+    session.start_combat("mon_moss_rat", boss=False)
+    combat = session.require_combat()
+    combat["enemy_hp"] = 1
+    game.apply_dot(combat["enemy_buffs"], "bleed", 1, 0.45, "physical", "物理")
+
+    response = session.dispatch("defend", {}, screen_id="combat_screen")
+
+    assert response["ok"] is True
+    assert combat["outcome"] == "victory"
+    assert any("流血造成" in line for line in combat["battle_log"])
+    assert not any("['" in line or line.endswith(": 6") for line in combat["battle_log"])
+    print("[Pass] Live bridge records DoT as readable lines and resolves DoT victory.")
+
+
 def run_smoke_test() -> None:
     print("Starting Combat Bridge Boss Rule Parity smoke test...")
     verify_boss_retreat_block()
     verify_boss_escape_scroll_block()
     verify_boss_action_markers()
     verify_action_loop_victory()
+    verify_dot_log_and_victory()
     print("\nCombat Bridge Boss Rule Parity smoke test passed.")
 
 

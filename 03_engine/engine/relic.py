@@ -85,6 +85,49 @@ def relic_enshrined(state: dict, relic: dict) -> bool:
     return bool(state.get("flags", {}).get(relic.get("complete_flag")))
 
 
+def relic_passive_choices(relic: dict) -> list[dict]:
+    return [choice for choice in relic.get("passive_choices", []) if isinstance(choice, dict)]
+
+
+def selected_relic_passive(state: dict, relic_id: str, relic: dict) -> dict | None:
+    choice_id = state.get("relic_passives", {}).get(relic_id)
+    return next((choice for choice in relic_passive_choices(relic) if choice.get("id") == choice_id), None)
+
+
+def active_relic_passive_effects(state: dict) -> dict[str, int]:
+    effects: dict[str, int] = {}
+    for relic_id, relic in preview_relic_entries():
+        if not relic_enshrined(state, relic):
+            continue
+        selected = selected_relic_passive(state, relic_id, relic)
+        if not selected:
+            continue
+        for effect_id, value in selected.get("effect", {}).items():
+            if isinstance(value, int):
+                effects[effect_id] = effects.get(effect_id, 0) + value
+    return effects
+
+
+def select_relic_passive(state: dict, relic_identifier: str | None, choice_id: str | None) -> dict:
+    found = find_preview_relic(relic_identifier)
+    if not found:
+        return {"status": "blocked", "changed": False, "message": "找不到指定的聖印資料。"}
+    relic_id, relic = found
+    if not relic_enshrined(state, relic):
+        return {"status": "blocked", "changed": False, "relic_id": relic_id, "message": "必須先安置此聖印，才能選擇被動效果。"}
+    selected = next((choice for choice in relic_passive_choices(relic) if choice.get("id") == choice_id), None)
+    if not selected:
+        return {"status": "blocked", "changed": False, "relic_id": relic_id, "message": "此聖印沒有指定的被動選項。"}
+    state.setdefault("relic_passives", {})[relic_id] = selected["id"]
+    return {
+        "status": "selected",
+        "changed": True,
+        "relic_id": relic_id,
+        "choice_id": selected["id"],
+        "message": f"{relic['name']} 已選擇「{selected['label']}」。可隨時免費改選。",
+    }
+
+
 def relic_ready_to_enshrine(state: dict, relic: dict) -> bool:
     return (
         not relic_enshrined(state, relic)
@@ -180,7 +223,7 @@ def enshrine_relic(state: dict, identifier: str | None) -> dict:
     message_lines = [
         relic["ready_text"],
         f"取得並安置：{item_name(seal_item_id)} x1。",
-        "聖印被動效果尚未開放。",
+        "可至轉職神殿選擇或免費改選聖印被動效果。",
     ]
     message_lines.extend(unlocked_lines)
     return {
@@ -189,6 +232,38 @@ def enshrine_relic(state: dict, identifier: str | None) -> dict:
         "relic_id": relic_id,
         "message": "\n".join(message_lines),
     }
+
+
+def relic_passive_menu(state: dict) -> None:
+    enshrined = [
+        (relic_id, relic)
+        for relic_id, relic in preview_relic_entries()
+        if relic_enshrined(state, relic)
+    ]
+    if not enshrined:
+        render_panel("聖印被動", ["尚未安置任何聖印。"], border_style="yellow")
+        return
+    options = []
+    for relic_id, relic in enshrined:
+        selected = selected_relic_passive(state, relic_id, relic)
+        current = selected["label"] if selected else "尚未選擇"
+        options.append(f"{relic['name']} / 目前：{current}")
+    choice = action_menu_panel("聖印被動", options, "轉職神殿", header_lines=["每枚已安置聖印可選一項被動，可免費改選。"], allow_back=True, border_style="yellow")
+    if not choice:
+        return
+    relic_id, relic = enshrined[choice - 1]
+    passive_options = relic_passive_choices(relic)
+    passive_choice = action_menu_panel(
+        relic["name"],
+        [f"{entry['label']} / {entry['summary']}" for entry in passive_options],
+        "轉職神殿",
+        header_lines=["選擇後可隨時免費改選。"],
+        allow_back=True,
+        border_style="yellow",
+    )
+    if passive_choice:
+        result = select_relic_passive(state, relic_id, passive_options[passive_choice - 1]["id"])
+        render_panel("聖印被動結果", result["message"].splitlines(), border_style="yellow")
 
 
 def relic_preview_menu(state: dict, region_id: str = "border_fire") -> None:

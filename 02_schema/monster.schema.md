@@ -18,6 +18,7 @@ MONSTERS = {
         "agility": int,
         "crit": int,
         "element": str,
+        "race": "beast" | "humanoid" | "plant" | "construct" | "spirit" | "aberration",
         "exp": int,
         "gold": tuple[int, int],
         "drops": list[tuple[item_or_material_id, chance_float, qty_int]],
@@ -39,6 +40,7 @@ MONSTERS = {
 - `physical_status_resist`: optional int; reduces physical status application chance.
 - `crit`
 - `element`
+- `race`: required combat race tag; one of `beast`, `humanoid`, `plant`, `construct`, `spirit`, or `aberration`.
 - `exp`
 - `gold`
 - `drops`

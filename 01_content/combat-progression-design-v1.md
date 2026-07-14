@@ -120,16 +120,37 @@ possible after all relics are enshrined.
 
 | Relic | Themed choices | Shared choice |
 |---|---|---|
-| Fire | direct damage +5%; physical lifesteal 5%; critical damage +15% | all elemental resistance +3% |
-| Ice | magic damage +5%; maximum MP +10%; magic defense +10% | all elemental resistance +3% |
-| Earth | maximum HP +10%; regeneration/healing +10%; damage-over-time +10% | all elemental resistance +3% |
-| Thunder | agility +5; critical chance +5%; effect accuracy +10% | all elemental resistance +3% |
+| Fire | direct damage +8%; physical lifesteal 7%; critical damage +20% | all elemental resistance +5% |
+| Ice | direct magic damage +8%; maximum MP +15%; magic defense +15% | all elemental resistance +5% |
+| Earth | maximum HP +15%; regeneration/healing +15%; damage-over-time +15% | all elemental resistance +5% |
+| Thunder | direct physical damage +8%; critical chance +8%; effect accuracy +15% | all elemental resistance +5% |
 
 - Fire's lifesteal applies only to direct physical damage.
+- `direct damage` means normal attacks and skill hits that deal damage
+  immediately, including physical and magic damage, but excluding all
+  periodic damage-over-time ticks.
 - Direct-damage bonuses exclude bleeding, poison, and Cleric magic
   damage-over-time; Earth owns the damage-over-time bonus.
-- Selecting the shared choice on all four relics grants +12% all elemental
-  resistance: meaningful in Final without replacing regional accessories.
+- Ice keeps the existing `magic_defense` stat rather than adding a new generic
+  damage-reduction formula. A future balance gate may reconsider that choice.
+- Thunder intentionally replaces the previous weak agility option with direct
+  physical damage; the current game has no speed/initiative layer that makes a
+  small agility bonus a meaningful relic choice.
+- Selecting the shared choice on all four relics grants +20% all elemental
+  resistance. This is a generalist defensive route; it will be measured only
+  in the later balance phase.
+
+### Relic Choice Intent
+
+- Fire is the general direct-output relic. All jobs can use direct damage;
+  Swordfighter and Rogue gain additional physical sustain or critical value.
+- Ice is the Mage-first relic, with Cleric as a secondary user through magic
+  output, MP, and magic defense.
+- Earth is the sustain relic: Cleric favors regeneration/healing and magic
+  damage-over-time, Rogue can favor physical status damage-over-time, and all
+  jobs can take maximum HP or the shared resistance option.
+- Thunder is the Rogue-first critical/status relic and a Swordfighter
+  secondary relic through direct physical damage and critical chance.
 
 ## Progression and Balance Order
 
@@ -159,6 +180,9 @@ Implementation must be sliced and separately approved:
    Mage books, Cleric mixed-stat weapons, and battle items.
 3. Relic passives: data contract, durable selection state, Temple selection /
    free respec flow, stat and combat integration, and save compatibility.
+   Implement function correctness before any balance tuning: do not alter
+   player growth, skill values, equipment values, monster values, or balance
+   harness thresholds in this gate.
 4. Balance: harness profiles at milestone levels, job-growth review only if
    needed, then monster HP/attack/defense/magic-defense/resistance/status
    tuning.

@@ -58,8 +58,27 @@ RELICS = {
 - `unlock.kind == "item"` 時，`key` 必須存在於 `ITEMS`、`EQUIPMENT` 或 `MATERIALS`。
 - `unlock.kind == "level"` 時，需使用正整數 `value`。
 
-## 未來注意事項
+## 相容性注意事項
 
 - 若要實作取得狀態，才評估新增 `state["relics"]` 與 save migration。
 - 若要實作聖物效果，才評估接入 `get_stats()` 或戰鬥傷害計算。
 - 本階段不得讓聖物改變裝備 stats、戰鬥數值、陷阱傷害或元素倍率。
+
+## Relic Passive v1
+
+每個 relic entry 的 `passive_choices` 必須是四筆 choice；每筆包含：
+
+```python
+{
+    "id": str,
+    "label": str,
+    "summary": str,
+    "effect": {effect_id: positive_int},
+}
+```
+
+- 已安置聖印的選擇儲存在 `state["relic_passives"][relic_id]`。
+- 每枚聖印只能保留一個 choice；覆寫 choice 不消耗金錢或物品。
+- `all_element_resist` 對四種元素抗性各加一次，並沿用既有 75% cap。
+- 直接傷害僅指立即命中的普攻／技能，不包含任何 DoT；物理 DoT 仍走既有忽略物防的路徑。
+- `magic_defense_percent` 只改既有 `magic_defense` stat，不新增泛用傷害減免公式。

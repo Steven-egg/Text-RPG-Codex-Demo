@@ -4,6 +4,12 @@ from __future__ import annotations
 RELICS = {
     "relic_fire_seal": {
         "element_id": "fire",
+        "passive_choices": [
+            {"id": "fire_direct_damage", "label": "熾焰猛攻", "summary": "直接傷害 +8%。", "effect": {"direct_damage_percent": 8}},
+            {"id": "fire_physical_lifesteal", "label": "餘燼汲取", "summary": "直接物理傷害吸血 7%。", "effect": {"physical_lifesteal_percent": 7}},
+            {"id": "fire_crit_damage", "label": "焚心暴擊", "summary": "暴擊傷害 +20%。", "effect": {"crit_damage_percent": 20}},
+            {"id": "fire_all_resist", "label": "元素屏障", "summary": "全元素抗性 +5%。", "effect": {"all_element_resist": 5}},
+        ],
         "label": "🔥 火之聖印",
         "name": "火之聖印",
         "summary": "由三枚火之印記碎片在聖物調查台合成並安置的第一枚元素聖印。",
@@ -22,6 +28,12 @@ RELICS = {
     },
     "relic_ice_marker_source": {
         "element_id": "ice",
+        "passive_choices": [
+            {"id": "ice_direct_magic_damage", "label": "霜華導引", "summary": "直接魔法傷害 +8%。", "effect": {"direct_magic_damage_percent": 8}},
+            {"id": "ice_max_mp", "label": "冰鏡靈泉", "summary": "最大 MP +15%。", "effect": {"max_mp_percent": 15}},
+            {"id": "ice_magic_defense", "label": "凍結護幕", "summary": "魔防 +15%。", "effect": {"magic_defense_percent": 15}},
+            {"id": "ice_all_resist", "label": "元素屏障", "summary": "全元素抗性 +5%。", "effect": {"all_element_resist": 5}},
+        ],
         "label": "❄️ 極寒聖印",
         "name": "極寒聖印",
         "summary": "由極寒封印源證定著而成的第二枚元素聖印。",
@@ -40,6 +52,12 @@ RELICS = {
     },
     "relic_earth_marker_source": {
         "element_id": "earth",
+        "passive_choices": [
+            {"id": "earth_max_hp", "label": "大地脈動", "summary": "最大 HP +15%。", "effect": {"max_hp_percent": 15}},
+            {"id": "earth_healing_regen", "label": "沃土回響", "summary": "再生／治療 +15%。", "effect": {"healing_regen_percent": 15}},
+            {"id": "earth_dot_damage", "label": "蝕地印記", "summary": "所有 DoT +15%。", "effect": {"dot_damage_percent": 15}},
+            {"id": "earth_all_resist", "label": "元素屏障", "summary": "全元素抗性 +5%。", "effect": {"all_element_resist": 5}},
+        ],
         "label": "🌿 大地聖印",
         "name": "大地聖印",
         "summary": "由亞爾根深核定著而成的第三枚元素聖印。",
@@ -58,6 +76,12 @@ RELICS = {
     },
     "relic_thunder_marker_source": {
         "element_id": "thunder",
+        "passive_choices": [
+            {"id": "thunder_direct_physical_damage", "label": "雷擊穿刺", "summary": "直接物理傷害 +8%。", "effect": {"direct_physical_damage_percent": 8}},
+            {"id": "thunder_crit", "label": "疾雷觀測", "summary": "暴擊率 +8%。", "effect": {"crit": 8}},
+            {"id": "thunder_effect_accuracy", "label": "導雷刻印", "summary": "效果命中 +15%。", "effect": {"effect_accuracy": 15}},
+            {"id": "thunder_all_resist", "label": "元素屏障", "summary": "全元素抗性 +5%。", "effect": {"all_element_resist": 5}},
+        ],
         "label": "⚡ 雷鳴聖印",
         "name": "雷鳴聖印",
         "summary": "由亞斯塔爾龍心定著而成的第四枚元素聖印。",

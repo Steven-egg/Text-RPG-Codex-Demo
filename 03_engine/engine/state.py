@@ -9,6 +9,8 @@ from data import (
     EQUIPMENT,
     QUESTS,
     REGIONS,
+    RELICS,
+    SKILLS,
     get_unlocked_regions,
 )
 
@@ -70,6 +72,7 @@ def create_state(name: str, job: str) -> dict:
         "unlocked": ["dungeon_moss_cave"],
         "cleared_dungeons": [],
         "flags": {},
+        "relic_passives": {},
         "storage_unlocked": False,
         "storage": {},
         "bestiary": [],
@@ -81,8 +84,25 @@ def create_state(name: str, job: str) -> dict:
 
 
 def ensure_state_defaults(state: dict) -> dict:
+    if not isinstance(state.get("learned_skills"), list):
+        job_id = state.get("job")
+        state["learned_skills"] = list(JOBS[job_id]["base_skills"]) if job_id in JOBS else []
+    else:
+        state["learned_skills"] = [skill_id for skill_id in state["learned_skills"] if skill_id in SKILLS]
     if not isinstance(state.get("flags"), dict):
         state["flags"] = {}
+    raw_relic_passives = state.get("relic_passives")
+    if not isinstance(raw_relic_passives, dict):
+        raw_relic_passives = {}
+    normalized_relic_passives = {}
+    for relic_id, choice_id in raw_relic_passives.items():
+        relic = RELICS.get(relic_id)
+        if not relic or not state["flags"].get(relic.get("complete_flag")):
+            continue
+        choice_ids = {choice.get("id") for choice in relic.get("passive_choices", [])}
+        if isinstance(choice_id, str) and choice_id in choice_ids:
+            normalized_relic_passives[relic_id] = choice_id
+    state["relic_passives"] = normalized_relic_passives
     state.setdefault("storage_unlocked", False)
     if not isinstance(state.get("storage"), dict):
         state["storage"] = {}
@@ -203,6 +223,25 @@ def player_facing_dungeon_ids(state: dict, region_id: str | None = None) -> list
     return dungeon_ids
 
 
+def active_relic_passive_effects(state: dict) -> dict[str, int]:
+    effects: dict[str, int] = {}
+    selected = state.get("relic_passives", {})
+    if not isinstance(selected, dict):
+        return effects
+    flags = state.get("flags", {})
+    for relic_id, choice_id in selected.items():
+        relic = RELICS.get(relic_id, {})
+        if not flags.get(relic.get("complete_flag")):
+            continue
+        choice = next((entry for entry in relic.get("passive_choices", []) if entry.get("id") == choice_id), None)
+        if not choice:
+            continue
+        for effect_id, value in choice.get("effect", {}).items():
+            if isinstance(value, int):
+                effects[effect_id] = effects.get(effect_id, 0) + value
+    return effects
+
+
 def get_stats(state: dict, buffs: dict | None = None) -> dict:
     job = JOBS[state["job"]]
     stats = deepcopy(job["base"])
@@ -229,6 +268,12 @@ def get_stats(state: dict, buffs: dict | None = None) -> dict:
         for key, value in EQUIPMENT[item_id].get("stats", {}).items():
             stats[key] = stats.get(key, 0) + value
 
+    relic_effects = active_relic_passive_effects(state)
+    stats["crit"] = stats.get("crit", 0) + relic_effects.get("crit", 0)
+    stats["effect_accuracy"] = stats.get("effect_accuracy", 0) + relic_effects.get("effect_accuracy", 0)
+    for key in ("fire_resist", "ice_resist", "earth_resist", "thunder_resist"):
+        stats[key] += relic_effects.get("all_element_resist", 0)
+
     if buffs:
         if buffs.get("defense_up", 0) > 0:
             stats["defense"] = math.ceil(stats["defense"] * 1.2)
@@ -236,6 +281,11 @@ def get_stats(state: dict, buffs: dict | None = None) -> dict:
             stats["defense"] = max(1, math.floor(stats["defense"] * 0.8))
         if buffs.get("quickstep", 0) > 0:
             stats["agility"] = math.ceil(stats["agility"] * 1.25)
+
+    for key, effect_key in (("max_hp", "max_hp_percent"), ("max_mp", "max_mp_percent"), ("magic_defense", "magic_defense_percent")):
+        percent = relic_effects.get(effect_key, 0)
+        if percent:
+            stats[key] = math.ceil(stats[key] * (1 + percent / 100))
 
     for key in ("fire_resist", "ice_resist", "earth_resist", "thunder_resist"):
         stats[key] = max(0, min(stats.get(key, 0), 75))

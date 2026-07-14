@@ -68,10 +68,14 @@ from .relic import (
     relic_source_count,
     relic_source_required,
     relic_disabled_reason,
+    relic_passive_choices,
+    selected_relic_passive,
+    select_relic_passive,
     preview_relic_entries,
     enshrine_relic,
     relic_preview_menu,
     ready_relic_names,
+    active_relic_passive_effects,
 )
 from data import (
     DUNGEONS,
@@ -201,7 +205,6 @@ SAVE_PATH = ROOT / "save.json"
 
 
 
-SLEEVE_BLADE_FOLLOWUP_MULTIPLIER = 0.35
 MAX_COMBAT_SUMMARY_LINES = 3
 
 
@@ -277,7 +280,52 @@ def buff_summary(buffs: dict) -> str:
         "regeneration": "再生",
     }
     active = [f"{labels.get(key, key)} {turns}" for key, turns in buffs.items() if not key.startswith("_") and isinstance(turns, int) and turns > 0]
+    if buffs.get("_physical_charge", 0) > 0:
+        active.append(f"Physical Charge {physical_charge(buffs)}")
     return "、".join(active) if active else "無"
+
+
+PHYSICAL_CHARGE_KEY = "_physical_charge"
+MAX_PHYSICAL_CHARGE = 3
+PHYSICAL_STATUS_EFFECTIVENESS = {
+    "beast": {"bleed": "effective", "poison": "normal"},
+    "humanoid": {"bleed": "effective", "poison": "normal"},
+    "plant": {"bleed": "ineffective", "poison": "effective"},
+    "construct": {"bleed": "ineffective", "poison": "ineffective"},
+    "spirit": {"bleed": "ineffective", "poison": "ineffective"},
+    "aberration": {"bleed": "normal", "poison": "effective"},
+}
+STATUS_DISPLAY_NAMES = {"bleed": "流血", "poison": "中毒", "burn": "灼傷"}
+
+
+def status_display_name(status: str) -> str:
+    return STATUS_DISPLAY_NAMES.get(status, status)
+
+
+def physical_charge(player_buffs: dict) -> int:
+    return max(0, min(MAX_PHYSICAL_CHARGE, int(player_buffs.get(PHYSICAL_CHARGE_KEY, 0))))
+
+
+def gain_physical_charge(state: dict, player_buffs: dict) -> int:
+    if state.get("job") != "劍士":
+        return physical_charge(player_buffs)
+    player_buffs[PHYSICAL_CHARGE_KEY] = min(MAX_PHYSICAL_CHARGE, physical_charge(player_buffs) + 1)
+    return physical_charge(player_buffs)
+
+
+def consume_physical_charge(player_buffs: dict) -> int:
+    stacks = physical_charge(player_buffs)
+    player_buffs.pop(PHYSICAL_CHARGE_KEY, None)
+    return stacks
+
+
+def physical_status_effectiveness(enemy: dict, status: str) -> str:
+    return PHYSICAL_STATUS_EFFECTIVENESS.get(enemy.get("race"), {}).get(status, "ineffective")
+
+
+def calc_physical_status_damage(power: int, multiplier: float) -> int:
+    """Status damage is deterministic and intentionally ignores defense."""
+    return max(1, math.ceil(power * multiplier))
 
 def combat_panel_lines(
     state: dict,
@@ -600,7 +648,7 @@ def adjusted_defense(target: dict, buffs: dict, damage_type: str) -> int:
     return defense
 
 
-def calc_typed_damage(power: int, multiplier: float, target: dict, target_buffs: dict, damage_type: str, element: str, *, agility: int = 0, crit_chance: int = 0, direct: bool = False) -> tuple[int, bool]:
+def calc_typed_damage(power: int, multiplier: float, target: dict, target_buffs: dict, damage_type: str, element: str, *, agility: int = 0, crit_chance: int = 0, crit_damage_percent: int = 0, direct: bool = False) -> tuple[int, bool]:
     defense = adjusted_defense(target, target_buffs, damage_type)
     base = max(1, power * multiplier - defense * 0.6)
     base *= element_multiplier(element, target.get("element", ""), target_buffs)
@@ -610,7 +658,7 @@ def calc_typed_damage(power: int, multiplier: float, target: dict, target_buffs:
         base *= direct_damage_roll(agility)
         is_crit = random.randint(1, 100) <= max(0, crit_chance)
         if is_crit:
-            base *= 1.5
+            base *= 1.5 * (1 + crit_damage_percent / 100)
     return max(1, math.ceil(base)), is_crit
 
 
@@ -619,23 +667,36 @@ def calc_player_damage(state: dict, enemy: dict, skill: dict | None, player_buff
     is_magic = bool(skill and skill.get("stat") == "magic")
     power = stats["magic_attack"] if is_magic else stats["attack"]
     multiplier = skill.get("multiplier", 1.0) if skill else 1.0
+    relic_effects = active_relic_passive_effects(state)
+    direct_bonus = relic_effects.get("direct_damage_percent", 0)
+    direct_bonus += relic_effects.get("direct_magic_damage_percent" if is_magic else "direct_physical_damage_percent", 0)
+    multiplier *= 1 + direct_bonus / 100
+    if skill and skill.get("charge_bonus_per_stack"):
+        multiplier += physical_charge(player_buffs) * skill["charge_bonus_per_stack"]
     attack_element = skill.get("element", "物理") if skill else "物理"
     crit_chance = stats["crit"] + (skill.get("crit_bonus", 0) if skill else 0)
     return calc_typed_damage(
         power, multiplier, enemy, enemy_buffs, "magic" if is_magic else "physical", attack_element,
-        agility=stats["agility"], crit_chance=crit_chance, direct=True,
+        agility=stats["agility"], crit_chance=crit_chance,
+        crit_damage_percent=relic_effects.get("crit_damage_percent", 0), direct=True,
     )
 
-def can_sleeve_blade_followup(state: dict, skill: dict | None) -> bool:
-    return (
-        skill is None
-        and state["job"] == "盜賊"
-        and state["equipment"].get("head") == "armor_rogue_sleeve_blade"
-    )
+def normal_attack_followup(state: dict, skill: dict | None) -> tuple[dict, dict] | None:
+    if skill is not None:
+        return None
+    head_id = state["equipment"].get("head")
+    head = EQUIPMENT.get(head_id, {})
+    followup = head.get("normal_attack_followup")
+    if not followup:
+        return None
+    return head, followup
 
-def calc_sleeve_blade_followup_damage(state: dict, enemy: dict, player_buffs: dict, enemy_buffs: dict) -> int:
+
+def calc_normal_attack_followup_damage(state: dict, enemy: dict, player_buffs: dict, enemy_buffs: dict, followup: dict) -> int:
     stats = get_stats(state, player_buffs)
-    damage, _ = calc_typed_damage(stats["attack"], SLEEVE_BLADE_FOLLOWUP_MULTIPLIER, enemy, enemy_buffs, "physical", "物理")
+    relic_effects = active_relic_passive_effects(state)
+    multiplier = followup["multiplier"] * (1 + (relic_effects.get("direct_damage_percent", 0) + relic_effects.get("direct_physical_damage_percent", 0)) / 100)
+    damage, _ = calc_typed_damage(stats["attack"], multiplier, enemy, enemy_buffs, "physical", followup["element"])
     return damage
 
 def calc_enemy_damage(enemy: dict, state: dict, multiplier: float, element: str, player_buffs: dict, defending: bool) -> int:
@@ -803,15 +864,42 @@ def player_attack(state: dict, enemy: dict, enemy_hp: int, skill: dict | None, p
     crit_text = " 暴擊！" if is_crit else ""
     events = [f"你使用{label}，造成 {damage} 傷害。{crit_text}"]
     summary = [f"你使用{label}，造成 {damage} 傷害。{crit_text}"]
-    if can_sleeve_blade_followup(state, skill) and enemy_hp - damage > 0:
-        followup_damage = calc_sleeve_blade_followup_damage(state, enemy, player_buffs, enemy_buffs)
+    if skill and skill.get("charge_bonus_per_stack"):
+        consumed = consume_physical_charge(player_buffs)
+        if consumed:
+            charge_line = f"消耗 Physical Charge {consumed} 層。"
+            events.append(charge_line)
+            summary.append(charge_line)
+    elif skill is None and state.get("job") == "劍士":
+        stacks = gain_physical_charge(state, player_buffs)
+        charge_line = f"Physical Charge 增加至 {stacks}/{MAX_PHYSICAL_CHARGE}。"
+        events.append(charge_line)
+        summary.append(charge_line)
+    followup_data = normal_attack_followup(state, skill)
+    if followup_data and enemy_hp - damage > 0:
+        followup_equipment, followup = followup_data
+        followup_damage = calc_normal_attack_followup_damage(state, enemy, player_buffs, enemy_buffs, followup)
         damage += followup_damage
-        events.append(f"影袖副刃順勢劃出追擊，造成 {followup_damage} 傷害。")
-        summary.append(f"影袖副刃追擊 {followup_damage} 傷害。")
+        events.append(f"{followup_equipment['name']}順勢劃出追擊，造成 {followup_damage} 傷害。")
+        summary.append(f"{followup_equipment['name']}追擊 {followup_damage} 傷害。")
+        if followup.get("on_hit"):
+            effect_events = apply_weapon_effect(state, enemy, followup["on_hit"], enemy_buffs)
+            events.extend(effect_events)
+            summary.extend(effect_events)
     if skill and skill.get("on_hit"):
         effect_events = apply_weapon_effect(state, enemy, skill["on_hit"], enemy_buffs)
         events.extend(effect_events)
         summary.extend(effect_events)
+    is_magic = bool(skill and skill.get("stat") == "magic")
+    lifesteal_percent = active_relic_passive_effects(state).get("physical_lifesteal_percent", 0)
+    if not is_magic and lifesteal_percent:
+        stats = get_stats(state, player_buffs)
+        healed = min(math.floor(damage * lifesteal_percent / 100), max(0, stats["max_hp"] - state["current_hp"]))
+        if healed:
+            state["current_hp"] += healed
+            line = f"火之聖印汲取 {healed} HP。"
+            events.append(line)
+            summary.append(line)
     return CombatActionResult(damage=damage, events=events, summary=summary)
 
 
@@ -828,13 +916,15 @@ def apply_weapon_effect(state: dict, enemy: dict, effect: dict, enemy_buffs: dic
     stats = get_stats(state)
     chance = max(35, min(95, effect.get("chance", 0) + stats.get("effect_accuracy", 0) - enemy.get("physical_status_resist", 0)))
     status = effect["status"]
+    if status in {"bleed", "poison"} and physical_status_effectiveness(enemy, status) == "ineffective":
+        return [f"{enemy['name']} 的種族不受{status_display_name(status)}影響。"]
     if random.randint(1, 100) > chance:
-        return [f"{status} 附加失敗（效果命中 {chance}%）。"]
+        return [f"{status_display_name(status)}附加失敗。"]
     if status == "defense_down":
         enemy_buffs[status] = effect["duration"]
-        return [f"{status} 附加成功（效果命中 {chance}%）。"]
+        return [f"{status_display_name(status)}附加成功。"]
     apply_dot(enemy_buffs, status, effect["duration"], effect["multiplier"], effect.get("damage_type", "physical"), effect.get("element", "物理"))
-    return [f"{status} 附加成功（效果命中 {chance}%）。"]
+    return [f"{status_display_name(status)}附加成功，持續 {effect['duration']} 回合。"]
 
 def skill_menu(state: dict, enemy: dict, player_buffs: dict, enemy_buffs: dict):
     skills = state["learned_skills"]
@@ -866,6 +956,7 @@ def skill_menu(state: dict, enemy: dict, player_buffs: dict, enemy_buffs: dict):
     if skill["kind"] == "heal":
         before = state["current_hp"]
         amount = skill["amount"] + math.floor(stats["magic_attack"] * skill.get("multiplier", 0))
+        amount = math.ceil(amount * (1 + active_relic_passive_effects(state).get("healing_regen_percent", 0) / 100))
         state["current_hp"] = min(stats["max_hp"], state["current_hp"] + amount)
         healed = state["current_hp"] - before
         line = f"你使用{skill['name']}，回復 {healed} HP。"
@@ -1125,6 +1216,7 @@ def tick_effects(state: dict, player_buffs: dict, enemy_buffs: dict, enemy: dict
         regen = player_buffs.get("_regen_data", {})
         stats = get_stats(state)
         amount = regen.get("amount", 0) + math.floor(stats["magic_attack"] * regen.get("multiplier", 0))
+        amount = math.ceil(amount * (1 + active_relic_passive_effects(state).get("healing_regen_percent", 0) / 100))
         healed = min(amount, stats["max_hp"] - state["current_hp"])
         state["current_hp"] += max(0, healed)
         events.append(f"再生回復 {max(0, healed)} HP。")
@@ -1134,11 +1226,15 @@ def tick_effects(state: dict, player_buffs: dict, enemy_buffs: dict, enemy: dict
                 continue
             stats = get_stats(state)
             power = stats["magic_attack"] if dot["damage_type"] == "magic" else stats["attack"]
-            damage, _ = calc_typed_damage(
-                power, dot["multiplier"], enemy, enemy_buffs, dot["damage_type"], dot["element"],
-            )
+            if dot["damage_type"] == "physical":
+                damage = calc_physical_status_damage(power, dot["multiplier"])
+            else:
+                damage, _ = calc_typed_damage(
+                    power, dot["multiplier"], enemy, enemy_buffs, dot["damage_type"], dot["element"],
+                )
+            damage = math.ceil(damage * (1 + active_relic_passive_effects(state).get("dot_damage_percent", 0) / 100))
             enemy_dot_damage += damage
-            events.append(f"{status} 造成 {damage} 傷害。")
+            events.append(f"{status_display_name(status)}造成 {damage} 傷害。")
     for buffs in (player_buffs, enemy_buffs):
         expired = []
         for key in list(buffs.keys()):
@@ -1461,15 +1557,6 @@ def smoke_test() -> None:
     state["gold"] = 999
     craft_recipe(state, "recipe_iron_sword_plus_1")
     assert state["inventory"].get("weapon_iron_sword_plus_1", 0) == 1
-    state["level"] = 4
-    add_item(state, "mat_cracked_stone", 3)
-    state["gold"] = 999
-    book = MAGIC_BOOKS["book_guardian_rune"]
-    assert state["job"] in book["jobs"]
-    assert can_pay_items(state, book["materials"])
-    pay_items(state, book["materials"])
-    state["learned_skills"].append(book["skill"])
-    assert "skill_guardian_rune" in state["learned_skills"]
     damage, _ = calc_player_damage(state, MONSTERS["mon_moss_rat"], None, {}, {})
     assert damage > 0
 

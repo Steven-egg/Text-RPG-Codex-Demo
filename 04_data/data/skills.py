@@ -10,6 +10,7 @@ SKILLS = {
         "stat": "attack",
         "element": "物理",
         "multiplier": 1.25,
+        "charge_bonus_per_stack": 0.08,
         "desc": "物理傷害，倍率 1.25。",
     },
     "skill_arcane_bolt": {
@@ -30,7 +31,7 @@ SKILLS = {
         "multiplier": 1.15,
         "crit_bonus": 10,
         "on_hit": {"status": "bleed", "duration": 3, "chance": 70, "multiplier": 0.45, "damage_type": "physical"},
-        "desc": "高命中物理傷害，暴擊 +10%。",
+        "desc": "高命中物理傷害，暴擊 +10%；命中後可附加流血，每回合造成自身攻擊力 ×45% 的物理狀態傷害，持續 3 回合。",
     },
     "skill_blessed_touch": {
         "name": "祝禱",
@@ -47,8 +48,8 @@ SKILLS = {
         "stat": "attack",
         "element": "物理",
         "multiplier": 0.9,
-        "on_hit": {"status": "poison", "duration": 3, "chance": 65, "multiplier": 0.35, "damage_type": "physical"},
-        "desc": "造成物理傷害，並有機率附加毒傷。",
+        "on_hit": {"status": "poison", "duration": 5, "chance": 65, "multiplier": 0.35, "damage_type": "physical"},
+        "desc": "造成物理傷害，並有機率附加中毒；每回合造成自身攻擊力 ×35% 的物理狀態傷害，持續 5 回合。",
     },
     "skill_sanctified_decay": {
         "name": "聖蝕",
@@ -94,14 +95,6 @@ SKILLS = {
         "amount": 45,
         "desc": "回復 HP 45。",
     },
-    "skill_guardian_rune": {
-        "name": "守護符文",
-        "mp": 8,
-        "kind": "buff",
-        "buff": "defense_up",
-        "duration": 3,
-        "desc": "3 回合防禦 +20%。",
-    },
     "skill_quickstep": {
         "name": "迅步術",
         "mp": 6,
@@ -135,14 +128,6 @@ SKILLS = {
         "amount": 60,
         "desc": "回復 HP 60。",
     },
-    "skill_ice_03": {
-        "name": "霜甲術",
-        "mp": 8,
-        "kind": "buff",
-        "buff": "defense_up",
-        "duration": 3,
-        "desc": "3 回合防禦 +20%。",
-    },
     "skill_ice_04": {
         "name": "冰斬術",
         "mp": 6,
@@ -150,6 +135,7 @@ SKILLS = {
         "stat": "attack",
         "element": "冰",
         "multiplier": 1.3,
+        "charge_bonus_per_stack": 0.10,
         "desc": "冰屬性物理傷害。",
     },
     "skill_ice_05": {
@@ -186,14 +172,6 @@ SKILLS = {
         "amount": 80,
         "desc": "回復 HP 80。",
     },
-    "skill_earth_04": {
-        "name": "古藤甲術",
-        "mp": 10,
-        "kind": "buff",
-        "buff": "defense_up",
-        "duration": 4,
-        "desc": "4 回合防禦 +20%。",
-    },
     "skill_earth_05": {
         "name": "石裂斬",
         "mp": 8,
@@ -201,6 +179,7 @@ SKILLS = {
         "stat": "attack",
         "element": "自然",
         "multiplier": 1.45,
+        "charge_bonus_per_stack": 0.12,
         "desc": "土屬性物理傷害。",
     },
     "skill_earth_06": {
@@ -238,14 +217,6 @@ SKILLS = {
         "amount": 110,
         "desc": "高階神聖回復 HP 110。",
     },
-    "skill_thunder_04": {
-        "name": "靜電盾術",
-        "mp": 12,
-        "kind": "buff",
-        "buff": "defense_up",
-        "duration": 3,
-        "desc": "3 回合防禦 +25%。",
-    },
     "skill_thunder_05": {
         "name": "迅雷斬",
         "mp": 10,
@@ -253,6 +224,7 @@ SKILLS = {
         "stat": "attack",
         "element": "雷",
         "multiplier": 1.6,
+        "charge_bonus_per_stack": 0.14,
         "desc": "雷屬性物理斬擊傷害。",
     },
     "skill_thunder_06": {
@@ -289,14 +261,6 @@ SKILLS = {
         "amount": 160,
         "desc": "終極神聖回復 HP 160。",
     },
-    "skill_final_04": {
-        "name": "虛空結界",
-        "mp": 18,
-        "kind": "buff",
-        "buff": "defense_up",
-        "duration": 4,
-        "desc": "4 回合防禦 +30%。",
-    },
     "skill_final_05": {
         "name": "深淵霸斬",
         "mp": 15,
@@ -304,6 +268,7 @@ SKILLS = {
         "stat": "attack",
         "element": "物理",
         "multiplier": 2.0,
+        "charge_bonus_per_stack": 0.16,
         "desc": "深淵物理霸斬傷害。",
     },
     "skill_final_06": {
@@ -343,14 +308,6 @@ MAGIC_BOOKS = {
         "materials": {"mat_moss_fiber": 2},
         "skill": "skill_minor_heal",
     },
-    "book_guardian_rune": {
-        "name": "守護符文書",
-        "jobs": ["劍士", "牧師"],
-        "level": 4,
-        "price": 300,
-        "materials": {"mat_cracked_stone": 3},
-        "skill": "skill_guardian_rune",
-    },
     "book_quickstep": {
         "name": "迅步術書",
         "jobs": ["盜賊", "劍士"],
@@ -384,15 +341,6 @@ MAGIC_BOOKS = {
         "price": 420,
         "materials": {"mat_ice_saltcloth": 2},
         "skill": "skill_ice_02",
-        "region": "ice",
-    },
-    "book_ice_03": {
-        "name": "霜甲術書",
-        "jobs": ["牧師"],
-        "level": 7,
-        "price": 440,
-        "materials": {"mat_ice_wreck_plank": 2},
-        "skill": "skill_ice_03",
         "region": "ice",
     },
     "book_ice_04": {
@@ -441,15 +389,6 @@ MAGIC_BOOKS = {
         "skill": "skill_earth_03",
         "region": "earth",
     },
-    "book_earth_04": {
-        "name": "古藤甲術書",
-        "jobs": ["牧師"],
-        "level": 12,
-        "price": 680,
-        "materials": {"mat_earth_quarry_stone": 2},
-        "skill": "skill_earth_04",
-        "region": "earth",
-    },
     "book_earth_05": {
         "name": "石裂斬術書",
         "jobs": ["劍士"],
@@ -496,15 +435,6 @@ MAGIC_BOOKS = {
         "skill": "skill_thunder_03",
         "region": "thunder",
     },
-    "book_thunder_04": {
-        "name": "靜電盾術書",
-        "jobs": ["牧師"],
-        "level": 17,
-        "price": 1000,
-        "materials": {"mat_thunder_sky_stone": 2},
-        "skill": "skill_thunder_04",
-        "region": "thunder",
-    },
     "book_thunder_05": {
         "name": "迅雷斬術書",
         "jobs": ["劍士"],
@@ -549,15 +479,6 @@ MAGIC_BOOKS = {
         "price": 1550,
         "materials": {"mat_final_root_stone": 2},
         "skill": "skill_final_03",
-        "region": "final",
-    },
-    "book_final_04": {
-        "name": "虛空結界書",
-        "jobs": ["牧師"],
-        "level": 23,
-        "price": 1700,
-        "materials": {"mat_final_storm_glass": 2},
-        "skill": "skill_final_04",
         "region": "final",
     },
     "book_final_05": {

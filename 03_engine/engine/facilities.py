@@ -55,6 +55,7 @@ from .state import (
 )
 from .relic import (
     ready_relic_names,
+    relic_passive_menu,
     relic_preview_menu,
 )
 from .cli_helpers import (
@@ -1499,7 +1500,19 @@ def temple(state: dict, region_id: str = "border_fire") -> None:
                 print(promotion_requirement_line(state, requirement))
     print("\n正式轉職尚未開放。")
     print("神殿目前只顯示未來方向，不會改變你的職業或能力。")
-    pause()
+    if any(state.get("flags", {}).get(flag) for flag in ("fire_seal_enshrined", "ice_seal_enshrined", "earth_seal_enshrined", "thunder_seal_enshrined")):
+        choice = action_menu_panel(
+            "聖印被動",
+            ["選擇／免費改選已安置聖印的被動效果"],
+            facility_name,
+            header_lines=["每枚已安置聖印可保留一個被動選擇。"],
+            allow_back=True,
+            border_style="yellow",
+        )
+        if choice:
+            relic_passive_menu(state)
+    else:
+        pause()
 
 
 def town_menu(state: dict, region_id: str = "border_fire") -> None:

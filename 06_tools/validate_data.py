@@ -77,7 +77,24 @@ VALID_JOB_SPECIALIZATION_STATUSES = {"preview"}
 VALID_RELIC_STATUSES = {"preview"}
 VALID_RELIC_UNLOCK_KINDS = {"level", "unlock", "quest", "flag", "item"}
 VALID_RELIC_ELEMENT_IDS = {"fire", "ice", "earth", "thunder"}
+VALID_RELIC_PASSIVE_EFFECTS = {
+    "direct_damage_percent",
+    "physical_lifesteal_percent",
+    "crit_damage_percent",
+    "all_element_resist",
+    "direct_magic_damage_percent",
+    "max_mp_percent",
+    "magic_defense_percent",
+    "max_hp_percent",
+    "healing_regen_percent",
+    "dot_damage_percent",
+    "direct_physical_damage_percent",
+    "crit",
+    "effect_accuracy",
+}
 VALID_REGIONS = {"border_fire", "ice", "earth", "thunder", "final"}
+VALID_MONSTER_RACES = {"beast", "humanoid", "plant", "construct", "spirit", "aberration"}
+VALID_FOLLOWUP_DAMAGE_TYPES = {"physical"}
 
 
 def error(errors: list[str], path: str, message: str) -> None:
@@ -289,6 +306,37 @@ def check_relics(errors: list[str]) -> None:
         if "unlock" in relic:
             check_relic_unlock(errors, f"RELICS.{relic_id}.unlock", relic["unlock"])
 
+        choices = relic.get("passive_choices")
+        if not isinstance(choices, list) or len(choices) != 4:
+            error(errors, f"RELICS.{relic_id}.passive_choices", "must contain exactly four choices")
+            continue
+        choice_ids = set()
+        for index, choice in enumerate(choices):
+            path = f"RELICS.{relic_id}.passive_choices[{index}]"
+            if not isinstance(choice, dict):
+                error(errors, path, "must be a dict")
+                continue
+            require_keys(errors, path, choice, {"id", "label", "summary", "effect"})
+            choice_id = choice.get("id")
+            if not isinstance(choice_id, str) or not choice_id:
+                error(errors, f"{path}.id", "must be a non-empty string")
+            elif choice_id in choice_ids:
+                error(errors, f"{path}.id", "must be unique per relic")
+            else:
+                choice_ids.add(choice_id)
+            for field in ("label", "summary"):
+                if not isinstance(choice.get(field), str) or not choice[field].strip():
+                    error(errors, f"{path}.{field}", "must be a non-empty string")
+            effect = choice.get("effect")
+            if not isinstance(effect, dict) or len(effect) != 1:
+                error(errors, f"{path}.effect", "must contain exactly one effect")
+                continue
+            effect_id, value = next(iter(effect.items()))
+            if effect_id not in VALID_RELIC_PASSIVE_EFFECTS:
+                error(errors, f"{path}.effect", f"uses unsupported effect: {effect_id}")
+            if not isinstance(value, int) or value <= 0:
+                error(errors, f"{path}.effect.{effect_id}", "must be a positive int")
+
 
 def check_items(errors: list[str]) -> None:
     for item_id, item in ITEMS.items():
@@ -324,6 +372,36 @@ def check_equipment(errors: list[str]) -> None:
         region = equipment.get("region")
         if region and region not in VALID_REGIONS:
             error(errors, f"EQUIPMENT.{eq_id}.region", f"uses unsupported region: {region}")
+        followup = equipment.get("normal_attack_followup")
+        if followup is not None:
+            if equipment.get("slot") != "head":
+                error(errors, f"EQUIPMENT.{eq_id}.normal_attack_followup", "is only supported on head-slot pseudo-offhands")
+            if not isinstance(followup, dict):
+                error(errors, f"EQUIPMENT.{eq_id}.normal_attack_followup", "must be an object")
+                continue
+            require_keys(errors, f"EQUIPMENT.{eq_id}.normal_attack_followup", followup, {"multiplier", "element"})
+            multiplier = followup.get("multiplier")
+            if not isinstance(multiplier, (int, float)) or isinstance(multiplier, bool) or multiplier <= 0:
+                error(errors, f"EQUIPMENT.{eq_id}.normal_attack_followup.multiplier", "must be a positive number")
+            if not isinstance(followup.get("element"), str) or not followup.get("element"):
+                error(errors, f"EQUIPMENT.{eq_id}.normal_attack_followup.element", "must be a non-empty string")
+            on_hit = followup.get("on_hit")
+            if on_hit is not None:
+                if not isinstance(on_hit, dict):
+                    error(errors, f"EQUIPMENT.{eq_id}.normal_attack_followup.on_hit", "must be an object")
+                    continue
+                require_keys(errors, f"EQUIPMENT.{eq_id}.normal_attack_followup.on_hit", on_hit, {"status", "duration", "chance", "multiplier", "damage_type"})
+                if on_hit.get("status") not in {"bleed", "poison"}:
+                    error(errors, f"EQUIPMENT.{eq_id}.normal_attack_followup.on_hit.status", "must be bleed or poison")
+                expected_duration = {"bleed": 3, "poison": 5}.get(on_hit.get("status"))
+                if expected_duration is not None and on_hit.get("duration") != expected_duration:
+                    error(errors, f"EQUIPMENT.{eq_id}.normal_attack_followup.on_hit.duration", f"must be {expected_duration} for {on_hit.get('status')}")
+                if not is_non_negative_int(on_hit.get("chance")) or on_hit.get("chance") > 100:
+                    error(errors, f"EQUIPMENT.{eq_id}.normal_attack_followup.on_hit.chance", "must be an integer from 0 to 100")
+                if not isinstance(on_hit.get("multiplier"), (int, float)) or isinstance(on_hit.get("multiplier"), bool) or on_hit.get("multiplier") <= 0:
+                    error(errors, f"EQUIPMENT.{eq_id}.normal_attack_followup.on_hit.multiplier", "must be a positive number")
+                if on_hit.get("damage_type") not in VALID_FOLLOWUP_DAMAGE_TYPES:
+                    error(errors, f"EQUIPMENT.{eq_id}.normal_attack_followup.on_hit.damage_type", "must be physical")
 
 
 def check_skills(errors: list[str]) -> None:
@@ -339,11 +417,22 @@ def check_skills(errors: list[str]) -> None:
             require_keys(errors, f"SKILLS.{skill_id}", skill, {"stat", "element", "multiplier"})
             if skill.get("stat") not in VALID_DAMAGE_STATS:
                 error(errors, f"SKILLS.{skill_id}.stat", f"uses unsupported damage stat: {skill.get('stat')}")
+            charge_bonus = skill.get("charge_bonus_per_stack")
+            if charge_bonus is not None and not (
+                skill.get("stat") == "attack"
+                and isinstance(charge_bonus, (int, float))
+                and not isinstance(charge_bonus, bool)
+                and charge_bonus > 0
+            ):
+                error(errors, f"SKILLS.{skill_id}.charge_bonus_per_stack", "must be a positive number on a physical damage skill")
             on_hit = skill.get("on_hit")
             if on_hit:
                 require_keys(errors, f"SKILLS.{skill_id}.on_hit", on_hit, {"status", "duration", "chance", "multiplier", "damage_type"})
                 if on_hit.get("status") not in VALID_EFFECT_KEYS:
                     error(errors, f"SKILLS.{skill_id}.on_hit.status", "uses unsupported effect key")
+                expected_duration = {"bleed": 3, "poison": 5}.get(on_hit.get("status"))
+                if expected_duration is not None and on_hit.get("duration") != expected_duration:
+                    error(errors, f"SKILLS.{skill_id}.on_hit.duration", f"must be {expected_duration} for {on_hit.get('status')}")
         elif kind == "heal":
             require_keys(errors, f"SKILLS.{skill_id}", skill, {"amount"})
         elif kind == "buff":
@@ -407,9 +496,11 @@ def check_recipes(errors: list[str]) -> None:
 
 
 def check_monsters(errors: list[str]) -> None:
-    required = {"name", "level", "hp", "attack", "defense", "agility", "crit", "element", "exp", "gold", "drops"}
+    required = {"name", "level", "hp", "attack", "defense", "agility", "crit", "element", "race", "exp", "gold", "drops"}
     for monster_id, monster in MONSTERS.items():
         require_keys(errors, f"MONSTERS.{monster_id}", monster, required)
+        if monster.get("race") not in VALID_MONSTER_RACES:
+            error(errors, f"MONSTERS.{monster_id}.race", f"uses unsupported race: {monster.get('race')}")
         gold = monster.get("gold")
         if not (isinstance(gold, tuple) and len(gold) == 2 and gold[0] <= gold[1]):
             error(errors, f"MONSTERS.{monster_id}.gold", "must be tuple(min, max)")
