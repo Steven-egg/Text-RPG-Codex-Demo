@@ -1,19 +1,21 @@
 # Combat Progression Design v1
 
-Purpose: record the owner-approved player-side combat direction before a later
-runtime/data/schema implementation gate. This is a planning SSOT, not
-implementation approval and not a monster-balance table.
+Purpose: record the owner-approved player-side combat direction, landed
+checkpoints, and the boundaries for later implementation gates. This remains a
+planning SSOT, not blanket approval for further runtime or monster changes.
 
 ## Current Checkpoint
 
-- `45cbbad` landed the attribute and status-effect rework.
-- The current combat-planning slice sets `Sanctified Decay` and `Regeneration`
-  to five turns and adds the deterministic
-  `06_tools/test_combat_balance.py` harness.
-- The harness measures representative four-job profiles. It is a player-output
-  and action-cost tool; it does not yet simulate enemy survival pressure.
-- Monster values remain the final balancing layer. Do not rebalance monsters
-  until the player systems below are implemented and measured.
+- `43cfc67` finalizes the current regional balance diagnostics after the
+  attribute/status foundation, player-content, and relic-passive slices.
+- The deterministic harness measures representative four-job profiles,
+  support windows, tactical strategies, deterministic equipment floors, and
+  role-aware Boss diagnostics. It remains a measurement tool, not a blanket
+  balance verdict or production enemy-AI model.
+- The approved narrow balance slice adjusted Fire Cinder Seal Sentinel attack,
+  Final Demon King HP/attack/defense/magic defense, and Cinder Mark direct
+  elemental-magic amplification. It did not alter job growth, promotion
+  preview, affix runtime, special slots, elemental infusion, GUI, or saves.
 
 ## Locked Combat Roles
 
@@ -172,25 +174,21 @@ acceleration at this stage.
 | Thunder | 25–32 | 34 |
 | Final | 32–40 | 43 |
 
-After player systems land, use the balance harness at levels 10, 18, 25, 32,
-and 40 with representative equipment. Only if monster tuning cannot meet the
-target fight bands should job base/growth/every-three values be revisited.
+The current regional baseline has been measured at the representative level
+bands and tuned through the approved narrow monster/data slice. Job
+base/growth/every-three values remain unchanged; reconsidering them requires a
+new read-only planning gate with evidence that further narrow tuning cannot
+meet the intended fight bands.
 
-## Future Implementation Gates
+## Completed Gates And Next Boundary
 
-Implementation must be sliced and separately approved:
+The following separately approved slices are landed: combat foundation;
+regional player content and tactical items; relic passive selection, persistence,
+and application; and the current balance measurement / narrow monster-tuning
+pass. B4 Final completes 5/5 for each job, while Boss action and final-HP bands
+remain role-specific diagnostics rather than hard gates.
 
-1. Combat foundation: monster race data/validation, status-damage handling,
-   and Warrior Physical Charge plus focused unit checks.
-2. Player content: regional equipment, Rogue offhands/Workshop upgrades,
-   Mage books, Cleric mixed-stat weapons, and battle items.
-3. Relic passives: data contract, durable selection state, Temple selection /
-   free respec flow, stat and combat integration, and save compatibility.
-   Implement function correctness before any balance tuning: do not alter
-   player growth, skill values, equipment values, monster values, or balance
-   harness thresholds in this gate.
-4. Balance: harness profiles at milestone levels, job-growth review only if
-   needed, then monster HP/attack/defense/magic-defense/resistance/status
-   tuning.
-
-Do not combine these gates into one implementation pass.
+No next combat implementation target is pre-approved. Any future job-growth,
+promotion, affix, special-slot, elemental-infusion, relic-system, save, GUI, or
+additional monster-tuning proposal must begin with its own read-only planning
+gate and must not be combined with an unrelated slice.

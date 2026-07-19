@@ -7,21 +7,18 @@ editing; this document identifies the current boundary, not gameplay SSOT.
 
 - Work directory: `C:\Users\user\OneDrive\文字冒險遊戲`
 - Current committed checkpoint:
-  `9a61eab 2026-07-15 [codex] feat(combat): complete progression and relic passive slices`.
-- `main` is ahead of `origin/main` by one commit. Do not push without explicit
-  owner approval.
-- The working tree is intentionally uncommitted. Do not stage, commit, create
-  a branch, push, or archive unless explicitly requested. LF-to-CRLF warnings
-  are known and must not be cleaned up opportunistically.
-- README was not synchronized in this combat pass; treat it as potentially
-  stale and report any drift rather than updating it without approval.
+  `43cfc67 2026-07-19 feat(combat): finalize regional balance diagnostics`.
+- Inspect `git status --short` before editing. Do not stage, commit, create a
+  branch, push, or archive unless explicitly requested. Known LF-to-CRLF
+  warnings must not be cleaned up opportunistically.
 
-## Landed Working-Tree Combat State
+## Landed Combat State
 
 - The player physical-defense buff is single-pass: `get_stats()` owns the
   player-side modifier and enemy damage does not apply it again. The value-model
-  audit checks Final Warrior baseline damage 43 and `defense_up` damage 15 with
-  zero single-pass delta.
+  audit keeps a zero single-pass delta. The Final Warrior sample is now
+  floor-clamped at damage 1, so it checks consistency rather than the size of
+  that defense gain.
 - Expedition supplies have five groups: sustain HP (3), emergency HP (1), MP,
   throwable, and escape. Unused supplies are not pre-deducted. Antidote keeps
   its existing combat rule outside the five groups.
@@ -50,6 +47,18 @@ editing; this document identifies the current boundary, not gameplay SSOT.
   existing relic damage-over-time bonus; it does not affect Rending Wound,
   Sanctified Erosion, Cleric magic damage-over-time, direct hits, or status
   application chance.
+- Quickstep and Froststep are passive triggers with replacement priority;
+  Froststep replaces the Rogue pursuit trigger when its higher-priority
+  condition applies. Cinder Mark remains MP 9 for five turns and increases
+  direct elemental-magic damage by 50%.
+- The deterministic equipment audit now emits 100 region × job × slot baseline
+  ledger records. It reports deterministic budgets and affix-cap overages
+  separately; no affix increment, special-slot expansion, or elemental
+  infusion runtime contract was added.
+- Fire Cinder Seal Sentinel attack is 28. Final Demon King values are HP 2400,
+  attack 135, defense 75, and magic defense 110. B4 Final now completes 5/5
+  for all four jobs. Boss action and final-HP bands are role-specific
+  diagnostics, not hard balance gates.
 
 ## Measurement State
 
@@ -71,23 +80,17 @@ editing; this document identifies the current boundary, not gameplay SSOT.
 - The tactical harness records live Cleric DoT state keys and paired five-turn
   damage, HP, and MP deltas. Its report verifies 300-record coverage, pairing,
   CSV/JSON parity, reproducibility, and global data/RNG non-mutation.
+- The support-window probes show the Cinder 50% adjustment is the minimum
+  single-field correction that makes Ice/Earth/Thunder three-turn output
+  repay positively; Final has no matching core-element Cinder scenario.
 
 ## Next Boundary
 
-No further gameplay implementation is pre-approved. The next task is a
-read-only combat-balance planning gate. Keep the following work separate:
-
-1. Measure Quickstep, Cinder Mark, and Froststep over three-, six-, and
-   ten-turn windows, including their action and MP break-even.
-2. Audit deterministic regional equipment budgets by region, job, and slot;
-   do not treat the B6 affix overlay as player-facing equipment rules.
-3. Define four-job, milestone-level, region/Boss target bands and the missing
-   enemy-survival-pressure measurements before tuning monster values.
-
-Only after those gates should the owner consider narrow support-book changes,
-equipment-data tuning, relic numeric tuning, or monster HP/attack/defense/
-magic-defense/resistance/status tuning. Do not combine this core-balance work
-with preview-only promotion/class-transfer or affix/save work.
+No further gameplay implementation is pre-approved. The completed support-book
+measurement, deterministic equipment audit, role-aware Boss diagnostics, and
+narrow monster tuning must not imply approval for job growth, promotion preview,
+affix/save work, special-slot expansion, elemental infusion, GUI, or further
+combat changes. Start any future exact slice with a read-only planning gate.
 
 ## Minimum Read List
 

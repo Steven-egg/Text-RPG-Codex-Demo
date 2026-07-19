@@ -29,10 +29,12 @@ and Final-gate flow can be exercised in the CLI, but it does not mean regional
 content, encounter texture, reward balance, dialogue, map routing, town hub
 presentation, or final polish are complete.
 
-Relic v1 is a progression and Final-gating layer only. Fire, Ice, Earth, and
-Thunder have true seal key items and enshrined flags. Final unlock now depends
-on all four enshrined elemental seals. Relic v1 does not add active effects,
-passive effects, stat bonuses, resistance, skill links, or combat behavior.
+Relic v1 keeps its progression and Final-gating role: Fire, Ice, Earth, and
+Thunder have true seal key items and enshrined flags, and Final unlock depends
+on all four enshrined elemental seals. Each enshrined relic also has one
+selectable passive choice, saved through the existing state flow and applied to
+the relevant stat or combat path. This does not approve broader relic systems
+or facility expansion.
 
 Future work should peel these layers deliberately, starting from the smallest
 approved slice and keeping runtime, data, schema, save, combat, GUI bridge, and

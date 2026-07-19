@@ -162,8 +162,9 @@ Regional towns reuse the existing facility families whenever possible:
 - Magic Shop: element-relevant books.
 - Temple: seal / class / lore preview.
 - Storage: shared utility.
-- Relic Preview: seal inspection / enshrinement surface; active and passive
-  relic effects stay deferred.
+- Relic Preview: seal inspection / enshrinement surface. The landed relic
+  passive choices use the existing Temple/state flow; broader relic systems
+  remain deferred.
 
 Town identity should mostly come from local data, presentation, and text, not
 from creating new systems.
@@ -172,13 +173,14 @@ from creating new systems.
 
 ## Relic Baseline
 
-Relic completion should not be treated as a pure key item, but this skeleton
-does not define active or passive relic effects yet.
+Relic completion is not a pure key-item layer. The landed passive-choice system
+is intentionally bounded; it does not authorize broader active relic systems.
 
-Current landed interpretation: as of `9445549`, Relic v1 implements true Fire,
+Current landed interpretation: as of `43cfc67`, Relic v1 implements true Fire,
 Ice, Earth, and Thunder seal key items, source-to-seal conversion, enshrined
-flags, and Final gating. It remains a progression layer, not a combat or stat
-layer.
+flags, Final gating, and one selectable passive choice per enshrined relic. The
+choice is saved through the existing state flow and applied to its relevant
+stat or combat path.
 
 For Fire, Ice, Earth, and Thunder, each completed relic is planned as:
 
@@ -187,10 +189,10 @@ For Fire, Ice, Earth, and Thunder, each completed relic is planned as:
 - A facility-unlock container for later local Shop, Magic Shop, Synthesis,
   Workshop, Temple, or guidance unlock timing.
 
-Concrete relic effects are intentionally deferred to a later Relic effects
-planning gate. That gate must explicitly cover runtime, data, schema, save
-compatibility, combat behavior, UI presentation, and smoke tests before any
-active, passive, stat, resistance, skill, or combat effect is implemented.
+Additional relic systems are intentionally deferred to a later planning gate.
+That gate must explicitly cover runtime, data, schema, save compatibility,
+combat behavior, UI presentation, and smoke tests before adding any new active,
+passive, stat, resistance, skill, or combat effect beyond the landed choices.
 
 ---
 

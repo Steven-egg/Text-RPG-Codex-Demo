@@ -7,10 +7,10 @@ screen-level verification, and historical MVP notes live in Task Zone files.
 ## Current Stable Capsule
 
 - Latest committed checkpoint:
-  `45cbbad 2026-07-12 [codex] feat(combat): rework attributes and status effects`.
-- The current combat-planning slice sets Cleric damage-over-time / regeneration
-  durations to five turns and adds `06_tools/test_combat_balance.py` as a
-  deterministic measurement harness.
+  `43cfc67 2026-07-19 feat(combat): finalize regional balance diagnostics`.
+- Combat Progression v1 foundation, player-content, relic-passive, and balance
+  slices are landed and covered by deterministic validation. The balance tools
+  keep B4 as the canonical gameplay baseline; B5/B6 remain QA overlays.
 - Element Maze is an expandable playable demo, not a closed demo.
 - The Python CLI runtime remains the gameplay authority.
 - Act 1 is playable through the main loop.
@@ -28,20 +28,19 @@ screen-level verification, and historical MVP notes live in Task Zone files.
 - Fire now consumes the three fire-mark shards at the Relic table after the
   Guild / Temple lookup closure, creates and enshrines the Fire seal, and
   unlocks Ice. Ice, Earth, and Thunder source items convert to true seals
-  without combat bonuses.
+  with their selected passive choices applied to stat and combat behavior.
 - Final access is gated by all four enshrined elemental seals, not by Thunder Q5
   alone.
 - `06_tools/naming_inventory_report.py` is a read-only naming inventory helper
   for duplicate display names and lightweight term-shape checks.
 - Final display naming keeps `魔王城` as the region-facing target and reveals
   `災禍邪神 阿巴頓` as the final boss display identity.
-- Relic resonance, active effects, passive effects, stat bonuses, resistance,
-  skill links, and combat behavior remain future runtime / facility planning
-  gates.
+- Each enshrined relic now offers a selectable passive choice, saved through
+  the existing state flow and applied to the relevant stat or combat path.
+  Additional relic systems remain separate future planning gates.
 - Owner-approved player-side combat direction now lives in
-  `01_content/combat-progression-design-v1.md`. It records planning only;
-  race statuses, equipment effects, relic passives, growth review, and monster
-  balance still require their own implementation gates.
+  `01_content/combat-progression-design-v1.md`. It records the landed combat
+  baseline and the boundaries for any later, separately approved slice.
 - Basic facility CLI-parity bridge coverage is complete through Guild material
   buyback.
 - The maintainability checkpoint is stable: shared GUI presentation helpers and
@@ -82,8 +81,9 @@ Current macro decisions:
 - Ice / Earth / Thunder regions each default to one regional town and three
   dungeons: two minor dungeons plus one main two-phase dungeon.
 - Current display naming coverage is complete through Final.
-- Four-seal Relic v1 is landed as a progression and Final-gating layer only; it
-  does not open relic effects, combat bonuses, or broad facility systems.
+- Four-seal Relic v1 is landed as a progression / Final-gating layer with one
+  selectable passive choice per enshrined relic; it does not open broad new
+  facility systems.
 - This skeleton does not approve runtime, data, schema, save, GUI, bridge,
   combat, class, relic, or asset-pipeline implementation.
 
@@ -269,8 +269,8 @@ Allowed as planning only:
 - route old Hot Zone details into Task / Cold Zone
 - produce a Hot Zone / branch-closure read-only sync check before future handoff
 - produce a read-only implementation gate for one exact future slice
-- produce the read-only implementation gate for Combat Progression v1 slice 1
-  (races, status damage, and Warrior Physical Charge)
+- produce a read-only planning gate for one exact future combat or progression
+  slice
 
 Still closed until a later exact-scope approval:
 
@@ -278,6 +278,7 @@ Still closed until a later exact-scope approval:
 - new quest data or broad quest framework work
 - generic inventory/equipment, storage capacity, shop sell, generic sell, or
   new / expanded facility gameplay systems beyond the landed extraction
-- formal class transfer, relic effects, endgame systems, settings persistence,
+- formal class transfer, relic systems beyond the landed passive choices,
+  endgame systems, settings persistence,
   or cross-screen preferences
 - new GUI image generation, bridge expansion, or formal asset pipeline work

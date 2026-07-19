@@ -30,6 +30,13 @@ for its exact file surface.
 - Phase 0 v2 measurement is landed in the two existing balance tools. It emits
   stdout-only records for opening-pair and finisher-only policies; B4 remains
   canonical and B5/B6 remain overlays.
+- Quickstep and Froststep are landed as passive triggers with replacement
+  priority. Cinder Mark remains MP 9 for five turns; its direct
+  elemental-magic amplification is 50% after the fixed-window evidence.
+- The deterministic equipment audit now emits 100 region × job × slot baseline
+  records and keeps baseline budgets separate from affix-cap accounting. No
+  affix increment, item generation, save contract, special-slot expansion, or
+  elemental-infusion runtime behavior was added.
 
 ## Design Decisions Already Chosen
 
@@ -57,17 +64,19 @@ for its exact file surface.
 - Opening-pair throwable use usually loses value to the two action costs;
   finisher-only use is currently the stronger measured policy. This is not a
   gameplay rule or a balance verdict.
-- B4 does not select or compare `skill_quickstep`, `skill_cinder_mark`, or
-  `skill_ice_05` (Froststep). Existing balance results therefore do not show
-  whether those books repay their action and MP costs.
+- The dedicated support-window probes measure Quickstep, Cinder Mark, and
+  Froststep independently of the core B4 rotation. The Cinder 50% adjustment
+  is the minimum single-field correction that makes Ice/Earth/Thunder
+  three-turn output repay positively; Final is outside its core-element scope.
 - B6 affixes are QA-only, in-memory sensitivity overlays. They are not item
   generation, random drops, a schema contract, or save-compatible state.
-- The current actual B4 result is not balanced. Do not use a passed
-  measurement-semantics test as a balance-target pass.
+- B4 Final now completes 5/5 for every job after the approved narrow Final
+  Boss tuning. This is evidence for the measured profile, not a universal
+  balance verdict; Boss action and final-HP bands remain diagnostics.
 
 ## Construction Sequence
 
-### Phase 0 — Item and Support-Skill Measurement Gate
+### Phase 0 — Item and Support-Skill Measurement Gate (completed)
 
 **Goal:** create evidence before changing gameplay.
 
@@ -92,7 +101,7 @@ It must not use B5 promotion or B6 affix overlays as canonical gameplay.
 **Approval gate:** owner approves the exact measurement file surface before
 any tool edits. No gameplay behavior changes in this phase.
 
-### Phase 1 — Consumable Contract and Data Slice
+### Phase 1 — Consumable Contract and Data Slice (completed)
 
 **Goal:** turn the selected standard kit into a real, explainable player rule.
 
@@ -113,7 +122,7 @@ Initial tactical catalogue should stay deliberately small:
   counterplay has a clear regional purpose;
 - antidote/cleanse and escape as non-DPS utility.
 
-**Likely implementation surface, pending approval:**
+**Landed supporting surface:**
 
 - `04_data/data/items.py`
 - `03_engine/engine/game.py`
@@ -124,7 +133,7 @@ Initial tactical catalogue should stay deliberately small:
 **Forbidden adjacent changes:** monster stats, player growth, equipment values,
 relic values, promotion overlays, B6 rules, GUI, and save migration.
 
-### Phase 2 — Support Magic-Book Value Slice
+### Phase 2 — Support Magic-Book Value Slice (completed)
 
 **Goal:** every purchasable support book has a visible tactical use and a
 measured break-even.
@@ -138,7 +147,11 @@ Use Phase 0 evidence to choose one minimal correction per ineffective book:
 
 The desired outcome is situational value, not automatic rotation dominance.
 
-**Likely implementation surface, pending approval:**
+Completed outcome: Quickstep/Froststep use the existing passive-trigger path
+with replacement priority. Cinder Mark retains its MP 9 and five-turn duration,
+but raises direct elemental-magic damage by 50%.
+
+**Landed supporting surface:**
 
 - `04_data/data/skills.py`
 - `03_engine/engine/game.py` and/or `03_engine/engine/state.py` only if the
@@ -149,7 +162,7 @@ The desired outcome is situational value, not automatic rotation dominance.
 **Forbidden adjacent changes:** item economy beyond Phase 1, monster tuning,
 job growth, relic values, equipment values, GUI, and saves.
 
-### Phase 3 — Deterministic Equipment Baseline Audit
+### Phase 3 — Deterministic Equipment Baseline Audit (completed)
 
 **Goal:** define a stable stat budget before allowing randomization.
 
@@ -171,8 +184,10 @@ not silently become formal player-facing item rules.
 - `06_tools/test_combat_balance.py`
 - `06_tools/test_combat_balance_report.py`
 
-**Approval gate:** owner approves the deterministic item budget before any
-equipment-data tuning or affix runtime work.
+**Completed outcome:** the 100-record ledger exposes the live deterministic
+floor, permitted slot families, pseudo-offhand effect budget, and unallocated
+element-infusion opportunity cost. Baseline values that exceed legacy affix caps
+are reported separately, not treated as affix-rule violations.
 
 ### Phase 4 — Affix and Replayability Design Gate
 
@@ -222,9 +237,10 @@ For balance slices, also run deterministic B4 comparisons using stdout or TEMP
 only. Do not create CSV/JSON artifacts in the repository. B3 may compare relic
 impact; B5 and B6 remain sensitivity overlays, never canonical baselines.
 
-## Recommended Next Approval
+## Next Approval Boundary
 
-Approve **Phase 0 only**, restricted to the named measurement tooling. Its
-deliverable is a read-only item/support-book effectiveness report, a proposed
-legal Boss kit, and the exact smallest Phase 1 file list. No gameplay data or
-runtime behavior changes occur until that report is reviewed.
+No next item, support-book, equipment, or affix implementation target is
+pre-approved. Phase 4 remains a separate high-risk affix/save design gate; it
+is not implied by the completed deterministic audit. Any future proposal must
+start with one exact read-only planning slice and preserve B4 as the canonical
+baseline while keeping B5/B6 as QA overlays.
