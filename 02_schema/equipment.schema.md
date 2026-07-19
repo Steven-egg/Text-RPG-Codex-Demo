@@ -1,5 +1,37 @@
 # equipment.schema
 
+## Phase 4A Affix Instance Contract
+
+`EQUIPMENT` remains static base data. It must never store a rolled affix or be
+mutated to represent one player's copy. A future runtime resolver combines a
+base entry with its persisted instance record:
+
+```python
+equipment_instance = {
+    "base_item_id": equipment_id,       # must exist in EQUIPMENT
+    "generation_version": 0 | 1,
+    "roll_index": int,                  # non-negative, unique in one state
+    "major_affix_id": str | None,
+    "minor_affix_id": str | None,
+}
+```
+
+`generation_version: 0` denotes a legacy-migrated, unaffixed copy. Version 1
+is reserved for the first deterministic runtime generator. The instance may
+have at most one major and one minor affix; neither may change its base slot,
+job list, price, or `normal_attack_followup` data.
+
+Affix definitions are planned as static data with an id, tier (`major` or
+`minor`), eligible base slots, stat increment, and family. A family may occur
+at most once per instance. The first runtime slice excludes `special`,
+head-slot pseudo-offhand behavior changes, and elemental infusion. Elemental
+infusion remains a later contract extension and must not override a skill's
+declared element.
+
+Per-item and loadout caps apply only to the sum of affix increments. They do
+not retroactively invalidate deterministic base stats that exceed legacy QA
+caps.
+
 ## 資料來源
 
 - `04_data/data/items.py`

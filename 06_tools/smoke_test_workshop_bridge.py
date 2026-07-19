@@ -10,6 +10,26 @@ for module_root in (ROOT / "04_data", ROOT / "03_engine"):
         sys.path.insert(0, module_path)
 
 from engine.gui_actions import GuiRuntimeSession, GuiActionError
+from engine.equipment_refs import equipment_base_id, first_inventory_equipment_ref
+
+
+def inventory_ref(state, base_item_id):
+    reference_id = first_inventory_equipment_ref(state, base_item_id)
+    assert reference_id and equipment_base_id(state, reference_id) == base_item_id
+    return reference_id
+
+
+def assert_inventory_base_count(state, base_item_id, expected):
+    assert sum(
+        quantity for reference_id, quantity in state["inventory"].items()
+        if equipment_base_id(state, reference_id) == base_item_id
+    ) == expected
+
+
+def clear_inventory_base(state, base_item_id):
+    for reference_id in list(state["inventory"]):
+        if equipment_base_id(state, reference_id) == base_item_id:
+            del state["inventory"][reference_id]
 
 
 def run_smoke_test():
@@ -26,9 +46,9 @@ def run_smoke_test():
     response = session.dispatch("buy_equipment", {"item_id": "weapon_wood_sword"}, screen_id="workshop_screen")
     assert response["ok"] is True
     assert state["gold"] == 20  # 100 - 80 = 20G
-    assert state["inventory"]["weapon_wood_sword"] == 1
+    assert_inventory_base_count(state, "weapon_wood_sword", 1)
     # Confirm equipped weapon has NOT changed (was special_trial_badge or None, not wood sword)
-    assert state["equipment"].get("weapon") != "weapon_wood_sword"
+    assert equipment_base_id(state, state["equipment"].get("weapon")) != "weapon_wood_sword"
 
     print("Happy Path verified: Gold deducted, inventory +1, equipment unchanged.")
 
@@ -68,27 +88,29 @@ def run_smoke_test():
     response_armor = session.dispatch("buy_equipment", {"item_id": "armor_round_shield"}, screen_id="workshop_screen")
     assert response_armor["ok"] is True
     assert state["gold"] == 20  # 200 - 180 = 20G
-    assert state["inventory"]["armor_round_shield"] == 1
+    assert_inventory_base_count(state, "armor_round_shield", 1)
     print("Happy Path verified: Purchased armor (shield) successfully.")
 
     # 5. Happy Path: Equip wood sword
     # Warrior currently has weapon_wood_sword x1 in inventory, none equipped
-    response = session.dispatch("equip_weapon", {"item_id": "weapon_wood_sword"}, screen_id="workshop_screen")
+    wood_sword = inventory_ref(state, "weapon_wood_sword")
+    response = session.dispatch("equip_weapon", {"item_id": wood_sword}, screen_id="workshop_screen")
     assert response["ok"] is True
-    assert state["equipment"]["weapon"] == "weapon_wood_sword"
-    assert state["inventory"].get("weapon_wood_sword", 0) == 0
+    assert state["equipment"]["weapon"] == wood_sword
+    assert_inventory_base_count(state, "weapon_wood_sword", 0)
     print("Equip Weapon verified: weapon equipped, inventory count decreased.")
 
     # 6. Swap Weapon: Buy & equip iron sword, check old wood sword returns to inventory
     state["gold"] = 500
     session.dispatch("buy_equipment", {"item_id": "weapon_iron_sword"}, screen_id="workshop_screen")
-    assert state["inventory"].get("weapon_iron_sword", 0) == 1
+    assert_inventory_base_count(state, "weapon_iron_sword", 1)
 
-    response = session.dispatch("equip_weapon", {"item_id": "weapon_iron_sword"}, screen_id="workshop_screen")
+    iron_sword = inventory_ref(state, "weapon_iron_sword")
+    response = session.dispatch("equip_weapon", {"item_id": iron_sword}, screen_id="workshop_screen")
     assert response["ok"] is True
-    assert state["equipment"]["weapon"] == "weapon_iron_sword"
-    assert state["inventory"].get("weapon_wood_sword", 0) == 1
-    assert state["inventory"].get("weapon_iron_sword", 0) == 0
+    assert state["equipment"]["weapon"] == iron_sword
+    assert_inventory_base_count(state, "weapon_wood_sword", 1)
+    assert_inventory_base_count(state, "weapon_iron_sword", 0)
     print("Swap Weapon verified: new weapon equipped, old weapon returned to inventory.")
 
     # 7. Blocked Path: Equip missing weapon
@@ -105,7 +127,7 @@ def run_smoke_test():
     from engine import game
     game.add_item(state, "weapon_apprentice_wand", 1)
     try:
-        session.dispatch("equip_weapon", {"item_id": "weapon_apprentice_wand"}, screen_id="workshop_screen")
+        session.dispatch("equip_weapon", {"item_id": inventory_ref(state, "weapon_apprentice_wand")}, screen_id="workshop_screen")
         raise AssertionError("Expected job-mismatched weapon equip to fail, but it succeeded.")
     except GuiActionError as err:
         assert err.status == 409
@@ -116,7 +138,7 @@ def run_smoke_test():
     # Manually add shield to inventory
     game.add_item(state, "armor_round_shield", 1)
     try:
-        session.dispatch("equip_weapon", {"item_id": "armor_round_shield"}, screen_id="workshop_screen")
+        session.dispatch("equip_weapon", {"item_id": inventory_ref(state, "armor_round_shield")}, screen_id="workshop_screen")
         raise AssertionError("Expected non-weapon equip to fail, but it succeeded.")
     except GuiActionError as err:
         assert err.status == 400
@@ -124,7 +146,7 @@ def run_smoke_test():
 
     # 10. Blocked Path: Equip already equipped weapon
     try:
-        session.dispatch("equip_weapon", {"item_id": "weapon_iron_sword"}, screen_id="workshop_screen")
+        session.dispatch("equip_weapon", {"item_id": iron_sword}, screen_id="workshop_screen")
         raise AssertionError("Expected already equipped weapon to fail, but it succeeded.")
     except GuiActionError as err:
         assert err.status == 409
@@ -133,27 +155,30 @@ def run_smoke_test():
 
     # 11. Happy Path: Equip body armor (equip_equipment)
     # Give Warrior armor_leather_armor
+    clear_inventory_base(state, "armor_leather_armor")
     game.add_item(state, "armor_leather_armor", 1)
-    assert state["inventory"].get("armor_leather_armor", 0) == 1
-    response = session.dispatch("equip_equipment", {"item_id": "armor_leather_armor"}, screen_id="workshop_screen")
+    assert_inventory_base_count(state, "armor_leather_armor", 1)
+    leather_armor = inventory_ref(state, "armor_leather_armor")
+    response = session.dispatch("equip_equipment", {"item_id": leather_armor}, screen_id="workshop_screen")
     assert response["ok"] is True
-    assert state["equipment"]["body"] == "armor_leather_armor"
-    assert state["inventory"].get("armor_leather_armor", 0) == 0
+    assert state["equipment"]["body"] == leather_armor
+    assert_inventory_base_count(state, "armor_leather_armor", 0)
     print("Equip Armor verified: armor equipped, inventory count decreased.")
 
     # 12. Swap Armor: Equip traveler cloth, check old leather armor returns to inventory
     game.add_item(state, "armor_traveler_cloth", 1)
-    response = session.dispatch("equip_equipment", {"item_id": "armor_traveler_cloth"}, screen_id="workshop_screen")
+    traveler_cloth = inventory_ref(state, "armor_traveler_cloth")
+    response = session.dispatch("equip_equipment", {"item_id": traveler_cloth}, screen_id="workshop_screen")
     assert response["ok"] is True
-    assert state["equipment"]["body"] == "armor_traveler_cloth"
-    assert state["inventory"].get("armor_leather_armor", 0) == 1
-    assert state["inventory"].get("armor_traveler_cloth", 0) == 0
+    assert state["equipment"]["body"] == traveler_cloth
+    assert_inventory_base_count(state, "armor_leather_armor", 1)
+    assert_inventory_base_count(state, "armor_traveler_cloth", 0)
     print("Swap Armor verified: new armor equipped, old armor returned to inventory.")
 
     # 13. Blocked Path: Equip job-mismatched armor
     game.add_item(state, "armor_rogue_sleeve_blade", 1)
     try:
-        session.dispatch("equip_equipment", {"item_id": "armor_rogue_sleeve_blade"}, screen_id="workshop_screen")
+        session.dispatch("equip_equipment", {"item_id": inventory_ref(state, "armor_rogue_sleeve_blade")}, screen_id="workshop_screen")
         raise AssertionError("Expected job-mismatched armor equip to fail, but it succeeded.")
     except GuiActionError as err:
         assert err.status == 409
@@ -171,7 +196,7 @@ def run_smoke_test():
 
     # 15. Blocked Path: Equip already equipped armor
     try:
-        session.dispatch("equip_equipment", {"item_id": "armor_traveler_cloth"}, screen_id="workshop_screen")
+        session.dispatch("equip_equipment", {"item_id": traveler_cloth}, screen_id="workshop_screen")
         raise AssertionError("Expected already equipped armor to fail, but it succeeded.")
     except GuiActionError as err:
         assert err.status == 409
@@ -203,7 +228,7 @@ def run_smoke_test():
     game.add_item(state, "mat_cracked_stone", 5)
     game.add_item(state, "mat_scorched_iron", 1)
     # Ensure iron sword is equipped
-    assert state["equipment"]["weapon"] == "weapon_iron_sword"
+    assert equipment_base_id(state, state["equipment"]["weapon"]) == "weapon_iron_sword"
     try:
         session.dispatch("upgrade_equipment", {"recipe_id": "recipe_iron_sword_plus_1"}, screen_id="workshop_screen")
         raise AssertionError("Expected low gold upgrade to fail, but it succeeded.")
@@ -229,7 +254,7 @@ def run_smoke_test():
     state["inventory"]["mat_cracked_stone"] = 5
     # Unequip and remove weapon_iron_sword
     state["equipment"]["weapon"] = None
-    state["inventory"]["weapon_iron_sword"] = 0
+    state["inventory"].pop(iron_sword, None)
     try:
         session.dispatch("upgrade_equipment", {"recipe_id": "recipe_iron_sword_plus_1"}, screen_id="workshop_screen")
         raise AssertionError("Expected missing base item upgrade to fail, but it succeeded.")
@@ -249,15 +274,16 @@ def run_smoke_test():
     response = session.dispatch("upgrade_equipment", {"recipe_id": "recipe_iron_sword_plus_1"}, screen_id="workshop_screen")
     assert response["ok"] is True
     assert state["gold"] == 20  # 200 - 180 = 20G
-    assert state["inventory"].get("weapon_iron_sword_plus_1", 0) == 1
-    assert state["inventory"].get("weapon_iron_sword", 0) == 0
+    assert_inventory_base_count(state, "weapon_iron_sword_plus_1", 1)
+    assert_inventory_base_count(state, "weapon_iron_sword", 0)
     assert state["inventory"].get("mat_cracked_stone", 0) == 0
     assert state["inventory"].get("mat_scorched_iron", 0) == 0
     print("Happy Path: Recipe upgrade verified successfully!")
 
     # 22. Happy Path: Armor Recipe upgrade success (recipe_leather_armor_plus_1)
     # Ensure base armor is exactly 1 in inventory
-    state["inventory"]["armor_leather_armor"] = 1
+    clear_inventory_base(state, "armor_leather_armor")
+    game.add_item(state, "armor_leather_armor", 1)
     # Ensure materials are exactly right
     state["inventory"]["mat_moss_fiber"] = 4
     state["inventory"]["mat_cracked_stone"] = 3
@@ -266,8 +292,8 @@ def run_smoke_test():
     response = session.dispatch("upgrade_equipment", {"recipe_id": "recipe_leather_armor_plus_1"}, screen_id="workshop_screen")
     assert response["ok"] is True
     assert state["gold"] == 40  # 200 - 160 = 40G
-    assert state["inventory"].get("armor_leather_armor_plus_1", 0) == 1
-    assert state["inventory"].get("armor_leather_armor", 0) == 0
+    assert_inventory_base_count(state, "armor_leather_armor_plus_1", 1)
+    assert_inventory_base_count(state, "armor_leather_armor", 0)
     assert state["inventory"].get("mat_moss_fiber", 0) == 0
     assert state["inventory"].get("mat_cracked_stone", 0) == 0
     print("Happy Path: Armor recipe upgrade verified successfully!")

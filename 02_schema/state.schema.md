@@ -35,8 +35,46 @@
     "unlocked": list[unlock_key],
     "cleared_dungeons": list[dungeon_id],
     "flags": dict[flag_key, bool],
+    "relic_passives": dict[relic_id, passive_choice_id],
 }
 ```
+
+## Phase 4A Affix State Contract
+
+The existing `relic_passives` field above is a persisted runtime field and must
+be preserved by every future migration.
+
+The first affix runtime migration will add the following fields; this schema
+records the contract before implementation:
+
+```python
+{
+    "state_version": 2,
+    "run_seed": int,                    # non-negative; persisted per run
+    "affix_roll_counter": int,           # non-negative
+    "equipment_instances": {
+        "eqi_<serial>": {
+            "base_item_id": equipment_id,
+            "generation_version": 0 | 1,
+            "roll_index": int,
+            "major_affix_id": str | None,
+            "minor_affix_id": str | None,
+        },
+    },
+}
+```
+
+After the migration, an equipment reference in `inventory` or an equipment
+slot is an `eqi_<serial>` key with quantity 1; consumables, materials, keys,
+and first-pass storage entries remain static count-based IDs. A v1 state has no
+`state_version`, seed, counter, or instances. Its equipment copies must migrate
+to distinct unaffixed version-0 instances, preserving inventory quantity and
+equipped slots without rolling new affixes.
+
+The generator is deterministic from `run_seed`, `roll_index`, and a stable
+generation version. Repeating the same seed and equipment-generation order
+must reproduce the same instance affixes. Manual `save.json` editing remains
+forbidden; migration belongs only in the runtime default/normalization path.
 
 ## 必填欄位
 

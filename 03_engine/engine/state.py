@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import math
+import secrets
 from copy import deepcopy
 from data import (
     JOBS,
@@ -13,6 +14,12 @@ from data import (
     RELICS,
     SKILLS,
     get_unlocked_regions,
+)
+from .equipment_refs import (
+    equipment_base_id,
+    equipment_ref_count,
+    first_inventory_equipment_ref,
+    resolve_equipment_ref,
 )
 
 RUN_SUPPLY_CAPS = {"sustain_hp": 3, "emergency_hp": 1, "throwable": 2, "escape": 1}
@@ -60,6 +67,51 @@ BOSS_CLEAR_FLAGS = {
     "boss_final_demon_king": "final_demon_king_defeated",
 }
 
+EQUIPMENT_INSTANCE_STATE_VERSION = 2
+
+
+def _next_equipment_instance_id(state: dict) -> str:
+    instances = state.setdefault("equipment_instances", {})
+    serial = len(instances) + 1
+    while f"eqi_{serial:06d}" in instances:
+        serial += 1
+    return f"eqi_{serial:06d}"
+
+
+def create_equipment_instance(state: dict, base_item_id: str, *, generation_version: int) -> str:
+    if base_item_id not in EQUIPMENT or EQUIPMENT[base_item_id]["slot"] == "special":
+        raise ValueError("Only non-special EQUIPMENT entries have instances.")
+    reference_id = _next_equipment_instance_id(state)
+    state.setdefault("equipment_instances", {})[reference_id] = {
+        "base_item_id": base_item_id,
+        "generation_version": generation_version,
+        "roll_index": 0,
+        "major_affix_id": None,
+        "minor_affix_id": None,
+    }
+    return reference_id
+
+
+def migrate_equipment_instances(state: dict) -> None:
+    """Convert legacy non-special equipment references to unaffixed v0 copies."""
+    if state.get("state_version", 1) >= EQUIPMENT_INSTANCE_STATE_VERSION:
+        return
+    state["run_seed"] = state.get("run_seed") if isinstance(state.get("run_seed"), int) and state["run_seed"] >= 0 else 0
+    state["affix_roll_counter"] = 0
+    state["equipment_instances"] = {}
+    migrated_inventory = {}
+    for item_id, quantity in state.get("inventory", {}).items():
+        if item_id in EQUIPMENT and EQUIPMENT[item_id]["slot"] != "special":
+            for _ in range(max(0, quantity if isinstance(quantity, int) else 0)):
+                migrated_inventory[create_equipment_instance(state, item_id, generation_version=0)] = 1
+        else:
+            migrated_inventory[item_id] = quantity
+    state["inventory"] = migrated_inventory
+    for slot, item_id in state.get("equipment", {}).items():
+        if item_id in EQUIPMENT and EQUIPMENT[item_id]["slot"] != "special":
+            state["equipment"][slot] = create_equipment_instance(state, item_id, generation_version=0)
+    state["state_version"] = EQUIPMENT_INSTANCE_STATE_VERSION
+
 
 def is_key_item(item_id: str) -> bool:
     return item_id.startswith("key_")
@@ -91,6 +143,10 @@ def create_state(name: str, job: str) -> dict:
         "storage_unlocked": False,
         "storage": {},
         "bestiary": [],
+        "state_version": EQUIPMENT_INSTANCE_STATE_VERSION,
+        "run_seed": secrets.randbits(63),
+        "affix_roll_counter": 0,
+        "equipment_instances": {},
     }
     for item_id, qty in QUESTS["quest_register"]["reward"]["items"].items():
         add_item(state, item_id, qty)
@@ -99,6 +155,14 @@ def create_state(name: str, job: str) -> dict:
 
 
 def ensure_state_defaults(state: dict) -> dict:
+    migrate_equipment_instances(state)
+    state["state_version"] = EQUIPMENT_INSTANCE_STATE_VERSION
+    if not isinstance(state.get("run_seed"), int) or state["run_seed"] < 0:
+        state["run_seed"] = 0
+    if not isinstance(state.get("affix_roll_counter"), int) or state["affix_roll_counter"] < 0:
+        state["affix_roll_counter"] = 0
+    if not isinstance(state.get("equipment_instances"), dict):
+        state["equipment_instances"] = {}
     if not isinstance(state.get("learned_skills"), list):
         job_id = state.get("job")
         state["learned_skills"] = list(JOBS[job_id]["base_skills"]) if job_id in JOBS else []
@@ -217,6 +281,10 @@ def consume_run_supply_item(state: dict, item_id: str) -> bool:
 def add_item(state: dict, item_id: str, qty: int = 1) -> None:
     if qty <= 0:
         return
+    if state.get("state_version", 1) >= EQUIPMENT_INSTANCE_STATE_VERSION and item_id in EQUIPMENT and EQUIPMENT[item_id]["slot"] != "special":
+        for _ in range(qty):
+            state["inventory"][create_equipment_instance(state, item_id, generation_version=1)] = 1
+        return
     state["inventory"][item_id] = state["inventory"].get(item_id, 0) + qty
 
 
@@ -249,12 +317,23 @@ def remove_storage_item(state: dict, item_id: str, qty: int = 1) -> bool:
 
 
 def owns_item_or_equipped(state: dict, item_id: str) -> bool:
+    if item_id in EQUIPMENT:
+        return equipment_ref_count(state, item_id, include_equipped=True) > 0
     if state["inventory"].get(item_id, 0) > 0:
         return True
     return item_id in state["equipment"].values()
 
 
 def consume_item_or_equipped(state: dict, item_id: str) -> bool:
+    if item_id in EQUIPMENT:
+        reference_id = first_inventory_equipment_ref(state, item_id)
+        if reference_id and remove_item(state, reference_id, 1):
+            return True
+        for slot, equipped in state["equipment"].items():
+            if equipment_base_id(state, equipped) == item_id:
+                state["equipment"][slot] = None
+                return True
+        return False
     if remove_item(state, item_id, 1):
         return True
     for slot, equipped in state["equipment"].items():
@@ -354,9 +433,10 @@ def get_stats(state: dict, buffs: dict | None = None) -> dict:
     stats["rare_drop"] = 0
 
     for item_id in state["equipment"].values():
-        if not item_id:
+        resolved = resolve_equipment_ref(state, item_id)
+        if not resolved:
             continue
-        for key, value in EQUIPMENT[item_id].get("stats", {}).items():
+        for key, value in resolved["base"].get("stats", {}).items():
             stats[key] = stats.get(key, 0) + value
 
     relic_effects = active_relic_passive_effects(state)
@@ -388,6 +468,81 @@ def get_stats(state: dict, buffs: dict | None = None) -> dict:
     return stats
 
 
+def equipment_comparison(state: dict, candidate_reference_id: str) -> dict:
+    """Return a side-effect-free candidate-versus-equipped comparison."""
+    candidate = resolve_equipment_ref(state, candidate_reference_id)
+    if not candidate:
+        raise ValueError("Unknown equipment reference.")
+
+    candidate_base = candidate["base"]
+    slot = candidate_base["slot"]
+    equipped_reference_id = state.get("equipment", {}).get(slot)
+    equipped = resolve_equipment_ref(state, equipped_reference_id)
+    compatible = state.get("job") in candidate_base.get("jobs", [])
+    reason = None if compatible else "目前職業無法裝備此物品。"
+    before = get_stats(state)
+    simulated = deepcopy(state)
+    simulated.setdefault("equipment", {})[slot] = candidate_reference_id
+    after = get_stats(simulated) if compatible else before
+
+    def presentation(resolved: dict | None) -> dict | None:
+        if not resolved:
+            return None
+        instance = resolved.get("instance") or {}
+        return {
+            "reference_id": resolved["reference_id"],
+            "base_item_id": resolved["base_item_id"],
+            "name": resolved["base"]["name"],
+            "quality": "normal",
+            "upgrade_level": 0,
+            "generation_version": instance.get("generation_version"),
+            "major_affix_id": instance.get("major_affix_id"),
+            "minor_affix_id": instance.get("minor_affix_id"),
+        }
+
+    def affix_change(before_id: str | None, after_id: str | None) -> str:
+        if before_id == after_id:
+            return "unchanged"
+        if before_id is None:
+            return "gained"
+        if after_id is None:
+            return "removed"
+        return "replaced"
+
+    stats = {
+        key: {"before": before.get(key, 0), "after": after.get(key, 0), "delta": after.get(key, 0) - before.get(key, 0)}
+        for key in sorted(set(before) | set(after))
+    }
+    candidate_view = presentation(candidate)
+    equipped_view = presentation(equipped)
+    return {
+        "slot": slot,
+        "compatible": compatible,
+        "reason": reason,
+        "candidate": candidate_view,
+        "equipped": equipped_view,
+        "stats": stats,
+        "affixes": {
+            "major": {
+                "before": equipped_view["major_affix_id"] if equipped_view else None,
+                "after": candidate_view["major_affix_id"],
+                "change": affix_change(
+                    equipped_view["major_affix_id"] if equipped_view else None,
+                    candidate_view["major_affix_id"],
+                ),
+            },
+            "minor": {
+                "before": equipped_view["minor_affix_id"] if equipped_view else None,
+                "after": candidate_view["minor_affix_id"],
+                "change": affix_change(
+                    equipped_view["minor_affix_id"] if equipped_view else None,
+                    candidate_view["minor_affix_id"],
+                ),
+            },
+        },
+    }
+
+
 def clamp_vitals(state: dict) -> None:
     stats = get_stats(state)
     state["current_hp"] = max(0, min(state["current_hp"], stats["max_hp"]))
@@ -395,9 +550,10 @@ def clamp_vitals(state: dict) -> None:
 
 
 def equip_item(state: dict, item_id: str, quiet: bool = False) -> bool:
-    if item_id not in EQUIPMENT:
+    resolved = resolve_equipment_ref(state, item_id)
+    if not resolved:
         return False
-    eq = EQUIPMENT[item_id]
+    eq = resolved["base"]
     if state["job"] not in eq["jobs"]:
         if not quiet:
             print(f"{state['job']}無法裝備 {eq['name']}。")

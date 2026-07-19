@@ -21,6 +21,7 @@ from .display import (
     title,
 )
 from .formatting import equipment_summary, format_items, item_name, monster_drop_names
+from .equipment_refs import equipment_ref_count
 from .previews import get_preview_promotions_for_job, show_job_specialization_preview
 from .state import (
     is_key_item,
@@ -39,6 +40,7 @@ from .state import (
     boss_defeated,
     player_facing_dungeon_ids,
     get_stats,
+    equipment_comparison,
     clamp_vitals,
     equip_item,
     ICE_REGION_UNLOCK,
@@ -570,7 +572,7 @@ def show_status(state: dict) -> None:
     equipment_lines = []
     for slot, label in slot_names.items():
         item_id = state["equipment"].get(slot)
-        equipment_lines.append(f"{label}: {item_name(item_id) if item_id else '無'}")
+        equipment_lines.append(f"{label}: {item_name(item_id, state) if item_id else '無'}")
     render_panel("裝備", equipment_lines, border_style="green")
 
     skill_lines = []
@@ -587,14 +589,15 @@ def show_inventory(state: dict) -> None:
         return
     lines = []
     for item_id, qty in sorted(state["inventory"].items(), key=lambda pair: item_name(pair[0])):
-        lines.append(f"{item_name(item_id)} x{qty} / {item_usage_summary(item_id)}")
+        lines.append(f"{item_name(item_id, state)} x{qty} / {item_usage_summary(item_id, state)}")
     render_panel("背包與素材", lines, border_style="green")
 
-def item_usage_summary(item_id: str) -> str:
+def item_usage_summary(item_id: str, state: dict | None = None) -> str:
     data = ITEMS.get(item_id) or EQUIPMENT.get(item_id)
     desc = data.get("desc", "") if data else ""
     usage = []
-    if item_id in EQUIPMENT:
+    from .equipment_refs import is_equipment_ref
+    if item_id in EQUIPMENT or (state and is_equipment_ref(state, item_id)):
         usage.append("可裝備")
     if item_id in {"item_potion_s", "item_potion_m", "item_focus_drop", "item_herb_antidote", "item_armor_piercer", "item_escape_scroll"}:
         usage.append("戰鬥可用")
@@ -622,10 +625,11 @@ def item_usage_summary(item_id: str) -> str:
 
 def equipment_menu(state: dict) -> None:
     while True:
-        equippables = [item_id for item_id in state["inventory"] if item_id in EQUIPMENT]
+        from .equipment_refs import inventory_equipment_refs
+        equippables = inventory_equipment_refs(state)
         slot_names = {"weapon": "武器", "head": "頭部", "body": "身體", "accessory": "飾品", "special": "特殊"}
         current_lines = [
-            f"{slot_names.get(slot, slot)}: {item_name(item_id) if item_id else '無'}"
+            f"{slot_names.get(slot, slot)}: {item_name(item_id, state) if item_id else '無'}"
             for slot, item_id in state["equipment"].items()
         ]
         render_panel("目前裝備", current_lines, border_style="green")
@@ -633,7 +637,7 @@ def equipment_menu(state: dict) -> None:
             print("\n背包裡沒有可裝備物品。")
             pause()
             return
-        options = [f"{item_name(item_id)} - {equipment_summary(item_id)}" for item_id in equippables]
+        options = [f"{item_name(item_id, state)} - {equipment_summary(item_id, state)}" for item_id in equippables]
         choice = action_menu_panel(
             "選擇要裝備的物品",
             options,
@@ -644,7 +648,23 @@ def equipment_menu(state: dict) -> None:
         )
         if choice == 0:
             return
-        equip_item(state, equippables[choice - 1])
+        item_id = equippables[choice - 1]
+        comparison = equipment_comparison(state, item_id)
+        candidate = comparison["candidate"]
+        equipped = comparison["equipped"]
+        comparison_lines = [
+            f"候選：{candidate['name']} / 普通 / +0",
+            f"目前：{equipped['name'] if equipped else '無'} / 普通 / +0" if equipped else "目前：無",
+        ]
+        for stat, values in comparison["stats"].items():
+            if values["delta"]:
+                comparison_lines.append(f"{stat}: {values['before']} → {values['after']} ({values['delta']:+})")
+        comparison_lines.append("詞綴：無 → 無")
+        render_panel("裝備比較", comparison_lines, border_style="cyan")
+        if comparison["compatible"] and action_menu_panel(
+            "確認替換", ["裝備此物品"], "裝備比較", allow_back=True, border_style="green"
+        ) == 1:
+            equip_item(state, item_id)
         pause()
 
 
@@ -1769,7 +1789,7 @@ def smoke_test() -> None:
     add_item(state, "mat_scorched_iron", 1)
     state["gold"] = 999
     craft_recipe(state, "recipe_iron_sword_plus_1")
-    assert state["inventory"].get("weapon_iron_sword_plus_1", 0) == 1
+    assert equipment_ref_count(state, "weapon_iron_sword_plus_1") == 1
     damage, _ = calc_player_damage(state, MONSTERS["mon_moss_rat"], None, {}, {})
     assert damage > 0
 

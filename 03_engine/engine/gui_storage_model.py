@@ -4,6 +4,7 @@ from typing import Any
 from data import EQUIPMENT, ITEMS
 from . import game
 from .formatting import item_name
+from .equipment_refs import is_equipment_ref, resolve_equipment_ref
 
 STORAGE_UNLOCK_COST = game.STORAGE_UNLOCK_COST
 STORAGE_CAPACITY = game.STORAGE_CAPACITY
@@ -23,6 +24,10 @@ def get_storage_item_category(item_id: str) -> str:
         if kind in {"battle", "special"}:
             return "valuables"
     return "materials"
+
+
+def get_state_item_category(state: dict[str, Any], item_id: str) -> str:
+    return "equipment" if is_equipment_ref(state, item_id) else get_storage_item_category(item_id)
 
 
 def get_item_category_label(item_id: str, is_storage: bool = False) -> str:
@@ -62,8 +67,8 @@ def storage_screen_model(state: dict[str, Any]) -> dict[str, Any]:
         if qty <= 0:
             continue
 
-        category = get_storage_item_category(item_id)
-        name = item_name(item_id)
+        category = get_state_item_category(state, item_id)
+        name = item_name(item_id, state)
 
         enabled = False
         disabled_reason = "倉庫未開啟"
@@ -93,8 +98,8 @@ def storage_screen_model(state: dict[str, Any]) -> dict[str, Any]:
             if qty <= 0:
                 continue
 
-            category = get_storage_item_category(item_id)
-            name = item_name(item_id)
+            category = get_state_item_category(state, item_id)
+            name = item_name(item_id, state)
 
             storage_rows.append({
                 "item_id": item_id,
@@ -114,15 +119,16 @@ def storage_screen_model(state: dict[str, Any]) -> dict[str, Any]:
         if not (in_inv or in_st):
             continue
 
-        name = item_name(item_id)
+        name = item_name(item_id, state)
         cat_label = get_item_category_label(item_id, is_storage=in_st and not in_inv)
 
         desc = ""
         effect = ""
         use_context = ""
 
-        if item_id in EQUIPMENT:
-            eq = EQUIPMENT[item_id]
+        resolved = resolve_equipment_ref(state, item_id)
+        if resolved:
+            eq = resolved["base"]
             desc = eq.get("desc", "")
             effect = f"提供屬性加成：攻擊+{eq.get('stats', {}).get('attack', 0)}" if eq.get('stats') else "提供裝備屬性"
             use_context = f"可裝備於：{eq.get('slot')}"

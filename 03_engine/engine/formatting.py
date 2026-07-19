@@ -1,13 +1,18 @@
 from __future__ import annotations
 
 from data import EQUIPMENT, ITEMS, MATERIALS
+from .equipment_refs import resolve_equipment_ref
 
 
-def item_name(item_id: str) -> str:
+def item_name(item_id: str, state: dict | None = None) -> str:
     if item_id in ITEMS:
         return ITEMS[item_id]["name"]
     if item_id in EQUIPMENT:
         return EQUIPMENT[item_id]["name"]
+    if state:
+        resolved = resolve_equipment_ref(state, item_id)
+        if resolved:
+            return resolved["base"]["name"]
     if item_id in MATERIALS:
         return MATERIALS[item_id]
     return item_id
@@ -34,8 +39,9 @@ def format_items(cost: dict) -> str:
     return "、".join(parts)
 
 
-def equipment_summary(item_id: str) -> str:
-    eq = EQUIPMENT[item_id]
+def equipment_summary(item_id: str, state: dict | None = None) -> str:
+    resolved = resolve_equipment_ref(state or {}, item_id)
+    eq = resolved["base"] if resolved else EQUIPMENT[item_id]
     stats = []
     for key, label in [
         ("attack", "攻擊"),

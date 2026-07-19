@@ -37,6 +37,9 @@ for its exact file surface.
   records and keeps baseline budgets separate from affix-cap accounting. No
   affix increment, item generation, save contract, special-slot expansion, or
   elemental-infusion runtime behavior was added.
+- Phase 4A now defines the instance, seed, and legacy-migration contract only.
+  It does not approve an affix generator, runtime migration, or save-file
+  operation.
 
 ## Design Decisions Already Chosen
 
@@ -222,6 +225,49 @@ Rules:
 This phase must begin with a read-only save/schema preflight. It is not covered
 by approval for Phases 0–3.
 
+### Phase 4A — Instance, Seed, And Migration Contract (approved design)
+
+Phase 4A defines the contract only. It does not add an affix generator, alter
+combat output, create item data, or migrate a real save file.
+
+The runtime contract is intentionally instance-based: static `EQUIPMENT` stays
+the deterministic regional base, while each generated copy has an
+`equipment_instance` record. Inventory and equipped slots will ultimately hold
+an instance reference for equipment, so multiple copies of the same base item
+can carry different affixes without mutating global data.
+
+The target state fields are:
+
+- `state_version`: the migration contract version; absent legacy state is v1.
+- `run_seed`: a persisted non-negative integer. The same seed plus the same
+  equipment-generation order must reproduce the same affix results.
+- `affix_roll_counter`: incremented only when an equipment instance is rolled.
+- `equipment_instances`: `instance_id -> {base_item_id, generation_version,
+  roll_index, major_affix_id | None, minor_affix_id | None}`.
+
+Migration must convert every legacy inventory or equipped equipment id into a
+distinct, unaffixed instance (`generation_version: 0`) before any new roll. It
+must preserve quantities, job legality, equipped slot, and current HP/MP; it
+must never retroactively roll an affix for an existing item. Static consumables,
+materials, keys, and storage entries remain count-based IDs in the first pass.
+
+The first runtime vertical slice must exclude `special`, head-slot pseudo-offhand
+effect changes, elemental infusion, new shops/drops, GUI, and any save-file
+manual operation. A later elemental-infusion slice may use the instance
+contract, but must not overwrite a skill's declared element.
+
+Affix caps apply to affix increments only. Existing deterministic baseline
+stats, including baseline values already above legacy QA caps, are not affix
+violations. One instance may have at most one major and one minor affix; the
+two IDs must be distinct families, and no first-slice affix may change an
+existing `normal_attack_followup` payload.
+
+Required implementation tests after a separate approval: identical
+seed/order reproducibility, legacy-state normalization, duplicate-base-item
+independence, slot/job legality, no global `EQUIPMENT` mutation, cap accounting,
+and unchanged unaffixed B4 results. B6 remains an in-memory QA overlay and does
+not become the runtime generator.
+
 ## Required Validation Per Implemented Slice
 
 Run the smallest relevant checks, then the cross-system checks when runtime or
@@ -239,8 +285,9 @@ impact; B5 and B6 remain sensitivity overlays, never canonical baselines.
 
 ## Next Approval Boundary
 
-No next item, support-book, equipment, or affix implementation target is
-pre-approved. Phase 4 remains a separate high-risk affix/save design gate; it
-is not implied by the completed deterministic audit. Any future proposal must
-start with one exact read-only planning slice and preserve B4 as the canonical
+Phase 4A contract design is complete. No Phase 4B runtime implementation target
+is pre-approved: instance resolution, migration, deterministic rolling, and
+CLI presentation require a separate high-risk approval. Elemental infusion,
+special-slot behavior, pseudo-offhand effect changes, GUI, and save-file
+operations remain outside that future slice. Preserve B4 as the canonical
 baseline while keeping B5/B6 as QA overlays.

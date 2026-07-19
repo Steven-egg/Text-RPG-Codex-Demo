@@ -11,6 +11,7 @@ for module_root in (ROOT / "04_data", ROOT / "03_engine"):
 
 from engine.gui_actions import GuiRuntimeSession, GuiActionError
 from engine import game
+from engine.equipment_refs import equipment_base_id, first_inventory_equipment_ref
 
 
 def run_smoke_test():
@@ -55,7 +56,8 @@ def run_smoke_test():
     assert state_fc["gold"] == 100  # 400 - 300 = 100G
     assert state_fc["inventory"]["mat_fire_stone"] == 2  # 5 - 3 = 2
     assert state_fc["inventory"]["mat_scorched_iron"] == 1  # 3 - 2 = 1
-    assert state_fc["inventory"]["acc_fire_cloak"] == 1
+    fire_cloak = first_inventory_equipment_ref(state_fc, "acc_fire_cloak")
+    assert fire_cloak and equipment_base_id(state_fc, fire_cloak) == "acc_fire_cloak"
     print("Happy Path (fire cloak) verified.")
 
     # ----------------------------------------------------
@@ -90,7 +92,7 @@ def run_smoke_test():
     state_hc1["gold"] = 500
     state_hc1["inventory"]["mat_fire_stone"] = 3
     state_hc1["inventory"]["mat_lava_shard"] = 2
-    state_hc1["inventory"]["acc_warm_stone"] = 1
+    game.add_item(state_hc1, "acc_warm_stone", 1)
 
     print(f"[Happy Path - heat charm (inv)] Initial Gold: {state_hc1['gold']}, Inventory: {dict(state_hc1['inventory'])}")
     response = session_hc1.dispatch("craft_recipe", {"recipe_id": "recipe_heat_charm"}, screen_id="synthesis_screen")
@@ -98,8 +100,8 @@ def run_smoke_test():
     assert state_hc1["gold"] == 240  # 500 - 260 = 240G
     assert state_hc1["inventory"]["mat_fire_stone"] == 1  # 3 - 2 = 1
     assert state_hc1["inventory"]["mat_lava_shard"] == 1  # 2 - 1 = 1
-    assert state_hc1["inventory"].get("acc_warm_stone", 0) == 0  # consumed
-    assert state_hc1["inventory"]["acc_warm_stone_plus"] == 1  # output
+    assert first_inventory_equipment_ref(state_hc1, "acc_warm_stone") is None  # consumed
+    assert equipment_base_id(state_hc1, first_inventory_equipment_ref(state_hc1, "acc_warm_stone_plus")) == "acc_warm_stone_plus"
     print("Happy Path (heat charm, base item in inventory) verified.")
 
     # ----------------------------------------------------
@@ -114,7 +116,8 @@ def run_smoke_test():
     state_hc2["inventory"]["mat_fire_stone"] = 3
     state_hc2["inventory"]["mat_lava_shard"] = 2
     # Equip the warm stone instead of keeping it in inventory
-    state_hc2["equipment"]["accessory"] = "acc_warm_stone"
+    game.add_item(state_hc2, "acc_warm_stone", 1)
+    game.equip_item(state_hc2, first_inventory_equipment_ref(state_hc2, "acc_warm_stone"), quiet=True)
 
     print(f"[Happy Path - heat charm (equipped)] Initial Gold: {state_hc2['gold']}, Equipment: {state_hc2['equipment']}, Inventory: {dict(state_hc2['inventory'])}")
     response = session_hc2.dispatch("craft_recipe", {"recipe_id": "recipe_heat_charm"}, screen_id="synthesis_screen")
@@ -123,7 +126,7 @@ def run_smoke_test():
     assert state_hc2["inventory"]["mat_fire_stone"] == 1  # 3 - 2 = 1
     assert state_hc2["inventory"]["mat_lava_shard"] == 1  # 2 - 1 = 1
     assert state_hc2["equipment"].get("accessory") is None  # consumed from equipment slot
-    assert state_hc2["inventory"]["acc_warm_stone_plus"] == 1  # output added to inventory
+    assert equipment_base_id(state_hc2, first_inventory_equipment_ref(state_hc2, "acc_warm_stone_plus")) == "acc_warm_stone_plus"
     print("Happy Path (heat charm, base item equipped) verified.")
 
     # ----------------------------------------------------
@@ -214,7 +217,7 @@ def run_smoke_test():
     state_non_white["gold"] = 500
     state_non_white["inventory"]["mat_cracked_stone"] = 10
     state_non_white["inventory"]["mat_scorched_iron"] = 10
-    state_non_white["inventory"]["weapon_iron_sword"] = 1
+    game.add_item(state_non_white, "weapon_iron_sword", 1)
 
     try:
         session_non_white.dispatch("craft_recipe", {"recipe_id": "recipe_iron_sword_plus_1"}, screen_id="synthesis_screen")
@@ -234,13 +237,13 @@ def run_smoke_test():
 
     model = session_model.screen_model("synthesis_screen")
     assert model["screen_id"] == "facility_synthesis_screen"
-    assert len(model["recipe_rows"]) == 4
+    assert len(model["recipe_rows"]) == 7
 
     # Check category counts
     category_tabs = model["category_tabs"]
-    assert any(tab["id"] == "all" and tab["count"] == 4 for tab in category_tabs)
+    assert any(tab["id"] == "all" and tab["count"] == 7 for tab in category_tabs)
     assert any(tab["id"] == "equipment" and tab["count"] == 3 for tab in category_tabs)
-    assert any(tab["id"] == "battle" and tab["count"] == 1 for tab in category_tabs)
+    assert any(tab["id"] == "battle" and tab["count"] == 4 for tab in category_tabs)
 
     # Check that locks and unlocks are correctly set
     rows = model["recipe_rows"]

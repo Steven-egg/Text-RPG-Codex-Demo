@@ -11,6 +11,7 @@ for module_root in (ROOT / "04_data", ROOT / "03_engine"):
 
 from engine.gui_actions import GuiRuntimeSession, GuiActionError
 from engine import game
+from engine.equipment_refs import equipment_base_id, first_inventory_equipment_ref
 from data import SHOP_INVENTORY, ITEMS, EQUIPMENT
 
 
@@ -33,14 +34,14 @@ def run_smoke_test():
         if (ITEMS.get(i_id) or EQUIPMENT.get(i_id, {})).get("region", "border_fire") == "border_fire"
     ]
     assert row_item_ids == expected_travel_items
-    assert len(row_item_ids) == 9
+    assert len(row_item_ids) == len(expected_travel_items)
     print("Shop model row IDs and order verified matches SHOP_INVENTORY['travel'].")
 
     # Verify category counts
     category_tabs = {tab["id"]: tab for tab in model["category_tabs"]}
-    assert category_tabs["all"]["count"] == 9
+    assert category_tabs["all"]["count"] == len(expected_travel_items)
     assert category_tabs["consumables"]["count"] == 4
-    assert category_tabs["tactical"]["count"] == 2
+    assert category_tabs["tactical"]["count"] == 5
     assert category_tabs["accessories"]["count"] == 3
     print("Category tabs and counts verified.")
 
@@ -68,13 +69,13 @@ def run_smoke_test():
 
     # 4. Happy Path Accessory Purchase (acc_lucky_charm)
     state["gold"] = 200
-    state["inventory"]["acc_lucky_charm"] = 0
     state["equipment"]["accessory"] = None  # Ensure accessory is not equipped
 
     response = session.dispatch("buy_item", {"item_id": "acc_lucky_charm"}, screen_id="shop_screen")
     assert response["ok"] is True
     assert state["gold"] == 40  # 200 - 160 = 40G
-    assert state["inventory"]["acc_lucky_charm"] == 1
+    lucky_charm = first_inventory_equipment_ref(state, "acc_lucky_charm")
+    assert lucky_charm and equipment_base_id(state, lucky_charm) == "acc_lucky_charm"
     assert state["equipment"]["accessory"] is None  # Verify accessory is NOT auto-equipped!
     print("Accessory (acc_lucky_charm) purchase verified (goes to inventory only, not auto-equipped).")
 
@@ -84,10 +85,10 @@ def run_smoke_test():
     assert game.travel_shop_owned_count(state, "acc_lucky_charm") == 1
 
     # Equip the lucky charm manually
-    game.equip_item(state, "acc_lucky_charm")
+    game.equip_item(state, lucky_charm)
     # Now it is equipped (in equipment slot), and count in inventory should be 0.
-    assert state["inventory"].get("acc_lucky_charm", 0) == 0
-    assert state["equipment"].get("accessory") == "acc_lucky_charm"
+    assert first_inventory_equipment_ref(state, "acc_lucky_charm") is None
+    assert equipment_base_id(state, state["equipment"].get("accessory")) == "acc_lucky_charm"
     
     # Total owned count should still be 1 (because it includes equipped items)
     assert game.travel_shop_owned_count(state, "acc_lucky_charm") == 1

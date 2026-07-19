@@ -19,6 +19,7 @@ from data import (
     SKILLS,
     get_unlocked_regions,
 )
+from .equipment_refs import is_equipment_ref, resolve_equipment_ref
 
 from . import game
 from .formatting import item_name
@@ -1077,10 +1078,11 @@ class GuiRuntimeSession:
         state = self.require_state()
         item_id = payload.get("item_id")
 
-        if not item_id or item_id not in EQUIPMENT:
+        resolved = resolve_equipment_ref(state, item_id)
+        if not resolved:
             raise GuiActionError("武器不存在。", status=400)
 
-        eq = EQUIPMENT[item_id]
+        eq = resolved["base"]
         if eq["slot"] != "weapon":
             raise GuiActionError("該裝備不是武器，無法裝備在武器欄位。", status=400)
 
@@ -1130,10 +1132,11 @@ class GuiRuntimeSession:
         state = self.require_state()
         item_id = payload.get("item_id")
 
-        if not item_id or item_id not in EQUIPMENT:
+        resolved = resolve_equipment_ref(state, item_id)
+        if not resolved:
             raise GuiActionError("裝備不存在。", status=400)
 
-        eq = EQUIPMENT[item_id]
+        eq = resolved["base"]
         slot = eq["slot"]
 
         if state.get("job") not in eq["jobs"]:
@@ -1838,7 +1841,7 @@ def inventory_preview(state: dict[str, Any]) -> list[dict[str, Any]]:
     entries = []
     for item_id, qty in state.get("inventory", {}).items():
         data = ITEMS.get(item_id) or EQUIPMENT.get(item_id) or {}
-        entries.append({"item_id": item_id, "label": data.get("name", item_name(item_id)), "quantity": qty})
+        entries.append({"item_id": item_id, "label": data.get("name", item_name(item_id, state)), "quantity": qty})
     return entries
 
 
@@ -1850,7 +1853,7 @@ def get_status_preview_data(state: dict[str, Any]) -> dict[str, Any]:
         item_id = state.get("equipment", {}).get(slot)
         equipment.append({
             "slot_label": label,
-            "item_name": item_name(item_id) if item_id else "無",
+            "item_name": item_name(item_id, state) if item_id else "無",
             "item_id": item_id
         })
     skills = []
@@ -1901,10 +1904,10 @@ def get_inventory_preview_data(state: dict[str, Any]) -> list[dict[str, Any]]:
     for item_id in sorted(counts.keys()):
         qty = counts[item_id]
         category = "其他"
-        if item_id in EQUIPMENT:
+        if is_equipment_ref(state, item_id):
             category = "裝備"
             is_equipped = item_id in equipped_set
-            name = f"{item_name(item_id)}（已裝備）" if is_equipped else item_name(item_id)
+            name = f"{item_name(item_id, state)}（已裝備）" if is_equipped else item_name(item_id, state)
         else:
             name = item_name(item_id)
             item_data = ITEMS.get(item_id, {})

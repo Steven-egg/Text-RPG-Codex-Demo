@@ -53,6 +53,7 @@ from .state import (
     player_summary_line,
     player_resource_lines,
 )
+from .equipment_refs import equipment_ref_count, equipped_reference_for_base
 from .relic import (
     ready_relic_names,
     relic_passive_menu,
@@ -225,9 +226,9 @@ def travel_shop_category(item_id: str) -> str:
 
 
 def travel_shop_owned_count(state: dict, item_id: str) -> int:
+    if item_id in EQUIPMENT:
+        return equipment_ref_count(state, item_id, include_equipped=True)
     owned = state["inventory"].get(item_id, 0)
-    if item_id in EQUIPMENT and item_id in state["equipment"].values():
-        owned += 1
     return owned
 
 
@@ -360,17 +361,15 @@ def travel_shop(state: dict, region_id: str = "border_fire") -> None:
 
 
 def equipment_owned_count(state: dict, item_id: str) -> int:
-    owned = state["inventory"].get(item_id, 0)
-    if item_id in state["equipment"].values():
-        owned += 1
-    return owned
+    return equipment_ref_count(state, item_id, include_equipped=True)
 
 
 def equipment_status_line(state: dict, item_id: str) -> str:
-    if item_id in state["equipment"].values():
+    if equipped_reference_for_base(state, item_id):
         return "已裝備"
-    if state["inventory"].get(item_id, 0) > 0:
-        return f"背包 x{state['inventory'][item_id]}"
+    owned = equipment_ref_count(state, item_id)
+    if owned > 0:
+        return f"背包 x{owned}"
     return "未持有"
 
 
@@ -568,7 +567,7 @@ def workshop_equipment_lines(state: dict, item_ids: list[str]) -> list[str]:
     lines = ["目前裝備："]
     for slot in relevant_slots:
         equipped = state["equipment"].get(slot)
-        lines.append(f"{slot_names.get(slot, slot)}：{item_name(equipped) if equipped else '無'}")
+        lines.append(f"{slot_names.get(slot, slot)}：{item_name(equipped, state) if equipped else '無'}")
     owned = [
         f"{item_name(item_id)} x{state['inventory'][item_id]} / {equipment_summary(item_id)}"
         for item_id in item_ids
