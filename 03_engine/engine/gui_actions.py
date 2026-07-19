@@ -420,6 +420,10 @@ class GuiRuntimeSession:
         dungeon = DUNGEONS[dungeon_id]
         if not game.is_unlocked(state, dungeon.get("unlock")):
             raise GuiActionError("Dungeon is locked.", status=403)
+        try:
+            game.configure_run_supplies(state, payload.get("supplies", {}))
+        except ValueError as error:
+            raise GuiActionError(str(error), status=409) from error
         self.current_region_id = normalize_region_id(state, payload.get("region_id") or region_for_dungeon_id(dungeon_id))
         game.clamp_vitals(state)
         run_log = {"gold": 0, "items": {}}
@@ -591,6 +595,11 @@ class GuiRuntimeSession:
                 raise GuiActionError("不支援的技能類型。", status=400)
 
         turn_events = list(action_result.events)
+        if action_result.free_action:
+            combat["mp_item_used_turn"] = True
+            game.record_battle_events(combat["battle_log"], combat["turn"], turn_events)
+            combat["last_action_summary"] = " / ".join(action_result.summary[:2])
+            return self._live_response(action_id, action_result.summary[0], screen_model=combat_screen_model(self))
         if combat["enemy_hp"] <= 0:
             turn_events.append(f"{enemy['name']}倒下。")
             game.record_battle_events(combat["battle_log"], combat["turn"], turn_events)
@@ -617,6 +626,7 @@ class GuiRuntimeSession:
         summary = game.combat_summary_lines(action_result.summary, enemy_events, effect_events)
         combat["last_action_summary"] = " / ".join(summary[:2]) if summary else "回合結束。"
         combat["turn"] += 1
+        combat["mp_item_used_turn"] = False
 
         if combat["enemy_hp"] <= 0:
             return self.resolve_victory(effect_events + [f"{enemy['name']}倒下了。"])
@@ -634,48 +644,39 @@ class GuiRuntimeSession:
         combat = self.require_combat()
         enemy = combat["enemy"]
         enemy_buffs = combat["enemy_buffs"]
-        if state.get("inventory", {}).get(item_id, 0) <= 0:
+        if game.combat_item_quantity(state, item_id) <= 0:
             raise GuiActionError("Item is not available.", status=409)
+        if item_id in game.COMBAT_MP_RECOVERY and combat.get("mp_item_used_turn"):
+            raise GuiActionError("本回合已使用 MP 藥水。", status=409, blocked_reason="本回合已使用 MP 藥水。")
         if item_id == "item_escape_scroll" and combat.get("boss"):
             raise GuiActionError(
                 "Boss 戰不可使用逃脫卷軸。",
                 status=409,
                 blocked_reason="Boss 戰不可使用逃脫卷軸。",
             )
-        if item_id == "item_potion_s":
+        if item_id in game.COMBAT_HP_RECOVERY:
             stats = game.get_stats(state)
             before = state["current_hp"]
-            state["current_hp"] = min(stats["max_hp"], state["current_hp"] + 35)
-            game.remove_item(state, item_id, 1)
-            line = f"使用小藥水，回復 {state['current_hp'] - before} HP。"
+            state["current_hp"] = min(stats["max_hp"], state["current_hp"] + game.combat_recovery_amount(state, item_id))
+            game.consume_combat_item(state, item_id)
+            line = f"使用{ITEMS[item_id]['name']}，回復 {state['current_hp'] - before} HP。"
             return game.CombatActionResult(events=[line], summary=[line])
-        if item_id == "item_potion_m":
-            stats = game.get_stats(state)
-            before = state["current_hp"]
-            state["current_hp"] = min(stats["max_hp"], state["current_hp"] + 70)
-            game.remove_item(state, item_id, 1)
-            line = f"使用中藥水，回復 {state['current_hp'] - before} HP。"
-            return game.CombatActionResult(events=[line], summary=[line])
-        if item_id == "item_focus_drop":
+        if item_id in game.COMBAT_MP_RECOVERY:
             stats = game.get_stats(state)
             before = state["current_mp"]
-            state["current_mp"] = min(stats["max_mp"], state["current_mp"] + 12)
-            game.remove_item(state, item_id, 1)
-            line = f"使用集中滴露，回復 {state['current_mp'] - before} MP。"
-            return game.CombatActionResult(events=[line], summary=[line])
+            state["current_mp"] = min(stats["max_mp"], state["current_mp"] + game.combat_recovery_amount(state, item_id))
+            game.consume_combat_item(state, item_id)
+            line = f"使用{ITEMS[item_id]['name']}，回復 {state['current_mp'] - before} MP。"
+            return game.CombatActionResult(events=[line], summary=[line], free_action=True)
         if item_id == "item_herb_antidote":
-            game.remove_item(state, item_id, 1)
+            game.consume_combat_item(state, item_id)
             state.setdefault("_clear_burn", True)
             line = "你嚼下解毒草，灼熱感稍微退去。"
             return game.CombatActionResult(events=[line], summary=[line])
-        if item_id == "item_armor_piercer":
-            game.remove_item(state, item_id, 1)
-            enemy_buffs["defense_down"] = max(enemy_buffs.get("defense_down", 0), 3)
-            damage = max(8, game.math.ceil(enemy["hp"] * 0.08))
-            line = f"破甲釘命中敵人的護具縫隙，造成 {damage} 傷害，敵方防禦下降。"
-            return game.CombatActionResult(damage=damage, events=[line], summary=[line])
+        if item_id in game.COMBAT_THROWABLE_IDS:
+            return game.use_combat_throwable(state, item_id, enemy, enemy_buffs)
         if item_id == "item_escape_scroll":
-            game.remove_item(state, item_id, 1)
+            game.consume_combat_item(state, item_id)
             return game.CombatActionResult(events=["卷軸化成白光，你撤回迷宮入口。"], summary=["卷軸化成白光，你撤回迷宮入口。"], outcome="escaped")
         raise GuiActionError("Unsupported combat item.", status=400)
 

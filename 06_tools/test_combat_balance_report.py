@@ -340,8 +340,9 @@ def _direct_item_use(state: dict, boss: bool, enemy_buffs: dict, enemy: dict):
 
 def _assert_item_adapter_parity() -> None:
     enemy = deepcopy(balance.MONSTERS["boss_thunder_crown_storm_lord"])
-    for item_id in ("item_potion_m", "item_focus_drop", "item_armor_piercer"):
-        base, _loadout, _complete, _carry, _relics = balance._build_state("cleric", "thunder", "full", False, True)
+    for item_id in ("item_potion_m", "item_focus_drop", *balance.game.COMBAT_THROWABLE_IDS):
+        job_key = "cleric" if item_id != "item_rending_spike" else "warrior"
+        base, _loadout, _complete, _carry, _relics = balance._build_state(job_key, "thunder", "full", False, True)
         base["inventory"] = {item_id: 2}
         if item_id == "item_potion_m":
             base["current_hp"] = 1
@@ -364,8 +365,12 @@ def _assert_item_adapter_parity() -> None:
         elif item_id == "item_focus_drop":
             assert adapter_state["current_mp"] == 12 and adapter_result.damage == 0
         else:
-            assert adapter_result.damage == max(8, math.ceil(enemy["hp"] * 0.08))
-            assert adapter_buffs["defense_down"] == 3
+            expected_damage, expected_defense_down = balance.game.combat_throwable_damage(item_id, enemy, {})
+            assert adapter_result.damage == expected_damage
+            if expected_defense_down:
+                assert adapter_buffs["defense_down"] == expected_defense_down
+            else:
+                assert "defense_down" not in adapter_buffs
 
 
 def _assert_audit_categories() -> None:
@@ -450,6 +455,197 @@ def _assert_quality_affix_semantics() -> None:
     ) == (2, 3)
 
 
+def _assert_phase0_measurement() -> None:
+    """Phase 0 is a separate stdout-only measurement surface, not B7."""
+    before = _global_snapshots()
+    rng_before = random.getstate()
+    records = balance.build_phase0_records(balance.DEFAULT_SEEDS)
+    assert len(records) == 1_900
+    assert len({record["scenario_id"] for record in records}) == len(records)
+    assert all(set(record) == set(balance.PHASE0_RECORD_FIELDS) for record in records)
+    assert all(record["phase_version"] == balance.PHASE0_VERSION for record in records)
+    assert all(record["scenario_kind"] in {"item", "support", "passive"} for record in records)
+    assert all(record["result"] in {"victory", "player_death", "timeout", "window_complete"} for record in records)
+
+    item_records = [record for record in records if record["scenario_kind"] == "item"]
+    assert len(item_records) == 1_000
+    assert {record["variant"] for record in item_records} == set(balance.PHASE0_ITEM_KITS)
+    assert all(record["items_used"] == 0 for record in item_records if record["kit_id"] == "no_item")
+    assert all(record["item_hp_restored"] >= 0 and record["item_mp_restored"] >= 0 for record in item_records)
+    assert all(record["comparison_id"] == f"item:{record['region']}:{record['job']}:{record['seed']}" for record in item_records)
+    legal_records = [record for record in item_records if record["kit_id"].startswith("legal_")]
+    assert all(record["throwable_item_id"] in balance.game.COMBAT_THROWABLE_IDS for record in legal_records)
+    assert {record["throwable_policy"] for record in legal_records} == {"opening_pair", "finisher_only"}
+    assert all(record["items_used"] <= 6 for record in legal_records)
+    core_regions = {"fire", "ice", "earth", "thunder"}
+    for record in legal_records:
+        if record["region"] not in core_regions:
+            continue
+        if record["kit_id"] == "legal_element_counter_pair":
+            assert record["throwable_relation"] == "counter"
+        elif record["kit_id"] == "legal_element_disadvantage_pair":
+            assert record["throwable_relation"] == "disadvantage"
+        elif record["kit_id"] == "legal_element_neutral_pair":
+            assert record["throwable_relation"] == "neutral"
+
+    support_records = [record for record in records if record["scenario_kind"] == "support"]
+    assert len(support_records) == 480
+    pairs = Counter(record["comparison_id"] for record in support_records)
+    assert all(count == 2 for count in pairs.values())
+    for comparison_id in pairs:
+        variants = {record["variant"] for record in support_records if record["comparison_id"] == comparison_id}
+        assert variants == {"control", "support"}
+    assert all(record["support_casts"] == 0 for record in support_records if record["variant"] == "control")
+    assert all(record["support_casts"] >= 1 for record in support_records if record["variant"] == "support")
+    assert {record["cast_timing"] for record in support_records} == set(balance.PHASE0_SUPPORT_CAST_TIMINGS)
+    assert all(record["displaced_action"] for record in support_records if record["variant"] == "support")
+    assert all(not record["displaced_action"] for record in support_records if record["variant"] == "control")
+    assert all(record["support_active_turns"] >= record["active_followup_actions"] for record in support_records)
+
+    passive_records = [record for record in records if record["scenario_kind"] == "passive"]
+    assert len(passive_records) == 420
+    passive_pairs = Counter(record["comparison_id"] for record in passive_records)
+    assert all(count == 2 for count in passive_pairs.values())
+    assert {record["variant"] for record in passive_records} == {"control", "passive"}
+    assert all(record["support_casts"] == 0 and record["maintenance_policy"] == "not_applicable" for record in passive_records)
+    assert all(record["passive_proc_count"] == 0 for record in passive_records if record["variant"] == "control")
+    assert all(record["passive_proc_count"] >= 0 for record in passive_records if record["variant"] == "passive")
+
+    csv_rows = list(csv.DictReader(io.StringIO(balance.render_phase0_records(records, "csv"))))
+    json_rows = json.loads(balance.render_phase0_records(records, "json"))
+    assert len(csv_rows) == len(json_rows) == len(records)
+    assert list(csv_rows[0]) == list(balance.PHASE0_RECORD_FIELDS)
+    _assert_globals_unchanged(before)
+    assert random.getstate() == rng_before
+
+
+def _assert_cinder_survival_overlay() -> None:
+    before = _global_snapshots()
+    rng_before = random.getstate()
+    records = balance.build_cinder_survival_records(balance.DEFAULT_SEEDS)
+    expected = len(balance.PHASE0_SUPPORTS["skill_cinder_mark"]["regions"]) * len(balance.CINDER_SURVIVAL_TARGETS) * len(balance.DEFAULT_SEEDS) * 2 * 2
+    assert len(records) == expected == 320
+    assert all(record["survival_overlay"] == "true" for record in records)
+    assert all(int(record["survival_target_actions"]) in balance.CINDER_SURVIVAL_TARGETS for record in records)
+    assert all(record["enemy_hp_remaining"] > 0 for record in records)
+    pairs = Counter(record["comparison_id"] for record in records)
+    assert all(count == 2 for count in pairs.values())
+    assert all(record["action_target_met"] in {"true", "false"} for record in records)
+    for comparison_id in pairs:
+        pair = [record for record in records if record["comparison_id"] == comparison_id]
+        assert {record["variant"] for record in pair} == {"control", "support"}
+        assert len({record["seed"] for record in pair}) == 1
+        assert len({record["kit_id"] for record in pair}) == 1
+        assert len({record["supply_profile"] for record in pair}) == 1
+        assert len({record["throwable_item_id"] for record in pair}) == 1
+        assert len({record["throwable_policy"] for record in pair}) == 1
+
+    no_item = [record for record in records if record["supply_profile"] == "no_item"]
+    legal_supply = [record for record in records if record["supply_profile"] == "legal_supply"]
+    assert len(no_item) == len(legal_supply) == expected // 2
+    assert all(record["kit_id"] == "no_item" for record in no_item)
+    assert all(record["items_used"] == record["hp_items_used"] == record["mp_items_used"] == record["throwables_used"] == 0 for record in no_item)
+    assert all(record["item_hp_restored"] == record["item_mp_restored"] == record["throwable_damage"] == 0 for record in no_item)
+    assert all(record["kit_id"] == "legal_element_counter_finisher" for record in legal_supply)
+    assert all(record["throwable_item_id"] in balance.game.COMBAT_THROWABLE_IDS for record in legal_supply)
+    assert all(record["throwable_policy"] == "finisher_only" for record in legal_supply)
+    assert all(record["throwable_relation"] == "counter" for record in legal_supply if record["region"] in {"ice", "earth", "thunder"})
+    assert all(record["throwable_relation"] == "neutral" for record in legal_supply if record["region"] == "final")
+    assert all(0 <= record["hp_items_used"] <= 2 and 0 <= record["mp_items_used"] <= 1 and 0 <= record["throwables_used"] <= 2 for record in legal_supply)
+    assert all(record["items_used"] == record["hp_items_used"] + record["mp_items_used"] + record["throwables_used"] for record in legal_supply)
+    assert all(record["item_hp_restored"] >= 0 and record["item_mp_restored"] >= 0 and record["throwable_damage"] >= 0 for record in legal_supply)
+    _assert_globals_unchanged(before)
+    assert random.getstate() == rng_before
+
+
+def _assert_tactical_strategy_measurement() -> None:
+    """Fixed tactics stay a separate diagnostic and never become runtime AI."""
+    before = _global_snapshots()
+    rng_before = random.getstate()
+    records = balance.build_tactical_strategy_records(balance.DEFAULT_SEEDS)
+    expected = len(balance.TACTICAL_STRATEGY_KITS) * len(balance.REGIONS) * len(balance.JOBS) * len(balance.DEFAULT_SEEDS)
+    assert len(records) == expected == 300
+    assert len({record["scenario_id"] for record in records}) == len(records)
+    assert all(set(record) == set(balance.TACTICAL_STRATEGY_FIELDS) for record in records)
+    assert all(record["strategy_version"] == balance.TACTICAL_STRATEGY_VERSION for record in records)
+    assert all(record["result"] in {"victory", "player_death", "timeout"} for record in records)
+    comparisons = Counter(record["comparison_id"] for record in records)
+    assert all(count == 3 for count in comparisons.values())
+    for comparison_id in comparisons:
+        variants = {record["kit_id"] for record in records if record["comparison_id"] == comparison_id}
+        assert variants == set(balance.TACTICAL_STRATEGY_KITS)
+    assert all(not record["throwable_item_id"] for record in records if record["kit_id"] == "no_throwable")
+    existing = [record for record in records if record["kit_id"] == "existing_throwable"]
+    assert all(record["throwable_item_id"] in balance.game.COMBAT_THROWABLE_IDS for record in existing)
+    tactical = [record for record in records if record["kit_id"] == "tactical_throwable"]
+    mage_tactical = [record for record in tactical if record["job"] == "mage"]
+    assert len(mage_tactical) == len(balance.REGIONS) * len(balance.DEFAULT_SEEDS)
+    assert all(record["tactical_status"] == "not_applicable" and not record["throwable_item_id"] for record in mage_tactical)
+    available = [record for record in tactical if record["job"] != "mage"]
+    assert all(record["tactical_status"] == "available" for record in available)
+    assert all(record["throwable_item_id"] == "item_sanctified_ash_vial" for record in available if record["job"] == "cleric")
+    assert all(record["throwable_item_id"] == "item_rending_spike" for record in available if record["job"] in {"warrior", "rogue"})
+    assert all(0 <= record["five_turn_window_turns"] <= 5 for record in records)
+    assert all(record["five_turn_damage_delta_vs_no"] == 0 for record in records if record["kit_id"] == "no_throwable")
+    assert all(record["five_turn_player_hp_delta_vs_no"] == 0 for record in records if record["kit_id"] == "no_throwable")
+    assert all(record["five_turn_player_mp_delta_vs_no"] == 0 for record in records if record["kit_id"] == "no_throwable")
+    cleric_tactical = [record for record in available if record["job"] == "cleric"]
+    assert all(record["cleric_dot_active_turns"] > 0 and record["sanctified_erosion_active_turns"] > 0 for record in cleric_tactical)
+    assert all(
+        abs(record["normal_action_share"] + record["skill_action_share"] + record["item_action_share"] - 1.0) <= 0.000002
+        for record in records
+    )
+    csv_rows = list(csv.DictReader(io.StringIO(balance.render_tactical_strategy_records(records, "csv"))))
+    json_rows = json.loads(balance.render_tactical_strategy_records(records, "json"))
+    assert len(csv_rows) == len(json_rows) == len(records)
+    assert list(csv_rows[0]) == list(balance.TACTICAL_STRATEGY_FIELDS)
+    first = balance.render_tactical_strategy_records(records, "json")
+    second = balance.render_tactical_strategy_records(balance.build_tactical_strategy_records(balance.DEFAULT_SEEDS), "json")
+    assert first == second
+    _assert_globals_unchanged(before)
+    assert random.getstate() == rng_before
+
+
+def _assert_value_model_audit() -> None:
+    """The audit reports the single-application defense semantics."""
+    before = _global_snapshots()
+    rng_before = random.getstate()
+    records = balance.build_value_model_records()
+    expected_defense = len(balance.REGIONS) * len(balance.JOBS) * 2
+    expected_resist = sum(
+        1
+        for region in balance.REGIONS.values()
+        if balance.game.normalized_element(balance.MONSTERS[region["boss"]].get("element", "")) in balance.game.ELEMENT_RESIST_KEYS
+    ) * len(balance.JOBS)
+    assert len(records) == expected_defense + expected_resist + len(balance.SKILLS)
+    assert all(set(record) == set(balance.VALUE_MODEL_FIELDS) for record in records)
+    assert all(record["audit_version"] == balance.VALUE_MODEL_VERSION for record in records)
+
+    defense = [record for record in records if record["record_kind"] == "defense" and record["effect_kind"] == "physical_defense"]
+    assert len(defense) == expected_defense
+    assert all(record["baseline_damage"] >= 1 and record["observed_damage"] >= 1 for record in defense)
+    assert all(record["hits_to_defeat"] >= 1 and record["ehp_multiplier"] > 0 for record in defense)
+    assert all(record["damage_delta"] == 0 for record in defense)
+    final_warrior_up = next(
+        record for record in defense
+        if record["region"] == "final" and record["job"] == "warrior" and record["effect_id"] == "defense_up"
+    )
+    assert final_warrior_up["baseline_damage"] == 43
+    assert final_warrior_up["single_pass_damage"] == final_warrior_up["observed_damage"] == 15
+
+    skills = [record for record in records if record["record_kind"] == "skill"]
+    assert len(skills) == len(balance.SKILLS)
+    assert all(record["player_action_cost"] == 1 and record["mp_cost"] >= 0 for record in skills)
+    assert all(record["timing"] in {"player_before_enemy", "post_enemy_tick"} for record in skills)
+
+    csv_rows = list(csv.DictReader(io.StringIO(balance.render_value_model_records(records, "csv"))))
+    json_rows = json.loads(balance.render_value_model_records(records, "json"))
+    assert len(csv_rows) == len(json_rows) == len(records)
+    assert list(csv_rows[0]) == list(balance.VALUE_MODEL_FIELDS)
+    _assert_globals_unchanged(before)
+    assert random.getstate() == rng_before
+
+
 def main() -> None:
     balance.check_runtime_contracts()
     before = _global_snapshots()
@@ -469,6 +665,10 @@ def main() -> None:
     _assert_item_adapter_parity()
     _assert_audit_categories()
     _assert_quality_affix_semantics()
+    _assert_phase0_measurement()
+    _assert_cinder_survival_overlay()
+    _assert_tactical_strategy_measurement()
+    _assert_value_model_audit()
     print("Balance Architecture v2 measurement-semantics checks ok (no balance verdict).")
 
 

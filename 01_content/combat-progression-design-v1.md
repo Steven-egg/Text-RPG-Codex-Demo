@@ -77,6 +77,12 @@ Monsters need one mandatory race tag: `beast`, `humanoid`, `plant`,
 | spirit | ineffective | ineffective |
 | aberration | normal | effective |
 
+`effective` Bleed and Poison ticks deal `1.25x` damage; `normal` deals `1.0x`;
+`ineffective` remains unappliable (and therefore deals `0x`). This multiplier
+applies only to those two physical status ticks, before the existing relic
+damage-over-time bonus. It does not affect Rending Wound, Sanctified Erosion,
+Cleric magic damage-over-time, direct hits, or status application chance.
+
 - Bleeding lasts three turns; poison lasts five turns.
 - Both use a separate status-damage path that ignores physical defense.
 - An ineffective status cannot be applied. Existing effect accuracy and the

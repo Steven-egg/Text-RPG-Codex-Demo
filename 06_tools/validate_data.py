@@ -53,8 +53,9 @@ except Exception as exc:  # pragma: no cover - protects CLI diagnostics.
 
 VALID_SLOTS = {"weapon", "head", "body", "accessory", "special"}
 VALID_ITEM_KINDS = {"consumable", "special", "battle"}
-VALID_SKILL_KINDS = {"damage", "heal", "buff", "debuff", "dot", "regen"}
+VALID_SKILL_KINDS = {"damage", "heal", "buff", "debuff", "dot", "regen", "passive"}
 VALID_DAMAGE_STATS = {"attack", "magic"}
+VALID_BUFF_STAT_KEYS = {"crit"}
 VALID_EQUIPMENT_STATS = {
     "attack",
     "magic_attack",
@@ -71,6 +72,9 @@ VALID_EQUIPMENT_STATS = {
     "rare_drop",
 }
 VALID_EFFECT_KEYS = {"defense_up", "defense_down", "quickstep", "cinder_mark", "burn", "bleed", "poison", "regeneration"}
+VALID_PASSIVE_EVENTS = {"physical_charge_reaches", "physical_status_applied"}
+VALID_PASSIVE_EFFECT_KINDS = {"charge_skill_bonus", "extra_normal_followup"}
+VALID_DAMAGE_SCOPES = {"elemental_magic"}
 VALID_PROMOTION_STATUSES = {"preview"}
 VALID_PROMOTION_REQUIREMENT_KINDS = {"level", "unlock", "quest", "flag", "item"}
 VALID_JOB_SPECIALIZATION_STATUSES = {"preview"}
@@ -95,6 +99,8 @@ VALID_RELIC_PASSIVE_EFFECTS = {
 VALID_REGIONS = {"border_fire", "ice", "earth", "thunder", "final"}
 VALID_MONSTER_RACES = {"beast", "humanoid", "plant", "construct", "spirit", "aberration"}
 VALID_FOLLOWUP_DAMAGE_TYPES = {"physical"}
+VALID_BATTLE_DAMAGE_TYPES = {"physical", "elemental", "fixed"}
+VALID_BATTLE_ELEMENTS = {"fire", "ice", "earth", "thunder"}
 
 
 def error(errors: list[str], path: str, message: str) -> None:
@@ -351,6 +357,41 @@ def check_items(errors: list[str]) -> None:
         region = item.get("region")
         if region and region not in VALID_REGIONS:
             error(errors, f"ITEMS.{item_id}.region", f"uses unsupported region: {region}")
+        battle_effect = item.get("battle_effect")
+        if item.get("kind") == "battle":
+            if not isinstance(battle_effect, dict):
+                error(errors, f"ITEMS.{item_id}.battle_effect", "battle item must define an effect object")
+                continue
+            damage_type = battle_effect.get("damage_type")
+            if damage_type not in VALID_BATTLE_DAMAGE_TYPES:
+                error(errors, f"ITEMS.{item_id}.battle_effect.damage_type", "uses unsupported damage type")
+            if not isinstance(battle_effect.get("power"), int) or battle_effect["power"] <= 0:
+                error(errors, f"ITEMS.{item_id}.battle_effect.power", "must be a positive int")
+            if damage_type == "elemental" and battle_effect.get("element") not in VALID_BATTLE_ELEMENTS:
+                error(errors, f"ITEMS.{item_id}.battle_effect.element", "must be a core element")
+            if damage_type == "physical" and battle_effect.get("element") is not None:
+                error(errors, f"ITEMS.{item_id}.battle_effect.element", "physical battle items cannot declare an element")
+            if damage_type == "fixed" and battle_effect.get("element") is not None:
+                error(errors, f"ITEMS.{item_id}.battle_effect.element", "fixed battle items cannot declare an element")
+            turns = battle_effect.get("defense_down_turns", 0)
+            if not isinstance(turns, int) or turns < 0:
+                error(errors, f"ITEMS.{item_id}.battle_effect.defense_down_turns", "must be a non-negative int")
+            jobs = item.get("jobs")
+            if jobs is not None and (not isinstance(jobs, list) or not jobs or any(job_id not in JOBS for job_id in jobs)):
+                error(errors, f"ITEMS.{item_id}.jobs", "must be a non-empty list of known job ids")
+            dot = battle_effect.get("dot")
+            if dot is not None:
+                if not isinstance(dot, dict):
+                    error(errors, f"ITEMS.{item_id}.battle_effect.dot", "must be an object")
+                elif (
+                    not isinstance(dot.get("status"), str) or not dot["status"].strip()
+                    or not isinstance(dot.get("duration"), int) or dot["duration"] <= 0
+                    or not isinstance(dot.get("power"), int) or dot["power"] <= 0
+                    or dot.get("damage_type") != "fixed"
+                ):
+                    error(errors, f"ITEMS.{item_id}.battle_effect.dot", "must define a fixed status, positive duration, and positive power")
+        elif battle_effect is not None:
+            error(errors, f"ITEMS.{item_id}.battle_effect", "only battle items may define an effect")
 
 
 def check_equipment(errors: list[str]) -> None:
@@ -439,16 +480,66 @@ def check_skills(errors: list[str]) -> None:
             require_keys(errors, f"SKILLS.{skill_id}", skill, {"buff", "duration"})
             if skill.get("buff") not in VALID_EFFECT_KEYS:
                 error(errors, f"SKILLS.{skill_id}.buff", f"uses unsupported effect key: {skill.get('buff')}")
+            buff_stats = skill.get("buff_stats")
+            if buff_stats is not None:
+                if not isinstance(buff_stats, dict) or not buff_stats:
+                    error(errors, f"SKILLS.{skill_id}.buff_stats", "must be a non-empty stat dict")
+                else:
+                    for stat_key, value in buff_stats.items():
+                        if stat_key not in VALID_BUFF_STAT_KEYS or not is_non_negative_int(value):
+                            error(errors, f"SKILLS.{skill_id}.buff_stats.{stat_key}", "must be a non-negative supported buff stat")
         elif kind == "debuff":
             require_keys(errors, f"SKILLS.{skill_id}", skill, {"debuff", "duration"})
             if skill.get("debuff") not in VALID_EFFECT_KEYS:
                 error(errors, f"SKILLS.{skill_id}.debuff", f"uses unsupported effect key: {skill.get('debuff')}")
+            damage_percent = skill.get("damage_percent")
+            if damage_percent is not None and (not is_non_negative_int(damage_percent) or damage_percent <= 0 or damage_percent > 100):
+                error(errors, f"SKILLS.{skill_id}.damage_percent", "must be an int from 1 to 100")
+            if damage_percent is not None and skill.get("damage_scope") not in VALID_DAMAGE_SCOPES:
+                error(errors, f"SKILLS.{skill_id}.damage_scope", "uses unsupported damage scope")
         elif kind == "dot":
             require_keys(errors, f"SKILLS.{skill_id}", skill, {"stat", "element", "duration", "multiplier"})
             if skill.get("stat") != "magic":
                 error(errors, f"SKILLS.{skill_id}.stat", "magic dot must use magic stat")
         elif kind == "regen":
             require_keys(errors, f"SKILLS.{skill_id}", skill, {"duration", "amount", "multiplier"})
+        elif kind == "passive":
+            triggers = skill.get("passive_triggers")
+            if skill.get("mp") != 0:
+                error(errors, f"SKILLS.{skill_id}.mp", "passive skills must cost 0 MP")
+            if not isinstance(triggers, list) or not triggers:
+                error(errors, f"SKILLS.{skill_id}.passive_triggers", "must be a non-empty list")
+                continue
+            for index, trigger in enumerate(triggers):
+                path = f"SKILLS.{skill_id}.passive_triggers[{index}]"
+                if not isinstance(trigger, dict):
+                    error(errors, path, "must be a mapping")
+                    continue
+                require_keys(errors, path, trigger, {"job", "event", "requires", "effect"})
+                if trigger.get("job") not in JOBS:
+                    error(errors, f"{path}.job", "references missing job_id")
+                if trigger.get("event") not in VALID_PASSIVE_EVENTS:
+                    error(errors, f"{path}.event", "uses unsupported passive event")
+                requires = trigger.get("requires")
+                if not isinstance(requires, dict):
+                    error(errors, f"{path}.requires", "must be a mapping")
+                elif trigger.get("event") == "physical_charge_reaches" and requires.get("stacks") != 3:
+                    error(errors, f"{path}.requires.stacks", "must be 3 for physical_charge_reaches")
+                elif trigger.get("event") == "physical_status_applied" and set(requires.get("statuses", [])) - {"bleed", "poison"}:
+                    error(errors, f"{path}.requires.statuses", "supports only bleed and poison")
+                effect = trigger.get("effect")
+                if not isinstance(effect, dict) or effect.get("kind") not in VALID_PASSIVE_EFFECT_KINDS:
+                    error(errors, f"{path}.effect", "uses unsupported passive effect")
+                    continue
+                if not isinstance(effect.get("state_key"), str) or not effect["state_key"]:
+                    error(errors, f"{path}.effect.state_key", "must be a non-empty string")
+                if effect["kind"] == "charge_skill_bonus" and (not is_non_negative_int(effect.get("damage_percent")) or effect.get("damage_percent") <= 0):
+                    error(errors, f"{path}.effect.damage_percent", "must be a positive int")
+                if effect["kind"] == "extra_normal_followup" and (effect.get("uses") != 1 or not isinstance(effect.get("followup_multiplier"), (int, float)) or effect.get("followup_multiplier") <= 0):
+                    error(errors, f"{path}.effect", "requires uses=1 and a positive followup_multiplier")
+                group = trigger.get("replacement_group")
+                if group is not None and (not isinstance(group, str) or not group or not is_non_negative_int(trigger.get("priority"))):
+                    error(errors, path, "replacement_group requires a non-negative priority")
 
 
 def check_magic_books(errors: list[str]) -> None:

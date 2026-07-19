@@ -2,6 +2,7 @@ from __future__ import annotations
 
 """Focused deterministic checks for Combat Progression v1 foundation."""
 
+import math
 import random
 import sys
 from copy import deepcopy
@@ -19,10 +20,16 @@ from engine.game import (  # noqa: E402
     MAX_PHYSICAL_CHARGE,
     apply_dot,
     apply_weapon_effect,
+    calc_player_damage,
+    element_multiplier,
+    get_stats,
     normal_attack_followup,
+    passive_triggers_for_event,
     physical_charge,
+    physical_status_damage_multiplier,
     physical_status_effectiveness,
     player_attack,
+    skill_menu,
     tick_effects,
 )
 from engine.state import create_state, ensure_state_defaults  # noqa: E402
@@ -52,8 +59,9 @@ def test_ineffective_status_skips_accuracy_roll() -> None:
     enemy = deepcopy(MONSTERS["mon_cracked_golem"])
     effect = SKILLS["skill_backstab"]["on_hit"]
     with patch("engine.game.random.randint", side_effect=AssertionError("accuracy roll must not run")):
-        events = apply_weapon_effect(state, enemy, effect, {})
+        events, applied_status = apply_weapon_effect(state, enemy, effect, {})
     assert events
+    assert applied_status is None
 
 
 def count_ticks(state: dict, enemy: dict, status: str, duration: int, multiplier: float) -> tuple[int, list[int]]:
@@ -81,6 +89,39 @@ def test_status_durations_and_defense_bypass() -> None:
     assert bleed_count == 3
     assert poison_count == 5
     assert low_ticks == high_ticks
+
+
+def test_physical_status_race_damage_multipliers() -> None:
+    state = create_state("Foundation Tester", "盜賊")
+    base_enemy = deepcopy(MONSTERS["mon_moss_rat"])
+    base_enemy["defense"] = 999_999
+    bleed = SKILLS["skill_backstab"]["on_hit"]
+    poison = SKILLS["skill_toxic_edge"]["on_hit"]
+    stats = get_stats(state)
+
+    cases = (
+        ("bleed", bleed, "beast", "aberration", "plant"),
+        ("poison", poison, "plant", "beast", "construct"),
+    )
+    for status, effect, effective_race, normal_race, ineffective_race in cases:
+        effective_enemy = deepcopy(base_enemy)
+        effective_enemy["race"] = effective_race
+        normal_enemy = deepcopy(base_enemy)
+        normal_enemy["race"] = normal_race
+        ineffective_enemy = deepcopy(base_enemy)
+        ineffective_enemy["race"] = ineffective_race
+
+        assert physical_status_damage_multiplier(effective_enemy, status) == 1.25
+        assert physical_status_damage_multiplier(normal_enemy, status) == 1.0
+        assert physical_status_damage_multiplier(ineffective_enemy, status) == 0.0
+
+        _, effective_ticks = count_ticks(state, effective_enemy, status, effect["duration"], effect["multiplier"])
+        _, normal_ticks = count_ticks(state, normal_enemy, status, effect["duration"], effect["multiplier"])
+        ineffective_count, ineffective_ticks = count_ticks(state, ineffective_enemy, status, effect["duration"], effect["multiplier"])
+        assert effective_ticks[0] == math.ceil(stats["attack"] * effect["multiplier"] * 1.25)
+        assert normal_ticks[0] == math.ceil(stats["attack"] * effect["multiplier"])
+        assert ineffective_count == 0
+        assert not any(ineffective_ticks)
 
 
 def test_physical_charge() -> None:
@@ -156,13 +197,80 @@ def test_removed_guardian_skills_are_filtered_from_legacy_state() -> None:
     assert all(skill_id in SKILLS for skill_id in state["learned_skills"])
 
 
+def test_passive_quickstep_charge_and_menu_filter() -> None:
+    warrior = create_state("Foundation Tester", "劍士")
+    warrior["learned_skills"] = ["skill_quickstep", "skill_final_05"]
+    enemy = deepcopy(MONSTERS["mon_moss_rat"])
+    enemy["hp"] = 999_999
+    player_buffs: dict = {}
+    for _ in range(3):
+        player_attack(warrior, enemy, enemy["hp"], None, player_buffs, {})
+    assert player_buffs["_warrior_quickstep_ready"]["damage_percent"] == 25
+    assert skill_menu({**warrior, "learned_skills": ["skill_quickstep"]}, enemy, {}, {}).outcome == "cancel"
+    random.seed(20260719)
+    prepared = player_attack(warrior, enemy, enemy["hp"], SKILLS["skill_final_05"], player_buffs, {})
+    assert physical_charge(player_buffs) == 0
+    assert "_warrior_quickstep_ready" not in player_buffs
+    baseline_buffs = {"_physical_charge": 3}
+    random.seed(20260719)
+    baseline = player_attack(warrior, enemy, enemy["hp"], SKILLS["skill_final_05"], baseline_buffs, {})
+    assert prepared.damage > baseline.damage
+
+
+def test_rogue_passive_pursuit_and_froststep_replacement() -> None:
+    rogue = create_state("Foundation Tester", "盜賊")
+    rogue["learned_skills"] = ["skill_quickstep", "skill_ice_05", "skill_backstab"]
+    rogue["equipment"]["head"] = "armor_ice_rogue_sleeve_blade"
+    triggers = passive_triggers_for_event(rogue, "physical_status_applied", status="bleed")
+    assert len(triggers) == 1 and triggers[0]["skill_id"] == "skill_ice_05"
+    enemy = deepcopy(MONSTERS["mon_moss_rat"])
+    enemy["hp"] = 999_999
+    player_buffs: dict = {}
+    enemy_buffs: dict = {}
+    with patch("engine.game.random.randint", return_value=1):
+        player_attack(rogue, enemy, enemy["hp"], SKILLS["skill_backstab"], player_buffs, enemy_buffs)
+        assert player_buffs["_rogue_pursuit"]["skill_id"] == "skill_ice_05"
+        result = player_attack(rogue, enemy, enemy["hp"], None, player_buffs, enemy_buffs)
+    assert any("霜速術追擊發動" in event for event in result.events)
+    # The consumed window may be freshly re-armed only by this normal attack's
+    # separate, successful sleeve-blade status application.
+    assert player_buffs["_rogue_pursuit"]["skill_id"] == "skill_ice_05"
+
+
+def test_cinder_mark_data_expires_without_overlap() -> None:
+    mage = create_state("Foundation Tester", "法師")
+    mage["learned_skills"] = ["skill_cinder_mark"]
+    enemy = {"name": "Test Enemy", "element": "Ice", "defense": 1, "magic_defense": 1}
+    enemy_buffs: dict = {}
+    base_fire, _ = calc_player_damage(mage, enemy, SKILLS["skill_spark"], {}, enemy_buffs)
+    base_ice, _ = calc_player_damage(mage, enemy, SKILLS["skill_ice_needle"], {}, enemy_buffs)
+    base_multiplier = element_multiplier("fire", "ice", enemy_buffs)
+    with patch("engine.game.action_menu_panel", return_value=1):
+        skill_menu(mage, enemy, {}, enemy_buffs)
+    assert enemy_buffs["cinder_mark"] == 5
+    assert enemy_buffs["_debuff_data"]["cinder_mark"] == {"damage_percent": 20, "damage_scope": "elemental_magic"}
+    assert element_multiplier("fire", "ice", enemy_buffs) == base_multiplier
+    marked_fire, _ = calc_player_damage(mage, enemy, SKILLS["skill_spark"], {}, enemy_buffs)
+    marked_ice, _ = calc_player_damage(mage, enemy, SKILLS["skill_ice_needle"], {}, enemy_buffs)
+    assert marked_fire > base_fire and marked_ice > base_ice
+    for _ in range(5):
+        tick_effects(mage, {}, enemy_buffs)
+    assert "cinder_mark" not in enemy_buffs
+    assert "cinder_mark" not in enemy_buffs.get("_debuff_data", {})
+    assert element_multiplier("fire", "ice", enemy_buffs) == base_multiplier
+
+
 def main() -> None:
     test_race_contract()
     test_ineffective_status_skips_accuracy_roll()
     test_status_durations_and_defense_bypass()
+    test_physical_status_race_damage_multipliers()
     test_physical_charge()
     test_data_driven_rogue_pseudo_offhands()
     test_removed_guardian_skills_are_filtered_from_legacy_state()
+    test_passive_quickstep_charge_and_menu_filter()
+    test_rogue_passive_pursuit_and_froststep_replacement()
+    test_cinder_mark_data_expires_without_overlap()
     print("combat progression foundation checks ok")
 
 

@@ -7,12 +7,27 @@ from data import (
     MONSTERS,
     DUNGEONS,
     EQUIPMENT,
+    ITEMS,
     QUESTS,
     REGIONS,
     RELICS,
     SKILLS,
     get_unlocked_regions,
 )
+
+RUN_SUPPLY_CAPS = {"sustain_hp": 3, "emergency_hp": 1, "throwable": 2, "escape": 1}
+RUN_SUPPLY_SUSTAIN_HP_ITEMS = {"item_potion_s", "item_potion_m"}
+RUN_SUPPLY_EMERGENCY_HP_ITEMS = RUN_SUPPLY_SUSTAIN_HP_ITEMS | {
+    "item_ice_potion_01", "item_earth_potion_01", "item_thunder_potion_01", "item_final_potion_01",
+}
+RUN_SUPPLY_MP_ITEMS = {
+    "item_focus_drop", "item_ice_potion_02", "item_earth_potion_02", "item_thunder_potion_02", "item_final_potion_02",
+}
+RUN_SUPPLY_THROW_ITEMS = {
+    "item_armor_piercer", "item_throw_fire", "item_throw_ice", "item_throw_earth", "item_throw_thunder",
+    "item_sanctified_ash_vial", "item_rending_spike",
+}
+RUN_SUPPLY_ESCAPE_ITEM = "item_escape_scroll"
 
 ICE_REGION_UNLOCK = "unlock_ice_region"
 ICE_PHASE_2_DUNGEON_ID = "dungeon_ice_main_phase_2"
@@ -120,7 +135,83 @@ def ensure_state_defaults(state: dict) -> dict:
                 clean_bestiary.append(monster_id)
                 seen.add(monster_id)
         state["bestiary"] = clean_bestiary
+    if state.get("run_supplies") is not None and not isinstance(state.get("run_supplies"), dict):
+        state["run_supplies"] = None
     return state
+
+
+def run_supply_mp_cap(state: dict) -> int:
+    return 1 if state.get("job") in {"戰士", "盜賊"} else 2
+
+
+def item_job_allowed(state: dict, item_id: str) -> bool:
+    """Return whether an item is unrestricted or legal for the current job."""
+    jobs = ITEMS.get(item_id, {}).get("jobs")
+    return not jobs or state.get("job") in jobs
+
+
+def configure_run_supplies(state: dict, selections: dict) -> dict:
+    """Validate and activate one expedition's five supply groups.
+
+    Items stay in the general inventory until consumed; this only records the
+    legal per-run quantity, so unused supplies need no return operation.
+    """
+    if not isinstance(selections, dict):
+        raise ValueError("補給配置必須是物件。")
+    specs = {
+        "sustain_hp": (RUN_SUPPLY_SUSTAIN_HP_ITEMS, RUN_SUPPLY_CAPS["sustain_hp"]),
+        "emergency_hp": (RUN_SUPPLY_EMERGENCY_HP_ITEMS, RUN_SUPPLY_CAPS["emergency_hp"]),
+        "mp": (RUN_SUPPLY_MP_ITEMS, run_supply_mp_cap(state)),
+        "throwable": (RUN_SUPPLY_THROW_ITEMS, RUN_SUPPLY_CAPS["throwable"]),
+        "escape": ({RUN_SUPPLY_ESCAPE_ITEM}, RUN_SUPPLY_CAPS["escape"]),
+    }
+    normalized: dict[str, dict[str, int | str | None]] = {}
+    requested: dict[str, int] = {}
+    for slot, (allowed, cap) in specs.items():
+        raw = selections.get(slot) or {}
+        item_id = raw.get("item_id") if isinstance(raw, dict) else None
+        quantity = raw.get("quantity", 0) if isinstance(raw, dict) else 0
+        if item_id in (None, ""):
+            item_id, quantity = None, 0
+        if item_id and not item_job_allowed(state, item_id):
+            raise ValueError("Item is not compatible with the current job.")
+        if item_id not in allowed and item_id is not None:
+            raise ValueError(f"{slot} 不可放入此道具。")
+        if isinstance(quantity, bool) or not isinstance(quantity, int) or quantity < 0 or quantity > cap:
+            raise ValueError(f"{slot} 的數量超出限制。")
+        if quantity and not item_id:
+            raise ValueError(f"{slot} 必須先選擇道具。")
+        normalized[slot] = {"item_id": item_id, "quantity": quantity}
+        if item_id:
+            requested[item_id] = requested.get(item_id, 0) + quantity
+    for item_id, quantity in requested.items():
+        if quantity > state.get("inventory", {}).get(item_id, 0):
+            raise ValueError(f"{ITEMS[item_id]['name']} 數量不足。")
+    state["run_supplies"] = normalized
+    return normalized
+
+
+def run_supply_item_quantity(state: dict, item_id: str) -> int:
+    supplies = state.get("run_supplies")
+    if supplies is None:  # Direct combat tools retain their legacy fixture behavior.
+        return state.get("inventory", {}).get(item_id, 0)
+    return sum(
+        int(slot.get("quantity", 0))
+        for slot in supplies.values()
+        if isinstance(slot, dict) and slot.get("item_id") == item_id
+    )
+
+
+def consume_run_supply_item(state: dict, item_id: str) -> bool:
+    if run_supply_item_quantity(state, item_id) <= 0 or not remove_item(state, item_id, 1):
+        return False
+    supplies = state.get("run_supplies")
+    if isinstance(supplies, dict):
+        for slot in supplies.values():
+            if isinstance(slot, dict) and slot.get("item_id") == item_id and slot.get("quantity", 0) > 0:
+                slot["quantity"] -= 1
+                break
+    return True
 
 
 def add_item(state: dict, item_id: str, qty: int = 1) -> None:
@@ -281,6 +372,11 @@ def get_stats(state: dict, buffs: dict | None = None) -> dict:
             stats["defense"] = max(1, math.floor(stats["defense"] * 0.8))
         if buffs.get("quickstep", 0) > 0:
             stats["agility"] = math.ceil(stats["agility"] * 1.25)
+        for buff_key, bonuses in buffs.get("_buff_stat_data", {}).items():
+            if buffs.get(buff_key, 0) <= 0:
+                continue
+            for stat_key, value in bonuses.items():
+                stats[stat_key] = stats.get(stat_key, 0) + value
 
     for key, effect_key in (("max_hp", "max_hp_percent"), ("max_mp", "max_mp_percent"), ("magic_defense", "magic_defense_percent")):
         percent = relic_effects.get(effect_key, 0)

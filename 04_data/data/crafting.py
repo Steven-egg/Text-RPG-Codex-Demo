@@ -54,6 +54,30 @@ RECIPES = {
         "unlock": "recipe_piercing_bundle",
         "desc": "取得破甲釘 x3。",
     },
+    "recipe_fire_throwable": {
+        "name": "餘燼火瓶組",
+        "output": {"item_throw_fire": 2},
+        "materials": {"mat_fire_stone": 2, "mat_lava_shard": 1},
+        "gold": 140,
+        "unlock": "item_armor_piercer",
+        "desc": "取得餘燼火瓶 x2。",
+    },
+    "recipe_sanctified_ash_vial": {
+        "name": "聖蝕聖瓶組",
+        "output": {"item_sanctified_ash_vial": 2},
+        "materials": {"mat_fire_stone": 1, "mat_small_crystal": 2},
+        "gold": 130,
+        "unlock": "item_armor_piercer",
+        "desc": "取得聖蝕聖瓶 x2。",
+    },
+    "recipe_rending_spike": {
+        "name": "裂甲創釘組",
+        "output": {"item_rending_spike": 2},
+        "materials": {"mat_scorched_iron": 2, "mat_cracked_stone": 2},
+        "gold": 120,
+        "unlock": "item_armor_piercer",
+        "desc": "取得裂甲創釘 x2。",
+    },
     # === Ice Region Recipes ===
     "recipe_ice_battle_01": {
         "name": "海鹽回復劑組",
@@ -62,6 +86,15 @@ RECIPES = {
         "gold": 150,
         "unlock": "unlock_ice_region",
         "desc": "調配海鹽回復劑 x2。",
+        "region": "ice",
+    },
+    "recipe_ice_throwable": {
+        "name": "霜鹽爆瓶組",
+        "output": {"item_throw_ice": 2},
+        "materials": {"mat_ice_salt": 3, "mat_ice_blue_stone": 1},
+        "gold": 200,
+        "unlock": "unlock_ice_region",
+        "desc": "取得霜鹽爆瓶 x2。",
         "region": "ice",
     },
     "recipe_ice_accessory_01": {
@@ -125,6 +158,15 @@ RECIPES = {
         "desc": "調配翠苔軟膏 x2。",
         "region": "earth",
     },
+    "recipe_earth_throwable": {
+        "name": "根岩震釘組",
+        "output": {"item_throw_earth": 2},
+        "materials": {"mat_earth_moss_loam": 3, "mat_earth_rootfiber": 1},
+        "gold": 280,
+        "unlock": "unlock_earth_region_preview",
+        "desc": "取得根岩震釘 x2。",
+        "region": "earth",
+    },
     "recipe_earth_accessory_01": {
         "name": "琥珀護符",
         "output": {"acc_earth_accessory_01": 1},
@@ -184,6 +226,15 @@ RECIPES = {
         "gold": 300,
         "unlock": "unlock_thunder_region_preview",
         "desc": "調配雷光彈 x2。",
+        "region": "thunder",
+    },
+    "recipe_thunder_throwable": {
+        "name": "導雷震盪球組",
+        "output": {"item_throw_thunder": 2},
+        "materials": {"mat_thunder_charge_sand": 3, "mat_thunder_copper_vein": 1},
+        "gold": 390,
+        "unlock": "unlock_thunder_region_preview",
+        "desc": "取得導雷震盪球 x2。",
         "region": "thunder",
     },
     "recipe_thunder_accessory_01": {

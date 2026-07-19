@@ -440,8 +440,8 @@ def use_tool_item_adapter(state: dict, boss: bool, enemy_buffs: dict, enemy: dic
     """Thin non-interactive adapter over the live ``combat_item_menu`` behavior."""
     usable_ids = [
         candidate
-        for candidate in ("item_potion_s", "item_potion_m", "item_focus_drop", "item_herb_antidote", "item_armor_piercer", "item_escape_scroll")
-        if state["inventory"].get(candidate, 0) > 0
+        for candidate in game.COMBAT_ITEM_IDS
+        if game.combat_item_quantity(state, candidate) > 0
     ]
     if item_id not in usable_ids:
         raise ValueError(f"item adapter cannot select unavailable item: {item_id}")
@@ -908,18 +908,723 @@ def render_records(records: list[dict[str, Any]], output_format: str) -> str:
     return stream.getvalue()
 
 
+# Phase 0 is intentionally separate from B0..B6.  It reuses the live combat
+# helpers, but never changes the canonical baseline layers or runtime data.
+PHASE0_VERSION = "item-support-passive-measurement-v5"
+PHASE0_ITEM_KITS = {
+    "no_item": {"mode": "none"},
+    "legacy_b4_qa_kit": {"item_potion_m": 2, "item_focus_drop": 1, "item_armor_piercer": 1},
+    "legal_physical_pair": {"mode": "physical", "policy": "opening_pair"},
+    "legal_element_counter_pair": {"mode": "counter", "policy": "opening_pair"},
+    "legal_element_neutral_pair": {"mode": "neutral", "policy": "opening_pair"},
+    "legal_element_disadvantage_pair": {"mode": "disadvantage", "policy": "opening_pair"},
+    "legal_physical_finisher": {"mode": "physical", "policy": "finisher_only"},
+    "legal_element_counter_finisher": {"mode": "counter", "policy": "finisher_only"},
+    "legal_element_neutral_finisher": {"mode": "neutral", "policy": "finisher_only"},
+    "legal_element_disadvantage_finisher": {"mode": "disadvantage", "policy": "finisher_only"},
+}
+PHASE0_SUPPORTS = {
+    "skill_cinder_mark": {"jobs": ("mage",), "regions": ("ice", "earth", "thunder", "final"), "control": "canonical"},
+}
+PHASE0_PASSIVES = {
+    "skill_quickstep": {"jobs": ("warrior", "rogue"), "regions": tuple(REGIONS)},
+    "skill_ice_05": {"jobs": ("rogue",), "regions": ("ice", "earth", "thunder", "final")},
+}
+PHASE0_SUPPORT_CAST_TIMINGS = ("opening", "after_one_canonical_action")
+PHASE0_RECORD_FIELDS = (
+    "phase_version", "scenario_id", "comparison_id", "scenario_kind", "variant", "seed", "region", "benchmark_level", "job", "enemy_id", "throwable_item_id", "throwable_relation", "throwable_policy",
+    "kit_id", "supply_profile", "support_skill_id", "control_id", "window_actions", "maintenance_policy", "cast_timing", "displaced_action", "result", "player_actions", "enemy_actions",
+    "enemy_hp_remaining", "initial_hp", "final_hp", "initial_mp", "final_mp", "mp_spent", "direct_damage", "dot_damage", "item_damage",
+    "item_hp_restored", "item_mp_restored", "items_used", "hp_items_used", "mp_items_used", "throwables_used", "throwable_damage", "support_casts", "support_active_turns", "support_active_actions", "active_followup_actions", "active_followup_damage",
+    "passive_proc_count", "prepared_charge_skills", "pursuit_windows_armed", "pursuit_followups_used",
+    "survival_overlay", "survival_target_actions", "action_target_met",
+)
+CINDER_SURVIVAL_TARGETS = (6, 8, 10, 12)
+CINDER_SURVIVAL_HP_FLOOR = 100_000
+
+# Value-model audit is intentionally a separate stdout-only diagnostic.  It
+# does not assign a universal stat price; it records encounter-specific EHP
+# and action-cost inputs for later owner decisions.
+VALUE_MODEL_VERSION = "ehp-action-audit-v1"
+VALUE_MODEL_FIELDS = (
+    "audit_version", "record_kind", "region", "job", "enemy_id", "effect_id", "effect_kind",
+    "player_action_cost", "mp_cost", "timing", "duration", "initial_hp", "defense", "magic_defense",
+    "element_resist", "baseline_damage", "single_pass_damage", "observed_damage", "damage_delta",
+    "ehp_multiplier", "hits_to_defeat", "configured_multiplier", "observed_damage_ratio",
+)
+
+
+def _phase0_throwable_for(enemy: dict, mode: str) -> tuple[str | None, str]:
+    if mode == "none":
+        return None, "none"
+    if mode == "physical":
+        return "item_armor_piercer", "physical"
+    target = game.normalized_element(enemy.get("element", ""))
+    core = tuple(game.ELEMENT_COUNTERS)
+    if mode == "counter":
+        element = next((candidate for candidate in core if game.ELEMENT_COUNTERS[candidate] == target), None)
+    elif mode == "disadvantage":
+        element = game.ELEMENT_COUNTERS.get(target)
+    else:
+        element = next((candidate for candidate in core if game.element_multiplier(candidate, target) == 1.0), None)
+    if not element:
+        element = "fire"
+    relation = "counter" if game.element_multiplier(element, target) > 1 else "disadvantage" if game.element_multiplier(element, target) < 1 else "neutral"
+    return f"item_throw_{element}", relation
+
+
+def _phase0_state(job_key: str, region_id: str, kit_id: str) -> tuple[dict, dict, str | None, str, str]:
+    state, _loadout, _complete, _carry, _relics = _build_state(job_key, region_id, "full", True, False)
+    enemy = deepcopy(MONSTERS[REGIONS[region_id]["boss"]])
+    spec = PHASE0_ITEM_KITS[kit_id]
+    if kit_id == "legacy_b4_qa_kit":
+        state["inventory"] = dict(spec)
+        return state, enemy, "item_armor_piercer", "legacy", "opening_pair"
+    throwable_id, relation = _phase0_throwable_for(enemy, spec["mode"])
+    if throwable_id is None:
+        state["inventory"] = {}
+        return state, enemy, None, relation, "none"
+    state["inventory"] = {
+        "item_potion_m": 2, "item_focus_drop": 1, "item_herb_antidote": 1, throwable_id: 2,
+    }
+    game.configure_run_supplies(state, {
+        "sustain_hp": {"item_id": "item_potion_m", "quantity": 1},
+        "emergency_hp": {"item_id": "item_potion_m", "quantity": 1},
+        "mp": {"item_id": "item_focus_drop", "quantity": 1},
+        "throwable": {"item_id": throwable_id, "quantity": 2},
+    })
+    return state, enemy, throwable_id, relation, spec["policy"]
+
+
+def _phase0_canonical(job_key: str, region_id: str, enemy: dict, state: dict, player_buffs: dict, enemy_buffs: dict, turn: int) -> tuple[str, str | None]:
+    return _choose_rotation_action(job_key, region_id, enemy, state, player_buffs, enemy_buffs, turn, False, {"hp": 0, "mp": 0, "battle": 0})
+
+
+def _phase0_item_action(job_key: str, region_id: str, enemy: dict, enemy_hp: int, state: dict, player_buffs: dict, enemy_buffs: dict, turn: int) -> tuple[str, str | None]:
+    """A transparent all-job item policy; it is a measurement policy, not gameplay."""
+    inventory = state["inventory"]
+    max_hp = get_stats(state, player_buffs)["max_hp"]
+    throwable_id = state.get("_phase0_throwable_id")
+    throwable_policy = state.get("_phase0_throwable_policy")
+    if throwable_id and game.combat_item_quantity(state, throwable_id) > 0:
+        if throwable_policy == "opening_pair" and (turn == 1 or throwable_id != "item_armor_piercer" or enemy_buffs.get("defense_down", 0) <= 0):
+            return "item", throwable_id
+        if throwable_policy == "finisher_only":
+            throwable_damage, _turns = game.combat_throwable_damage(throwable_id, enemy, enemy_buffs)
+            if throwable_damage >= enemy_hp:
+                return "item", throwable_id
+    if inventory.get("item_herb_antidote", 0) and player_buffs.get("burn", 0) > 0:
+        return "item", "item_herb_antidote"
+    if inventory.get("item_potion_m", 0) and state["current_hp"] <= max_hp * 0.25:
+        return "item", "item_potion_m"
+    source, skill_id = _phase0_canonical(job_key, region_id, enemy, state, player_buffs, enemy_buffs, turn)
+    if source == "normal" and inventory.get("item_focus_drop", 0) and state["current_mp"] < 4:
+        return "item", "item_focus_drop"
+    return source, skill_id
+
+
+def _phase0_apply_action(state: dict, enemy: dict, enemy_hp: int, player_buffs: dict, enemy_buffs: dict, source: str, value: str | None) -> tuple[int, int, int, int]:
+    """Run one live player action and return damage plus effective item recovery."""
+    hp_before, mp_before = state["current_hp"], state["current_mp"]
+    if source == "skill":
+        result = _invoke_skill(state, enemy, player_buffs, enemy_buffs, value or "")
+    elif source == "item":
+        result = use_tool_item_adapter(state, True, enemy_buffs, enemy, value or "")
+    else:
+        result = game.player_attack(state, enemy, enemy_hp, None, player_buffs, enemy_buffs)
+    max_hp = get_stats(state, player_buffs)["max_hp"]
+    return result.damage, max(0, hp_before - state["current_hp"]), max(0, state["current_hp"] - hp_before), max(0, state["current_mp"] - mp_before)
+
+
+def _phase0_record(**values: Any) -> dict[str, Any]:
+    return {field: values.get(field, "") for field in PHASE0_RECORD_FIELDS}
+
+
+def _measure_phase0_item(kit_id: str, region_id: str, job_key: str, seed: int) -> dict[str, Any]:
+    with _common_random_stream(region_id, job_key, "boss", seed):
+        state, enemy, throwable_id, throwable_relation, throwable_policy = _phase0_state(job_key, region_id, kit_id)
+        state["_phase0_throwable_id"] = throwable_id
+        state["_phase0_throwable_policy"] = throwable_policy
+        enemy_hp, player_buffs, enemy_buffs = enemy["hp"], {}, {}
+        initial_hp, initial_mp = state["current_hp"], state["current_mp"]
+        direct = dot = item_damage = item_hp = item_mp = enemy_actions = 0
+        boss_marker = False
+        result, turn = "timeout", 0
+        for turn in range(1, MAX_PLAYER_ACTIONS + 1):
+            source, value = _phase0_item_action(job_key, region_id, enemy, enemy_hp, state, player_buffs, enemy_buffs, turn)
+            damage, _hp_loss, hp_gain, mp_gain = _phase0_apply_action(state, enemy, enemy_hp, player_buffs, enemy_buffs, source, value)
+            effective = min(max(0, enemy_hp), max(0, damage))
+            enemy_hp -= damage
+            if source == "item":
+                item_damage += effective
+                item_hp += hp_gain
+                item_mp += mp_gain
+            else:
+                direct += effective
+            if enemy_hp <= 0:
+                result = "victory"
+                break
+            boss_marker, _events = game.dispatch_enemy_turn(
+                REGIONS[region_id]["boss"], enemy, enemy_hp, state, player_buffs, enemy_buffs, False, turn, boss_marker,
+            )
+            enemy_actions += 1
+            _events, tick_damage = game.tick_effects(state, player_buffs, enemy_buffs, enemy)
+            effective_tick = min(max(0, enemy_hp), max(0, tick_damage))
+            enemy_hp -= tick_damage
+            dot += effective_tick
+            outcome = _round_outcome(state["current_hp"], enemy_hp)
+            if outcome:
+                result = outcome
+                break
+        comparison = f"item:{region_id}:{job_key}:{seed}"
+        initial_items = 0 if kit_id == "no_item" else (4 if kit_id == "legacy_b4_qa_kit" else 6)
+        used = initial_items - sum(state["inventory"].values())
+        return _phase0_record(
+            phase_version=PHASE0_VERSION, scenario_id=f"{comparison}:{kit_id}", comparison_id=comparison,
+            scenario_kind="item", variant=kit_id, seed=seed, region=region_id, benchmark_level=REGIONS[region_id]["level"], job=job_key,
+            enemy_id=REGIONS[region_id]["boss"], throwable_item_id=throwable_id or "", throwable_relation=throwable_relation,
+            throwable_policy=throwable_policy, kit_id=kit_id, supply_profile=("no_item" if kit_id == "no_item" else "item_kit"), support_skill_id="", control_id="", window_actions="", maintenance_policy="", cast_timing="", displaced_action="",
+            result=result, player_actions=turn, enemy_actions=enemy_actions, enemy_hp_remaining=max(0, enemy_hp), initial_hp=initial_hp,
+            final_hp=max(0, state["current_hp"]), initial_mp=initial_mp, final_mp=max(0, state["current_mp"]), mp_spent=max(0, initial_mp - state["current_mp"]),
+            direct_damage=direct, dot_damage=dot, item_damage=item_damage, item_hp_restored=item_hp, item_mp_restored=item_mp, items_used=used,
+            hp_items_used="", mp_items_used="", throwables_used="", throwable_damage="",
+            support_casts=0, support_active_turns=0, support_active_actions=0, active_followup_actions=0, active_followup_damage=0,
+            passive_proc_count=0, prepared_charge_skills=0, pursuit_windows_armed=0, pursuit_followups_used=0,
+        )
+
+
+def _measure_phase0_support(
+    skill_id: str, region_id: str, job_key: str, seed: int, window: int,
+    maintenance: str, cast_timing: str, variant: str, *, survival_overlay: bool = False,
+    kit_id: str = "no_item", supply_profile: str = "no_item",
+) -> dict[str, Any]:
+    """Measure a support book against the action it displaces; never alter runtime behavior."""
+    spec = PHASE0_SUPPORTS[skill_id]
+    initial_cast_turn = {"opening": 1, "after_one_canonical_action": 2}[cast_timing]
+    with _common_random_stream(region_id, job_key, "boss", seed):
+        state, enemy, throwable_id, throwable_relation, throwable_policy = _phase0_state(job_key, region_id, kit_id)
+        state["_phase0_throwable_id"] = throwable_id
+        state["_phase0_throwable_policy"] = throwable_policy
+        if survival_overlay:
+            enemy["hp"] = max(enemy["hp"], CINDER_SURVIVAL_HP_FLOOR)
+        if skill_id not in state["learned_skills"]:
+            state["learned_skills"].append(skill_id)
+        if spec["control"] == "fire_followup" and "skill_spark" not in state["learned_skills"]:
+            state["learned_skills"].append("skill_spark")
+        enemy_hp, player_buffs, enemy_buffs = enemy["hp"], {}, {}
+        initial_hp, initial_mp = state["current_hp"], state["current_mp"]
+        direct = dot = item_damage = item_hp = item_mp = enemy_actions = support_casts = active_followups = active_followup_damage = 0
+        hp_items_used = mp_items_used = throwables_used = throwable_damage = 0
+        support_active_turns = support_active_actions = 0
+        displaced_action = ""
+        support_started = False
+        boss_marker = False
+        result, turn = "window_complete", 0
+        for turn in range(1, window + 1):
+            support_active = player_buffs.get("quickstep", 0) > 0 or enemy_buffs.get("cinder_mark", 0) > 0
+            cast_now = variant == "support" and (
+                (not support_started and turn == initial_cast_turn)
+                or (support_started and maintenance == "maintain_on_expiry" and not support_active)
+            )
+            if spec["control"] == "fire_followup" and state["current_mp"] >= SKILLS["skill_spark"]["mp"]:
+                control_source, control_value = "skill", "skill_spark"
+            else:
+                control_source, control_value = _phase0_canonical(
+                    job_key, region_id, enemy, state, player_buffs, enemy_buffs, turn,
+                )
+            if cast_now and state["current_mp"] >= SKILLS[skill_id]["mp"]:
+                source, value = "skill", skill_id
+                support_casts += 1
+                support_started = True
+                if not displaced_action:
+                    displaced_action = f"{control_source}:{control_value or ''}"
+            else:
+                source, value = _phase0_item_action(
+                    job_key, region_id, enemy, enemy_hp, state, player_buffs, enemy_buffs, turn,
+                )
+            support_active_turns += int(variant == "support" and support_active)
+            support_active_actions += int(variant == "support" and support_active and source != "item")
+            damage, _hp_loss, hp_gain, mp_gain = _phase0_apply_action(state, enemy, enemy_hp, player_buffs, enemy_buffs, source, value)
+            effective = min(max(0, enemy_hp), max(0, damage))
+            enemy_hp -= damage
+            if source == "item":
+                item_damage += effective
+                item_hp += hp_gain
+                item_mp += mp_gain
+                if value in game.COMBAT_HP_RECOVERY:
+                    hp_items_used += 1
+                elif value in game.COMBAT_MP_RECOVERY:
+                    mp_items_used += 1
+                elif value in game.COMBAT_THROWABLE_IDS:
+                    throwables_used += 1
+                    throwable_damage += effective
+            else:
+                direct += effective
+            if variant == "support" and support_active and value == "skill_spark":
+                active_followups += 1
+                active_followup_damage += effective
+            if enemy_hp <= 0:
+                result = "victory"
+                break
+            boss_marker, _events = game.dispatch_enemy_turn(
+                REGIONS[region_id]["boss"], enemy, enemy_hp, state, player_buffs, enemy_buffs, False, turn, boss_marker,
+            )
+            enemy_actions += 1
+            _events, tick_damage = game.tick_effects(state, player_buffs, enemy_buffs, enemy)
+            effective_tick = min(max(0, enemy_hp), max(0, tick_damage))
+            enemy_hp -= tick_damage
+            dot += effective_tick
+            outcome = _round_outcome(state["current_hp"], enemy_hp)
+            if outcome:
+                result = outcome
+                break
+        comparison = f"support:{skill_id}:{region_id}:{job_key}:{seed}:{window}:{maintenance}:{cast_timing}:kit={kit_id}:survival={int(survival_overlay)}"
+        return _phase0_record(
+            phase_version=PHASE0_VERSION, scenario_id=f"{comparison}:{variant}", comparison_id=comparison,
+            scenario_kind="support", variant=variant, seed=seed, region=region_id, benchmark_level=REGIONS[region_id]["level"], job=job_key,
+            enemy_id=REGIONS[region_id]["boss"], throwable_item_id=throwable_id or "", throwable_relation=throwable_relation, throwable_policy=throwable_policy, kit_id=kit_id, supply_profile=supply_profile, support_skill_id=skill_id, control_id=spec["control"], window_actions=window,
+            maintenance_policy=maintenance, cast_timing=cast_timing, displaced_action=displaced_action, result=result, player_actions=turn, enemy_actions=enemy_actions, enemy_hp_remaining=max(0, enemy_hp),
+            initial_hp=initial_hp, final_hp=max(0, state["current_hp"]), initial_mp=initial_mp, final_mp=max(0, state["current_mp"]),
+            mp_spent=max(0, initial_mp - state["current_mp"]), direct_damage=direct, dot_damage=dot, item_damage=item_damage, item_hp_restored=item_hp,
+            item_mp_restored=item_mp, items_used=hp_items_used + mp_items_used + throwables_used, hp_items_used=hp_items_used, mp_items_used=mp_items_used,
+            throwables_used=throwables_used, throwable_damage=throwable_damage, support_casts=support_casts, support_active_turns=support_active_turns,
+            support_active_actions=support_active_actions, active_followup_actions=active_followups, active_followup_damage=active_followup_damage,
+            passive_proc_count=0, prepared_charge_skills=0, pursuit_windows_armed=0, pursuit_followups_used=0,
+            survival_overlay=str(survival_overlay).lower(), survival_target_actions=window if survival_overlay else "",
+            action_target_met=str(survival_overlay and result == "window_complete").lower() if survival_overlay else "",
+        )
+
+
+def _measure_phase0_passive(skill_id: str, region_id: str, job_key: str, seed: int, window: int, variant: str) -> dict[str, Any]:
+    """Pair a learned passive with the same no-passive rotation and RNG stream."""
+    with _common_random_stream(region_id, job_key, "boss", seed):
+        state, enemy, _throwable_id, _throwable_relation, _throwable_policy = _phase0_state(job_key, region_id, "no_item")
+        if variant == "passive" and skill_id not in state["learned_skills"]:
+            state["learned_skills"].append(skill_id)
+        enemy_hp, player_buffs, enemy_buffs = enemy["hp"], {}, {}
+        initial_hp, initial_mp = state["current_hp"], state["current_mp"]
+        direct = dot = enemy_actions = procs = prepared = pursuit_armed = pursuit_used = 0
+        boss_marker = False
+        result, turn = "window_complete", 0
+        for turn in range(1, window + 1):
+            source, value = _phase0_canonical(job_key, region_id, enemy, state, player_buffs, enemy_buffs, turn)
+            had_ready = bool(player_buffs.get("_warrior_quickstep_ready"))
+            had_pursuit = bool(player_buffs.get("_rogue_pursuit"))
+            damage, _hp_loss, _hp_gain, _mp_gain = _phase0_apply_action(state, enemy, enemy_hp, player_buffs, enemy_buffs, source, value)
+            prepared += int(had_ready and source == "skill" and bool(SKILLS.get(value or "", {}).get("charge_bonus_per_stack")))
+            pursuit_used += int(had_pursuit and source == "normal")
+            new_ready = bool(player_buffs.get("_warrior_quickstep_ready")) and not had_ready
+            new_pursuit = bool(player_buffs.get("_rogue_pursuit")) and not had_pursuit
+            procs += int(new_ready) + int(new_pursuit)
+            pursuit_armed += int(new_pursuit)
+            effective = min(max(0, enemy_hp), max(0, damage))
+            enemy_hp -= damage
+            direct += effective
+            if enemy_hp <= 0:
+                result = "victory"
+                break
+            boss_marker, _events = game.dispatch_enemy_turn(REGIONS[region_id]["boss"], enemy, enemy_hp, state, player_buffs, enemy_buffs, False, turn, boss_marker)
+            enemy_actions += 1
+            _events, tick_damage = game.tick_effects(state, player_buffs, enemy_buffs, enemy)
+            enemy_hp -= tick_damage
+            dot += min(max(0, enemy_hp + tick_damage), max(0, tick_damage))
+            outcome = _round_outcome(state["current_hp"], enemy_hp)
+            if outcome:
+                result = outcome
+                break
+        comparison = f"passive:{skill_id}:{region_id}:{job_key}:{seed}:{window}"
+        return _phase0_record(
+            phase_version=PHASE0_VERSION, scenario_id=f"{comparison}:{variant}", comparison_id=comparison,
+            scenario_kind="passive", variant=variant, seed=seed, region=region_id, benchmark_level=REGIONS[region_id]["level"], job=job_key,
+            enemy_id=REGIONS[region_id]["boss"], throwable_item_id="", throwable_relation="", throwable_policy="", kit_id="no_item", supply_profile="no_item",
+            support_skill_id=skill_id, control_id="canonical", window_actions=window, maintenance_policy="not_applicable", cast_timing="not_applicable", displaced_action="",
+            result=result, player_actions=turn, enemy_actions=enemy_actions, enemy_hp_remaining=max(0, enemy_hp), initial_hp=initial_hp, final_hp=max(0, state["current_hp"]),
+            initial_mp=initial_mp, final_mp=max(0, state["current_mp"]), mp_spent=max(0, initial_mp - state["current_mp"]), direct_damage=direct, dot_damage=dot,
+            item_damage=0, item_hp_restored=0, item_mp_restored=0, items_used=0, hp_items_used=0, mp_items_used=0, throwables_used=0, throwable_damage=0, support_casts=0, support_active_turns=0, support_active_actions=0,
+            active_followup_actions=0, active_followup_damage=0, passive_proc_count=procs, prepared_charge_skills=prepared,
+            pursuit_windows_armed=pursuit_armed, pursuit_followups_used=pursuit_used,
+        )
+
+
+def build_phase0_records(seeds: Iterable[int] = DEFAULT_SEEDS) -> list[dict[str, Any]]:
+    records = [
+        _measure_phase0_item(kit_id, region_id, job_key, seed)
+        for kit_id in PHASE0_ITEM_KITS for region_id in REGIONS for job_key in JOBS for seed in seeds
+    ]
+    for skill_id, spec in PHASE0_SUPPORTS.items():
+        for region_id in spec["regions"]:
+            for job_key in spec["jobs"]:
+                for window in (3, 6, 10):
+                    for maintenance in ("single_cast", "maintain_on_expiry"):
+                        for cast_timing in PHASE0_SUPPORT_CAST_TIMINGS:
+                            for seed in seeds:
+                                records.extend(
+                                    _measure_phase0_support(
+                                        skill_id, region_id, job_key, seed, window,
+                                        maintenance, cast_timing, variant,
+                                    )
+                                    for variant in ("control", "support")
+                                )
+    for skill_id, spec in PHASE0_PASSIVES.items():
+        for region_id in spec["regions"]:
+            for job_key in spec["jobs"]:
+                for window in (3, 6, 10):
+                    for seed in seeds:
+                        records.extend(_measure_phase0_passive(skill_id, region_id, job_key, seed, window, variant) for variant in ("control", "passive"))
+    return records
+
+
+def build_cinder_survival_records(seeds: Iterable[int] = DEFAULT_SEEDS) -> list[dict[str, Any]]:
+    """Fixed action-window probe; the HP floor exists only in this copied enemy."""
+    records = []
+    supply_profiles = (
+        ("no_item", "no_item"),
+        ("legal_supply", "legal_element_counter_finisher"),
+    )
+    for region_id in PHASE0_SUPPORTS["skill_cinder_mark"]["regions"]:
+        for target_actions in CINDER_SURVIVAL_TARGETS:
+            for seed in seeds:
+                for supply_profile, kit_id in supply_profiles:
+                    records.extend(
+                        _measure_phase0_support(
+                            "skill_cinder_mark", region_id, "mage", seed, target_actions,
+                            "single_cast", "opening", variant, survival_overlay=True,
+                            kit_id=kit_id, supply_profile=supply_profile,
+                        )
+                        for variant in ("control", "support")
+                    )
+    return records
+
+
+def render_phase0_records(records: list[dict[str, Any]], output_format: str) -> str:
+    if output_format == "json":
+        return json.dumps(records, ensure_ascii=True, sort_keys=True, separators=(",", ":"))
+    stream = io.StringIO(newline="")
+    writer = csv.DictWriter(stream, fieldnames=PHASE0_RECORD_FIELDS, lineterminator="\n", extrasaction="raise")
+    writer.writeheader()
+    writer.writerows(records)
+    return stream.getvalue()
+
+
+# Tactical strategy is a separate, deterministic measurement surface.  It is
+# deliberately not B7 and does not model production enemy decision making.
+TACTICAL_STRATEGY_VERSION = "fixed-tactical-strategy-v2"
+TACTICAL_STRATEGY_FIELDS = (
+    "strategy_version", "scenario_id", "comparison_id", "kit_id", "strategy_id", "tactical_status",
+    "seed", "region", "benchmark_level", "job", "enemy_id", "throwable_item_id", "throwable_relation",
+    "result", "player_actions", "enemy_actions", "initial_hp", "final_hp", "initial_mp", "final_mp", "mp_spent",
+    "enemy_hp_remaining", "direct_damage", "dot_damage", "item_damage", "normal_actions", "skill_actions", "item_actions",
+    "normal_action_share", "skill_action_share", "item_action_share", "cleric_dot_active_turns", "bleed_active_turns",
+    "poison_active_turns", "sanctified_erosion_active_turns", "rending_wound_active_turns", "five_turn_window_turns",
+    "enemy_hp_after_five_turns", "player_hp_after_five_turns", "player_mp_after_five_turns",
+    "five_turn_damage_delta_vs_no", "five_turn_player_hp_delta_vs_no", "five_turn_player_mp_delta_vs_no",
+)
+TACTICAL_STRATEGY_KITS = ("no_throwable", "existing_throwable", "tactical_throwable")
+TACTICAL_DOT_STATUS_KEYS = {
+    "cleric_dot": SKILLS["skill_sanctified_decay"]["name"],
+    "bleed": "bleed",
+    "poison": "poison",
+    "sanctified_erosion": "sanctified_erosion",
+    "rending_wound": "rending_wound",
+}
+
+
+def _tactical_existing_throwable(enemy: dict, job_key: str) -> tuple[str, str, str]:
+    if job_key in {"warrior", "rogue"}:
+        return "item_armor_piercer", "physical", "opening_once"
+    item_id, relation = _phase0_throwable_for(enemy, "counter")
+    assert item_id is not None
+    return item_id, relation, "finisher_only"
+
+
+def _tactical_throwable(enemy: dict, job_key: str) -> tuple[str | None, str, str, str]:
+    if job_key == "cleric":
+        return "item_sanctified_ash_vial", "tactical_dot", "opening_then_refresh", "available"
+    if job_key in {"warrior", "rogue"}:
+        return "item_rending_spike", "tactical_dot", "opening_then_refresh", "available"
+    return None, "none", "never", "not_applicable"
+
+
+def _tactical_state(job_key: str, region_id: str, kit_id: str) -> tuple[dict, dict, str | None, str, str, str]:
+    state, _loadout, _complete, _carry, _relics = _build_state(job_key, region_id, "full", True, True)
+    enemy = deepcopy(MONSTERS[REGIONS[region_id]["boss"]])
+    throwable_id: str | None = None
+    relation, policy, tactical_status = "none", "never", "not_selected"
+    if kit_id == "existing_throwable":
+        throwable_id, relation, policy = _tactical_existing_throwable(enemy, job_key)
+    elif kit_id == "tactical_throwable":
+        throwable_id, relation, policy, tactical_status = _tactical_throwable(enemy, job_key)
+    elif kit_id != "no_throwable":
+        raise ValueError(f"unknown tactical strategy kit: {kit_id}")
+    state["inventory"] = {"item_potion_m": 2, "item_focus_drop": 1, "item_herb_antidote": 1}
+    supplies: dict[str, dict[str, int | str]] = {
+        "sustain_hp": {"item_id": "item_potion_m", "quantity": 1},
+        "emergency_hp": {"item_id": "item_potion_m", "quantity": 1},
+        "mp": {"item_id": "item_focus_drop", "quantity": 1},
+    }
+    if throwable_id:
+        state["inventory"][throwable_id] = 2
+        supplies["throwable"] = {"item_id": throwable_id, "quantity": 2}
+    game.configure_run_supplies(state, supplies)
+    return state, enemy, throwable_id, relation, policy, tactical_status
+
+
+def _tactical_strategy_action(
+    job_key: str, region_id: str, enemy: dict, enemy_hp: int, state: dict, player_buffs: dict,
+    enemy_buffs: dict, turn: int, throwable_id: str | None, policy: str,
+) -> tuple[str, str | None]:
+    """Fixed policy only: transparent comparison aid, never runtime enemy AI."""
+    if throwable_id and game.combat_item_quantity(state, throwable_id) > 0:
+        effect = game.ITEMS[throwable_id]["battle_effect"]
+        dot = effect.get("dot")
+        dot_expired = bool(dot and enemy_buffs.get(dot["status"], 0) <= 0)
+        if policy == "opening_once" and turn == 1:
+            return "item", throwable_id
+        if policy == "opening_then_refresh" and (turn == 1 or dot_expired):
+            return "item", throwable_id
+        if policy == "finisher_only":
+            throwable_damage, _turns = game.combat_throwable_damage(throwable_id, enemy, enemy_buffs)
+            if throwable_damage >= enemy_hp:
+                return "item", throwable_id
+    max_hp = get_stats(state, player_buffs)["max_hp"]
+    if state["inventory"].get("item_herb_antidote", 0) and player_buffs.get("burn", 0) > 0:
+        return "item", "item_herb_antidote"
+    if state["inventory"].get("item_potion_m", 0) and state["current_hp"] <= max_hp * 0.25:
+        return "item", "item_potion_m"
+    source, skill_id = _phase0_canonical(job_key, region_id, enemy, state, player_buffs, enemy_buffs, turn)
+    if source == "normal" and state["inventory"].get("item_focus_drop", 0) and state["current_mp"] < 4:
+        return "item", "item_focus_drop"
+    return source, skill_id
+
+
+def _tactical_record(**values: Any) -> dict[str, Any]:
+    return {field: values.get(field, "") for field in TACTICAL_STRATEGY_FIELDS}
+
+
+def _measure_tactical_strategy(kit_id: str, region_id: str, job_key: str, seed: int) -> dict[str, Any]:
+    with _common_random_stream(region_id, job_key, "boss", seed):
+        state, enemy, throwable_id, relation, policy, tactical_status = _tactical_state(job_key, region_id, kit_id)
+        enemy_hp, player_buffs, enemy_buffs = enemy["hp"], {}, {}
+        initial_hp, initial_mp = state["current_hp"], state["current_mp"]
+        direct = dot = item_damage = enemy_actions = 0
+        action_counts = {"normal": 0, "skill": 0, "item": 0}
+        dot_coverage = {field: 0 for field in TACTICAL_DOT_STATUS_KEYS}
+        five_turn_window_turns = 0
+        enemy_hp_after_five_turns: int | None = None
+        player_hp_after_five_turns: int | None = None
+        player_mp_after_five_turns: int | None = None
+        boss_marker = False
+        result, turn = "timeout", 0
+        for turn in range(1, MAX_PLAYER_ACTIONS + 1):
+            source, value = _tactical_strategy_action(
+                job_key, region_id, enemy, enemy_hp, state, player_buffs, enemy_buffs, turn, throwable_id, policy,
+            )
+            action_counts[source] += 1
+            damage, _hp_loss, _hp_gain, _mp_gain = _phase0_apply_action(
+                state, enemy, enemy_hp, player_buffs, enemy_buffs, source, value,
+            )
+            effective = min(max(0, enemy_hp), max(0, damage))
+            enemy_hp -= damage
+            if source == "item":
+                item_damage += effective
+            else:
+                direct += effective
+            if enemy_hp <= 0:
+                result = "victory"
+                if turn <= 5:
+                    five_turn_window_turns = turn
+                    enemy_hp_after_five_turns = 0
+                    player_hp_after_five_turns = max(0, state["current_hp"])
+                    player_mp_after_five_turns = max(0, state["current_mp"])
+                break
+            boss_marker, _events = game.dispatch_enemy_turn(
+                REGIONS[region_id]["boss"], enemy, enemy_hp, state, player_buffs, enemy_buffs, False, turn, boss_marker,
+            )
+            enemy_actions += 1
+            for field, status_key in TACTICAL_DOT_STATUS_KEYS.items():
+                dot_coverage[field] += int(enemy_buffs.get(status_key, 0) > 0)
+            _events, tick_damage = game.tick_effects(state, player_buffs, enemy_buffs, enemy)
+            effective_tick = min(max(0, enemy_hp), max(0, tick_damage))
+            enemy_hp -= tick_damage
+            dot += effective_tick
+            if turn <= 5:
+                five_turn_window_turns = turn
+                if turn == 5:
+                    enemy_hp_after_five_turns = max(0, enemy_hp)
+                    player_hp_after_five_turns = max(0, state["current_hp"])
+                    player_mp_after_five_turns = max(0, state["current_mp"])
+            outcome = _round_outcome(state["current_hp"], enemy_hp)
+            if outcome:
+                result = outcome
+                if turn <= 5:
+                    enemy_hp_after_five_turns = max(0, enemy_hp)
+                    player_hp_after_five_turns = max(0, state["current_hp"])
+                    player_mp_after_five_turns = max(0, state["current_mp"])
+                break
+        if enemy_hp_after_five_turns is None:
+            enemy_hp_after_five_turns = max(0, enemy_hp)
+            player_hp_after_five_turns = max(0, state["current_hp"])
+            player_mp_after_five_turns = max(0, state["current_mp"])
+        actions = max(1, sum(action_counts.values()))
+        comparison = f"tactical:{region_id}:{job_key}:{seed}"
+        strategy_id = f"{job_key}:{kit_id}:{policy}"
+        return _tactical_record(
+            strategy_version=TACTICAL_STRATEGY_VERSION, scenario_id=f"{comparison}:{kit_id}", comparison_id=comparison,
+            kit_id=kit_id, strategy_id=strategy_id, tactical_status=tactical_status, seed=seed, region=region_id,
+            benchmark_level=REGIONS[region_id]["level"], job=job_key, enemy_id=REGIONS[region_id]["boss"],
+            throwable_item_id=throwable_id or "", throwable_relation=relation, result=result, player_actions=turn,
+            enemy_actions=enemy_actions, initial_hp=initial_hp, final_hp=max(0, state["current_hp"]), initial_mp=initial_mp,
+            final_mp=max(0, state["current_mp"]), mp_spent=max(0, initial_mp - state["current_mp"]), enemy_hp_remaining=max(0, enemy_hp),
+            direct_damage=direct, dot_damage=dot, item_damage=item_damage, normal_actions=action_counts["normal"],
+            skill_actions=action_counts["skill"], item_actions=action_counts["item"], normal_action_share=round(action_counts["normal"] / actions, 6),
+            skill_action_share=round(action_counts["skill"] / actions, 6), item_action_share=round(action_counts["item"] / actions, 6),
+            cleric_dot_active_turns=dot_coverage["cleric_dot"], bleed_active_turns=dot_coverage["bleed"],
+            poison_active_turns=dot_coverage["poison"], sanctified_erosion_active_turns=dot_coverage["sanctified_erosion"],
+            rending_wound_active_turns=dot_coverage["rending_wound"], five_turn_window_turns=five_turn_window_turns,
+            enemy_hp_after_five_turns=enemy_hp_after_five_turns, player_hp_after_five_turns=player_hp_after_five_turns,
+            player_mp_after_five_turns=player_mp_after_five_turns,
+        )
+
+
+def build_tactical_strategy_records(seeds: Iterable[int] = DEFAULT_SEEDS) -> list[dict[str, Any]]:
+    records = [
+        _measure_tactical_strategy(kit_id, region_id, job_key, seed)
+        for kit_id in TACTICAL_STRATEGY_KITS for region_id in REGIONS for job_key in JOBS for seed in seeds
+    ]
+    no_throwable = {record["comparison_id"]: record for record in records if record["kit_id"] == "no_throwable"}
+    for record in records:
+        baseline = no_throwable[record["comparison_id"]]
+        record["five_turn_damage_delta_vs_no"] = baseline["enemy_hp_after_five_turns"] - record["enemy_hp_after_five_turns"]
+        record["five_turn_player_hp_delta_vs_no"] = record["player_hp_after_five_turns"] - baseline["player_hp_after_five_turns"]
+        record["five_turn_player_mp_delta_vs_no"] = record["player_mp_after_five_turns"] - baseline["player_mp_after_five_turns"]
+    return records
+
+
+def render_tactical_strategy_records(records: list[dict[str, Any]], output_format: str) -> str:
+    if output_format == "json":
+        return json.dumps(records, ensure_ascii=True, sort_keys=True, separators=(",", ":"))
+    stream = io.StringIO(newline="")
+    writer = csv.DictWriter(stream, fieldnames=TACTICAL_STRATEGY_FIELDS, lineterminator="\n", extrasaction="raise")
+    writer.writeheader()
+    writer.writerows(records)
+    return stream.getvalue()
+
+
+def _value_model_record(**values: Any) -> dict[str, Any]:
+    return {field: values.get(field, "") for field in VALUE_MODEL_FIELDS}
+
+
+def _hits_to_defeat(hp: int, damage: int) -> int:
+    return math.ceil(max(0, hp) / max(1, damage))
+
+
+def build_value_model_records() -> list[dict[str, Any]]:
+    """Measure current EHP and action-cost semantics without changing them."""
+    records: list[dict[str, Any]] = []
+    for region_id in REGIONS:
+        enemy_id = REGIONS[region_id]["boss"]
+        enemy = deepcopy(MONSTERS[enemy_id])
+        for job_key in JOBS:
+            state, _loadout, _complete, _carry, _relics = _build_state(job_key, region_id, "full", True, True)
+            stats = game.get_stats(state)
+            initial_hp = stats["max_hp"]
+            baseline = game.calc_enemy_damage(enemy, state, 1.0, "physical", {}, False)
+            for effect_id, buffs, configured in (
+                ("defense_up", {"defense_up": 3}, 1.20),
+                ("defense_down", {"defense_down": 3}, 0.80),
+            ):
+                observed = game.calc_enemy_damage(enemy, state, 1.0, "physical", buffs, False)
+                single_pass_stats = dict(stats)
+                single_pass_stats["defense"] = (
+                    math.ceil(stats["defense"] * configured)
+                    if effect_id == "defense_up"
+                    else max(1, math.floor(stats["defense"] * configured))
+                )
+                single_pass, _ = game.calc_typed_damage(
+                    enemy["attack"], 1.0, single_pass_stats, {}, "physical", "physical",
+                )
+                records.append(_value_model_record(
+                    audit_version=VALUE_MODEL_VERSION, record_kind="defense", region=region_id, job=job_key,
+                    enemy_id=enemy_id, effect_id=effect_id, effect_kind="physical_defense",
+                    player_action_cost=0, mp_cost=0, timing="passive", duration=3, initial_hp=initial_hp,
+                    defense=stats["defense"], magic_defense=stats["magic_defense"], element_resist=0,
+                    baseline_damage=baseline, single_pass_damage=single_pass, observed_damage=observed,
+                    damage_delta=observed - single_pass,
+                    ehp_multiplier=round(baseline / max(1, observed), 6),
+                    hits_to_defeat=_hits_to_defeat(initial_hp, observed), configured_multiplier=configured,
+                    observed_damage_ratio=round(observed / max(1, baseline), 6),
+                ))
+            element = game.normalized_element(enemy.get("element", ""))
+            if element in game.ELEMENT_RESIST_KEYS:
+                resisted = game.calc_enemy_damage(enemy, state, 1.0, element, {}, False)
+                without_resist = dict(stats)
+                without_resist[game.ELEMENT_RESIST_KEYS[element]] = 0
+                unresisted, _ = game.calc_typed_damage(
+                    enemy.get("magic_attack", enemy["attack"]), 1.0, without_resist, {}, "magic", element,
+                )
+                records.append(_value_model_record(
+                    audit_version=VALUE_MODEL_VERSION, record_kind="defense", region=region_id, job=job_key,
+                    enemy_id=enemy_id, effect_id=f"{element}_resist", effect_kind="element_resist",
+                    player_action_cost=0, mp_cost=0, timing="passive", duration="", initial_hp=initial_hp,
+                    defense=stats["defense"], magic_defense=stats["magic_defense"],
+                    element_resist=stats.get(game.ELEMENT_RESIST_KEYS[element], 0), baseline_damage=unresisted,
+                    single_pass_damage=unresisted, observed_damage=resisted, damage_delta=resisted - unresisted,
+                    ehp_multiplier=round(unresisted / max(1, resisted), 6),
+                    hits_to_defeat=_hits_to_defeat(initial_hp, resisted), configured_multiplier="",
+                    observed_damage_ratio=round(resisted / max(1, unresisted), 6),
+                ))
+    for skill_id, skill in SKILLS.items():
+        kind = skill["kind"]
+        timing = "player_before_enemy" if kind in {"heal", "damage", "buff", "debuff", "dot"} else "post_enemy_tick"
+        records.append(_value_model_record(
+            audit_version=VALUE_MODEL_VERSION, record_kind="skill", region="", job="", enemy_id="",
+            effect_id=skill_id, effect_kind=kind, player_action_cost=1, mp_cost=skill["mp"], timing=timing,
+            duration=skill.get("duration", ""), initial_hp="", defense="", magic_defense="", element_resist="",
+            baseline_damage="", single_pass_damage="", observed_damage="", damage_delta="", ehp_multiplier="",
+            hits_to_defeat="", configured_multiplier=skill.get("multiplier", ""), observed_damage_ratio="",
+        ))
+    return records
+
+
+def render_value_model_records(records: list[dict[str, Any]], output_format: str) -> str:
+    if output_format == "json":
+        return json.dumps(records, ensure_ascii=True, sort_keys=True, separators=(",", ":"))
+    stream = io.StringIO(newline="")
+    writer = csv.DictWriter(stream, fieldnames=VALUE_MODEL_FIELDS, lineterminator="\n", extrasaction="raise")
+    writer.writeheader()
+    writer.writerows(records)
+    return stream.getvalue()
+
+
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Deterministic Balance Architecture v2 QA harness")
     parser.add_argument("--layers", default=",".join(LAYERS), help="comma-separated subset of B0..B6")
     parser.add_argument("--seeds", default=",".join(str(seed) for seed in DEFAULT_SEEDS), help="comma-separated integer seeds")
     parser.add_argument("--format", choices=("csv", "json"), default="csv")
     parser.add_argument("--audit-equipment", action="store_true", help="offline equipment / manual-effect audit only")
+    parser.add_argument("--phase0", action="store_true", help="stdout-only Phase 0 item/support measurement")
+    parser.add_argument("--cinder-survival", action="store_true", help="stdout-only fixed-window Cinder Mark probe")
+    parser.add_argument("--tactical-strategy", action="store_true", help="stdout-only fixed tactical-item strategy measurement")
+    parser.add_argument("--value-model-audit", action="store_true", help="stdout-only EHP and action-cost measurement")
     return parser.parse_args(argv)
 
 
 def main(argv: list[str] | None = None) -> None:
     args = parse_args(argv)
     check_runtime_contracts()
+    if args.phase0:
+        print(render_phase0_records(build_phase0_records(tuple(int(seed.strip()) for seed in args.seeds.split(",") if seed.strip())), args.format), end="")
+        return
+    if args.cinder_survival:
+        print(render_phase0_records(build_cinder_survival_records(tuple(int(seed.strip()) for seed in args.seeds.split(",") if seed.strip())), args.format), end="")
+        return
+    if args.tactical_strategy:
+        seeds = tuple(int(seed.strip()) for seed in args.seeds.split(",") if seed.strip())
+        print(render_tactical_strategy_records(build_tactical_strategy_records(seeds), args.format), end="")
+        return
+    if args.value_model_audit:
+        print(render_value_model_records(build_value_model_records(), args.format), end="")
+        return
     if args.audit_equipment:
         print(json.dumps(audit_equipment(), ensure_ascii=True, sort_keys=True, separators=(",", ":")))
         return

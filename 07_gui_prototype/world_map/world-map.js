@@ -677,6 +677,47 @@ function navigateAfterAction(action) {
 
 async function dispatchRuntimeAction(action, source) {
   try {
+    if (action.action_id === "confirm_travel") {
+      const quantity = (label, limit) => {
+        const raw = window.prompt(`${label}（0-${limit}，0 為不帶）`, "0");
+        const value = Number.parseInt(raw ?? "0", 10);
+        return Number.isInteger(value) && value >= 0 ? Math.min(value, limit) : 0;
+      };
+      const sustainType = window.prompt("續航 HP：輸入 s 小藥水、m 中藥水，或留白", "")?.trim().toLowerCase();
+      const emergencyType = window.prompt("保險 HP：輸入 s 小、m 中、i 冰、e 地、t 雷、f 終末藥水，或留白", "")?.trim().toLowerCase();
+      const mpType = window.prompt("MP：輸入 d 集中滴露、i 冰、e 地、t 雷、f 終末藥水，或留白", "")?.trim().toLowerCase();
+      const itemFor = (value, category) => {
+        const choices = category === "mp"
+          ? { d: "item_focus_drop", i: "item_ice_potion_02", e: "item_earth_potion_02", t: "item_thunder_potion_02", f: "item_final_potion_02" }
+          : { s: "item_potion_s", m: "item_potion_m", i: "item_ice_potion_01", e: "item_earth_potion_01", t: "item_thunder_potion_01", f: "item_final_potion_01" };
+        return choices[value] ?? null;
+      };
+      const sustainItem = itemFor(sustainType, "hp");
+      const emergencyItem = itemFor(emergencyType, "hp");
+      const mpItem = itemFor(mpType, "mp");
+      const throwableType = window.prompt("投擲品：p 破甲釘、f 餘燼火瓶、i 霜鹽爆瓶、e 根岩震釘、t 導雷震盪球", "")?.trim().toLowerCase();
+      const throwableItem = {
+        p: "item_armor_piercer",
+        f: "item_throw_fire",
+        i: "item_throw_ice",
+        e: "item_throw_earth",
+        t: "item_throw_thunder",
+      }[throwableType] ?? null;
+      const mpLimit = 2; // Runtime validates the warrior/rogue one-bottle limit.
+      action = {
+        ...action,
+        payload: {
+          ...(action.payload ?? {}),
+          supplies: {
+            sustain_hp: { item_id: sustainItem, quantity: sustainItem ? quantity("續航 HP 數量", 3) : 0 },
+            emergency_hp: { item_id: emergencyItem, quantity: emergencyItem ? quantity("保險 HP 數量", 1) : 0 },
+            mp: { item_id: mpItem, quantity: mpItem ? quantity("MP 藥水數量", mpLimit) : 0 },
+            throwable: { item_id: throwableItem, quantity: throwableItem ? quantity("投擲品數量", 2) : 0 },
+            escape: { item_id: "item_escape_scroll", quantity: quantity("逃脫卷軸數量", 1) },
+          },
+        },
+      };
+    }
     const result = await runtimeClient.dispatchAction("world_map", action.action_id, action.payload ?? {});
     shellEl.dataset.runtimeStatus = result.status ?? "success";
     if (result.screen_model) {

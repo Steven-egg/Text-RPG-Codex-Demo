@@ -15,6 +15,19 @@ ITEMS = {
         "price": int,
         "desc": str,
         "unlock": str,  # optional
+        "battle_effect": {  # required when kind == "battle"
+            "damage_type": "physical" | "elemental" | "fixed",
+            "power": int,
+            "element": "fire" | "ice" | "earth" | "thunder",  # elemental only
+            "defense_down_turns": int,  # optional, physical only
+            "jobs": [str],  # optional; restricted battle item jobs
+            "dot": {  # optional fixed tactical DoT; same status refreshes instead of stacking
+                "status": str,
+                "duration": int,
+                "power": int,
+                "damage_type": "fixed",
+            },
+        },
     }
 }
 ```
@@ -30,6 +43,7 @@ ITEMS = {
 
 - `unlock`
 - `region`
+- `battle_effect`（`kind == "battle"` 時必填）
 
 ## 型別與規則
 

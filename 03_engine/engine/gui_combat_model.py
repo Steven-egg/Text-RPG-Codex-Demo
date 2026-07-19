@@ -9,8 +9,8 @@ from .gui_presentation_helpers import percent
 
 def combat_item_rows(state: dict[str, Any]) -> list[dict[str, Any]]:
     rows = []
-    for item_id in ["item_potion_s", "item_potion_m", "item_focus_drop", "item_herb_antidote", "item_armor_piercer", "item_escape_scroll"]:
-        qty = state.get("inventory", {}).get(item_id, 0)
+    for item_id in game.COMBAT_ITEM_IDS:
+        qty = game.combat_item_quantity(state, item_id)
         if qty <= 0:
             continue
         item = ITEMS.get(item_id, {})

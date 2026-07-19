@@ -73,6 +73,7 @@
     "kind": "buff",
     "buff": str,
     "duration": int,
+    "buff_stats": {"crit": int},  # optional; active only while this buff remains
     "desc": str,
 }
 ```
@@ -86,6 +87,30 @@
     "kind": "debuff",
     "debuff": str,
     "duration": int,
+    "damage_percent": int,  # optional; matching element bonus defined by the debuff
+    "damage_scope": "elemental_magic",  # required with damage_percent
+    "desc": str,
+}
+```
+
+### passive
+
+```python
+{
+    "name": str,
+    "mp": 0,
+    "kind": "passive",
+    "passive_triggers": [
+        {
+            "job": str,
+            "event": "physical_charge_reaches" | "physical_status_applied",
+            "requires": {"stacks": int} | {"statuses": ["bleed" | "poison", ...]},
+            "replacement_group": str,  # optional; highest learned priority wins
+            "priority": int,  # required with replacement_group
+            "effect": {"kind": "charge_skill_bonus", "state_key": str, "damage_percent": int}
+                | {"kind": "extra_normal_followup", "state_key": str, "uses": 1, "followup_multiplier": float},
+        },
+    ],
     "desc": str,
 }
 ```
@@ -102,11 +127,16 @@
 
 - `damage.crit_bonus`
 - `damage.charge_bonus_per_stack`: positive per-stack multiplier bonus for a Warrior physical skill. The skill consumes all current Physical Charge stacks.
+- `buff.buff_stats`: currently supports `crit`; its values apply only while the named buff is active.
+- `debuff.damage_percent` with `damage_scope: "elemental_magic"`: optional positive bonus for direct elemental magic skills only; it excludes physical skills, battle items, and periodic damage-over-time.
+- `passive`: learned skills remain in `state.learned_skills`, but are not selectable actions. A replacement group resolves to one highest-priority learned trigger and never stacks.
 
 Physical status `on_hit` effects use `effect_accuracy` and the target's
 `physical_status_resist`. Bleeding lasts three turns and poison lasts five.
 Race-invalid statuses cannot be applied. Their periodic damage uses a separate
-status-damage path and ignores physical defense.
+status-damage path and ignores physical defense. Bleed and poison ticks use a
+race multiplier of `1.25` for `effective`, `1.0` for `normal`, and `0` for
+`ineffective`; the ineffective case remains blocked before application.
 
 ## 引用規則
 

@@ -97,19 +97,35 @@ SKILLS = {
     },
     "skill_quickstep": {
         "name": "迅步術",
-        "mp": 6,
-        "kind": "buff",
-        "buff": "quickstep",
-        "duration": 3,
-        "desc": "3 回合敏捷 +25%。",
+        "mp": 0,
+        "kind": "passive",
+        "passive_triggers": [
+            {
+                "job": "劍士",
+                "event": "physical_charge_reaches",
+                "requires": {"stacks": 3},
+                "effect": {"kind": "charge_skill_bonus", "state_key": "warrior_quickstep_ready", "damage_percent": 25},
+            },
+            {
+                "job": "盜賊",
+                "event": "physical_status_applied",
+                "requires": {"statuses": ["bleed", "poison"]},
+                "replacement_group": "rogue_pursuit",
+                "priority": 1,
+                "effect": {"kind": "extra_normal_followup", "state_key": "rogue_pursuit", "uses": 1, "followup_multiplier": 1.0},
+            },
+        ],
+        "desc": "被動：劍士滿層蓄力後強化下一次蓄力技能；盜賊成功附加流血或中毒後獲得一次追擊。",
     },
     "skill_cinder_mark": {
         "name": "燼印術",
         "mp": 9,
         "kind": "debuff",
         "debuff": "cinder_mark",
-        "duration": 3,
-        "desc": "3 回合使敵人更容易受到火屬性傷害。",
+        "duration": 5,
+        "damage_percent": 20,
+        "damage_scope": "elemental_magic",
+        "desc": "5 回合使敵人受到的直接元素魔法傷害 +20%。",
     },
     # === Ice Region Skills ===
     "skill_ice_01": {
@@ -140,11 +156,19 @@ SKILLS = {
     },
     "skill_ice_05": {
         "name": "霜速術",
-        "mp": 7,
-        "kind": "buff",
-        "buff": "quickstep",
-        "duration": 3,
-        "desc": "3 回合敏捷 +25%。",
+        "mp": 0,
+        "kind": "passive",
+        "passive_triggers": [
+            {
+                "job": "盜賊",
+                "event": "physical_status_applied",
+                "requires": {"statuses": ["bleed", "poison"]},
+                "replacement_group": "rogue_pursuit",
+                "priority": 2,
+                "effect": {"kind": "extra_normal_followup", "state_key": "rogue_pursuit", "uses": 1, "followup_multiplier": 1.5},
+            },
+        ],
+        "desc": "被動：取代迅步追擊；成功附加流血或中毒後，下一次普通攻擊追加更強追擊。",
     },
     # === Earth Region Skills ===
     "skill_earth_01": {
@@ -318,11 +342,12 @@ MAGIC_BOOKS = {
     },
     "book_cinder_mark": {
         "name": "燼印術書",
-        "jobs": ["法師", "牧師"],
-        "level": 5,
-        "price": 360,
-        "materials": {"mat_fire_stone": 2},
+        "jobs": ["法師"],
+        "level": 6,
+        "price": 460,
+        "materials": {"mat_ice_blue_stone": 2},
         "skill": "skill_cinder_mark",
+        "region": "ice",
     },
     # === Ice Region Magic Books ===
     "book_ice_01": {

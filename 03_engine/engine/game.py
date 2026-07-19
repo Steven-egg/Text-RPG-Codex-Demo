@@ -61,6 +61,10 @@ from .state import (
     player_resource_lines,
     add_gold,
     add_loot,
+    run_supply_item_quantity,
+    item_job_allowed,
+    consume_run_supply_item,
+    configure_run_supplies,
 )
 from .relic import (
     relic_enshrined,
@@ -263,6 +267,94 @@ class CombatActionResult:
     events: list[str] = field(default_factory=list)
     summary: list[str] = field(default_factory=list)
     outcome: str | None = None
+    free_action: bool = False
+
+
+def combat_item_quantity(state: dict, item_id: str) -> int:
+    """Return the amount legal for the current expedition."""
+    if not item_job_allowed(state, item_id):
+        return 0
+    if item_id == "item_herb_antidote":
+        return state.get("inventory", {}).get(item_id, 0)
+    return min(state.get("inventory", {}).get(item_id, 0), run_supply_item_quantity(state, item_id))
+
+
+def consume_combat_item(state: dict, item_id: str) -> bool:
+    if item_id == "item_herb_antidote":
+        return remove_item(state, item_id, 1)
+    return consume_run_supply_item(state, item_id)
+
+
+COMBAT_HP_RECOVERY = {
+    "item_potion_s": (35, 0.0),
+    "item_potion_m": (70, 0.0),
+    "item_ice_potion_01": (120, 0.60),
+    "item_earth_potion_01": (200, 0.60),
+    "item_thunder_potion_01": (350, 0.60),
+    "item_final_potion_01": (600, 0.60),
+}
+COMBAT_MP_RECOVERY = {
+    "item_focus_drop": (12, 0.0),
+    "item_ice_potion_02": (30, 0.30),
+    "item_earth_potion_02": (50, 0.30),
+    "item_thunder_potion_02": (80, 0.30),
+    "item_final_potion_02": (150, 0.30),
+}
+COMBAT_THROWABLE_IDS = tuple(item_id for item_id, item in ITEMS.items() if item.get("kind") == "battle")
+COMBAT_ITEM_IDS = (*COMBAT_HP_RECOVERY, *COMBAT_MP_RECOVERY, "item_herb_antidote", *COMBAT_THROWABLE_IDS, "item_escape_scroll")
+
+
+def combat_recovery_amount(state: dict, item_id: str) -> int:
+    """Return the configured fixed-or-percent recovery before the resource cap."""
+    stats = get_stats(state)
+    if item_id in COMBAT_HP_RECOVERY:
+        fixed, ratio = COMBAT_HP_RECOVERY[item_id]
+        return max(fixed, math.ceil(stats["max_hp"] * ratio))
+    if item_id in COMBAT_MP_RECOVERY:
+        fixed, ratio = COMBAT_MP_RECOVERY[item_id]
+        return max(fixed, math.ceil(stats["max_mp"] * ratio))
+    raise ValueError(f"Unsupported recovery item: {item_id}")
+
+
+def combat_throwable_damage(item_id: str, enemy: dict, enemy_buffs: dict) -> tuple[int, int]:
+    """Resolve a fixed battle-item hit without player-stat or critical scaling."""
+    effect = ITEMS.get(item_id, {}).get("battle_effect")
+    if not isinstance(effect, dict):
+        raise ValueError(f"Unsupported throwable item: {item_id}")
+    power = effect["power"]
+    if effect["damage_type"] == "physical":
+        damage = max(1, math.ceil(power - adjusted_defense(enemy, enemy_buffs, "physical") * 0.6))
+    elif effect["damage_type"] == "elemental":
+        damage = max(1, math.ceil(power * element_multiplier(effect["element"], enemy.get("element", ""), enemy_buffs)))
+    else:
+        damage = power
+    return damage, effect.get("defense_down_turns", 0)
+
+
+def use_combat_throwable(state: dict, item_id: str, enemy: dict, enemy_buffs: dict) -> CombatActionResult:
+    """Apply a battle item once for both CLI and live GUI combat paths."""
+    effect = ITEMS[item_id]["battle_effect"]
+    damage, defense_down_turns = combat_throwable_damage(item_id, enemy, enemy_buffs)
+    consume_combat_item(state, item_id)
+    detail = []
+    if defense_down_turns:
+        enemy_buffs["defense_down"] = max(enemy_buffs.get("defense_down", 0), defense_down_turns)
+        detail.append("敵方防禦下降")
+    dot = effect.get("dot")
+    if dot:
+        apply_dot(
+            enemy_buffs,
+            dot["status"],
+            dot["duration"],
+            0,
+            dot["damage_type"],
+            "none",
+            fixed_power=dot["power"],
+        )
+        detail.append(f"{status_display_name(dot['status'])}持續 {dot['duration']} 回合")
+    suffix = f"，{'；'.join(detail)}。" if detail else "。"
+    line = f"{item_name(item_id)}命中敵人，造成 {damage} 傷害{suffix}"
+    return CombatActionResult(damage=damage, events=[line], summary=[line])
 
 
 
@@ -282,6 +374,10 @@ def buff_summary(buffs: dict) -> str:
     active = [f"{labels.get(key, key)} {turns}" for key, turns in buffs.items() if not key.startswith("_") and isinstance(turns, int) and turns > 0]
     if buffs.get("_physical_charge", 0) > 0:
         active.append(f"Physical Charge {physical_charge(buffs)}")
+    if buffs.get("_warrior_quickstep_ready"):
+        active.append("迅步預備")
+    if buffs.get("_rogue_pursuit"):
+        active.append(f"{buffs['_rogue_pursuit']['skill_name']}追擊")
     return "、".join(active) if active else "無"
 
 
@@ -295,7 +391,15 @@ PHYSICAL_STATUS_EFFECTIVENESS = {
     "spirit": {"bleed": "ineffective", "poison": "ineffective"},
     "aberration": {"bleed": "normal", "poison": "effective"},
 }
-STATUS_DISPLAY_NAMES = {"bleed": "流血", "poison": "中毒", "burn": "灼傷"}
+PHYSICAL_STATUS_DAMAGE_MULTIPLIERS = {
+    "effective": 1.25,
+    "normal": 1.0,
+    "ineffective": 0.0,
+}
+STATUS_DISPLAY_NAMES = {
+    "bleed": "流血", "poison": "中毒", "burn": "灼傷",
+    "sanctified_erosion": "聖蝕", "rending_wound": "裂創",
+}
 
 
 def status_display_name(status: str) -> str:
@@ -316,11 +420,57 @@ def gain_physical_charge(state: dict, player_buffs: dict) -> int:
 def consume_physical_charge(player_buffs: dict) -> int:
     stacks = physical_charge(player_buffs)
     player_buffs.pop(PHYSICAL_CHARGE_KEY, None)
+    player_buffs.pop("_warrior_quickstep_ready", None)
     return stacks
+
+
+def passive_triggers_for_event(state: dict, event: str, **context: object) -> list[dict]:
+    """Return learned passive triggers, resolving replacement groups once."""
+    candidates: list[dict] = []
+    for skill_id in state.get("learned_skills", []):
+        skill = SKILLS.get(skill_id, {})
+        if skill.get("kind") != "passive":
+            continue
+        for trigger in skill.get("passive_triggers", []):
+            requires = trigger.get("requires", {})
+            if trigger.get("job") != state.get("job") or trigger.get("event") != event:
+                continue
+            if event == "physical_charge_reaches" and context.get("stacks") != requires.get("stacks"):
+                continue
+            if event == "physical_status_applied" and context.get("status") not in requires.get("statuses", []):
+                continue
+            candidates.append({**trigger, "skill_id": skill_id, "skill_name": skill["name"]})
+    resolved: dict[str, dict] = {}
+    ungrouped: list[dict] = []
+    for trigger in candidates:
+        group = trigger.get("replacement_group")
+        if not group:
+            ungrouped.append(trigger)
+        elif group not in resolved or trigger.get("priority", 0) > resolved[group].get("priority", 0):
+            resolved[group] = trigger
+    return [*ungrouped, *resolved.values()]
+
+
+def activate_passives(state: dict, player_buffs: dict, event: str, **context: object) -> list[str]:
+    events = []
+    for trigger in passive_triggers_for_event(state, event, **context):
+        effect = trigger["effect"]
+        player_buffs[f"_{effect['state_key']}"] = {**effect, "skill_id": trigger["skill_id"], "skill_name": trigger["skill_name"]}
+        if effect["kind"] == "charge_skill_bonus":
+            events.append(f"{trigger['skill_name']}預備完成：下一次消耗 Physical Charge 的物理技能傷害 +{effect['damage_percent']}%。")
+        else:
+            events.append(f"{trigger['skill_name']}追擊窗口開啟：下一次普通攻擊追加一次追擊。")
+    return events
 
 
 def physical_status_effectiveness(enemy: dict, status: str) -> str:
     return PHYSICAL_STATUS_EFFECTIVENESS.get(enemy.get("race"), {}).get(status, "ineffective")
+
+
+def physical_status_damage_multiplier(enemy: dict, status: str) -> float:
+    if status not in {"bleed", "poison"}:
+        return 1.0
+    return PHYSICAL_STATUS_DAMAGE_MULTIPLIERS[physical_status_effectiveness(enemy, status)]
 
 
 def calc_physical_status_damage(power: int, multiplier: float) -> int:
@@ -620,8 +770,6 @@ def element_multiplier(attack_element: str, target_element: str, enemy_buffs: di
     attack = normalized_element(attack_element)
     target = normalized_element(target_element)
     multiplier = 1.25 if ELEMENT_COUNTERS.get(attack) == target else 0.80 if ELEMENT_COUNTERS.get(target) == attack else 1.0
-    if enemy_buffs and enemy_buffs.get("cinder_mark", 0) > 0 and attack == "fire":
-        multiplier *= 1.15
     return multiplier
 
 
@@ -673,7 +821,17 @@ def calc_player_damage(state: dict, enemy: dict, skill: dict | None, player_buff
     multiplier *= 1 + direct_bonus / 100
     if skill and skill.get("charge_bonus_per_stack"):
         multiplier += physical_charge(player_buffs) * skill["charge_bonus_per_stack"]
+        ready = player_buffs.get("_warrior_quickstep_ready", {})
+        if ready.get("kind") == "charge_skill_bonus":
+            multiplier *= 1 + ready["damage_percent"] / 100
     attack_element = skill.get("element", "物理") if skill else "物理"
+    mark_data = enemy_buffs.get("_debuff_data", {}).get("cinder_mark", {})
+    if (
+        is_magic
+        and normalized_element(attack_element) in ELEMENT_RESIST_KEYS
+        and mark_data.get("damage_scope") == "elemental_magic"
+    ):
+        multiplier *= 1 + mark_data["damage_percent"] / 100
     crit_chance = stats["crit"] + (skill.get("crit_bonus", 0) if skill else 0)
     return calc_typed_damage(
         power, multiplier, enemy, enemy_buffs, "magic" if is_magic else "physical", attack_element,
@@ -692,10 +850,10 @@ def normal_attack_followup(state: dict, skill: dict | None) -> tuple[dict, dict]
     return head, followup
 
 
-def calc_normal_attack_followup_damage(state: dict, enemy: dict, player_buffs: dict, enemy_buffs: dict, followup: dict) -> int:
+def calc_normal_attack_followup_damage(state: dict, enemy: dict, player_buffs: dict, enemy_buffs: dict, followup: dict, bonus_multiplier: float = 1.0) -> int:
     stats = get_stats(state, player_buffs)
     relic_effects = active_relic_passive_effects(state)
-    multiplier = followup["multiplier"] * (1 + (relic_effects.get("direct_damage_percent", 0) + relic_effects.get("direct_physical_damage_percent", 0)) / 100)
+    multiplier = followup["multiplier"] * bonus_multiplier * (1 + (relic_effects.get("direct_damage_percent", 0) + relic_effects.get("direct_physical_damage_percent", 0)) / 100)
     damage, _ = calc_typed_damage(stats["attack"], multiplier, enemy, enemy_buffs, "physical", followup["element"])
     return damage
 
@@ -703,7 +861,10 @@ def calc_enemy_damage(enemy: dict, state: dict, multiplier: float, element: str,
     stats = get_stats(state, player_buffs)
     is_magic = normalized_element(element) in ELEMENT_RESIST_KEYS
     power = enemy.get("magic_attack", enemy["attack"]) if is_magic else enemy["attack"]
-    damage, _ = calc_typed_damage(power, multiplier, stats, player_buffs, "magic" if is_magic else "physical", element)
+    # ``stats`` already includes the player's temporary defense modifiers.
+    # Do not feed them into calc_typed_damage again: that path is still needed
+    # for enemy-side defense statuses, whose raw stats do not include buffs.
+    damage, _ = calc_typed_damage(power, multiplier, stats, {}, "magic" if is_magic else "physical", element)
     if defending:
         damage = max(1, math.ceil(damage * 0.6))
     return damage
@@ -765,7 +926,7 @@ def combat(state: dict, enemy_id: str, boss: bool = False, run_log: dict | None 
             action_result = result
             enemy_hp -= action_result.damage
         elif choice == 4:
-            result = combat_item_menu(state, boss, enemy_buffs, enemy)
+            result = combat_item_menu(state, boss, enemy_buffs, enemy, player_buffs.get("_mp_item_used", False))
             if result.outcome == "cancel":
                 render_combat_summary(result.summary, boss)
                 if result.summary:
@@ -779,6 +940,13 @@ def combat(state: dict, enemy_id: str, boss: bool = False, run_log: dict | None 
                 render_battle_log(battle_log, boss)
                 return "fled"
             enemy_hp -= action_result.damage
+            if action_result.free_action:
+                player_buffs["_mp_item_used"] = True
+                record_battle_events(battle_log, turn, action_result.events)
+                render_combat_summary(action_result.summary, boss)
+                if action_result.summary:
+                    last_action_summary = action_result.summary[0]
+                continue
         elif not boss and choice == 5:
             if try_escape(state, enemy):
                 action_result = CombatActionResult(
@@ -815,6 +983,7 @@ def combat(state: dict, enemy_id: str, boss: bool = False, run_log: dict | None 
         )
 
         effect_result = tick_effects(state, player_buffs, enemy_buffs, enemy)
+        player_buffs.pop("_mp_item_used", None)
         effect_events, dot_damage = effect_result
         enemy_hp -= dot_damage
         turn_events.extend(enemy_events)
@@ -864,6 +1033,7 @@ def player_attack(state: dict, enemy: dict, enemy_hp: int, skill: dict | None, p
     crit_text = " 暴擊！" if is_crit else ""
     events = [f"你使用{label}，造成 {damage} 傷害。{crit_text}"]
     summary = [f"你使用{label}，造成 {damage} 傷害。{crit_text}"]
+    pursuit = player_buffs.pop("_rogue_pursuit", None) if skill is None else None
     if skill and skill.get("charge_bonus_per_stack"):
         consumed = consume_physical_charge(player_buffs)
         if consumed:
@@ -875,6 +1045,9 @@ def player_attack(state: dict, enemy: dict, enemy_hp: int, skill: dict | None, p
         charge_line = f"Physical Charge 增加至 {stacks}/{MAX_PHYSICAL_CHARGE}。"
         events.append(charge_line)
         summary.append(charge_line)
+        passive_events = activate_passives(state, player_buffs, "physical_charge_reaches", stacks=stacks)
+        events.extend(passive_events)
+        summary.extend(passive_events)
     followup_data = normal_attack_followup(state, skill)
     if followup_data and enemy_hp - damage > 0:
         followup_equipment, followup = followup_data
@@ -883,13 +1056,30 @@ def player_attack(state: dict, enemy: dict, enemy_hp: int, skill: dict | None, p
         events.append(f"{followup_equipment['name']}順勢劃出追擊，造成 {followup_damage} 傷害。")
         summary.append(f"{followup_equipment['name']}追擊 {followup_damage} 傷害。")
         if followup.get("on_hit"):
-            effect_events = apply_weapon_effect(state, enemy, followup["on_hit"], enemy_buffs)
+            effect_events, applied_status = apply_weapon_effect(state, enemy, followup["on_hit"], enemy_buffs)
             events.extend(effect_events)
             summary.extend(effect_events)
+            if applied_status:
+                passive_events = activate_passives(state, player_buffs, "physical_status_applied", status=applied_status)
+                events.extend(passive_events)
+                summary.extend(passive_events)
+    if pursuit and followup_data and enemy_hp - damage > 0:
+        followup_equipment, followup = followup_data
+        pursuit_damage = calc_normal_attack_followup_damage(
+            state, enemy, player_buffs, enemy_buffs, followup, pursuit["followup_multiplier"],
+        )
+        damage += pursuit_damage
+        pursuit_line = f"{pursuit['skill_name']}追擊發動，{followup_equipment['name']}追加造成 {pursuit_damage} 傷害。"
+        events.append(pursuit_line)
+        summary.append(pursuit_line)
     if skill and skill.get("on_hit"):
-        effect_events = apply_weapon_effect(state, enemy, skill["on_hit"], enemy_buffs)
+        effect_events, applied_status = apply_weapon_effect(state, enemy, skill["on_hit"], enemy_buffs)
         events.extend(effect_events)
         summary.extend(effect_events)
+        if applied_status:
+            passive_events = activate_passives(state, player_buffs, "physical_status_applied", status=applied_status)
+            events.extend(passive_events)
+            summary.extend(passive_events)
     is_magic = bool(skill and skill.get("stat") == "magic")
     lifesteal_percent = active_relic_passive_effects(state).get("physical_lifesteal_percent", 0)
     if not is_magic and lifesteal_percent:
@@ -903,31 +1093,44 @@ def player_attack(state: dict, enemy: dict, enemy_hp: int, skill: dict | None, p
     return CombatActionResult(damage=damage, events=events, summary=summary)
 
 
-def apply_dot(enemy_buffs: dict, status: str, duration: int, multiplier: float, damage_type: str, element: str) -> None:
+def apply_dot(
+    enemy_buffs: dict,
+    status: str,
+    duration: int,
+    multiplier: float,
+    damage_type: str,
+    element: str,
+    *,
+    fixed_power: int | None = None,
+) -> None:
     enemy_buffs[status] = duration
     enemy_buffs.setdefault("_dot_data", {})[status] = {
         "multiplier": multiplier,
         "damage_type": damage_type,
         "element": element,
     }
+    if fixed_power is not None:
+        enemy_buffs["_dot_data"][status]["fixed_power"] = fixed_power
 
 
-def apply_weapon_effect(state: dict, enemy: dict, effect: dict, enemy_buffs: dict) -> list[str]:
+def apply_weapon_effect(state: dict, enemy: dict, effect: dict, enemy_buffs: dict) -> tuple[list[str], str | None]:
     stats = get_stats(state)
     chance = max(35, min(95, effect.get("chance", 0) + stats.get("effect_accuracy", 0) - enemy.get("physical_status_resist", 0)))
     status = effect["status"]
     if status in {"bleed", "poison"} and physical_status_effectiveness(enemy, status) == "ineffective":
-        return [f"{enemy['name']} 的種族不受{status_display_name(status)}影響。"]
+        return [f"{enemy['name']} 的種族不受{status_display_name(status)}影響。"], None
     if random.randint(1, 100) > chance:
-        return [f"{status_display_name(status)}附加失敗。"]
+        return [f"{status_display_name(status)}附加失敗。"], None
     if status == "defense_down":
         enemy_buffs[status] = effect["duration"]
-        return [f"{status_display_name(status)}附加成功。"]
+        return [f"{status_display_name(status)}附加成功。"], status
     apply_dot(enemy_buffs, status, effect["duration"], effect["multiplier"], effect.get("damage_type", "physical"), effect.get("element", "物理"))
-    return [f"{status_display_name(status)}附加成功，持續 {effect['duration']} 回合。"]
+    return [f"{status_display_name(status)}附加成功，持續 {effect['duration']} 回合。"], status
 
 def skill_menu(state: dict, enemy: dict, player_buffs: dict, enemy_buffs: dict):
-    skills = state["learned_skills"]
+    skills = [skill_id for skill_id in state["learned_skills"] if SKILLS[skill_id].get("kind") != "passive"]
+    if not skills:
+        return CombatActionResult(events=["沒有可施放的主動技能。"], summary=["沒有可施放的主動技能。"], outcome="cancel")
     options = []
     for skill_id in skills:
         skill = SKILLS[skill_id]
@@ -963,10 +1166,17 @@ def skill_menu(state: dict, enemy: dict, player_buffs: dict, enemy_buffs: dict):
         return CombatActionResult(events=[line], summary=[line])
     if skill["kind"] == "buff":
         player_buffs[skill["buff"]] = skill["duration"]
+        if skill.get("buff_stats"):
+            player_buffs.setdefault("_buff_stat_data", {})[skill["buff"]] = dict(skill["buff_stats"])
         line = f"你使用{skill['name']}。{skill['desc']}"
         return CombatActionResult(events=[line], summary=[line])
     if skill["kind"] == "debuff":
         enemy_buffs[skill["debuff"]] = skill["duration"]
+        if skill.get("damage_percent") is not None:
+            enemy_buffs.setdefault("_debuff_data", {})[skill["debuff"]] = {
+                "damage_percent": skill["damage_percent"],
+                "damage_scope": skill.get("damage_scope"),
+            }
         line = f"你使用{skill['name']}。{skill['desc']}"
         return CombatActionResult(events=[line], summary=[line])
     if skill["kind"] == "dot":
@@ -980,15 +1190,15 @@ def skill_menu(state: dict, enemy: dict, player_buffs: dict, enemy_buffs: dict):
         return CombatActionResult(events=[line], summary=[line])
     return CombatActionResult()
 
-def combat_item_menu(state: dict, boss: bool, enemy_buffs: dict, enemy: dict):
+def combat_item_menu(state: dict, boss: bool, enemy_buffs: dict, enemy: dict, mp_item_used: bool = False):
     usable_ids = [
         item_id
-        for item_id in ["item_potion_s", "item_potion_m", "item_focus_drop", "item_herb_antidote", "item_armor_piercer", "item_escape_scroll"]
-        if state["inventory"].get(item_id, 0) > 0
+        for item_id in COMBAT_ITEM_IDS
+        if combat_item_quantity(state, item_id) > 0
     ]
     if not usable_ids:
         return CombatActionResult(events=["沒有可用道具。"], summary=["沒有可用道具。"], outcome="cancel")
-    options = [f"{item_name(item_id)} x{state['inventory'][item_id]} / {ITEMS[item_id]['desc']}" for item_id in usable_ids]
+    options = [f"{item_name(item_id)} x{combat_item_quantity(state, item_id)} / {ITEMS[item_id]['desc']}" for item_id in usable_ids]
     choice = action_menu_panel(
         "選擇道具",
         options,
@@ -1000,42 +1210,33 @@ def combat_item_menu(state: dict, boss: bool, enemy_buffs: dict, enemy: dict):
     if choice == 0:
         return CombatActionResult(outcome="cancel")
     item_id = usable_ids[choice - 1]
-    if item_id == "item_potion_s":
+    if item_id in COMBAT_MP_RECOVERY and mp_item_used:
+        return CombatActionResult(events=["本回合已使用 MP 藥水。"], summary=["本回合已使用 MP 藥水。"], outcome="cancel")
+    if item_id in COMBAT_HP_RECOVERY:
         stats = get_stats(state)
         before = state["current_hp"]
-        state["current_hp"] = min(stats["max_hp"], state["current_hp"] + 35)
-        remove_item(state, item_id, 1)
-        line = f"使用小藥水，回復 {state['current_hp'] - before} HP。"
+        state["current_hp"] = min(stats["max_hp"], state["current_hp"] + combat_recovery_amount(state, item_id))
+        consume_combat_item(state, item_id)
+        line = f"使用{item_name(item_id)}，回復 {state['current_hp'] - before} HP。"
         return CombatActionResult(events=[line], summary=[line])
-    elif item_id == "item_potion_m":
-        stats = get_stats(state)
-        before = state["current_hp"]
-        state["current_hp"] = min(stats["max_hp"], state["current_hp"] + 70)
-        remove_item(state, item_id, 1)
-        line = f"使用中藥水，回復 {state['current_hp'] - before} HP。"
-        return CombatActionResult(events=[line], summary=[line])
-    elif item_id == "item_focus_drop":
+    elif item_id in COMBAT_MP_RECOVERY:
         stats = get_stats(state)
         before = state["current_mp"]
-        state["current_mp"] = min(stats["max_mp"], state["current_mp"] + 12)
-        remove_item(state, item_id, 1)
-        line = f"使用集中滴露，回復 {state['current_mp'] - before} MP。"
-        return CombatActionResult(events=[line], summary=[line])
+        state["current_mp"] = min(stats["max_mp"], state["current_mp"] + combat_recovery_amount(state, item_id))
+        consume_combat_item(state, item_id)
+        line = f"使用{item_name(item_id)}，回復 {state['current_mp'] - before} MP。"
+        return CombatActionResult(events=[line], summary=[line], free_action=True)
     elif item_id == "item_herb_antidote":
-        remove_item(state, item_id, 1)
+        consume_combat_item(state, item_id)
         state.setdefault("_clear_burn", True)
         line = "你嚼下解毒草，灼熱感稍微退去。"
         return CombatActionResult(events=[line], summary=[line])
-    elif item_id == "item_armor_piercer":
-        remove_item(state, item_id, 1)
-        enemy_buffs["defense_down"] = max(enemy_buffs.get("defense_down", 0), 3)
-        damage = max(8, math.ceil(enemy["hp"] * 0.08))
-        line = f"破甲釘命中敵人的護具縫隙，造成 {damage} 傷害，敵方防禦下降。"
-        return CombatActionResult(damage=damage, events=[line], summary=[line])
+    elif item_id in COMBAT_THROWABLE_IDS:
+        return use_combat_throwable(state, item_id, enemy, enemy_buffs)
     elif item_id == "item_escape_scroll":
         if boss:
             return CombatActionResult(events=["Boss 戰中無法使用逃脫卷軸。"], summary=["Boss 戰中無法使用逃脫卷軸。"], outcome="cancel")
-        remove_item(state, item_id, 1)
+        consume_combat_item(state, item_id)
         return CombatActionResult(events=["卷軸化成白光，你撤回迷宮入口。"], summary=["卷軸化成白光，你撤回迷宮入口。"], outcome="escaped")
     return CombatActionResult()
 
@@ -1224,15 +1425,24 @@ def tick_effects(state: dict, player_buffs: dict, enemy_buffs: dict, enemy: dict
         for status, dot in list(enemy_buffs.get("_dot_data", {}).items()):
             if enemy_buffs.get(status, 0) <= 0:
                 continue
-            stats = get_stats(state)
-            power = stats["magic_attack"] if dot["damage_type"] == "magic" else stats["attack"]
-            if dot["damage_type"] == "physical":
-                damage = calc_physical_status_damage(power, dot["multiplier"])
+            if "fixed_power" in dot:
+                damage = dot["fixed_power"]
             else:
-                damage, _ = calc_typed_damage(
-                    power, dot["multiplier"], enemy, enemy_buffs, dot["damage_type"], dot["element"],
-                )
-            damage = math.ceil(damage * (1 + active_relic_passive_effects(state).get("dot_damage_percent", 0) / 100))
+                stats = get_stats(state)
+                power = stats["magic_attack"] if dot["damage_type"] == "magic" else stats["attack"]
+                if dot["damage_type"] == "physical":
+                    race_multiplier = physical_status_damage_multiplier(enemy, status)
+                    damage = (
+                        calc_physical_status_damage(power, dot["multiplier"] * race_multiplier)
+                        if race_multiplier > 0
+                        else 0
+                    )
+                else:
+                    damage, _ = calc_typed_damage(
+                        power, dot["multiplier"], enemy, enemy_buffs, dot["damage_type"], dot["element"],
+                    )
+            if "fixed_power" not in dot:
+                damage = math.ceil(damage * (1 + active_relic_passive_effects(state).get("dot_damage_percent", 0) / 100))
             enemy_dot_damage += damage
             events.append(f"{status_display_name(status)}造成 {damage} 傷害。")
     for buffs in (player_buffs, enemy_buffs):
@@ -1247,8 +1457,11 @@ def tick_effects(state: dict, player_buffs: dict, enemy_buffs: dict, enemy: dict
             del buffs[key]
             if buffs is enemy_buffs:
                 buffs.get("_dot_data", {}).pop(key, None)
+                buffs.get("_debuff_data", {}).pop(key, None)
             if buffs is player_buffs and key == "regeneration":
                 buffs.pop("_regen_data", None)
+            if buffs is player_buffs:
+                buffs.get("_buff_stat_data", {}).pop(key, None)
     return (events, enemy_dot_damage) if enemy is not None else events
 
 CLI_REGION_ORDER = ["border_fire", "ice", "earth", "thunder", "final"]

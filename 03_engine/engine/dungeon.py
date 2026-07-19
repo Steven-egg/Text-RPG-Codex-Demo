@@ -27,6 +27,9 @@ from .state import (
     FINAL_QUEST_ID,
     add_gold,
     add_loot,
+    configure_run_supplies,
+    RUN_SUPPLY_THROW_ITEMS,
+    item_job_allowed,
 )
 from .facilities import (
     BOSS_GLEN_SIGHTED_FLAG,
@@ -171,7 +174,53 @@ def dungeon_menu(state: dict, region_id: str = "border_fire") -> None:
     )
     if choice == 0:
         return
+    if not configure_cli_run_supplies(state):
+        return
     explore_dungeon(state, unlocked_dungeons[choice - 1])
+
+
+def configure_cli_run_supplies(state: dict) -> bool:
+    """Small CLI preparation step; unused inventory remains untouched."""
+    inventory = state.get("inventory", {})
+    def choose(label: str, allowed: tuple[str, ...], cap: int) -> dict:
+        available = [item_id for item_id in allowed if inventory.get(item_id, 0) > 0]
+        if not available or cap == 0:
+            return {}
+        print(f"{label}：" + " / ".join(f"{item_name(item_id)} x{inventory[item_id]}" for item_id in available))
+        if len(available) > 1:
+            raw_item = input("輸入 1 選第一項、2 選第二項（留白不帶）> ").strip()
+            if raw_item not in {"1", "2"}:
+                return {}
+            item_id = available[int(raw_item) - 1]
+        else:
+            item_id = available[0]
+        raw = input(f"輸入數量 0-{min(cap, inventory[item_id])}（0 不帶）> ").strip()
+        try:
+            quantity = int(raw or "0")
+        except ValueError:
+            print("數量格式錯誤。")
+            return {}
+        if quantity <= 0:
+            return {}
+        return {"item_id": item_id, "quantity": quantity}
+    selections = {
+        "sustain_hp": choose("續航 HP 格", ("item_potion_s", "item_potion_m"), 3),
+        "emergency_hp": choose("保險 HP 格", ("item_potion_s", "item_potion_m", "item_ice_potion_01", "item_earth_potion_01", "item_thunder_potion_01", "item_final_potion_01"), 1),
+        "mp": choose("MP 格", ("item_focus_drop", "item_ice_potion_02", "item_earth_potion_02", "item_thunder_potion_02", "item_final_potion_02"), 1 if state.get("job") in {"戰士", "盜賊"} else 2),
+        "throwable": choose(
+            "投擲格",
+            tuple(item_id for item_id in RUN_SUPPLY_THROW_ITEMS if item_job_allowed(state, item_id)),
+            2,
+        ),
+        "escape": choose("逃脫格", ("item_escape_scroll",), 1),
+    }
+    try:
+        configure_run_supplies(state, selections)
+    except ValueError as error:
+        print(f"補給配置失敗：{error}")
+        pause()
+        return False
+    return True
 
 
 def boss_available_at_dungeon_end(state: dict, dungeon_id: str, boss_id: str | None) -> bool:
