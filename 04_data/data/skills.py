@@ -123,9 +123,9 @@ SKILLS = {
         "kind": "debuff",
         "debuff": "cinder_mark",
         "duration": 5,
-        "damage_percent": 20,
+        "damage_percent": 50,
         "damage_scope": "elemental_magic",
-        "desc": "5 回合使敵人受到的直接元素魔法傷害 +20%。",
+        "desc": "5 回合使敵人受到的直接元素魔法傷害 +50%。",
     },
     # === Ice Region Skills ===
     "skill_ice_01": {

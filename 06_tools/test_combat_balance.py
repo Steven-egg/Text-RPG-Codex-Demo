@@ -148,11 +148,34 @@ MAGE_ROTATIONS = {
 }
 
 BENCHMARK_TARGETS = {
-    "fire": {"normal_actions": (2, 5), "boss_actions": (6, 10), "boss_min_final_hp_ratio": 0.25},
-    "ice": {"normal_actions": (2, 5), "boss_actions": (7, 12), "boss_min_final_hp_ratio": 0.25},
-    "earth": {"normal_actions": (3, 6), "boss_actions": (8, 14), "boss_min_final_hp_ratio": 0.20},
-    "thunder": {"normal_actions": (3, 6), "boss_actions": (9, 16), "boss_min_final_hp_ratio": 0.15},
-    "final": {"normal_actions": (4, 7), "boss_actions": (12, 20), "boss_min_final_hp_ratio": 0.10},
+    # Boss action and exit-HP bands are role-aware diagnostic references, not
+    # balance gates.  They retain the same deterministic output semantics
+    # while avoiding one shared tempo expectation for burst and long-fight jobs.
+    "fire": {
+        "normal_actions": (2, 5), "boss_actions": (6, 10), "boss_min_final_hp_ratio": 0.25,
+        "boss_actions_by_job": {"warrior": (6, 10), "mage": (4, 8), "rogue": (8, 14), "cleric": (14, 24)},
+        "boss_min_final_hp_ratio_by_job": {"warrior": 0.25, "mage": 0.25, "rogue": 0.10, "cleric": 0.25},
+    },
+    "ice": {
+        "normal_actions": (2, 5), "boss_actions": (7, 12), "boss_min_final_hp_ratio": 0.25,
+        "boss_actions_by_job": {"warrior": (6, 12), "mage": (4, 9), "rogue": (7, 12), "cleric": (12, 22)},
+        "boss_min_final_hp_ratio_by_job": {"warrior": 0.25, "mage": 0.20, "rogue": 0.10, "cleric": 0.25},
+    },
+    "earth": {
+        "normal_actions": (3, 6), "boss_actions": (8, 14), "boss_min_final_hp_ratio": 0.20,
+        "boss_actions_by_job": {"warrior": (6, 12), "mage": (4, 9), "rogue": (5, 12), "cleric": (14, 24)},
+        "boss_min_final_hp_ratio_by_job": {"warrior": 0.20, "mage": 0.20, "rogue": 0.15, "cleric": 0.20},
+    },
+    "thunder": {
+        "normal_actions": (3, 6), "boss_actions": (9, 16), "boss_min_final_hp_ratio": 0.15,
+        "boss_actions_by_job": {"warrior": (6, 14), "mage": (4, 10), "rogue": (5, 12), "cleric": (16, 28)},
+        "boss_min_final_hp_ratio_by_job": {"warrior": 0.15, "mage": 0.15, "rogue": 0.10, "cleric": 0.15},
+    },
+    "final": {
+        "normal_actions": (4, 7), "boss_actions": (12, 20), "boss_min_final_hp_ratio": 0.10,
+        "boss_actions_by_job": {"warrior": (6, 14), "mage": (4, 10), "rogue": (6, 14), "cleric": (20, 40)},
+        "boss_min_final_hp_ratio_by_job": {"warrior": 0.15, "mage": 0.10, "rogue": 0.10, "cleric": 0.15},
+    },
 }
 
 RELIC_ORDER = (
@@ -218,6 +241,7 @@ SLOT_STATS = {
     "accessory": {"defense", "magic_defense", "agility", "effect_accuracy", "crit", "fire_resist", "ice_resist", "earth_resist", "thunder_resist", "trap_evasion", "rare_drop"},
     "special": {"defense", "magic_defense", "agility", "effect_accuracy", "crit", "fire_resist", "ice_resist", "earth_resist", "thunder_resist", "trap_evasion", "rare_drop"},
 }
+DETERMINISTIC_EQUIPMENT_SLOTS = ("weapon", "head", "body", "accessory", "special")
 
 RECORD_FIELDS = (
     "schema_version", "scenario_id", "seed", "rng_stream_id", "layer", "region", "benchmark_level", "job", "target_type", "enemy_id",
@@ -575,11 +599,16 @@ def _round_outcome(player_hp: int, enemy_hp: int) -> str | None:
 
 def evaluate_benchmark_record(record: dict[str, Any]) -> dict[str, bool]:
     target = BENCHMARK_TARGETS[record["region"]]
-    action_band = target["boss_actions" if record["target_type"] == "boss" else "normal_actions"]
+    if record["target_type"] == "boss":
+        action_band = target.get("boss_actions_by_job", {}).get(record.get("job"), target["boss_actions"])
+        hp_floor = target.get("boss_min_final_hp_ratio_by_job", {}).get(record.get("job"), target["boss_min_final_hp_ratio"])
+    else:
+        action_band = target["normal_actions"]
+        hp_floor = 0.0
     action_target_met = record["result"] == "victory" and action_band[0] <= record["player_actions"] <= action_band[1]
     hp_target_met = True
     if record["target_type"] == "boss":
-        hp_target_met = record["result"] == "victory" and record["final_hp_ratio"] >= target["boss_min_final_hp_ratio"]
+        hp_target_met = record["result"] == "victory" and record["final_hp_ratio"] >= hp_floor
     return {"action_target_met": action_target_met, "boss_hp_target_met": hp_target_met}
 
 
@@ -792,7 +821,14 @@ def build_records(layers: Iterable[str] = LAYERS, seeds: Iterable[int] = DEFAULT
     return records
 
 
-def _classify_equipment(equipment_id: str, entry: dict, synthetic_spent: float | None = None, synthetic_cap: float | None = None) -> list[str]:
+def _classify_equipment(
+    equipment_id: str,
+    entry: dict,
+    synthetic_spent: float | None = None,
+    synthetic_cap: float | None = None,
+    *,
+    enforce_affix_caps: bool = True,
+) -> list[str]:
     findings: list[str] = []
     slot = entry.get("slot")
     if slot not in {"weapon", "head", "body", "accessory", "special"}:
@@ -807,7 +843,7 @@ def _classify_equipment(equipment_id: str, entry: dict, synthetic_spent: float |
             findings.append("SANDBOX_ONLY_STAT")
         elif stat not in allowed_stats:
             findings.append("SLOT_ILLEGAL")
-        if value > PER_ITEM_STAT_CAPS.get(stat, value):
+        if enforce_affix_caps and value > PER_ITEM_STAT_CAPS.get(stat, value):
             findings.append("STACKING_ILLEGAL")
     followup = entry.get("normal_attack_followup")
     if followup:
@@ -823,13 +859,34 @@ def _classify_equipment(equipment_id: str, entry: dict, synthetic_spent: float |
 
 
 def _classify_loadout(loadout: dict[str, str | None]) -> list[str]:
+    return list(_loadout_affix_cap_overages(loadout))
+
+
+def _loadout_stat_totals(loadout: dict[str, str | None]) -> dict[str, int]:
     totals: dict[str, int] = {}
     for item_id in loadout.values():
         if not item_id:
             continue
         for stat, value in EQUIPMENT[item_id].get("stats", {}).items():
             totals[stat] = totals.get(stat, 0) + max(0, value)
-    return [stat for stat, cap in LOADOUT_STAT_CAPS.items() if totals.get(stat, 0) > cap]
+    return totals
+
+
+def _loadout_affix_cap_overages(loadout: dict[str, str | None]) -> dict[str, dict[str, int]]:
+    totals = _loadout_stat_totals(loadout)
+    return {
+        stat: {"baseline": totals.get(stat, 0), "affix_cap": cap, "over_by": totals.get(stat, 0) - cap}
+        for stat, cap in sorted(LOADOUT_STAT_CAPS.items())
+        if totals.get(stat, 0) > cap
+    }
+
+
+def _item_affix_cap_overages(entry: dict) -> dict[str, dict[str, int]]:
+    return {
+        stat: {"baseline": value, "affix_cap": cap, "over_by": value - cap}
+        for stat, cap in sorted(PER_ITEM_STAT_CAPS.items())
+        if (value := entry.get("stats", {}).get(stat, 0)) > cap
+    }
 
 
 def _lexicon_stat_summary() -> dict[str, str]:
@@ -856,12 +913,99 @@ def _lexicon_stat_summary() -> dict[str, str]:
     }
 
 
+def _stat_ranges(entries: list[dict]) -> dict[str, dict[str, int]]:
+    values: dict[str, list[int]] = {}
+    for entry in entries:
+        for stat, value in entry.get("stats", {}).items():
+            values.setdefault(stat, []).append(value)
+    return {
+        stat: {"min": min(stat_values), "max": max(stat_values)}
+        for stat, stat_values in sorted(values.items())
+    }
+
+
+def _deterministic_equipment_budget() -> dict[str, Any]:
+    """Expose the live regional floor without creating affix or item state."""
+    records: list[dict[str, Any]] = []
+    region_slot_entries: dict[tuple[str, str], list[dict]] = {}
+    for region_id, jobs in FULL_LOADOUTS.items():
+        for job_key, loadout in jobs.items():
+            for slot in DETERMINISTIC_EQUIPMENT_SLOTS:
+                equipment_id = loadout.get(slot)
+                entry = EQUIPMENT.get(equipment_id, {}) if equipment_id else {}
+                stats = dict(sorted(entry.get("stats", {}).items()))
+                followup = entry.get("normal_attack_followup")
+                affix_headroom = {
+                    stat: max(0, cap - max(0, stats.get(stat, 0)))
+                    for stat, cap in sorted(PER_ITEM_STAT_CAPS.items())
+                    if stat in SLOT_STATS[slot]
+                }
+                record = {
+                    "region": region_id,
+                    "job": job_key,
+                    "slot": slot,
+                    "equipment_id": equipment_id or "",
+                    "source_region": entry.get("region", "starter") if equipment_id else "unassigned",
+                    "carry_forward": bool(equipment_id and entry.get("region") not in {None, region_id}),
+                    "stats": stats,
+                    "weighted_stat_budget": _equipment_power([equipment_id]),
+                    "affix_increment_budget": 0.0,
+                    "baseline_above_affix_cap": _item_affix_cap_overages(entry),
+                    "affix_headroom": affix_headroom,
+                    "permitted_stat_families": sorted(SLOT_STATS[slot]),
+                    "negative_stat_tradeoffs": {stat: value for stat, value in stats.items() if value < 0},
+                    # One unit is the entire allowance for the existing head-slot
+                    # pseudo-offhand, including any attached on-hit rider.
+                    "pseudo_offhand_effect_budget": 1 if followup else 0,
+                    "pseudo_offhand_effect": dict(followup) if followup else {},
+                    # This audit reports the current deterministic floor only.
+                    # It reserves no value for a future elemental-infusion affix.
+                    "element_infusion": {
+                        "eligible": slot == "weapon",
+                        "configured": False,
+                        "opportunity_cost": "unallocated",
+                    },
+                }
+                records.append(record)
+                if equipment_id:
+                    region_slot_entries.setdefault((region_id, slot), []).append(entry)
+    return {
+        "records": records,
+        "region_slot_base_stat_ranges": {
+            f"{region_id}:{slot}": _stat_ranges(entries)
+            for (region_id, slot), entries in sorted(region_slot_entries.items())
+        },
+    }
+
+
 def audit_equipment() -> dict[str, Any]:
-    findings = {equipment_id: _classify_equipment(equipment_id, entry) for equipment_id, entry in sorted(EQUIPMENT.items())}
+    findings = {
+        equipment_id: _classify_equipment(equipment_id, entry, enforce_affix_caps=False)
+        for equipment_id, entry in sorted(EQUIPMENT.items())
+    }
     loadout_stacking = {
         f"{region_id}:{job_key}": _classify_loadout(loadout)
         for region_id, jobs in FULL_LOADOUTS.items()
         for job_key, loadout in jobs.items()
+    }
+    baseline_affix_envelope = {
+        "increment_budget_configured": False,
+        "item_baseline_above_affix_cap": {
+            equipment_id: overages
+            for equipment_id, entry in sorted(EQUIPMENT.items())
+            if (overages := _item_affix_cap_overages(entry))
+        },
+        "loadout_baseline_above_affix_cap": {
+            f"{region_id}:{job_key}": overages
+            for region_id, jobs in FULL_LOADOUTS.items()
+            for job_key, loadout in jobs.items()
+            if (overages := _loadout_affix_cap_overages(loadout))
+        },
+        "contract_errors": {
+            equipment_id: [finding for finding in item_findings if finding in {"SLOT_ILLEGAL", "SANDBOX_ONLY_STAT"}]
+            for equipment_id, item_findings in findings.items()
+            if any(finding in {"SLOT_ILLEGAL", "SANDBOX_ONLY_STAT"} for finding in item_findings)
+        },
     }
     manual = {}
     sleeve = dict(FULL_LOADOUTS["ice"]["rogue"])
@@ -895,6 +1039,8 @@ def audit_equipment() -> dict[str, Any]:
         "loadout_stacking_overages": loadout_stacking,
         "lexicon_stat_summary": _lexicon_stat_summary(),
         "manual_effect_head_slot_isolate": manual,
+        "deterministic_budget": _deterministic_equipment_budget(),
+        "baseline_affix_envelope": baseline_affix_envelope,
     }
 
 

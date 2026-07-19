@@ -248,7 +248,7 @@ def test_cinder_mark_data_expires_without_overlap() -> None:
     with patch("engine.game.action_menu_panel", return_value=1):
         skill_menu(mage, enemy, {}, enemy_buffs)
     assert enemy_buffs["cinder_mark"] == 5
-    assert enemy_buffs["_debuff_data"]["cinder_mark"] == {"damage_percent": 20, "damage_scope": "elemental_magic"}
+    assert enemy_buffs["_debuff_data"]["cinder_mark"] == {"damage_percent": 50, "damage_scope": "elemental_magic"}
     assert element_multiplier("fire", "ice", enemy_buffs) == base_multiplier
     marked_fire, _ = calc_player_damage(mage, enemy, SKILLS["skill_spark"], {}, enemy_buffs)
     marked_ice, _ = calc_player_damage(mage, enemy, SKILLS["skill_ice_needle"], {}, enemy_buffs)

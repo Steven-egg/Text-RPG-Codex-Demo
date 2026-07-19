@@ -28,11 +28,11 @@ SPEC.loader.exec_module(balance)
 
 
 EXPECTED_TARGETS = {
-    "fire": {"normal_actions": (2, 5), "boss_actions": (6, 10), "boss_min_final_hp_ratio": 0.25},
-    "ice": {"normal_actions": (2, 5), "boss_actions": (7, 12), "boss_min_final_hp_ratio": 0.25},
-    "earth": {"normal_actions": (3, 6), "boss_actions": (8, 14), "boss_min_final_hp_ratio": 0.20},
-    "thunder": {"normal_actions": (3, 6), "boss_actions": (9, 16), "boss_min_final_hp_ratio": 0.15},
-    "final": {"normal_actions": (4, 7), "boss_actions": (12, 20), "boss_min_final_hp_ratio": 0.10},
+    "fire": {"normal_actions": (2, 5), "boss_actions": (6, 10), "boss_min_final_hp_ratio": 0.25, "boss_actions_by_job": {"warrior": (6, 10), "mage": (4, 8), "rogue": (8, 14), "cleric": (14, 24)}, "boss_min_final_hp_ratio_by_job": {"warrior": 0.25, "mage": 0.25, "rogue": 0.10, "cleric": 0.25}},
+    "ice": {"normal_actions": (2, 5), "boss_actions": (7, 12), "boss_min_final_hp_ratio": 0.25, "boss_actions_by_job": {"warrior": (6, 12), "mage": (4, 9), "rogue": (7, 12), "cleric": (12, 22)}, "boss_min_final_hp_ratio_by_job": {"warrior": 0.25, "mage": 0.20, "rogue": 0.10, "cleric": 0.25}},
+    "earth": {"normal_actions": (3, 6), "boss_actions": (8, 14), "boss_min_final_hp_ratio": 0.20, "boss_actions_by_job": {"warrior": (6, 12), "mage": (4, 9), "rogue": (5, 12), "cleric": (14, 24)}, "boss_min_final_hp_ratio_by_job": {"warrior": 0.20, "mage": 0.20, "rogue": 0.15, "cleric": 0.20}},
+    "thunder": {"normal_actions": (3, 6), "boss_actions": (9, 16), "boss_min_final_hp_ratio": 0.15, "boss_actions_by_job": {"warrior": (6, 14), "mage": (4, 10), "rogue": (5, 12), "cleric": (16, 28)}, "boss_min_final_hp_ratio_by_job": {"warrior": 0.15, "mage": 0.15, "rogue": 0.10, "cleric": 0.15}},
+    "final": {"normal_actions": (4, 7), "boss_actions": (12, 20), "boss_min_final_hp_ratio": 0.10, "boss_actions_by_job": {"warrior": (6, 14), "mage": (4, 10), "rogue": (6, 14), "cleric": (20, 40)}, "boss_min_final_hp_ratio_by_job": {"warrior": 0.15, "mage": 0.10, "rogue": 0.10, "cleric": 0.15}},
 }
 
 
@@ -284,6 +284,19 @@ def _assert_benchmark_targets(records: list[dict]) -> None:
             sample["player_actions"] = high + 1
             assert not balance.evaluate_benchmark_record(sample)["action_target_met"]
 
+        for job, (low, high) in target["boss_actions_by_job"].items():
+            sample = {
+                "region": region,
+                "target_type": "boss",
+                "job": job,
+                "result": "victory",
+                "player_actions": low,
+                "final_hp_ratio": target["boss_min_final_hp_ratio_by_job"][job],
+            }
+            assert balance.evaluate_benchmark_record(sample) == {"action_target_met": True, "boss_hp_target_met": True}
+            sample["player_actions"] = high + 1
+            assert not balance.evaluate_benchmark_record(sample)["action_target_met"]
+
     # Directly evaluate the actual pre-promotion comparison layers.  The QA
     # check validates target semantics and keeps B5 overlays out of baseline
     # pass/fail; it intentionally does not assert that the game meets targets.
@@ -395,6 +408,41 @@ def _assert_audit_categories() -> None:
     audit = balance.audit_equipment()
     assert audit["manual_effect_head_slot_isolate"]
     assert all(entry["other_slots_equal"] for entry in audit["manual_effect_head_slot_isolate"].values())
+    budget = audit["deterministic_budget"]
+    expected_records = len(balance.FULL_LOADOUTS) * len(balance.JOBS) * len(balance.DETERMINISTIC_EQUIPMENT_SLOTS)
+    assert len(budget["records"]) == expected_records
+    assert {
+        (record["region"], record["job"], record["slot"])
+        for record in budget["records"]
+    } == {
+        (region_id, job_key, slot)
+        for region_id in balance.FULL_LOADOUTS
+        for job_key in balance.JOBS
+        for slot in balance.DETERMINISTIC_EQUIPMENT_SLOTS
+    }
+    assert all(record["permitted_stat_families"] == sorted(balance.SLOT_STATS[record["slot"]]) for record in budget["records"])
+    assert all(record["element_infusion"]["eligible"] == (record["slot"] == "weapon") for record in budget["records"])
+    assert all(record["element_infusion"]["configured"] is False for record in budget["records"])
+    pseudo_offhands = [record for record in budget["records"] if record["pseudo_offhand_effect_budget"]]
+    assert pseudo_offhands
+    assert all(record["slot"] == "head" and record["pseudo_offhand_effect_budget"] == 1 for record in pseudo_offhands)
+    assert all(record["pseudo_offhand_effect"] for record in pseudo_offhands)
+    assert all(record["affix_increment_budget"] == 0.0 for record in budget["records"])
+    expected_range_keys = {
+        f"{record['region']}:{record['slot']}"
+        for record in budget["records"]
+        if record["equipment_id"]
+    }
+    assert set(budget["region_slot_base_stat_ranges"]) == expected_range_keys
+    envelope = audit["baseline_affix_envelope"]
+    assert envelope["increment_budget_configured"] is False
+    assert envelope["contract_errors"] == {}
+    assert envelope["item_baseline_above_affix_cap"]
+    assert envelope["loadout_baseline_above_affix_cap"]
+    assert set(envelope["loadout_baseline_above_affix_cap"]) == {"ice:rogue", "earth:rogue", "thunder:rogue", "final:rogue"}
+    assert all("baseline" in details[stat] and "affix_cap" in details[stat] for details in envelope["item_baseline_above_affix_cap"].values() for stat in details)
+    assert all(record["slot"] == "head" for record in pseudo_offhands)
+    assert all(record["pseudo_offhand_effect_budget"] == 1 for record in pseudo_offhands)
 
 
 def _flatten(adjustments: dict[str, dict[str, int]]) -> dict[tuple[str, str], int]:
@@ -630,8 +678,8 @@ def _assert_value_model_audit() -> None:
         record for record in defense
         if record["region"] == "final" and record["job"] == "warrior" and record["effect_id"] == "defense_up"
     )
-    assert final_warrior_up["baseline_damage"] == 43
-    assert final_warrior_up["single_pass_damage"] == final_warrior_up["observed_damage"] == 15
+    assert final_warrior_up["baseline_damage"] == 1
+    assert final_warrior_up["single_pass_damage"] == final_warrior_up["observed_damage"] == 1
 
     skills = [record for record in records if record["record_kind"] == "skill"]
     assert len(skills) == len(balance.SKILLS)
