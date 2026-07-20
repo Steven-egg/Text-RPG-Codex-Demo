@@ -45,6 +45,13 @@ const staticActionRoutes = {
 };
 const navigationDelayMs = 120;
 
+const supplySlotItemIds = {
+  sustain_hp: ["item_potion_s", "item_potion_m"],
+  emergency_hp: ["item_potion_s", "item_potion_m", "item_ice_potion_01", "item_earth_potion_01", "item_thunder_potion_01", "item_final_potion_01"],
+  mp: ["item_focus_drop", "item_ice_potion_02", "item_earth_potion_02", "item_thunder_potion_02", "item_final_potion_02"],
+  throwable: ["item_armor_piercer", "item_throw_fire", "item_throw_ice", "item_throw_earth", "item_throw_thunder", "item_sanctified_ash_vial", "item_rending_spike"],
+};
+
 let utilityPanelEl = null;
 let utilityTitleEl = null;
 let utilityPanelLabelEl = null;
@@ -678,6 +685,22 @@ function navigateAfterAction(action) {
 async function dispatchRuntimeAction(action, source) {
   try {
     if (action.action_id === "confirm_travel") {
+      const inventory = await liveSupplyInventory();
+      action = {
+        ...action,
+        supplyPromptPrepared: true,
+        payload: {
+          ...(action.payload ?? {}),
+          supplies: {
+            sustain_hp: promptLiveSupply("\u7e8c\u822a HP", "sustain_hp", 3, inventory),
+            emergency_hp: promptLiveSupply("\u7dca\u6025 HP", "emergency_hp", 1, inventory),
+            mp: promptLiveSupply("MP \u85e5\u6c34", "mp", 2, inventory),
+            throwable: promptLiveSupply("\u6295\u64f2\u54c1", "throwable", 2, inventory),
+          },
+        },
+      };
+    }
+    if (action.action_id === "confirm_travel" && !action.supplyPromptPrepared) {
       const quantity = (label, limit) => {
         const raw = window.prompt(`${label}（0-${limit}，0 為不帶）`, "0");
         const value = Number.parseInt(raw ?? "0", 10);
@@ -713,7 +736,6 @@ async function dispatchRuntimeAction(action, source) {
             emergency_hp: { item_id: emergencyItem, quantity: emergencyItem ? quantity("保險 HP 數量", 1) : 0 },
             mp: { item_id: mpItem, quantity: mpItem ? quantity("MP 藥水數量", mpLimit) : 0 },
             throwable: { item_id: throwableItem, quantity: throwableItem ? quantity("投擲品數量", 2) : 0 },
-            escape: { item_id: "item_escape_scroll", quantity: quantity("逃脫卷軸數量", 1) },
           },
         },
       };
@@ -747,6 +769,43 @@ async function dispatchRuntimeAction(action, source) {
     });
     feedbackMessageEl.textContent = reason;
   }
+}
+
+async function liveSupplyInventory() {
+  const result = await runtimeClient.dispatchAction("world_map", "open_inventory", {});
+  const entries = result.screen_model?.utility_preview?.type === "inventory"
+    ? result.screen_model.utility_preview.data
+    : [];
+  return new Map(
+    entries
+      .filter((entry) => Number.isInteger(entry.quantity) && entry.quantity > 0 && entry.item_id)
+      .map((entry) => [entry.item_id, entry]),
+  );
+}
+
+function promptLiveSupply(label, slot, cap, inventory) {
+  const candidates = supplySlotItemIds[slot].map((itemId) => inventory.get(itemId)).filter(Boolean);
+  if (candidates.length === 0) {
+    return { item_id: null, quantity: 0 };
+  }
+  const options = candidates.map((entry, index) => `${index + 1}. ${entry.name} x${entry.quantity}`);
+  const choice = Number.parseInt(
+    window.prompt(`${label}\uff1a\u8f38\u5165\u9078\u9805\u7de8\u865f\uff1b\u7559\u7a7a\u3001\u53d6\u6d88\u6216 0 \u70ba\u4e0d\u5e36\n${options.join("\n")}`, "0") ?? "0",
+    10,
+  );
+  const selected = candidates[choice - 1];
+  if (!selected) {
+    return { item_id: null, quantity: 0 };
+  }
+  const maxQuantity = Math.min(cap, selected.quantity);
+  const quantity = Number.parseInt(
+    window.prompt(`${selected.name} \u6578\u91cf\uff1a0-${maxQuantity}`, "0") ?? "0",
+    10,
+  );
+  return {
+    item_id: selected.item_id,
+    quantity: Number.isInteger(quantity) && quantity > 0 ? Math.min(quantity, maxQuantity) : 0,
+  };
 }
 
 function setMenuOpen(open, shouldLog) {

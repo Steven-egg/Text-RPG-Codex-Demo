@@ -691,3 +691,25 @@ EQUIPMENT = {
         "region": "final",
     },
 }
+
+
+# Balance adjustment for fluid combat (Weapon stats buff by 35% - 50%)
+for eq_id, eq in EQUIPMENT.items():
+    if eq.get('slot') == 'weapon':
+        stats = eq.get('stats', {})
+        if 'attack' in stats:
+            val = stats['attack']
+            if val <= 10:
+                stats['attack'] = int(val * 1.20)
+            elif val <= 25:
+                stats['attack'] = int(val * 1.35)
+            else:
+                stats['attack'] = int(val * 1.50)
+        if 'magic_attack' in stats:
+            val = stats['magic_attack']
+            if val <= 15:
+                stats['magic_attack'] = int(val * 1.20)
+            elif val <= 35:
+                stats['magic_attack'] = int(val * 1.35)
+            else:
+                stats['magic_attack'] = int(val * 1.50)

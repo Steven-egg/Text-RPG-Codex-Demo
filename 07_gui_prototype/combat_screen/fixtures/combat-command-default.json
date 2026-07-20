@@ -89,13 +89,13 @@
       },
       {
         "action_id": "use_item",
-        "label": "逃脫卷軸",
+        "label": "解毒草",
         "meta": "x1",
         "description": "非 Boss 戰中撤退，保留已取得素材。",
         "enabled": true,
         "disabled_reason": null,
-        "payload": { "item_id": "item_escape_scroll" },
-        "feedback_message": "已送出 use_item：逃脫卷軸。static prototype 不會結算撤退。"
+        "payload": { "item_id": "item_herb_antidote" },
+        "feedback_message": "已送出 use_item：解毒草。static prototype 不會計算狀態清除。"
       }
     ]
   },

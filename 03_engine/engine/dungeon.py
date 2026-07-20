@@ -212,7 +212,6 @@ def configure_cli_run_supplies(state: dict) -> bool:
             tuple(item_id for item_id in RUN_SUPPLY_THROW_ITEMS if item_job_allowed(state, item_id)),
             2,
         ),
-        "escape": choose("逃脫格", ("item_escape_scroll",), 1),
     }
     try:
         configure_run_supplies(state, selections)
@@ -456,18 +455,20 @@ def dungeon_special_event(state: dict, dungeon_id: str, run_log: dict) -> None:
 
 
 def handle_defeat(state: dict, run_log: dict) -> None:
-    lost_gold = math.floor(run_log.get("gold", 0) * 0.3)
+    lost_gold = math.ceil(run_log.get("gold", 0) * 0.5)
     state["gold"] = max(0, state["gold"] - lost_gold)
     lost_items = []
     for item_id, qty in run_log.get("items", {}).items():
-        lose_qty = math.floor(qty * 0.3)
+        if is_key_item(item_id) or item_id in EQUIPMENT:
+            continue
+        lose_qty = math.ceil(qty * 0.5)
         if lose_qty > 0 and state["inventory"].get(item_id, 0) > 0:
             actual = min(lose_qty, state["inventory"].get(item_id, 0))
             remove_item(state, item_id, actual)
             lost_items.append(f"{item_name(item_id)} x{actual}")
     stats = get_stats(state)
-    state["current_hp"] = max(1, stats["max_hp"] // 2)
-    state["current_mp"] = max(0, stats["max_mp"] // 2)
+    state["current_hp"] = max(1, math.ceil(stats["max_hp"] * 0.25))
+    state["current_mp"] = math.ceil(stats["max_mp"] * 0.25)
     result_lines = [
         "工會救援隊把你帶回艾爾姆。",
         f"失去本趟金幣 {lost_gold}G。",

@@ -408,6 +408,15 @@ def status_display_name(status: str) -> str:
     return STATUS_DISPLAY_NAMES.get(status, status)
 
 
+def parent_job(job: str) -> str:
+    return {
+        "元素騎士": "劍士",
+        "星詠者": "法師",
+        "影行者": "盜賊",
+        "聖印使": "牧師"
+    }.get(job, job)
+
+
 def physical_charge(player_buffs: dict) -> int:
     return max(0, min(MAX_PHYSICAL_CHARGE, int(player_buffs.get(PHYSICAL_CHARGE_KEY, 0))))
 
@@ -894,6 +903,8 @@ def combat(state: dict, enemy_id: str, boss: bool = False, run_log: dict | None 
     enemy_hp = enemy["hp"]
     player_buffs = {}
     enemy_buffs = {}
+    if state.get("job") == "影行者":
+        player_buffs["_rogue_pursuit"] = {"skill_name": "影行者身法", "followup_multiplier": 1.8}
     turn = 1
     boss_marker = False
     last_action_summary = "尚未行動。"
@@ -1060,7 +1071,7 @@ def player_attack(state: dict, enemy: dict, enemy_hp: int, skill: dict | None, p
             charge_line = f"消耗 Physical Charge {consumed} 層。"
             events.append(charge_line)
             summary.append(charge_line)
-    elif skill is None and state.get("job") == "劍士":
+    elif skill is None and parent_job(state.get("job")) == "劍士":
         stacks = gain_physical_charge(state, player_buffs)
         charge_line = f"Physical Charge 增加至 {stacks}/{MAX_PHYSICAL_CHARGE}。"
         events.append(charge_line)
@@ -1068,6 +1079,13 @@ def player_attack(state: dict, enemy: dict, enemy_hp: int, skill: dict | None, p
         passive_events = activate_passives(state, player_buffs, "physical_charge_reaches", stacks=stacks)
         events.extend(passive_events)
         summary.extend(passive_events)
+        if state.get("job") == "元素騎士":
+            stats = get_stats(state, player_buffs)
+            elemental_bonus = max(1, int(stats["attack"] * 0.15))
+            damage += elemental_bonus
+            element = random.choice(["火", "冰", "自然", "雷"])
+            events.append(f"元素騎士的劍刃激盪出{element}元素傷害，追加 {elemental_bonus} 傷害。")
+            summary.append(f"元素追擊 {elemental_bonus} 傷害。")
     followup_data = normal_attack_followup(state, skill)
     if followup_data and enemy_hp - damage > 0:
         followup_equipment, followup = followup_data
@@ -1101,6 +1119,10 @@ def player_attack(state: dict, enemy: dict, enemy_hp: int, skill: dict | None, p
             events.extend(passive_events)
             summary.extend(passive_events)
     is_magic = bool(skill and skill.get("stat") == "magic")
+    if is_magic and is_crit and state.get("job") == "星詠者":
+        state["current_mp"] = min(get_stats(state)["max_mp"], state["current_mp"] + 3)
+        events.append("星詠者的星光引導，暴擊回復 3 MP。")
+        summary.append("星光回復 3 MP。")
     lifesteal_percent = active_relic_passive_effects(state).get("physical_lifesteal_percent", 0)
     if not is_magic and lifesteal_percent:
         stats = get_stats(state, player_buffs)
@@ -1111,6 +1133,7 @@ def player_attack(state: dict, enemy: dict, enemy_hp: int, skill: dict | None, p
             events.append(line)
             summary.append(line)
     return CombatActionResult(damage=damage, events=events, summary=summary)
+
 
 
 def apply_dot(
@@ -1438,7 +1461,10 @@ def tick_effects(state: dict, player_buffs: dict, enemy_buffs: dict, enemy: dict
         stats = get_stats(state)
         amount = regen.get("amount", 0) + math.floor(stats["magic_attack"] * regen.get("multiplier", 0))
         amount = math.ceil(amount * (1 + active_relic_passive_effects(state).get("healing_regen_percent", 0) / 100))
+        if state.get("job") == "聖印使":
+            amount = math.ceil(amount * 1.20)
         healed = min(amount, stats["max_hp"] - state["current_hp"])
+
         state["current_hp"] += max(0, healed)
         events.append(f"再生回復 {max(0, healed)} HP。")
     if enemy is not None:

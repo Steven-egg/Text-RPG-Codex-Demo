@@ -60,7 +60,6 @@ SHOP_INVENTORY = {
         "item_potion_m",
         "item_herb_antidote",
         "item_focus_drop",
-        "item_escape_scroll",
         "item_armor_piercer",
         "item_throw_fire",
         "item_throw_ice",

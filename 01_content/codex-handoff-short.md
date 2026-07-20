@@ -7,10 +7,31 @@ editing; this document identifies the current boundary, not gameplay SSOT.
 
 - Work directory: `C:\Users\user\OneDrive\文字冒險遊戲`
 - Current committed checkpoint:
-  `43cfc67 2026-07-19 feat(combat): finalize regional balance diagnostics`.
+  `c44ddb7 2026-07-19 feat(equipment): add unaffixed instance lifecycle baseline`.
 - Inspect `git status --short` before editing. Do not stage, commit, create a
   branch, push, or archive unless explicitly requested. Known LF-to-CRLF
   warnings must not be cleaned up opportunistically.
+- Runtime content scope: the five-region mainline is present in data and engine
+  flow, not merely a future skeleton. The current inventory reports 21 dungeon
+  entries, 28 quests, 20 bosses, and 93 monsters. Do not describe the project
+  as needing its Fire / Ice / Earth / Thunder / Final route built from scratch.
+
+## Active OneDrive Worktree
+
+- B4B-2 is implemented but uncommitted: non-special equipment instances may
+  resolve the fixed static affixes `major_sharp` (attack +1), `minor_agile`
+  (agility +1), and `minor_fire_ward` (fire resist +5). Resolver output stays
+  detached; invalid IDs, tiers, and slots do not apply increments.
+- B4B-3a is implemented but uncommitted: the CLI equipment summary uses
+  effective stats, while the comparison panel renders major/minor affix views
+  and incompatibility reasons. No acquisition source, rolling, quality, `+N`,
+  shop, synthesis, drop, GUI, or save behavior was added.
+- Run `06_tools/test_equipment_affix_resolution.py`,
+  `06_tools/test_equipment_cli_affix_presentation.py`,
+  `06_tools/test_equipment_instance_lifecycle.py`, and
+  `06_tools/test_equipment_reference_adapter.py` before the next equipment
+  slice. The shared OneDrive worktree carries these uncommitted changes to the
+  other machine; still inspect `git status --short` there before editing.
 
 ## Landed Combat State
 
@@ -88,9 +109,15 @@ editing; this document identifies the current boundary, not gameplay SSOT.
 
 No further gameplay implementation is pre-approved. The completed support-book
 measurement, deterministic equipment audit, role-aware Boss diagnostics, and
-narrow monster tuning must not imply approval for job growth, promotion preview,
+narrow monster tuning must not imply approval for job growth, formal promotion,
 affix/save work, special-slot expansion, elemental infusion, GUI, or further
 combat changes. Start any future exact slice with a read-only planning gate.
+
+The next planning direction is to turn the existing role, promotion-preview,
+equipment-affix, and monster data into one implementable progression-and-balance
+chain: settle the current uncommitted gameplay baseline, define a minimal formal
+promotion contract, then adjust player and monster values with deterministic
+measurement. Do not restart five-region content planning.
 
 ## Minimum Read List
 

@@ -49,9 +49,9 @@ RECIPES = {
     "recipe_piercing_bundle": {
         "name": "破甲釘組",
         "output": {"item_armor_piercer": 3},
-        "materials": {"mat_scorched_iron": 2, "mat_cracked_stone": 3},
+        "materials": {"mat_ravine_ash": 3, "mat_charred_iron": 2},
         "gold": 120,
-        "unlock": "recipe_piercing_bundle",
+        "unlock": "quest_ash_ravine_scout",
         "desc": "取得破甲釘 x3。",
     },
     "recipe_fire_throwable": {
@@ -59,7 +59,7 @@ RECIPES = {
         "output": {"item_throw_fire": 2},
         "materials": {"mat_fire_stone": 2, "mat_lava_shard": 1},
         "gold": 140,
-        "unlock": "item_armor_piercer",
+        "unlock": "quest_ash_ravine_scout",
         "desc": "取得餘燼火瓶 x2。",
     },
     "recipe_sanctified_ash_vial": {
@@ -67,15 +67,15 @@ RECIPES = {
         "output": {"item_sanctified_ash_vial": 2},
         "materials": {"mat_fire_stone": 1, "mat_small_crystal": 2},
         "gold": 130,
-        "unlock": "item_armor_piercer",
+        "unlock": "quest_ash_ravine_scout",
         "desc": "取得聖蝕聖瓶 x2。",
     },
     "recipe_rending_spike": {
         "name": "裂甲創釘組",
         "output": {"item_rending_spike": 2},
-        "materials": {"mat_scorched_iron": 2, "mat_cracked_stone": 2},
+        "materials": {"mat_ravine_ash": 2, "mat_charred_iron": 2},
         "gold": 120,
-        "unlock": "item_armor_piercer",
+        "unlock": "quest_ash_ravine_scout",
         "desc": "取得裂甲創釘 x2。",
     },
     # === Ice Region Recipes ===

@@ -16,7 +16,7 @@ QUESTS = {
         "giver": "諾亞",
         "turn_in": {"mat_moss_fiber": 3, "mat_cracked_stone": 2},
         "reward": {"gold": 120, "items": {}, "guild": 30},
-        "unlocks": ["shop_synthesis_01", "item_escape_scroll", "dungeon_scorched_mine", "quest_cave_gathering"],
+        "unlocks": ["shop_synthesis_01", "dungeon_scorched_mine", "quest_cave_gathering", "item_escape_scroll"],
         "desc": "交付青苔纖維 x3、破裂石片 x2。",
     },
     "quest_magic_crystal": {
@@ -48,7 +48,7 @@ QUESTS = {
         "giver": "諾亞",
         "turn_in": {"mat_ravine_ash": 2, "mat_charred_iron": 1},
         "reward": {"gold": 180, "items": {"item_potion_s": 2}, "guild": 70},
-        "unlocks": ["quest_ash_ravine_scout"],
+        "unlocks": ["quest_ash_ravine_scout", "item_armor_piercer", "recipe_piercing_bundle", "recipe_rending_spike"],
         "desc": "前往新解鎖的灰燼裂谷偵查，帶回裂谷灰 x2、焦黑鐵片 x1。這不是討伐任務，遇到壓力就先撤回城鎮。",
     },
     "quest_supply_upgrade": {

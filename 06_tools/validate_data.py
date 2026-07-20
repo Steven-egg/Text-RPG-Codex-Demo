@@ -14,6 +14,7 @@ try:
     from data import (
         CORE_FACILITY_KEYS,
         CORE_NPC_KEYS,
+        AFFIXES,
         DUNGEONS,
         EQUIPMENT,
         EVENT_WEIGHTS,
@@ -96,6 +97,8 @@ VALID_RELIC_PASSIVE_EFFECTS = {
     "crit",
     "effect_accuracy",
 }
+VALID_AFFIX_TIERS = {"major", "minor"}
+VALID_AFFIX_SLOTS = VALID_SLOTS - {"special"}
 VALID_REGIONS = {"border_fire", "ice", "earth", "thunder", "final"}
 VALID_MONSTER_RACES = {"beast", "humanoid", "plant", "construct", "spirit", "aberration"}
 VALID_FOLLOWUP_DAMAGE_TYPES = {"physical"}
@@ -445,6 +448,32 @@ def check_equipment(errors: list[str]) -> None:
                     error(errors, f"EQUIPMENT.{eq_id}.normal_attack_followup.on_hit.damage_type", "must be physical")
 
 
+def check_affixes(errors: list[str]) -> None:
+    for affix_id, affix in AFFIXES.items():
+        path = f"AFFIXES.{affix_id}"
+        require_keys(errors, path, affix, {"name", "tier", "family", "slots", "stats"})
+        if not isinstance(affix.get("name"), str) or not affix["name"]:
+            error(errors, f"{path}.name", "must be a non-empty string")
+        if affix.get("tier") not in VALID_AFFIX_TIERS:
+            error(errors, f"{path}.tier", "must be major or minor")
+        if not isinstance(affix.get("family"), str) or not affix["family"]:
+            error(errors, f"{path}.family", "must be a non-empty string")
+        slots = affix.get("slots")
+        if not isinstance(slots, (list, tuple)) or not slots:
+            error(errors, f"{path}.slots", "must be a non-empty list or tuple")
+        elif len(set(slots)) != len(slots) or any(slot not in VALID_AFFIX_SLOTS for slot in slots):
+            error(errors, f"{path}.slots", "must contain unique non-special equipment slots")
+        stats = affix.get("stats")
+        if not isinstance(stats, dict) or not stats:
+            error(errors, f"{path}.stats", "must be a non-empty object")
+        else:
+            for stat_key, value in stats.items():
+                if stat_key not in VALID_EQUIPMENT_STATS:
+                    error(errors, f"{path}.stats", f"uses unsupported stat key: {stat_key}")
+                if not isinstance(value, int) or isinstance(value, bool) or value <= 0:
+                    error(errors, f"{path}.stats.{stat_key}", "must be a positive integer")
+
+
 def check_skills(errors: list[str]) -> None:
     for skill_id, skill in SKILLS.items():
         require_keys(errors, f"SKILLS.{skill_id}", skill, {"name", "mp", "kind", "desc"})
@@ -775,6 +804,7 @@ def validate() -> list[str]:
     check_relics(errors)
     check_items(errors)
     check_equipment(errors)
+    check_affixes(errors)
     check_skills(errors)
     check_magic_books(errors)
     check_recipes(errors)

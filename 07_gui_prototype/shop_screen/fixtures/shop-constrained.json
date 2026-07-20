@@ -108,9 +108,9 @@
       "badges": []
     },
     {
-      "id": "row_escape_scroll",
-      "item_id": "item_escape_scroll",
-      "title": "逃脫卷軸",
+      "id": "row_focus_drop_fixture",
+      "item_id": "item_focus_drop",
+      "title": "集中滴露",
       "category": "tactical",
       "summary": "非 Boss 戰中撤退，保留已取得素材。",
       "price": 120,
@@ -233,9 +233,9 @@
       "status": "purchasable",
       "disabled_reason": null
     },
-    "item_escape_scroll": {
-      "item_id": "item_escape_scroll",
-      "title": "逃脫卷軸",
+    "item_focus_drop_fixture": {
+      "item_id": "item_focus_drop",
+      "title": "集中滴露",
       "category_label": "戰術道具",
       "description": "刻印有傳送法術的單次消耗型法術卷軸。能在迷宮深處將冒險者安全送回地表。",
       "effect_summary": "非 Boss 戰中立即撤退，保留當前已取得的所有素材",
@@ -335,7 +335,7 @@
         "disabled_reason": null
       }
     ],
-    "item_escape_scroll": [
+    "item_focus_drop_fixture": [
       {
         "id": "gold",
         "label": "金幣需求",
@@ -439,16 +439,16 @@
       },
       "result_message": "成功購買集中滴露！獲得集中滴露 x1，扣除金幣 45G (此為 Static Prototype，實際數值不變)。"
     },
-    "item_escape_scroll": {
+    "item_focus_drop_fixture": {
       "action_id": "buy_item",
-      "label": "購買逃脫卷軸",
+      "label": "購買集中滴露",
       "enabled": false,
       "disabled_reason": "金幣不足",
       "payload": {
-        "item_id": "item_escape_scroll",
+        "item_id": "item_focus_drop",
         "price": 120
       },
-      "result_message": "無法購買逃脫卷軸：金幣不足。"
+      "result_message": "無法購買集中滴露：金幣不足。"
     },
     "item_armor_piercer": {
       "action_id": "buy_item",

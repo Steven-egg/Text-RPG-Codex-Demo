@@ -422,7 +422,6 @@
       "status_label": "Border / Fire",
       "related_unlocks": [
         "shop_synthesis_01",
-        "item_escape_scroll",
         "dungeon_scorched_mine",
         "quest_cave_gathering"
       ],
@@ -929,7 +928,6 @@
       "items": [],
       "unlocks": [
         "shop_synthesis_01",
-        "item_escape_scroll",
         "dungeon_scorched_mine",
         "quest_cave_gathering"
       ],

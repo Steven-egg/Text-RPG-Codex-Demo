@@ -79,7 +79,7 @@ MONSTERS = {
         "element": "無",
         "exp": 55,
         "gold": (45, 70),
-        "drops": [("mat_scorched_iron", 0.50, 1), ("item_armor_piercer", 0.08, 1)],
+        "drops": [("mat_scorched_iron", 0.50, 1)],
     },
     "boss_glen": {
         "name": "山寨頭目葛倫",
@@ -1341,3 +1341,24 @@ if MONSTER_RACES.keys() != MONSTERS.keys():
 
 for monster_id, race in MONSTER_RACES.items():
     MONSTERS[monster_id]["race"] = race
+
+
+# Balance adjustment for fluid combat (3-5 turns normal, 10-15 turns boss)
+for monster_id, monster in MONSTERS.items():
+    if monster.get("boss"):
+        # Boss HP down by 25% (except final boss which is down by 33%)
+        if monster_id == "boss_final_demon_king":
+            monster["hp"] = 1600 # From 2400 (33% down)
+        elif monster_id == "boss_earth_deep_leyline_lord":
+            monster["hp"] = 770 # From 1100
+        elif monster_id == "boss_thunder_crown_storm_lord":
+            monster["hp"] = 840 # From 1200
+        else:
+            monster["hp"] = int(monster["hp"] * 0.75)
+    else:
+        # Normal monster HP down by 30%
+        monster["hp"] = int(monster["hp"] * 0.70)
+        # Late game normal monsters agility clamp to avoid double turns
+        if monster["level"] >= 25:
+            monster["agility"] = min(monster["agility"], 18)
+

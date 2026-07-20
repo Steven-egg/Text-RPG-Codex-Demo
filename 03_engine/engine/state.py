@@ -22,6 +22,16 @@ from .equipment_refs import (
     resolve_equipment_ref,
 )
 
+
+def parent_job(job: str) -> str:
+    return {
+        "元素騎士": "劍士",
+        "星詠者": "法師",
+        "影行者": "盜賊",
+        "聖印使": "牧師"
+    }.get(job, job)
+
+
 RUN_SUPPLY_CAPS = {"sustain_hp": 3, "emergency_hp": 1, "throwable": 2, "escape": 1}
 RUN_SUPPLY_SUSTAIN_HP_ITEMS = {"item_potion_s", "item_potion_m"}
 RUN_SUPPLY_EMERGENCY_HP_ITEMS = RUN_SUPPLY_SUSTAIN_HP_ITEMS | {
@@ -413,7 +423,7 @@ def active_relic_passive_effects(state: dict) -> dict[str, int]:
 
 
 def get_stats(state: dict, buffs: dict | None = None) -> dict:
-    job = JOBS[state["job"]]
+    job = JOBS[parent_job(state["job"])]
     stats = deepcopy(job["base"])
     level_bonus = state["level"] - 1
     for key, value in job["growth"].items():
@@ -463,9 +473,16 @@ def get_stats(state: dict, buffs: dict | None = None) -> dict:
         if percent:
             stats[key] = math.ceil(stats[key] * (1 + percent / 100))
 
+    if state.get("job") == "元素騎士":
+        for key in ("fire_resist", "ice_resist", "earth_resist", "thunder_resist"):
+            stats[key] = stats.get(key, 0) + 10
+    elif state.get("job") == "星詠者":
+        stats["crit"] = stats.get("crit", 0) + 15
+
     for key in ("fire_resist", "ice_resist", "earth_resist", "thunder_resist"):
         stats[key] = max(0, min(stats.get(key, 0), 75))
     return stats
+
 
 
 def equipment_comparison(state: dict, candidate_reference_id: str) -> dict:
@@ -478,7 +495,7 @@ def equipment_comparison(state: dict, candidate_reference_id: str) -> dict:
     slot = candidate_base["slot"]
     equipped_reference_id = state.get("equipment", {}).get(slot)
     equipped = resolve_equipment_ref(state, equipped_reference_id)
-    compatible = state.get("job") in candidate_base.get("jobs", [])
+    compatible = parent_job(state.get("job")) in candidate_base.get("jobs", [])
     reason = None if compatible else "目前職業無法裝備此物品。"
     before = get_stats(state)
     simulated = deepcopy(state)
@@ -554,7 +571,7 @@ def equip_item(state: dict, item_id: str, quiet: bool = False) -> bool:
     if not resolved:
         return False
     eq = resolved["base"]
-    if state["job"] not in eq["jobs"]:
+    if parent_job(state["job"]) not in eq["jobs"]:
         if not quiet:
             print(f"{state['job']}無法裝備 {eq['name']}。")
         return False

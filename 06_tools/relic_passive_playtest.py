@@ -67,7 +67,6 @@ def build_playtest_state(job: str = "cleric", level: int = 25) -> dict:
         "item_focus_drop": 5,
         "item_herb_antidote": 5,
         "item_armor_piercer": 5,
-        "item_escape_scroll": 3,
     }.items():
         add_item(state, item_id, quantity)
     stats = get_stats(state)

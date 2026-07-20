@@ -1,20 +1,29 @@
 # Element Maze
 
 Purpose: compact project entry point for the playable Python CLI RPG, GUI
-prototype, and formal-version content planning. Detailed bridge status,
+prototype, and current-game content planning. Detailed bridge status,
 screen-level verification, and historical MVP notes live in Task Zone files.
 
 ## Current Stable Capsule
 
 - Latest committed checkpoint:
-  `43cfc67 2026-07-19 feat(combat): finalize regional balance diagnostics`.
+  `c44ddb7 2026-07-19 feat(equipment): add unaffixed instance lifecycle baseline`.
+- Active OneDrive worktree (not yet committed): B4B-2 adds three fixed static
+  affixes (`major_sharp`, `minor_agile`, `minor_fire_ward`), detached resolver
+  increments, and side-effect-free comparison views. B4B-3a renders those
+  views in the CLI equipment summary and comparison panel. This remains outside
+  random rolls, quality, `+N`, drops, shops, synthesis, GUI, and save work.
 - Combat Progression v1 foundation, player-content, relic-passive, and balance
   slices are landed and covered by deterministic validation. The balance tools
   keep B4 as the canonical gameplay baseline; B5/B6 remain QA overlays.
-- Element Maze is an expandable playable demo, not a closed demo.
+- Element Maze already has a playable five-region mainline: Border / Fire, Ice,
+  Earth, Thunder, and Final. The current runtime inventory reports 21 dungeon
+  entries, 28 quests, 20 bosses, and 93 monsters. Treat this as the content
+  foundation for a small complete RPG; future expansion is optional rather than
+  a prerequisite for the existing route.
 - The Python CLI runtime remains the gameplay authority.
-- Act 1 is playable through the main loop.
-- Act 2 fire demo content is in runtime data and bridge coverage, including Ash
+- The CLI mainline has runtime data and progression scaffolding through Final.
+- The Fire route is in runtime data and bridge coverage, including Ash
   Ravine, Cinder Seal Depths, three fire-mark shards, Guild / Temple / Church
   lookup closure, and Boss rule parity for Glen, Ash Guardian, and Cinder Seal
   Sentinel.
@@ -68,7 +77,7 @@ document cleanup or archive changes.
 
 ## Content Skeleton
 
-Current formal-version macro planning lives in:
+Current macro route and content planning lives in:
 
 - `01_content/world-content-skeleton-v0.1.md`
 
@@ -76,7 +85,7 @@ Current macro decisions:
 
 - Four core content elements: Fire, Ice, Earth, Thunder.
 - Final region is a composite endgame zone, not a fifth core element.
-- The existing fire demo route uses the existing Border Town only; do not add an
+- The existing Fire route uses the existing Border Town only; do not add an
   Ash Outpost.
 - Ice / Earth / Thunder regions each default to one regional town and three
   dungeons: two minor dungeons plus one main two-phase dungeon.

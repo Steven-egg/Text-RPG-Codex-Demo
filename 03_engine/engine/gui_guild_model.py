@@ -200,8 +200,6 @@ def guild_screen_model(state: dict[str, Any], selected_region_id: str | None = N
                 continue
             if u_key == "shop_synthesis_01":
                 reward_unlocks.append("米菈合成屋")
-            elif u_key == "item_escape_scroll":
-                reward_unlocks.append("逃脫卷軸")
             elif u_key == "second_act_preview":
                 reward_unlocks.append("第二幕預告")
             elif u_key == "unlock_act_2":

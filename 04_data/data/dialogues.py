@@ -419,7 +419,7 @@ DIALOGUE_TEMPLATES: dict[str, dict[str, Any]] = {
         "label": "洞窟採集委託完成對話",
         "variables": [],
         "templates": [
-            ["米菈合成屋開放了。拉比也開始販售逃脫卷軸。"]
+            ["米菈合成屋開放了。拉比也整理了新的旅途補給。"]
         ],
     },
     "quest_complete.quest_magic_crystal": {

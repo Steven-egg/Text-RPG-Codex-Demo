@@ -4,6 +4,7 @@ from .jobs import JOBS
 from .job_specializations import JOB_SPECIALIZATIONS
 from .materials import MATERIALS
 from .items import ITEMS, EQUIPMENT
+from .affixes import AFFIXES
 from .skills import SKILLS, MAGIC_BOOKS
 from .crafting import RECIPES
 from .monsters import MONSTERS
@@ -32,6 +33,7 @@ __all__ = [
     "MATERIALS",
     "ITEMS",
     "EQUIPMENT",
+    "AFFIXES",
     "SKILLS",
     "MAGIC_BOOKS",
     "RECIPES",

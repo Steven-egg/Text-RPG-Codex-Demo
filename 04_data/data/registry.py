@@ -47,8 +47,11 @@ INITIAL_UNLOCK_KEYS = {
 
 
 ENGINE_EVENT_UNLOCK_KEYS = {
+    # Valid unlock targets; production is now quest_ash_ravine_scout rather
+    # than a per-kill monster event.
     "item_armor_piercer",
     "recipe_piercing_bundle",
+    "recipe_rending_spike",
     "recipe_heat_charm",
 }
 

@@ -21,9 +21,12 @@ is reserved for the first deterministic runtime generator. The instance may
 have at most one major and one minor affix; neither may change its base slot,
 job list, price, or `normal_attack_followup` data.
 
-Affix definitions are planned as static data with an id, tier (`major` or
-`minor`), eligible base slots, stat increment, and family. A family may occur
-at most once per instance. The first runtime slice excludes `special`,
+Affix definitions live in static `04_data/data/affixes.py` data. Each entry has
+an id, player-facing `name`, tier (`major` or `minor`), `family`, eligible
+non-`special` `slots`, and fixed positive `stats` increments. A family may occur
+at most once per instance. The resolver returns detached `base`, `affixes`,
+`affix_stats`, and `effective_stats`; it applies only valid tier/slot/family
+entries and never mutates the instance or `EQUIPMENT`. The first runtime slice excludes `special`,
 head-slot pseudo-offhand behavior changes, and elemental infusion. Elemental
 infusion remains a later contract extension and must not override a skill's
 declared element.

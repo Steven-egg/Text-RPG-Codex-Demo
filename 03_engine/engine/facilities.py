@@ -1472,6 +1472,15 @@ def fire_mark_church_lookup(state: dict) -> None:
     print()
 
 
+def parent_job(job: str) -> str:
+    return {
+        "元素騎士": "劍士",
+        "星詠者": "法師",
+        "影行者": "盜賊",
+        "聖印使": "牧師"
+    }.get(job, job)
+
+
 def temple(state: dict, region_id: str = "border_fire") -> None:
     facility_name = get_facility_display_name(region_id, "temple")
     welcome_msg = get_dialogue(region_id, "temple", "welcome")
@@ -1486,32 +1495,52 @@ def temple(state: dict, region_id: str = "border_fire") -> None:
         print("「這還不是完整的印記。但神殿記得它的溫度。若你找到更多線索，再回來找我。」")
     print()
     print(f"目前職業：{state['job']}")
-    previews = get_preview_promotions_for_job(state["job"])
+    job_for_preview = parent_job(state["job"])
+    previews = get_preview_promotions_for_job(job_for_preview)
     if not previews:
         print("目前尚無可預覽轉職方向。")
     else:
-        print("可預覽轉職方向：")
+        print("可轉職方向：")
         for promotion in previews:
-            print(f"\n{state['job']} → {promotion['name']}")
+            print(f"\n{job_for_preview} → {promotion['name']}")
             print(promotion["summary"])
             print("條件狀態：")
+            all_met = True
             for requirement in promotion["requirements"]:
                 print(promotion_requirement_line(state, requirement))
-    print("\n正式轉職尚未開放。")
-    print("神殿目前只顯示未來方向，不會改變你的職業或能力。")
+                if not promotion_requirement_met(state, requirement):
+                    all_met = False
+            if state["job"] != promotion["name"] and all_met:
+                print(f"\n[可轉職] 賽恩微笑著看著你：「你已經證明了自己。是否要繼承力量，轉職為 {promotion['name']}？」")
+                choice = action_menu_panel(
+                    f"轉職為 {promotion['name']}",
+                    ["確認轉職", "我再想想"],
+                    facility_name,
+                    border_style="yellow"
+                )
+                if choice == 1:
+                    state["job"] = promotion["name"]
+                    print(f"\n【系統】轉職成功！你已正式成為 {promotion['name']}！")
+                    print(f"解鎖轉職被動技能特色！")
+                    pause()
+                    return
+    print("\n神殿聖印選項：")
     if any(state.get("flags", {}).get(flag) for flag in ("fire_seal_enshrined", "ice_seal_enshrined", "earth_seal_enshrined", "thunder_seal_enshrined")):
         choice = action_menu_panel(
             "聖印被動",
-            ["選擇／免費改選已安置聖印的被動效果"],
+            ["選擇／免費改選已安置聖印的被動效果", "離開神殿"],
             facility_name,
             header_lines=["每枚已安置聖印可保留一個被動選擇。"],
             allow_back=True,
             border_style="yellow",
         )
-        if choice:
+        if choice == 1:
             relic_passive_menu(state)
+        else:
+            return
     else:
         pause()
+
 
 
 def town_menu(state: dict, region_id: str = "border_fire") -> None:

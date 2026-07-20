@@ -54,27 +54,6 @@ def verify_boss_retreat_block() -> None:
     print("[Pass] Boss retreat is blocked without advancing combat.")
 
 
-def verify_boss_escape_scroll_block() -> None:
-    session, state = boss_session("boss_glen")
-    state["inventory"]["item_escape_scroll"] = 1
-    combat = session.require_combat()
-    turn_before = combat["turn"]
-
-    error = assert_blocked(
-        lambda: session.dispatch(
-            "use_item",
-            {"item_id": "item_escape_scroll"},
-            screen_id="combat_screen",
-        )
-    )
-
-    assert error.blocked_reason == "Boss 戰不可使用逃脫卷軸。"
-    assert state["inventory"]["item_escape_scroll"] == 1
-    assert combat["turn"] == turn_before
-    assert combat["outcome"] is None
-    print("[Pass] Boss Escape Scroll is blocked without consumption or turn advance.")
-
-
 def verify_run_supply_limits_and_mp_timing() -> None:
     session = GuiRuntimeSession()
     session.new_game(name="Supply Bridge Tester", job_id="mage")
@@ -84,7 +63,6 @@ def verify_run_supply_limits_and_mp_timing() -> None:
         "item_potion_m": 1,
         "item_focus_drop": 2,
         "item_armor_piercer": 2,
-        "item_escape_scroll": 1,
     }.items():
         game.add_item(state, item_id, quantity)
     game.configure_run_supplies(state, {
@@ -92,7 +70,6 @@ def verify_run_supply_limits_and_mp_timing() -> None:
         "emergency_hp": {"item_id": "item_potion_m", "quantity": 1},
         "mp": {"item_id": "item_focus_drop", "quantity": 2},
         "throwable": {"item_id": "item_armor_piercer", "quantity": 2},
-        "escape": {"item_id": "item_escape_scroll", "quantity": 1},
     })
     assert game.combat_item_quantity(state, "item_potion_s") == 3
     session.start_combat("mon_moss_rat", boss=False)
@@ -161,7 +138,7 @@ def verify_throwable_contract_and_live_parity() -> None:
     physical_enemy = game.MONSTERS["boss_glen"]
     physical_damage, debuff_turns = game.combat_throwable_damage("item_armor_piercer", physical_enemy, {})
     assert physical_damage == game.math.ceil(90 - physical_enemy["defense"] * 0.6)
-    assert debuff_turns == 3
+    assert debuff_turns == 5
 
     elemental_enemy = game.MONSTERS["boss_glen"]
     ice_damage, debuff_turns = game.combat_throwable_damage("item_throw_ice", elemental_enemy, {})
@@ -282,7 +259,6 @@ def verify_dot_log_and_victory() -> None:
 def run_smoke_test() -> None:
     print("Starting Combat Bridge Boss Rule Parity smoke test...")
     verify_boss_retreat_block()
-    verify_boss_escape_scroll_block()
     verify_run_supply_limits_and_mp_timing()
     verify_regional_supply_slots_and_recovery()
     verify_throwable_contract_and_live_parity()

@@ -510,6 +510,168 @@ MAGIC_BOOKS = {
         "name": "深淵霸斬書",
         "jobs": ["劍士"],
         "level": 23,
+    },
+    # === Ice Region Magic Books ===
+    "book_ice_01": {
+        "name": "冰刃術書",
+        "jobs": ["法師"],
+        "level": 6,
+        "price": 400,
+        "materials": {"mat_ice_salt": 3},
+        "skill": "skill_ice_01",
+        "region": "ice",
+    },
+    "book_ice_02": {
+        "name": "冰療術書",
+        "jobs": ["牧師"],
+        "level": 6,
+        "price": 420,
+        "materials": {"mat_ice_saltcloth": 2},
+        "skill": "skill_ice_02",
+        "region": "ice",
+    },
+    "book_ice_04": {
+        "name": "冰斬術書",
+        "jobs": ["劍士"],
+        "level": 7,
+        "price": 450,
+        "materials": {"mat_ice_frostroot": 2},
+        "skill": "skill_ice_04",
+        "region": "ice",
+    },
+    "book_ice_05": {
+        "name": "霜速術書",
+        "jobs": ["盜賊"],
+        "level": 7,
+        "price": 460,
+        "materials": {"mat_ice_blue_stone": 2},
+        "skill": "skill_ice_05",
+        "region": "ice",
+    },
+    # === Earth Region Magic Books ===
+    "book_earth_01": {
+        "name": "落石術書",
+        "jobs": ["法師"],
+        "level": 11,
+        "price": 600,
+        "materials": {"mat_earth_moss_loam": 3},
+        "skill": "skill_earth_01",
+        "region": "earth",
+    },
+    "book_earth_02": {
+        "name": "地沙術書",
+        "jobs": ["法師"],
+        "level": 12,
+        "price": 620,
+        "materials": {"mat_earth_rootfiber": 2},
+        "skill": "skill_earth_02",
+        "region": "earth",
+    },
+    "book_earth_03": {
+        "name": "大地療育書",
+        "jobs": ["牧師"],
+        "level": 11,
+        "price": 650,
+        "materials": {"mat_earth_spore_cap": 2},
+        "skill": "skill_earth_03",
+        "region": "earth",
+    },
+    "book_earth_05": {
+        "name": "石裂斬術書",
+        "jobs": ["劍士"],
+        "level": 12,
+        "price": 700,
+        "materials": {"mat_earth_petrified_bark": 2},
+        "skill": "skill_earth_05",
+        "region": "earth",
+    },
+    "book_earth_06": {
+        "name": "深根毒刺書",
+        "jobs": ["盜賊"],
+        "level": 12,
+        "price": 720,
+        "materials": {"mat_earth_leyline_shard": 2},
+        "skill": "skill_earth_06",
+        "region": "earth",
+    },
+    # === Thunder Region Magic Books ===
+    "book_thunder_01": {
+        "name": "電弧術書",
+        "jobs": ["法師"],
+        "level": 16,
+        "price": 900,
+        "materials": {"mat_thunder_charge_sand": 3},
+        "skill": "skill_thunder_01",
+        "region": "thunder",
+    },
+    "book_thunder_02": {
+        "name": "狂雷術書",
+        "jobs": ["法師"],
+        "level": 17,
+        "price": 950,
+        "materials": {"mat_thunder_copper_vein": 2},
+        "skill": "skill_thunder_02",
+        "region": "thunder",
+    },
+    "book_thunder_03": {
+        "name": "閃電之光書",
+        "jobs": ["牧師"],
+        "level": 16,
+        "price": 980,
+        "materials": {"mat_thunder_stormglass": 2},
+        "skill": "skill_thunder_03",
+        "region": "thunder",
+    },
+    "book_thunder_05": {
+        "name": "迅雷斬術書",
+        "jobs": ["劍士"],
+        "level": 17,
+        "price": 1050,
+        "materials": {"mat_thunder_conductor_rod": 2},
+        "skill": "skill_thunder_05",
+        "region": "thunder",
+    },
+    "book_thunder_06": {
+        "name": "雷閃步術書",
+        "jobs": ["盜賊"],
+        "level": 17,
+        "price": 1080,
+        "materials": {"mat_thunder_cloud_essence": 2},
+        "skill": "skill_thunder_06",
+        "region": "thunder",
+    },
+    # === Final Region Magic Books ===
+    "book_final_01": {
+        "name": "虛空衝擊書",
+        "jobs": ["法師"],
+        "level": 21,
+        "price": 1500,
+        "materials": {"mat_final_echo_ash": 3},
+        "skill": "skill_final_01",
+        "region": "final",
+    },
+    "book_final_02": {
+        "name": "深淵黑洞書",
+        "jobs": ["法師"],
+        "level": 23,
+        "price": 1600,
+        "materials": {"mat_final_frost_memory": 2},
+        "skill": "skill_final_02",
+        "region": "final",
+    },
+    "book_final_03": {
+        "name": "聖暗雙重書",
+        "jobs": ["牧師"],
+        "level": 21,
+        "price": 1550,
+        "materials": {"mat_final_root_stone": 2},
+        "skill": "skill_final_03",
+        "region": "final",
+    },
+    "book_final_05": {
+        "name": "深淵霸斬書",
+        "jobs": ["劍士"],
+        "level": 23,
         "price": 1800,
         "materials": {"mat_final_void_shard": 2},
         "skill": "skill_final_05",
@@ -525,3 +687,37 @@ MAGIC_BOOKS = {
         "region": "final",
     },
 }
+
+
+# Balance adjustment for fluid combat (Warrior/Mage/Rogue/Cleric buffs)
+SKILLS["skill_power_slash"]["charge_bonus_per_stack"] = 0.15
+SKILLS["skill_ice_04"]["charge_bonus_per_stack"] = 0.20
+SKILLS["skill_earth_05"]["charge_bonus_per_stack"] = 0.25
+SKILLS["skill_thunder_05"]["charge_bonus_per_stack"] = 0.30
+SKILLS["skill_final_05"]["charge_bonus_per_stack"] = 0.35
+
+SKILLS["skill_arcane_bolt"]["mp"] = 3
+SKILLS["skill_spark"]["mp"] = 4
+SKILLS["skill_ice_needle"]["mp"] = 4
+SKILLS["skill_ice_01"]["mp"] = 5
+SKILLS["skill_earth_01"]["mp"] = 6
+SKILLS["skill_earth_02"]["mp"] = 7
+SKILLS["skill_thunder_01"]["mp"] = 8
+SKILLS["skill_thunder_02"]["mp"] = 10
+SKILLS["skill_final_01"]["mp"] = 12
+SKILLS["skill_final_02"]["mp"] = 15
+
+SKILLS["skill_backstab"]["on_hit"]["multiplier"] = 0.60
+SKILLS["skill_toxic_edge"]["on_hit"]["multiplier"] = 0.50
+
+# Rogue passive followup multipliers
+for trigger in SKILLS["skill_quickstep"]["passive_triggers"]:
+    if trigger.get("job") == "盜賊":
+        trigger["effect"]["followup_multiplier"] = 1.2
+for trigger in SKILLS["skill_ice_05"]["passive_triggers"]:
+    if trigger.get("job") == "盜賊":
+        trigger["effect"]["followup_multiplier"] = 1.8
+
+# Cleric adjustments
+SKILLS["skill_sanctified_decay"]["multiplier"] = 0.70
+SKILLS["skill_regeneration"]["amount"] = 10

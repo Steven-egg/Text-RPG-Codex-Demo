@@ -1,7 +1,8 @@
 # World Content Skeleton v0.1
 
-Purpose: Hot Zone content skeleton for future formal-version expansion. This file
-captures the current macro structure only. It does not approve runtime, data,
+Purpose: Hot Zone record of the current macro route and content structure. This
+file captures the implemented mainline shape and its remaining planning
+boundaries. It does not approve runtime, data,
 schema, save, GUI, bridge, combat, class, relic, or asset-pipeline work.
 
 ## Core Decision
@@ -10,7 +11,7 @@ Element Maze uses four core content elements:
 
 | Element | Map Mood | Notes |
 |---|---|---|
-| Fire | Ash, scorched stone, lava seams, sealed furnace ruins | Current demo fire route is already represented by the existing Border Town path. |
+| Fire | Ash, scorched stone, lava seams, sealed furnace ruins | The current Fire route is represented by the existing Border Town path. |
 | Ice | Frost-tide coast, cold sea, broken ice, fog harbor, salt-frost lighthouse | Not just glacier; it should feel coastal, wet, and distant. |
 | Earth | Forest ring, root network, old quarry, fungal caverns, leyline stone | Nature is folded into Earth: roots, poison, moss, stone, and ancient growth. |
 | Thunder | Storm plateau, sky roads, floating stone, conductive channels, lightning towers | Water can appear as conductive terrain, but Thunder remains the core identity. |
@@ -20,14 +21,17 @@ tests and echoes the four elements.
 
 ## Current Runtime Interpretation
 
-In the stable CLI skeleton (established in early integration phases), the Ice,
-Earth, Thunder, and Final playable scaffolds have landed as traversal and
-progression scaffolds, display naming is complete through Final, and Relic v1
-has landed as a four-element seal enshrinement flow.
-This means the required quest, dungeon, boss, ending, elemental seal placement,
-and Final-gate flow can be exercised in the CLI, but it does not mean regional
-content, encounter texture, reward balance, dialogue, map routing, town hub
-presentation, or final polish are complete.
+The stable CLI contains a playable mainline through Border / Fire, Ice, Earth,
+Thunder, and Final. The current runtime inventory reports 21 dungeon entries,
+28 quests, 20 bosses, and 93 monsters; the route includes the required quest,
+dungeon, boss, elemental-seal, and Final-gate flow. Display naming is complete
+through Final, and Relic v1 has landed as a four-element seal enshrinement flow.
+
+This is not a claim that every encounter, reward, dialogue, map presentation,
+or balance target is final. The next content-facing work should refine the
+existing route—especially formal promotion, player progression, and
+job-versus-monster balance—rather than treating the five-region mainline as
+unbuilt future content.
 
 Relic v1 keeps its progression and Final-gating role: Fire, Ice, Earth, and
 Thunder have true seal key items and enshrined flags, and Final unlock depends
@@ -54,11 +58,11 @@ These baselines are for planning only and do not constitute implementation appro
 
 | Region | Town Count | Dungeon Count | Current Decision |
 |---|---:|---:|---|
-| Border / Fire demo route | 1 | Existing demo dungeons | Use the existing Border Town only. Do not add an Ash Outpost. |
-| Ice region | 1 | 3 | One regional town, two minor dungeons, one main two-phase dungeon. |
-| Earth region | 1 | 3 | One regional town, two minor dungeons, one main two-phase dungeon. |
-| Thunder region | 1 | 3 | One regional town, two minor dungeons, one main two-phase dungeon. |
-| Final region | 1 | 3 | One front-line camp, two minor dungeons, one final main three-phase dungeon. |
+| Border / Fire route | 1 | Existing Fire-route dungeons | Use the existing Border Town only. Do not add an Ash Outpost. |
+| Ice region | 1 | 3 sites / 4 entries | One regional town, two minor dungeons, one main two-phase dungeon. |
+| Earth region | 1 | 3 sites / 4 entries | One regional town, two minor dungeons, one main two-phase dungeon. |
+| Thunder region | 1 | 3 sites / 4 entries | One regional town, two minor dungeons, one main two-phase dungeon. |
+| Final region | 1 | 3 sites / 5 entries | One front-line camp, two minor dungeons, one final main three-phase dungeon. |
 
 Detailed region-level data template planning lives in:
 

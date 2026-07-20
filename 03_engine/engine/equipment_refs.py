@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from copy import deepcopy
 
-from data import EQUIPMENT
+from data import AFFIXES, EQUIPMENT
 
 
 def equipment_base_id(state: dict, reference_id: str | None) -> str | None:
@@ -16,17 +16,60 @@ def equipment_base_id(state: dict, reference_id: str | None) -> str | None:
 
 
 def resolve_equipment_ref(state: dict, reference_id: str | None) -> dict | None:
-    """Return detached display data and never mutate global EQUIPMENT."""
+    """Return detached base/effective data and never mutate global data."""
     base_item_id = equipment_base_id(state, reference_id)
     if not base_item_id:
         return None
+    base = deepcopy(EQUIPMENT[base_item_id])
     instance = state.get("equipment_instances", {}).get(reference_id)
+    affixes, affix_stats = _resolve_affixes(base, instance)
+    effective_stats = deepcopy(base.get("stats", {}))
+    for stat_key, value in affix_stats.items():
+        effective_stats[stat_key] = effective_stats.get(stat_key, 0) + value
     return {
         "reference_id": reference_id,
         "base_item_id": base_item_id,
-        "base": deepcopy(EQUIPMENT[base_item_id]),
+        "base": base,
         "instance": deepcopy(instance) if isinstance(instance, dict) else None,
+        "affixes": affixes,
+        "affix_stats": affix_stats,
+        "effective_stats": effective_stats,
     }
+
+
+def _resolve_affixes(base: dict, instance: object) -> tuple[dict[str, dict], dict[str, int]]:
+    """Resolve valid fixed affixes without normalizing or mutating state."""
+    affixes: dict[str, dict] = {}
+    increments: dict[str, int] = {}
+    used_families: set[str] = set()
+    for tier in ("major", "minor"):
+        raw_id = instance.get(f"{tier}_affix_id") if isinstance(instance, dict) else None
+        view = {"id": raw_id, "status": "none"}
+        affix = AFFIXES.get(raw_id) if isinstance(raw_id, str) else None
+        if raw_id is None:
+            affixes[tier] = view
+            continue
+        if not affix:
+            view["status"] = "invalid_id"
+        elif affix["tier"] != tier:
+            view["status"] = "invalid_tier"
+        elif base["slot"] not in affix["slots"]:
+            view["status"] = "invalid_slot"
+        elif affix["family"] in used_families:
+            view["status"] = "duplicate_family"
+        else:
+            view.update({
+                "name": affix["name"],
+                "tier": affix["tier"],
+                "family": affix["family"],
+                "stats": deepcopy(affix["stats"]),
+                "status": "valid",
+            })
+            used_families.add(affix["family"])
+            for stat_key, value in affix["stats"].items():
+                increments[stat_key] = increments.get(stat_key, 0) + value
+        affixes[tier] = view
+    return affixes, increments
 
 
 def is_equipment_ref(state: dict, reference_id: str | None) -> bool:

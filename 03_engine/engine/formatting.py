@@ -4,6 +4,24 @@ from data import EQUIPMENT, ITEMS, MATERIALS
 from .equipment_refs import resolve_equipment_ref
 
 
+def format_affix_view(affix: dict | None) -> str:
+    """Format a detached resolver affix view for the CLI without mutation."""
+    if not affix or affix.get("status") == "none":
+        return "無"
+    if affix.get("status") != "valid":
+        return f"異常詞綴 ({affix.get('id', 'unknown')})"
+    stat_parts = []
+    for stat_key, value in affix.get("stats", {}).items():
+        suffix = "%" if stat_key in {"effect_accuracy", "crit", "fire_resist", "ice_resist", "earth_resist", "thunder_resist", "trap_evasion", "rare_drop"} else ""
+        stat_parts.append(f"{stat_key} {value:+}{suffix}")
+    return f"{affix['name']} ({'、'.join(stat_parts)})"
+
+
+def equipment_affix_summary(affixes: dict | None) -> str:
+    affixes = affixes or {}
+    return f"主詞綴：{format_affix_view(affixes.get('major'))}／次詞綴：{format_affix_view(affixes.get('minor'))}"
+
+
 def item_name(item_id: str, state: dict | None = None) -> str:
     if item_id in ITEMS:
         return ITEMS[item_id]["name"]
@@ -42,6 +60,7 @@ def format_items(cost: dict) -> str:
 def equipment_summary(item_id: str, state: dict | None = None) -> str:
     resolved = resolve_equipment_ref(state or {}, item_id)
     eq = resolved["base"] if resolved else EQUIPMENT[item_id]
+    stat_values = resolved["effective_stats"] if resolved else eq.get("stats", {})
     stats = []
     for key, label in [
         ("attack", "攻擊"),
@@ -55,8 +74,8 @@ def equipment_summary(item_id: str, state: dict | None = None) -> str:
         ("trap_evasion", "陷阱迴避"),
         ("rare_drop", "稀有掉落"),
     ]:
-        if key in eq.get("stats", {}):
-            value = eq["stats"][key]
+        if key in stat_values:
+            value = stat_values[key]
             suffix = "%" if key in {"effect_accuracy", "crit", "fire_resist", "ice_resist", "earth_resist", "thunder_resist", "trap_evasion", "rare_drop"} else ""
             stats.append(f"{label} {value:+}{suffix}")
     return "，".join(stats) if stats else eq.get("desc", "")

@@ -41,7 +41,7 @@ def run_smoke_test():
     category_tabs = {tab["id"]: tab for tab in model["category_tabs"]}
     assert category_tabs["all"]["count"] == len(expected_travel_items)
     assert category_tabs["consumables"]["count"] == 4
-    assert category_tabs["tactical"]["count"] == 5
+    assert category_tabs["tactical"]["count"] == 4
     assert category_tabs["accessories"]["count"] == 3
     print("Category tabs and counts verified.")
 
@@ -55,19 +55,7 @@ def run_smoke_test():
     assert state["inventory"]["item_potion_s"] == 1
     print("Consumable (item_potion_s) purchase verified.")
 
-    # 3. Happy Path Tactical/Battle Item Purchase (item_escape_scroll)
-    # Unlock item_escape_scroll and give enough gold
-    game.unlock(state, "item_escape_scroll")
-    state["gold"] = 200
-    state["inventory"]["item_escape_scroll"] = 0
-
-    response = session.dispatch("buy_item", {"item_id": "item_escape_scroll"}, screen_id="shop_screen")
-    assert response["ok"] is True
-    assert state["gold"] == 80  # 200 - 120 = 80G
-    assert state["inventory"]["item_escape_scroll"] == 1
-    print("Tactical item (item_escape_scroll) purchase verified.")
-
-    # 4. Happy Path Accessory Purchase (acc_lucky_charm)
+    # 3. Happy Path Accessory Purchase (acc_lucky_charm)
     state["gold"] = 200
     state["equipment"]["accessory"] = None  # Ensure accessory is not equipped
 

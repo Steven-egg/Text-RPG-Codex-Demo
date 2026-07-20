@@ -25,8 +25,9 @@ New session minimum read order:
    - Short new-session handoff: stable state, prohibitions, Task Zone routing,
      and next boundary.
 6. `01_content/world-content-skeleton-v0.1.md`
-   - Current macro content skeleton: four core elements, regional map mood,
-     town/dungeon count decisions, and no-implementation boundary.
+   - Current macro route: the implemented Fire / Ice / Earth / Thunder / Final
+     mainline shape, regional map mood, town/dungeon count decisions, and
+     no-implementation boundary.
 
 For GUI static prototype tasks, also read the current agent's GUI static
 prototype skill:

@@ -649,12 +649,6 @@ class GuiRuntimeSession:
             raise GuiActionError("Item is not available.", status=409)
         if item_id in game.COMBAT_MP_RECOVERY and combat.get("mp_item_used_turn"):
             raise GuiActionError("本回合已使用 MP 藥水。", status=409, blocked_reason="本回合已使用 MP 藥水。")
-        if item_id == "item_escape_scroll" and combat.get("boss"):
-            raise GuiActionError(
-                "Boss 戰不可使用逃脫卷軸。",
-                status=409,
-                blocked_reason="Boss 戰不可使用逃脫卷軸。",
-            )
         if item_id in game.COMBAT_HP_RECOVERY:
             stats = game.get_stats(state)
             before = state["current_hp"]
@@ -676,9 +670,6 @@ class GuiRuntimeSession:
             return game.CombatActionResult(events=[line], summary=[line])
         if item_id in game.COMBAT_THROWABLE_IDS:
             return game.use_combat_throwable(state, item_id, enemy, enemy_buffs)
-        if item_id == "item_escape_scroll":
-            game.consume_combat_item(state, item_id)
-            return game.CombatActionResult(events=["卷軸化成白光，你撤回迷宮入口。"], summary=["卷軸化成白光，你撤回迷宮入口。"], outcome="escaped")
         raise GuiActionError("Unsupported combat item.", status=400)
 
     def combat_retreat(self) -> dict[str, Any]:
@@ -769,11 +760,6 @@ class GuiRuntimeSession:
         else:
             reward_lines.append(f"📖 圖鑑提示：{enemy['name']} 的資料已存在於圖鑑中。")
 
-        # 處理特定守護者特殊解鎖提示
-        if enemy_id == "mon_scorched_guard":
-            game.unlock(state, "item_armor_piercer")
-            game.unlock(state, "recipe_piercing_bundle")
-            reward_lines.append("🔑 解鎖配方：[破甲釘組] 與道具 [破甲釘]。")
         if enemy_id == "mon_lava_imp":
             game.unlock(state, "recipe_heat_charm")
             reward_lines.append("🔑 解鎖配方：[暖石墜]。")
@@ -823,18 +809,20 @@ class GuiRuntimeSession:
     def resolve_defeat(self, message: str) -> dict[str, Any]:
         state = self.require_state()
         run_log = self.current_run_log()
-        lost_gold = game.math.floor(run_log.get("gold", 0) * 0.3)
+        lost_gold = game.math.ceil(run_log.get("gold", 0) * 0.5)
         state["gold"] = max(0, state.get("gold", 0) - lost_gold)
         lost_items = []
         for item_id, qty in run_log.get("items", {}).items():
-            lose_qty = game.math.floor(qty * 0.3)
+            if game.is_key_item(item_id) or item_id in game.EQUIPMENT:
+                continue
+            lose_qty = game.math.ceil(qty * 0.5)
             if lose_qty > 0 and state.get("inventory", {}).get(item_id, 0) > 0:
                 actual = min(lose_qty, state["inventory"].get(item_id, 0))
                 game.remove_item(state, item_id, actual)
                 lost_items.append(f"{item_name(item_id)} x{actual}")
         stats = game.get_stats(state)
-        state["current_hp"] = max(1, stats["max_hp"] // 2)
-        state["current_mp"] = max(0, stats["max_mp"] // 2)
+        state["current_hp"] = max(1, game.math.ceil(stats["max_hp"] * 0.25))
+        state["current_mp"] = game.math.ceil(stats["max_mp"] * 0.25)
         if self.combat is None:
             self.start_combat(DUNGEONS[self.require_exploration()["dungeon_id"]]["monsters"][0])
         combat = self.require_combat()
@@ -842,8 +830,8 @@ class GuiRuntimeSession:
         combat["last_action_summary"] = message
 
         reward_lines = [
-            f"扣減本趟所獲金幣的 30% ({lost_gold}G)。",
-            "散落丟失本趟 30% 素材：" + "、".join(lost_items) if lost_items else "本趟素材大致都保住了。",
+            f"扣減本趟所獲金幣的 50% ({lost_gold}G)。",
+            "散落丟失本趟一般掉落的 50%：" + "、".join(lost_items) if lost_items else "本趟素材大致都保住了。",
             "公會救援隊收取了救援代價，已平安把你帶回據點城鎮艾爾姆。"
         ]
 
@@ -1371,7 +1359,7 @@ class GuiRuntimeSession:
     def craft_recipe(self, payload: dict[str, Any], *, screen_id: str | None = None) -> dict[str, Any]:
         state = self.require_state()
         recipe_id = payload.get("recipe_id")
-        mira_recipes = {"recipe_fire_cloak", "recipe_focus_pouch", "recipe_heat_charm", "recipe_piercing_bundle"}
+        mira_recipes = {"recipe_fire_cloak", "recipe_focus_pouch", "recipe_heat_charm", "recipe_piercing_bundle", "recipe_rending_spike"}
         if recipe_id not in mira_recipes:
             raise GuiActionError("非白名單配方。", status=403)
 

@@ -55,6 +55,15 @@ def run_smoke_test() -> None:
     assert session.exploration["dungeon_id"] == "dungeon_earth_main_phase_1"
     print(" - The phase 1 action re-enters the existing runtime dungeon without a new action type.")
 
+    empty_supplies = {
+        "sustain_hp": {"item_id": None, "quantity": 0},
+        "emergency_hp": {"item_id": None, "quantity": 0},
+        "mp": {"item_id": None, "quantity": 0},
+        "throwable": {"item_id": None, "quantity": 0},
+    }
+    assert game.configure_run_supplies(state, empty_supplies) == empty_supplies
+    print(" - An empty four-slot supply configuration remains a valid expedition payload.")
+
     for region_id in ("ice", "earth", "thunder", "final"):
         slot = next(candidate for candidate in REGION_DUNGEON_LAYOUTS[region_id] if candidate.get("main_dungeon"))
         for dungeon_id in slot["dungeon_ids"]:

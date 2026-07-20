@@ -24,17 +24,17 @@ def run_smoke_test():
     session.new_game(name="測試合成家", job_id="rogue")
     state = session.require_state()
 
-    game.unlock(state, "recipe_piercing_bundle")
+    state["completed_quests"].append("quest_ash_ravine_scout")
     state["gold"] = 200
-    state["inventory"]["mat_scorched_iron"] = 3
-    state["inventory"]["mat_cracked_stone"] = 4
+    state["inventory"]["mat_ravine_ash"] = 3
+    state["inventory"]["mat_charred_iron"] = 2
 
     print(f"[Happy Path - piercing] Initial Gold: {state['gold']}, Inventory: {dict(state['inventory'])}")
     response = session.dispatch("craft_recipe", {"recipe_id": "recipe_piercing_bundle"}, screen_id="synthesis_screen")
     assert response["ok"] is True
     assert state["gold"] == 80  # 200 - 120 = 80G
-    assert state["inventory"]["mat_scorched_iron"] == 1  # 3 - 2 = 1
-    assert state["inventory"]["mat_cracked_stone"] == 1  # 4 - 3 = 1
+    assert state["inventory"].get("mat_ravine_ash", 0) == 0  # 3 - 3 = 0
+    assert state["inventory"].get("mat_charred_iron", 0) == 0  # 2 - 2 = 0
     assert state["inventory"]["item_armor_piercer"] == 3  # outputs 3 items
     print("Happy Path (piercing bundle) verified.")
 
@@ -233,7 +233,7 @@ def run_smoke_test():
     session_model = GuiRuntimeSession()
     session_model.new_game(name="測試合成家", job_id="rogue")
     state_model = session_model.require_state()
-    game.unlock(state_model, "recipe_piercing_bundle")
+    state_model["completed_quests"].append("quest_ash_ravine_scout")
 
     model = session_model.screen_model("synthesis_screen")
     assert model["screen_id"] == "facility_synthesis_screen"
