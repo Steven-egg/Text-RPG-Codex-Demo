@@ -808,10 +808,10 @@ def elemental_resistance(target: dict, attack_element: str) -> int:
 
 def direct_damage_roll(agility: int) -> float:
     agility = max(0, agility)
-    low = 0.85 + min(agility, 30) * 0.005
-    if random.randint(1, 100) <= min(agility, 30):
-        return random.uniform(1.06, 1.20)
-    return random.uniform(low, 1.05)
+    high_damage_chance = min(30.0, agility * 0.15)
+    if random.random() * 100 < high_damage_chance:
+        return random.uniform(1.15, 1.45)
+    return random.uniform(0.80, 1.10)
 
 
 def adjusted_defense(target: dict, buffs: dict, damage_type: str) -> int:

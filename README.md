@@ -6,8 +6,17 @@ screen-level verification, and historical MVP notes live in Task Zone files.
 
 ## Current Stable Capsule
 
-- Latest committed checkpoint:
-  `c44ddb7 2026-07-19 feat(equipment): add unaffixed instance lifecycle baseline`.
+- Latest committed checkpoint before the active Hot Zone package:
+  `81be8c4 [codex] chore(checkpoint): back up current worktree`.
+- Active Hot Zone: four core jobs now use the unified point-based growth
+  contract: 15.00 points per level plus a derived 5.00-point every-three-level
+  milestone. `04_data/data/jobs.py` is the SSOT, `get_stats` preserves the
+  fractional result, and direct-damage agility uses the 0.80–1.10 / 1.15–1.45
+  split with a 30% high-roll cap. The decision record and Lv8/16/24/32/40
+  old/new tables live in `01_content/proposed-job-growth-points-v1.md`.
+- This Hot Zone package changes player growth, required stat validation, and
+  focused tests only. It does not adjust monsters, equipment, skills, relics,
+  saves, GUI, dungeon content, supplies, or S10 configuration.
 - Active OneDrive worktree (not yet committed): B4B-2 adds three fixed static
   affixes (`major_sharp`, `minor_agile`, `minor_fire_ward`), detached resolver
   increments, and side-effect-free comparison views. B4B-3a renders those

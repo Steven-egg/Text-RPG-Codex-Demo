@@ -15,6 +15,7 @@ from data import (
     SKILLS,
     get_unlocked_regions,
 )
+from data.jobs import GROWTH_POINT_RATES, per_three_level_points
 from .equipment_refs import (
     equipment_base_id,
     equipment_ref_count,
@@ -426,11 +427,13 @@ def get_stats(state: dict, buffs: dict | None = None) -> dict:
     job = JOBS[parent_job(state["job"])]
     stats = deepcopy(job["base"])
     level_bonus = state["level"] - 1
-    for key, value in job["growth"].items():
-        stats[key] += value * level_bonus
-    extra_count = (state["level"] - 1) // 3
-    for key, value in job["extra_every_3"].items():
-        stats[key] = stats.get(key, 0) + value * extra_count
+    per_level_points = job["growth_points"]
+    milestone_count = (state["level"] - 1) // 3
+    milestone_points = per_three_level_points(per_level_points)
+    for key, rate in GROWTH_POINT_RATES.items():
+        points = per_level_points.get(key, 0) * level_bonus
+        points += milestone_points.get(key, 0) * milestone_count
+        stats[key] = stats.get(key, 0) + points * rate
 
     stats.setdefault("magic_attack", 0)
     stats.setdefault("magic_defense", 0)

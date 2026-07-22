@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import sys
+import math
 from pathlib import Path
 from typing import Any
 
@@ -122,13 +123,19 @@ def is_non_negative_int(value: Any) -> bool:
 
 def check_jobs(errors: list[str]) -> None:
     required_base = {"max_hp", "max_mp", "attack", "magic_attack", "defense", "magic_defense", "agility", "effect_accuracy", "crit"}
-    required_growth = {"max_hp", "max_mp", "attack", "magic_attack", "defense", "magic_defense", "agility"}
+    required_growth_points = {"max_hp", "max_mp", "attack", "magic_attack", "defense", "magic_defense", "agility", "effect_accuracy", "crit"}
     for job_id, job in JOBS.items():
-        require_keys(errors, f"JOBS.{job_id}", job, {"base", "growth", "extra_every_3", "base_skills"})
+        require_keys(errors, f"JOBS.{job_id}", job, {"base", "growth_points", "base_skills"})
         base = job.get("base", {})
-        growth = job.get("growth", {})
+        growth_points = job.get("growth_points", {})
         require_keys(errors, f"JOBS.{job_id}.base", base, required_base)
-        require_keys(errors, f"JOBS.{job_id}.growth", growth, required_growth)
+        require_keys(errors, f"JOBS.{job_id}.growth_points", growth_points, required_growth_points)
+        if "growth" in job or "extra_every_3" in job:
+            error(errors, f"JOBS.{job_id}", "must not retain legacy growth or extra_every_3 fields")
+        if not all(isinstance(value, (int, float)) and not isinstance(value, bool) and value >= 0 for value in growth_points.values()):
+            error(errors, f"JOBS.{job_id}.growth_points", "must use non-negative numeric point allocations")
+        elif not math.isclose(sum(growth_points.values()), 15.0, abs_tol=1e-12):
+            error(errors, f"JOBS.{job_id}.growth_points", "must total exactly 15.00 points per level")
         for skill_id in job.get("base_skills", []):
             if skill_id not in SKILLS:
                 error(errors, f"JOBS.{job_id}.base_skills", f"references missing skill_id: {skill_id}")
