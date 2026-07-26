@@ -17,6 +17,74 @@ planning SSOT, not blanket approval for further runtime or monster changes.
   elemental-magic amplification. It did not alter job growth, promotion
   preview, affix runtime, special slots, elemental infusion, GUI, or saves.
 
+## Quality Equipment Checkpoint — 2026-07-26
+
+This checkpoint records the owner direction and landed four-job quality slice.
+It is the current bridge from the completed player-content baseline to the
+next measurement gate; it does not approve a new monster or promotion slice.
+
+### North Star And Boundaries
+
+- Four jobs should clear the five regions through distinct, viable strategies.
+  Quality equipment is a bounded build direction, not a replacement for job
+  skills, relic choices, or supplies.
+- Quality keeps one shared contract: Normal is unaffixed; Fine/Rare use a
+  fixed major affix; Epic/Legendary add that pattern's fixed minor affix;
+  values use `1.00 / 1.15 / 1.35 / 1.60` multipliers.  Synthesis weights,
+  Boss-quality mapping, sale multipliers, v3 migration, and no-retro-roll
+  rules are shared by all four jobs.
+- `special` remains outside quality.  No new free-form rerolls, independent
+  `+N`, elemental weapon infusion, or a second parallel counter system are
+  part of this slice.
+
+### Landed Four-Job Quality Direction
+
+- Boss routes are no longer job-gated: all four jobs can challenge eligible
+  five-region Bosses and receive a quality instance from their legal regional
+  candidate pool.  Fire uses the untagged starting/Fire equipment pool.
+- Warrior weapons have two fixed patterns.  Both add `+4` percentage points
+  per Physical Charge stack to charge-consuming skills; Epic+ then chooses
+  either a `+1` charge cap or a 25% chance for one extra Charge after a normal
+  attack.  The cap uses floor-after-quality-scaling and may reach the new cap
+  on that attack.
+- Mage weapons retain `magic_attack` as their common major direction.  Epic+
+  chooses either direct elemental magic `+6%` or weapon magic defense `+1`.
+  The elemental effect excludes neutral magic, DoT, fixed battle items, and
+  physical damage; it adds with direct-magic relic bonuses before the existing
+  Cinder Mark multiplier.
+- Warrior/Mage head, body, and accessory patterns remain defensive: physical
+  guard or magic guard plus a region-aware resistance minor.  Ice/Earth/
+  Thunder receive `+5` to their matching resistance; Final receives `+2` to
+  each elemental resistance.
+- Rogue's head pseudo-offhand exception and Cleric's existing DoT, regeneration,
+  and fixed-item boundaries remain unchanged.
+
+### Next Balance Gate
+
+1. Build a non-S10 measurement harness using fixed seeds, identical base items
+   and patterns across Fine/Rare/Epic/Legendary, then run all four jobs against
+   five-region Boss paths.
+2. Compare no-supply, conservative HP/MP, throwable-output, and legal mixed
+   supply strategies.  Never use retired `item_potion_m`; record survival,
+   turns, final HP/MP, supply use, and adjacent-quality monotonicity.
+3. Adjust player affix values first if the measurement identifies a narrow
+   problem.  Then make a first unpromoted monster pass for regional/Boss
+   HP/attack/defense/magic defense, element, race distribution, and existing
+   status effectiveness.
+4. Plan promotion before final monster numbers are frozen; implement it after
+   that first monster baseline; then run a final late-game/Final-Boss pass.
+
+### Owner Decisions Needed Before Numeric Sign-Off
+
+- Define per-region and Boss success bands: survival rate, expected turns,
+  permitted supply use, and whether role-specific risk profiles are intended.
+- Confirm the final Charge bonus/cap/extra-gain values and the cap rounding
+  rule; confirm Mage elemental percentage and the defensive-affix scale.
+- Confirm the Final resistance split, seed list/sample count, acceptable
+  quality deltas, and the escalation order when player and monster changes
+  could both solve a measured gap.
+- Define promotion's timing and power budget before the final monster pass.
+
 ## Locked Combat Roles
 
 | Job | Combat identity |

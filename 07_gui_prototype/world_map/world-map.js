@@ -38,6 +38,8 @@ const state = {
   },
 };
 
+let travelPrepEl = null;
+
 const staticActionRoutes = {
   back_to_town_hub: "../town_hub/index.html",
   back_to_start_screen: "../start_screen/index.html",
@@ -85,6 +87,11 @@ nextDungeonEl.addEventListener("click", () => {
 
 document.addEventListener("keydown", (event) => {
   if (event.key !== "Escape") {
+    return;
+  }
+
+  if (travelPrepEl) {
+    closeTravelPrep();
     return;
   }
 
@@ -586,6 +593,11 @@ async function activateAction(action, source) {
     return;
   }
 
+  if (action.action_id === "confirm_travel") {
+    await openTravelPrep(action, source);
+    return;
+  }
+
   // Handle Offline Static Fallback for utilities
   if (!runtimeClient.isLiveMode() && ["view_status", "open_inventory", "open_bestiary"].includes(action.action_id)) {
     let mockPreview = null;
@@ -684,62 +696,6 @@ function navigateAfterAction(action) {
 
 async function dispatchRuntimeAction(action, source) {
   try {
-    if (action.action_id === "confirm_travel") {
-      const inventory = await liveSupplyInventory();
-      action = {
-        ...action,
-        supplyPromptPrepared: true,
-        payload: {
-          ...(action.payload ?? {}),
-          supplies: {
-            sustain_hp: promptLiveSupply("\u7e8c\u822a HP", "sustain_hp", 3, inventory),
-            emergency_hp: promptLiveSupply("\u7dca\u6025 HP", "emergency_hp", 1, inventory),
-            mp: promptLiveSupply("MP \u85e5\u6c34", "mp", 2, inventory),
-            throwable: promptLiveSupply("\u6295\u64f2\u54c1", "throwable", 2, inventory),
-          },
-        },
-      };
-    }
-    if (action.action_id === "confirm_travel" && !action.supplyPromptPrepared) {
-      const quantity = (label, limit) => {
-        const raw = window.prompt(`${label}（0-${limit}，0 為不帶）`, "0");
-        const value = Number.parseInt(raw ?? "0", 10);
-        return Number.isInteger(value) && value >= 0 ? Math.min(value, limit) : 0;
-      };
-      const sustainType = window.prompt("續航 HP：輸入 s 小藥水、m 中藥水，或留白", "")?.trim().toLowerCase();
-      const emergencyType = window.prompt("保險 HP：輸入 s 小、m 中、i 冰、e 地、t 雷、f 終末藥水，或留白", "")?.trim().toLowerCase();
-      const mpType = window.prompt("MP：輸入 d 集中滴露、i 冰、e 地、t 雷、f 終末藥水，或留白", "")?.trim().toLowerCase();
-      const itemFor = (value, category) => {
-        const choices = category === "mp"
-          ? { d: "item_focus_drop", i: "item_ice_potion_02", e: "item_earth_potion_02", t: "item_thunder_potion_02", f: "item_final_potion_02" }
-          : { s: "item_potion_s", m: "item_potion_m", i: "item_ice_potion_01", e: "item_earth_potion_01", t: "item_thunder_potion_01", f: "item_final_potion_01" };
-        return choices[value] ?? null;
-      };
-      const sustainItem = itemFor(sustainType, "hp");
-      const emergencyItem = itemFor(emergencyType, "hp");
-      const mpItem = itemFor(mpType, "mp");
-      const throwableType = window.prompt("投擲品：p 破甲釘、f 餘燼火瓶、i 霜鹽爆瓶、e 根岩震釘、t 導雷震盪球", "")?.trim().toLowerCase();
-      const throwableItem = {
-        p: "item_armor_piercer",
-        f: "item_throw_fire",
-        i: "item_throw_ice",
-        e: "item_throw_earth",
-        t: "item_throw_thunder",
-      }[throwableType] ?? null;
-      const mpLimit = 2; // Runtime validates the warrior/rogue one-bottle limit.
-      action = {
-        ...action,
-        payload: {
-          ...(action.payload ?? {}),
-          supplies: {
-            sustain_hp: { item_id: sustainItem, quantity: sustainItem ? quantity("續航 HP 數量", 3) : 0 },
-            emergency_hp: { item_id: emergencyItem, quantity: emergencyItem ? quantity("保險 HP 數量", 1) : 0 },
-            mp: { item_id: mpItem, quantity: mpItem ? quantity("MP 藥水數量", mpLimit) : 0 },
-            throwable: { item_id: throwableItem, quantity: throwableItem ? quantity("投擲品數量", 2) : 0 },
-          },
-        },
-      };
-    }
     const result = await runtimeClient.dispatchAction("world_map", action.action_id, action.payload ?? {});
     shellEl.dataset.runtimeStatus = result.status ?? "success";
     if (result.screen_model) {
@@ -783,29 +739,181 @@ async function liveSupplyInventory() {
   );
 }
 
-function promptLiveSupply(label, slot, cap, inventory) {
-  const candidates = supplySlotItemIds[slot].map((itemId) => inventory.get(itemId)).filter(Boolean);
-  if (candidates.length === 0) {
-    return { item_id: null, quantity: 0 };
-  }
-  const options = candidates.map((entry, index) => `${index + 1}. ${entry.name} x${entry.quantity}`);
-  const choice = Number.parseInt(
-    window.prompt(`${label}\uff1a\u8f38\u5165\u9078\u9805\u7de8\u865f\uff1b\u7559\u7a7a\u3001\u53d6\u6d88\u6216 0 \u70ba\u4e0d\u5e36\n${options.join("\n")}`, "0") ?? "0",
-    10,
-  );
-  const selected = candidates[choice - 1];
-  if (!selected) {
-    return { item_id: null, quantity: 0 };
-  }
-  const maxQuantity = Math.min(cap, selected.quantity);
-  const quantity = Number.parseInt(
-    window.prompt(`${selected.name} \u6578\u91cf\uff1a0-${maxQuantity}`, "0") ?? "0",
-    10,
-  );
-  return {
-    item_id: selected.item_id,
-    quantity: Number.isInteger(quantity) && quantity > 0 ? Math.min(quantity, maxQuantity) : 0,
-  };
+function staticPrepInventory() {
+  return [
+    { item_id: "item_potion_s", name: "小藥水", quantity: 4, category: "補給品", desc: "回復 HP 35。" },
+    { item_id: "item_potion_m", name: "中藥水", quantity: 1, category: "補給品", desc: "回復 HP 70。" },
+    { item_id: "item_focus_drop", name: "集中滴露", quantity: 1, category: "補給品", desc: "回復 MP 12。" },
+    { item_id: "item_armor_piercer", name: "破甲釘", quantity: 1, category: "戰術道具", desc: "造成傷害並削弱防禦。" },
+    { item_id: "item_escape_scroll", name: "逃脫卷軸", quantity: 1, category: "戰術道具", desc: "撤回迷宮入口。" },
+    { item_id: "static_weapon", name: "鐵劍（已裝備）", quantity: 1, category: "裝備", desc: "目前武器。" },
+    { item_id: "static_body", name: "皮甲（已裝備）", quantity: 1, category: "裝備", desc: "目前防具。" },
+    { item_id: "static_accessory", name: "見習徽章（已裝備）", quantity: 1, category: "裝備", desc: "目前飾品。" },
+  ];
+}
+
+function travelSupplySlots() {
+  const job = state.model?.player?.class_label ?? "";
+  const mpCap = /戰士|盜賊/.test(job) ? 1 : 2;
+  return [
+    { id: "sustain_hp", label: "續航 HP", hint: "長途探索用", cap: 3 },
+    { id: "emergency_hp", label: "緊急 HP", hint: "保命用", cap: 1 },
+    { id: "mp", label: "MP 藥水", hint: "技能資源", cap: mpCap },
+    { id: "throwable", label: "投擲品", hint: "戰術道具", cap: 2 },
+    { id: "escape", label: "逃脫", hint: "撤退保險", cap: 1 },
+  ];
+}
+
+async function openTravelPrep(action, source) {
+  const inventory = runtimeClient.isLiveMode()
+    ? [...(await liveSupplyInventory()).values()]
+    : staticPrepInventory();
+  const location = getSelectedLocation() ?? {};
+  const supplies = travelSupplySlots();
+  const equipped = inventory.filter((entry) => entry.name?.includes("（已裝備）"));
+
+  closeTravelPrep();
+  const overlay = document.createElement("div");
+  overlay.className = "travel-prep-overlay";
+  overlay.setAttribute("role", "presentation");
+  const dialog = document.createElement("section");
+  dialog.className = "travel-prep-dialog";
+  dialog.setAttribute("role", "dialog");
+  dialog.setAttribute("aria-modal", "true");
+  dialog.setAttribute("aria-label", "出發整備");
+
+  const heading = document.createElement("header");
+  heading.className = "travel-prep-heading";
+  heading.innerHTML = `<div><p class="panel-label">出發前確認</p><h2>出發整備</h2><p class="travel-prep-location">${escapeHtml(location.label ?? "選定迷宮")}</p></div>`;
+  const close = document.createElement("button");
+  close.type = "button";
+  close.className = "close-travel-prep";
+  close.textContent = "×";
+  close.setAttribute("aria-label", "關閉出發整備");
+  close.addEventListener("click", closeTravelPrep);
+  heading.append(close);
+
+  const body = document.createElement("div");
+  body.className = "travel-prep-body";
+  const loadout = document.createElement("section");
+  loadout.className = "travel-prep-section loadout-summary";
+  loadout.innerHTML = `<h3>目前裝備</h3><p class="travel-prep-note">裝備會直接套用到本次探索；補給才會佔用遠征格。</p>`;
+  const equipmentList = document.createElement("div");
+  equipmentList.className = "equipment-summary-list";
+  const equipmentRows = equipped.length ? equipped : [{ name: "尚無可顯示的裝備資料", desc: "可從主選單的背包／裝備查看目前構築。" }];
+  equipmentRows.forEach((entry) => {
+    const row = document.createElement("div");
+    row.className = "equipment-summary-row";
+    row.innerHTML = `<strong>${escapeHtml(entry.name)}</strong><span>${escapeHtml(entry.desc ?? "")}</span>`;
+    equipmentList.append(row);
+  });
+  loadout.append(equipmentList);
+
+  const risk = document.createElement("section");
+  risk.className = "travel-prep-section risk-summary";
+  risk.innerHTML = `<h3>地城風險</h3>
+    <dl><div><dt>推薦等級</dt><dd>${escapeHtml(location.recommended_level ?? "—")}</dd></div>
+    <div><dt>屬性</dt><dd>${escapeHtml(location.attribute ?? "—")}</dd></div>
+    <div><dt>步數</dt><dd>${escapeHtml(location.steps ?? "—")}</dd></div>
+    <div><dt>Boss</dt><dd>${escapeHtml(location.boss ?? "—")}</dd></div></dl>`;
+
+  const supplySection = document.createElement("section");
+  supplySection.className = "travel-prep-section supply-selection";
+  supplySection.innerHTML = `<div class="travel-prep-section-heading"><div><h3>本次補給</h3><p>每格只能選一種道具；未使用的物品會留在背包。</p></div><button type="button" class="prep-clear-button">清空補給</button></div>`;
+  const slots = document.createElement("div");
+  slots.className = "supply-slot-list";
+  const formControls = new Map();
+  supplies.forEach((slot) => {
+    const candidates = supplySlotItemIds[slot.id] ?? (slot.id === "escape" ? ["item_escape_scroll"] : []);
+    const eligible = inventory.filter((entry) => candidates.includes(entry.item_id));
+    const row = document.createElement("div");
+    row.className = "supply-slot-row";
+    const copy = document.createElement("div");
+    copy.innerHTML = `<strong>${slot.label}</strong><span>${slot.hint} · 上限 ${slot.cap}</span>`;
+    const select = document.createElement("select");
+    select.setAttribute("aria-label", `${slot.label}道具`);
+    select.append(new Option("不攜帶", ""));
+    eligible.forEach((entry) => select.append(new Option(`${entry.name}（持有 ${entry.quantity}）`, entry.item_id)));
+    const quantity = document.createElement("input");
+    quantity.type = "number";
+    quantity.min = "0";
+    quantity.max = String(slot.cap);
+    quantity.value = "0";
+    quantity.disabled = true;
+    quantity.setAttribute("aria-label", `${slot.label}數量`);
+    select.addEventListener("change", () => {
+      const entry = inventory.find((item) => item.item_id === select.value);
+      quantity.disabled = !entry;
+      quantity.max = String(Math.min(slot.cap, entry?.quantity ?? 0));
+      quantity.value = entry ? String(Math.min(1, entry.quantity, slot.cap)) : "0";
+    });
+    row.append(copy, select, quantity);
+    slots.append(row);
+    formControls.set(slot.id, { select, quantity, cap: slot.cap });
+  });
+  supplySection.append(slots);
+  supplySection.querySelector(".prep-clear-button").addEventListener("click", () => {
+    formControls.forEach(({ select, quantity }) => {
+      select.value = "";
+      quantity.value = "0";
+      quantity.disabled = true;
+    });
+  });
+
+  body.append(loadout, risk, supplySection);
+  const feedback = document.createElement("p");
+  feedback.className = "travel-prep-feedback";
+  feedback.textContent = "確認後才會扣除實際使用的補給。";
+  const footer = document.createElement("footer");
+  footer.className = "travel-prep-footer";
+  const cancel = document.createElement("button");
+  cancel.type = "button";
+  cancel.className = "prep-secondary-button";
+  cancel.textContent = "返回地圖";
+  cancel.addEventListener("click", closeTravelPrep);
+  const submit = document.createElement("button");
+  submit.type = "button";
+  submit.className = "prep-primary-button";
+  submit.textContent = "確認出發";
+  submit.addEventListener("click", async () => {
+    const configured = {};
+    const selectedTotals = new Map();
+    for (const [slotId, control] of formControls) {
+      const itemId = control.select.value || null;
+      const raw = Number.parseInt(control.quantity.value, 10);
+      const quantity = itemId && Number.isInteger(raw) ? Math.max(0, Math.min(raw, control.cap)) : 0;
+      configured[slotId] = { item_id: itemId, quantity };
+      if (itemId) selectedTotals.set(itemId, (selectedTotals.get(itemId) ?? 0) + quantity);
+    }
+    const overSelected = [...selectedTotals].find(([itemId, quantity]) => quantity > (inventory.find((entry) => entry.item_id === itemId)?.quantity ?? 0));
+    if (overSelected) {
+      feedback.textContent = `「${inventory.find((entry) => entry.item_id === overSelected[0])?.name}」選取數量超過背包持有量。`;
+      return;
+    }
+    const preparedAction = { ...action, supplyPromptPrepared: true, payload: { ...(action.payload ?? {}), supplies: configured } };
+    closeTravelPrep();
+    if (runtimeClient.isLiveMode()) {
+      await dispatchRuntimeAction(preparedAction, "travel_prep_confirm");
+    } else {
+      pushActionLog({ action_id: "confirm_travel", payload: preparedAction.payload, source: "travel_prep_confirm", dispatched: true });
+      feedbackMessageEl.textContent = "已完成出發整備，前往探索畫面。";
+      navigateAfterAction(preparedAction);
+    }
+  });
+  footer.append(cancel, submit);
+  dialog.append(heading, body, feedback, footer);
+  overlay.append(dialog);
+  overlay.addEventListener("click", (event) => {
+    if (event.target === overlay) closeTravelPrep();
+  });
+  document.body.append(overlay);
+  travelPrepEl = overlay;
+  close.focus();
+}
+
+function closeTravelPrep() {
+  travelPrepEl?.remove();
+  travelPrepEl = null;
 }
 
 function setMenuOpen(open, shouldLog) {

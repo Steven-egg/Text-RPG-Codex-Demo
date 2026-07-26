@@ -25,13 +25,13 @@ from engine.state import (
 def assert_unaffixed_instance(state: dict, reference_id: str, base_item_id: str, generation_version: int) -> None:
     instance = state["equipment_instances"][reference_id]
     assert reference_id.startswith("eqi_")
-    assert instance == {
-        "base_item_id": base_item_id,
-        "generation_version": generation_version,
-        "roll_index": 0,
-        "major_affix_id": None,
-        "minor_affix_id": None,
-    }
+    assert instance["base_item_id"] == base_item_id
+    assert instance["generation_version"] == generation_version
+    assert instance["roll_index"] == 0
+    assert instance["quality"] == "normal"
+    assert instance["pattern_id"] is None
+    assert instance["major_affix_id"] is None
+    assert instance["minor_affix_id"] is None
 
 
 def run() -> None:

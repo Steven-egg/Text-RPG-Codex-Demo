@@ -721,3 +721,122 @@ for trigger in SKILLS["skill_ice_05"]["passive_triggers"]:
 # Cleric adjustments
 SKILLS["skill_sanctified_decay"]["multiplier"] = 0.70
 SKILLS["skill_regeneration"]["amount"] = 10
+
+
+# === Formal Promotion v1 Skills ===
+SKILLS.update({
+    # 劍士 - 血鋒鬥士
+    "skill_blood_blade_strike": {
+        "name": "血鋒本戰",
+        "mp": 0,
+        "kind": "buff",
+        "buff": "blood_blade_active",
+        "duration": 99,
+        "desc": "消耗 15% 最大 HP 獲得 1 層血戰狀態，提升 Physical Charge 爆發傷害（上限 3 層）。不可自殺。"
+    },
+    "skill_blood_blade_passive": {
+        "name": "血鋒本能",
+        "mp": 0,
+        "kind": "passive",
+        "desc": "被動：擁有血戰層數時，每層使蓄力技能傷害倍率額外提升 12%。"
+    },
+    # 劍士 - 血鎧守衛
+    "skill_blood_armor_shield": {
+        "name": "血鎧護衛",
+        "mp": 0,
+        "kind": "buff",
+        "buff": "blood_armor_active",
+        "duration": 99,
+        "desc": "消耗 15% 最大 HP 獲得 1 層血鎧狀態，提升防禦力（上限 3/4 層）。不可自殺。"
+    },
+    "skill_blood_armor_passive": {
+        "name": "堅毅血鎧",
+        "mp": 0,
+        "kind": "passive",
+        "desc": "被動：血鎧最大上限 +1 且每層提升的防禦力提高。"
+    },
+    # 法師 - 星裂術士
+    "skill_star_fracture": {
+        "name": "星裂術",
+        "mp": 12,
+        "kind": "damage",
+        "desc": "消耗高 MP 施放已學元素的單次大爆發傷害。"
+    },
+    "skill_star_fracture_passive": {
+        "name": "星裂回報",
+        "mp": 0,
+        "kind": "passive",
+        "desc": "被動：若星裂術契合敵方弱點元素，傷害提升 25% 且回復 6 MP。"
+    },
+    # 法師 - 印紋術士
+    "skill_sigil_mage": {
+        "name": "印紋術",
+        "mp": 6,
+        "kind": "debuff",
+        "debuff": "sigil_mage_mark",
+        "duration": 5,
+        "desc": "對目標施加已學元素的印記，同元素再次命中時引爆大額額外傷害並清除印記。"
+    },
+    "skill_sigil_mage_passive": {
+        "name": "印紋引爆",
+        "mp": 0,
+        "kind": "passive",
+        "desc": "被動：同元素技能命中印記目標時引爆額外無屬性傷害，並清除印記。"
+    },
+    # 盜賊 - 斷影刺客
+    "skill_shadow_slayer_execute": {
+        "name": "斷影處決",
+        "mp": 6,
+        "kind": "damage",
+        "desc": "物理傷害，對低生命（<40% HP）目標造成雙倍處決傷害。"
+    },
+    "skill_shadow_slayer_passive": {
+        "name": "收尾狂熱",
+        "mp": 0,
+        "kind": "passive",
+        "desc": "被動：對低生命（<40% HP）目標，自身暴擊率提升 25% 且暴擊傷害提升 50%。"
+    },
+    # 盜賊 - 瘴痕獵手
+    "skill_miasma_strike": {
+        "name": "瘴痕打擊",
+        "mp": 6,
+        "kind": "damage",
+        "desc": "物理傷害，目標每有流血或中毒狀態，傷害倍率增加 0.6。"
+    },
+    "skill_miasma_hunter_passive": {
+        "name": "瘴痕狩獵",
+        "mp": 0,
+        "kind": "passive",
+        "desc": "被動：目標每有流血或中毒狀態，自身造成的攻擊與技能傷害提升 15%。"
+    },
+    # 牧師 - 聖幕司祭
+    "skill_holy_veil_barrier": {
+        "name": "聖幕結界",
+        "mp": 8,
+        "kind": "buff",
+        "buff": "holy_veil_shield",
+        "duration": 99,
+        "desc": "主動建立能吸收直接傷害的護盾，吸收時對攻擊者進行神聖反震。"
+    },
+    "skill_holy_veil_passive": {
+        "name": "聖幕屏障",
+        "mp": 0,
+        "kind": "passive",
+        "desc": "被動：最大護盾容量提升 25%。"
+    },
+    # 牧師 - 聖蝕司祭
+    "skill_holy_eclipse_cast": {
+        "name": "聖蝕儀式",
+        "mp": 10,
+        "kind": "buff",
+        "buff": "holy_eclipse_active",
+        "duration": 5,
+        "desc": "同時施加自身聖蝕 DoT 與再生狀態 5 回合。勝利後若使用過聖蝕聖瓶則返還一瓶。"
+    },
+    "skill_holy_eclipse_passive": {
+        "name": "聖蝕交融",
+        "mp": 0,
+        "kind": "passive",
+        "desc": "被動：再生與自身聖蝕 DoT 並存時強化 DoT 傷害，並於戰後返還第一瓶聖蝕聖瓶。"
+    }
+})

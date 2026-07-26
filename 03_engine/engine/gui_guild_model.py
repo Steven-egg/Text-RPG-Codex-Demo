@@ -5,6 +5,8 @@ from data import DUNGEONS, EQUIPMENT, ITEMS, QUESTS, REGIONS, get_region_by_dung
 from . import game
 from .formatting import item_name
 from .gui_presentation import resource_strip
+from .equipment_refs import inventory_equipment_refs, resolve_equipment_ref
+from .equipment_quality import QUALITY_LABELS, filter_tags, sell_price
 
 
 REGION_ORDER = ["border_fire", "ice", "earth", "thunder", "final"]
@@ -576,6 +578,24 @@ def guild_screen_model(state: dict[str, Any], selected_region_id: str | None = N
                 "unit_price": unit_price
             })
 
+    quality_equipment_rows = []
+    for reference_id in inventory_equipment_refs(state):
+        resolved = resolve_equipment_ref(state, reference_id)
+        if not resolved or resolved.get("quality") == "normal":
+            continue
+        base = resolved["base"]
+        quality_equipment_rows.append({
+            "reference_id": reference_id,
+            "base_item_id": resolved["base_item_id"],
+            "title": base["name"],
+            "quality": resolved["quality"],
+            "quality_label": QUALITY_LABELS[resolved["quality"]],
+            "owned_count": 1,
+            "unit_price": sell_price(base.get("price", 0), resolved["quality"]),
+            "filter_tags": sorted(filter_tags(base, resolved.get("instance"))),
+            "action": {"action_id": "sell_quality_equipment", "payload": {"reference_id": reference_id, "confirm": True}},
+        })
+
     return {
         "screen_id": "facility_guild_screen",
         "facility_id": "guild",
@@ -600,5 +620,7 @@ def guild_screen_model(state: dict[str, Any], selected_region_id: str | None = N
         "condition_rows": condition_rows,
         "feedback_message": feedback_message,
         "secondary_actions": secondary_actions,
-        "sellable_materials": sellable_materials
+        "sellable_materials": sellable_materials,
+        "quality_equipment_filters": ["attack", "defense", "resist", "resource", "utility", "job_mechanic"],
+        "sellable_quality_equipment": quality_equipment_rows,
     }

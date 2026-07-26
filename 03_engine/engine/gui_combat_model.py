@@ -28,6 +28,17 @@ def combat_item_rows(state: dict[str, Any]) -> list[dict[str, Any]]:
     return rows
 
 
+def get_learned_elements(state: dict[str, Any]) -> list[str]:
+    elements = []
+    for skill_id in state.get("learned_skills", []):
+        skill = SKILLS.get(skill_id)
+        if skill and skill.get("element") in {"火", "冰", "自然", "雷"}:
+            elem = skill["element"]
+            if elem not in elements:
+                elements.append(elem)
+    return elements
+
+
 def combat_skill_rows(state: dict[str, Any], combat: dict[str, Any] | None, resolved: bool) -> list[dict[str, Any]]:
     rows = []
     learned_skills = state.get("learned_skills", [])
@@ -35,6 +46,54 @@ def combat_skill_rows(state: dict[str, Any], combat: dict[str, Any] | None, reso
         skill = SKILLS.get(skill_id)
         if not skill:
             continue
+
+        if skill_id in {"skill_star_fracture", "skill_sigil_mage"}:
+            learned_elements = get_learned_elements(state)
+            if not learned_elements:
+                mp_cost = skill.get("mp", 0)
+                rows.append({
+                    "action_id": "use_skill",
+                    "label": f"{skill.get('name')} (無可用元素)",
+                    "meta": f"MP {mp_cost}",
+                    "description": "尚未學會火、冰、自然、雷中任何一項元素魔法，無法使用此技能。",
+                    "enabled": False,
+                    "disabled_reason": "未學會任何元素魔法。",
+                    "payload": {"skill_id": skill_id}
+                })
+                continue
+
+            for elem in learned_elements:
+                mp_cost = skill.get("mp", 0)
+                has_enough_mp = state.get("current_mp", 0) >= mp_cost
+                enabled = not resolved and has_enough_mp
+                disabled_reason = None
+                if resolved:
+                    disabled_reason = "戰鬥已結束。"
+                elif not has_enough_mp:
+                    disabled_reason = "MP 不足。"
+
+                payload = {"skill_id": skill_id, "element": elem}
+                if combat and "enemy_id" in combat:
+                    payload["enemy_id"] = combat["enemy_id"]
+
+                if skill_id == "skill_star_fracture":
+                    label = f"星裂術：{elem}"
+                    desc = f"消耗 12 MP。對敵人造成大額【{elem}】屬性魔法傷害。"
+                else:
+                    label = f"印紋術：{elem}"
+                    desc = f"消耗 6 MP。對目標施加【{elem}】之印紋（持續 5 回合）。"
+
+                rows.append({
+                    "action_id": "use_skill",
+                    "label": label,
+                    "meta": f"MP {mp_cost}",
+                    "description": desc,
+                    "enabled": enabled,
+                    "disabled_reason": disabled_reason,
+                    "payload": payload,
+                })
+            continue
+
         mp_cost = skill.get("mp", 0)
         has_enough_mp = state.get("current_mp", 0) >= mp_cost
         enabled = not resolved and has_enough_mp

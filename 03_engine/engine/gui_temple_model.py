@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import Any
 from . import game
 from .gui_presentation import resource_strip
-from .previews import get_preview_promotions_for_job
+from data import PROMOTIONS, SKILLS
 
 
 def temple_screen_model(state: dict[str, Any]) -> dict[str, Any]:
@@ -21,9 +21,15 @@ def temple_screen_model(state: dict[str, Any]) -> dict[str, Any]:
         "payload": { "altar_action": "pray", "cost": 30 }
     }
 
-    previews = get_preview_promotions_for_job(state.get("job", ""))
+    choices = [
+        (promo_id, promo)
+        for promo_id, promo in PROMOTIONS.items()
+        if promo.get("source_job") == state.get("job") and promo.get("status") == "formal"
+    ]
+
+    current_promo_id = state.get("promotion_id")
     promotions = []
-    for promo in previews:
+    for promo_id, promo in choices:
         reqs = []
         for req in promo.get("requirements", []):
             satisfied = game.promotion_requirement_met(state, req)
@@ -48,13 +54,39 @@ def temple_screen_model(state: dict[str, Any]) -> dict[str, Any]:
                 "satisfied": satisfied
             })
 
+        # 主被動技能預覽
+        active_skill = SKILLS.get(promo["active_skill_id"], {})
+        passive_skill = SKILLS.get(promo["passive_skill_id"], {})
+        description = (
+            f"{promo.get('summary', '')} "
+            f"| 主動技能：[{active_skill.get('name')}] - {active_skill.get('desc')} "
+            f"| 被動技能：[{passive_skill.get('name')}] - {passive_skill.get('desc')}"
+        )
+
+        # 檢查轉職按鈕狀態
+        if current_promo_id:
+            if current_promo_id == promo_id:
+                enabled = False
+                label = f"{promo.get('name')} (已晉升)"
+                disabled_reason = "您已晉升此職業。"
+            else:
+                enabled = False
+                label = promo.get("name")
+                disabled_reason = "您已宣誓晉升為其他職業。"
+        else:
+            # 檢查條件是否全數達成
+            all_satisfied = all(game.promotion_requirement_met(state, req) for req in promo.get("requirements", []))
+            enabled = all_satisfied
+            label = promo.get("name")
+            disabled_reason = None if all_satisfied else "未達成所有晉升要求條件。"
+
         promotions.append({
-            "class_id": promo.get("name", ""),
-            "label": f"{promo.get('name', '')} (預覽)",
-            "description": f"二階{state.get('job','')}特化。{promo.get('summary', '')}",
+            "class_id": promo_id,
+            "label": label,
+            "description": description,
             "requirements": reqs,
-            "enabled": False,
-            "disabled_reason": "正式轉職功能尚未開放（目前僅供預覽）。"
+            "enabled": enabled,
+            "disabled_reason": disabled_reason
         })
 
     inquiries = []

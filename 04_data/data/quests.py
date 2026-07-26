@@ -228,3 +228,13 @@ QUESTS = {
         "desc": "進入魔王王座，擊敗災禍邪神 阿巴頓，終結魔王城前線的災禍源頭。",
     },
 }
+
+# Formal supply migration: quest rewards never issue the retired medium potion.
+# Preserve their former recovery value by granting two T1 travel recoveries.
+for _quest in QUESTS.values():
+    _reward_items = _quest.get("reward", {}).get("items", {})
+    _retired_qty = _reward_items.pop("item_potion_m", 0)
+    if _retired_qty:
+        _reward_items["item_potion_s"] = _reward_items.get("item_potion_s", 0) + _retired_qty * 2
+    if "unlocks" in _quest:
+        _quest["unlocks"] = [key for key in _quest["unlocks"] if key != "item_potion_m"]

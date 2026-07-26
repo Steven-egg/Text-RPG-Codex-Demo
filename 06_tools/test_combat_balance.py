@@ -31,6 +31,14 @@ from data import EQUIPMENT, MONSTERS, RELICS, SKILLS  # noqa: E402
 from engine import game  # noqa: E402
 from engine.relic import select_relic_passive  # noqa: E402
 from engine.state import create_state, get_stats  # noqa: E402
+from s10_baseline_config import (  # noqa: E402
+    S10_SCENARIOS,
+    S10_SUPPLY_PROFILES,
+    S10_TARGETS,
+    S10_VERSION,
+    scenario_config_id,
+    supply_profile_for,
+)
 
 
 SCHEMA_VERSION = "balance-architecture-v2"
@@ -313,9 +321,9 @@ def _skill_ids(job_key: str, region_id: str) -> list[str]:
     return list(dict.fromkeys(base + [skill_id for skill_id in extras if skill_id in SKILLS]))
 
 
-def _apply_relics(state: dict, job_key: str, region_id: str) -> list[str]:
+def _apply_relics(state: dict, job_key: str, region_id: str, relic_count: int | None = None) -> list[str]:
     selected = []
-    count = REGIONS[region_id]["relic_count"]
+    count = REGIONS[region_id]["relic_count"] if relic_count is None else relic_count
     for relic_id, choice_id in zip(RELIC_ORDER[:count], RELIC_CHOICES[job_key][:count], strict=True):
         state["flags"][RELICS[relic_id]["complete_flag"]] = True
         result = select_relic_passive(state, relic_id, choice_id)
@@ -480,6 +488,7 @@ def _build_state(
     with_relics: bool,
     boss: bool,
     loadout_override: dict[str, str | None] | None = None,
+    relic_count_override: int | None = None,
 ) -> tuple[dict, dict[str, str | None], str, str, list[str]]:
     state = create_state("Balance QA", JOBS[job_key])
     state["level"] = REGIONS[region_id]["level"]
@@ -490,7 +499,7 @@ def _build_state(
         loadout, complete, carry = dict(loadout_override), "focused-isolate", ""
     state["equipment"].update(loadout)
     state["learned_skills"] = _skill_ids(job_key, region_id)
-    relic_profile = _apply_relics(state, job_key, region_id) if with_relics else []
+    relic_profile = _apply_relics(state, job_key, region_id, relic_count_override) if with_relics else []
     if boss:
         state["inventory"] = {"item_potion_m": 2, "item_focus_drop": 1, "item_armor_piercer": 1}
     stats = get_stats(state)
@@ -630,8 +639,10 @@ def measure_scenario(
     b6_profile: str | None = None,
     loadout_override: dict[str, str | None] | None = None,
     equipment_profile_id: str | None = None,
+    relic_count_override: int | None = None,
+    run_supplies: dict[str, dict[str, int | str | None]] | None = None,
 ) -> dict[str, Any]:
-    if layer not in LAYERS:
+    if layer not in (*LAYERS, "S10"):
         raise ValueError(f"unknown layer: {layer}")
     if promotion_profile != "none" and REGIONS[region_id]["level"] < 12:
         raise ValueError("promotion overlays are limited to benchmark level 12 and above")
@@ -652,8 +663,17 @@ def measure_scenario(
 
     with _common_random_stream(region_id, job_key, target_type, seed), _temporary_equipment_stats(adjustments):
         state, _loadout, complete, carry, relic_profile = _build_state(
-            job_key, region_id, equipment_profile, relics, boss, loadout_override,
+            job_key, region_id, equipment_profile, relics, boss, loadout_override, relic_count_override,
         )
+        if run_supplies is not None:
+            configured_inventory: dict[str, int] = {}
+            for selection in run_supplies.values():
+                item_id = selection.get("item_id")
+                quantity = int(selection.get("quantity", 0))
+                if item_id and quantity:
+                    configured_inventory[item_id] = configured_inventory.get(item_id, 0) + quantity
+            state["inventory"] = configured_inventory
+            game.configure_run_supplies(state, run_supplies)
         enemy = deepcopy(MONSTERS[enemy_id])
         enemy_hp = enemy["hp"]
         player_buffs: dict[str, Any] = {}
@@ -1049,6 +1069,181 @@ def render_records(records: list[dict[str, Any]], output_format: str) -> str:
         return json.dumps(records, ensure_ascii=True, sort_keys=True, separators=(",", ":"))
     stream = io.StringIO(newline="")
     writer = csv.DictWriter(stream, fieldnames=RECORD_FIELDS, lineterminator="\n", extrasaction="raise")
+    writer.writeheader()
+    writer.writerows(records)
+    return stream.getvalue()
+
+
+S10_RECORD_FIELDS = (
+    "s10_version", "config_id", "scenario_id", "seed", "region", "checkpoint", "benchmark_level", "job",
+    "target_type", "enemy_id", "result", "player_actions", "enemy_actions", "initial_hp", "final_hp",
+    "initial_mp", "final_mp", "equipment_profile_id", "relic_profile", "supply_profile",
+    "action_target_min", "action_target_max", "victory_target_met", "action_target_met", "target_met",
+)
+S10_SUMMARY_FIELDS = (
+    "s10_version", "config_id", "region", "checkpoint", "job", "target_type", "enemy_id", "trials", "victories",
+    "player_actions_min", "player_actions_median", "player_actions_max", "action_target_min", "action_target_max",
+    "all_victories", "target_met",
+)
+
+
+def _s10_record(**values: Any) -> dict[str, Any]:
+    return {field: values.get(field, "") for field in S10_RECORD_FIELDS}
+
+
+def validate_s10_config() -> None:
+    """Validate the ten owner-facing configuration rows before measuring."""
+    if len(S10_SCENARIOS) != 10:
+        raise ValueError("S10 must define exactly ten scenarios.")
+    region_order = tuple(REGIONS)
+    seen: set[tuple[str, str]] = set()
+    for scenario in S10_SCENARIOS:
+        region_id = scenario["region"]
+        target_type = scenario["target_type"]
+        checkpoint = scenario["checkpoint"]
+        pair = (region_id, checkpoint)
+        if region_id not in REGIONS or target_type not in S10_TARGETS or pair in seen:
+            raise ValueError(f"Invalid or duplicate S10 scenario: {pair}")
+        seen.add(pair)
+        if scenario["enemy_id"] not in MONSTERS:
+            raise ValueError(f"Unknown S10 enemy: {scenario['enemy_id']}")
+        region_index = region_order.index(region_id)
+        expected_checkpoint = "entry" if target_type == "normal" else "endgame"
+        expected_loadout_region = region_order[max(0, region_index - 1)] if target_type == "normal" else region_id
+        expected_relic_count = max(0, region_index - 1) if target_type == "normal" else region_index
+        if checkpoint != expected_checkpoint or scenario["loadout_region"] != expected_loadout_region:
+            raise ValueError(f"S10 progression timing mismatch: {pair}")
+        if scenario["relic_count"] != expected_relic_count:
+            raise ValueError(f"S10 relic timing mismatch: {pair}")
+        if target_type == "normal" and MONSTERS[scenario["enemy_id"]].get("boss"):
+            raise ValueError(f"S10 normal scenario cannot use a boss: {scenario['enemy_id']}")
+        if target_type == "boss" and not MONSTERS[scenario["enemy_id"]].get("boss"):
+            raise ValueError(f"S10 Boss scenario requires a boss: {scenario['enemy_id']}")
+        profile_id = supply_profile_for(scenario)
+        supplies = S10_SUPPLY_PROFILES.get_profile(profile_id, scenario["region"])
+        for job_key, job_name in JOBS.items():
+            loadout = dict(FULL_LOADOUTS[scenario["loadout_region"]][job_key])
+            loadout.update(scenario["loadout_overrides"].get(job_key, {}))
+            for slot, equipment_id in loadout.items():
+                if equipment_id is None:
+                     continue
+                equipment = EQUIPMENT.get(equipment_id)
+                if not equipment or equipment.get("slot") != slot or job_name not in equipment.get("jobs", ()):
+                    raise ValueError(f"Invalid S10 equipment for {pair}:{job_key}:{slot}")
+            inventory: dict[str, int] = {}
+            for selection in supplies.values():
+                item_id = selection["item_id"]
+                quantity = selection["quantity"]
+                if item_id:
+                    inventory[item_id] = inventory.get(item_id, 0) + quantity
+            supply_state = create_state("S10 validation", job_name)
+            supply_state["inventory"] = inventory
+            game.configure_run_supplies(supply_state, supplies)
+
+
+def build_s10_records(seeds: Iterable[int] = DEFAULT_SEEDS) -> list[dict[str, Any]]:
+    validate_s10_config()
+    records: list[dict[str, Any]] = []
+    for scenario in S10_SCENARIOS:
+        config_id = scenario_config_id(scenario)
+        supply_profile = supply_profile_for(scenario)
+        action_min, action_max = S10_TARGETS[scenario["target_type"]]
+        for job_key in JOBS:
+            loadout = dict(FULL_LOADOUTS[scenario["loadout_region"]][job_key])
+            loadout.update(scenario["loadout_overrides"].get(job_key, {}))
+            for seed in seeds:
+                measured = measure_scenario(
+                    layer="S10",
+                    region_id=scenario["region"],
+                    job_key=job_key,
+                    target_type=scenario["target_type"],
+                    seed=seed,
+                    equipment_profile="full",
+                    rotation=True,
+                    relics=True,
+                    loadout_override=loadout,
+                    equipment_profile_id=config_id,
+                    relic_count_override=scenario["relic_count"],
+                    run_supplies=S10_SUPPLY_PROFILES.get_profile(supply_profile, scenario["region"]),
+                )
+                victory_target_met = measured["result"] == "victory"
+                action_target_met = victory_target_met and action_min <= measured["player_actions"] <= action_max
+                records.append(_s10_record(
+                    s10_version=S10_VERSION,
+                    config_id=config_id,
+                    scenario_id=f"{config_id}:{job_key}:{seed}",
+                    seed=seed,
+                    region=scenario["region"],
+                    checkpoint=scenario["checkpoint"],
+                    benchmark_level=REGIONS[scenario["region"]]["level"],
+                    job=job_key,
+                    target_type=scenario["target_type"],
+                    enemy_id=scenario["enemy_id"],
+                    result=measured["result"],
+                    player_actions=measured["player_actions"],
+                    enemy_actions=measured["enemy_actions"],
+                    initial_hp=measured["initial_hp"],
+                    final_hp=measured["final_hp"],
+                    initial_mp=measured["initial_mp"],
+                    final_mp=measured["final_mp"],
+                    equipment_profile_id=config_id,
+                    relic_profile=measured["relic_profile"],
+                    supply_profile=supply_profile,
+                    action_target_min=action_min,
+                    action_target_max=action_max,
+                    victory_target_met=victory_target_met,
+                    action_target_met=action_target_met,
+                    target_met=victory_target_met and action_target_met,
+                ))
+    return records
+
+
+def render_s10_records(records: list[dict[str, Any]], output_format: str) -> str:
+    if output_format == "json":
+        return json.dumps(records, ensure_ascii=True, sort_keys=True, separators=(",", ":"))
+    stream = io.StringIO(newline="")
+    writer = csv.DictWriter(stream, fieldnames=S10_RECORD_FIELDS, lineterminator="\n", extrasaction="raise")
+    writer.writeheader()
+    writer.writerows(records)
+    return stream.getvalue()
+
+
+def summarize_s10_records(records: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    summaries: list[dict[str, Any]] = []
+    grouped: dict[tuple[str, str], list[dict[str, Any]]] = {}
+    for record in records:
+        grouped.setdefault((record["config_id"], record["job"]), []).append(record)
+    for (_config_id, _job), group in grouped.items():
+        ordered = sorted(group, key=lambda record: record["seed"])
+        actions = sorted(record["player_actions"] for record in ordered)
+        first = ordered[0]
+        all_victories = all(record["victory_target_met"] for record in ordered)
+        summaries.append({
+            "s10_version": S10_VERSION,
+            "config_id": first["config_id"],
+            "region": first["region"],
+            "checkpoint": first["checkpoint"],
+            "job": first["job"],
+            "target_type": first["target_type"],
+            "enemy_id": first["enemy_id"],
+            "trials": len(ordered),
+            "victories": sum(record["victory_target_met"] for record in ordered),
+            "player_actions_min": actions[0],
+            "player_actions_median": actions[(len(actions) - 1) // 2],
+            "player_actions_max": actions[-1],
+            "action_target_min": first["action_target_min"],
+            "action_target_max": first["action_target_max"],
+            "all_victories": all_victories,
+            "target_met": all(record["target_met"] for record in ordered),
+        })
+    return summaries
+
+
+def render_s10_summary(records: list[dict[str, Any]], output_format: str) -> str:
+    if output_format == "json":
+        return json.dumps(records, ensure_ascii=True, sort_keys=True, separators=(",", ":"))
+    stream = io.StringIO(newline="")
+    writer = csv.DictWriter(stream, fieldnames=S10_SUMMARY_FIELDS, lineterminator="\n", extrasaction="raise")
     writer.writeheader()
     writer.writerows(records)
     return stream.getvalue()
@@ -1752,12 +1947,20 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--cinder-survival", action="store_true", help="stdout-only fixed-window Cinder Mark probe")
     parser.add_argument("--tactical-strategy", action="store_true", help="stdout-only fixed tactical-item strategy measurement")
     parser.add_argument("--value-model-audit", action="store_true", help="stdout-only EHP and action-cost measurement")
+    parser.add_argument("--s10", action="store_true", help="stdout-only S10 entry/endgame balance measurement")
+    parser.add_argument("--s10-summary", action="store_true", help="stdout-only S10 per-job range and median summary")
     return parser.parse_args(argv)
 
 
 def main(argv: list[str] | None = None) -> None:
     args = parse_args(argv)
     check_runtime_contracts()
+    if args.s10 or args.s10_summary:
+        seeds = tuple(int(seed.strip()) for seed in args.seeds.split(",") if seed.strip())
+        records = build_s10_records(seeds)
+        rendered = render_s10_summary(summarize_s10_records(records), args.format) if args.s10_summary else render_s10_records(records, args.format)
+        print(rendered, end="")
+        return
     if args.phase0:
         print(render_phase0_records(build_phase0_records(tuple(int(seed.strip()) for seed in args.seeds.split(",") if seed.strip())), args.format), end="")
         return

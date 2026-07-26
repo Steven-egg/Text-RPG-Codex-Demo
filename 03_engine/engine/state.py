@@ -13,6 +13,7 @@ from data import (
     REGIONS,
     RELICS,
     SKILLS,
+    PROMOTIONS,
     get_unlocked_regions,
 )
 from data.jobs import GROWTH_POINT_RATES, per_three_level_points
@@ -124,6 +125,33 @@ def migrate_equipment_instances(state: dict) -> None:
     state["state_version"] = EQUIPMENT_INSTANCE_STATE_VERSION
 
 
+def grant_quality_equipment(state: dict, base_item_id: str, quality: str) -> str:
+    from .equipment_quality import pattern_for
+    reference_id = create_equipment_instance(state, base_item_id, generation_version=2)
+    instance = state["equipment_instances"][reference_id]
+    instance["quality"] = quality
+
+    base_item = EQUIPMENT[base_item_id]
+    job = parent_job(state["job"])
+    pattern_id, major, minor = pattern_for(base_item, job, quality)
+    instance["major_affix_id"] = major
+    instance["minor_affix_id"] = minor
+    instance["pattern_id"] = pattern_id
+
+    state.setdefault("inventory", {})[reference_id] = state.setdefault("inventory", {}).get(reference_id, 0) + 1
+    return reference_id
+
+
+def quality_equipment_candidates(state: dict, region: str) -> list[str]:
+    candidates = []
+    for item_id, item in EQUIPMENT.items():
+        if item.get("slot") == "special":
+            continue
+        if item.get("region") == region and parent_job(state["job"]) in item.get("jobs", []):
+            candidates.append(item_id)
+    return candidates
+
+
 def is_key_item(item_id: str) -> bool:
     return item_id.startswith("key_")
 
@@ -137,6 +165,7 @@ def create_state(name: str, job: str) -> dict:
     state = {
         "name": name,
         "job": job,
+        "promotion_id": None,
         "level": 1,
         "exp": 0,
         "gold": 120,
@@ -212,6 +241,21 @@ def ensure_state_defaults(state: dict) -> dict:
         state["bestiary"] = clean_bestiary
     if state.get("run_supplies") is not None and not isinstance(state.get("run_supplies"), dict):
         state["run_supplies"] = None
+
+    # 存檔遷移：將舊稱號還原為基礎職業
+    legacy_jobs = {
+        "元素騎士": "劍士",
+        "星詠者": "法師",
+        "影行者": "盜賊",
+        "聖印使": "牧師"
+    }
+    if state.get("job") in legacy_jobs:
+        state["job"] = legacy_jobs[state["job"]]
+        state["promotion_id"] = None
+
+    if "promotion_id" not in state:
+        state["promotion_id"] = None
+
     return state
 
 
@@ -471,6 +515,13 @@ def get_stats(state: dict, buffs: dict | None = None) -> dict:
             for stat_key, value in bonuses.items():
                 stats[stat_key] = stats.get(stat_key, 0) + value
 
+        blood_armor_stacks = buffs.get("blood_armor_active", 0)
+        if blood_armor_stacks > 0:
+            pct_per_stack = 25 if "skill_blood_armor_passive" in state.get("learned_skills", []) else 20
+            pct = pct_per_stack * blood_armor_stacks
+            stats["defense"] = math.ceil(stats["defense"] * (1 + pct / 100))
+            stats["magic_defense"] = math.ceil(stats["magic_defense"] * (1 + pct / 100))
+
     for key, effect_key in (("max_hp", "max_hp_percent"), ("max_mp", "max_mp_percent"), ("magic_defense", "magic_defense_percent")):
         percent = relic_effects.get(effect_key, 0)
         if percent:
@@ -701,8 +752,13 @@ def quest_ready(state: dict, quest_id: str) -> bool:
 def player_summary_line(state: dict) -> str:
     clamp_vitals(state)
     stats = get_stats(state)
+    job_str = state['job']
+    if state.get("promotion_id"):
+        promo_name = PROMOTIONS.get(state["promotion_id"], {}).get("name", "")
+        if promo_name:
+            job_str = f"{state['job']}／{promo_name}"
     return (
-        f"{state['name']} / {state['job']} Lv{state['level']} / "
+        f"{state['name']} / {job_str} Lv{state['level']} / "
         f"HP {state['current_hp']}/{stats['max_hp']} / "
         f"MP {state['current_mp']}/{stats['max_mp']} / {state['gold']}G"
     )

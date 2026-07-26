@@ -52,8 +52,11 @@ from .state import (
     quest_ready,
     player_summary_line,
     player_resource_lines,
+    grant_quality_equipment,
 )
 from .equipment_refs import equipment_ref_count, equipped_reference_for_base
+from .equipment_refs import inventory_equipment_refs, resolve_equipment_ref
+from .equipment_quality import roll_craft_quality, sell_price, supports_quality_job, QUALITY_LABELS
 from .relic import (
     ready_relic_names,
     relic_passive_menu,
@@ -515,7 +518,12 @@ def craft_recipe_message(state: dict, recipe_id: str) -> str:
     if base_item:
         consume_item_or_equipped(state, base_item)
     for item_id, qty in recipe["output"].items():
-        add_item(state, item_id, qty)
+        if item_id in EQUIPMENT and item_id != "special" and supports_quality_job(state["job"]):
+            quality = roll_craft_quality(recipe.get("region", "border_fire"))
+            for _ in range(qty):
+                grant_quality_equipment(state, item_id, quality)
+        else:
+            add_item(state, item_id, qty)
     return f"完成：{recipe['name']}。"
 
 
@@ -800,6 +808,9 @@ def magic_shop(state: dict, region_id: str = "border_fire") -> None:
 
 def recipe_available(state: dict, recipe_id: str) -> bool:
     recipe = RECIPES[recipe_id]
+    equipment_outputs = [item_id for item_id in recipe["output"] if item_id in EQUIPMENT and EQUIPMENT[item_id].get("slot") != "special"]
+    if equipment_outputs and not supports_quality_job(state["job"]):
+        return False
     return is_unlocked(state, recipe.get("unlock"))
 
 
@@ -1482,6 +1493,8 @@ def parent_job(job: str) -> str:
 
 
 def temple(state: dict, region_id: str = "border_fire") -> None:
+    from data import PROMOTIONS, SKILLS
+
     facility_name = get_facility_display_name(region_id, "temple")
     welcome_msg = get_dialogue(region_id, "temple", "welcome")
     title(facility_name)
@@ -1494,36 +1507,77 @@ def temple(state: dict, region_id: str = "border_fire") -> None:
         print("賽恩看著你手中的火之印記碎片：")
         print("「這還不是完整的印記。但神殿記得它的溫度。若你找到更多線索，再回來找我。」")
     print()
-    print(f"目前職業：{state['job']}")
-    job_for_preview = parent_job(state["job"])
-    previews = get_preview_promotions_for_job(job_for_preview)
-    if not previews:
-        print("目前尚無可預覽轉職方向。")
+
+    # 檢查是否已選轉職
+    promotion_id = state.get("promotion_id")
+    if promotion_id:
+        promo = PROMOTIONS.get(promotion_id)
+        if promo:
+            print(f"目前職業：{state['job']}／{promo['name']}")
+            print(f"稱號摘要：{promo['summary']}")
+            print("您已宣誓晉升，力量已與印記融合。")
+            print()
     else:
-        print("可轉職方向：")
-        for promotion in previews:
-            print(f"\n{job_for_preview} → {promotion['name']}")
-            print(promotion["summary"])
-            print("條件狀態：")
-            all_met = True
-            for requirement in promotion["requirements"]:
-                print(promotion_requirement_line(state, requirement))
-                if not promotion_requirement_met(state, requirement):
-                    all_met = False
-            if state["job"] != promotion["name"] and all_met:
-                print(f"\n[可轉職] 賽恩微笑著看著你：「你已經證明了自己。是否要繼承力量，轉職為 {promotion['name']}？」")
+        print(f"目前職業：{state['job']} (尚未轉職)")
+        # 獲取該基礎職業對應的正式轉職
+        choices = [
+            (promo_id, promo)
+            for promo_id, promo in PROMOTIONS.items()
+            if promo.get("source_job") == state["job"] and promo.get("status") == "formal"
+        ]
+        if not choices:
+            print("目前尚無可供晉升的正式轉職路線。")
+        else:
+            print("可晉升轉職路線：")
+            for promo_id, promo in choices:
+                print("\n────────────────────────────────────────")
+                print(f"【{promo['name']}】")
+                print(f"描述：{promo['summary']}")
+                active_name = SKILLS.get(promo["active_skill_id"], {}).get("name", promo["active_skill_id"])
+                active_desc = SKILLS.get(promo["active_skill_id"], {}).get("desc", "")
+                passive_name = SKILLS.get(promo["passive_skill_id"], {}).get("name", promo["passive_skill_id"])
+                passive_desc = SKILLS.get(promo["passive_skill_id"], {}).get("desc", "")
+                print(f" └─ 新主動技能：[{active_name}] - {active_desc}")
+                print(f" └─ 新被動技能：[{passive_name}] - {passive_desc}")
+            print("────────────────────────────────────────\n")
+
+            # 檢查晉升條件
+            lv_satisfied = state.get("level", 1) >= 18
+            quest_satisfied = "quest_ice_return_handoff" in state.get("completed_quests", [])
+
+            print("晉升要求狀態：")
+            print(f"- [{'已達成' if lv_satisfied else '未達成'}] 角色等級達 Lv18 (目前: Lv{state.get('level', 1)})")
+            print(f"- [{'已達成' if quest_satisfied else '未達成'}] 完成任務「寒冰歸來手尾」")
+
+            if lv_satisfied and quest_satisfied:
+                print("\n[可轉職] 賽恩微笑著看著你：「你已經證明了自己。是否要繼承力量，進行職業晉升？」")
+                menu_options = [f"晉升為 {promo['name']}" for promo_id, promo in choices] + ["我再想想"]
                 choice = action_menu_panel(
-                    f"轉職為 {promotion['name']}",
-                    ["確認轉職", "我再想想"],
+                    "選擇晉升方向",
+                    menu_options,
                     facility_name,
                     border_style="yellow"
                 )
-                if choice == 1:
-                    state["job"] = promotion["name"]
-                    print(f"\n【系統】轉職成功！你已正式成為 {promotion['name']}！")
-                    print(f"解鎖轉職被動技能特色！")
-                    pause()
-                    return
+                if 1 <= choice <= len(choices):
+                    chosen_id, chosen_promo = choices[choice - 1]
+                    confirm = input(f"\n【警告】轉職是一次性且不可逆的決定，你確定要轉職為「{chosen_promo['name']}」嗎？(y/n) > ").strip().lower()
+                    if confirm in ("y", "yes"):
+                        state["promotion_id"] = chosen_id
+                        # 學習主動與被動技能
+                        learned = state.setdefault("learned_skills", [])
+                        if chosen_promo["active_skill_id"] not in learned:
+                            learned.append(chosen_promo["active_skill_id"])
+                        if chosen_promo["passive_skill_id"] not in learned:
+                            learned.append(chosen_promo["passive_skill_id"])
+
+                        print(f"\n【系統】晉升成功！你已正式成為 {chosen_promo['name']}！")
+                        print(f"解鎖主動技能 [{SKILLS.get(chosen_promo['active_skill_id'], {}).get('name')}]！")
+                        print(f"解鎖被動技能 [{SKILLS.get(chosen_promo['passive_skill_id'], {}).get('name')}]！")
+                        pause()
+                        return
+                    else:
+                        print("\n你決定再考慮一下。")
+                        pause()
     print("\n神殿聖印選項：")
     if any(state.get("flags", {}).get(flag) for flag in ("fire_seal_enshrined", "ice_seal_enshrined", "earth_seal_enshrined", "thunder_seal_enshrined")):
         choice = action_menu_panel(
@@ -1540,7 +1594,6 @@ def temple(state: dict, region_id: str = "border_fire") -> None:
             return
     else:
         pause()
-
 
 
 def town_menu(state: dict, region_id: str = "border_fire") -> None:

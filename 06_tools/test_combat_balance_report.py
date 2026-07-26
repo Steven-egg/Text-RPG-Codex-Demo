@@ -694,6 +694,50 @@ def _assert_value_model_audit() -> None:
     assert random.getstate() == rng_before
 
 
+def _assert_s10_measurement() -> None:
+    """S10 is a separate, deterministic, five-slot measurement surface."""
+    before = _global_snapshots()
+    rng_before = random.getstate()
+    balance.validate_s10_config()
+    records = balance.build_s10_records(balance.DEFAULT_SEEDS)
+    assert len(records) == 10 * len(balance.JOBS) * len(balance.DEFAULT_SEEDS)
+    assert all(set(record) == set(balance.S10_RECORD_FIELDS) for record in records)
+    assert {record["s10_version"] for record in records} == {balance.S10_VERSION}
+    assert len({record["scenario_id"] for record in records}) == len(records)
+
+    counts = Counter((record["config_id"], record["job"], record["seed"]) for record in records)
+    assert all(count == 1 for count in counts.values())
+    assert len({record["config_id"] for record in records}) == 10
+    assert all(record["checkpoint"] == "entry" for record in records if record["target_type"] == "normal")
+    assert all(record["checkpoint"] == "endgame" for record in records if record["target_type"] == "boss")
+    assert all(record["supply_profile"] == "none" for record in records if record["target_type"] == "normal")
+    assert all(record["supply_profile"] == "boss_standard" for record in records if record["target_type"] == "boss")
+    assert all(record["action_target_min"] == 3 and record["action_target_max"] == 5 for record in records if record["target_type"] == "normal")
+    assert all(record["action_target_min"] == 10 and record["action_target_max"] == 15 for record in records if record["target_type"] == "boss")
+    assert all(record["victory_target_met"] == (record["result"] == "victory") for record in records)
+    assert all(record["target_met"] == (record["victory_target_met"] and record["action_target_met"]) for record in records)
+
+    csv_rows = list(csv.DictReader(io.StringIO(balance.render_s10_records(records, "csv"))))
+    json_rows = json.loads(balance.render_s10_records(records, "json"))
+    assert len(csv_rows) == len(json_rows) == len(records)
+    assert list(csv_rows[0]) == list(balance.S10_RECORD_FIELDS)
+    summaries = balance.summarize_s10_records(records)
+    assert len(summaries) == 10 * len(balance.JOBS)
+    assert all(set(summary) == set(balance.S10_SUMMARY_FIELDS) for summary in summaries)
+    assert all(summary["trials"] == len(balance.DEFAULT_SEEDS) for summary in summaries)
+    assert all(summary["victories"] <= summary["trials"] for summary in summaries)
+    assert all(summary["player_actions_min"] <= summary["player_actions_median"] <= summary["player_actions_max"] for summary in summaries)
+    summary_csv_rows = list(csv.DictReader(io.StringIO(balance.render_s10_summary(summaries, "csv"))))
+    summary_json_rows = json.loads(balance.render_s10_summary(summaries, "json"))
+    assert len(summary_csv_rows) == len(summary_json_rows) == len(summaries)
+    assert list(summary_csv_rows[0]) == list(balance.S10_SUMMARY_FIELDS)
+    first = balance.render_s10_records(records, "json")
+    second = balance.render_s10_records(balance.build_s10_records(balance.DEFAULT_SEEDS), "json")
+    assert first == second
+    _assert_globals_unchanged(before)
+    assert random.getstate() == rng_before
+
+
 def main() -> None:
     balance.check_runtime_contracts()
     before = _global_snapshots()
@@ -717,6 +761,7 @@ def main() -> None:
     _assert_cinder_survival_overlay()
     _assert_tactical_strategy_measurement()
     _assert_value_model_audit()
+    _assert_s10_measurement()
     print("Balance Architecture v2 measurement-semantics checks ok (no balance verdict).")
 
 

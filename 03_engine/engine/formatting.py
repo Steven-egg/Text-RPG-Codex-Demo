@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from .equipment_quality import QUALITY_LABELS
+
 from data import EQUIPMENT, ITEMS, MATERIALS
 from .equipment_refs import resolve_equipment_ref
 
@@ -20,6 +22,12 @@ def format_affix_view(affix: dict | None) -> str:
 def equipment_affix_summary(affixes: dict | None) -> str:
     affixes = affixes or {}
     return f"主詞綴：{format_affix_view(affixes.get('major'))}／次詞綴：{format_affix_view(affixes.get('minor'))}"
+
+
+def equipment_quality_summary(resolved: dict | None) -> str:
+    if not resolved:
+        return ""
+    return QUALITY_LABELS.get(resolved.get("quality", "normal"), "普通")
 
 
 def item_name(item_id: str, state: dict | None = None) -> str:

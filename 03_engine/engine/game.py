@@ -288,19 +288,18 @@ def consume_combat_item(state: dict, item_id: str) -> bool:
 
 
 COMBAT_HP_RECOVERY = {
-    "item_potion_s": (35, 0.0),
-    "item_potion_m": (70, 0.0),
-    "item_ice_potion_01": (120, 0.60),
-    "item_earth_potion_01": (200, 0.60),
-    "item_thunder_potion_01": (350, 0.60),
-    "item_final_potion_01": (600, 0.60),
+    "item_potion_s": (35, 0.30),
+    "item_ice_potion_01": (70, 0.35),
+    "item_earth_potion_01": (120, 0.40),
+    "item_thunder_potion_01": (180, 0.48),
+    "item_final_potion_01": (260, 0.55),
 }
 COMBAT_MP_RECOVERY = {
-    "item_focus_drop": (12, 0.0),
+    "item_focus_drop": (12, 0.25),
     "item_ice_potion_02": (30, 0.30),
-    "item_earth_potion_02": (50, 0.30),
-    "item_thunder_potion_02": (80, 0.30),
-    "item_final_potion_02": (150, 0.30),
+    "item_earth_potion_02": (40, 0.35),
+    "item_thunder_potion_02": (60, 0.40),
+    "item_final_potion_02": (90, 0.45),
 }
 COMBAT_THROWABLE_IDS = tuple(item_id for item_id, item in ITEMS.items() if item.get("kind") == "battle")
 COMBAT_ITEM_IDS = (*COMBAT_HP_RECOVERY, *COMBAT_MP_RECOVERY, "item_herb_antidote", *COMBAT_THROWABLE_IDS, "item_escape_scroll")
@@ -417,19 +416,35 @@ def parent_job(job: str) -> str:
     }.get(job, job)
 
 
-def physical_charge(player_buffs: dict) -> int:
-    return max(0, min(MAX_PHYSICAL_CHARGE, int(player_buffs.get(PHYSICAL_CHARGE_KEY, 0))))
+def physical_charge_cap(state: dict | None = None) -> int:
+    """Return the live Warrior Charge cap, including a quality weapon bonus.
+
+    The affix value is intentionally floored after quality scaling so the
+    integer stack contract remains stable across the non-normal quality bands.
+    """
+    if not state:
+        return MAX_PHYSICAL_CHARGE
+    return MAX_PHYSICAL_CHARGE + max(0, math.floor(get_stats(state).get("physical_charge_cap", 0)))
+
+
+def physical_charge(player_buffs: dict, state: dict | None = None) -> int:
+    return max(0, min(physical_charge_cap(state), int(player_buffs.get(PHYSICAL_CHARGE_KEY, 0))))
 
 
 def gain_physical_charge(state: dict, player_buffs: dict) -> int:
-    if state.get("job") != "劍士":
-        return physical_charge(player_buffs)
-    player_buffs[PHYSICAL_CHARGE_KEY] = min(MAX_PHYSICAL_CHARGE, physical_charge(player_buffs) + 1)
-    return physical_charge(player_buffs)
+    if parent_job(state.get("job", "")) != "劍士":
+        return physical_charge(player_buffs, state)
+    cap = physical_charge_cap(state)
+    stacks = min(cap, physical_charge(player_buffs, state) + 1)
+    chance = max(0, min(100, get_stats(state).get("physical_charge_gain_chance", 0)))
+    if stacks < cap and random.random() * 100 < chance:
+        stacks = min(cap, stacks + 1)
+    player_buffs[PHYSICAL_CHARGE_KEY] = stacks
+    return stacks
 
 
-def consume_physical_charge(player_buffs: dict) -> int:
-    stacks = physical_charge(player_buffs)
+def consume_physical_charge(player_buffs: dict, state: dict | None = None) -> int:
+    stacks = physical_charge(player_buffs, state)
     player_buffs.pop(PHYSICAL_CHARGE_KEY, None)
     player_buffs.pop("_warrior_quickstep_ready", None)
     return stacks
@@ -847,13 +862,16 @@ def calc_player_damage(state: dict, enemy: dict, skill: dict | None, player_buff
     relic_effects = active_relic_passive_effects(state)
     direct_bonus = relic_effects.get("direct_damage_percent", 0)
     direct_bonus += relic_effects.get("direct_magic_damage_percent" if is_magic else "direct_physical_damage_percent", 0)
+    attack_element = skill.get("element", "物理") if skill else "物理"
+    if is_magic and normalized_element(attack_element) in ELEMENT_RESIST_KEYS:
+        direct_bonus += stats.get("elemental_magic_direct_percent", 0)
     multiplier *= 1 + direct_bonus / 100
     if skill and skill.get("charge_bonus_per_stack"):
-        multiplier += physical_charge(player_buffs) * skill["charge_bonus_per_stack"]
+        per_stack_bonus = skill["charge_bonus_per_stack"] + stats.get("physical_charge_skill_bonus", 0) / 100
+        multiplier += physical_charge(player_buffs, state) * per_stack_bonus
         ready = player_buffs.get("_warrior_quickstep_ready", {})
         if ready.get("kind") == "charge_skill_bonus":
             multiplier *= 1 + ready["damage_percent"] / 100
-    attack_element = skill.get("element", "物理") if skill else "物理"
     mark_data = enemy_buffs.get("_debuff_data", {}).get("cinder_mark", {})
     if (
         is_magic
@@ -890,12 +908,32 @@ def calc_enemy_damage(enemy: dict, state: dict, multiplier: float, element: str,
     stats = get_stats(state, player_buffs)
     is_magic = normalized_element(element) in ELEMENT_RESIST_KEYS
     power = enemy.get("magic_attack", enemy["attack"]) if is_magic else enemy["attack"]
-    # ``stats`` already includes the player's temporary defense modifiers.
-    # Do not feed them into calc_typed_damage again: that path is still needed
-    # for enemy-side defense statuses, whose raw stats do not include buffs.
     damage, _ = calc_typed_damage(power, multiplier, stats, {}, "magic" if is_magic else "physical", element)
     if defending:
         damage = max(1, math.ceil(damage * 0.6))
+
+    # 聖幕司祭護盾吸收邏輯
+    if player_buffs.get("holy_veil_shield", 0) > 0 and player_buffs.get("_holy_veil_shield_value", 0) > 0:
+        shield = player_buffs["_holy_veil_shield_value"]
+        absorbed = min(damage, shield)
+        damage -= absorbed
+        player_buffs["_holy_veil_shield_value"] -= absorbed
+        player_buffs.setdefault("_shield_absorb_logs", []).append(f"聖幕結界吸收了 {absorbed} 點傷害。")
+
+        # 觸發反震：每敵方行動最多一次
+        if not player_buffs.get("_holy_veil_reflected_this_action"):
+            player_buffs["_holy_veil_reflected_this_action"] = True
+            from data import PROMOTIONS
+            promo = PROMOTIONS.get(state.get("promotion_id", ""))
+            reflect_mult = promo["config"].get("reflect_multiplier", 0.8) if promo else 0.8
+            reflect_damage = max(1, math.ceil(stats["magic_attack"] * reflect_mult))
+            player_buffs["_reflect_damage_queue"] = player_buffs.get("_reflect_damage_queue", 0) + reflect_damage
+            player_buffs.setdefault("_shield_absorb_logs", []).append(f"聖幕結界反震，對敵人造成 {reflect_damage} 點神聖傷害。")
+
+        if player_buffs["_holy_veil_shield_value"] <= 0:
+            player_buffs.pop("holy_veil_shield", None)
+            player_buffs.pop("_holy_veil_shield_value", None)
+
     return damage
 
 def combat(state: dict, enemy_id: str, boss: bool = False, run_log: dict | None = None):
@@ -903,6 +941,8 @@ def combat(state: dict, enemy_id: str, boss: bool = False, run_log: dict | None 
     enemy_hp = enemy["hp"]
     player_buffs = {}
     enemy_buffs = {}
+    # 聖蝕聖瓶初始計數
+    initial_vials = state.get("inventory", {}).get("item_sanctified_ash_vial", 0)
     if state.get("job") == "影行者":
         player_buffs["_rogue_pursuit"] = {"skill_name": "影行者身法", "followup_multiplier": 1.8}
     turn = 1
@@ -1001,6 +1041,12 @@ def combat(state: dict, enemy_id: str, boss: bool = False, run_log: dict | None 
                 last_action_summary = summary[0]
             break
 
+        # 同步當前 HP 至 enemy 字典以利低生命/被動判定
+        enemy["current_hp"] = enemy_hp
+
+        # 重置反震限制
+        player_buffs.pop("_holy_veil_reflected_this_action", None)
+
         boss_marker, enemy_events = dispatch_enemy_turn(
             enemy_id,
             enemy,
@@ -1012,6 +1058,21 @@ def combat(state: dict, enemy_id: str, boss: bool = False, run_log: dict | None 
             turn,
             boss_marker,
         )
+
+        # 收集護盾吸收日誌
+        absorb_logs = player_buffs.pop("_shield_absorb_logs", [])
+        for log in absorb_logs:
+            enemy_events.append(log)
+
+        # 扣減反震傷害
+        reflect_damage = player_buffs.pop("_reflect_damage_queue", 0)
+        if reflect_damage > 0:
+            enemy_hp = max(0, enemy_hp - reflect_damage)
+
+        # 星裂術 MP 回復被動與印記引爆 log 收集
+        sigil_logs = player_buffs.pop("_sigil_detonate_logs", [])
+        for d in sigil_logs:
+            enemy_events.append(f"【被動】印紋引爆！追加造成 {d} 點魔法傷害，並清除了印記。")
 
         effect_result = tick_effects(state, player_buffs, enemy_buffs, enemy)
         player_buffs.pop("_mp_item_used", None)
@@ -1033,6 +1094,12 @@ def combat(state: dict, enemy_id: str, boss: bool = False, run_log: dict | None 
         return False
 
     print(f"\n擊敗 {enemy['name']}！")
+    # 聖蝕司祭返還聖瓶邏輯
+    if state.get("promotion_id") == "promotion_holy_eclipse" and player_buffs.get("_holy_eclipse_vial_marked"):
+        current_vials = state.get("inventory", {}).get("item_sanctified_ash_vial", 0)
+        if current_vials < initial_vials:
+            add_item(state, "item_sanctified_ash_vial", 1)
+            print("【被動】聖蝕司祭淨化儀式：戰鬥勝利，返還本戰消耗的聖蝕聖瓶 x1。")
     try_register_bestiary(state, enemy_id)
     gain_exp(state, enemy["exp"])
     gold = random.randint(*enemy["gold"])
@@ -1066,17 +1133,17 @@ def player_attack(state: dict, enemy: dict, enemy_hp: int, skill: dict | None, p
     summary = [f"你使用{label}，造成 {damage} 傷害。{crit_text}"]
     pursuit = player_buffs.pop("_rogue_pursuit", None) if skill is None else None
     if skill and skill.get("charge_bonus_per_stack"):
-        consumed = consume_physical_charge(player_buffs)
+        consumed = consume_physical_charge(player_buffs, state)
         if consumed:
             charge_line = f"消耗 Physical Charge {consumed} 層。"
             events.append(charge_line)
             summary.append(charge_line)
     elif skill is None and parent_job(state.get("job")) == "劍士":
         stacks = gain_physical_charge(state, player_buffs)
-        charge_line = f"Physical Charge 增加至 {stacks}/{MAX_PHYSICAL_CHARGE}。"
+        charge_line = f"Physical Charge 增加至 {stacks}/{physical_charge_cap(state)}。"
         events.append(charge_line)
         summary.append(charge_line)
-        passive_events = activate_passives(state, player_buffs, "physical_charge_reaches", stacks=stacks)
+        passive_events = activate_passives(state, player_buffs, "physical_charge_reaches", stacks=min(stacks, MAX_PHYSICAL_CHARGE))
         events.extend(passive_events)
         summary.extend(passive_events)
         if state.get("job") == "元素騎士":
@@ -1170,6 +1237,133 @@ def apply_weapon_effect(state: dict, enemy: dict, effect: dict, enemy_buffs: dic
     apply_dot(enemy_buffs, status, effect["duration"], effect["multiplier"], effect.get("damage_type", "physical"), effect.get("element", "物理"))
     return [f"{status_display_name(status)}附加成功，持續 {effect['duration']} 回合。"], status
 
+def execute_skill(state: dict, enemy: dict, skill_id: str, skill: dict, player_buffs: dict, enemy_buffs: dict) -> CombatActionResult:
+    stats = get_stats(state, player_buffs)
+
+    # 1. 扣 HP 的技能（血鋒/血鎧）
+    if skill_id in {"skill_blood_blade_strike", "skill_blood_armor_shield"}:
+        max_hp = stats["max_hp"]
+        hp_cost = int(max_hp * 0.15)
+        if state["current_hp"] <= hp_cost:
+            return CombatActionResult(events=["HP 不足，無法安全支付生命代價。"], summary=["HP 不足，無法安全支付生命代價。"], outcome="cancel")
+        state["current_hp"] -= hp_cost
+
+    # 2. 處理元素選擇技能的 element 賦予
+    if skill_id in {"skill_star_fracture", "skill_sigil_mage"} and not skill.get("element"):
+        learned_elements = []
+        for sk_id in state.get("learned_skills", []):
+            sk = SKILLS.get(sk_id)
+            if sk and sk.get("element") in {"火", "冰", "自然", "雷"}:
+                elem = sk["element"]
+                if elem not in learned_elements:
+                    learned_elements.append(elem)
+        if not learned_elements:
+            return CombatActionResult(events=["尚未學會火、冰、自然、雷中任何一項元素魔法。"], summary=["無可用元素魔法。"], outcome="cancel")
+
+        if len(learned_elements) == 1:
+            chosen_element = learned_elements[0]
+        else:
+            choice = action_menu_panel(
+                "選擇施放元素",
+                learned_elements,
+                "元素選擇",
+                hint_lines=["此技能必須以學會的元素施放。"],
+                allow_back=False,
+                border_style="magenta"
+            )
+            chosen_element = learned_elements[choice - 1]
+
+        skill = {**skill, "element": chosen_element}
+
+    # 3. 按技能種類執行
+    if skill["kind"] == "damage":
+        return player_attack(state, enemy, enemy.get("current_hp", enemy.get("hp", 100)), skill, player_buffs, enemy_buffs)
+
+    elif skill["kind"] == "heal":
+        before = state["current_hp"]
+        amount = skill["amount"] + math.floor(stats["magic_attack"] * skill.get("multiplier", 0))
+        amount = math.ceil(amount * (1 + active_relic_passive_effects(state).get("healing_regen_percent", 0) / 100))
+        state["current_hp"] = min(stats["max_hp"], state["current_hp"] + amount)
+        healed = state["current_hp"] - before
+        line = f"你使用{skill['name']}，回復 {healed} HP。"
+        return CombatActionResult(events=[line], summary=[line])
+
+    elif skill["kind"] == "buff":
+        buff_key = skill["buff"]
+        if buff_key in {"blood_blade_active", "blood_armor_active"}:
+            max_stk = 3
+            if buff_key == "blood_armor_active":
+                max_stk = 4 if "skill_blood_armor_passive" in state.get("learned_skills", []) else 3
+            player_buffs[buff_key] = min(max_stk, player_buffs.get(buff_key, 0) + 1)
+            line = f"你使用{skill['name']}。目前【{status_display_name(buff_key)}】堆疊至 {player_buffs[buff_key]}/{max_stk} 層。"
+        elif buff_key == "holy_veil_shield":
+            shield_base = 40
+            shield_mult = 1.5
+            from data import PROMOTIONS
+            promo = PROMOTIONS.get("promotion_holy_veil", {})
+            cfg = promo.get("config", {})
+            if cfg:
+                shield_base = cfg.get("shield_base", 40)
+                shield_mult = cfg.get("shield_multiplier", 1.5)
+            shield_cap = stats["magic_attack"] * shield_mult + shield_base
+            if "skill_holy_veil_passive" in state.get("learned_skills", []):
+                shield_cap *= (1.0 + cfg.get("passive_capacity_bonus_percent", 25) / 100.0)
+            shield_cap = int(shield_cap)
+            player_buffs["holy_veil_shield"] = 99
+            player_buffs["_holy_veil_shield_value"] = shield_cap
+            line = f"你使用{skill['name']}。建立容量 {shield_cap} 的聖幕護盾。"
+        elif buff_key == "holy_eclipse_active":
+            from data import PROMOTIONS
+            promo = PROMOTIONS.get("promotion_holy_eclipse", {})
+            cfg = promo.get("config", {})
+            dur = cfg.get("duration", 5)
+            regen_amt = cfg.get("regen_amount", 6)
+            regen_mult = cfg.get("regen_multiplier", 0.45)
+            dot_mult = cfg.get("dot_multiplier", 0.6)
+
+            player_buffs["regeneration"] = dur
+            player_buffs["_regen_data"] = {"amount": regen_amt, "multiplier": regen_mult}
+            apply_dot(enemy_buffs, "聖蝕", dur, dot_mult, "magic", "無")
+            player_buffs["_holy_eclipse_vial_marked"] = True
+            line = f"你使用{skill['name']}。自身進入再生狀態，且對敵人施加聖蝕持續魔法傷害，持續 {dur} 回合。"
+        else:
+            player_buffs[buff_key] = skill["duration"]
+            if skill.get("buff_stats"):
+                player_buffs.setdefault("_buff_stat_data", {})[buff_key] = dict(skill["buff_stats"])
+            line = f"你使用{skill['name']}。{skill['desc']}"
+        return CombatActionResult(events=[line], summary=[line])
+
+    elif skill["kind"] == "debuff":
+        debuff_key = skill["debuff"]
+        if debuff_key == "sigil_mage_mark":
+            elem = skill.get("element", "物理")
+            enemy_buffs["sigil_mage_mark"] = skill["duration"]
+            enemy_buffs["_sigil_element"] = elem
+            line = f"你使用{skill['name']}。施加【{elem}】之印記，持續 {skill['duration']} 回合。"
+        else:
+            enemy_buffs[debuff_key] = skill["duration"]
+            if skill.get("damage_percent") is not None:
+                enemy_buffs.setdefault("_debuff_data", {})[debuff_key] = {
+                    "damage_percent": skill["damage_percent"],
+                    "damage_scope": skill.get("damage_scope"),
+                }
+            line = f"你使用{skill['name']}。{skill['desc']}"
+        return CombatActionResult(events=[line], summary=[line])
+
+    elif skill["kind"] == "dot":
+        apply_dot(enemy_buffs, skill["name"], skill["duration"], skill["multiplier"], "magic", skill.get("element", "無"))
+        line = f"{skill['name']} 必定附加，持續 {skill['duration']} 回合。"
+        return CombatActionResult(events=[line], summary=[line])
+
+    elif skill["kind"] == "regen":
+        player_buffs["regeneration"] = skill["duration"]
+        player_buffs["_regen_data"] = {"amount": skill["amount"], "multiplier": skill["multiplier"]}
+        line = f"{skill['name']} 必定附加，持續 {skill['duration']} 回合。"
+        return CombatActionResult(events=[line], summary=[line])
+
+    return CombatActionResult()
+
+
 def skill_menu(state: dict, enemy: dict, player_buffs: dict, enemy_buffs: dict):
     skills = [skill_id for skill_id in state["learned_skills"] if SKILLS[skill_id].get("kind") != "passive"]
     if not skills:
@@ -1196,42 +1390,13 @@ def skill_menu(state: dict, enemy: dict, player_buffs: dict, enemy_buffs: dict):
     skill = SKILLS[skill_id]
     if state["current_mp"] < skill["mp"]:
         return CombatActionResult(events=["MP 不足。"], summary=["MP 不足。"], outcome="cancel")
+
+    # 執行技能
+    res = execute_skill(state, enemy, skill_id, skill, player_buffs, enemy_buffs)
+    if res.outcome == "cancel":
+        return res
     state["current_mp"] -= skill["mp"]
-    if skill["kind"] == "damage":
-        return player_attack(state, enemy, enemy["hp"], skill, player_buffs, enemy_buffs)
-    if skill["kind"] == "heal":
-        before = state["current_hp"]
-        amount = skill["amount"] + math.floor(stats["magic_attack"] * skill.get("multiplier", 0))
-        amount = math.ceil(amount * (1 + active_relic_passive_effects(state).get("healing_regen_percent", 0) / 100))
-        state["current_hp"] = min(stats["max_hp"], state["current_hp"] + amount)
-        healed = state["current_hp"] - before
-        line = f"你使用{skill['name']}，回復 {healed} HP。"
-        return CombatActionResult(events=[line], summary=[line])
-    if skill["kind"] == "buff":
-        player_buffs[skill["buff"]] = skill["duration"]
-        if skill.get("buff_stats"):
-            player_buffs.setdefault("_buff_stat_data", {})[skill["buff"]] = dict(skill["buff_stats"])
-        line = f"你使用{skill['name']}。{skill['desc']}"
-        return CombatActionResult(events=[line], summary=[line])
-    if skill["kind"] == "debuff":
-        enemy_buffs[skill["debuff"]] = skill["duration"]
-        if skill.get("damage_percent") is not None:
-            enemy_buffs.setdefault("_debuff_data", {})[skill["debuff"]] = {
-                "damage_percent": skill["damage_percent"],
-                "damage_scope": skill.get("damage_scope"),
-            }
-        line = f"你使用{skill['name']}。{skill['desc']}"
-        return CombatActionResult(events=[line], summary=[line])
-    if skill["kind"] == "dot":
-        apply_dot(enemy_buffs, skill["name"], skill["duration"], skill["multiplier"], "magic", skill.get("element", "無"))
-        line = f"{skill['name']} 必定附加，持續 {skill['duration']} 回合。"
-        return CombatActionResult(events=[line], summary=[line])
-    if skill["kind"] == "regen":
-        player_buffs["regeneration"] = skill["duration"]
-        player_buffs["_regen_data"] = {"amount": skill["amount"], "multiplier": skill["multiplier"]}
-        line = f"{skill['name']} 必定附加，持續 {skill['duration']} 回合。"
-        return CombatActionResult(events=[line], summary=[line])
-    return CombatActionResult()
+    return res
 
 def combat_item_menu(state: dict, boss: bool, enemy_buffs: dict, enemy: dict, mp_item_used: bool = False):
     usable_ids = [
@@ -1489,6 +1654,14 @@ def tick_effects(state: dict, player_buffs: dict, enemy_buffs: dict, enemy: dict
                     )
             if "fixed_power" not in dot:
                 damage = math.ceil(damage * (1 + active_relic_passive_effects(state).get("dot_damage_percent", 0) / 100))
+
+            # 聖蝕司祭被動：再生與聖蝕並存時傷害提升 30%
+            if status == "聖蝕" and player_buffs.get("regeneration", 0) > 0 and "skill_holy_eclipse_passive" in state.get("learned_skills", []):
+                from data import PROMOTIONS
+                promo = PROMOTIONS.get("promotion_holy_eclipse", {})
+                cfg = promo.get("config", {})
+                damage = math.ceil(damage * (1.0 + cfg.get("passive_dot_damage_bonus_percent", 30) / 100.0))
+
             enemy_dot_damage += damage
             events.append(f"{status_display_name(status)}造成 {damage} 傷害。")
     for buffs in (player_buffs, enemy_buffs):
@@ -1602,6 +1775,8 @@ def main_loop(state: dict) -> str | None:
             return
 
 def smoke_test() -> None:
+    # Boss routes are intentionally gated to the v1 Rogue/Cleric quality path.
+    quality_smoke_job = "盜賊"
     state = create_state("測試者", "劍士")
     assert state["inventory"].get("item_potion_s") == 2
     assert state["equipment"].get("special") == "special_trial_badge"
@@ -1629,7 +1804,7 @@ def smoke_test() -> None:
     assert legacy_state["storage_unlocked"] is False
     assert legacy_state["storage"] == {}
     assert legacy_state["bestiary"] == []
-    glen_state = create_state("格倫規則測試", "劍士")
+    glen_state = create_state("格倫規則測試", quality_smoke_job)
     glen_state["completed_quests"].append("quest_mine_scout")
     assert not quest_unlocked(glen_state, "quest_boss_glen")
     assert not boss_available_at_dungeon_end(glen_state, "dungeon_scorched_mine", "boss_glen")
@@ -1640,13 +1815,13 @@ def smoke_test() -> None:
     assert not accept_boss_glen_investigation(glen_state)
     assert quest_unlocked(glen_state, "quest_boss_glen")
     assert boss_available_at_dungeon_end(glen_state, "dungeon_scorched_mine", "boss_glen")
-    legacy_glen_state = create_state("舊格倫進度測試", "劍士")
+    legacy_glen_state = create_state("舊格倫進度測試", quality_smoke_job)
     legacy_glen_state["completed_quests"].append("quest_mine_scout")
     legacy_glen_state["flags"]["boss_glen_defeated"] = True
     assert quest_unlocked(legacy_glen_state, "quest_boss_glen")
     assert not can_accept_boss_glen_investigation(legacy_glen_state)
     assert not boss_available_at_dungeon_end(legacy_glen_state, "dungeon_scorched_mine", "boss_glen")
-    ice_state = create_state("Ice route smoke", next(iter(JOBS)))
+    ice_state = create_state("Ice route smoke", quality_smoke_job)
     ice_state["flags"]["cinder_seal_sentinel_defeated"] = True
     ice_state["flags"][FIRE_MARK_CHURCH_LOOKUP_FLAG] = True
     ice_state["inventory"][FIRE_MARK_SHARD_ID] = 3
@@ -1685,7 +1860,7 @@ def smoke_test() -> None:
     ice_state["completed_quests"].append("quest_ice_main_phase_2")
     assert quest_unlocked(ice_state, "quest_ice_return_handoff")
     assert quest_ready(ice_state, "quest_ice_return_handoff")
-    earth_state = create_state("Earth route smoke", next(iter(JOBS)))
+    earth_state = create_state("Earth route smoke", quality_smoke_job)
     unlock(earth_state, EARTH_REGION_UNLOCK)
     assert quest_unlocked(earth_state, "quest_earth_minor_a")
     assert "dungeon_earth_minor_a" in player_facing_dungeon_ids(earth_state)
@@ -1712,7 +1887,7 @@ def smoke_test() -> None:
     earth_state["completed_quests"].append("quest_earth_main_phase_2")
     assert quest_unlocked(earth_state, "quest_earth_return_handoff")
     assert quest_ready(earth_state, "quest_earth_return_handoff")
-    thunder_state = create_state("Thunder route smoke", next(iter(JOBS)))
+    thunder_state = create_state("Thunder route smoke", quality_smoke_job)
     unlock(thunder_state, THUNDER_REGION_UNLOCK)
     assert quest_unlocked(thunder_state, "quest_thunder_minor_a")
     assert "dungeon_thunder_minor_a" in player_facing_dungeon_ids(thunder_state)
@@ -1742,7 +1917,7 @@ def smoke_test() -> None:
     for key in QUESTS["quest_thunder_return_handoff"]["unlocks"]:
         unlock(thunder_state, key)
     assert not is_unlocked(thunder_state, FINAL_REGION_UNLOCK)
-    final_gate_state = create_state("Final gate smoke", next(iter(JOBS)))
+    final_gate_state = create_state("Final gate smoke", quality_smoke_job)
     final_gate_state["flags"]["fire_seal_enshrined"] = True
     final_gate_state["flags"]["ice_seal_enshrined"] = True
     final_gate_state["flags"]["earth_seal_enshrined"] = True
@@ -1754,7 +1929,7 @@ def smoke_test() -> None:
     assert final_gate_state["flags"]["thunder_seal_enshrined"]
     assert final_gate_state["inventory"].get("key_thunder_seal", 0) == 1
     assert is_unlocked(final_gate_state, FINAL_REGION_UNLOCK)
-    final_state = create_state("Final route smoke", next(iter(JOBS)))
+    final_state = create_state("Final route smoke", quality_smoke_job)
     unlock(final_state, FINAL_REGION_UNLOCK)
     assert quest_unlocked(final_state, "quest_final_minor_a")
     assert "dungeon_final_minor_a" in player_facing_dungeon_ids(final_state)

@@ -4,6 +4,7 @@ from __future__ import annotations
 from copy import deepcopy
 
 from data import AFFIXES, EQUIPMENT
+from .equipment_quality import affix_value_multiplier
 
 
 def equipment_base_id(state: dict, reference_id: str | None) -> str | None:
@@ -34,13 +35,15 @@ def resolve_equipment_ref(state: dict, reference_id: str | None) -> dict | None:
         "affixes": affixes,
         "affix_stats": affix_stats,
         "effective_stats": effective_stats,
+        "quality": (instance or {}).get("quality", "normal") if isinstance(instance, dict) else "normal",
     }
 
 
-def _resolve_affixes(base: dict, instance: object) -> tuple[dict[str, dict], dict[str, int]]:
+def _resolve_affixes(base: dict, instance: object) -> tuple[dict[str, dict], dict[str, float]]:
     """Resolve valid fixed affixes without normalizing or mutating state."""
     affixes: dict[str, dict] = {}
-    increments: dict[str, int] = {}
+    increments: dict[str, float] = {}
+    multiplier = affix_value_multiplier(instance.get("quality") if isinstance(instance, dict) else None)
     used_families: set[str] = set()
     for tier in ("major", "minor"):
         raw_id = instance.get(f"{tier}_affix_id") if isinstance(instance, dict) else None
@@ -58,15 +61,19 @@ def _resolve_affixes(base: dict, instance: object) -> tuple[dict[str, dict], dic
         elif affix["family"] in used_families:
             view["status"] = "duplicate_family"
         else:
+            effective_affix_stats = {
+                stat_key: value * multiplier
+                for stat_key, value in affix["stats"].items()
+            }
             view.update({
                 "name": affix["name"],
                 "tier": affix["tier"],
                 "family": affix["family"],
-                "stats": deepcopy(affix["stats"]),
+                "stats": effective_affix_stats,
                 "status": "valid",
             })
             used_families.add(affix["family"])
-            for stat_key, value in affix["stats"].items():
+            for stat_key, value in effective_affix_stats.items():
                 increments[stat_key] = increments.get(stat_key, 0) + value
         affixes[tier] = view
     return affixes, increments

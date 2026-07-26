@@ -1586,3 +1586,194 @@ select:focus-visible {
   animation-iteration-count: 1 !important;
   transition-duration: 0.01ms !important;
 }
+
+/* Expedition preparation replaces the live bridge's temporary prompt() flow. */
+.travel-prep-overlay {
+  position: fixed;
+  z-index: 80;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: clamp(12px, 3vw, 36px);
+  background: rgba(3, 7, 7, 0.76);
+  backdrop-filter: blur(5px);
+}
+
+.travel-prep-dialog {
+  width: min(960px, 100%);
+  max-height: min(820px, calc(100dvh - 24px));
+  overflow: auto;
+  border: 1px solid rgba(208, 168, 76, 0.48);
+  border-radius: 12px;
+  background: linear-gradient(145deg, rgba(20, 29, 25, 0.99), rgba(9, 14, 13, 0.99));
+  box-shadow: 0 28px 80px rgba(0, 0, 0, 0.65);
+}
+
+.travel-prep-heading,
+.travel-prep-footer,
+.travel-prep-section-heading,
+.supply-slot-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.travel-prep-heading {
+  padding: 22px 24px 18px;
+  border-bottom: 1px solid var(--line);
+}
+
+.travel-prep-heading h2,
+.travel-prep-section h3 {
+  margin: 0;
+  color: var(--paper);
+}
+
+.travel-prep-heading h2 {
+  font-size: clamp(1.5rem, 3vw, 2.15rem);
+}
+
+.travel-prep-location,
+.travel-prep-note,
+.travel-prep-section-heading p,
+.travel-prep-feedback,
+.equipment-summary-row span,
+.supply-slot-row span {
+  margin: 4px 0 0;
+  color: var(--paper-muted);
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+
+.close-travel-prep,
+.prep-clear-button,
+.prep-secondary-button,
+.prep-primary-button {
+  border: 1px solid var(--line-strong);
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.close-travel-prep {
+  width: 42px;
+  height: 42px;
+  color: var(--paper);
+  background: rgba(255, 255, 255, 0.045);
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.travel-prep-body {
+  display: grid;
+  grid-template-columns: minmax(220px, 0.8fr) minmax(220px, 0.8fr) minmax(300px, 1.25fr);
+  gap: 14px;
+  padding: 18px 24px;
+}
+
+.travel-prep-section {
+  min-width: 0;
+  padding: 15px;
+  border: 1px solid rgba(239, 231, 211, 0.14);
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.equipment-summary-list,
+.supply-slot-list {
+  display: grid;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.equipment-summary-row {
+  display: grid;
+  gap: 2px;
+  padding: 9px 10px;
+  border-left: 3px solid rgba(208, 168, 76, 0.62);
+  background: rgba(0, 0, 0, 0.16);
+}
+
+.equipment-summary-row strong,
+.supply-slot-row strong {
+  color: var(--paper);
+  font-size: 0.9rem;
+}
+
+.risk-summary dl {
+  display: grid;
+  gap: 0;
+  margin: 12px 0 0;
+}
+
+.risk-summary dl div {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(239, 231, 211, 0.1);
+}
+
+.risk-summary dt { color: var(--paper-muted); font-size: 0.82rem; }
+.risk-summary dd { margin: 0; color: var(--gold); font-weight: 800; text-align: right; }
+
+.supply-selection { grid-column: span 1; }
+.travel-prep-section-heading { align-items: flex-start; }
+.prep-clear-button,
+.prep-secondary-button { padding: 9px 12px; color: var(--paper); background: rgba(255, 255, 255, 0.05); }
+
+.supply-slot-row {
+  display: grid;
+  grid-template-columns: minmax(90px, 1fr) minmax(130px, 1.4fr) 58px;
+  align-items: end;
+  padding: 9px 0;
+  border-bottom: 1px solid rgba(239, 231, 211, 0.1);
+}
+
+.supply-slot-row > div { display: grid; }
+.supply-slot-row select,
+.supply-slot-row input {
+  min-width: 0;
+  height: 36px;
+  border: 1px solid rgba(239, 231, 211, 0.28);
+  border-radius: 6px;
+  color: var(--paper);
+  background: rgba(3, 7, 7, 0.62);
+  padding: 0 8px;
+}
+
+.supply-slot-row input:disabled { opacity: 0.5; }
+
+.travel-prep-feedback {
+  min-height: 22px;
+  margin: 0;
+  padding: 0 24px 12px;
+}
+
+.travel-prep-footer {
+  padding: 16px 24px 22px;
+  border-top: 1px solid var(--line);
+}
+
+.prep-primary-button {
+  padding: 11px 18px;
+  color: #16140d;
+  font-weight: 900;
+  background: linear-gradient(135deg, #e4c268, #ae7d31);
+  border-color: #f3d57c;
+}
+
+.prep-primary-button:hover { filter: brightness(1.1); }
+
+@media (max-width: 820px) {
+  .travel-prep-body { grid-template-columns: 1fr 1fr; }
+  .supply-selection { grid-column: span 2; }
+}
+
+@media (max-width: 580px) {
+  .travel-prep-heading,
+  .travel-prep-footer { padding-left: 16px; padding-right: 16px; }
+  .travel-prep-body { grid-template-columns: 1fr; padding: 14px 16px; }
+  .supply-selection { grid-column: span 1; }
+  .supply-slot-row { grid-template-columns: 1fr 1.35fr 52px; gap: 8px; }
+}

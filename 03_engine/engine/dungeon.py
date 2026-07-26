@@ -30,7 +30,10 @@ from .state import (
     configure_run_supplies,
     RUN_SUPPLY_THROW_ITEMS,
     item_job_allowed,
+    grant_quality_equipment,
+    quality_equipment_candidates,
 )
+from .equipment_quality import BOSS_QUALITY, QUALITY_LABELS, supports_quality_job
 from .facilities import (
     BOSS_GLEN_SIGHTED_FLAG,
     BOSS_GLEN_INVESTIGATION_ACCEPTED_FLAG,
@@ -204,8 +207,8 @@ def configure_cli_run_supplies(state: dict) -> bool:
             return {}
         return {"item_id": item_id, "quantity": quantity}
     selections = {
-        "sustain_hp": choose("續航 HP 格", ("item_potion_s", "item_potion_m"), 3),
-        "emergency_hp": choose("保險 HP 格", ("item_potion_s", "item_potion_m", "item_ice_potion_01", "item_earth_potion_01", "item_thunder_potion_01", "item_final_potion_01"), 1),
+        "sustain_hp": choose("續航 HP 格", ("item_potion_s",), 3),
+        "emergency_hp": choose("保險 HP 格", ("item_potion_s", "item_ice_potion_01", "item_earth_potion_01", "item_thunder_potion_01", "item_final_potion_01"), 1),
         "mp": choose("MP 格", ("item_focus_drop", "item_ice_potion_02", "item_earth_potion_02", "item_thunder_potion_02", "item_final_potion_02"), 1 if state.get("job") in {"戰士", "盜賊"} else 2),
         "throwable": choose(
             "投擲格",
@@ -283,6 +286,20 @@ def clear_dungeon_boss(state: dict, boss_id: str, run_log: dict) -> None:
     # Loot
     for item_id, qty in data.get("loot", []):
         add_loot(state, item_id, qty, run_log)
+
+    quality = BOSS_QUALITY.get(boss_id)
+    if quality:
+        region_id = (
+            "border_fire" if boss_id in {"boss_glen", "boss_ash_guardian", "boss_cinder_seal_sentinel"}
+            else "final" if boss_id.startswith("boss_final_")
+            else boss_id.split("_")[1]
+        )
+        candidates = quality_equipment_candidates(state, region_id)
+        if candidates:
+            reference_id = grant_quality_equipment(state, random.choice(candidates), quality)
+            state.setdefault("_quality_reward_messages", []).append(
+                f"獲得 {QUALITY_LABELS[quality]}品質裝備（{reference_id}）。"
+            )
 
     # Special Action
     if data.get("special_action") == "demon_king_ending":

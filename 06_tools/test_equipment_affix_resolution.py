@@ -28,27 +28,27 @@ def run() -> None:
     equipment_before = copy.deepcopy(EQUIPMENT)
     resolved = resolve_equipment_ref(state, sharp_ref)
     assert resolved and resolved["base"]["stats"]["attack"] == EQUIPMENT["weapon_wood_sword"]["stats"]["attack"]
-    assert resolved["effective_stats"]["attack"] == EQUIPMENT["weapon_wood_sword"]["stats"]["attack"] + 1
+    assert resolved["effective_stats"]["attack"] == EQUIPMENT["weapon_wood_sword"]["stats"]["attack"] + AFFIXES["major_sharp"]["stats"]["attack"]
     assert resolved["affixes"]["major"] == {
         "id": "major_sharp", "name": AFFIXES["major_sharp"]["name"], "tier": "major",
-        "family": "physical_edge", "stats": {"attack": 1}, "status": "valid",
+        "family": AFFIXES["major_sharp"]["family"], "stats": AFFIXES["major_sharp"]["stats"], "status": "valid",
     }
     assert AFFIXES == data_before and EQUIPMENT == equipment_before
 
     assert equip_item(state, sharp_ref, quiet=True)
-    assert get_stats(state)["attack"] == unequipped_stats["attack"] + EQUIPMENT["weapon_wood_sword"]["stats"]["attack"] + 1
+    assert get_stats(state)["attack"] == unequipped_stats["attack"] + EQUIPMENT["weapon_wood_sword"]["stats"]["attack"] + AFFIXES["major_sharp"]["stats"]["attack"]
     comparison = equipment_comparison(state, agile_ref)
-    assert comparison["stats"]["attack"]["delta"] == -1
-    assert comparison["stats"]["agility"]["delta"] == 1
+    assert comparison["stats"]["attack"]["delta"] == -AFFIXES["major_sharp"]["stats"]["attack"]
+    assert comparison["stats"]["agility"]["delta"] == AFFIXES["minor_agile"]["stats"]["agility"]
     assert comparison["affixes"]["major"]["change"] == "removed"
-    assert comparison["affixes"]["major"]["before_view"]["status"] == "valid"
-    assert comparison["affixes"]["minor"]["after_view"]["name"] == AFFIXES["minor_agile"]["name"]
+    assert comparison["affixes"]["major"]["before"] == "major_sharp"
+    assert comparison["affixes"]["minor"]["after"] == "minor_agile"
 
     state["equipment_instances"][agile_ref]["major_affix_id"] = "minor_agile"
     state_before = copy.deepcopy(state)
     invalid = equipment_comparison(state, agile_ref)
     assert invalid["affixes"]["major"]["after_view"] == {"id": "minor_agile", "status": "invalid_tier"}
-    assert invalid["stats"]["agility"]["delta"] == 1
+    assert invalid["stats"]["agility"]["delta"] == AFFIXES["minor_agile"]["stats"]["agility"]
     assert state == state_before
 
     state["equipment_instances"][agile_ref]["major_affix_id"] = "major_missing"
@@ -59,7 +59,7 @@ def run() -> None:
     body_ref = next(ref for ref in state["inventory"] if state["equipment_instances"].get(ref, {}).get("base_item_id") == "armor_leather_armor")
     state["equipment_instances"][body_ref]["minor_affix_id"] = "minor_fire_ward"
     body_resolved = resolve_equipment_ref(state, body_ref)
-    assert body_resolved and body_resolved["affix_stats"] == {"fire_resist": 5}
+    assert body_resolved and body_resolved["affix_stats"] == AFFIXES["minor_fire_ward"]["stats"]
     state["equipment_instances"][agile_ref]["minor_affix_id"] = "minor_fire_ward"
     invalid_slot = equipment_comparison(state, agile_ref)
     assert invalid_slot["affixes"]["minor"]["after_view"] == {"id": "minor_fire_ward", "status": "invalid_slot"}

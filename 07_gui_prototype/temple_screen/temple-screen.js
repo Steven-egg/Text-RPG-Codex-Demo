@@ -386,7 +386,39 @@ async function handlePray() {
   }
 }
 
-function handlePromotion(promo) {
+async function handlePromotion(promo) {
+  if (runtimeClient.isLiveMode()) {
+    pushActionLog({
+      action_id: "claim_promotion",
+      payload: { class_id: promo.class_id },
+      source: "promotion_altar",
+      dispatched: true,
+    });
+    try {
+      const result = await runtimeClient.dispatchAction("temple_screen", "claim_promotion", { class_id: promo.class_id });
+      shellEl.dataset.runtimeStatus = result.status ?? "success";
+      if (result.screen_model) {
+        state.model = result.screen_model;
+        render();
+      }
+      if (result.message) {
+        npcBubbleEl.textContent = `大祭司賽恩：「${result.message}」`;
+      }
+    } catch (error) {
+      const reason = runtimeClient.errorMessage(error);
+      shellEl.dataset.runtimeStatus = error?.runtimeStatus ?? "error";
+      pushActionLog({
+        action_id: "claim_promotion",
+        payload: { class_id: promo.class_id },
+        source: "promotion_altar",
+        dispatched: false,
+        reason,
+      });
+      npcBubbleEl.textContent = `大祭司賽恩：「${reason}」`;
+    }
+    return;
+  }
+
   pushActionLog({
     action_id: "claim_promotion",
     payload: { class_id: promo.class_id },

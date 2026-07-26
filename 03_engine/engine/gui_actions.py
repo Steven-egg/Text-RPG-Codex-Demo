@@ -298,6 +298,8 @@ class GuiRuntimeSession:
             return self.fire_mark_church_lookup(payload, screen_id=screen_id)
         if action_id == "temple_pray":
             return self.temple_pray(payload, screen_id=screen_id)
+        if action_id == "claim_promotion":
+            return self.claim_promotion(payload, screen_id=screen_id)
         if action_id == "attune_relic":
             return self.attune_relic(payload, screen_id=screen_id)
         if action_id == "select_relic_passive":
@@ -484,7 +486,7 @@ class GuiRuntimeSession:
             raise GuiActionError("Boss challenge conditions are not met.", status=403)
         if state.get("current_hp", 0) <= 0:
             return self.resolve_defeat("You collapsed before challenging the boss.")
-        
+
         self.start_combat(boss_id, boss=True)
         exploration["status"] = "combat"
         exploration["last_message"] = f"決戰：開始挑戰守護者 {game.MONSTERS[boss_id]['name']}！"
@@ -590,7 +592,21 @@ class GuiRuntimeSession:
                 action_result = game.CombatActionResult(events=[line], summary=[line])
             elif skill["kind"] == "debuff":
                 enemy_buffs[skill["debuff"]] = skill["duration"]
+                if skill.get("damage_percent") is not None:
+                    enemy_buffs.setdefault("_debuff_data", {})[skill["debuff"]] = {
+                        "damage_percent": skill["damage_percent"],
+                        "damage_scope": skill.get("damage_scope"),
+                    }
                 line = f"你使用 {skill['name']}。{skill['desc']}"
+                action_result = game.CombatActionResult(events=[line], summary=[line])
+            elif skill["kind"] == "dot":
+                game.apply_dot(enemy_buffs, skill["name"], skill["duration"], skill["multiplier"], "magic", skill.get("element", "無"))
+                line = f"{skill['name']} 必定附加，持續 {skill['duration']} 回合。"
+                action_result = game.CombatActionResult(events=[line], summary=[line])
+            elif skill["kind"] == "regen":
+                player_buffs["regeneration"] = skill["duration"]
+                player_buffs["_regen_data"] = {"amount": skill["amount"], "multiplier": skill["multiplier"]}
+                line = f"{skill['name']} 必定附加，持續 {skill['duration']} 回合。"
                 action_result = game.CombatActionResult(events=[line], summary=[line])
             else:
                 raise GuiActionError("不支援的技能類型。", status=400)
@@ -1590,6 +1606,43 @@ class GuiRuntimeSession:
         msg = "你汲取了微光閃爍的泉水進行祈福！獲得了 [月華庇護] (抗性 +10%，探索裝扮預覽，效果依後續版本開放為準)。"
         return self._live_response(
             "temple_pray",
+            msg,
+            screen_model=self.temple_screen_model()
+        )
+
+    def claim_promotion(self, payload: dict[str, Any], screen_id: str | None = None) -> dict[str, Any]:
+        from data import PROMOTIONS, SKILLS
+        state = self.require_state()
+        class_id = payload.get("class_id")
+        if not class_id or class_id not in PROMOTIONS:
+            raise GuiActionError("無效的轉職 ID。", status=400)
+
+        promo = PROMOTIONS[class_id]
+        if promo.get("source_job") != state.get("job"):
+            raise GuiActionError("職業不符，無法晉升此方向。", status=409)
+
+        if state.get("promotion_id"):
+            raise GuiActionError("角色已選定晉升方向，無法重複晉升。", status=409)
+
+        # 驗證條件
+        lv_satisfied = state.get("level", 1) >= 18
+        quest_satisfied = "quest_ice_return_handoff" in state.get("completed_quests", [])
+        if not (lv_satisfied and quest_satisfied):
+            raise GuiActionError("未達成晉升的等級或任務要求條件。", status=409)
+
+        # 執行晉升
+        state["promotion_id"] = class_id
+
+        # 學習技能
+        learned = state.setdefault("learned_skills", [])
+        if promo["active_skill_id"] not in learned:
+            learned.append(promo["active_skill_id"])
+        if promo["passive_skill_id"] not in learned:
+            learned.append(promo["passive_skill_id"])
+
+        msg = f"宣誓晉升成功！您已正式成為【{promo['name']}】。解鎖新主動技能及被動特性！"
+        return self._live_response(
+            "claim_promotion",
             msg,
             screen_model=self.temple_screen_model()
         )

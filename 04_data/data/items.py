@@ -163,6 +163,18 @@ ITEMS = {
     },
 }
 
+# Formal five-tier supply contract.  Keep the existing regional IDs, prices,
+# and unlocks; only their recovery formulas and T1 presentation changed.
+ITEMS["item_potion_s"].update({
+    "name": "旅行回復劑",
+    "desc": "回復 HP：35 或最大 HP 的 30%，取較高者。",
+})
+ITEMS["item_focus_drop"].update({
+    "name": "靈泉滴露",
+    "desc": "回復 MP：12 或最大 MP 的 25%，取較高者。",
+})
+ITEMS.pop("item_potion_m", None)
+
 
 
 EQUIPMENT = {

@@ -88,3 +88,6 @@ SHOP_INVENTORY = {
         "acc_final_accessory_01",
     ],
 }
+
+# The retired medium potion must not remain purchasable by old shop fixtures.
+SHOP_INVENTORY["travel"] = [item_id for item_id in SHOP_INVENTORY["travel"] if item_id != "item_potion_m"]
