@@ -240,8 +240,8 @@ def storage_screen_model(state: dict[str, Any]) -> dict[str, Any]:
             "name": "諾亞",
             "role": "冒險者工會會長",
             "portrait_placeholder": "Noah",
-            "avatar_text": "「目前先幫你開啟與檢視保管箱；寄存與取出服務還在準備中。」",
-            "dialog_locked": "本輪 Live MVP 僅提供倉庫解鎖與檢視；寄存與取出尚未開放。" if unlocked else f"花費 {STORAGE_UNLOCK_COST}G 金幣可為米菈小隊解鎖工會專屬的無限期保管箱。"
+            "avatar_text": "「我可以協助解鎖保管箱，並在背包與倉庫之間存取物品。」",
+            "dialog_locked": "保管箱已開啟：可存入與取出非關鍵物品，容量上限為 10 種。" if unlocked else f"花費 {STORAGE_UNLOCK_COST}G 金幣可為米菈小隊解鎖工會專屬的無限期保管箱。"
         },
         "category_tabs": category_tabs,
         "inventory_rows": inventory_rows,

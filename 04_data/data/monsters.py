@@ -137,9 +137,9 @@ MONSTERS = {
     "mon_ember_stalker": {
         "name": "餘燼潛獵者",
         "level": 9,
-        "hp": 148,
+        "hp": 185,
         "attack": 28,
-        "defense": 13,
+        "defense": 14,
         "agility": 15,
         "crit": 5,
         "element": "火",
@@ -190,9 +190,9 @@ MONSTERS = {
     "boss_cinder_seal_sentinel": {
         "name": "燼印鎮衛",
         "level": 12,
-        "hp": 465,
-        "attack": 28,
-        "defense": 23,
+        "hp": 520,
+        "attack": 24,
+        "defense": 24,
         "agility": 10,
         "crit": 5,
         "element": "火",
@@ -308,9 +308,9 @@ MONSTERS = {
     "mon_ice_outer_guard": {
         "name": "斷階石衛",
         "level": 15,
-        "hp": 220,
-        "attack": 40,
-        "defense": 22,
+        "hp": 270,
+        "attack": 38,
+        "defense": 23,
         "agility": 10,
         "crit": 4,
         "element": "Ice",
@@ -455,8 +455,8 @@ MONSTERS = {
         "name": "霜冠誓王 亞爾溟",
         "level": 20,
         "hp": 780,
-        "attack": 54,
-        "defense": 32,
+        "attack": 50,
+        "defense": 33,
         "agility": 12,
         "crit": 6,
         "element": "Ice",
@@ -572,9 +572,9 @@ MONSTERS = {
     "mon_earth_leyline_guard": {
         "name": "地脈石僕",
         "level": 23,
-        "hp": 340,
-        "attack": 64,
-        "defense": 34,
+        "hp": 405,
+        "attack": 60,
+        "defense": 35,
         "agility": 11,
         "crit": 5,
         "element": "Earth",
@@ -692,9 +692,9 @@ MONSTERS = {
     "boss_earth_deep_leyline_lord": {
         "name": "深脈殿主 亞爾根",
         "level": 27,
-        "hp": 1100,
-        "attack": 76,
-        "defense": 48,
+        "hp": 1050,
+        "attack": 68,
+        "defense": 50,
         "agility": 12,
         "crit": 6,
         "element": "Earth",
@@ -810,9 +810,9 @@ MONSTERS = {
     "mon_thunder_array_guard": {
         "name": "下層陣偶",
         "level": 30,
-        "hp": 525,
-        "attack": 92,
-        "defense": 47,
+        "hp": 620,
+        "attack": 86,
+        "defense": 49,
         "agility": 18,
         "crit": 6,
         "element": "Thunder",
@@ -930,9 +930,9 @@ MONSTERS = {
     "boss_thunder_crown_storm_lord": {
         "name": "冠頂風暴龍 亞斯塔爾",
         "level": 34,
-        "hp": 1660,
-        "attack": 112,
-        "defense": 60,
+        "hp": 1180,
+        "attack": 98,
+        "defense": 62,
         "agility": 23,
         "crit": 8,
         "element": "Thunder",
@@ -1087,9 +1087,9 @@ MONSTERS = {
     "mon_final_core_guard": {
         "name": "封核魔衛",
         "level": 39,
-        "hp": 820,
-        "attack": 148,
-        "defense": 70,
+        "hp": 960,
+        "attack": 136,
+        "defense": 73,
         "agility": 18,
         "crit": 6,
         "element": "Final",
@@ -1221,10 +1221,10 @@ MONSTERS = {
     "boss_final_demon_king": {
         "name": "災禍邪神 阿巴頓",
         "level": 43,
-        "hp": 2400,
-        "attack": 135,
-        "defense": 75,
-        "magic_defense": 110,
+        "hp": 2000,
+        "attack": 122,
+        "defense": 78,
+        "magic_defense": 96,
         "agility": 26,
         "crit": 9,
         "element": "Final",
@@ -1334,6 +1334,83 @@ MONSTER_RACES = {
     "boss_final_demon_king": "aberration",
 }
 
+
+# Race rules are gameplay data.  Consumers must not infer these rules from a
+# monster's name, element, region, or boss status.
+PHYSICAL_STATUS_EFFECTIVENESS_MULTIPLIERS = {
+    "effective": 1.25,
+    "normal": 1.0,
+    "ineffective": 0.0,
+}
+
+MONSTER_RACE_RULES = {
+    "beast": {
+        "display_name": "野獸",
+        "physical_status": {"bleed": "effective", "poison": "normal"},
+        "trait": {
+            "id": "wounded_frenzy",
+            "display_name": "負傷狂暴",
+            "trigger": {"kind": "hp_below", "ratio": 0.50, "once": True},
+            # The original +15% candidate made the fixed Thunder Mage Boss
+            # probe lose 5/5.  +5% preserves the readable trait and 5/5 gate.
+            "effect": {"kind": "next_attack_multiplier", "value": 1.05},
+        },
+    },
+    "humanoid": {
+        "display_name": "人形",
+        "physical_status": {"bleed": "effective", "poison": "normal"},
+        "trait": {
+            "id": "guard_stance",
+            "display_name": "防守架勢",
+            "trigger": {"kind": "hp_below", "ratio": 0.50, "once": True},
+            "effect": {"kind": "buff", "buff": "defense_up", "turns": 2},
+        },
+    },
+    "plant": {
+        "display_name": "植物",
+        "physical_status": {"bleed": "ineffective", "poison": "effective"},
+        "trait": {
+            "id": "root_regrowth",
+            "display_name": "紮根再生",
+            "trigger": {"kind": "hp_below", "ratio": 0.50, "once": True},
+            "effect": {"kind": "heal_max_hp", "ratio": 0.08},
+        },
+    },
+    "construct": {
+        "display_name": "構裝",
+        "physical_status": {"bleed": "ineffective", "poison": "ineffective"},
+        "trait": {
+            "id": "breakable_plating",
+            "display_name": "可破裝甲",
+            "trigger": {"kind": "battle_start", "once": True},
+            # A 20% opening ward pushed the fixed Thunder Warrior normal probe
+            # beyond five actions.  5% keeps the trait visible without adding
+            # a new target-interval regression.
+            "effect": {"kind": "first_direct_damage_reduction", "damage_type": "physical", "ratio": 0.05},
+        },
+    },
+    "spirit": {
+        "display_name": "靈體",
+        "physical_status": {"bleed": "ineffective", "poison": "ineffective"},
+        "trait": {
+            "id": "phase_veil",
+            "display_name": "相位帷幕",
+            "trigger": {"kind": "battle_start", "once": True},
+            "effect": {"kind": "first_direct_damage_reduction", "damage_type": "magic", "ratio": 0.20},
+        },
+    },
+    "aberration": {
+        "display_name": "異變",
+        "physical_status": {"bleed": "normal", "poison": "effective"},
+        "trait": {
+            "id": "unstable_pulse",
+            "display_name": "失控脈衝",
+            "trigger": {"kind": "enemy_action_count", "count": 3, "once": True},
+            "effect": {"kind": "next_attack_multiplier", "value": 1.15},
+        },
+    },
+}
+
 if MONSTER_RACES.keys() != MONSTERS.keys():
     missing = sorted(MONSTERS.keys() - MONSTER_RACES.keys())
     extra = sorted(MONSTER_RACES.keys() - MONSTERS.keys())
@@ -1341,24 +1418,3 @@ if MONSTER_RACES.keys() != MONSTERS.keys():
 
 for monster_id, race in MONSTER_RACES.items():
     MONSTERS[monster_id]["race"] = race
-
-
-# Balance adjustment for fluid combat (3-5 turns normal, 10-15 turns boss)
-for monster_id, monster in MONSTERS.items():
-    if monster.get("boss"):
-        # Boss HP down by 25% (except final boss which is down by 33%)
-        if monster_id == "boss_final_demon_king":
-            monster["hp"] = 1600 # From 2400 (33% down)
-        elif monster_id == "boss_earth_deep_leyline_lord":
-            monster["hp"] = 770 # From 1100
-        elif monster_id == "boss_thunder_crown_storm_lord":
-            monster["hp"] = 840 # From 1200
-        else:
-            monster["hp"] = int(monster["hp"] * 0.75)
-    else:
-        # Normal monster HP down by 30%
-        monster["hp"] = int(monster["hp"] * 0.70)
-        # Late game normal monsters agility clamp to avoid double turns
-        if monster["level"] >= 25:
-            monster["agility"] = min(monster["agility"], 18)
-

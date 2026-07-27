@@ -9,7 +9,7 @@ SKILLS = {
         "kind": "damage",
         "stat": "attack",
         "element": "物理",
-        "multiplier": 1.25,
+        "multiplier": 1.3125,
         "charge_bonus_per_stack": 0.08,
         "desc": "物理傷害，倍率 1.25。",
     },
@@ -19,7 +19,7 @@ SKILLS = {
         "kind": "damage",
         "stat": "magic",
         "element": "無",
-        "multiplier": 1.2,
+        "multiplier": 0.564,
         "desc": "無屬性魔法傷害，倍率 1.2。",
     },
     "skill_backstab": {
@@ -76,7 +76,7 @@ SKILLS = {
         "kind": "damage",
         "stat": "magic",
         "element": "火",
-        "multiplier": 1.25,
+        "multiplier": 0.588,
         "desc": "火屬性小傷害。",
     },
     "skill_ice_needle": {
@@ -85,7 +85,7 @@ SKILLS = {
         "kind": "damage",
         "stat": "magic",
         "element": "冰",
-        "multiplier": 1.35,
+        "multiplier": 0.635,
         "desc": "冰屬性小傷害，對火屬敵人有效。",
     },
     "skill_minor_heal": {
@@ -134,7 +134,7 @@ SKILLS = {
         "kind": "damage",
         "stat": "magic",
         "element": "冰",
-        "multiplier": 1.4,
+        "multiplier": 0.658,
         "desc": "冰屬性魔法傷害。",
     },
     "skill_ice_02": {
@@ -177,7 +177,7 @@ SKILLS = {
         "kind": "damage",
         "stat": "magic",
         "element": "自然",
-        "multiplier": 1.5,
+        "multiplier": 0.495,
         "desc": "土屬性魔法傷害。",
     },
     "skill_earth_02": {
@@ -186,7 +186,7 @@ SKILLS = {
         "kind": "damage",
         "stat": "magic",
         "element": "自然",
-        "multiplier": 1.6,
+        "multiplier": 0.528,
         "desc": "土屬性重度魔法傷害。",
     },
     "skill_earth_03": {
@@ -222,7 +222,7 @@ SKILLS = {
         "kind": "damage",
         "stat": "magic",
         "element": "雷",
-        "multiplier": 1.6,
+        "multiplier": 0.752,
         "desc": "雷屬性魔法傷害。",
     },
     "skill_thunder_02": {
@@ -231,7 +231,7 @@ SKILLS = {
         "kind": "damage",
         "stat": "magic",
         "element": "雷",
-        "multiplier": 1.85,
+        "multiplier": 0.87,
         "desc": "雷屬性高階魔法傷害。",
     },
     "skill_thunder_03": {
@@ -247,7 +247,7 @@ SKILLS = {
         "kind": "damage",
         "stat": "attack",
         "element": "雷",
-        "multiplier": 1.6,
+        "multiplier": 2.08,
         "charge_bonus_per_stack": 0.14,
         "desc": "雷屬性物理斬擊傷害。",
     },
@@ -266,7 +266,7 @@ SKILLS = {
         "kind": "damage",
         "stat": "magic",
         "element": "無",
-        "multiplier": 1.9,
+        "multiplier": 0.893,
         "desc": "虛空屬性高階魔法傷害。",
     },
     "skill_final_02": {
@@ -275,7 +275,7 @@ SKILLS = {
         "kind": "damage",
         "stat": "magic",
         "element": "無",
-        "multiplier": 2.3,
+        "multiplier": 1.081,
         "desc": "深淵禁忌魔法，大範圍高階魔法傷害。",
     },
     "skill_final_03": {
@@ -291,7 +291,7 @@ SKILLS = {
         "kind": "damage",
         "stat": "attack",
         "element": "物理",
-        "multiplier": 2.0,
+        "multiplier": 3.6,
         "charge_bonus_per_stack": 0.16,
         "desc": "深淵物理霸斬傷害。",
     },

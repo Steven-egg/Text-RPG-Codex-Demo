@@ -388,14 +388,25 @@ async function handlePray() {
 
 async function handlePromotion(promo) {
   if (runtimeClient.isLiveMode()) {
+    const confirmed = window.confirm(`晉升為「${promo.label}」後不可逆。確定要宣誓晉升嗎？`);
+    if (!confirmed) {
+      pushActionLog({
+        action_id: "claim_promotion",
+        payload: { class_id: promo.class_id },
+        source: "promotion_altar",
+        dispatched: false,
+        reason: "promotion_cancelled_by_user",
+      });
+      return;
+    }
     pushActionLog({
       action_id: "claim_promotion",
-      payload: { class_id: promo.class_id },
+      payload: { class_id: promo.class_id, confirmed: true },
       source: "promotion_altar",
       dispatched: true,
     });
     try {
-      const result = await runtimeClient.dispatchAction("temple_screen", "claim_promotion", { class_id: promo.class_id });
+      const result = await runtimeClient.dispatchAction("temple_screen", "claim_promotion", { class_id: promo.class_id, confirmed: true });
       shellEl.dataset.runtimeStatus = result.status ?? "success";
       if (result.screen_model) {
         state.model = result.screen_model;

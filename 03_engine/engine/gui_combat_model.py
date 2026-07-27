@@ -7,6 +7,22 @@ from .formatting import item_name
 from .gui_presentation_helpers import percent
 
 
+def combat_enemy_trait_status(enemy: dict[str, Any], enemy_buffs: dict[str, Any]) -> str:
+    """Return a GUI-readable status without duplicating the race rule table."""
+    trait = game.monster_race_trait(enemy)
+    trait_name = trait.get("display_name", "")
+    summary = game.monster_race_trait_summary(enemy, enemy_buffs)
+    if not trait_name or summary == "無":
+        return "無"
+
+    status = summary.removeprefix(trait_name).strip()
+    if status in {"0", "1"}:
+        return f"剩餘 {status} 次"
+    if status.startswith("（") and status.endswith("）"):
+        return status[1:-1]
+    return status or "待機"
+
+
 def combat_item_rows(state: dict[str, Any]) -> list[dict[str, Any]]:
     rows = []
     for item_id in game.COMBAT_ITEM_IDS:
@@ -166,6 +182,7 @@ def combat_screen_model(session: Any) -> dict[str, Any]:
     boss = bool(combat.get("boss"))
     usable_items = combat_item_rows(state)
     usable_skills = combat_skill_rows(state, combat, resolved)
+    enemy_trait = game.monster_race_trait(enemy)
     return {
         "screen_id": "combat_screen",
         "title": "戰鬥",
@@ -186,6 +203,9 @@ def combat_screen_model(session: Any) -> dict[str, Any]:
             "hp_label": f"HP {enemy_hp} / {enemy['hp']}",
             "hp_percent": percent(enemy_hp, enemy["hp"]),
             "attribute": enemy["element"],
+            "race_label": game.monster_race_display_name(enemy),
+            "trait_label": enemy_trait.get("display_name", "無"),
+            "trait_status_label": combat_enemy_trait_status(enemy, combat["enemy_buffs"]),
             "status_label": game.buff_summary(combat["enemy_buffs"]),
         },
         "command_message": combat.get("last_action_summary", ""),

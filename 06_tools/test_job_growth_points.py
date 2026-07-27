@@ -21,11 +21,12 @@ from engine.state import create_state, get_stats  # noqa: E402
 
 LEVELS = (8, 16, 24, 32, 40)
 EXPECTED_POINTS = {
-    "warrior": {"max_hp": 4.05, "max_mp": 0.75, "attack": 3.0, "magic_attack": 0.0, "defense": 3.3, "magic_defense": 0.75, "agility": 0.15, "crit": 3.0, "effect_accuracy": 0.0},
+    "warrior": {"max_hp": 4.05, "max_mp": 0.75, "attack": 1.5, "magic_attack": 0.0, "defense": 3.3, "magic_defense": 0.75, "agility": 0.15, "crit": 3.0, "effect_accuracy": 0.0},
     "mage": {"max_hp": 2.0, "max_mp": 5.0, "attack": 0.0, "magic_attack": 5.0, "defense": 0.75, "magic_defense": 2.25, "agility": 0.0, "crit": 0.0, "effect_accuracy": 0.0},
     "rogue": {"max_hp": 3.0, "max_mp": 0.0, "attack": 1.95, "magic_attack": 0.0, "defense": 2.7, "magic_defense": 0.75, "agility": 1.5, "crit": 2.85, "effect_accuracy": 2.25},
     "cleric": {"max_hp": 3.4, "max_mp": 2.25, "attack": 2.25, "magic_attack": 2.3, "defense": 1.5, "magic_defense": 3.0, "agility": 0.3, "crit": 0.0, "effect_accuracy": 0.0},
 }
+EXPECTED_TOTALS = {"warrior": 13.5, "mage": 15.0, "rogue": 15.0, "cleric": 15.0}
 
 
 def _job_name(job_key: str) -> str:
@@ -38,10 +39,10 @@ def test_point_tables_and_milestones() -> None:
         job = JOBS[_job_name(job_key)]
         assert "growth" not in job and "extra_every_3" not in job
         assert job["growth_points"] == expected
-        assert math.isclose(sum(job["growth_points"].values()), 15.0, abs_tol=1e-12)
+        assert math.isclose(sum(job["growth_points"].values()), EXPECTED_TOTALS[job_key], abs_tol=1e-12)
         milestone = per_three_level_points(job["growth_points"])
         assert all(math.isclose(milestone[key], value / 3, abs_tol=1e-12) for key, value in expected.items())
-        assert math.isclose(sum(milestone.values()), 5.0, abs_tol=1e-12)
+        assert math.isclose(sum(milestone.values()), EXPECTED_TOTALS[job_key] / 3, abs_tol=1e-12)
 
 
 def test_bare_stats_follow_point_formula_at_required_levels() -> None:

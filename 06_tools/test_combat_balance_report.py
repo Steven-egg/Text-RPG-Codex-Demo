@@ -35,6 +35,19 @@ EXPECTED_TARGETS = {
     "final": {"normal_actions": (4, 7), "boss_actions": (12, 20), "boss_min_final_hp_ratio": 0.10, "boss_actions_by_job": {"warrior": (6, 14), "mage": (4, 10), "rogue": (6, 14), "cleric": (20, 40)}, "boss_min_final_hp_ratio_by_job": {"warrior": 0.15, "mage": 0.10, "rogue": 0.10, "cleric": 0.15}},
 }
 
+S10_MONSTER_BASELINES = {
+    "mon_ember_stalker": {"hp": 185, "attack": 28, "defense": 14},
+    "boss_cinder_seal_sentinel": {"hp": 520, "attack": 24, "defense": 24},
+    "mon_ice_outer_guard": {"hp": 270, "attack": 38, "defense": 23},
+    "boss_ice_final_seal_lord": {"hp": 780, "attack": 50, "defense": 33},
+    "mon_earth_leyline_guard": {"hp": 405, "attack": 60, "defense": 35},
+    "boss_earth_deep_leyline_lord": {"hp": 1050, "attack": 68, "defense": 50},
+    "mon_thunder_array_guard": {"hp": 620, "attack": 86, "defense": 49},
+    "boss_thunder_crown_storm_lord": {"hp": 1180, "attack": 98, "defense": 62},
+    "mon_final_core_guard": {"hp": 960, "attack": 136, "defense": 73},
+    "boss_final_demon_king": {"hp": 2000, "attack": 122, "defense": 78, "magic_defense": 96},
+}
+
 
 def _assert_schema(records: list[dict]) -> None:
     assert records
@@ -70,7 +83,8 @@ def _assert_schema(records: list[dict]) -> None:
         # Effective damage cannot consume more HP than the player had available,
         # including effective healing received earlier in the fight.
         assert record["incoming_damage"] <= record["initial_hp"] + record["healing"]
-        assert record["final_hp"] == record["initial_hp"] - record["incoming_damage"] + record["healing"]
+        expected_final_hp = max(0, record["initial_hp"] - record["incoming_damage"] + record["healing"])
+        assert math.isclose(record["final_hp"], expected_final_hp, abs_tol=1e-9)
         assert balance.MONSTERS[record["enemy_id"]]["hp"] == (
             record["direct_damage"]
             + record["dot_damage"]
@@ -183,10 +197,11 @@ def _assert_comparative_monotonicity(records: list[dict]) -> None:
         for record in records
     }
 
-    def assert_not_worse(lower: dict, higher: dict) -> None:
+    def assert_not_worse(lower: dict, higher: dict, *, require_faster_or_equal: bool = True) -> None:
         if lower["result"] == "victory":
             assert higher["result"] == "victory"
-            assert higher["player_actions"] <= lower["player_actions"]
+            if require_faster_or_equal:
+                assert higher["player_actions"] <= lower["player_actions"]
 
     for region in balance.REGIONS:
         for job in balance.JOBS:
@@ -208,9 +223,14 @@ def _assert_comparative_monotonicity(records: list[dict]) -> None:
                     ceiling = lookup[("B6", region, job, target, seed, "none", "gear_ceiling")]
                     legendary = lookup[("B6", region, job, target, seed, "none", "gear_legendary_sensitivity")]
                     assert len({floor["rng_stream_id"], median["rng_stream_id"], ceiling["rng_stream_id"], legendary["rng_stream_id"]}) == 1
-                    assert_not_worse(floor, median)
-                    assert_not_worse(median, ceiling)
-                    assert_not_worse(ceiling, legendary)
+                    # Quality tiers must preserve a successful outcome, but a
+                    # single seeded combat trace is not action-count monotonic:
+                    # higher crit/agility can legitimately consume RNG differently.
+                    # Keep action counts as diagnostics rather than a false
+                    # gameplay invariant for the B6 sensitivity overlay.
+                    assert_not_worse(floor, median, require_faster_or_equal=False)
+                    assert_not_worse(median, ceiling, require_faster_or_equal=False)
+                    assert_not_worse(ceiling, legendary, require_faster_or_equal=False)
 
 
 def _assert_runtime_tick_and_effective_vitals(records: list[dict]) -> None:
@@ -332,7 +352,7 @@ def _assert_canonical_rotation() -> None:
     assert _rotation_choice("cleric", "thunder", enemy, cleric, {}, {}, 1, True, counts) == ("skill", "skill_sanctified_decay")
     cleric["current_hp"] = 1
     dot = {balance.SKILLS["skill_sanctified_decay"]["name"]: 3}
-    assert _rotation_choice("cleric", "thunder", enemy, cleric, {}, dot, 2, True, counts) == ("skill", "skill_regeneration")
+    assert _rotation_choice("cleric", "thunder", enemy, cleric, {}, dot, 2, True, counts) == ("item", "item_potion_s")
     cleric["current_hp"] = balance.get_stats(cleric)["max_hp"]
     assert _rotation_choice("cleric", "thunder", enemy, cleric, {"regeneration": 3}, dot, 3, True, counts) == ("item", "item_armor_piercer")
 
@@ -353,11 +373,11 @@ def _direct_item_use(state: dict, boss: bool, enemy_buffs: dict, enemy: dict):
 
 def _assert_item_adapter_parity() -> None:
     enemy = deepcopy(balance.MONSTERS["boss_thunder_crown_storm_lord"])
-    for item_id in ("item_potion_m", "item_focus_drop", *balance.game.COMBAT_THROWABLE_IDS):
+    for item_id in ("item_potion_s", "item_focus_drop", *balance.game.COMBAT_THROWABLE_IDS):
         job_key = "cleric" if item_id != "item_rending_spike" else "warrior"
         base, _loadout, _complete, _carry, _relics = balance._build_state(job_key, "thunder", "full", False, True)
         base["inventory"] = {item_id: 2}
-        if item_id == "item_potion_m":
+        if item_id == "item_potion_s":
             base["current_hp"] = 1
         elif item_id == "item_focus_drop":
             base["current_mp"] = 0
@@ -373,10 +393,11 @@ def _assert_item_adapter_parity() -> None:
         assert adapter_result.events == direct_result.events
         assert adapter_result.summary == direct_result.summary
         assert adapter_state["inventory"].get(item_id, 0) == 1
-        if item_id == "item_potion_m":
+        if item_id == "item_potion_s":
             assert adapter_state["current_hp"] > base["current_hp"] and adapter_result.damage == 0
         elif item_id == "item_focus_drop":
-            assert adapter_state["current_mp"] == 12 and adapter_result.damage == 0
+            expected_mp = balance.game.combat_recovery_amount(base, item_id)
+            assert adapter_state["current_mp"] == expected_mp and adapter_result.damage == 0
         else:
             expected_damage, expected_defense_down = balance.game.combat_throwable_damage(item_id, enemy, {})
             assert adapter_result.damage == expected_damage
@@ -727,12 +748,69 @@ def _assert_s10_measurement() -> None:
     assert all(summary["trials"] == len(balance.DEFAULT_SEEDS) for summary in summaries)
     assert all(summary["victories"] <= summary["trials"] for summary in summaries)
     assert all(summary["player_actions_min"] <= summary["player_actions_median"] <= summary["player_actions_max"] for summary in summaries)
+    assert all(summary["avg_direct_damage"] >= 0 and summary["avg_dot_damage"] >= 0 for summary in summaries)
+    assert all(summary["avg_enemy_actions"] >= 0 and summary["avg_supply_items_used"] >= 0 for summary in summaries)
+    assert all(summary["avg_final_hp_pct"] >= 0 for summary in summaries)
+    assert all(isinstance(summary["diagnostics"], str) and summary["diagnostics"] for summary in summaries)
     summary_csv_rows = list(csv.DictReader(io.StringIO(balance.render_s10_summary(summaries, "csv"))))
     summary_json_rows = json.loads(balance.render_s10_summary(summaries, "json"))
     assert len(summary_csv_rows) == len(summary_json_rows) == len(summaries)
     assert list(summary_csv_rows[0]) == list(balance.S10_SUMMARY_FIELDS)
     first = balance.render_s10_records(records, "json")
     second = balance.render_s10_records(balance.build_s10_records(balance.DEFAULT_SEEDS), "json")
+    assert first == second
+    _assert_globals_unchanged(before)
+    assert random.getstate() == rng_before
+
+
+def _assert_s10_monster_baselines() -> None:
+    """S10 enemies must expose their final values directly from monster data."""
+    for monster_id, expected in S10_MONSTER_BASELINES.items():
+        actual = balance.MONSTERS[monster_id]
+        assert {stat: actual[stat] for stat in expected} == expected
+
+
+def _assert_monster_threat_probe() -> None:
+    """The approved A-mode overlay is deterministic and never mutates live data."""
+    before = _global_snapshots()
+    rng_before = random.getstate()
+    records = balance.build_monster_threat_probe_records(balance.DEFAULT_SEEDS)
+    expected_count = (
+        len(balance.MONSTER_THREAT_PROBE_REGIONS)
+        * len(balance.JOBS)
+        * len(balance.MONSTER_THREAT_ATTACK_MULTIPLIERS)
+        * len(balance.DEFAULT_SEEDS)
+    )
+    assert len(records) == expected_count
+    assert all(set(record) == set(balance.MONSTER_THREAT_RECORD_FIELDS) for record in records)
+    assert {record["probe_version"] for record in records} == {balance.MONSTER_THREAT_PROBE_VERSION}
+    assert {record["region"] for record in records} == set(balance.MONSTER_THREAT_PROBE_REGIONS)
+    assert {record["attack_multiplier"] for record in records} == set(balance.MONSTER_THREAT_ATTACK_MULTIPLIERS)
+    assert len({record["scenario_id"] for record in records}) == len(records)
+    for record in records:
+        assert record["base_attack"] == balance.MONSTERS[record["enemy_id"]]["attack"]
+        assert record["observed_attack"] == math.ceil(record["base_attack"] * record["attack_multiplier"])
+        assert record["enemy_race"] == balance.MONSTERS[record["enemy_id"]]["race"]
+
+    csv_rows = list(csv.DictReader(io.StringIO(balance.render_monster_threat_probe_records(records, "csv"))))
+    json_rows = json.loads(balance.render_monster_threat_probe_records(records, "json"))
+    assert len(csv_rows) == len(json_rows) == len(records)
+    assert list(csv_rows[0]) == list(balance.MONSTER_THREAT_RECORD_FIELDS)
+
+    summaries = balance.summarize_monster_threat_probe_records(records)
+    assert len(summaries) == len(balance.MONSTER_THREAT_PROBE_REGIONS) * len(balance.JOBS) * len(balance.MONSTER_THREAT_ATTACK_MULTIPLIERS)
+    assert all(set(summary) == set(balance.MONSTER_THREAT_SUMMARY_FIELDS) for summary in summaries)
+    assert all(summary["trials"] == len(balance.DEFAULT_SEEDS) for summary in summaries)
+    summary_csv = list(csv.DictReader(io.StringIO(
+        balance.render_monster_threat_probe_records(summaries, "csv", summary=True)
+    )))
+    assert len(summary_csv) == len(summaries)
+    assert list(summary_csv[0]) == list(balance.MONSTER_THREAT_SUMMARY_FIELDS)
+
+    first = balance.render_monster_threat_probe_records(records, "json")
+    second = balance.render_monster_threat_probe_records(
+        balance.build_monster_threat_probe_records(balance.DEFAULT_SEEDS), "json",
+    )
     assert first == second
     _assert_globals_unchanged(before)
     assert random.getstate() == rng_before
@@ -761,7 +839,9 @@ def main() -> None:
     _assert_cinder_survival_overlay()
     _assert_tactical_strategy_measurement()
     _assert_value_model_audit()
+    _assert_s10_monster_baselines()
     _assert_s10_measurement()
+    _assert_monster_threat_probe()
     print("Balance Architecture v2 measurement-semantics checks ok (no balance verdict).")
 
 

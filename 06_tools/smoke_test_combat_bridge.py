@@ -60,18 +60,17 @@ def verify_run_supply_limits_and_mp_timing() -> None:
     state = session.require_state()
     for item_id, quantity in {
         "item_potion_s": 4,
-        "item_potion_m": 1,
         "item_focus_drop": 2,
         "item_armor_piercer": 2,
     }.items():
         game.add_item(state, item_id, quantity)
     game.configure_run_supplies(state, {
         "sustain_hp": {"item_id": "item_potion_s", "quantity": 3},
-        "emergency_hp": {"item_id": "item_potion_m", "quantity": 1},
+        "emergency_hp": {"item_id": "item_potion_s", "quantity": 1},
         "mp": {"item_id": "item_focus_drop", "quantity": 2},
         "throwable": {"item_id": "item_armor_piercer", "quantity": 2},
     })
-    assert game.combat_item_quantity(state, "item_potion_s") == 3
+    assert game.combat_item_quantity(state, "item_potion_s") == 4
     session.start_combat("mon_moss_rat", boss=False)
     combat = session.require_combat()
     turn_before = combat["turn"]
@@ -106,7 +105,7 @@ def verify_regional_supply_slots_and_recovery() -> None:
     stats = game.get_stats(state)
     hp_recovery = game.combat_recovery_amount(state, "item_ice_potion_01")
     mp_recovery = game.combat_recovery_amount(state, "item_ice_potion_02")
-    assert hp_recovery == max(120, game.math.ceil(stats["max_hp"] * 0.60))
+    assert hp_recovery == max(70, game.math.ceil(stats["max_hp"] * 0.35))
     assert mp_recovery == max(30, game.math.ceil(stats["max_mp"] * 0.30))
     state["current_hp"] = 1
     state["current_mp"] = 0
@@ -138,7 +137,7 @@ def verify_throwable_contract_and_live_parity() -> None:
     physical_enemy = game.MONSTERS["boss_glen"]
     physical_damage, debuff_turns = game.combat_throwable_damage("item_armor_piercer", physical_enemy, {})
     assert physical_damage == game.math.ceil(90 - physical_enemy["defense"] * 0.6)
-    assert debuff_turns == 5
+    assert debuff_turns == 3
 
     elemental_enemy = game.MONSTERS["boss_glen"]
     ice_damage, debuff_turns = game.combat_throwable_damage("item_throw_ice", elemental_enemy, {})
@@ -256,6 +255,29 @@ def verify_dot_log_and_victory() -> None:
     print("[Pass] Live bridge records DoT as readable lines and resolves DoT victory.")
 
 
+def verify_live_enemy_race_trait_status() -> None:
+    session = GuiRuntimeSession()
+    session.new_game(name="Race Trait GUI Tester", job_id="warrior")
+    session.start_combat("mon_cracked_golem", boss=False)
+
+    initial_enemy = session.combat_screen_model()["enemy"]
+    assert initial_enemy["race_label"] == "構裝"
+    assert initial_enemy["trait_label"] == "可破裝甲"
+    assert initial_enemy["trait_status_label"] == "剩餘 1 次"
+
+    response = session.dispatch(
+        "basic_attack",
+        {"enemy_id": "mon_cracked_golem"},
+        screen_id="combat_screen",
+    )
+    updated_enemy = response["screen_model"]["enemy"]
+    assert updated_enemy["race_label"] == "構裝"
+    assert updated_enemy["trait_label"] == "可破裝甲"
+    assert updated_enemy["trait_status_label"] == "剩餘 0 次"
+    assert any("可破裝甲" in line and "效果隨即消失" in line for line in response["screen_model"]["battle_log"])
+    print("[Pass] Live combat model exposes race/trait labels and updates a consumed one-shot ward.")
+
+
 def run_smoke_test() -> None:
     print("Starting Combat Bridge Boss Rule Parity smoke test...")
     verify_boss_retreat_block()
@@ -266,6 +288,7 @@ def run_smoke_test() -> None:
     verify_boss_action_markers()
     verify_action_loop_victory()
     verify_dot_log_and_victory()
+    verify_live_enemy_race_trait_status()
     print("\nCombat Bridge Boss Rule Parity smoke test passed.")
 
 

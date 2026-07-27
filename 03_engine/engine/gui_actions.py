@@ -538,6 +538,7 @@ class GuiRuntimeSession:
             raise GuiActionError("Combat is already resolved.", status=409)
 
         enemy = combat["enemy"]
+        enemy["current_hp"] = combat["enemy_hp"]
         player_buffs = combat["player_buffs"]
         enemy_buffs = combat["enemy_buffs"]
         defending = False
@@ -575,10 +576,21 @@ class GuiRuntimeSession:
                     result_status="blocked",
                     blocked_reason="MP 不足，無法使用技能。",
                 )
+            runtime_skill = dict(skill)
+            if skill_id in {"skill_star_fracture", "skill_sigil_mage"}:
+                selected_element = payload.get("element")
+                learned_elements = {
+                    known_skill.get("element")
+                    for known_skill_id in state.get("learned_skills", [])
+                    if (known_skill := SKILLS.get(known_skill_id)) and known_skill.get("element") in {"火", "冰", "自然", "雷"}
+                }
+                if selected_element not in learned_elements:
+                    raise GuiActionError("未學會所選元素，無法施展此技能。", status=409)
+                runtime_skill["element"] = selected_element
             state["current_mp"] -= skill["mp"]
             stats = game.get_stats(state, player_buffs)
             if skill["kind"] == "damage":
-                action_result = game.player_attack(state, enemy, combat["enemy_hp"], skill, player_buffs, enemy_buffs)
+                action_result = game.execute_skill(state, enemy, skill_id, runtime_skill, player_buffs, enemy_buffs)
                 combat["enemy_hp"] -= action_result.damage
             elif skill["kind"] == "heal":
                 before = state["current_hp"]
@@ -590,6 +602,9 @@ class GuiRuntimeSession:
                 player_buffs[skill["buff"]] = skill["duration"]
                 line = f"你使用 {skill['name']}。{skill['desc']}"
                 action_result = game.CombatActionResult(events=[line], summary=[line])
+                if skill_id in {"skill_blood_blade_strike", "skill_blood_armor_shield", "skill_holy_veil_barrier", "skill_holy_eclipse_cast"}:
+                    player_buffs.pop(skill["buff"], None)
+                    action_result = game.execute_skill(state, enemy, skill_id, runtime_skill, player_buffs, enemy_buffs)
             elif skill["kind"] == "debuff":
                 enemy_buffs[skill["debuff"]] = skill["duration"]
                 if skill.get("damage_percent") is not None:
@@ -599,6 +614,8 @@ class GuiRuntimeSession:
                     }
                 line = f"你使用 {skill['name']}。{skill['desc']}"
                 action_result = game.CombatActionResult(events=[line], summary=[line])
+                if skill_id == "skill_sigil_mage":
+                    action_result = game.execute_skill(state, enemy, skill_id, runtime_skill, player_buffs, enemy_buffs)
             elif skill["kind"] == "dot":
                 game.apply_dot(enemy_buffs, skill["name"], skill["duration"], skill["multiplier"], "magic", skill.get("element", "無"))
                 line = f"{skill['name']} 必定附加，持續 {skill['duration']} 回合。"
@@ -610,6 +627,11 @@ class GuiRuntimeSession:
                 action_result = game.CombatActionResult(events=[line], summary=[line])
             else:
                 raise GuiActionError("不支援的技能類型。", status=400)
+
+        if action_result.outcome == "cancel":
+            if action_id == "use_skill":
+                state["current_mp"] += skill["mp"]
+            raise GuiActionError(action_result.summary[0], status=409)
 
         turn_events = list(action_result.events)
         if action_result.free_action:
@@ -633,6 +655,10 @@ class GuiRuntimeSession:
             combat["turn"],
             combat.get("boss_marker", False),
         )
+        enemy_events.extend(player_buffs.pop("_shield_absorb_logs", []))
+        reflect_damage = player_buffs.pop("_reflect_damage_queue", 0)
+        if reflect_damage:
+            combat["enemy_hp"] = max(0, combat["enemy_hp"] - reflect_damage)
         # Pass the live enemy so periodic enemy DoT effects are resolved and
         # included in the bridge battle log just like the CLI combat path.
         effect_events, dot_damage = game.tick_effects(state, player_buffs, enemy_buffs, enemy)
@@ -1623,6 +1649,8 @@ class GuiRuntimeSession:
 
         if state.get("promotion_id"):
             raise GuiActionError("角色已選定晉升方向，無法重複晉升。", status=409)
+        if payload.get("confirmed") is not True:
+            raise GuiActionError("晉升不可逆，請先確認宣誓。", status=409)
 
         # 驗證條件
         lv_satisfied = state.get("level", 1) >= 18

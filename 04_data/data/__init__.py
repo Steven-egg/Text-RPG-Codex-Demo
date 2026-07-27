@@ -7,7 +7,7 @@ from .items import ITEMS, EQUIPMENT
 from .affixes import AFFIXES
 from .skills import SKILLS, MAGIC_BOOKS
 from .crafting import RECIPES
-from .monsters import MONSTERS
+from .monsters import MONSTERS, MONSTER_RACE_RULES, PHYSICAL_STATUS_EFFECTIVENESS_MULTIPLIERS
 from .dungeons import DUNGEONS, EVENT_WEIGHTS
 from .quests import QUESTS
 from .shops import SHOP_INVENTORY
@@ -38,6 +38,8 @@ __all__ = [
     "MAGIC_BOOKS",
     "RECIPES",
     "MONSTERS",
+    "MONSTER_RACE_RULES",
+    "PHYSICAL_STATUS_EFFECTIVENESS_MULTIPLIERS",
     "DUNGEONS",
     "EVENT_WEIGHTS",
     "QUESTS",

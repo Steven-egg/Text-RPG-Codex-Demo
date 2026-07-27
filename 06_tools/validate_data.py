@@ -28,7 +28,9 @@ try:
         MAGIC_BOOKS,
         MATERIALS,
         MONSTERS,
+        MONSTER_RACE_RULES,
         NPC_DISPLAY_NAMES,
+        PHYSICAL_STATUS_EFFECTIVENESS_MULTIPLIERS,
         PROMOTIONS,
         QUESTS,
         RECIPES,
@@ -72,12 +74,19 @@ VALID_EQUIPMENT_STATS = {
     "thunder_resist",
     "trap_evasion",
     "rare_drop",
+    "physical_charge_skill_bonus",
+    "physical_charge_cap",
+    "physical_charge_gain_chance",
+    "elemental_magic_direct_percent",
 }
-VALID_EFFECT_KEYS = {"defense_up", "defense_down", "quickstep", "cinder_mark", "burn", "bleed", "poison", "regeneration"}
+VALID_EFFECT_KEYS = {
+    "defense_up", "defense_down", "quickstep", "cinder_mark", "burn", "bleed", "poison", "regeneration",
+    "blood_blade_active", "blood_armor_active", "sigil_mage_mark", "holy_veil_shield", "holy_eclipse_active",
+}
 VALID_PASSIVE_EVENTS = {"physical_charge_reaches", "physical_status_applied"}
 VALID_PASSIVE_EFFECT_KINDS = {"charge_skill_bonus", "extra_normal_followup"}
 VALID_DAMAGE_SCOPES = {"elemental_magic"}
-VALID_PROMOTION_STATUSES = {"preview"}
+VALID_PROMOTION_STATUSES = {"preview", "formal"}
 VALID_PROMOTION_REQUIREMENT_KINDS = {"level", "unlock", "quest", "flag", "item"}
 VALID_JOB_SPECIALIZATION_STATUSES = {"preview"}
 VALID_RELIC_STATUSES = {"preview"}
@@ -102,9 +111,23 @@ VALID_AFFIX_TIERS = {"major", "minor"}
 VALID_AFFIX_SLOTS = VALID_SLOTS - {"special"}
 VALID_REGIONS = {"border_fire", "ice", "earth", "thunder", "final"}
 VALID_MONSTER_RACES = {"beast", "humanoid", "plant", "construct", "spirit", "aberration"}
+VALID_PHYSICAL_STATUS_EFFECTIVENESS = {"effective", "normal", "ineffective"}
+VALID_MONSTER_RACE_TRAIT_TRIGGERS = {"battle_start", "hp_below", "enemy_action_count"}
+VALID_MONSTER_RACE_TRAIT_EFFECTS = {
+    "next_attack_multiplier",
+    "buff",
+    "heal_max_hp",
+    "first_direct_damage_reduction",
+}
 VALID_FOLLOWUP_DAMAGE_TYPES = {"physical"}
 VALID_BATTLE_DAMAGE_TYPES = {"physical", "elemental", "fixed"}
 VALID_BATTLE_ELEMENTS = {"fire", "ice", "earth", "thunder"}
+EXPECTED_JOB_GROWTH_POINT_TOTALS = {
+    "劍士": 13.5,  # Frozen owner-approved exception; do not buff to satisfy a uniform total.
+    "法師": 15.0,
+    "盜賊": 15.0,
+    "牧師": 15.0,
+}
 
 
 def error(errors: list[str], path: str, message: str) -> None:
@@ -134,8 +157,17 @@ def check_jobs(errors: list[str]) -> None:
             error(errors, f"JOBS.{job_id}", "must not retain legacy growth or extra_every_3 fields")
         if not all(isinstance(value, (int, float)) and not isinstance(value, bool) and value >= 0 for value in growth_points.values()):
             error(errors, f"JOBS.{job_id}.growth_points", "must use non-negative numeric point allocations")
-        elif not math.isclose(sum(growth_points.values()), 15.0, abs_tol=1e-12):
-            error(errors, f"JOBS.{job_id}.growth_points", "must total exactly 15.00 points per level")
+        else:
+            expected_total = EXPECTED_JOB_GROWTH_POINT_TOTALS.get(job_id)
+            if expected_total is None:
+                error(errors, f"JOBS.{job_id}.growth_points", "has no frozen total contract")
+            elif not math.isclose(sum(growth_points.values()), expected_total, abs_tol=1e-12):
+                exception_note = " (documented frozen exception)" if job_id == "劍士" else ""
+                error(
+                    errors,
+                    f"JOBS.{job_id}.growth_points",
+                    f"must total exactly {expected_total:.2f} points per level{exception_note}",
+                )
         for skill_id in job.get("base_skills", []):
             if skill_id not in SKILLS:
                 error(errors, f"JOBS.{job_id}.base_skills", f"references missing skill_id: {skill_id}")
@@ -482,6 +514,13 @@ def check_affixes(errors: list[str]) -> None:
 
 
 def check_skills(errors: list[str]) -> None:
+    formal_promotion_skill_ids = {
+        skill_id
+        for promotion in PROMOTIONS.values()
+        if promotion.get("status") == "formal"
+        for skill_id in (promotion.get("active_skill_id"), promotion.get("passive_skill_id"))
+        if isinstance(skill_id, str)
+    }
     for skill_id, skill in SKILLS.items():
         require_keys(errors, f"SKILLS.{skill_id}", skill, {"name", "mp", "kind", "desc"})
         kind = skill.get("kind")
@@ -490,7 +529,7 @@ def check_skills(errors: list[str]) -> None:
             continue
         if not is_non_negative_int(skill.get("mp")):
             error(errors, f"SKILLS.{skill_id}.mp", "must be a non-negative int")
-        if kind == "damage":
+        if kind == "damage" and skill_id not in formal_promotion_skill_ids:
             require_keys(errors, f"SKILLS.{skill_id}", skill, {"stat", "element", "multiplier"})
             if skill.get("stat") not in VALID_DAMAGE_STATS:
                 error(errors, f"SKILLS.{skill_id}.stat", f"uses unsupported damage stat: {skill.get('stat')}")
@@ -543,6 +582,8 @@ def check_skills(errors: list[str]) -> None:
             triggers = skill.get("passive_triggers")
             if skill.get("mp") != 0:
                 error(errors, f"SKILLS.{skill_id}.mp", "passive skills must cost 0 MP")
+            if skill_id in formal_promotion_skill_ids and triggers is None:
+                continue
             if not isinstance(triggers, list) or not triggers:
                 error(errors, f"SKILLS.{skill_id}.passive_triggers", "must be a non-empty list")
                 continue
@@ -622,12 +663,119 @@ def check_recipes(errors: list[str]) -> None:
             error(errors, f"RECIPES.{recipe_id}.region", f"uses unsupported region: {region}")
 
 
+def check_monster_race_rules(errors: list[str]) -> None:
+    if set(MONSTER_RACE_RULES) != VALID_MONSTER_RACES:
+        missing = sorted(VALID_MONSTER_RACES - set(MONSTER_RACE_RULES))
+        extra = sorted(set(MONSTER_RACE_RULES) - VALID_MONSTER_RACES)
+        error(errors, "MONSTER_RACE_RULES", f"must exactly cover valid races: missing={missing}, extra={extra}")
+
+    expected_multipliers = {"effective": 1.25, "normal": 1.0, "ineffective": 0.0}
+    if PHYSICAL_STATUS_EFFECTIVENESS_MULTIPLIERS != expected_multipliers:
+        error(
+            errors,
+            "PHYSICAL_STATUS_EFFECTIVENESS_MULTIPLIERS",
+            f"must equal the frozen readable contract: {expected_multipliers}",
+        )
+
+    trait_ids: set[str] = set()
+    for race, rule in MONSTER_RACE_RULES.items():
+        path = f"MONSTER_RACE_RULES.{race}"
+        if not isinstance(rule, dict):
+            error(errors, path, "must be a mapping")
+            continue
+        required_rule_keys = {"display_name", "physical_status", "trait"}
+        require_keys(errors, path, rule, required_rule_keys)
+        if set(rule) - required_rule_keys:
+            error(errors, path, f"uses unsupported keys: {sorted(set(rule) - required_rule_keys)}")
+        if not isinstance(rule.get("display_name"), str) or not rule["display_name"].strip():
+            error(errors, f"{path}.display_name", "must be a non-empty string")
+
+        statuses = rule.get("physical_status")
+        if not isinstance(statuses, dict) or set(statuses) != {"bleed", "poison"}:
+            error(errors, f"{path}.physical_status", "must define exactly bleed and poison")
+        else:
+            for status, effectiveness in statuses.items():
+                if effectiveness not in VALID_PHYSICAL_STATUS_EFFECTIVENESS:
+                    error(errors, f"{path}.physical_status.{status}", f"uses unsupported effectiveness: {effectiveness}")
+
+        trait = rule.get("trait")
+        if not isinstance(trait, dict):
+            error(errors, f"{path}.trait", "must be a mapping")
+            continue
+        required_trait_keys = {"id", "display_name", "trigger", "effect"}
+        require_keys(errors, f"{path}.trait", trait, required_trait_keys)
+        if set(trait) - required_trait_keys:
+            error(errors, f"{path}.trait", f"uses unsupported keys: {sorted(set(trait) - required_trait_keys)}")
+        trait_id = trait.get("id")
+        if not isinstance(trait_id, str) or not trait_id:
+            error(errors, f"{path}.trait.id", "must be a non-empty string")
+        elif trait_id in trait_ids:
+            error(errors, f"{path}.trait.id", f"must be unique: {trait_id}")
+        else:
+            trait_ids.add(trait_id)
+        if not isinstance(trait.get("display_name"), str) or not trait["display_name"].strip():
+            error(errors, f"{path}.trait.display_name", "must be a non-empty string")
+
+        trigger = trait.get("trigger")
+        if not isinstance(trigger, dict):
+            error(errors, f"{path}.trait.trigger", "must be a mapping")
+            continue
+        trigger_kind = trigger.get("kind")
+        if trigger_kind not in VALID_MONSTER_RACE_TRAIT_TRIGGERS:
+            error(errors, f"{path}.trait.trigger.kind", f"uses unsupported trigger: {trigger_kind}")
+        if trigger.get("once") is not True:
+            error(errors, f"{path}.trait.trigger.once", "must be true for the v1 one-shot trait contract")
+        if trigger_kind == "hp_below":
+            ratio = trigger.get("ratio")
+            if not isinstance(ratio, (int, float)) or isinstance(ratio, bool) or not 0 < ratio < 1:
+                error(errors, f"{path}.trait.trigger.ratio", "must be numeric and between 0 and 1")
+        elif trigger_kind == "enemy_action_count" and (not isinstance(trigger.get("count"), int) or trigger["count"] <= 0):
+            error(errors, f"{path}.trait.trigger.count", "must be a positive integer")
+
+        effect = trait.get("effect")
+        if not isinstance(effect, dict):
+            error(errors, f"{path}.trait.effect", "must be a mapping")
+            continue
+        effect_kind = effect.get("kind")
+        if effect_kind not in VALID_MONSTER_RACE_TRAIT_EFFECTS:
+            error(errors, f"{path}.trait.effect.kind", f"uses unsupported effect: {effect_kind}")
+        if effect_kind == "next_attack_multiplier":
+            value = effect.get("value")
+            if not isinstance(value, (int, float)) or isinstance(value, bool) or not 1 < value <= 2:
+                error(errors, f"{path}.trait.effect.value", "must be numeric, greater than 1, and at most 2")
+        elif effect_kind == "buff":
+            if effect.get("buff") != "defense_up" or not isinstance(effect.get("turns"), int) or effect["turns"] <= 0:
+                error(errors, f"{path}.trait.effect", "buff must be defense_up with positive integer turns")
+        elif effect_kind == "heal_max_hp":
+            ratio = effect.get("ratio")
+            if not isinstance(ratio, (int, float)) or isinstance(ratio, bool) or not 0 < ratio <= 0.5:
+                error(errors, f"{path}.trait.effect.ratio", "must be numeric, greater than 0, and at most 0.5")
+        elif effect_kind == "first_direct_damage_reduction":
+            ratio = effect.get("ratio")
+            if effect.get("damage_type") not in {"physical", "magic"}:
+                error(errors, f"{path}.trait.effect.damage_type", "must be physical or magic")
+            if not isinstance(ratio, (int, float)) or isinstance(ratio, bool) or not 0 < ratio < 1:
+                error(errors, f"{path}.trait.effect.ratio", "must be numeric and between 0 and 1")
+
+
 def check_monsters(errors: list[str]) -> None:
     required = {"name", "level", "hp", "attack", "defense", "agility", "crit", "element", "race", "exp", "gold", "drops"}
     for monster_id, monster in MONSTERS.items():
         require_keys(errors, f"MONSTERS.{monster_id}", monster, required)
         if monster.get("race") not in VALID_MONSTER_RACES:
             error(errors, f"MONSTERS.{monster_id}.race", f"uses unsupported race: {monster.get('race')}")
+        for stat in ("level", "hp", "attack", "defense"):
+            if not isinstance(monster.get(stat), int) or isinstance(monster.get(stat), bool) or monster[stat] <= 0:
+                error(errors, f"MONSTERS.{monster_id}.{stat}", "must be a positive integer")
+        for stat in ("agility", "crit"):
+            if not is_non_negative_int(monster.get(stat)):
+                error(errors, f"MONSTERS.{monster_id}.{stat}", "must be a non-negative integer")
+        if isinstance(monster.get("crit"), int) and monster["crit"] > 100:
+            error(errors, f"MONSTERS.{monster_id}.crit", "must not exceed 100")
+        if "magic_defense" in monster and not is_non_negative_int(monster["magic_defense"]):
+            error(errors, f"MONSTERS.{monster_id}.magic_defense", "must be a non-negative integer")
+        if "boss" in monster and not isinstance(monster["boss"], bool):
+            error(errors, f"MONSTERS.{monster_id}.boss", "must be a bool when present")
         gold = monster.get("gold")
         if not (isinstance(gold, tuple) and len(gold) == 2 and gold[0] <= gold[1]):
             error(errors, f"MONSTERS.{monster_id}.gold", "must be tuple(min, max)")
@@ -815,6 +963,7 @@ def validate() -> list[str]:
     check_skills(errors)
     check_magic_books(errors)
     check_recipes(errors)
+    check_monster_race_rules(errors)
     check_monsters(errors)
     check_dungeons(errors)
     check_quests(errors)

@@ -37,6 +37,7 @@ from s10_baseline_config import (  # noqa: E402
     S10_TARGETS,
     S10_VERSION,
     scenario_config_id,
+    supplies_for_job,
     supply_profile_for,
 )
 
@@ -501,7 +502,7 @@ def _build_state(
     state["learned_skills"] = _skill_ids(job_key, region_id)
     relic_profile = _apply_relics(state, job_key, region_id, relic_count_override) if with_relics else []
     if boss:
-        state["inventory"] = {"item_potion_m": 2, "item_focus_drop": 1, "item_armor_piercer": 1}
+        state["inventory"] = {"item_potion_s": 2, "item_focus_drop": 1, "item_armor_piercer": 1}
     stats = get_stats(state)
     state["current_hp"] = stats["max_hp"]
     state["current_mp"] = stats["max_mp"]
@@ -526,9 +527,32 @@ def _choose_rotation_action(
     boss: bool,
     item_counts: dict[str, int],
 ) -> tuple[str, str | None]:
+    # S10 supplies are part of the deterministic player loadout.  Every job
+    # may use the configured recovery supplies before its class rotation;
+    # this is a transparent player policy, never an enemy-side adjustment.
+    if boss:
+        max_hp = get_stats(state, player_buffs)["max_hp"]
+        hp_item = next((
+            item_id for item_id, quantity in state["inventory"].items()
+            if quantity > 0 and item_id in game.COMBAT_HP_RECOVERY
+        ), None)
+        if hp_item and state["current_hp"] <= max_hp * 0.25:
+            return "item", hp_item
+        mp_item = next((
+            item_id for item_id, quantity in state["inventory"].items()
+            if quantity > 0 and item_id in game.COMBAT_MP_RECOVERY
+        ), None)
+        if mp_item and state["current_mp"] < 4:
+            return "item", mp_item
     if job_key == "warrior":
         skill_id = REGION_SKILLS[region_id]["warrior"]
-        if game.physical_charge(player_buffs) >= 3 and state["current_mp"] >= SKILLS[skill_id]["mp"]:
+        # Bosses reward a measured direct-attack cadence after Fire.  Normal
+        # encounters use the late regional strikes at two charge stacks so
+        # the reduced Warrior growth does not slow routine combat.
+        if boss and region_id != "fire":
+            return "normal", None
+        charge_threshold = 2 if not boss and region_id in {"thunder", "final"} else 3
+        if game.physical_charge(player_buffs) >= charge_threshold and state["current_mp"] >= SKILLS[skill_id]["mp"]:
             return "skill", skill_id
         return "normal", None
     if job_key == "mage":
@@ -538,6 +562,21 @@ def _choose_rotation_action(
             return "skill", skill_id
         return "normal", None
     if job_key == "rogue":
+        # Fire's construct Boss rejects bleed and poison.  Spend the legal
+        # Rogue-only rending supply at opening and when its DoT expires.
+        if (
+            boss
+            and state["inventory"].get("item_rending_spike", 0) > 0
+            and enemy_buffs.get("rending_wound", 0) <= 0
+        ):
+            return "item", "item_rending_spike"
+        # The Earth, Thunder, and Final endgame targets are defeated before a second
+        # status cycle can pay back its setup action.  Keep the S10 Boss
+        # rotation to direct attacks there rather than front-loading both
+        # bleed and poison.  This is a player-side tempo policy; normal
+        # encounters retain the full status rotation.
+        if boss and region_id in {"earth", "thunder", "final"}:
+            return "normal", None
         candidates = (("skill_backstab", "bleed"), ("skill_toxic_edge", "poison"))
         candidates = sorted(
             candidates,
@@ -562,8 +601,8 @@ def _choose_rotation_action(
         return "skill", "skill_regeneration"
     if boss and enemy["defense"] >= 40 and item_counts["battle"] == 0 and state["inventory"].get("item_armor_piercer", 0):
         return "item", "item_armor_piercer"
-    if boss and state["current_hp"] <= max_hp * 0.25 and item_counts["hp"] < 2 and state["inventory"].get("item_potion_m", 0):
-        return "item", "item_potion_m"
+    if boss and state["current_hp"] <= max_hp * 0.25 and item_counts["hp"] < 2 and state["inventory"].get("item_potion_s", 0):
+        return "item", "item_potion_s"
     if boss and state["current_mp"] < 4 and item_counts["mp"] < 1 and state["inventory"].get("item_focus_drop", 0):
         return "item", "item_focus_drop"
     return "normal", None
@@ -641,6 +680,7 @@ def measure_scenario(
     equipment_profile_id: str | None = None,
     relic_count_override: int | None = None,
     run_supplies: dict[str, dict[str, int | str | None]] | None = None,
+    enemy_attack_multiplier: float = 1.0,
 ) -> dict[str, Any]:
     if layer not in (*LAYERS, "S10"):
         raise ValueError(f"unknown layer: {layer}")
@@ -675,6 +715,11 @@ def measure_scenario(
             state["inventory"] = configured_inventory
             game.configure_run_supplies(state, run_supplies)
         enemy = deepcopy(MONSTERS[enemy_id])
+        if enemy_attack_multiplier <= 0:
+            raise ValueError("enemy attack multiplier must be positive")
+        enemy["attack"] = math.ceil(enemy["attack"] * enemy_attack_multiplier)
+        if "magic_attack" in enemy:
+            enemy["magic_attack"] = math.ceil(enemy["magic_attack"] * enemy_attack_multiplier)
         enemy_hp = enemy["hp"]
         player_buffs: dict[str, Any] = {}
         enemy_buffs: dict[str, Any] = {}
@@ -689,15 +734,16 @@ def measure_scenario(
         death_turn: int | None = None
 
         for turn in range(1, MAX_PLAYER_ACTIONS + 1):
+            enemy["current_hp"] = enemy_hp
             source, value = _choose_rotation_action(job_key, region_id, enemy, state, player_buffs, enemy_buffs, turn, boss, item_counts) if rotation else ("normal", None)
             hp_before_action, mp_before_action = state["current_hp"], state["current_mp"]
             if source == "skill":
                 action_result = _invoke_skill(state, enemy, player_buffs, enemy_buffs, value or "")
             elif source == "item":
                 action_result = use_tool_item_adapter(state, boss, enemy_buffs, enemy, value or "")
-                if value == "item_potion_m":
+                if value in game.COMBAT_HP_RECOVERY:
                     item_counts["hp"] += 1
-                elif value == "item_focus_drop":
+                elif value in game.COMBAT_MP_RECOVERY:
                     item_counts["mp"] += 1
                 else:
                     item_counts["battle"] += 1
@@ -1078,12 +1124,15 @@ S10_RECORD_FIELDS = (
     "s10_version", "config_id", "scenario_id", "seed", "region", "checkpoint", "benchmark_level", "job",
     "target_type", "enemy_id", "result", "player_actions", "enemy_actions", "initial_hp", "final_hp",
     "initial_mp", "final_mp", "equipment_profile_id", "relic_profile", "supply_profile",
+    "direct_damage", "dot_damage", "hp_items_used", "mp_items_used", "battle_items_used", "supply_items_used",
+    "final_hp_ratio",
     "action_target_min", "action_target_max", "victory_target_met", "action_target_met", "target_met",
 )
 S10_SUMMARY_FIELDS = (
     "s10_version", "config_id", "region", "checkpoint", "job", "target_type", "enemy_id", "trials", "victories",
     "player_actions_min", "player_actions_median", "player_actions_max", "action_target_min", "action_target_max",
-    "all_victories", "target_met",
+    "avg_direct_damage", "avg_dot_damage", "avg_enemy_actions", "avg_supply_items_used", "avg_final_hp_pct",
+    "all_victories", "target_met", "diagnostics",
 )
 
 
@@ -1120,8 +1169,8 @@ def validate_s10_config() -> None:
         if target_type == "boss" and not MONSTERS[scenario["enemy_id"]].get("boss"):
             raise ValueError(f"S10 Boss scenario requires a boss: {scenario['enemy_id']}")
         profile_id = supply_profile_for(scenario)
-        supplies = S10_SUPPLY_PROFILES.get_profile(profile_id, scenario["region"])
         for job_key, job_name in JOBS.items():
+            supplies = supplies_for_job(scenario, job_key)
             loadout = dict(FULL_LOADOUTS[scenario["loadout_region"]][job_key])
             loadout.update(scenario["loadout_overrides"].get(job_key, {}))
             for slot, equipment_id in loadout.items():
@@ -1164,7 +1213,7 @@ def build_s10_records(seeds: Iterable[int] = DEFAULT_SEEDS) -> list[dict[str, An
                     loadout_override=loadout,
                     equipment_profile_id=config_id,
                     relic_count_override=scenario["relic_count"],
-                    run_supplies=S10_SUPPLY_PROFILES.get_profile(supply_profile, scenario["region"]),
+                    run_supplies=supplies_for_job(scenario, job_key),
                 )
                 victory_target_met = measured["result"] == "victory"
                 action_target_met = victory_target_met and action_min <= measured["player_actions"] <= action_max
@@ -1189,6 +1238,17 @@ def build_s10_records(seeds: Iterable[int] = DEFAULT_SEEDS) -> list[dict[str, An
                     equipment_profile_id=config_id,
                     relic_profile=measured["relic_profile"],
                     supply_profile=supply_profile,
+                    direct_damage=measured["direct_damage"],
+                    dot_damage=measured["dot_damage"],
+                    hp_items_used=measured["hp_items_used"],
+                    mp_items_used=measured["mp_items_used"],
+                    battle_items_used=measured["battle_items_used"],
+                    supply_items_used=(
+                        measured["hp_items_used"]
+                        + measured["mp_items_used"]
+                        + measured["battle_items_used"]
+                    ),
+                    final_hp_ratio=measured["final_hp_ratio"],
                     action_target_min=action_min,
                     action_target_max=action_max,
                     victory_target_met=victory_target_met,
@@ -1218,6 +1278,16 @@ def summarize_s10_records(records: list[dict[str, Any]]) -> list[dict[str, Any]]
         actions = sorted(record["player_actions"] for record in ordered)
         first = ordered[0]
         all_victories = all(record["victory_target_met"] for record in ordered)
+        all_action_targets = all(record["action_target_met"] for record in ordered)
+        diagnostics: list[str] = []
+        if all_victories and any(record["player_actions"] < first["action_target_min"] for record in ordered):
+            diagnostics.append("overfast_kill")
+        if all_action_targets:
+            diagnostics.append("target_interval")
+        if any(record["result"] == "player_death" or record["final_hp_ratio"] <= 0 for record in ordered):
+            diagnostics.append("survival_insufficient")
+        if not all_victories:
+            diagnostics.append("not_all_victories")
         summaries.append({
             "s10_version": S10_VERSION,
             "config_id": first["config_id"],
@@ -1233,8 +1303,14 @@ def summarize_s10_records(records: list[dict[str, Any]]) -> list[dict[str, Any]]
             "player_actions_max": actions[-1],
             "action_target_min": first["action_target_min"],
             "action_target_max": first["action_target_max"],
+            "avg_direct_damage": round(sum(record["direct_damage"] for record in ordered) / len(ordered), 2),
+            "avg_dot_damage": round(sum(record["dot_damage"] for record in ordered) / len(ordered), 2),
+            "avg_enemy_actions": round(sum(record["enemy_actions"] for record in ordered) / len(ordered), 2),
+            "avg_supply_items_used": round(sum(record["supply_items_used"] for record in ordered) / len(ordered), 2),
+            "avg_final_hp_pct": round(100 * sum(record["final_hp_ratio"] for record in ordered) / len(ordered), 2),
             "all_victories": all_victories,
             "target_met": all(record["target_met"] for record in ordered),
+            "diagnostics": ";".join(diagnostics) or "outside_target_interval",
         })
     return summaries
 
@@ -1249,12 +1325,127 @@ def render_s10_summary(records: list[dict[str, Any]], output_format: str) -> str
     return stream.getvalue()
 
 
+# This is a measurement-only A-mode overlay.  It never mutates MONSTERS and
+# deliberately excludes Fire so the probe stays focused on the four later
+# regional Boss checkpoints identified by the v1 read-only gate.
+MONSTER_THREAT_PROBE_VERSION = "late-boss-attack-overlay-v1"
+MONSTER_THREAT_PROBE_REGIONS = ("ice", "earth", "thunder", "final")
+MONSTER_THREAT_ATTACK_MULTIPLIERS = (1.0, 1.05, 1.10)
+MONSTER_THREAT_RECORD_FIELDS = (
+    "probe_version", "scenario_id", "seed", "region", "benchmark_level", "job", "enemy_id", "enemy_race",
+    "attack_multiplier", "base_attack", "observed_attack", "result", "player_actions", "enemy_actions",
+    "incoming_damage", "initial_hp", "final_hp", "final_hp_ratio", "supply_items_used",
+)
+MONSTER_THREAT_SUMMARY_FIELDS = (
+    "probe_version", "region", "job", "enemy_id", "enemy_race", "attack_multiplier", "trials", "victories",
+    "player_actions_min", "player_actions_median", "player_actions_max", "avg_enemy_actions",
+    "avg_incoming_damage", "avg_supply_items_used", "avg_final_hp_pct",
+)
+
+
+def build_monster_threat_probe_records(seeds: Iterable[int] = DEFAULT_SEEDS) -> list[dict[str, Any]]:
+    records: list[dict[str, Any]] = []
+    scenarios = {
+        scenario["region"]: scenario
+        for scenario in S10_SCENARIOS
+        if scenario["target_type"] == "boss" and scenario["region"] in MONSTER_THREAT_PROBE_REGIONS
+    }
+    if set(scenarios) != set(MONSTER_THREAT_PROBE_REGIONS):
+        raise ValueError("monster threat probe requires one S10 Boss scenario for every late region")
+    for region_id in MONSTER_THREAT_PROBE_REGIONS:
+        scenario = scenarios[region_id]
+        enemy_id = scenario["enemy_id"]
+        base_attack = MONSTERS[enemy_id]["attack"]
+        for job_key in JOBS:
+            loadout = dict(FULL_LOADOUTS[scenario["loadout_region"]][job_key])
+            loadout.update(scenario["loadout_overrides"].get(job_key, {}))
+            for attack_multiplier in MONSTER_THREAT_ATTACK_MULTIPLIERS:
+                for seed in seeds:
+                    measured = measure_scenario(
+                        layer="S10",
+                        region_id=region_id,
+                        job_key=job_key,
+                        target_type="boss",
+                        seed=seed,
+                        equipment_profile="full",
+                        rotation=True,
+                        relics=True,
+                        loadout_override=loadout,
+                        equipment_profile_id=f"{MONSTER_THREAT_PROBE_VERSION}:{region_id}",
+                        relic_count_override=scenario["relic_count"],
+                        run_supplies=supplies_for_job(scenario, job_key),
+                        enemy_attack_multiplier=attack_multiplier,
+                    )
+                    records.append({
+                        "probe_version": MONSTER_THREAT_PROBE_VERSION,
+                        "scenario_id": f"{MONSTER_THREAT_PROBE_VERSION}:{region_id}:{job_key}:{attack_multiplier:.2f}:{seed}",
+                        "seed": seed,
+                        "region": region_id,
+                        "benchmark_level": REGIONS[region_id]["level"],
+                        "job": job_key,
+                        "enemy_id": enemy_id,
+                        "enemy_race": MONSTERS[enemy_id]["race"],
+                        "attack_multiplier": attack_multiplier,
+                        "base_attack": base_attack,
+                        "observed_attack": math.ceil(base_attack * attack_multiplier),
+                        "result": measured["result"],
+                        "player_actions": measured["player_actions"],
+                        "enemy_actions": measured["enemy_actions"],
+                        "incoming_damage": measured["incoming_damage"],
+                        "initial_hp": measured["initial_hp"],
+                        "final_hp": measured["final_hp"],
+                        "final_hp_ratio": measured["final_hp_ratio"],
+                        "supply_items_used": measured["hp_items_used"] + measured["mp_items_used"] + measured["battle_items_used"],
+                    })
+    return records
+
+
+def summarize_monster_threat_probe_records(records: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    grouped: dict[tuple[str, str, float], list[dict[str, Any]]] = {}
+    for record in records:
+        grouped.setdefault((record["region"], record["job"], record["attack_multiplier"]), []).append(record)
+    summaries: list[dict[str, Any]] = []
+    for group in grouped.values():
+        ordered = sorted(group, key=lambda record: record["seed"])
+        actions = sorted(record["player_actions"] for record in ordered)
+        first = ordered[0]
+        summaries.append({
+            "probe_version": MONSTER_THREAT_PROBE_VERSION,
+            "region": first["region"],
+            "job": first["job"],
+            "enemy_id": first["enemy_id"],
+            "enemy_race": first["enemy_race"],
+            "attack_multiplier": first["attack_multiplier"],
+            "trials": len(ordered),
+            "victories": sum(record["result"] == "victory" for record in ordered),
+            "player_actions_min": actions[0],
+            "player_actions_median": actions[(len(actions) - 1) // 2],
+            "player_actions_max": actions[-1],
+            "avg_enemy_actions": round(sum(record["enemy_actions"] for record in ordered) / len(ordered), 2),
+            "avg_incoming_damage": round(sum(record["incoming_damage"] for record in ordered) / len(ordered), 2),
+            "avg_supply_items_used": round(sum(record["supply_items_used"] for record in ordered) / len(ordered), 2),
+            "avg_final_hp_pct": round(100 * sum(record["final_hp_ratio"] for record in ordered) / len(ordered), 2),
+        })
+    return summaries
+
+
+def render_monster_threat_probe_records(records: list[dict[str, Any]], output_format: str, *, summary: bool = False) -> str:
+    fields = MONSTER_THREAT_SUMMARY_FIELDS if summary else MONSTER_THREAT_RECORD_FIELDS
+    if output_format == "json":
+        return json.dumps(records, ensure_ascii=True, sort_keys=True, separators=(",", ":"))
+    stream = io.StringIO(newline="")
+    writer = csv.DictWriter(stream, fieldnames=fields, lineterminator="\n", extrasaction="raise")
+    writer.writeheader()
+    writer.writerows(records)
+    return stream.getvalue()
+
+
 # Phase 0 is intentionally separate from B0..B6.  It reuses the live combat
 # helpers, but never changes the canonical baseline layers or runtime data.
 PHASE0_VERSION = "item-support-passive-measurement-v5"
 PHASE0_ITEM_KITS = {
     "no_item": {"mode": "none"},
-    "legacy_b4_qa_kit": {"item_potion_m": 2, "item_focus_drop": 1, "item_armor_piercer": 1},
+    "legacy_b4_qa_kit": {"item_potion_s": 2, "item_focus_drop": 1, "item_armor_piercer": 1},
     "legal_physical_pair": {"mode": "physical", "policy": "opening_pair"},
     "legal_element_counter_pair": {"mode": "counter", "policy": "opening_pair"},
     "legal_element_neutral_pair": {"mode": "neutral", "policy": "opening_pair"},
@@ -1326,11 +1517,11 @@ def _phase0_state(job_key: str, region_id: str, kit_id: str) -> tuple[dict, dict
         state["inventory"] = {}
         return state, enemy, None, relation, "none"
     state["inventory"] = {
-        "item_potion_m": 2, "item_focus_drop": 1, "item_herb_antidote": 1, throwable_id: 2,
+        "item_potion_s": 2, "item_focus_drop": 1, "item_herb_antidote": 1, throwable_id: 2,
     }
     game.configure_run_supplies(state, {
-        "sustain_hp": {"item_id": "item_potion_m", "quantity": 1},
-        "emergency_hp": {"item_id": "item_potion_m", "quantity": 1},
+        "sustain_hp": {"item_id": "item_potion_s", "quantity": 1},
+        "emergency_hp": {"item_id": "item_potion_s", "quantity": 1},
         "mp": {"item_id": "item_focus_drop", "quantity": 1},
         "throwable": {"item_id": throwable_id, "quantity": 2},
     })
@@ -1356,8 +1547,8 @@ def _phase0_item_action(job_key: str, region_id: str, enemy: dict, enemy_hp: int
                 return "item", throwable_id
     if inventory.get("item_herb_antidote", 0) and player_buffs.get("burn", 0) > 0:
         return "item", "item_herb_antidote"
-    if inventory.get("item_potion_m", 0) and state["current_hp"] <= max_hp * 0.25:
-        return "item", "item_potion_m"
+    if inventory.get("item_potion_s", 0) and state["current_hp"] <= max_hp * 0.25:
+        return "item", "item_potion_s"
     source, skill_id = _phase0_canonical(job_key, region_id, enemy, state, player_buffs, enemy_buffs, turn)
     if source == "normal" and inventory.get("item_focus_drop", 0) and state["current_mp"] < 4:
         return "item", "item_focus_drop"
@@ -1697,10 +1888,10 @@ def _tactical_state(job_key: str, region_id: str, kit_id: str) -> tuple[dict, di
         throwable_id, relation, policy, tactical_status = _tactical_throwable(enemy, job_key)
     elif kit_id != "no_throwable":
         raise ValueError(f"unknown tactical strategy kit: {kit_id}")
-    state["inventory"] = {"item_potion_m": 2, "item_focus_drop": 1, "item_herb_antidote": 1}
+    state["inventory"] = {"item_potion_s": 2, "item_focus_drop": 1, "item_herb_antidote": 1}
     supplies: dict[str, dict[str, int | str]] = {
-        "sustain_hp": {"item_id": "item_potion_m", "quantity": 1},
-        "emergency_hp": {"item_id": "item_potion_m", "quantity": 1},
+        "sustain_hp": {"item_id": "item_potion_s", "quantity": 1},
+        "emergency_hp": {"item_id": "item_potion_s", "quantity": 1},
         "mp": {"item_id": "item_focus_drop", "quantity": 1},
     }
     if throwable_id:
@@ -1730,8 +1921,8 @@ def _tactical_strategy_action(
     max_hp = get_stats(state, player_buffs)["max_hp"]
     if state["inventory"].get("item_herb_antidote", 0) and player_buffs.get("burn", 0) > 0:
         return "item", "item_herb_antidote"
-    if state["inventory"].get("item_potion_m", 0) and state["current_hp"] <= max_hp * 0.25:
-        return "item", "item_potion_m"
+    if state["inventory"].get("item_potion_s", 0) and state["current_hp"] <= max_hp * 0.25:
+        return "item", "item_potion_s"
     source, skill_id = _phase0_canonical(job_key, region_id, enemy, state, player_buffs, enemy_buffs, turn)
     if source == "normal" and state["inventory"].get("item_focus_drop", 0) and state["current_mp"] < 4:
         return "item", "item_focus_drop"
@@ -1949,12 +2140,23 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--value-model-audit", action="store_true", help="stdout-only EHP and action-cost measurement")
     parser.add_argument("--s10", action="store_true", help="stdout-only S10 entry/endgame balance measurement")
     parser.add_argument("--s10-summary", action="store_true", help="stdout-only S10 per-job range and median summary")
+    parser.add_argument("--monster-threat-probe", action="store_true", help="stdout-only late-Boss attack +5%/+10% measurement overlay")
+    parser.add_argument("--monster-threat-summary", action="store_true", help="stdout-only summary for the late-Boss attack overlay")
     return parser.parse_args(argv)
 
 
 def main(argv: list[str] | None = None) -> None:
     args = parse_args(argv)
     check_runtime_contracts()
+    if args.monster_threat_probe or args.monster_threat_summary:
+        seeds = tuple(int(seed.strip()) for seed in args.seeds.split(",") if seed.strip())
+        records = build_monster_threat_probe_records(seeds)
+        if args.monster_threat_summary:
+            summaries = summarize_monster_threat_probe_records(records)
+            print(render_monster_threat_probe_records(summaries, args.format, summary=True), end="")
+        else:
+            print(render_monster_threat_probe_records(records, args.format), end="")
+        return
     if args.s10 or args.s10_summary:
         seeds = tuple(int(seed.strip()) for seed in args.seeds.split(",") if seed.strip())
         records = build_s10_records(seeds)

@@ -6,6 +6,7 @@ from typing import Any
 
 from data import (
     DUNGEONS,
+    EQUIPMENT,
     MONSTERS,
     EVENT_WEIGHTS,
     QUESTS,
@@ -14,6 +15,7 @@ from data import (
 from .formatting import item_name
 from .display import action_menu_panel, render_panel, pause
 from .state import (
+    is_key_item,
     is_unlocked,
     unlock,
     player_facing_dungeon_ids,

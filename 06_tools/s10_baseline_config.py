@@ -95,3 +95,12 @@ def scenario_config_id(scenario: dict) -> str:
 
 def supply_profile_for(scenario: dict) -> str:
     return "boss_standard" if scenario["target_type"] == "boss" else "none"
+
+
+def supplies_for_job(scenario: dict, job_key: str) -> dict:
+    """Return the legal S10 supply profile, including explicit job overrides."""
+    profile = S10_SUPPLY_PROFILES.get_profile(supply_profile_for(scenario), scenario["region"])
+    supplies = {slot: dict(selection) for slot, selection in profile.items()}
+    if scenario["region"] == "fire" and scenario["target_type"] == "boss" and job_key == "rogue":
+        supplies["throwable"] = {"item_id": "item_rending_spike", "quantity": 2}
+    return supplies

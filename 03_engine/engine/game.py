@@ -91,6 +91,8 @@ from data import (
     JOBS,
     MAGIC_BOOKS,
     MONSTERS,
+    MONSTER_RACE_RULES,
+    PHYSICAL_STATUS_EFFECTIVENESS_MULTIPLIERS,
     QUESTS,
     RECIPES,
     REGIONS,
@@ -384,19 +386,7 @@ def buff_summary(buffs: dict) -> str:
 
 PHYSICAL_CHARGE_KEY = "_physical_charge"
 MAX_PHYSICAL_CHARGE = 3
-PHYSICAL_STATUS_EFFECTIVENESS = {
-    "beast": {"bleed": "effective", "poison": "normal"},
-    "humanoid": {"bleed": "effective", "poison": "normal"},
-    "plant": {"bleed": "ineffective", "poison": "effective"},
-    "construct": {"bleed": "ineffective", "poison": "ineffective"},
-    "spirit": {"bleed": "ineffective", "poison": "ineffective"},
-    "aberration": {"bleed": "normal", "poison": "effective"},
-}
-PHYSICAL_STATUS_DAMAGE_MULTIPLIERS = {
-    "effective": 1.25,
-    "normal": 1.0,
-    "ineffective": 0.0,
-}
+RACE_TRAIT_STATE_KEY = "_race_trait_state"
 STATUS_DISPLAY_NAMES = {
     "bleed": "流血", "poison": "中毒", "burn": "灼傷",
     "sanctified_erosion": "聖蝕", "rending_wound": "裂創",
@@ -405,6 +395,139 @@ STATUS_DISPLAY_NAMES = {
 
 def status_display_name(status: str) -> str:
     return STATUS_DISPLAY_NAMES.get(status, status)
+
+
+def monster_race_rule(enemy: dict) -> dict:
+    return MONSTER_RACE_RULES.get(enemy.get("race"), {})
+
+
+def monster_race_display_name(enemy: dict) -> str:
+    return monster_race_rule(enemy).get("display_name", enemy.get("race", "未知"))
+
+
+def monster_race_trait(enemy: dict) -> dict:
+    return monster_race_rule(enemy).get("trait", {})
+
+
+def monster_race_trait_summary(enemy: dict, enemy_buffs: dict | None = None) -> str:
+    trait = monster_race_trait(enemy)
+    if not trait:
+        return "無"
+    state = (enemy_buffs or {}).get(RACE_TRAIT_STATE_KEY, {})
+    effect_kind = trait.get("effect", {}).get("kind")
+    if effect_kind == "first_direct_damage_reduction":
+        status = "0" if state.get("triggered") else "1"
+        return f"{trait['display_name']} {status}"
+    return f"{trait['display_name']}（{'已觸發' if state.get('triggered') else '待機'}）"
+
+
+def _monster_race_trait_state(enemy_buffs: dict) -> dict:
+    return enemy_buffs.setdefault(RACE_TRAIT_STATE_KEY, {})
+
+
+def apply_monster_race_direct_damage_trait(
+    enemy: dict,
+    enemy_buffs: dict,
+    damage: int,
+    damage_type: str,
+) -> tuple[int, list[str]]:
+    """Consume a visible one-shot race ward on a matching direct hit."""
+    trait = monster_race_trait(enemy)
+    effect = trait.get("effect", {})
+    state = _monster_race_trait_state(enemy_buffs)
+    if (
+        damage <= 0
+        or state.get("triggered")
+        or effect.get("kind") != "first_direct_damage_reduction"
+        or effect.get("damage_type") != damage_type
+    ):
+        return damage, []
+    reduced_damage = max(1, math.ceil(damage * (1 - effect["ratio"])))
+    prevented = max(0, damage - reduced_damage)
+    state.update({
+        "trait_id": trait["id"],
+        "triggered": True,
+        "proc_count": state.get("proc_count", 0) + 1,
+        "damage_prevented": state.get("damage_prevented", 0) + prevented,
+    })
+    label = "物理" if damage_type == "physical" else "魔法"
+    return reduced_damage, [
+        f"種族特性【{trait['display_name']}】吸收 {prevented} 點直接{label}傷害，效果隨即消失。"
+    ]
+
+
+def apply_monster_race_threshold_recovery(
+    enemy: dict,
+    enemy_hp: int,
+    damage: int,
+    enemy_buffs: dict,
+) -> tuple[int, list[str]]:
+    """Resolve the Plant one-shot heal as net damage on the triggering hit."""
+    trait = monster_race_trait(enemy)
+    trigger = trait.get("trigger", {})
+    effect = trait.get("effect", {})
+    state = _monster_race_trait_state(enemy_buffs)
+    projected_hp = enemy_hp - damage
+    if (
+        damage <= 0
+        or state.get("triggered")
+        or trigger.get("kind") != "hp_below"
+        or effect.get("kind") != "heal_max_hp"
+        or projected_hp <= 0
+        or projected_hp > enemy["hp"] * trigger["ratio"]
+    ):
+        return damage, []
+    requested = math.ceil(enemy["hp"] * effect["ratio"])
+    healed = min(requested, damage, max(0, enemy["hp"] - projected_hp))
+    if healed <= 0:
+        return damage, []
+    state.update({
+        "trait_id": trait["id"],
+        "triggered": True,
+        "proc_count": state.get("proc_count", 0) + 1,
+        "healing": state.get("healing", 0) + healed,
+    })
+    return damage - healed, [f"種族特性【{trait['display_name']}】發動，回復 {healed} HP。"]
+
+
+def prepare_monster_race_enemy_turn(
+    enemy: dict,
+    enemy_hp: int,
+    enemy_buffs: dict,
+) -> list[str]:
+    """Arm or resolve deterministic one-shot race traits before an enemy turn."""
+    trait = monster_race_trait(enemy)
+    if not trait:
+        return []
+    trigger = trait.get("trigger", {})
+    effect = trait.get("effect", {})
+    state = _monster_race_trait_state(enemy_buffs)
+    state["enemy_actions"] = state.get("enemy_actions", 0) + 1
+    if state.get("triggered"):
+        return []
+
+    trigger_kind = trigger.get("kind")
+    should_trigger = (
+        trigger_kind == "hp_below" and enemy_hp <= enemy["hp"] * trigger["ratio"]
+    ) or (
+        trigger_kind == "enemy_action_count" and state["enemy_actions"] == trigger["count"]
+    )
+    if not should_trigger:
+        return []
+
+    state.update({
+        "trait_id": trait["id"],
+        "triggered": True,
+        "proc_count": state.get("proc_count", 0) + 1,
+    })
+    if effect.get("kind") == "next_attack_multiplier":
+        enemy["_race_next_attack_multiplier"] = effect["value"]
+        return [f"種族特性【{trait['display_name']}】發動，下一次攻擊傷害提升。"]
+    if effect.get("kind") == "buff":
+        buff = effect["buff"]
+        enemy_buffs[buff] = max(enemy_buffs.get(buff, 0), effect["turns"])
+        return [f"種族特性【{trait['display_name']}】發動，防禦上升。"]
+    return []
 
 
 def parent_job(job: str) -> str:
@@ -490,13 +613,13 @@ def activate_passives(state: dict, player_buffs: dict, event: str, **context: ob
 
 
 def physical_status_effectiveness(enemy: dict, status: str) -> str:
-    return PHYSICAL_STATUS_EFFECTIVENESS.get(enemy.get("race"), {}).get(status, "ineffective")
+    return monster_race_rule(enemy).get("physical_status", {}).get(status, "ineffective")
 
 
 def physical_status_damage_multiplier(enemy: dict, status: str) -> float:
     if status not in {"bleed", "poison"}:
         return 1.0
-    return PHYSICAL_STATUS_DAMAGE_MULTIPLIERS[physical_status_effectiveness(enemy, status)]
+    return PHYSICAL_STATUS_EFFECTIVENESS_MULTIPLIERS[physical_status_effectiveness(enemy, status)]
 
 
 def calc_physical_status_damage(power: int, multiplier: float) -> int:
@@ -516,7 +639,11 @@ def combat_panel_lines(
     return [
         f"回合 {turn}",
         f"{state['name']} HP {state['current_hp']}/{stats['max_hp']} / MP {state['current_mp']}/{stats['max_mp']} / 狀態 {buff_summary(player_buffs)}",
-        f"{enemy['name']} HP {enemy_hp}/{enemy['hp']} / 屬性 {enemy['element']} / 狀態 {buff_summary(enemy_buffs)}",
+        (
+            f"{enemy['name']} HP {enemy_hp}/{enemy['hp']} / 屬性 {enemy['element']} / "
+            f"種族 {monster_race_display_name(enemy)} / 特性 {monster_race_trait_summary(enemy, enemy_buffs)} / "
+            f"狀態 {buff_summary(enemy_buffs)}"
+        ),
         f"上一動：{last_action_summary}",
     ]
 
@@ -859,6 +986,11 @@ def calc_player_damage(state: dict, enemy: dict, skill: dict | None, player_buff
     is_magic = bool(skill and skill.get("stat") == "magic")
     power = stats["magic_attack"] if is_magic else stats["attack"]
     multiplier = skill.get("multiplier", 1.0) if skill else 1.0
+    promotion_id = state.get("promotion_id")
+    promotion_config = {}
+    if promotion_id:
+        from data import PROMOTIONS
+        promotion_config = PROMOTIONS.get(promotion_id, {}).get("config", {})
     relic_effects = active_relic_passive_effects(state)
     direct_bonus = relic_effects.get("direct_damage_percent", 0)
     direct_bonus += relic_effects.get("direct_magic_damage_percent" if is_magic else "direct_physical_damage_percent", 0)
@@ -872,6 +1004,12 @@ def calc_player_damage(state: dict, enemy: dict, skill: dict | None, player_buff
         ready = player_buffs.get("_warrior_quickstep_ready", {})
         if ready.get("kind") == "charge_skill_bonus":
             multiplier *= 1 + ready["damage_percent"] / 100
+    if skill and skill.get("charge_bonus_per_stack") and promotion_id == "promotion_blood_blade":
+        multiplier += player_buffs.get("blood_blade_active", 0) * promotion_config.get("charge_bonus_per_stack", 0)
+    if promotion_id == "promotion_miasma_hunter":
+        afflicted = sum(enemy_buffs.get(status, 0) > 0 for status in ("bleed", "poison"))
+        if afflicted:
+            multiplier *= 1 + promotion_config.get("passive_damage_bonus_percent", 0) / 100
     mark_data = enemy_buffs.get("_debuff_data", {}).get("cinder_mark", {})
     if (
         is_magic
@@ -880,10 +1018,11 @@ def calc_player_damage(state: dict, enemy: dict, skill: dict | None, player_buff
     ):
         multiplier *= 1 + mark_data["damage_percent"] / 100
     crit_chance = stats["crit"] + (skill.get("crit_bonus", 0) if skill else 0)
+    crit_damage_percent = relic_effects.get("crit_damage_percent", 0) + (skill.get("crit_damage_percent", 0) if skill else 0)
     return calc_typed_damage(
         power, multiplier, enemy, enemy_buffs, "magic" if is_magic else "physical", attack_element,
         agility=stats["agility"], crit_chance=crit_chance,
-        crit_damage_percent=relic_effects.get("crit_damage_percent", 0), direct=True,
+        crit_damage_percent=crit_damage_percent, direct=True,
     )
 
 def normal_attack_followup(state: dict, skill: dict | None) -> tuple[dict, dict] | None:
@@ -908,6 +1047,7 @@ def calc_enemy_damage(enemy: dict, state: dict, multiplier: float, element: str,
     stats = get_stats(state, player_buffs)
     is_magic = normalized_element(element) in ELEMENT_RESIST_KEYS
     power = enemy.get("magic_attack", enemy["attack"]) if is_magic else enemy["attack"]
+    multiplier *= enemy.pop("_race_next_attack_multiplier", 1.0)
     damage, _ = calc_typed_damage(power, multiplier, stats, {}, "magic" if is_magic else "physical", element)
     if defending:
         damage = max(1, math.ceil(damage * 0.6))
@@ -948,17 +1088,23 @@ def combat(state: dict, enemy_id: str, boss: bool = False, run_log: dict | None 
     turn = 1
     boss_marker = False
     last_action_summary = "尚未行動。"
-    battle_log = [f"遭遇 {enemy['name']}。敵人屬性：{enemy['element']} / HP {enemy_hp}/{enemy['hp']}。"]
+    race_name = monster_race_display_name(enemy)
+    trait_name = monster_race_trait(enemy).get("display_name", "無")
+    battle_log = [
+        f"遭遇 {enemy['name']}。敵人屬性：{enemy['element']} / 種族：{race_name} / 特性：{trait_name} / HP {enemy_hp}/{enemy['hp']}。"
+    ]
     render_panel(
         f"遭遇 {enemy['name']}",
         [
-            f"敵人屬性：{enemy['element']} / HP {enemy_hp}/{enemy['hp']}",
+            f"敵人屬性：{enemy['element']} / 種族：{race_name} / HP {enemy_hp}/{enemy['hp']}",
+            f"種族特性：{trait_name}",
             "觀察敵我狀態後選擇攻擊、防禦、技能或道具。",
         ],
         border_style="red" if boss else "yellow",
     )
     while enemy_hp > 0 and state["current_hp"] > 0:
         clamp_vitals(state)
+        enemy["current_hp"] = enemy_hp
 
         options = ["攻擊", "防禦", "技能", "道具"]
         if not boss:
@@ -1127,10 +1273,16 @@ def combat(state: dict, enemy_id: str, boss: bool = False, run_log: dict | None 
 
 def player_attack(state: dict, enemy: dict, enemy_hp: int, skill: dict | None, player_buffs: dict, enemy_buffs: dict):
     damage, is_crit = calc_player_damage(state, enemy, skill, player_buffs, enemy_buffs)
+    is_magic = bool(skill and skill.get("stat") == "magic")
+    damage, race_events = apply_monster_race_direct_damage_trait(
+        enemy, enemy_buffs, damage, "magic" if is_magic else "physical",
+    )
     label = skill["name"] if skill else "普通攻擊"
     crit_text = " 暴擊！" if is_crit else ""
     events = [f"你使用{label}，造成 {damage} 傷害。{crit_text}"]
     summary = [f"你使用{label}，造成 {damage} 傷害。{crit_text}"]
+    events.extend(race_events)
+    summary.extend(race_events)
     pursuit = player_buffs.pop("_rogue_pursuit", None) if skill is None else None
     if skill and skill.get("charge_bonus_per_stack"):
         consumed = consume_physical_charge(player_buffs, state)
@@ -1157,9 +1309,14 @@ def player_attack(state: dict, enemy: dict, enemy_hp: int, skill: dict | None, p
     if followup_data and enemy_hp - damage > 0:
         followup_equipment, followup = followup_data
         followup_damage = calc_normal_attack_followup_damage(state, enemy, player_buffs, enemy_buffs, followup)
+        followup_damage, race_events = apply_monster_race_direct_damage_trait(
+            enemy, enemy_buffs, followup_damage, "physical",
+        )
         damage += followup_damage
         events.append(f"{followup_equipment['name']}順勢劃出追擊，造成 {followup_damage} 傷害。")
         summary.append(f"{followup_equipment['name']}追擊 {followup_damage} 傷害。")
+        events.extend(race_events)
+        summary.extend(race_events)
         if followup.get("on_hit"):
             effect_events, applied_status = apply_weapon_effect(state, enemy, followup["on_hit"], enemy_buffs)
             events.extend(effect_events)
@@ -1173,10 +1330,15 @@ def player_attack(state: dict, enemy: dict, enemy_hp: int, skill: dict | None, p
         pursuit_damage = calc_normal_attack_followup_damage(
             state, enemy, player_buffs, enemy_buffs, followup, pursuit["followup_multiplier"],
         )
+        pursuit_damage, race_events = apply_monster_race_direct_damage_trait(
+            enemy, enemy_buffs, pursuit_damage, "physical",
+        )
         damage += pursuit_damage
         pursuit_line = f"{pursuit['skill_name']}追擊發動，{followup_equipment['name']}追加造成 {pursuit_damage} 傷害。"
         events.append(pursuit_line)
         summary.append(pursuit_line)
+        events.extend(race_events)
+        summary.extend(race_events)
     if skill and skill.get("on_hit"):
         effect_events, applied_status = apply_weapon_effect(state, enemy, skill["on_hit"], enemy_buffs)
         events.extend(effect_events)
@@ -1185,11 +1347,39 @@ def player_attack(state: dict, enemy: dict, enemy_hp: int, skill: dict | None, p
             passive_events = activate_passives(state, player_buffs, "physical_status_applied", status=applied_status)
             events.extend(passive_events)
             summary.extend(passive_events)
-    is_magic = bool(skill and skill.get("stat") == "magic")
+    if skill and skill.get("stat") == "magic" and enemy_buffs.get("sigil_mage_mark", 0) > 0:
+        marked_element = enemy_buffs.get("_sigil_element")
+        if normalized_element(marked_element) == normalized_element(skill.get("element")):
+            from data import PROMOTIONS
+            config = PROMOTIONS["promotion_sigil_mage"]["config"]
+            detonation, _ = calc_typed_damage(
+                get_stats(state, player_buffs)["magic_attack"], config["detonate_multiplier"],
+                enemy, enemy_buffs, "magic", "none",
+            )
+            detonation, race_events = apply_monster_race_direct_damage_trait(
+                enemy, enemy_buffs, detonation, "magic",
+            )
+            damage += detonation
+            enemy_buffs.pop("sigil_mage_mark", None)
+            enemy_buffs.pop("_sigil_element", None)
+            events.append(f"印紋引爆，追加造成 {detonation} 點魔法傷害。")
+            summary.append(f"印紋引爆 +{detonation} 傷害。")
+            events.extend(race_events)
+            summary.extend(race_events)
+    if skill and skill.get("_skill_id") == "skill_star_fracture":
+        if element_multiplier(skill.get("element", "none"), enemy.get("element", "")) > 1:
+            from data import PROMOTIONS
+            refund = PROMOTIONS["promotion_star_fracture"]["config"].get("weakness_mp_refund", 0)
+            state["current_mp"] = min(get_stats(state)["max_mp"], state["current_mp"] + refund)
+            events.append(f"星裂契合弱點，回復 {refund} MP。")
+            summary.append(f"弱點回復 {refund} MP。")
     if is_magic and is_crit and state.get("job") == "星詠者":
         state["current_mp"] = min(get_stats(state)["max_mp"], state["current_mp"] + 3)
         events.append("星詠者的星光引導，暴擊回復 3 MP。")
         summary.append("星光回復 3 MP。")
+    damage, race_events = apply_monster_race_threshold_recovery(enemy, enemy_hp, damage, enemy_buffs)
+    events.extend(race_events)
+    summary.extend(race_events)
     lifesteal_percent = active_relic_passive_effects(state).get("physical_lifesteal_percent", 0)
     if not is_magic and lifesteal_percent:
         stats = get_stats(state, player_buffs)
@@ -1239,6 +1429,8 @@ def apply_weapon_effect(state: dict, enemy: dict, effect: dict, enemy_buffs: dic
 
 def execute_skill(state: dict, enemy: dict, skill_id: str, skill: dict, player_buffs: dict, enemy_buffs: dict) -> CombatActionResult:
     stats = get_stats(state, player_buffs)
+    skill = {**skill, "_skill_id": skill_id}
+    from data import PROMOTIONS
 
     # 1. 扣 HP 的技能（血鋒/血鎧）
     if skill_id in {"skill_blood_blade_strike", "skill_blood_armor_shield"}:
@@ -1274,6 +1466,26 @@ def execute_skill(state: dict, enemy: dict, skill_id: str, skill: dict, player_b
             chosen_element = learned_elements[choice - 1]
 
         skill = {**skill, "element": chosen_element}
+
+    if skill_id == "skill_star_fracture":
+        config = PROMOTIONS["promotion_star_fracture"]["config"]
+        multiplier = config["multiplier"]
+        if element_multiplier(skill["element"], enemy.get("element", "")) > 1:
+            multiplier *= 1 + config.get("weakness_multiplier_bonus", 0)
+        skill = {**skill, "stat": "magic", "multiplier": multiplier}
+    elif skill_id == "skill_shadow_slayer_execute":
+        config = PROMOTIONS["promotion_shadow_slayer"]["config"]
+        low_hp = enemy.get("current_hp", enemy.get("hp", 1)) / max(1, enemy.get("hp", 1)) < config["threshold_hp_percent"] / 100
+        skill = {
+            **skill,
+            "multiplier": config["execute_multiplier"] if low_hp else config["base_multiplier"],
+            "crit_bonus": config["passive_crit_bonus"] if low_hp else 0,
+            "crit_damage_percent": config["passive_crit_damage_percent"] if low_hp else 0,
+        }
+    elif skill_id == "skill_miasma_strike":
+        config = PROMOTIONS["promotion_miasma_hunter"]["config"]
+        status_count = sum(enemy_buffs.get(status, 0) > 0 for status in ("bleed", "poison"))
+        skill = {**skill, "multiplier": config["base_multiplier"] + status_count * config["multiplier_bonus_per_status"]}
 
     # 3. 按技能種類執行
     if skill["kind"] == "damage":
@@ -1320,6 +1532,9 @@ def execute_skill(state: dict, enemy: dict, skill_id: str, skill: dict, player_b
             regen_amt = cfg.get("regen_amount", 6)
             regen_mult = cfg.get("regen_multiplier", 0.45)
             dot_mult = cfg.get("dot_multiplier", 0.6)
+            vial_id = "item_sanctified_ash_vial"
+            if not remove_item(state, vial_id):
+                return CombatActionResult(events=["缺少聖蝕聖瓶，無法施展聖蝕祈禱。"], summary=["缺少聖蝕聖瓶。"], outcome="cancel")
 
             player_buffs["regeneration"] = dur
             player_buffs["_regen_data"] = {"amount": regen_amt, "multiplier": regen_mult}
@@ -1577,8 +1792,9 @@ def dispatch_enemy_turn(
     turn: int,
     boss_marker: bool,
 ) -> tuple[bool, list[str]]:
+    race_events = prepare_monster_race_enemy_turn(enemy, enemy_hp, enemy_buffs)
     if enemy_id == "boss_glen":
-        return boss_glen_action(
+        boss_marker, events = boss_glen_action(
             enemy,
             enemy_hp,
             state,
@@ -1588,8 +1804,8 @@ def dispatch_enemy_turn(
             turn,
             boss_marker,
         )
-    if enemy_id == "boss_ash_guardian":
-        return boss_ash_guardian_action(
+    elif enemy_id == "boss_ash_guardian":
+        boss_marker, events = boss_ash_guardian_action(
             enemy,
             enemy_hp,
             state,
@@ -1599,8 +1815,8 @@ def dispatch_enemy_turn(
             turn,
             boss_marker,
         )
-    if enemy_id == "boss_cinder_seal_sentinel":
-        return boss_cinder_seal_sentinel_action(
+    elif enemy_id == "boss_cinder_seal_sentinel":
+        boss_marker, events = boss_cinder_seal_sentinel_action(
             enemy,
             enemy_hp,
             state,
@@ -1610,7 +1826,9 @@ def dispatch_enemy_turn(
             turn,
             boss_marker,
         )
-    return boss_marker, monster_action(enemy_id, enemy, state, player_buffs, defending)
+    else:
+        events = monster_action(enemy_id, enemy, state, player_buffs, defending)
+    return boss_marker, [*race_events, *events]
 
 def tick_effects(state: dict, player_buffs: dict, enemy_buffs: dict, enemy: dict | None = None):
     events = []
@@ -1660,7 +1878,7 @@ def tick_effects(state: dict, player_buffs: dict, enemy_buffs: dict, enemy: dict
                 from data import PROMOTIONS
                 promo = PROMOTIONS.get("promotion_holy_eclipse", {})
                 cfg = promo.get("config", {})
-                damage = math.ceil(damage * (1.0 + cfg.get("passive_dot_damage_bonus_percent", 30) / 100.0))
+                damage = math.ceil(damage * (1.0 + cfg.get("passive_dot_boost_percent", cfg.get("passive_dot_damage_bonus_percent", 30)) / 100.0))
 
             enemy_dot_damage += damage
             events.append(f"{status_display_name(status)}造成 {damage} 傷害。")
@@ -1677,6 +1895,8 @@ def tick_effects(state: dict, player_buffs: dict, enemy_buffs: dict, enemy: dict
             if buffs is enemy_buffs:
                 buffs.get("_dot_data", {}).pop(key, None)
                 buffs.get("_debuff_data", {}).pop(key, None)
+                if key == "sigil_mage_mark":
+                    buffs.pop("_sigil_element", None)
             if buffs is player_buffs and key == "regeneration":
                 buffs.pop("_regen_data", None)
             if buffs is player_buffs:

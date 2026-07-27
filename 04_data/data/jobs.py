@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-# Growth allocations are authored in points.  Keep the conversion here so the
+# Growth allocations are authored in points. Keep the conversion here so the
 # job table remains the single source of truth for both level cadences.
 GROWTH_POINT_RATES = {
     "max_hp": 2.0,
@@ -16,7 +16,7 @@ GROWTH_POINT_RATES = {
 
 
 def per_three_level_points(per_level_points: dict[str, float]) -> dict[str, float]:
-    """Derive the five-point milestone allocation from the 15-point table."""
+    """Derive the milestone allocation from the frozen per-level table."""
     return {stat: points / 3 for stat, points in per_level_points.items()}
 
 
@@ -34,16 +34,16 @@ JOBS = {
             "effect_accuracy": 0,
             "crit": 5,
         },
-        "growth_points": {"max_hp": 4.05, "max_mp": 0.75, "attack": 3.0, "magic_attack": 0.0, "defense": 3.3, "magic_defense": 0.75, "agility": 0.15, "crit": 3.0, "effect_accuracy": 0.0},
+        "growth_points": {"max_hp": 4.05, "max_mp": 0.75, "attack": 1.5, "magic_attack": 0.0, "defense": 3.3, "magic_defense": 0.75, "agility": 0.15, "crit": 3.0, "effect_accuracy": 0.0},
         "base_skills": ["skill_power_slash"],
     },
     "法師": {
         "base": {
-            "max_hp": 80,
+            "max_hp": 110,
             "max_mp": 55,
             "attack": 8,
             "magic_attack": 15,
-            "defense": 5,
+            "defense": 12,
             "magic_defense": 10,
             "agility": 9,
             "effect_accuracy": 0,

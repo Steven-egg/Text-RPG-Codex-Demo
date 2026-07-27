@@ -1,4 +1,5 @@
 import { runtimeClient } from "../shared/runtime-client.js";
+import { combatEnemyMetaRows } from "./combat-enemy-meta.mjs";
 
 const fixtureSelect = document.querySelector("#fixture-select");
 const shellEl = document.querySelector(".combat-shell");
@@ -835,10 +836,7 @@ function renderBattlefield(model) {
 }
 
 function renderEnemyMeta(enemy) {
-  const rows = [
-    ["屬性", enemy.attribute],
-    ["狀態", enemy.status_label],
-  ].filter(([, value]) => Boolean(value));
+  const rows = combatEnemyMetaRows(enemy);
 
   enemyMetaEl.replaceChildren(
     ...rows.map(([label, value]) => {
