@@ -2,7 +2,7 @@
   position: fixed;
   inset-block-start: max(0.75rem, env(safe-area-inset-top));
   inset-inline-end: max(0.75rem, env(safe-area-inset-right));
-  z-index: 2147483000;
+  z-index: 9000;
   display: inline-flex;
   align-items: center;
   justify-content: center;

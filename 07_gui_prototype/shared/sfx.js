@@ -219,10 +219,10 @@ function isDisabledTarget(target) {
   }
 }
 
-function handleDelegatedClick(event) {
-  // Keyboard activation is trusted with detail=0; pointer activation has
-  // detail>0. Programmatic element.click() is untrusted with detail=0.
-  if (!event.isTrusted && event.detail === 0) {
+export function handleDelegatedClick(event) {
+  // Native pointer and keyboard activation are trusted. Every synthetic click
+  // is ignored, regardless of detail, so it cannot create or resume audio.
+  if (!event.isTrusted) {
     return;
   }
 
