@@ -580,19 +580,13 @@ function makeActionToken(value) {
   return trimmed ? trimmed.slice(0, 1) : "?";
 }
 
-// Initialize debug mode and cover preview from URL query params
+// Initialize debug mode from URL query params
 (() => {
   const urlParams = new URLSearchParams(window.location.search);
   const isDebug = urlParams.get("debug") === "1";
-  const cover = urlParams.get("cover") === "frontier" ? "frontier" : "default";
 
   const shell = document.querySelector(".start-screen-shell");
   if (shell) {
     shell.dataset.debug = String(isDebug);
-  }
-
-  const stage = document.querySelector(".start-stage");
-  if (stage) {
-    stage.dataset.cover = cover;
   }
 })();
