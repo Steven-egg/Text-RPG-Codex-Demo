@@ -1,0 +1,65 @@
+.sfx-toggle {
+  position: fixed;
+  inset-block-start: max(0.75rem, env(safe-area-inset-top));
+  inset-inline-end: max(0.75rem, env(safe-area-inset-right));
+  z-index: 2147483000;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  min-width: 5.25rem;
+  min-height: 2.4rem;
+  padding: 0.45rem 0.7rem;
+  border: 1px solid rgba(241, 206, 119, 0.7);
+  border-radius: 999px;
+  background: rgba(18, 20, 27, 0.9);
+  box-shadow: 0 0.35rem 1.25rem rgba(0, 0, 0, 0.35);
+  color: #f6e7bd;
+  font: 700 0.82rem/1 "Outfit", "Noto Sans TC", system-ui, sans-serif;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.sfx-toggle:hover {
+  border-color: rgba(255, 226, 148, 0.95);
+  background: rgba(35, 35, 42, 0.96);
+}
+
+.sfx-toggle:focus-visible {
+  outline: 3px solid #fff0b8;
+  outline-offset: 3px;
+}
+
+.sfx-toggle[data-muted="true"] {
+  border-color: rgba(190, 194, 204, 0.62);
+  color: #d6d8df;
+}
+
+.sfx-toggle-icon {
+  font-size: 1rem;
+  line-height: 1;
+}
+
+@media (max-width: 640px) {
+  .sfx-toggle {
+    min-width: 2.7rem;
+    padding-inline: 0.6rem;
+  }
+
+  .sfx-toggle-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sfx-toggle {
+    transition: none;
+  }
+}
