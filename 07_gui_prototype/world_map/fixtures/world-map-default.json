@@ -383,6 +383,17 @@
           "dungeon_id": "dungeon_moss_cave",
           "location_id": "dungeon_moss_cave",
           "region_id": "border_fire"
+        },
+        "story_beat": {
+          "id": "beat_region_moss_cave",
+          "kind": "region_transition",
+          "title": "青苔濕地",
+          "lines": [
+            "潮濕的空氣撲面而來，石壁上長滿了發光的苔蘚。",
+            "你聽到遠處傳來水滴的迴聲。"
+          ],
+          "dismiss_label": "進入",
+          "tone": "neutral"
         }
       },
       "preview_image": "../dungeon_exploration/assets/moss-cave-exploration-v01.png"

@@ -44,7 +44,19 @@
       "registration_feedback": "輸入名字並選擇初始職業；空白名字會使用「見習冒險者」。",
       "confirm_label": "確認開始",
       "dispatch_message": "已記錄 start_new_game；static prototype 不建立角色或進入 runtime。",
-      "payload": { "entry": "new_game" }
+      "payload": { "entry": "new_game" },
+      "story_beat": {
+        "id": "beat_prologue",
+        "kind": "prologue",
+        "title": "邊境的召喚",
+        "lines": [
+          "你帶著簡單的行囊來到邊境小鎮。",
+          "聽說這裡的礦道深處，埋藏著遠古的元素秘密。",
+          "公會的接待員交給你一塊見習徽章，你的冒險即將開始。"
+        ],
+        "dismiss_label": "出發",
+        "tone": "neutral"
+      }
     }
   ]
 }

@@ -1,4 +1,5 @@
 import { runtimeClient } from "../shared/runtime-client.js";
+import { presentStoryBeat } from "../shared/story-beat.js";
 
 const fixtureSelect = document.querySelector("#fixture-select");
 const shellEl = document.querySelector(".exploration-shell");
@@ -298,6 +299,10 @@ async function activateAction(action, source) {
     narrativeMessageEl.textContent = `已送出 ${action.action_id}。static prototype 不會推進探索狀態。`;
   }
 
+  if (action.story_beat) {
+    await presentStoryBeat(action.story_beat);
+  }
+
   navigateAfterAction(action);
 }
 
@@ -309,6 +314,11 @@ async function dispatchRuntimeAction(action, source) {
       render();
     }
     narrativeMessageEl.textContent = result.message ?? `Dispatched ${action.action_id}`;
+
+    if (result.story_beat) {
+      await presentStoryBeat(result.story_beat);
+    }
+
     if (result.next_route) {
       window.setTimeout(() => {
         window.location.href = runtimeClient.nextRoute(result, staticActionRoutes[action.action_id]);

@@ -1,7 +1,7 @@
 {
   "screen_id": "combat_screen",
   "title": "戰鬥",
-  "subtitle": "Static fixture driven prototype：Victory Result Preview 只驗證同畫面結算 overlay。",
+  "subtitle": "Static fixture driven prototype：Ending Result Preview（驗證結局展示）",
   "resource_strip": [
     { "label": "第 4 回合", "tone": "neutral" }
   ],
@@ -119,15 +119,15 @@
       "navigate_to": "../dungeon_exploration/index.html",
       "feedback_message": "已送出 back_to_exploration。",
       "story_beat": {
-        "id": "beat_boss_after",
-        "kind": "boss_after",
-        "title": "凱旋而歸",
+        "id": "beat_ending",
+        "kind": "ending",
+        "title": "深淵的終局",
         "lines": [
-          "首領在最後的掙扎中倒下，化為滿地的灰燼與元素結晶。",
-          "你拾起了戰利品，知道自己又向迷宮深處邁進了一步。"
+          "這就是最後了。所有的秘密都在此揭曉。",
+          "你的旅程將被銘記。"
         ],
-        "dismiss_label": "收下",
-        "tone": "victory"
+        "dismiss_label": "完成",
+        "tone": "ending"
       }
     }
   },

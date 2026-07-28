@@ -1,5 +1,6 @@
 import { runtimeClient } from "../shared/runtime-client.js";
 import { createI18n } from "../shared/i18n.js";
+import { presentStoryBeat } from "../shared/story-beat.js";
 
 const fixtureSelectEl = document.querySelector("#fixture-select");
 const localeSelectEl = document.querySelector("#locale-select");
@@ -432,8 +433,12 @@ async function confirmRegistration() {
     },
     dispatched: true,
   });
-  registrationFeedbackEl.textContent =
-    getStaticDispatchFeedback(finalActionId);
+  registrationFeedbackEl.textContent = getStaticDispatchFeedback(finalActionId);
+
+  if (state.registrationAction?.story_beat) {
+    await presentStoryBeat(state.registrationAction.story_beat);
+  }
+
   navigateAfterAction(finalActionId);
 }
 
@@ -470,6 +475,11 @@ async function dispatchRuntimeAction(action, payload) {
       dispatched: true,
     });
     registrationFeedbackEl.textContent = t("feedback.runtime_success");
+
+    if (result.story_beat) {
+      await presentStoryBeat(result.story_beat);
+    }
+
     const route = runtimeClient.nextRoute(result, staticActionRoutes[action.action_id] ?? "../town_hub/index.html");
     if (route) {
       window.setTimeout(() => {

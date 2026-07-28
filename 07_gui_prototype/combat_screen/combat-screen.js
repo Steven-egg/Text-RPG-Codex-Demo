@@ -1,5 +1,6 @@
 import { runtimeClient } from "../shared/runtime-client.js";
 import { combatEnemyMetaRows } from "./combat-enemy-meta.mjs";
+import { presentStoryBeat } from "../shared/story-beat.js";
 
 const fixtureSelect = document.querySelector("#fixture-select");
 const shellEl = document.querySelector(".combat-shell");
@@ -625,6 +626,7 @@ const state = {
   activeSubmenu: null,
   submenuAnchorActionId: null,
   resultOpen: false,
+  pendingStoryBeat: null,
 };
 
 fixtureSelect.addEventListener("change", () => {
@@ -1001,7 +1003,16 @@ async function dispatchRuntimeAction(action, source) {
     if (result.message && !state.resultOpen) {
       commandMessageEl.textContent = result.message;
     }
-    if (result.next_route) {
+
+    if (result.story_beat) {
+      if (state.resultOpen) {
+        state.pendingStoryBeat = result.story_beat;
+      } else {
+        await presentStoryBeat(result.story_beat);
+      }
+    }
+
+    if (result.next_route && !state.resultOpen) {
       window.setTimeout(() => {
         window.location.href = runtimeClient.nextRoute(result, "../town_hub/index.html");
       }, 140);
@@ -1145,6 +1156,10 @@ function openResultOverlay(action) {
   renderResultOverlay();
   commandMessageEl.textContent =
     action.result_message ?? action.feedback_message ?? "戰鬥已結束，請確認結算。";
+
+  if (action.story_beat) {
+    state.pendingStoryBeat = action.story_beat;
+  }
 }
 
 async function activateResultNextAction() {
@@ -1161,9 +1176,23 @@ async function activateResultNextAction() {
   });
   commandMessageEl.textContent = nextAction.feedback_message ?? `已送出 ${nextAction.action_id}。`;
 
+  state.resultOpen = false;
+  renderResultOverlay();
+
+  if (state.pendingStoryBeat) {
+    const beat = state.pendingStoryBeat;
+    state.pendingStoryBeat = null;
+    await presentStoryBeat(beat);
+  }
+
   if (runtimeClient.isLiveMode()) {
     try {
       const result = await runtimeClient.dispatchAction("combat_screen", nextAction.action_id, nextAction.payload ?? {});
+
+      if (result.story_beat) {
+        await presentStoryBeat(result.story_beat);
+      }
+
       window.setTimeout(() => {
         window.location.href = runtimeClient.nextRoute(result, nextAction.navigate_to ?? "../town_hub/index.html");
       }, 140);
@@ -1177,6 +1206,10 @@ async function activateResultNextAction() {
       });
     }
     return;
+  }
+
+  if (nextAction.story_beat) {
+    await presentStoryBeat(nextAction.story_beat);
   }
 
   if (nextAction.navigate_to) {
