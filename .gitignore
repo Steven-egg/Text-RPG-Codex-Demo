@@ -10,3 +10,4 @@ __pycache__/
 htmlcov/
 save.json
 save.gui-backup-*.json
+dist/

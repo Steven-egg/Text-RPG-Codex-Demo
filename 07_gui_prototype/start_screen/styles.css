@@ -110,10 +110,6 @@ input {
   gap: clamp(18px, 3dvh, 34px);
 }
 
-.start-stage[data-cover="frontier"] {
-  background-image: url("./assets/start-screen-cover-frontier-overlook-v01.png");
-}
-
 .start-stage::before {
   content: "";
   position: absolute;
@@ -123,12 +119,6 @@ input {
   background:
     linear-gradient(90deg, rgba(4, 9, 17, 0.82) 0%, rgba(4, 9, 17, 0.58) 31%, rgba(4, 9, 17, 0.12) 58%, transparent 78%),
     linear-gradient(180deg, rgba(2, 5, 10, 0.16), transparent 46%, rgba(2, 5, 10, 0.38));
-}
-
-.start-stage[data-cover="frontier"]::before {
-  background:
-    linear-gradient(180deg, rgba(6, 15, 25, 0.1) 0%, transparent 42%, rgba(6, 15, 25, 0.68) 100%),
-    linear-gradient(90deg, rgba(6, 15, 25, 0.1), transparent 28%, transparent 72%, rgba(6, 15, 25, 0.1));
 }
 
 .start-stage::after {
@@ -252,14 +242,6 @@ input {
   padding: 0;
 }
 
-.start-stage[data-cover="frontier"] .start-layout {
-  justify-self: center;
-  align-self: end;
-  width: min(58vw, 720px);
-  margin-inline: auto;
-  margin-bottom: clamp(16px, 5vh, 72px);
-}
-
 .title-block {
   min-width: 0;
   max-width: 640px;
@@ -323,24 +305,11 @@ input {
   line-height: 1.45;
 }
 
-.start-stage[data-cover="frontier"] .title-block {
-  justify-self: center;
-  text-align: center;
-}
-
-.start-stage[data-cover="frontier"] .hero-copy {
-  margin-inline: auto;
-}
-
 .login-panel {
   min-width: 0;
   width: min(100%, 500px);
   justify-self: start;
   display: grid;
-}
-
-.start-stage[data-cover="frontier"] .login-panel {
-  justify-self: center;
 }
 
 .panel-view {
@@ -768,18 +737,10 @@ input:focus-visible {
     padding: 28px 18px;
   }
 
-  .start-stage::before,
-  .start-stage[data-cover="frontier"]::before {
+  .start-stage::before {
     background:
       linear-gradient(180deg, rgba(4, 9, 17, 0.36), rgba(4, 9, 17, 0.48)),
       linear-gradient(90deg, rgba(4, 9, 17, 0.46), transparent 56%, rgba(4, 9, 17, 0.2));
-  }
-
-  .start-stage[data-cover="frontier"] .start-layout {
-    align-self: center;
-    width: 100%;
-    margin-inline: 0;
-    margin-bottom: 0;
   }
 
   .summary-row {
