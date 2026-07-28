@@ -24,6 +24,7 @@ def run_smoke_test():
     model_no_save = start_screen_model(False)
     assert model_no_save["screen_id"] == "start_screen"
     assert model_no_save["layout_family"] == "entry"
+    assert model_no_save["presentation"]["has_save"] is False
     assert "actions" in model_no_save
     assert len(model_no_save["actions"]) == 1
     assert model_no_save["actions"][0]["action_id"] == "start_new_game"
@@ -33,6 +34,7 @@ def run_smoke_test():
     model_has_save = start_screen_model(True)
     assert model_has_save["screen_id"] == "start_screen"
     assert model_has_save["layout_family"] == "entry"
+    assert model_has_save["presentation"]["has_save"] is True
     assert "actions" in model_has_save
     assert len(model_has_save["actions"]) == 2
     action_ids = [act["action_id"] for act in model_has_save["actions"]]

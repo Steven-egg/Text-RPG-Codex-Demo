@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>《元素迷宮：邊境冒險者》開始畫面</title>
-    <link rel="stylesheet" href="./styles.css?v=start-screen-v3" />
+    <link rel="stylesheet" href="./styles.css?v=start-screen-v4" />
   </head>
   <body>
     <div class="start-screen-shell" data-load-state="loading">
@@ -35,9 +35,17 @@
 
         <section class="start-layout">
           <section class="title-block" aria-labelledby="game-title">
+            <label class="locale-control" for="locale-select">
+              <span id="locale-label"></span>
+              <select id="locale-select">
+                <option value="zh-Hant">繁體中文</option>
+                <option value="en">English</option>
+              </select>
+            </label>
             <p id="hero-kicker" class="hero-kicker"></p>
             <h2 id="hero-title"></h2>
             <p id="hero-copy" class="hero-copy"></p>
+            <p id="locale-notice" class="locale-notice" hidden></p>
           </section>
 
           <section class="login-panel" aria-label="Start actions">
@@ -102,6 +110,6 @@
       </section>
     </div>
 
-    <script type="module" src="./start-screen.js?v=start-screen-v3"></script>
+    <script type="module" src="./start-screen.js?v=start-screen-v4"></script>
   </body>
 </html>

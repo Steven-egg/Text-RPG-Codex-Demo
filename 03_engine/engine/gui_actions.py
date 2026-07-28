@@ -1857,6 +1857,7 @@ def start_screen_model(has_save: bool) -> dict[str, Any]:
     return {
         "screen_id": "start_screen",
         "layout_family": "entry",
+        "presentation": {"has_save": has_save},
         "screen_label": "開始畫面",
         "title": "《元素迷宮：邊境冒險者》",
         "hero_kicker": "邊境公會記錄",

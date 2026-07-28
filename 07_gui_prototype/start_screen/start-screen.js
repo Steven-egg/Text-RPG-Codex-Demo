@@ -1,13 +1,19 @@
 import { runtimeClient } from "../shared/runtime-client.js";
+import { createI18n } from "../shared/i18n.js";
 
 const fixtureSelectEl = document.querySelector("#fixture-select");
+const localeSelectEl = document.querySelector("#locale-select");
+const localeLabelEl = document.querySelector("#locale-label");
+const localeNoticeEl = document.querySelector("#locale-notice");
 const shellEl = document.querySelector(".start-screen-shell");
+const startStageEl = document.querySelector(".start-stage");
 const screenKickerEl = document.querySelector("#screen-kicker");
 const gameTitleEl = document.querySelector("#game-title");
 const heroKickerEl = document.querySelector("#hero-kicker");
 const heroTitleEl = document.querySelector("#hero-title");
 const heroCopyEl = document.querySelector("#hero-copy");
 const entryViewEl = document.querySelector("#entry-view");
+const loginPanelEl = document.querySelector(".login-panel");
 const actionListEl = document.querySelector("#action-list");
 const registrationModalEl = document.querySelector("#registration-modal");
 const modalScrimEl = document.querySelector(".modal-scrim");
@@ -22,9 +28,11 @@ const jobHintEl = document.querySelector("#job-hint");
 const jobListEl = document.querySelector("#job-list");
 const registrationFeedbackEl = document.querySelector("#registration-feedback");
 const registrationBackEl = document.querySelector("#registration-back");
+const registrationBackTokenEl = registrationBackEl.querySelector(".action-token");
 const registrationBackLabelEl = document.querySelector("#registration-back-label");
 const registrationBackDescriptionEl = document.querySelector("#registration-back-description");
 const registrationConfirmEl = document.querySelector("#registration-confirm");
+const registrationConfirmTokenEl = registrationConfirmEl.querySelector(".action-token");
 const registrationConfirmLabelEl = document.querySelector("#registration-confirm-label");
 const registrationConfirmDescriptionEl = document.querySelector("#registration-confirm-description");
 const actionLogEl = document.querySelector("#action-log");
@@ -32,6 +40,7 @@ const clearLogEl = document.querySelector("#clear-log");
 const fixtureControlLabelEl = document.querySelector(".fixture-control span");
 
 const state = {
+  i18n: null,
   model: null,
   actionLog: [],
   modalOpen: false,
@@ -48,6 +57,11 @@ const navigationDelayMs = 120;
 
 fixtureSelectEl.addEventListener("change", () => {
   loadFixture(fixtureSelectEl.value);
+});
+
+localeSelectEl.addEventListener("change", () => {
+  state.i18n.setLocale(localeSelectEl.value);
+  render();
 });
 
 clearLogEl.addEventListener("click", () => {
@@ -74,12 +88,31 @@ document.addEventListener("keydown", (event) => {
   }
 });
 
-loadFixture(fixtureSelectEl.value);
+bootstrap();
+
+async function bootstrap() {
+  try {
+    state.i18n = await createI18n("../shared/start-screen-locales.json");
+    localeSelectEl.value = state.i18n.locale;
+    await loadFixture(fixtureSelectEl.value);
+  } catch (error) {
+    renderLoadError(error);
+    shellEl.dataset.loadState = "error";
+  }
+}
+
+function t(key, values) {
+  return state.i18n?.t(key, values) ?? `[missing: ${key}]`;
+}
+
+function hasSave(model = state.model) {
+  return model?.presentation?.has_save ?? (model?.actions ?? []).some((action) => action.action_id === "load_game");
+}
 
 function setFixtureControlMode(mode, model = null) {
   const isLive = mode === "live";
   fixtureSelectEl.disabled = isLive;
-  fixtureControlLabelEl.textContent = isLive ? "Runtime 狀態" : "測試狀態";
+  fixtureControlLabelEl.textContent = t(isLive ? "control.runtime" : "control.fixture");
   fixtureSelectEl.title = "";
   if (!isLive || !model) {
     return;
@@ -87,7 +120,7 @@ function setFixtureControlMode(mode, model = null) {
 
   const hasSaveAction = (model.actions ?? []).some((action) => action.action_id === "load_game");
   fixtureSelectEl.value = hasSaveAction ? "./fixtures/start-has-save.json" : "./fixtures/start-empty.json";
-  fixtureSelectEl.title = hasSaveAction ? "Live runtime 偵測到可讀取存檔" : "Live runtime 未偵測到存檔";
+  fixtureSelectEl.title = t(hasSaveAction ? "control.has_save" : "control.empty");
 }
 
 async function loadFixture(path) {
@@ -112,7 +145,7 @@ async function loadFixture(path) {
     state.registrationAction = null;
     state.selectedJobId = getDefaultJobId(model);
     render();
-    logSystem(`loaded ${path}`);
+    logSystem(t("log.loaded", { path }));
     shellEl.dataset.loadState = "ready";
   } catch (error) {
     renderLoadError(error);
@@ -131,7 +164,7 @@ async function loadLiveScreen(path) {
     state.registrationAction = null;
     state.selectedJobId = getDefaultJobId(model);
     render();
-    logSystem("live runtime screen loaded", {
+    logSystem(t("log.live_loaded"), {
       actionId: "live_screen_loaded",
       source: "live_loader",
       payload: { mode: "live", screen_id: "start_screen" },
@@ -156,7 +189,7 @@ async function loadStaticFallback(path, liveError) {
     state.registrationAction = null;
     state.selectedJobId = getDefaultJobId(model);
     render();
-    logSystem(`live unavailable; loaded fixture ${path}`);
+    logSystem(t("log.live_fallback", { path }));
     pushActionLog({
       action_id: "live_bridge_unavailable",
       payload: { reason: liveError instanceof Error ? liveError.message : String(liveError) },
@@ -172,11 +205,25 @@ async function loadStaticFallback(path, liveError) {
 
 function render() {
   const { model } = state;
-  screenKickerEl.textContent = model.screen_label ?? "登入畫面";
-  gameTitleEl.textContent = model.title ?? "";
-  heroKickerEl.textContent = model.hero_kicker ?? "";
-  heroTitleEl.textContent = model.hero_title ?? "";
-  heroCopyEl.textContent = model.hero_copy ?? "";
+  document.documentElement.lang = state.i18n.locale;
+  document.title = `${t("screen.title")} — ${t("screen.label")}`;
+  startStageEl.setAttribute("aria-label", t("screen.label"));
+  loginPanelEl.setAttribute("aria-label", t("screen.actions_label"));
+  localeLabelEl.textContent = t("control.language");
+  screenKickerEl.textContent = t("screen.label");
+  gameTitleEl.textContent = t("screen.title");
+  heroKickerEl.textContent = t("hero.kicker");
+  heroTitleEl.textContent = t("hero.title");
+  heroCopyEl.textContent = t(hasSave(model) ? "hero.has_save" : "hero.empty");
+  localeNoticeEl.hidden = state.i18n.locale !== "en";
+  localeNoticeEl.textContent = t("notice.english_content");
+  fixtureSelectEl.options[0].textContent = t("control.empty");
+  fixtureSelectEl.options[1].textContent = t("control.has_save");
+  fixtureControlLabelEl.textContent = t(fixtureSelectEl.disabled ? "control.runtime" : "control.fixture");
+  fixtureSelectEl.title = fixtureSelectEl.disabled
+    ? t(hasSave(model) ? "control.has_save" : "control.empty")
+    : "";
+  clearLogEl.textContent = t("control.clear_log");
 
   renderActions(model.actions ?? []);
   renderRegistration();
@@ -193,18 +240,18 @@ function renderActions(actions) {
       button.dataset.actionId = action.action_id;
       button.dataset.kind = action.kind ?? "secondary";
       button.dataset.disabled = String(!action.enabled);
-      button.title = action.enabled ? action.description ?? "" : action.disabled_reason ?? "";
+      button.title = action.enabled ? "" : action.disabled_reason ?? "";
 
       const token = document.createElement("span");
       token.className = "action-token";
       token.setAttribute("aria-hidden", "true");
-      token.textContent = action.token ?? makeActionToken(action.label ?? action.action_id);
+      token.textContent = makeActionToken(t(`action.${action.action_id}`));
 
       const copy = document.createElement("span");
       copy.className = "action-copy";
 
       const label = document.createElement("strong");
-      label.textContent = action.label ?? action.action_id;
+      label.textContent = t(`action.${action.action_id}`);
 
       copy.append(label);
       if (action.description) {
@@ -224,19 +271,23 @@ function renderActions(actions) {
 
 function renderRegistration() {
   const registration = state.model?.registration ?? {};
-  registrationSubtitleEl.textContent = registration.panel_label ?? "冒險者登錄";
+  registrationSubtitleEl.textContent = t("registration.panel_label");
   registrationTitleEl.textContent = getRegistrationTitle();
   registrationChipEl.textContent = registration.chip ?? "REG";
-  nameLabelEl.textContent = registration.name_label ?? "冒險者名字";
-  adventurerNameEl.placeholder = registration.name_placeholder ?? registration.fallback_name ?? "見習冒險者";
-  jobLabelEl.textContent = registration.job_label ?? "初始職業";
-  jobHintEl.textContent = registration.job_hint ?? "選擇一個初始職業。";
+  nameLabelEl.textContent = t("registration.name_label");
+  adventurerNameEl.placeholder = t("registration.name_placeholder");
+  jobLabelEl.textContent = t("registration.job_label");
+  jobHintEl.textContent = t(`registration.job_hint.${runtimeClient.isLiveMode() ? "live" : "static"}`);
   registrationFeedbackEl.textContent = getRegistrationFeedback();
-  registrationBackLabelEl.textContent = registration.back_label ?? "返回";
-  registrationBackDescriptionEl.textContent = registration.back_description ?? "回到開始畫面";
-  registrationConfirmLabelEl.textContent = getConfirmLabel();
+  const backLabel = t("registration.back_label");
+  const confirmLabel = getConfirmLabel();
+  registrationBackTokenEl.textContent = makeActionToken(backLabel);
+  registrationBackLabelEl.textContent = backLabel;
+  registrationBackDescriptionEl.textContent = t("registration.back_description");
+  registrationConfirmTokenEl.textContent = makeActionToken(confirmLabel);
+  registrationConfirmLabelEl.textContent = confirmLabel;
   registrationConfirmDescriptionEl.textContent =
-    registration.confirm_description ?? "只記錄靜態 UIAction，前往世界地圖原型。";
+    t(`registration.confirm_description.${runtimeClient.isLiveMode() ? "live" : "static"}`);
 
   const jobs = registration.jobs ?? [];
   jobListEl.replaceChildren(
@@ -256,10 +307,10 @@ function renderRegistration() {
       copy.className = "job-copy";
 
       const label = document.createElement("strong");
-      label.textContent = job.label ?? job.id;
+      label.textContent = t(`job.${job.id}.label`);
 
       const summary = document.createElement("span");
-      summary.textContent = job.summary ?? "";
+      summary.textContent = t(`job.${job.id}.summary`);
 
       copy.append(label, summary);
       button.append(index, copy);
@@ -345,7 +396,7 @@ async function confirmRegistration() {
   const name = adventurerNameEl.value.trim() || fallbackName;
 
   if (!selectedJob) {
-    registrationFeedbackEl.textContent = "請先選擇初始職業。";
+    registrationFeedbackEl.textContent = t("feedback.missing_job");
     pushActionLog({
       action_id: "confirm_adventurer_registration",
       payload: { name },
@@ -382,7 +433,7 @@ async function confirmRegistration() {
     dispatched: true,
   });
   registrationFeedbackEl.textContent =
-    state.registrationAction?.dispatch_message ?? `已送出 ${finalActionId}。`;
+    getStaticDispatchFeedback(finalActionId);
   navigateAfterAction(finalActionId);
 }
 
@@ -418,7 +469,7 @@ async function dispatchRuntimeAction(action, payload) {
       payload,
       dispatched: true,
     });
-    registrationFeedbackEl.textContent = result.message ?? `Dispatched ${action.action_id}`;
+    registrationFeedbackEl.textContent = t("feedback.runtime_success");
     const route = runtimeClient.nextRoute(result, staticActionRoutes[action.action_id] ?? "../town_hub/index.html");
     if (route) {
       window.setTimeout(() => {
@@ -434,7 +485,7 @@ async function dispatchRuntimeAction(action, payload) {
       dispatched: false,
       reason,
     });
-    registrationFeedbackEl.textContent = reason;
+    registrationFeedbackEl.textContent = t("feedback.runtime_error");
   }
 }
 
@@ -445,21 +496,30 @@ function getDefaultJobId(model) {
 }
 
 function getRegistrationTitle() {
-  return state.registrationAction?.registration_title ?? state.model?.registration?.title ?? "建立冒險者名冊";
+  return t(state.registrationAction?.final_action_id === "restart_game" ? "registration.restart_title" : "registration.new_title");
 }
 
 function getRegistrationFeedback() {
-  return state.registrationAction?.registration_feedback ?? state.model?.registration?.feedback ?? "";
+  if (state.registrationAction?.final_action_id === "restart_game") {
+    return t(`registration.restart_feedback.${runtimeClient.isLiveMode() ? "live" : "static"}`);
+  }
+  return t("registration.new_feedback");
 }
 
 function getConfirmLabel() {
-  return state.registrationAction?.confirm_label ?? state.model?.registration?.confirm_label ?? "確認開始";
+  return t(state.registrationAction?.final_action_id === "restart_game" ? "registration.confirm_restart" : "registration.confirm_new");
+}
+
+function getStaticDispatchFeedback(actionId) {
+  if (actionId === "start_new_game") return t("feedback.static_start");
+  if (actionId === "restart_game") return t("feedback.static_restart");
+  return t("feedback.static_dispatched", { action_id: actionId });
 }
 
 function renderActionLog() {
   if (state.actionLog.length === 0) {
     const empty = document.createElement("li");
-    empty.textContent = "尚無 UIAction event";
+    empty.textContent = t("log.empty");
     actionLogEl.replaceChildren(empty);
     return;
   }
@@ -495,10 +555,10 @@ function logSystem(message, options = {}) {
 
 function renderLoadError(error) {
   state.modalOpen = false;
-  gameTitleEl.textContent = "Start Screen";
-  heroKickerEl.textContent = "Fixture Error";
-  heroTitleEl.textContent = "讀取失敗";
-  heroCopyEl.textContent = error instanceof Error ? error.message : String(error);
+  gameTitleEl.textContent = t("screen.label");
+  heroKickerEl.textContent = t("load_error.kicker");
+  heroTitleEl.textContent = t("feedback.load_error");
+  heroCopyEl.textContent = t("feedback.runtime_error");
   actionListEl.replaceChildren();
   jobListEl.replaceChildren();
   renderModalState();
