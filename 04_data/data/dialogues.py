@@ -213,6 +213,7 @@ def render_template(template: Any, context: Mapping[str, Any]) -> Any:
 
 DEFAULT_CONTEXT: dict[str, Any] = {
     "player": "見習冒險者",
+    "job": "冒險者",
     "npc": "諾亞",
     "facility": "轉職神殿",
     "region": "灰燼裂谷",
@@ -221,6 +222,186 @@ DEFAULT_CONTEXT: dict[str, Any] = {
     "item": "火之印記碎片",
     "quest": "裂谷偵查委託",
     "amount": 0,
+}
+
+STORY_BEATS: dict[str, dict[str, Any]] = {
+    "prologue.new_game": {
+        "kind": "prologue",
+        "title": "邊境的第一步",
+        "lines": [
+            "諾亞替{player}別上見習徽章，正式登記為{job}。",
+            "元素迷宮的異動正從邊境蔓延，工會需要有人查明源頭。",
+            "你的旅程，從火之地的第一份委託開始。",
+        ],
+        "dismiss_label": "踏上旅程",
+        "tone": "neutral",
+    },
+    "region.enter.ice": {
+        "kind": "region_transition",
+        "title": "霜潮海岸",
+        "lines": [
+            "火之聖印在寒風中微微發亮，替你穩住通往北境的航路。",
+            "霜潮港外，冰封迷宮正吞沒失去聯絡的船隊。",
+            "第二道元素封印，就沉睡在白霧深處。",
+        ],
+        "dismiss_label": "進入霜潮",
+        "tone": "neutral",
+    },
+    "region.enter.earth": {
+        "kind": "region_transition",
+        "title": "根環林地",
+        "lines": [
+            "穿過融雪後的山徑，潮濕土壤傳來低沉而規律的震動。",
+            "古樹的根脈封住舊路，也把地底的異常牢牢纏在其中。",
+            "大地的封印正在森林最深處等待回應。",
+        ],
+        "dismiss_label": "踏入林地",
+        "tone": "neutral",
+    },
+    "region.enter.thunder": {
+        "kind": "region_transition",
+        "title": "雷脊高原",
+        "lines": [
+            "雲層壓得很低，遠方的導雷塔在暴風中接連熄滅。",
+            "每一道雷光都照出通往冠峰的殘破石階。",
+            "第四道元素封印，就在風暴中心。",
+        ],
+        "dismiss_label": "登上雷脊",
+        "tone": "warning",
+    },
+    "region.enter.final": {
+        "kind": "region_transition",
+        "title": "終門前線",
+        "lines": [
+            "四枚元素聖印彼此共鳴，終於撐開通往迷宮核心的道路。",
+            "前線之外沒有城鎮，只有被黑霧包圍的最後一道門。",
+            "魔王與元素迷宮的主封印，都在門後等你。",
+        ],
+        "dismiss_label": "前往終門",
+        "tone": "warning",
+    },
+    "boss.before.boss_cinder_seal_sentinel": {
+        "kind": "boss_before",
+        "title": "燼印鎮衛",
+        "lines": [
+            "三枚火之印記碎片同時發熱，深窟的赤紅刻紋逐一亮起。",
+            "鎮衛從封印前站起，拒絕讓未受承認的人再向前一步。",
+            "要追查火之印記的真相，必須先證明你能承受它的火焰。",
+        ],
+        "dismiss_label": "迎戰鎮衛",
+        "tone": "warning",
+    },
+    "boss.after.boss_cinder_seal_sentinel": {
+        "kind": "boss_after",
+        "title": "三枚火印碎片",
+        "lines": [
+            "鎮衛的鎧甲化為餘燼，胸口的刻印凝成第三枚碎片。",
+            "三枚碎片短暫共鳴，卻還沒有成為完整的聖印。",
+            "先帶回工會與神殿，查明這股火焰真正的用途。",
+        ],
+        "dismiss_label": "帶回碎片",
+        "tone": "victory",
+    },
+    "boss.before.boss_ice_final_seal_lord": {
+        "kind": "boss_before",
+        "title": "寒封之主",
+        "lines": [
+            "冰壁後方傳來沉重回音，整座迷宮像在同一次呼吸中凍結。",
+            "寒封之主守著失控的冰之核心，不容任何熱量靠近。",
+            "只有擊穿這場永冬，霜潮的航路才會重開。",
+        ],
+        "dismiss_label": "破除寒封",
+        "tone": "warning",
+    },
+    "boss.after.boss_ice_final_seal_lord": {
+        "kind": "boss_after",
+        "title": "冰印源核",
+        "lines": [
+            "寒封之主倒下後，冰層的裂紋凝成一枚清澈源核。",
+            "失控寒氣暫時退去，但冰之聖印尚未完成安置。",
+            "帶著這份印記線索回城，讓工會與神殿確認下一步。",
+        ],
+        "dismiss_label": "帶回冰核",
+        "tone": "victory",
+    },
+    "boss.before.boss_earth_deep_leyline_lord": {
+        "kind": "boss_before",
+        "title": "地脈領主",
+        "lines": [
+            "巨根在你身後閉合，地底脈動化成震耳欲聾的怒吼。",
+            "地脈領主盤踞核心，將每一道侵入者的腳步傳遍岩層。",
+            "想讓森林恢復呼吸，就得先平息大地的暴走。",
+        ],
+        "dismiss_label": "平息地脈",
+        "tone": "warning",
+    },
+    "boss.after.boss_earth_deep_leyline_lord": {
+        "kind": "boss_after",
+        "title": "地脈源核",
+        "lines": [
+            "領主沉入岩層，狂亂的根脈終於停止收縮。",
+            "地脈深處留下沉穩源核，但大地聖印尚未完成安置。",
+            "先把這份印記線索帶回城，森林才有機會真正恢復。",
+        ],
+        "dismiss_label": "帶回地核",
+        "tone": "victory",
+    },
+    "boss.before.boss_thunder_crown_storm_lord": {
+        "kind": "boss_before",
+        "title": "冠峰風暴領主",
+        "lines": [
+            "最後一座導雷塔被強光貫穿，冠峰在雷聲中裂開。",
+            "風暴領主立於雲海中央，將失序雷霆全部引向你的腳下。",
+            "這是抵達終門前，最後一道元素試煉。",
+        ],
+        "dismiss_label": "穿越風暴",
+        "tone": "warning",
+    },
+    "boss.after.boss_thunder_crown_storm_lord": {
+        "kind": "boss_after",
+        "title": "雷印源核",
+        "lines": [
+            "風暴領主消散，積壓已久的雷雲從冠峰兩側退開。",
+            "雷光凝成最後一枚源核，但雷之聖印尚未完成安置。",
+            "把印記線索帶回城後，四種元素才可能完整共鳴。",
+        ],
+        "dismiss_label": "帶回雷核",
+        "tone": "victory",
+    },
+    "boss.before.boss_final_demon_king": {
+        "kind": "boss_before",
+        "title": "魔王御前",
+        "lines": [
+            "王座前的黑霧凝成身影，四枚聖印同時發出警告。",
+            "魔王正以迷宮主封印汲取元素之力，讓所有道路屈從於它。",
+            "這一戰將決定迷宮是否再次吞沒艾爾姆。",
+        ],
+        "dismiss_label": "迎戰魔王",
+        "tone": "warning",
+    },
+    "boss.after.boss_final_demon_king": {
+        "kind": "boss_after",
+        "title": "王座沉寂",
+        "lines": [
+            "魔王的身影在四印光芒中崩解，王座上的黑霧不再流動。",
+            "迷宮深處仍有回音，但支撐主封印的惡意已經消失。",
+            "你終於為艾爾姆爭回一條能夠回家的路。",
+        ],
+        "dismiss_label": "走向封印",
+        "tone": "victory",
+    },
+    "ending.main_story_clear": {
+        "kind": "ending",
+        "title": "元素迷宮・主線完成",
+        "lines": [
+            "灰燼、寒霜、根脈與雷光彼此呼應，重新穩住迷宮的主封印。",
+            "迷宮沒有消失，卻不再飢渴地扭曲每一條道路。",
+            "{player}回到工會，成為第一位關閉元素迷宮主封印的冒險者。",
+            "新的探索仍會開始，但艾爾姆今晚終於能安穩點燈。",
+        ],
+        "dismiss_label": "返回標題",
+        "tone": "ending",
+    },
 }
 
 DIALOGUE_TEMPLATES: dict[str, dict[str, Any]] = {

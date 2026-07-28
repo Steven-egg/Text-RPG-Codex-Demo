@@ -20,6 +20,7 @@ from .display import (
     start_screen_panel,
     title,
 )
+from .story_beats import region_story_beat_id, show_story_beat, take_story_beat
 from .formatting import equipment_summary, format_items, item_name, monster_drop_names
 from .equipment_refs import equipment_ref_count
 from .previews import get_preview_promotions_for_job, show_job_specialization_preview
@@ -712,7 +713,13 @@ def new_game() -> dict:
     choice = menu("選擇初始職業", jobs, allow_back=False)
     job = jobs[choice - 1]
     state = create_state(name, job)
-    print(f"\n諾亞替你別上見習徽章：「歡迎來到艾爾姆，{name}。今天開始，你就是{job}了。」")
+    show_story_beat(
+        take_story_beat(
+            state,
+            "prologue.new_game",
+            context={"player": name, "job": job},
+        )
+    )
     return state
 
 def show_status(state: dict) -> None:
@@ -1941,6 +1948,8 @@ def region_travel_menu(state: dict, current_region_id: str) -> str:
         pause()
         return current_region_id
     print(f"Traveling to {cli_region_label(region_id)}.")
+    if region_id != current_region_id:
+        show_story_beat(take_story_beat(state, region_story_beat_id(region_id)))
     pause()
     return region_id
 

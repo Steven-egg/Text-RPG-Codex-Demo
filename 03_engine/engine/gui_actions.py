@@ -23,6 +23,11 @@ from .equipment_refs import is_equipment_ref, resolve_equipment_ref
 
 from . import game
 from .formatting import item_name
+from .story_beats import (
+    boss_story_beat_id,
+    region_story_beat_id,
+    take_story_beat,
+)
 from .gui_shop_model import shop_screen_model
 from .gui_magic_shop_model import magic_shop_screen_model
 from .gui_workshop_model import workshop_screen_model
@@ -142,12 +147,18 @@ class GuiRuntimeSession:
         self.state = game.create_state(character_name, job_key)
         self.current_region_id = "border_fire"
         self._clear_live_run()
+        story_beat = take_story_beat(
+            self.state,
+            "prologue.new_game",
+            context={"player": character_name, "job": job_key},
+        )
         return action_response(
             "start_new_game",
             "新的冒險者名冊已建立。可在世界地圖主選單進行存檔。",
             self.state,
             screen_id="town_hub",
             next_route="../town_hub/index.html?mode=live",
+            story_beat=story_beat,
         )
 
     def load_demo_seed(self) -> dict[str, Any]:
@@ -335,6 +346,13 @@ class GuiRuntimeSession:
         if action_id in {"return_to_exploration", "back_to_exploration"}:
             state = self.require_state()
             exploration = self.require_exploration()
+            ending_story_beat = None
+            if state.pop("_ending_pending", False):
+                ending_story_beat = take_story_beat(
+                    state,
+                    "ending.main_story_clear",
+                    context={"player": state.get("name", "見習冒險者")},
+                )
             self.combat = None
             exploration["status"] = "exploring"
 
@@ -384,6 +402,7 @@ class GuiRuntimeSession:
                 "正在返回探索...",
                 screen_model=exploration_screen_model(self),
                 next_route="../dungeon_exploration/index.html?mode=live",
+                story_beat=ending_story_beat,
             )
         if action_id == "confirm_travel":
             return self.confirm_travel(payload)
@@ -406,13 +425,18 @@ class GuiRuntimeSession:
             raise GuiActionError("Unknown region.", status=400)
         if not region_route_enabled(state, region_id):
             raise GuiActionError(region_locked_reason(region_id), status=403)
+        previous_region_id = self.current_region_id
         self.set_current_region(region_id)
         self._clear_live_run()
+        story_beat = None
+        if region_id != previous_region_id:
+            story_beat = take_story_beat(state, region_story_beat_id(region_id))
         return self._live_response(
             "travel_region",
             f"Traveling to {REGION_LABELS[region_id]}.",
             screen_model=world_map_model(state, self.current_region_id),
             next_route="../world_map/index.html?mode=live",
+            story_beat=story_beat,
         )
 
     def confirm_travel(self, payload: dict[str, Any]) -> dict[str, Any]:
@@ -491,11 +515,13 @@ class GuiRuntimeSession:
         exploration["status"] = "combat"
         exploration["last_message"] = f"決戰：開始挑戰守護者 {game.MONSTERS[boss_id]['name']}！"
         exploration.setdefault("events", []).append(exploration["last_message"])
+        story_beat = take_story_beat(state, boss_story_beat_id(boss_id, "before"))
         return self._live_response(
             "challenge_boss",
             f"決戰開始：{game.MONSTERS[boss_id]['name']}！",
             screen_model=combat_screen_model(self),
             next_route="../combat_screen/index.html?mode=live",
+            story_beat=story_beat,
         )
 
     def retreat_from_exploration(self) -> dict[str, Any]:
@@ -757,6 +783,7 @@ class GuiRuntimeSession:
         enemy = combat["enemy"]
         enemy_id = combat["enemy_id"]
         run_log = self.current_run_log()
+        story_beat = None
 
         # 記錄升級前狀態與 Level
         level_before = state.get("level", 1)
@@ -808,7 +835,7 @@ class GuiRuntimeSession:
 
         # 處理 Boss 擊敗與劇情物品掉落
         if combat.get("boss"):
-            game.clear_dungeon_boss(state, enemy_id, run_log)
+            story_beat = game.clear_dungeon_boss(state, enemy_id, run_log)
             if enemy_id == "boss_glen":
                 reward_lines.append("🔑 取得戰利品：血跡地圖 x1、火之印記碎片 x1、熔岩碎片 x2。")
             elif enemy_id in {"boss_ash_guardian", "boss_cinder_seal_sentinel"}:
@@ -826,7 +853,12 @@ class GuiRuntimeSession:
             combat["last_action_summary"],
             reward_lines + [game.run_loot_summary(run_log)],
         )
-        return self._live_response("basic_attack", "Victory.", screen_model=combat_screen_model(self))
+        return self._live_response(
+            "basic_attack",
+            "Victory.",
+            screen_model=combat_screen_model(self),
+            story_beat=story_beat,
+        )
 
     def resolve_retreat(self, summary_lines: list[str]) -> dict[str, Any]:
         combat = self.require_combat()
@@ -909,6 +941,7 @@ class GuiRuntimeSession:
         *,
         screen_model: dict[str, Any] | None,
         next_route: str | None = None,
+        story_beat: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
         return {
             "ok": True,
@@ -919,6 +952,7 @@ class GuiRuntimeSession:
             "screen_model": screen_model,
             "next_route": next_route,
             "next_screen_id": screen_model.get("screen_id") if screen_model else None,
+            "story_beat": story_beat,
         }
 
     def _clear_live_run(self) -> None:
@@ -1761,6 +1795,7 @@ def action_response(
     screen_id: str | None,
     next_route: str | None = None,
     selected_region_id: str | None = None,
+    story_beat: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     return {
         "ok": True,
@@ -1771,6 +1806,7 @@ def action_response(
         "screen_model": build_screen_model(screen_id, state, selected_region_id=selected_region_id) if screen_id else None,
         "next_route": next_route,
         "next_screen_id": screen_id,
+        "story_beat": story_beat,
     }
 
 

@@ -14,6 +14,7 @@ from data import (
 )
 from .formatting import item_name
 from .display import action_menu_panel, render_panel, pause
+from .story_beats import boss_story_beat_id, show_story_beat, take_story_beat
 from .state import (
     is_key_item,
     is_unlocked,
@@ -265,15 +266,15 @@ def boss_challenge_prompt(boss_id: str) -> str:
     return "礦坑深處傳來粗暴的笑聲。要挑戰 Boss 嗎？(y/n) > "
 
 
-def clear_dungeon_boss(state: dict, boss_id: str, run_log: dict) -> None:
+def clear_dungeon_boss(state: dict, boss_id: str, run_log: dict) -> dict[str, Any] | None:
     from .cli_helpers import BOSS_CLEAR_DATA
     if boss_id not in BOSS_CLEAR_DATA:
-        return
+        return None
 
     data = BOSS_CLEAR_DATA[boss_id]
     defeated_flag = data["defeated_flag"]
     if state["flags"].get(defeated_flag):
-        return
+        return None
 
     state["flags"][defeated_flag] = True
 
@@ -315,6 +316,7 @@ def clear_dungeon_boss(state: dict, boss_id: str, run_log: dict) -> None:
         print(f"\n{messages[0]}")
         for msg in messages[1:]:
             print(msg)
+    return take_story_beat(state, boss_story_beat_id(boss_id, "after"))
 
 
 def explore_dungeon(state: dict, dungeon_id: str) -> None:
@@ -394,6 +396,7 @@ def explore_dungeon(state: dict, dungeon_id: str) -> None:
         ):
             print(f"請先返回冒險者公會回報，接受{dungeon['name']}異常調查後再來挑戰。")
     if boss_available_at_dungeon_end(state, dungeon_id, boss_id):
+        show_story_beat(take_story_beat(state, boss_story_beat_id(boss_id, "before")))
         raw = input(boss_challenge_prompt(boss_id)).strip().lower()
         if raw == "y":
             result = combat(state, boss_id, boss=True, run_log=run_log)
@@ -401,7 +404,7 @@ def explore_dungeon(state: dict, dungeon_id: str) -> None:
                 handle_defeat(state, run_log)
                 return
             if result is True:
-                clear_dungeon_boss(state, boss_id, run_log)
+                show_story_beat(clear_dungeon_boss(state, boss_id, run_log))
                 if state.pop("_ending_pending", False):
                     show_main_story_ending(state)
                     state["_return_to_title"] = True
@@ -518,15 +521,12 @@ def complete_final_quest_from_boss(state: dict) -> None:
 
 
 def show_main_story_ending(state: dict) -> None:
-    render_panel(
-        "Ending",
-        [
-            "The Demon King's throne falls silent.",
-            "The four elemental marks answer one another: ash, frost, root, and thunder.",
-            "The maze does not vanish, but its hunger loosens. Roads that once twisted shut begin to breathe again.",
-            f"{state['name']} returns to the Guild as the first adventurer to close the Element Maze's main seal.",
-        ],
-        border_style="yellow",
+    show_story_beat(
+        take_story_beat(
+            state,
+            "ending.main_story_clear",
+            context={"player": state.get("name", "見習冒險者")},
+        )
     )
     pause()
     render_panel(
