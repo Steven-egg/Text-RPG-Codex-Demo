@@ -7,7 +7,7 @@ schema, save, combat, GUI, bridge, or asset-pipeline implementation.
 
 Use this file after:
 
-- `01_content/world-content-skeleton-v0.1.md`
+- `01_content/archive/world-content-skeleton-v0.1.md`
 - `01_content/blueprints/regional-data-template-v0.1.md`
 
 ## Core Approach

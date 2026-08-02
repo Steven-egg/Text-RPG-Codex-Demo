@@ -4,7 +4,26 @@ Compact entry point for the playable Element Maze RPG, its primary live GUI,
 the secondary CLI, and the release boundaries. Detailed decisions and focused
 contracts live under `01_content/`.
 
-## Acceptance Status
+[繁體中文說明](README.zh-TW.md)
+
+## Current Phase: Feedback-Led Maintenance
+
+The playable scope is currently stable. Do not start a new expansion or a
+formal release push by default. Collect and prioritize real user feedback,
+then make focused changes that improve the existing game experience.
+
+Expected maintenance areas include:
+
+- sound-effect quality, timing, volume, or mute behavior;
+- Traditional Chinese copy, translations, terminology, and encoding issues;
+- GUI layout, readability, interaction feedback, and presentation issues;
+- reproducible gameplay or runtime defects that affect normal play.
+
+Treat each reported issue as a coherent maintenance task. Keep gameplay rules
+authoritative in Python and `04_data/data/`; do not infer new content, systems,
+or release scope from feedback without explicit approval.
+
+## Historical Verification Record
 
 - The verified Batch A--C integration candidate is
   `02aa179ef8f9259b56369e3998cb7d91ee81ea3d` on
@@ -12,8 +31,7 @@ contracts live under `01_content/`.
   asset, portable-package, and localhost/browser verification.
 - `main` and `origin/main` remain at
   `46efeb93a0e98da12bde6c60769af2d303aeeb26`. The candidate is not `main` and
-  must not be described as promoted until an independent Gate 3 / final
-  acceptance passes and the Owner approves an ff-only promotion.
+  this record does not mean it was promoted or formally released.
 - The GUI is the primary product entrypoint. The secondary CLI is named
   **文字核心版 Text Core**.
 - Python and `04_data/data/` remain gameplay authority. Browser JavaScript,
@@ -155,14 +173,14 @@ authorize tuning:
 
 ## Document Routing
 
-- Short Codex handoff: `01_content/codex-handoff-short.md`
 - GUI live bridge: `01_content/gui-runtime-bridge-plan-v1.md`
 - GUI static state: `01_content/gui-static-current-state-v1.md`
 - Release asset contract: `01_content/release-asset-policy-v1.md`
 - Windows portable contract: `01_content/windows-portable-release-v1.md`
-- Maintenance closure: `01_content/maintenance-closure-v1.md`
-- Job growth decision: `01_content/proposed-job-growth-points-v1.md`
-- Historical task and architecture notes: `01_content/archive/`
+- Current asset inventory: `01_content/asset-production-inventory-v0.1.md`
+- Historical handoffs, closed decisions, and verification notes:
+  `01_content/archive/`
+- Unapproved future designs: `01_content/blueprints/`
 
 ## Fixed Boundaries
 
@@ -173,10 +191,11 @@ authorize tuning:
 - Growth SSOT is `04_data/data/jobs.py`. Warrior remains the frozen exception
   at 13.50 points per level (`attack = 1.5`); Mage, Rogue, and Cleric remain at
   15.00.
-- Do not expand storage capacity, facilities, assets, classes, saves, rewards,
-  unlocks, or gameplay scope without separate exact approval.
+- Do not proactively expand storage capacity, facilities, classes, saves,
+  rewards, unlocks, or gameplay scope. Targeted asset replacements or
+  adjustments needed to resolve user feedback are allowed.
 - Preserve `game.py` compatibility re-exports while the GUI bridge and tools
   still import through `game.*`.
-- The only approved next step for this integration candidate is an independent
-  Gate 3 / final acceptance. Only after Owner approval may `main` be advanced
-  ff-only.
+- During this maintenance phase, use user feedback and reproducible issues to
+  select focused fixes. A later formal-release or promotion decision requires
+  separate Owner approval and its own acceptance criteria.

@@ -6,7 +6,7 @@ material timing, and candidate-content handoff only. It does not approve
 runtime, data, schema, save, GUI, bridge, combat, class, relic, or asset-pipeline
 implementation.
 
-Use this file after `01_content/world-content-skeleton-v0.1.md` when a task needs
+Use this file after `01_content/archive/world-content-skeleton-v0.1.md` when a task needs
 region-level data planning detail.
 
 ## Region Hub Rule

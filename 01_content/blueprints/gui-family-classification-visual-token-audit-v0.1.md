@@ -45,7 +45,7 @@ Evidence labels used in this audit:
 
 Files reviewed:
 
-- `01_content/gui-planning-index.md`
+- `01_content/archive/gui-planning-index.md`
 - `01_content/blueprints/gui-facility-shell-baseline-v0.1.md`
 - `01_content/blueprints/facilities-visual-integration-spec-v0.1.md`
 - `01_content/archive/gui-ui-direction-brief.md`

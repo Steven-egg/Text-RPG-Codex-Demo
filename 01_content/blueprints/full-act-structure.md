@@ -2,7 +2,7 @@
 
 版本：full act structure draft v0.1  
 用途：作為 `README.md`、`game-design.md`、`game-architecture.md`、`act-2-content-plan.md` 之間的幕次總綱。  
-限制：此文件只整理內容階段與施工邊界；已實作狀態以 README 與 runtime data 為準。若本文件的早期幕次語句與 README / handoff 不一致，以 README / `codex-handoff-short.md` 為準。
+限制：此文件只整理內容階段與施工邊界；已實作狀態以 README 與 runtime data 為準。若本文件的早期幕次語句與 README 不一致，以 README 為準。
 
 ---
 

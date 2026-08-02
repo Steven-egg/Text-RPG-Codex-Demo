@@ -19,7 +19,7 @@ Use the matching skill only when the task needs its specialized workflow.
 ## 2. Startup Order
 
 Start with this file. Read `README.md`, handoff material, planning documents,
-or task-specific files only when they help answer or complete the user’s
+or task-specific files only when they help answer or complete the user's
 current request. Do not load a fixed Hot Zone by default.
 
 ## 3. GUI Static Prototype Route
@@ -34,14 +34,45 @@ screen files. Consult planning material when it materially helps the task.
 For runtime-connected work, consult the bridge plan when it is relevant to the
 implementation.
 
-## 5. Reading Discipline
+## 5. Autonomous Work By Phase
 
-Read the smallest useful set of files. Avoid broad history unless it is needed
-to resolve the current task.
+Read the live files that are useful for the task, then complete the requested
+outcome as one coherent piece of work. Make normal implementation decisions
+without a planning or approval checkpoint.
 
-## 6. Change Discipline
+### Feedback Maintenance
 
-Act directly within the user’s requested scope: inspect the relevant files,
-make the needed changes, and run proportionate verification. Use planning or
-status documents when they help execution, not as a prerequisite to ordinary
-work.
+For user-reported sound, translation, presentation, usability, runtime, or
+reproducible gameplay issues, own the complete focused fix: diagnose, edit all
+necessary supporting files, verify it proportionately, and update the relevant
+current documentation when it changes the maintained behaviour.
+
+### Documentation And Repository Hygiene
+
+Keep the active documentation surface small and useful. Consolidate overlapping
+documents, move completed work and historical handoffs to `01_content/archive/`,
+move unapproved future work to `01_content/blueprints/`, and delete files fully
+superseded by the current source of truth. Preserve a recoverable Git history:
+make moves explicit and leave a concise retirement note or commit message when
+it improves later recovery.
+
+### Feature Work
+
+Once the user names the desired feature or outcome, decide the ordinary
+technical details and implement all necessary local changes, including focused
+tests, fixtures, and documentation. Keep the implementation aligned with the
+existing Python/data gameplay authority.
+
+### Release Work
+
+Build, package, inspect, and verify release candidates autonomously. Treat the
+decision to publish externally, promote a branch, or declare a formal release
+as an Owner decision after the supporting evidence is ready.
+
+## 6. Decision Rule
+
+Do not split ordinary work into planning, approval, or micro-task phases merely
+to report progress. Create phases only for real dependencies, independent
+acceptance boundaries, or a checkpoint requested by the user. State reasonable
+assumptions and proceed; request direction only when it would change the
+requested product outcome or require an external decision.

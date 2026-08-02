@@ -8,7 +8,7 @@ generation implementation.
 
 Use this file with:
 
-- `01_content/world-content-skeleton-v0.1.md`
+- `01_content/archive/world-content-skeleton-v0.1.md`
 - `01_content/blueprints/regional-data-template-v0.1.md`
 - `01_content/blueprints/regional-data-instantiation-plan-v0.1.md`
 
