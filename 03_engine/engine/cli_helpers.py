@@ -67,7 +67,7 @@ BOSS_CLEAR_DATA = {
     },
     "boss_ash_guardian": {
         "defeated_flag": "ash_guardian_defeated",
-        "unlocks": ["dungeon_cinder_seal_depths"],
+        "unlocks": [],
         "loot": [
             ("key_fire_mark_shard", 1),
         ],

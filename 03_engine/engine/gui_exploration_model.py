@@ -4,6 +4,7 @@ from typing import Any
 from data import DUNGEONS, MONSTERS
 from . import game
 from .gui_presentation_helpers import run_reward_rows, boss_label
+from .gui_presentation import display_resource
 
 
 def exploration_screen_model(session: Any) -> dict[str, Any]:
@@ -178,8 +179,8 @@ def exploration_screen_model(session: Any) -> dict[str, Any]:
         "title": "迷宮探索",
         "subtitle": "正在進行迷宮探索，冒險的下一步正等待著你。",
         "resource_strip": [
-            {"id": "hp", "label": f"HP {state['current_hp']}/{stats['max_hp']}", "tone": "hp" if state["current_hp"] > stats["max_hp"] * 0.35 else "warning"},
-            {"id": "mp", "label": f"MP {state['current_mp']}/{stats['max_mp']}", "tone": "mp"},
+            {"id": "hp", "label": f"HP {display_resource(state['current_hp'])}/{display_resource(stats['max_hp'])}", "tone": "hp" if state["current_hp"] > stats["max_hp"] * 0.35 else "warning"},
+            {"id": "mp", "label": f"MP {display_resource(state['current_mp'])}/{display_resource(stats['max_mp'])}", "tone": "mp"},
         ],
         "dungeon": {
             "dungeon_id": exploration["dungeon_id"],

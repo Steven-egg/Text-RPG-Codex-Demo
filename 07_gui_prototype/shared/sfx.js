@@ -286,14 +286,16 @@ function renderToggle() {
 }
 
 function createToggle() {
-  toggleEl = document.createElement("button");
-  toggleEl.id = TOGGLE_ID;
-  toggleEl.className = "sfx-toggle";
-  toggleEl.type = "button";
-  toggleEl.innerHTML =
-    '<span class="sfx-toggle-icon" aria-hidden="true"></span><span class="sfx-toggle-label"></span>';
-  document.body.append(toggleEl);
-  renderToggle();
+  // Sound is configured from the world-map main menu.  Do not inject a
+  // floating control over every facility screen.
+}
+
+export function isSfxMuted() {
+  return muted;
+}
+
+export function setSfxMuted(nextMuted) {
+  setMuted(nextMuted);
 }
 
 function initializeSfx() {

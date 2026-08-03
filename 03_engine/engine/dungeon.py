@@ -173,8 +173,6 @@ def choose_weighted_event() -> str:
 
 
 def dungeon_menu(state: dict, region_id: str = "border_fire") -> None:
-    if state["flags"].get("ash_guardian_defeated") and not is_unlocked(state, "dungeon_cinder_seal_depths"):
-        unlock(state, "dungeon_cinder_seal_depths")
     unlocked_dungeons = player_facing_dungeon_ids(state, region_id)
     if not unlocked_dungeons:
         print("目前沒有可探索的迷宮。")

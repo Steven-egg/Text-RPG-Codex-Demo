@@ -67,8 +67,8 @@ def relic_preview_screen_model(state: dict[str, Any]) -> dict[str, Any]:
 
     return {
         "screen_id": "relic_preview_screen",
-        "title": "聖物調查台 (Relic Preview)",
-        "subtitle": "Fire / Ice / Earth / Thunder 聖印同時推進主線；安置後可選擇既有被動加成，並立即套用於戰鬥與能力值。",
+        "title": "聖物調查台",
+        "subtitle": "安置可用的聖印後，選擇一項被動加成；之後仍可免費改選。",
         "resource_strip": strip,
         "slots": slots,
         "story_beat": preview_beat,

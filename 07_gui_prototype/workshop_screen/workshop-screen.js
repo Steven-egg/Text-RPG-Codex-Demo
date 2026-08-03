@@ -442,6 +442,13 @@ function renderList() {
  * 取得玩家目前擁有的裝備清單
  */
 function getOwnedItemsList() {
+  if (Array.isArray(currentFixtureData.owned_equipment)) {
+    return currentFixtureData.owned_equipment.map((item) => ({
+      ...item,
+      count: 1,
+      equippedSlot: item.equipped_slot ?? null,
+    }));
+  }
   const map = new Map();
   const player = currentFixtureData.player;
 
@@ -563,8 +570,10 @@ function checkRequirements(item) {
   if (currentTab === 'upgrade') {
     // A. 檢查基底裝備 (在背包或已裝備算擁有)
     const baseId = item.base_item;
-    const isEquipped = Object.values(player.equipment).includes(baseId);
-    const inInventory = (player.inventory[baseId] || 0) > 0;
+    const owned = getOwnedItemsList();
+    const hasBase = owned.some((entry) => entry.base_item_id === baseId || entry.id === baseId);
+    const isEquipped = owned.some((entry) => entry.equippedSlot && (entry.base_item_id === baseId || entry.id === baseId));
+    const inInventory = hasBase && !isEquipped;
     if (!isEquipped && !inInventory) {
       return { satisfied: false, reasonText: '缺基底', disabledReason: 'missing_base_item' };
     }

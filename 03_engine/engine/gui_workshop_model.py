@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import Any
 from data import EQUIPMENT, SHOP_INVENTORY, RECIPES, MATERIALS
 from . import game
+from .equipment_refs import inventory_equipment_refs, resolve_equipment_ref
 
 
 def workshop_screen_model(state: dict[str, Any], selected_region_id: str | None = None) -> dict[str, Any]:
@@ -119,6 +120,29 @@ def workshop_screen_model(state: dict[str, Any], selected_region_id: str | None 
                 "unlock_quest": r.get("unlock", "")
             })
 
+    owned_equipment = []
+    equipped_by_reference = {
+        reference_id: slot
+        for slot, reference_id in state.get("equipment", {}).items()
+        if reference_id
+    }
+    for reference_id in [*inventory_equipment_refs(state), *equipped_by_reference]:
+        resolved = resolve_equipment_ref(state, reference_id)
+        if not resolved:
+            continue
+        base = resolved["base"]
+        owned_equipment.append({
+            "id": reference_id,
+            "base_item_id": resolved["base_item_id"],
+            "name": base["name"],
+            "slot": base["slot"],
+            "subtype": base["subtype"],
+            "jobs": base["jobs"],
+            "stats": resolved["effective_stats"],
+            "desc": base["desc"],
+            "equipped_slot": equipped_by_reference.get(reference_id),
+        })
+
     return {
         "screen_id": "facility_workshop_screen",
         "facility_id": "workshop",
@@ -128,5 +152,6 @@ def workshop_screen_model(state: dict[str, Any], selected_region_id: str | None 
         "weapons": weapons_list,
         "weapons_details": weapons_details,
         "armors": armors_list,
-        "upgrades": upgrades_list
+        "upgrades": upgrades_list,
+        "owned_equipment": owned_equipment,
     }
