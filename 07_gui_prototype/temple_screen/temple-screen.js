@@ -62,7 +62,7 @@ openInquiriesBtnEl.addEventListener("click", () => {
   if (inq) {
     handleInquiry(inq);
   } else {
-    npcBubbleEl.textContent = "大祭司賽恩：「願聖光指引你，旅人。目前沒有新的線索。」";
+    npcBubbleEl.textContent = "大祭司艾莉希亞：「願聖光指引你，旅人。目前沒有可處理的聖痕或新線索。」";
   }
 });
 

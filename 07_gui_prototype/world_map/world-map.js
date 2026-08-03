@@ -1,5 +1,6 @@
 import { runtimeClient } from "../shared/runtime-client.js";
 import { presentStoryBeat } from "../shared/story-beat.js";
+import { isSfxMuted, setSfxMuted } from "../shared/sfx.js";
 
 const fixtureSelect = document.querySelector("#fixture-select");
 const shellEl = document.querySelector(".world-map-shell");
@@ -1157,6 +1158,7 @@ function renderSettingsPanel() {
     title: "畫面設定",
     data: {
       reduced_motion: state.settings.reducedMotion,
+      sfx_muted: isSfxMuted(),
     },
   });
 }
@@ -1324,8 +1326,17 @@ function renderUtilityPreview(preview) {
             <span class="settings-switch-thumb"></span>
           </span>
         </label>
+        <label class="settings-toggle-row" for="settings-sfx-muted">
+          <span class="settings-toggle-copy">
+            <strong>音效</strong>
+            <span id="settings-sfx-muted-description">保留於此裝置的靜音偏好。</span>
+          </span>
+          <input id="settings-sfx-muted" class="settings-switch-input" type="checkbox" role="switch"
+            aria-describedby="settings-sfx-muted-description" ${preview.data.sfx_muted ? "checked" : ""}>
+          <span class="settings-switch-track" aria-hidden="true"><span class="settings-switch-thumb"></span></span>
+        </label>
         <p id="settings-scope-note" class="settings-scope-note">
-          此偏好僅套用於目前的世界地圖頁面，重新載入後會回到裝置的預設動態偏好。
+          減少動態效果僅套用於目前的世界地圖頁面；音效靜音偏好會保留於此裝置。
         </p>
       </div>
     `;
@@ -1338,6 +1349,11 @@ function renderUtilityPreview(preview) {
     const reducedMotionEl = utilityPanelEl.querySelector("#settings-reduced-motion");
     reducedMotionEl?.addEventListener("change", () => {
       applyReducedMotionPreference(reducedMotionEl.checked, true);
+    });
+    const sfxMutedEl = utilityPanelEl.querySelector("#settings-sfx-muted");
+    sfxMutedEl?.addEventListener("change", () => {
+      setSfxMuted(sfxMutedEl.checked);
+      feedbackMessageEl.textContent = sfxMutedEl.checked ? "音效已靜音。" : "音效已開啟。";
     });
   }
 

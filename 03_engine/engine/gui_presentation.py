@@ -4,6 +4,15 @@ from typing import Any
 from .state import ensure_state_defaults, get_stats
 
 
+def display_resource(value: object) -> str:
+    """Render resource values without leaking fractional implementation detail."""
+    try:
+        number = float(value)
+    except (TypeError, ValueError):
+        return str(value)
+    return str(int(number)) if number.is_integer() else f"{number:.2f}".rstrip("0").rstrip(".")
+
+
 def resource_strip(state: dict[str, Any]) -> list[dict[str, str]]:
     ensure_state_defaults(state)
     stats = get_stats(state)
@@ -23,8 +32,8 @@ def resource_strip(state: dict[str, Any]) -> list[dict[str, str]]:
 
     return [
         {"id": "hero", "label": f"{name} / {job_label} Lv{level}", "tone": "primary"},
-        {"id": "hp", "label": f"HP {current_hp}/{max_hp}", "tone": "healthy"},
-        {"id": "mp", "label": f"MP {current_mp}/{max_mp}", "tone": "mana"},
+        {"id": "hp", "label": f"HP {display_resource(current_hp)}/{display_resource(max_hp)}", "tone": "healthy"},
+        {"id": "mp", "label": f"MP {display_resource(current_mp)}/{display_resource(max_mp)}", "tone": "mana"},
         {"id": "gold", "label": f"{gold}G", "tone": "gold"},
         {"id": "guild_points", "label": f"Guild {guild_points}", "tone": "neutral"},
     ]
