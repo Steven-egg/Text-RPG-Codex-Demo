@@ -68,6 +68,10 @@ def verify_data_contract() -> None:
         assert beat is not None
         assert_story_beat(beat, beat_id)
     assert build_story_beat("missing.story.beat") is None
+    relic_guidance = build_story_beat("guidance.relic_preview")
+    assert relic_guidance is not None
+    assert any("既有被動加成" in line for line in relic_guidance["lines"])
+    assert not any("尚未實裝" in line for line in relic_guidance["lines"])
     print(f"[Pass] All {len(EXPECTED_IDS)} story nodes satisfy the exact presentation contract.")
 
 

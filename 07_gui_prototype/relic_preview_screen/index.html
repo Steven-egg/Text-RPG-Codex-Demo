@@ -28,9 +28,9 @@
       <section class="resource-strip" id="resource-strip" aria-label="Resources"></section>
 
       <main class="relic-layout">
-        <!-- 左側：八元素插槽清單 -->
+        <!-- 左側：四元素聖印插槽清單 -->
         <section class="slots-card" aria-label="Elemental Slots">
-          <p class="panel-label">八元素遺物插槽</p>
+          <p class="panel-label">四元素聖印</p>
           <div id="slots-container" class="slots-list"></div>
         </section>
 
@@ -52,8 +52,13 @@
           <div class="tablet-detail">
             <h3>古代碑文譯本</h3>
             <p id="tablet-translation-text" class="tablet-text"></p>
+            <div class="passive-area" aria-live="polite">
+              <h3>聖印被動</h3>
+              <p id="passive-status-text" class="tablet-text"></p>
+              <div id="passive-choices" class="passive-choices"></div>
+            </div>
             <div class="disclaimer-area">
-              <p>※ 註：此為靜態原型功能預覽，實際被動屬性加成與啟用判定將依據未來 CLI runtime 實作為準。</p>
+              <p>※ 聖印同時是主線進度與既有被動系統：安置後可在此免費選擇或改選，被動效果會由 Python 核心立即套用。</p>
             </div>
           </div>
         </section>

@@ -1721,10 +1721,18 @@ class GuiRuntimeSession:
         )
 
     def attune_relic(self, payload: dict[str, Any], screen_id: str | None = None) -> dict[str, Any]:
-        raise GuiActionError("四元素聖印目前僅供主線進度前瞻，效果尚未實裝。", status=409)
+        state = self.require_state()
+        relic_identifier = payload.get("relic_id") or payload.get("relic_name") or payload.get("element_id")
+        result = game.enshrine_relic(state, str(relic_identifier) if relic_identifier else None)
+        return self._live_response("attune_relic", result["message"], screen_model=self.relic_preview_screen_model())
 
     def select_relic_passive(self, payload: dict[str, Any], screen_id: str | None = None) -> dict[str, Any]:
-        raise GuiActionError("四元素聖印目前僅供主線進度前瞻，效果尚未實裝。", status=409)
+        state = self.require_state()
+        relic_identifier = payload.get("relic_id") or payload.get("relic_name") or payload.get("element_id")
+        result = game.select_relic_passive(state, str(relic_identifier) if relic_identifier else None, payload.get("choice_id"))
+        if result["status"] == "blocked":
+            raise GuiActionError(result["message"], status=409, result_status="blocked", blocked_reason=result["message"])
+        return self._live_response("select_relic_passive", result["message"], screen_model=self.relic_preview_screen_model())
 
     def screen_model(self, screen_id: str) -> dict[str, Any]:
         if screen_id == "start_screen":

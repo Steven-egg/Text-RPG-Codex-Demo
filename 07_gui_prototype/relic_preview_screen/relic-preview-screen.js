@@ -13,6 +13,8 @@ const orbVisualEl = document.querySelector("#orb-visual");
 const focusFeedbackEl = document.querySelector("#focus-feedback");
 const attuneRelicBtnEl = document.querySelector("#attune-relic-btn");
 const tabletTranslationTextEl = document.querySelector("#tablet-translation-text");
+const passiveStatusTextEl = document.querySelector("#passive-status-text");
+const passiveChoicesEl = document.querySelector("#passive-choices");
 const backToTownBtnEl = document.querySelector("#back-to-town");
 const actionLogEl = document.querySelector("#action-log");
 const clearLogEl = document.querySelector("#clear-log");
@@ -275,6 +277,8 @@ function renderSelectedRelic() {
     focusSubtitleEl.textContent = "";
     orbVisualEl.dataset.element = "none";
     tabletTranslationTextEl.textContent = "無可顯示之古代碑文譯本。";
+    passiveStatusTextEl.textContent = "";
+    passiveChoicesEl.replaceChildren();
     attuneRelicBtnEl.disabled = true;
     focusFeedbackEl.textContent = "";
     return;
@@ -284,9 +288,9 @@ function renderSelectedRelic() {
   focusSubtitleEl.textContent = slot.unlocked ? "【已解碼遺物核心】" : "【未知遺跡聖物】";
   orbVisualEl.dataset.element = slot.unlocked ? slot.element_id : "none";
   tabletTranslationTextEl.textContent = slot.ancient_text ?? "";
-  
-  // 只有已解鎖/已收集的聖物才可以 attune 共鳴
-  attuneRelicBtnEl.disabled = !slot.unlocked;
+  attuneRelicBtnEl.disabled = !(slot.ready && !slot.enshrined);
+  attuneRelicBtnEl.querySelector(".btn-text").textContent = slot.enshrined ? "已安置" : (slot.action_label ?? "安置聖印");
+  renderPassiveChoices(slot);
   focusFeedbackEl.textContent = "";
 
   // 更新左側 button 狀態高亮
@@ -294,6 +298,26 @@ function renderSelectedRelic() {
     const selected = btn.dataset.elementId === slot.element_id;
     btn.classList.toggle("is-selected", selected);
   });
+}
+
+function renderPassiveChoices(slot) {
+  passiveChoicesEl.replaceChildren();
+  if (!slot.enshrined) {
+    passiveStatusTextEl.textContent = slot.passive_disabled_reason ?? "需先安置此聖印。";
+    return;
+  }
+  passiveStatusTextEl.textContent = slot.selected_passive_label
+    ? `目前選擇：${slot.selected_passive_label}（可免費改選）`
+    : "請選擇一項被動加成；可隨時免費改選。";
+  for (const choice of slot.passive_choices ?? []) {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "passive-choice";
+    button.classList.toggle("is-selected", Boolean(choice.selected));
+    button.textContent = `${choice.label}：${choice.summary}`;
+    button.addEventListener("click", () => handlePassiveChoice(slot, choice));
+    passiveChoicesEl.append(button);
+  }
 }
 
 function selectSlot(elementId) {
@@ -354,7 +378,35 @@ async function handleAttune() {
     dispatched: true,
   });
 
-  focusFeedbackEl.textContent = `共鳴度提升！核心發出微弱的脈衝反應！(靜態模擬已記錄 UIAction)`;
+  focusFeedbackEl.textContent = `靜態原型已記錄「${slot.action_label ?? "安置聖印"}」；請使用 live 模式實際寫入核心狀態。`;
+}
+
+async function handlePassiveChoice(slot, choice) {
+  const payload = { relic_id: slot.relic_id ?? slot.relic_name, choice_id: choice.choice_id };
+  pushActionLog({ action_id: "select_relic_passive", payload, source: "passive_choice", dispatched: true });
+  if (!runtimeClient.isLiveMode()) {
+    for (const entry of slot.passive_choices ?? []) entry.selected = entry.choice_id === choice.choice_id;
+    slot.selected_passive_id = choice.choice_id;
+    slot.selected_passive_label = choice.label;
+    slot.active = true;
+    renderPassiveChoices(slot);
+    focusFeedbackEl.textContent = `靜態原型已選擇「${choice.label}」；live 模式會立即套用核心加成。`;
+    return;
+  }
+  try {
+    const result = await runtimeClient.dispatchAction("relic_preview_screen", "select_relic_passive", payload);
+    shellEl.dataset.runtimeStatus = result.status ?? "success";
+    if (result.screen_model) {
+      state.model = result.screen_model;
+      render();
+    }
+    focusFeedbackEl.textContent = result.message ?? "聖印被動已更新。";
+  } catch (error) {
+    const reason = runtimeClient.errorMessage(error);
+    shellEl.dataset.runtimeStatus = error?.runtimeStatus ?? "error";
+    pushActionLog({ action_id: "select_relic_passive", payload, source: "passive_choice", dispatched: false, reason });
+    focusFeedbackEl.textContent = reason;
+  }
 }
 
 function getSelectedSlot() {

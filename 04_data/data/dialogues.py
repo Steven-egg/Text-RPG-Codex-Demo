@@ -414,8 +414,9 @@ STORY_BEATS: dict[str, dict[str, Any]] = {
         "kind": "region_transition",
         "title": "四元素聖印",
         "lines": [
-            "Fire、Ice、Earth、Thunder 聖印記錄主線進度與調查線索。",
-            "目前僅提供前瞻，聖印效果尚未實裝，請勿視為戰鬥加成。",
+            "四枚聖印會推進主線，並在全數安置後開啟終局路線。",
+            "每枚安置完成的聖印可選擇一項既有被動加成，立即套用於傷害、HP／MP、暴擊或抗性等能力。",
+            "可隨時在此免費改選被動；尚未安置的聖印則會顯示所需線索與材料。",
         ],
         "dismiss_label": "查看聖印",
         "tone": "neutral",

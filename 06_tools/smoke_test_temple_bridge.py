@@ -42,6 +42,8 @@ def run_smoke_test():
     assert fire_slot["ready"] is False
     assert fire_slot["enshrined"] is False
     assert fire_slot["active"] is False
+    assert fire_slot["passive_enabled"] is False
+    assert fire_slot["passive_disabled_reason"] == "需先安置此聖印。"
     print("Initial relic_preview_screen_model loaded successfully.")
 
     # 3. Test temple_pray action
@@ -91,6 +93,9 @@ def run_smoke_test():
     assert fire_slot["ready"] is True
     assert fire_slot["enshrined"] is False
     assert fire_slot["active"] is False
+    assert fire_slot["passive_enabled"] is False
+    assert fire_slot["passive_disabled_reason"] == "需先安置此聖印。"
+    assert len(fire_slot["passive_choices"]) == 4
     assert fire_slot["collected"] == 3
     print("Relic ready preview verified (fire seal can be enshrined).")
 
@@ -106,6 +111,8 @@ def run_smoke_test():
     assert fire_slot["ready"] is False
     assert fire_slot["enshrined"] is True
     assert fire_slot["active"] is False
+    assert fire_slot["passive_enabled"] is True
+    assert len(fire_slot["passive_choices"]) == 4
     print("Fire seal enshrinement verified.")
 
     res_repeat = session.dispatch("attune_relic", {"relic_id": "火之聖印"}, screen_id="relic_preview_screen")
@@ -156,6 +163,7 @@ def run_smoke_test():
     assert res_passive["ok"] is True
     fire_slot = next(s for s in res_passive["screen_model"]["slots"] if s["element_id"] == "fire")
     assert fire_slot["active"] is True
+    assert fire_slot["passive_enabled"] is True
     assert fire_slot["selected_passive_id"] == "fire_direct_damage"
     assert len(fire_slot["passive_choices"]) == 4
 
