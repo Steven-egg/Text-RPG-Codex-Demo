@@ -250,6 +250,7 @@ from .dungeon import (
     dungeon_boss_status,
     dungeon_option_line,
     record_boss_glen_sighting,
+    activate_boss_glen_investigation,
     choose_weighted_event,
     dungeon_menu,
     boss_available_at_dungeon_end,
@@ -678,9 +679,32 @@ def render_battle_log(battle_log: list[str], boss: bool) -> None:
         border_style="red" if boss else "cyan",
     )
 
-def gain_exp(state: dict, amount: int) -> None:
-    print(f"獲得經驗 {amount}。")
-    state["exp"] += amount
+def exp_reward_for_dungeon(state: dict, amount: int, dungeon_id: str | None = None) -> dict:
+    """Calculate the shared dungeon EXP reward used by CLI and GUI."""
+    reward = {"base_exp": amount, "awarded_exp": amount, "multiplier": 1.0, "reason": None}
+    dungeon = DUNGEONS.get(dungeon_id or "")
+    if not dungeon:
+        return reward
+    try:
+        recommended_max = int(dungeon["recommended"].replace("Lv", "").split("-")[-1])
+    except (AttributeError, ValueError, IndexError):
+        return reward
+    if state.get("level", 1) > recommended_max + 2:
+        reward.update(
+            awarded_exp=math.floor(amount * 0.2),
+            multiplier=0.2,
+            reason=f"目前 Lv{state['level']} 高於此地圖推薦上限 Lv{recommended_max} 兩級以上",
+        )
+    return reward
+
+
+def gain_exp(state: dict, amount: int, dungeon_id: str | None = None) -> dict:
+    reward = exp_reward_for_dungeon(state, amount, dungeon_id)
+    awarded_exp = reward["awarded_exp"]
+    print(f"獲得經驗 {awarded_exp}。")
+    if reward["reason"]:
+        print(f"經驗衰減：{reward['reason']}，本次僅獲得 20%（原始 {amount} EXP）。")
+    state["exp"] += awarded_exp
     while state["exp"] >= exp_to_next(state["level"]):
         state["exp"] -= exp_to_next(state["level"])
         state["level"] += 1
@@ -689,8 +713,7 @@ def gain_exp(state: dict, amount: int) -> None:
         state["current_mp"] = stats["max_mp"]
         print(f"等級提升！現在是 Lv{state['level']}，HP/MP 已回滿。")
 
-
-
+    return reward
 
 
 def save_game(state: dict) -> None:
@@ -1254,7 +1277,7 @@ def combat(state: dict, enemy_id: str, boss: bool = False, run_log: dict | None 
             add_item(state, "item_sanctified_ash_vial", 1)
             print("【被動】聖蝕司祭淨化儀式：戰鬥勝利，返還本戰消耗的聖蝕聖瓶 x1。")
     try_register_bestiary(state, enemy_id)
-    gain_exp(state, enemy["exp"])
+    gain_exp(state, enemy["exp"], (run_log or {}).get("dungeon_id"))
     gold = random.randint(*enemy["gold"])
     add_gold(state, gold, run_log)
     print(f"獲得 {gold}G。")

@@ -3,11 +3,13 @@ from __future__ import annotations
 from typing import Any
 from . import game
 from .gui_presentation import resource_strip
+from .story_beats import take_story_beat
 from data import PROMOTIONS, SKILLS
 
 
 def temple_screen_model(state: dict[str, Any]) -> dict[str, Any]:
     game.ensure_state_defaults(state)
+    preview_beat = take_story_beat(state, "guidance.promotion_preview")
 
     strip = resource_strip(state)
 
@@ -124,9 +126,10 @@ def temple_screen_model(state: dict[str, Any]) -> dict[str, Any]:
     return {
         "screen_id": "temple_screen",
         "title": "轉職神殿 (Live)",
-        "subtitle": "在此沐浴月神光華，進行職業晉升宣誓或查閱古代碑文。",
+        "subtitle": "正式轉職需 Lv18 與 Ice 回報任務；此處可先查看條件與路線。",
         "resource_strip": strip,
         "moon_well": moon_well,
         "promotions": promotions,
-        "inquiries": inquiries
+        "inquiries": inquiries,
+        "story_beat": preview_beat,
     }

@@ -40,6 +40,9 @@ EXPECTED_IDS = {
     "region.enter.thunder",
     "region.enter.final",
     "ending.main_story_clear",
+    "boss.before.boss_glen",
+    "guidance.promotion_preview",
+    "guidance.relic_preview",
     *(f"boss.{timing}.{boss_id}" for boss_id in MAIN_STORY_BOSSES for timing in ("before", "after")),
 }
 
@@ -65,7 +68,7 @@ def verify_data_contract() -> None:
         assert beat is not None
         assert_story_beat(beat, beat_id)
     assert build_story_beat("missing.story.beat") is None
-    print("[Pass] All 16 story nodes satisfy the exact presentation contract.")
+    print(f"[Pass] All {len(EXPECTED_IDS)} story nodes satisfy the exact presentation contract.")
 
 
 def verify_seen_flags_and_legacy_state() -> None:

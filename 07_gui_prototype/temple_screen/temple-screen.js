@@ -1,5 +1,6 @@
 import { applyFacilityBackground } from "../shared/facility-backgrounds.js";
 import { runtimeClient } from "../shared/runtime-client.js";
+import { presentStoryBeat } from "../shared/story-beat.js";
 
 const fixtureSelect = document.querySelector("#fixture-select");
 const titleEl = document.querySelector("#screen-title");
@@ -116,6 +117,7 @@ async function loadFixture(path) {
     render();
     logSystem(`loaded ${path}`);
     shellEl.dataset.loadState = "ready";
+    await presentStoryBeat(model.story_beat);
   } catch (error) {
     renderLoadError(error);
     shellEl.dataset.loadState = "error";
@@ -135,6 +137,7 @@ async function loadLiveScreen() {
       payload: { mode: "live", screen_id: "temple_screen" },
     });
     shellEl.dataset.loadState = "ready";
+    await presentStoryBeat(model.story_beat);
   } catch (error) {
     await loadStaticFallback(fixtureSelect.value, error);
   }

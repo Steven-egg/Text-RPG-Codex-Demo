@@ -364,6 +364,10 @@ class GuiRuntimeSession:
             if current_step >= total_steps:
                 # Check if the boss was defeated to record the defeat event log
                 boss_id = dungeon.get("boss")
+                if boss_id == "boss_glen" and not game.boss_defeated(state, boss_id):
+                    newly_accepted = game.activate_boss_glen_investigation(state)
+                    if newly_accepted and ending_story_beat is None:
+                        ending_story_beat = take_story_beat(state, "boss.before.boss_glen")
                 boss_defeated = game.boss_defeated(state, boss_id)
 
                 if boss_defeated and not exploration.get("boss_defeat_logged"):
@@ -453,7 +457,7 @@ class GuiRuntimeSession:
             raise GuiActionError(str(error), status=409) from error
         self.current_region_id = normalize_region_id(state, payload.get("region_id") or region_for_dungeon_id(dungeon_id))
         game.clamp_vitals(state)
-        run_log = {"gold": 0, "items": {}}
+        run_log = {"gold": 0, "items": {}, "dungeon_id": dungeon_id}
         if state.get("equipment", {}).get("special") == "special_focus_pouch":
             game.add_loot(state, "item_focus_drop", 1, run_log)
             opening_event = "集中藥袋發出微光，出發前多整理出一瓶集中滴露。"
@@ -792,7 +796,9 @@ class GuiRuntimeSession:
         newly_registered = game.try_register_bestiary(state, enemy_id)
 
         # 獲得經驗值與 Level Up 處理
-        game.gain_exp(state, enemy["exp"])
+        dungeon_id = self.exploration.get("dungeon_id") if self.exploration else None
+        exp_reward = game.gain_exp(state, enemy["exp"], dungeon_id)
+        enemy["exp"] = exp_reward["awarded_exp"]
         level_after = state.get("level", 1)
         level_up_occurred = level_after > level_before
 
@@ -810,6 +816,9 @@ class GuiRuntimeSession:
             reward_lines.append(f"獲得經驗：+{enemy['exp']} EXP (目前 {state['exp']}/{game.exp_to_next(level_after)})")
 
         # 處理掉落素材
+        if exp_reward["reason"]:
+            reward_lines.append(f"經驗衰減：{exp_reward['reason']}，原始 {exp_reward['base_exp']} EXP 的 20%。")
+
         drops_found = []
         for item_id, chance, qty in enemy["drops"]:
             stats = game.get_stats(state)
@@ -917,7 +926,9 @@ class GuiRuntimeSession:
             reward_lines,
         )
         combat.setdefault("battle_log", []).append("戰鬥結束：你倒下了。")
-        return self._live_response("defeat", "Defeated. Returned by rescue.", screen_model=combat_screen_model(self))
+        defeat_screen_model = combat_screen_model(self)
+        self._clear_live_run()
+        return self._live_response("defeat", "Defeated. Returned by rescue.", screen_model=defeat_screen_model)
 
     def require_exploration(self) -> dict[str, Any]:
         if self.exploration is None:
@@ -1710,30 +1721,10 @@ class GuiRuntimeSession:
         )
 
     def attune_relic(self, payload: dict[str, Any], screen_id: str | None = None) -> dict[str, Any]:
-        state = self.require_state()
-        relic_identifier = payload.get("relic_id") or payload.get("relic_name") or payload.get("element_id")
-        result = game.enshrine_relic(state, str(relic_identifier) if relic_identifier else None)
-        return self._live_response(
-            "attune_relic",
-            result["message"],
-            screen_model=self.relic_preview_screen_model()
-        )
+        raise GuiActionError("四元素聖印目前僅供主線進度前瞻，效果尚未實裝。", status=409)
 
     def select_relic_passive(self, payload: dict[str, Any], screen_id: str | None = None) -> dict[str, Any]:
-        state = self.require_state()
-        relic_identifier = payload.get("relic_id") or payload.get("relic_name") or payload.get("element_id")
-        result = game.select_relic_passive(
-            state,
-            str(relic_identifier) if relic_identifier else None,
-            payload.get("choice_id"),
-        )
-        if result["status"] == "blocked":
-            raise GuiActionError(result["message"], status=409, result_status="blocked", blocked_reason=result["message"])
-        return self._live_response(
-            "select_relic_passive",
-            result["message"],
-            screen_model=self.relic_preview_screen_model(),
-        )
+        raise GuiActionError("四元素聖印目前僅供主線進度前瞻，效果尚未實裝。", status=409)
 
     def screen_model(self, screen_id: str) -> dict[str, Any]:
         if screen_id == "start_screen":

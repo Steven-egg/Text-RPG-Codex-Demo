@@ -146,6 +146,21 @@ def record_boss_glen_sighting(state: dict) -> bool:
     return True
 
 
+def activate_boss_glen_investigation(state: dict) -> bool:
+    """Auto-accept Glen's investigation at the mine endpoint.
+
+    This also upgrades legacy saves which have only the former sighting flag.
+    """
+    flags = state.setdefault("flags", {})
+    if flags.get("boss_glen_defeated"):
+        return False
+    flags[BOSS_GLEN_SIGHTED_FLAG] = True
+    if flags.get(BOSS_GLEN_INVESTIGATION_ACCEPTED_FLAG):
+        return False
+    flags[BOSS_GLEN_INVESTIGATION_ACCEPTED_FLAG] = True
+    return True
+
+
 def choose_weighted_event() -> str:
     total = sum(weight for _, weight in EVENT_WEIGHTS)
     roll = random.randint(1, total)
@@ -322,7 +337,7 @@ def clear_dungeon_boss(state: dict, boss_id: str, run_log: dict) -> dict[str, An
 def explore_dungeon(state: dict, dungeon_id: str) -> None:
     from .game import combat
     dungeon = DUNGEONS[dungeon_id]
-    run_log = {"gold": 0, "items": {}}
+    run_log = {"gold": 0, "items": {}, "dungeon_id": dungeon_id}
     render_panel(
         dungeon["name"],
         [
@@ -387,14 +402,9 @@ def explore_dungeon(state: dict, dungeon_id: str) -> None:
 
     boss_id = dungeon.get("boss")
     if dungeon_id == "dungeon_scorched_mine" and boss_id == "boss_glen":
-        first_sighting = record_boss_glen_sighting(state)
-        if first_sighting:
-            print(f"\n你在{dungeon['name']}深處發現了{MONSTERS[boss_id]['name']}，但目前情報不足。")
-        if (
-            not state["flags"].get(BOSS_GLEN_INVESTIGATION_ACCEPTED_FLAG)
-            and not state["flags"].get("boss_glen_defeated")
-        ):
-            print(f"請先返回冒險者公會回報，接受{dungeon['name']}異常調查後再來挑戰。")
+        if activate_boss_glen_investigation(state):
+            print(f"\n你在{dungeon['name']}深處發現了{MONSTERS[boss_id]['name']}。調查已自動承接，可立刻挑戰。")
+            show_story_beat(take_story_beat(state, "boss.before.boss_glen"))
     if boss_available_at_dungeon_end(state, dungeon_id, boss_id):
         show_story_beat(take_story_beat(state, boss_story_beat_id(boss_id, "before")))
         raw = input(boss_challenge_prompt(boss_id)).strip().lower()

@@ -16,20 +16,14 @@ def exploration_screen_model(session: Any) -> dict[str, Any]:
     status = exploration.get("status", "exploring")
 
     if exploration["dungeon_id"] == "dungeon_scorched_mine" and current_step >= total_steps:
-        game.record_boss_glen_sighting(state)
+        game.activate_boss_glen_investigation(state)
 
     boss_id = dungeon.get("boss")
     boss_action = None
     boss_is_available = boss_id and game.boss_available_at_dungeon_end(
         state, exploration["dungeon_id"], boss_id
     )
-    show_pending_glen = (
-        boss_id == "boss_glen"
-        and current_step >= total_steps
-        and state.get("flags", {}).get(game.BOSS_GLEN_SIGHTED_FLAG)
-        and not state.get("flags", {}).get("boss_glen_defeated")
-    )
-    if boss_id and current_step >= total_steps and (boss_is_available or show_pending_glen):
+    if boss_id and current_step >= total_steps and boss_is_available:
         boss_name = MONSTERS[boss_id]["name"]
         is_enabled = status in ("exploring", "resolved") and current_step >= total_steps
         disabled_reason = None

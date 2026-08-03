@@ -390,6 +390,36 @@ STORY_BEATS: dict[str, dict[str, Any]] = {
         "dismiss_label": "走向封印",
         "tone": "victory",
     },
+    "boss.before.boss_glen": {
+        "kind": "boss_before",
+        "title": "礦坑深處的守門者",
+        "lines": [
+            "焦石礦坑的異常源頭現身了：格倫擋在熔岩裂隙前。",
+            "你已自動承接調查與討伐，不必返回公會，可立刻挑戰。",
+        ],
+        "dismiss_label": "準備迎戰",
+        "tone": "warning",
+    },
+    "guidance.promotion_preview": {
+        "kind": "region_transition",
+        "title": "轉職前瞻",
+        "lines": [
+            "正式轉職需達 Lv18，並完成 Ice 區域的回報任務。",
+            "此處先可查看路線與條件；尚未達成前不會進行轉職。",
+        ],
+        "dismiss_label": "查看條件",
+        "tone": "neutral",
+    },
+    "guidance.relic_preview": {
+        "kind": "region_transition",
+        "title": "四元素聖印",
+        "lines": [
+            "Fire、Ice、Earth、Thunder 聖印記錄主線進度與調查線索。",
+            "目前僅提供前瞻，聖印效果尚未實裝，請勿視為戰鬥加成。",
+        ],
+        "dismiss_label": "查看聖印",
+        "tone": "neutral",
+    },
     "ending.main_story_clear": {
         "kind": "ending",
         "title": "元素迷宮・主線完成",
