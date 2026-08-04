@@ -112,6 +112,11 @@ Gameplay/runtime baseline:
 & $mazePython 06_tools\test_dungeon_defeat_contract.py
 & $mazePython 06_tools\smoke_test_combat_bridge.py
 & $mazePython 06_tools\test_combat_balance_report.py
+& $mazePython 06_tools\test_equipment_instance_lifecycle.py
+& $mazePython 06_tools\test_equipment_instance_recipe_boundary.py
+& $mazePython 06_tools\smoke_test_workshop_bridge.py
+& $mazePython 06_tools\smoke_test_synthesis_bridge.py
+& $mazePython 06_tools\test_gui_recipe_runtime_coverage.py
 ```
 
 Story and GUI SFX focused checks:

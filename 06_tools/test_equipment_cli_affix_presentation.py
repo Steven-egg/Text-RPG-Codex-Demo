@@ -9,7 +9,7 @@ for module_root in (ROOT / "03_engine", ROOT / "04_data"):
     if str(module_root) not in sys.path:
         sys.path.insert(0, str(module_root))
 
-from data import EQUIPMENT
+from data import AFFIXES, EQUIPMENT
 from engine.formatting import equipment_affix_summary, equipment_summary, format_affix_view
 from engine.state import add_item, create_state
 
@@ -28,7 +28,7 @@ def run() -> None:
     reference_id = next(ref for ref in state["inventory"] if state["equipment_instances"].get(ref, {}).get("base_item_id") == "weapon_wood_sword")
     state["equipment_instances"][reference_id]["major_affix_id"] = "major_sharp"
     summary = equipment_summary(reference_id, state)
-    assert f"{EQUIPMENT['weapon_wood_sword']['stats']['attack'] + 1:+}" in summary
+    assert f"{EQUIPMENT['weapon_wood_sword']['stats']['attack'] + AFFIXES['major_sharp']['stats']['attack']:+}" in summary
 
 
 if __name__ == "__main__":

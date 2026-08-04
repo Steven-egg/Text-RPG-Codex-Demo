@@ -79,6 +79,13 @@ def run_smoke_test():
     assert state_fp["inventory"]["mat_moss_fiber"] == 1  # 4 - 3 = 1
     assert state_fp["inventory"]["mat_small_crystal"] == 1  # 3 - 2 = 1
     assert state_fp["inventory"]["special_focus_pouch"] == 1
+    equip_response = session_fp.dispatch(
+        "equip_equipment",
+        {"item_id": "special_focus_pouch"},
+        screen_id="world_map",
+    )
+    assert state_fp["equipment"]["special"] == "special_focus_pouch"
+    assert equip_response["screen_model"]["utility_preview"]["type"] == "inventory"
     print("Happy Path (focus pouch) verified.")
 
     # ----------------------------------------------------
@@ -145,7 +152,8 @@ def run_smoke_test():
         raise AssertionError("Expected craft of locked recipe to fail, but it succeeded.")
     except GuiActionError as err:
         assert err.status == 403
-        assert err.blocked_reason == "配方尚未解鎖。"
+        assert "完成公會任務「焦石偵查」" in err.blocked_reason
+        assert "recipe_" not in err.blocked_reason and "unlock_" not in err.blocked_reason
         print("Blocked Path (Locked recipe) verified.")
 
     # ----------------------------------------------------
@@ -207,12 +215,11 @@ def run_smoke_test():
         print("Blocked Path (Missing base item) verified.")
 
     # ----------------------------------------------------
-    # 10. Blocked Path: Non-whitelisted recipe
+    # 10. Blocked Path: Workshop recipe sent to the synthesis action
     # ----------------------------------------------------
     session_non_white = GuiRuntimeSession()
     session_non_white.new_game(name="測試合成家", job_id="rogue")
     state_non_white = session_non_white.require_state()
-    # recipe_iron_sword_plus_1 is in RECIPES but not in Mira whitelist
     game.unlock(state_non_white, "recipe_iron_sword_plus_1")
     state_non_white["gold"] = 500
     state_non_white["inventory"]["mat_cracked_stone"] = 10
@@ -221,11 +228,12 @@ def run_smoke_test():
 
     try:
         session_non_white.dispatch("craft_recipe", {"recipe_id": "recipe_iron_sword_plus_1"}, screen_id="synthesis_screen")
-        raise AssertionError("Expected craft of non-whitelisted recipe to fail, but it succeeded.")
+        raise AssertionError("Expected workshop recipe on synthesis action to fail, but it succeeded.")
     except GuiActionError as err:
-        assert err.status == 403
-        assert "非白名單配方。" in str(err)
-        print("Blocked Path (Non-whitelisted recipe) verified.")
+        assert err.status == 409
+        assert "工坊" in err.blocked_reason
+        assert "白名單" not in str(err)
+        print("Blocked Path (Wrong facility recipe) verified.")
 
     # ----------------------------------------------------
     # 11. Verify Synthesis Screen Model
@@ -253,6 +261,7 @@ def run_smoke_test():
     assert piercing_row["status_label"] != "尚未解鎖"  # because unlocked in session
     assert fire_cloak_row["status"] == "missing"  # because locked
     assert fire_cloak_row["status_label"] == "尚未解鎖"
+    assert "完成公會任務「焦石偵查」" in fire_cloak_row["disabled_reason"]
     print("Synthesis Screen Model verified.")
 
     print("\nSynthesis bridge smoke test successfully completed all checks!")

@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import Any
 from data import EQUIPMENT, SHOP_INVENTORY, RECIPES, MATERIALS
 from . import game
-from .equipment_refs import inventory_equipment_refs, resolve_equipment_ref
+from .equipment_refs import equipment_base_id, inventory_equipment_refs, resolve_equipment_ref
 
 
 def workshop_screen_model(state: dict[str, Any], selected_region_id: str | None = None) -> dict[str, Any]:
@@ -82,13 +82,8 @@ def workshop_screen_model(state: dict[str, Any], selected_region_id: str | None 
         }
 
     upgrades_list = []
-    whitelisted_recipes = [
-        r_id for r_id, r in RECIPES.items()
-        if r.get("region", "border_fire") == region_id
-        and r.get("base_item")
-        and EQUIPMENT.get(list(r["output"].keys())[0], {}).get("slot") != "accessory"
-    ]
-    for recipe_id in whitelisted_recipes:
+    workshop_recipes = game.workshop_recipe_ids(region_id)
+    for recipe_id in workshop_recipes:
         if recipe_id in RECIPES:
             r = RECIPES[recipe_id]
             output_id = list(r["output"].keys())[0]
@@ -105,6 +100,14 @@ def workshop_screen_model(state: dict[str, Any], selected_region_id: str | None 
                 }
 
             output_stats = EQUIPMENT[output_id]["stats"] if output_id in EQUIPMENT else {}
+            output_jobs = EQUIPMENT[output_id].get("jobs", []) if output_id in EQUIPMENT else []
+            unlocked = game.is_unlocked(state, r.get("unlock"))
+            job_compatible = game.recipe_job_compatible(state, recipe_id)
+            base_inventory_count = game.equipment_ref_count(state, base_item) if base_item else 0
+            base_equipped = bool(base_item) and any(
+                equipment_base_id(state, reference_id) == base_item
+                for reference_id in state.get("equipment", {}).values()
+            )
 
             upgrades_list.append({
                 "id": recipe_id,
@@ -116,8 +119,16 @@ def workshop_screen_model(state: dict[str, Any], selected_region_id: str | None 
                 "materials": materials_formatted,
                 "gold": r.get("gold", 0),
                 "stats": output_stats,
+                "jobs": output_jobs,
                 "desc": r.get("desc", ""),
-                "unlock_quest": r.get("unlock", "")
+                "unlocked": unlocked,
+                "unlock_condition": game.recipe_unlock_condition(recipe_id),
+                "locked_reason": game.recipe_locked_reason(state, recipe_id),
+                "job_compatible": job_compatible,
+                "job_blocked_reason": None if job_compatible else game.recipe_unavailable_reason(state, recipe_id),
+                "base_inventory_count": base_inventory_count,
+                "base_equipped": base_equipped,
+                "base_owned_count": base_inventory_count + (1 if base_equipped else 0),
             })
 
     owned_equipment = []

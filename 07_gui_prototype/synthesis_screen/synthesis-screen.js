@@ -435,8 +435,14 @@ function renderActionLog() {
     ...state.actionLog.map((entry) => {
       const li = document.createElement("li");
       li.className = entry.dispatched ? "log-dispatched" : "log-blocked";
+      const publicPayload = { ...(entry.payload ?? {}) };
+      if (publicPayload.recipe_id) {
+        const recipe = state.model?.recipe_rows?.find((row) => row.recipe_id === publicPayload.recipe_id);
+        publicPayload.recipe = recipe?.title ?? "已選配方";
+        delete publicPayload.recipe_id;
+      }
       li.textContent = `[${entry.time}] ${entry.dispatched ? "dispatch" : "blocked"} ${entry.action_id} ${JSON.stringify(
-        entry.payload ?? {},
+        publicPayload,
       )}${entry.reason ? ` reason=${entry.reason}` : ""}`;
       return li;
     }),

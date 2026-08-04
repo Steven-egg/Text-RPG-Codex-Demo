@@ -1483,6 +1483,31 @@ select:focus-visible {
   line-height: 1.4;
 }
 
+.utility-equip-action {
+  align-self: flex-end;
+  min-width: 72px;
+  padding: 6px 12px;
+  border: 1px solid rgba(208, 168, 76, 0.58);
+  border-radius: 5px;
+  background: rgba(208, 168, 76, 0.12);
+  color: var(--gold);
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.utility-equip-action:hover:not(:disabled),
+.utility-equip-action:focus-visible {
+  background: rgba(208, 168, 76, 0.24);
+  border-color: var(--gold);
+}
+
+.utility-equip-action:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
 .utility-empty-msg {
   text-align: center;
   color: var(--paper-muted);

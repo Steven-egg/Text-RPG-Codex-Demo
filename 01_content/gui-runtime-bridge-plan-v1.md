@@ -23,8 +23,12 @@ in `archive/gui-runtime-bridge-plan-v1.md`.
 
 Existing live slices include start/load/restart, town and facility shells,
 approved dungeon/combat actions, guild reporting, shop consumables,
-magic-book learning, and workshop weapon buy/equip coverage. Live and static
-modes share screen interfaces while keeping their data sources distinct.
+magic-book learning, all authoritative current-region workshop and synthesis
+recipes, and equipment actions from both the workshop and the world-map
+inventory preview. Recipe execution consumes exact equipment instances
+(including legacy-normalized instances), while special-slot equipment remains
+a static equipment reference. Live and static modes share screen interfaces
+while keeping their data sources distinct.
 
 The verified integration candidate adds optional `story_beat` presentation to
 that boundary:
