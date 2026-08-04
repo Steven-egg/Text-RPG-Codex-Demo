@@ -208,17 +208,20 @@ def run_smoke_test():
         session.dispatch("upgrade_equipment", {"recipe_id": "recipe_iron_sword_plus_1"}, screen_id="workshop_screen")
         raise AssertionError("Expected locked recipe upgrade to fail, but it succeeded.")
     except GuiActionError as err:
-        assert err.status == 409
-        assert err.blocked_reason == "配方未解鎖"
+        assert err.status == 403
+        assert "完成公會任務「洞窟採集」" in err.blocked_reason
+        assert "recipe_" not in err.blocked_reason and "unlock_" not in err.blocked_reason
         print("Blocked Path (Locked recipe upgrade) verified.")
 
-    # 17. Blocked Path: Non-whitelisted recipe upgrade
+    # 17. Blocked Path: Synthesis recipe sent to the workshop action
     try:
         session.dispatch("upgrade_equipment", {"recipe_id": "recipe_fire_cloak"}, screen_id="workshop_screen")
-        raise AssertionError("Expected non-whitelisted recipe upgrade to fail, but it succeeded.")
+        raise AssertionError("Expected synthesis recipe on workshop action to fail, but it succeeded.")
     except GuiActionError as err:
-        assert err.status == 400
-        print("Blocked Path (Non-whitelisted recipe upgrade) verified.")
+        assert err.status == 409
+        assert "合成屋" in err.blocked_reason
+        assert "白名單" not in str(err)
+        print("Blocked Path (Wrong facility recipe) verified.")
 
     # 18. Blocked Path: Recipe upgrade low gold
     # Unlock recipe first

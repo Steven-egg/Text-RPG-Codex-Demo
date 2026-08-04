@@ -12,9 +12,9 @@ for module_root in (REPO_ROOT / "03_engine", REPO_ROOT / "04_data"):
 
 from data import EQUIPMENT
 from engine.equipment_refs import equipment_base_id, resolve_equipment_ref
-from engine.gui_actions import GuiRuntimeSession, get_inventory_preview_data, get_status_preview_data
+from engine.gui_actions import GuiActionError, GuiRuntimeSession, get_inventory_preview_data, get_status_preview_data
 from engine.gui_storage_model import storage_screen_model
-from engine.state import create_state, equip_item, get_stats, owns_item_or_equipped
+from engine.state import add_item, create_state, equip_item, get_stats, owns_item_or_equipped
 
 
 def run() -> None:
@@ -60,6 +60,34 @@ def run() -> None:
     assert response["ok"] is True
     assert state["equipment"]["weapon"] == "eqi_0002"
     assert state["inventory"] == {"eqi_0001": 1}
+
+    preview = get_inventory_preview_data(state)
+    backpack_sword = next(row for row in preview if row["item_id"] == "eqi_0001")
+    assert backpack_sword["equip_action"] == {
+        "action_id": "equip_equipment",
+        "label": "裝備",
+        "enabled": True,
+        "disabled_reason": None,
+        "payload": {"item_id": "eqi_0001"},
+    }
+    response = session.dispatch("equip_equipment", {"item_id": "eqi_0001"}, screen_id="world_map")
+    assert response["next_screen_id"] == "world_map"
+    assert response["screen_model"]["utility_preview"]["type"] == "inventory"
+    assert state["equipment"]["weapon"] == "eqi_0001"
+    assert state["inventory"] == {"eqi_0002": 1}
+
+    mage = create_state("preview-job-gate", "法師")
+    add_item(mage, "weapon_wood_sword")
+    mage_ref = next(ref for ref in mage["inventory"] if equipment_base_id(mage, ref) == "weapon_wood_sword")
+    mage_row = next(row for row in get_inventory_preview_data(mage) if row["item_id"] == mage_ref)
+    assert mage_row["equip_action"]["enabled"] is False
+    mage_session = GuiRuntimeSession()
+    mage_session.state = mage
+    try:
+        mage_session.dispatch("equip_equipment", {"item_id": mage_ref}, screen_id="world_map")
+        raise AssertionError("job-incompatible inventory equipment unexpectedly equipped")
+    except GuiActionError as error:
+        assert error.status == 409 and error.blocked_reason == "職業不符"
 
 
 if __name__ == "__main__":

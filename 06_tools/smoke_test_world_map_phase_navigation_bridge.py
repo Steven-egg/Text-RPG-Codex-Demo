@@ -60,9 +60,10 @@ def run_smoke_test() -> None:
         "emergency_hp": {"item_id": None, "quantity": 0},
         "mp": {"item_id": None, "quantity": 0},
         "throwable": {"item_id": None, "quantity": 0},
+        "escape": {"item_id": None, "quantity": 0},
     }
     assert game.configure_run_supplies(state, empty_supplies) == empty_supplies
-    print(" - An empty four-slot supply configuration remains a valid expedition payload.")
+    print(" - An empty five-slot supply configuration remains a valid expedition payload.")
 
     for region_id in ("ice", "earth", "thunder", "final"):
         slot = next(candidate for candidate in REGION_DUNGEON_LAYOUTS[region_id] if candidate.get("main_dungeon"))

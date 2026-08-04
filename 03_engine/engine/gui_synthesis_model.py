@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import Any
 from data import EQUIPMENT, ITEMS, RECIPES, MATERIALS
 from . import game
+from .equipment_refs import equipment_base_id
 from .gui_presentation import resource_strip
 
 
@@ -12,11 +13,7 @@ def synthesis_screen_model(state: dict[str, Any], selected_region_id: str | None
     region_id = selected_region_id or "border_fire"
     if region_id not in REGIONS or not _is_unlocked(state, REGIONS[region_id].get("unlock_key")):
         region_id = "border_fire"
-    mira_recipes = [
-        r_id for r_id, r in RECIPES.items()
-        if r.get("region", "border_fire") == region_id
-        and (not r.get("base_item") or EQUIPMENT.get(list(r["output"].keys())[0], {}).get("slot") == "accessory")
-    ]
+    mira_recipes = game.synthesis_recipe_ids(region_id)
 
     recipe_rows = []
     recipe_details = {}
@@ -43,12 +40,14 @@ def synthesis_screen_model(state: dict[str, Any], selected_region_id: str | None
         else:
             battle_count += 1
 
-    # Default selection to the first whitelisted recipe
+    # Default selection to the first recipe routed to this region's synthesis shop.
     default_recipe_id = mira_recipes[0] if mira_recipes else ""
 
     for r_id in mira_recipes:
         recipe = RECIPES[r_id]
-        unlocked = game.recipe_available(state, r_id)
+        unlocked = game.is_unlocked(state, recipe.get("unlock"))
+        job_compatible = game.recipe_job_compatible(state, r_id)
+        unavailable_reason = game.recipe_unavailable_reason(state, r_id)
         has_enough_gold = gold >= recipe["gold"]
         has_enough_mats = game.can_pay_items(state, recipe["materials"])
 
@@ -78,12 +77,19 @@ def synthesis_screen_model(state: dict[str, Any], selected_region_id: str | None
         craft_limit = game.max_synthesis_count(state, r_id)
 
         # Determine status
-        if not unlocked:
+        if not job_compatible:
+            status = "missing"
+            status_label = "職業不符"
+            action_enabled = False
+            action_disabled_reason = unavailable_reason
+            feedback_text = unavailable_reason
+            feedback_tone = "warning"
+        elif not unlocked:
             status = "missing"
             status_label = "尚未解鎖"
             action_enabled = False
-            action_disabled_reason = "配方尚未解鎖。"
-            feedback_text = "這張配方目前在公會還沒登記，暫時無法製作。"
+            action_disabled_reason = game.recipe_locked_reason(state, r_id)
+            feedback_text = action_disabled_reason
             feedback_tone = "warning"
         elif not has_enough_gold:
             status = "missing"
@@ -132,7 +138,8 @@ def synthesis_screen_model(state: dict[str, Any], selected_region_id: str | None
             "output_summary": output_summary,
             "owned_summary": owned_summary,
             "max_count": craft_limit,
-            "gold": recipe["gold"]
+            "gold": recipe["gold"],
+            "disabled_reason": action_disabled_reason,
         })
 
         # Build detailed result message for synthesis confirmation
@@ -161,11 +168,26 @@ def synthesis_screen_model(state: dict[str, Any], selected_region_id: str | None
                 "tone": feedback_tone,
                 "speaker": "米菈",
                 "text": feedback_text
-            }
+            },
+            "blocked_feedback": {
+                "tone": feedback_tone,
+                "speaker": "米菈",
+                "text": feedback_text
+            },
         }
 
         # Build requirement rows
         r_rows = [
+            {
+                "id": "recipe_access",
+                "icon_label": "方",
+                "label": "配方取得條件",
+                "required_value": game.recipe_unlock_condition(r_id),
+                "current_value": "已取得" if unlocked else "未取得",
+                "status": "met" if unlocked else "missing",
+                "status_label": "已滿足" if unlocked else "未滿足",
+                "disabled_reason": None if unlocked else game.recipe_locked_reason(state, r_id),
+            },
             {
                 "id": "gold",
                 "icon_label": "G",
@@ -179,10 +201,12 @@ def synthesis_screen_model(state: dict[str, Any], selected_region_id: str | None
         ]
 
         if base_item:
-            owned_base_qty = state.get("inventory", {}).get(base_item, 0)
-            is_equipped = base_item in state.get("equipment", {}).values()
+            owned_base_qty = game.recipe_base_owned_count(state, recipe)
+            is_equipped = any(
+                equipment_base_id(state, reference_id) == base_item
+                for reference_id in state.get("equipment", {}).values()
+            )
             if is_equipped:
-                owned_base_qty += 1
                 curr_val_str = f"x{owned_base_qty}（已裝備）"
             else:
                 curr_val_str = f"x{owned_base_qty}"

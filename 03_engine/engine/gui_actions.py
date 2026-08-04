@@ -20,6 +20,8 @@ from data import (
     get_unlocked_regions,
 )
 from .equipment_refs import is_equipment_ref, resolve_equipment_ref
+from .equipment_quality import QUALITY_LABELS
+from .state import parent_job
 
 from . import game
 from .formatting import item_name
@@ -1133,6 +1135,7 @@ class GuiRuntimeSession:
             f"成功購買 {eq['name']}！獲得 {eq['name']} x1，扣除金幣 {price}G。",
             state,
             screen_id="workshop_screen",
+            selected_region_id=self.current_region_id,
         )
         if response.get("screen_model"):
             is_weapon = eq["slot"] == "weapon"
@@ -1194,6 +1197,7 @@ class GuiRuntimeSession:
             f"已裝備 {eq['name']}。",
             state,
             screen_id="workshop_screen",
+            selected_region_id=self.current_region_id,
         )
         if response.get("screen_model"):
             response["screen_model"]["feedback_message"] = {
@@ -1242,11 +1246,25 @@ class GuiRuntimeSession:
         if not success:
             raise GuiActionError("裝備穿戴失敗。", status=400)
 
+        if screen_id == "world_map":
+            model = world_map_model(state, self.current_region_id)
+            model["utility_preview"] = {
+                "type": "inventory",
+                "title": "背包 / 裝備",
+                "data": get_inventory_preview_data(state),
+            }
+            return self._live_response(
+                "equip_equipment",
+                f"已裝備 {eq['name']}。",
+                screen_model=model,
+            )
+
         response = action_response(
             "equip_equipment",
             f"已裝備 {eq['name']}。",
             state,
             screen_id="workshop_screen",
+            selected_region_id=self.current_region_id,
         )
         if response.get("screen_model"):
             speaker = "葛雷" if slot == "weapon" else "布琳"
@@ -1257,26 +1275,49 @@ class GuiRuntimeSession:
             }
         return response
 
+    def _validated_facility_recipe(self, recipe_id: object, facility: str) -> dict[str, Any]:
+        state = self.require_state()
+        if not isinstance(recipe_id, str) or recipe_id not in RECIPES:
+            raise GuiActionError("配方不存在。", status=400)
+        recipe = RECIPES[recipe_id]
+        recipe_region_id = game.recipe_region_id(recipe)
+        if recipe_region_id != self.current_region_id:
+            town_name = REGIONS.get(recipe_region_id, {}).get("town_name", "對應區域城鎮")
+            raise GuiActionError(
+                f"此配方只能在「{town_name}」使用。",
+                status=403,
+                result_status="blocked",
+                blocked_reason=f"請前往「{town_name}」。",
+            )
+
+        allowed_ids = (
+            game.workshop_recipe_ids(self.current_region_id)
+            if facility == "workshop"
+            else game.synthesis_recipe_ids(self.current_region_id)
+        )
+        if recipe_id not in allowed_ids:
+            destination = "合成屋" if facility == "workshop" else "工坊"
+            raise GuiActionError(
+                f"這張配方應在目前地區的{destination}使用。",
+                status=409,
+                result_status="blocked",
+                blocked_reason=f"請改至{destination}使用此配方。",
+            )
+
+        unavailable_reason = game.recipe_unavailable_reason(state, recipe_id)
+        if unavailable_reason:
+            raise GuiActionError(
+                unavailable_reason,
+                status=403,
+                result_status="blocked",
+                blocked_reason=unavailable_reason,
+            )
+        return recipe
+
     def upgrade_equipment(self, payload: dict[str, Any], *, screen_id: str | None = None) -> dict[str, Any]:
         state = self.require_state()
         recipe_id = payload.get("recipe_id")
-
-        whitelisted_recipes = {"recipe_iron_sword_plus_1", "recipe_leather_armor_plus_1"}
-        if recipe_id not in whitelisted_recipes:
-            raise GuiActionError("非白名單配方。", status=400)
-
-        if not recipe_id or recipe_id not in RECIPES:
-            raise GuiActionError("配方不存在。", status=400)
-
-        recipe = RECIPES[recipe_id]
-
-        if not game.recipe_available(state, recipe_id):
-            raise GuiActionError(
-                "配方尚未解鎖，無法進行強化。",
-                status=409,
-                result_status="blocked",
-                blocked_reason="配方未解鎖",
-            )
+        recipe = self._validated_facility_recipe(recipe_id, "workshop")
 
         if state.get("gold", 0) < recipe["gold"]:
             raise GuiActionError(
@@ -1312,6 +1353,7 @@ class GuiRuntimeSession:
             f"成功強化 {recipe['name']}！",
             state,
             screen_id="workshop_screen",
+            selected_region_id=self.current_region_id,
         )
         if response.get("screen_model"):
             response["screen_model"]["feedback_message"] = {
@@ -1446,17 +1488,7 @@ class GuiRuntimeSession:
     def craft_recipe(self, payload: dict[str, Any], *, screen_id: str | None = None) -> dict[str, Any]:
         state = self.require_state()
         recipe_id = payload.get("recipe_id")
-        mira_recipes = {"recipe_fire_cloak", "recipe_focus_pouch", "recipe_heat_charm", "recipe_piercing_bundle", "recipe_rending_spike"}
-        if recipe_id not in mira_recipes:
-            raise GuiActionError("非白名單配方。", status=403)
-
-        if not game.recipe_available(state, recipe_id):
-            raise GuiActionError(
-                "配方尚未解鎖。",
-                status=403,
-                result_status="blocked",
-                blocked_reason="配方尚未解鎖。",
-            )
+        recipe = self._validated_facility_recipe(recipe_id, "synthesis")
 
         result = game.craft_recipe_message(state, recipe_id)
         if result == "金幣不足。":
@@ -1481,8 +1513,13 @@ class GuiRuntimeSession:
                 blocked_reason=result,
             )
 
-        screen_to_use = screen_id or "synthesis_screen"
-        return action_response("craft_recipe", result, state, screen_id=screen_to_use)
+        return action_response(
+            "craft_recipe",
+            result,
+            state,
+            screen_id="synthesis_screen",
+            selected_region_id=self.current_region_id,
+        )
 
     def guild_screen_model(self) -> dict[str, Any]:
         return guild_screen_model(self.require_state(), selected_region_id=self.current_region_id)
@@ -2009,10 +2046,37 @@ def get_inventory_preview_data(state: dict[str, Any]) -> list[dict[str, Any]]:
     for item_id in sorted(counts.keys()):
         qty = counts[item_id]
         category = "其他"
+        equip_action = None
+        equipment_data = None
         if is_equipment_ref(state, item_id):
             category = "裝備"
             is_equipped = item_id in equipped_set
-            name = f"{item_name(item_id, state)}（已裝備）" if is_equipped else item_name(item_id, state)
+            resolved = resolve_equipment_ref(state, item_id)
+            quality = resolved["quality"] if resolved else "normal"
+            quality_label = QUALITY_LABELS.get(quality, "普通")
+            base_name = item_name(item_id, state)
+            display_name = f"{quality_label} {base_name}" if quality != "normal" else base_name
+            name = f"{display_name}（已裝備）" if is_equipped else display_name
+            job_compatible = bool(resolved) and parent_job(state.get("job", "")) in resolved["base"].get("jobs", [])
+            in_inventory = state.get("inventory", {}).get(item_id, 0) > 0
+            if not is_equipped and in_inventory:
+                equip_action = {
+                    "action_id": "equip_equipment",
+                    "label": "裝備",
+                    "enabled": job_compatible,
+                    "disabled_reason": None if job_compatible else f"目前職業「{state.get('job', '')}」無法裝備此物品。",
+                    "payload": {"item_id": item_id},
+                }
+            equipment_data = {
+                "base_item_id": resolved["base_item_id"] if resolved else None,
+                "slot": resolved["base"].get("slot") if resolved else None,
+                "quality": quality,
+                "quality_label": quality_label,
+                "effective_stats": resolved["effective_stats"] if resolved else {},
+                "affixes": resolved["affixes"] if resolved else {},
+                "equipped": is_equipped,
+                "job_compatible": job_compatible,
+            }
         else:
             name = item_name(item_id)
             item_data = ITEMS.get(item_id, {})
@@ -2031,7 +2095,9 @@ def get_inventory_preview_data(state: dict[str, Any]) -> list[dict[str, Any]]:
             "name": name,
             "quantity": qty,
             "category": category,
-            "desc": game.item_usage_summary(item_id)
+            "desc": game.item_usage_summary(item_id, state),
+            "equipment": equipment_data,
+            "equip_action": equip_action,
         })
     return entries
 

@@ -1266,6 +1266,16 @@ function renderUtilityPreview(preview) {
                       <span class="meta">x${escapeHtml(item.quantity)}</span>
                     </div>
                     <div class="utility-list-item-desc">${escapeHtml(item.desc)}</div>
+                    ${item.equip_action ? `
+                      <button
+                        class="utility-equip-action"
+                        type="button"
+                        data-item-id="${escapeHtml(item.item_id)}"
+                        aria-disabled="${String(!item.equip_action.enabled)}"
+                        title="${escapeHtml(item.equip_action.disabled_reason ?? "")}"
+                        ${item.equip_action.enabled ? "" : "disabled"}
+                      >${escapeHtml(item.equip_action.label ?? "裝備")}</button>
+                    ` : ""}
                   </div>
                 `).join("")}
               </div>
@@ -1354,6 +1364,16 @@ function renderUtilityPreview(preview) {
     sfxMutedEl?.addEventListener("change", () => {
       setSfxMuted(sfxMutedEl.checked);
       feedbackMessageEl.textContent = sfxMutedEl.checked ? "音效已靜音。" : "音效已開啟。";
+    });
+  }
+  if (preview.type === "inventory") {
+    utilityContentEl.querySelectorAll(".utility-equip-action").forEach((button) => {
+      button.addEventListener("click", () => {
+        const item = preview.data.find((entry) => entry.item_id === button.dataset.itemId);
+        if (item?.equip_action) {
+          activateAction(item.equip_action, "inventory_preview");
+        }
+      });
     });
   }
 
