@@ -75,14 +75,11 @@ or label this artifact as a formal release.
 ## Minimum Read List
 
 1. `AGENTS.md`
-2. `.codex/skills/element-maze-session-ops/SKILL.md`
-3. `README.md`
-4. this file
-5. the task-specific live contract or source files
+2. `README.md`
+3. this file
+4. the task-specific live contract or source files
 
-For GUI work, also use
-`.codex/skills/element-maze-gui-static-prototype/SKILL.md` and the two current
-GUI boundary documents. For release work, read
+For GUI work, also use the two current GUI boundary documents. For release work, read
 `release-asset-policy-v1.md` and `windows-portable-release-v1.md`.
 
 ## Next Boundary

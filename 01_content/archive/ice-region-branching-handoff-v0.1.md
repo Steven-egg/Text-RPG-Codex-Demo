@@ -69,19 +69,18 @@ Seal / relic handling:
 ```text
 Work directory: C:\Users\User\OneDrive\文字冒險遊戲
 
-請先遵守 AGENTS.md 與 Codex session ops。這是 Ice town hub placeholder image
+請先遵守 AGENTS.md。這是 Ice town hub placeholder image
 candidate route，不是 runtime / data / schema / save / combat / bridge / formal
 asset-pipeline task。
 
 Minimum read:
 1. AGENTS.md
 2. 01_content/agent-startup-reading-list.md
-3. .codex/skills/element-maze-session-ops/SKILL.md
-4. README.md
-5. 01_content/codex-handoff-short.md
-6. 01_content/world-content-skeleton-v0.1.md
-7. 01_content/ui-art-prep-brief-v0.1.md
-8. 01_content/ice-region-branching-handoff-v0.1.md
+3. README.md
+4. 01_content/codex-handoff-short.md
+5. 01_content/world-content-skeleton-v0.1.md
+6. 01_content/ui-art-prep-brief-v0.1.md
+7. 01_content/ice-region-branching-handoff-v0.1.md
 
 Also inspect visual anchors from 07_gui_prototype before image work:
 - 07_gui_prototype/town_hub/assets/town-hub-environment-v01.jpg
@@ -127,20 +126,19 @@ Output expected:
 ```text
 Work directory: C:\Users\User\OneDrive\文字冒險遊戲
 
-請先遵守 AGENTS.md 與 Codex session ops。這是 read-only / planning-first
+請先遵守 AGENTS.md。這是 read-only / planning-first
 quest and CLI expansion route。不要修改 runtime、data、schema、save、combat、
 GUI、bridge、asset pipeline，也不要 stage/commit/push。
 
 Minimum read:
 1. AGENTS.md
 2. 01_content/agent-startup-reading-list.md
-3. .codex/skills/element-maze-session-ops/SKILL.md
-4. README.md
-5. 01_content/codex-handoff-short.md
-6. 01_content/world-content-skeleton-v0.1.md
-7. 01_content/regional-data-template-v0.1.md
-8. 01_content/regional-data-instantiation-plan-v0.1.md
-9. 01_content/ice-region-branching-handoff-v0.1.md
+3. README.md
+4. 01_content/codex-handoff-short.md
+5. 01_content/world-content-skeleton-v0.1.md
+6. 01_content/regional-data-template-v0.1.md
+7. 01_content/regional-data-instantiation-plan-v0.1.md
+8. 01_content/ice-region-branching-handoff-v0.1.md
 
 Read-only implementation context to inspect:
 - 04_data/data/quests.py

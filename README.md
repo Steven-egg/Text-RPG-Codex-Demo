@@ -96,10 +96,8 @@ Secondary CLI (**文字核心版 Text Core**):
 environment is healthy. `save.json` is runtime output and must not be edited
 manually.
 
-For static-only GUI work, read
-`.codex/skills/element-maze-gui-static-prototype/SKILL.md`, start
-`start_gui_prototype_server.bat`, and preserve fixture fallback and UIAction
-logging.
+For static-only GUI work, start `start_gui_prototype_server.bat` and preserve
+fixture fallback and UIAction logging.
 
 ## Verification Routes
 

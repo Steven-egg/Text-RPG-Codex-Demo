@@ -105,7 +105,7 @@ $mazePython = 'C:\Users\user\.cache\codex-runtimes\codex-primary-runtime\depende
 | 阻擋型（GUI render） | `node 06_tools\test_combat_gui_render.mjs` 與 `node --check 07_gui_prototype\combat_screen\combat-screen.js` | live race/trait meta mapping、舊 fixture fallback 與 JavaScript syntax |
 | 阻擋型（工具契約） | `& $mazePython 06_tools\test_combat_balance_report.py` | 報表欄位、配對、重現性與工具可執行性；報表數值仍是診斷，不是平衡 gate |
 | 診斷型 | `& $mazePython 06_tools\test_combat_balance.py --phase0` | 回合數、耗材、品質比較、傷害比例；成功執行與輸出可留存，但數值不得自行觸發調整 |
-| 阻擋型（GUI 有改時） | 讀 `.codex/skills/element-maze-gui-static-prototype/SKILL.md`，以 localhost `?mode=live` 驗證 live 畫面與不帶 mode 的 static fixture | 不使用 `file://`；runtime bridge 仍由 Python 掌握 gameplay |
+| 阻擋型（GUI 有改時） | 以 localhost `?mode=live` 驗證 live 畫面與不帶 mode 的 static fixture | 不使用 `file://`；runtime bridge 仍由 Python 掌握 gameplay |
 | 阻擋型 | `git diff --check` | whitespace／patch integrity |
 
 本次實際結果：

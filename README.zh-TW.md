@@ -83,9 +83,8 @@ $mazePython = 'C:\Users\user\.cache\codex-runtimes\codex-primary-runtime\depende
 當本機 Python 環境正常時，`run-game.bat` 仍可作為 CLI 便利入口。`save.json` 是
 runtime 輸出，不應手動編輯。
 
-若只處理靜態 GUI，請先讀
-`.codex/skills/element-maze-gui-static-prototype/SKILL.md`，啟動
-`start_gui_prototype_server.bat`，並保留 fixture fallback 與 UIAction logging。
+若只處理靜態 GUI，請啟動 `start_gui_prototype_server.bat`，並保留 fixture
+fallback 與 UIAction logging。
 
 ## 驗證路徑
 

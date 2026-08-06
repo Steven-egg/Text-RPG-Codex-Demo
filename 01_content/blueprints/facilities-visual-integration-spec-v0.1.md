@@ -51,8 +51,7 @@ AI facility hero image
 ```
 
 This document adds a comparison layer over current facility CSS. It does not
-replace `AGENTS.md`, the current agent's skills, the GUI static sprint rules, or
-screen-level progress records.
+replace the project's GUI working boundaries or screen-level progress records.
 
 ## 3. Boundaries
 
@@ -307,9 +306,9 @@ read current screen and relevant CSS
 -> update documentation only if the result is accepted
 ```
 
-Follow `AGENTS.md` and the current agent's GUI static prototype skill for planning
-gates, allowed surfaces, implementation, and verification. This document does
-not duplicate agent-specific prompts or command policies.
+Follow the project's current GUI working boundaries for planning gates, allowed
+surfaces, implementation, and verification. This document does not duplicate
+agent-specific prompts or command policies.
 
 When a future visual adjustment is approved, prefer direct edits to the formal
 `07_gui_prototype/<screen>/` path on a short-lived feature branch for uncertain
