@@ -426,6 +426,21 @@ body:has(.brin-armor) .list-item-row.selected {
   font-family: var(--facility-font-ui);
 }
 
+.item-ownership {
+  flex: 0 0 auto;
+  font-size: 0.55rem;
+  color: var(--gold-bright);
+  border: 1px solid rgba(208, 168, 76, 0.35);
+  border-radius: 3px;
+  padding: 2px 5px;
+}
+
+.item-ownership.equipped {
+  color: var(--success-color);
+  border-color: rgba(143, 168, 116, 0.45);
+  background: rgba(143, 168, 116, 0.1);
+}
+
 .list-item-row.selected .item-name {
   color: var(--accent);
   text-shadow: 0 0 6px var(--accent-glow);
@@ -627,6 +642,42 @@ body:has(.brin-armor) .list-item-row.selected {
 .stat-value {
   color: var(--success-color);
 }
+
+.equipment-comparison-panel {
+  display: grid;
+  gap: 5px;
+  padding: 8px 10px;
+  border: 1px solid var(--center-panel-inset);
+  border-radius: 4px;
+  background: rgba(8, 9, 11, 0.38);
+}
+
+.equipment-comparison-title,
+.equipment-comparison-row {
+  display: grid;
+  grid-template-columns: minmax(95px, 1fr) minmax(105px, auto) 48px;
+  gap: 8px;
+  align-items: center;
+  font-size: 0.61rem;
+}
+
+.equipment-comparison-title {
+  display: flex;
+  justify-content: space-between;
+  color: var(--paper-muted);
+  padding-bottom: 4px;
+  border-bottom: 1px solid rgba(239, 231, 211, 0.08);
+}
+
+.equipment-comparison-title strong { color: var(--paper-body); }
+.equipment-comparison-row span:nth-child(2) { color: var(--paper-muted); text-align: right; }
+.equipment-comparison-row strong { text-align: right; }
+.equipment-comparison-row .positive { color: var(--success-color); }
+.equipment-comparison-row .negative { color: var(--danger-color); }
+.equipment-comparison-row .neutral { color: var(--paper-muted); }
+.equipment-comparison-empty,
+.equipment-purchase-note { margin: 0; font-size: 0.58rem; color: var(--paper-muted); }
+.equipment-purchase-note { color: var(--gold-bright); }
 
 .job-compatibility-panel {
   display: flex;

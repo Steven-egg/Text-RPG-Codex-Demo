@@ -4,6 +4,30 @@ from typing import Any
 from data import EQUIPMENT, SHOP_INVENTORY, RECIPES, MATERIALS
 from . import game
 from .equipment_refs import equipment_base_id, inventory_equipment_refs, resolve_equipment_ref
+from .equipment_quality import QUALITY_LABELS
+from .gui_presentation import equipment_affix_names, equipment_slot_comparison, equipment_stat_rows
+
+
+def _shop_equipment_row(state: dict[str, Any], item_id: str) -> dict[str, Any]:
+    eq = EQUIPMENT[item_id]
+    equipped_same_base = any(
+        equipment_base_id(state, reference_id) == item_id
+        for reference_id in state.get("equipment", {}).values()
+    )
+    return {
+        "id": item_id,
+        "name": eq["name"],
+        "slot": eq["slot"],
+        "subtype": eq["subtype"],
+        "price": eq["price"],
+        "jobs": eq["jobs"],
+        "stats": eq["stats"],
+        "stat_rows": equipment_stat_rows(eq["stats"]),
+        "desc": eq["desc"],
+        "owned_count": game.equipment_ref_count(state, item_id, include_equipped=True),
+        "equipped_same_base": equipped_same_base,
+        "comparison": equipment_slot_comparison(state, item_id),
+    }
 
 
 def workshop_screen_model(state: dict[str, Any], selected_region_id: str | None = None) -> dict[str, Any]:
@@ -36,17 +60,7 @@ def workshop_screen_model(state: dict[str, Any], selected_region_id: str | None 
     weapons_list = []
     for item_id in weapons_to_show:
         if item_id in EQUIPMENT:
-            eq = EQUIPMENT[item_id]
-            weapons_list.append({
-                "id": item_id,
-                "name": eq["name"],
-                "slot": eq["slot"],
-                "subtype": eq["subtype"],
-                "price": eq["price"],
-                "jobs": eq["jobs"],
-                "stats": eq["stats"],
-                "desc": eq["desc"]
-            })
+            weapons_list.append(_shop_equipment_row(state, item_id))
 
     armors_to_show = [
         a_id for a_id in SHOP_INVENTORY["armor"]
@@ -56,17 +70,7 @@ def workshop_screen_model(state: dict[str, Any], selected_region_id: str | None 
     armors_list = []
     for item_id in armors_to_show:
         if item_id in EQUIPMENT:
-            eq = EQUIPMENT[item_id]
-            armors_list.append({
-                "id": item_id,
-                "name": eq["name"],
-                "slot": eq["slot"],
-                "subtype": eq["subtype"],
-                "price": eq["price"],
-                "jobs": eq["jobs"],
-                "stats": eq["stats"],
-                "desc": eq["desc"]
-            })
+            armors_list.append(_shop_equipment_row(state, item_id))
 
     weapons_details = {}
     for item_id, eq in EQUIPMENT.items():
@@ -78,6 +82,7 @@ def workshop_screen_model(state: dict[str, Any], selected_region_id: str | None 
             "price": eq["price"],
             "jobs": eq["jobs"],
             "stats": eq["stats"],
+            "stat_rows": equipment_stat_rows(eq["stats"]),
             "desc": eq["desc"]
         }
 
@@ -150,8 +155,12 @@ def workshop_screen_model(state: dict[str, Any], selected_region_id: str | None 
             "subtype": base["subtype"],
             "jobs": base["jobs"],
             "stats": resolved["effective_stats"],
+            "stat_rows": equipment_stat_rows(resolved["effective_stats"]),
             "desc": base["desc"],
             "equipped_slot": equipped_by_reference.get(reference_id),
+            "quality_label": QUALITY_LABELS.get(resolved["quality"], "普通"),
+            "affix_names": equipment_affix_names(resolved),
+            "comparison": equipment_slot_comparison(state, reference_id),
         })
 
     return {

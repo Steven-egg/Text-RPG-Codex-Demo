@@ -34,7 +34,13 @@ from .gui_shop_model import shop_screen_model
 from .gui_magic_shop_model import magic_shop_screen_model
 from .gui_workshop_model import workshop_screen_model
 from .gui_storage_model import storage_screen_model
-from .gui_presentation import resource_strip
+from .gui_presentation import (
+    EQUIPMENT_SLOT_LABELS,
+    equipment_affix_names,
+    equipment_slot_comparison,
+    equipment_stat_rows,
+    resource_strip,
+)
 from .gui_synthesis_model import synthesis_screen_model
 from .gui_temple_model import temple_screen_model
 from .gui_relic_preview_model import relic_preview_screen_model
@@ -2048,6 +2054,7 @@ def get_inventory_preview_data(state: dict[str, Any]) -> list[dict[str, Any]]:
         category = "其他"
         equip_action = None
         equipment_data = None
+        resolved = None
         if is_equipment_ref(state, item_id):
             category = "裝備"
             is_equipped = item_id in equipped_set
@@ -2070,12 +2077,20 @@ def get_inventory_preview_data(state: dict[str, Any]) -> list[dict[str, Any]]:
             equipment_data = {
                 "base_item_id": resolved["base_item_id"] if resolved else None,
                 "slot": resolved["base"].get("slot") if resolved else None,
+                "slot_label": (
+                    EQUIPMENT_SLOT_LABELS.get(resolved["base"].get("slot"), resolved["base"].get("slot"))
+                    if resolved else None
+                ),
+                "subtype": resolved["base"].get("subtype") if resolved else None,
                 "quality": quality,
                 "quality_label": quality_label,
                 "effective_stats": resolved["effective_stats"] if resolved else {},
-                "affixes": resolved["affixes"] if resolved else {},
+                "stat_rows": equipment_stat_rows(resolved["effective_stats"]) if resolved else [],
+                "affix_names": equipment_affix_names(resolved),
                 "equipped": is_equipped,
+                "status_label": "已裝備" if is_equipped else "背包中",
                 "job_compatible": job_compatible,
+                "comparison": equipment_slot_comparison(state, item_id) if resolved else None,
             }
         else:
             name = item_name(item_id)
@@ -2095,7 +2110,11 @@ def get_inventory_preview_data(state: dict[str, Any]) -> list[dict[str, Any]]:
             "name": name,
             "quantity": qty,
             "category": category,
-            "desc": game.item_usage_summary(item_id, state),
+            "desc": (
+                resolved["base"].get("desc", "")
+                if equipment_data and resolved
+                else game.item_usage_summary(item_id, state)
+            ),
             "equipment": equipment_data,
             "equip_action": equip_action,
         })

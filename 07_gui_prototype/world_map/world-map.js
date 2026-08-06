@@ -1259,13 +1259,44 @@ function renderUtilityPreview(preview) {
             <div class="utility-section">
               <p class="utility-section-title">${escapeHtml(cat)} (${items.length})</p>
               <div style="display: grid; gap: 8px;">
-                ${items.map(item => `
-                  <div class="utility-list-item">
+                ${items.map(item => {
+                  const equipment = item.equipment;
+                  const statChips = equipment?.stat_rows?.map(row =>
+                    `<span class="utility-equipment-stat"><span>${escapeHtml(row.label)}</span><strong>${escapeHtml(row.display_value)}</strong></span>`
+                  ).join("") || "";
+                  const affixes = equipment?.affix_names?.length
+                    ? `<p class="utility-equipment-affixes">詞綴：${equipment.affix_names.map(escapeHtml).join("、")}</p>`
+                    : "";
+                  const comparison = equipment?.comparison;
+                  const comparisonRows = comparison?.stat_rows?.map(row => {
+                    const tone = row.delta > 0 ? "positive" : (row.delta < 0 ? "negative" : "neutral");
+                    const delta = row.delta > 0 ? `+${row.delta}` : `${row.delta}`;
+                    return `<div class="utility-equipment-comparison-row">
+                      <span>${escapeHtml(row.label)}</span>
+                      <span>${escapeHtml(row.current)}${escapeHtml(row.suffix)} → ${escapeHtml(row.candidate)}${escapeHtml(row.suffix)}</span>
+                      <strong class="${tone}">${escapeHtml(delta)}${escapeHtml(row.suffix)}</strong>
+                    </div>`;
+                  }).join("") || "";
+                  return `
+                  <div class="utility-list-item ${equipment ? "utility-equipment-item" : ""}"
+                    ${equipment ? `data-equipment-row="${escapeHtml(item.item_id)}" tabindex="0" role="button" aria-expanded="false"` : ""}>
                     <div class="utility-list-item-header">
                       <span class="name">${escapeHtml(item.name)}</span>
                       <span class="meta">x${escapeHtml(item.quantity)}</span>
                     </div>
+                    ${equipment ? `<div class="utility-equipment-meta">
+                      <span class="${equipment.equipped ? "equipped" : "stored"}">${escapeHtml(equipment.status_label)}</span>
+                      <span>${escapeHtml(equipment.slot_label)}</span>
+                      <span>${escapeHtml(equipment.quality_label)}</span>
+                    </div>
+                    <div class="utility-equipment-stats">${statChips || '<span class="utility-equipment-stat">無數值屬性</span>'}</div>` : ""}
                     <div class="utility-list-item-desc">${escapeHtml(item.desc)}</div>
+                    ${equipment ? `<div class="utility-equipment-details">
+                      ${affixes}
+                      <p class="utility-equipment-current">目前${escapeHtml(comparison?.slot_label || equipment.slot_label)}：${escapeHtml(comparison?.current_name || "未裝備")}</p>
+                      ${comparisonRows}
+                    </div>
+                    <span class="utility-equipment-hint">點擊查看裝備詳情</span>` : ""}
                     ${item.equip_action ? `
                       <button
                         class="utility-equip-action"
@@ -1277,7 +1308,7 @@ function renderUtilityPreview(preview) {
                       >${escapeHtml(item.equip_action.label ?? "裝備")}</button>
                     ` : ""}
                   </div>
-                `).join("")}
+                `}).join("")}
               </div>
             </div>
           `;
@@ -1367,8 +1398,29 @@ function renderUtilityPreview(preview) {
     });
   }
   if (preview.type === "inventory") {
+    const toggleEquipmentDetails = (row) => {
+      const expanded = row.getAttribute("aria-expanded") === "true";
+      row.setAttribute("aria-expanded", String(!expanded));
+      row.classList.toggle("is-inspected", !expanded);
+      const hint = row.querySelector(".utility-equipment-hint");
+      if (hint) hint.textContent = expanded ? "點擊查看裝備詳情" : "點擊收合裝備詳情";
+      const item = preview.data.find((entry) => entry.item_id === row.dataset.equipmentRow);
+      if (!expanded && item?.equipment) {
+        feedbackMessageEl.textContent = `${item.equipment.status_label}：${item.name}（${item.equipment.slot_label}）`;
+      }
+    };
+    utilityContentEl.querySelectorAll("[data-equipment-row]").forEach((row) => {
+      row.addEventListener("click", () => toggleEquipmentDetails(row));
+      row.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          toggleEquipmentDetails(row);
+        }
+      });
+    });
     utilityContentEl.querySelectorAll(".utility-equip-action").forEach((button) => {
-      button.addEventListener("click", () => {
+      button.addEventListener("click", (event) => {
+        event.stopPropagation();
         const item = preview.data.find((entry) => entry.item_id === button.dataset.itemId);
         if (item?.equip_action) {
           activateAction(item.equip_action, "inventory_preview");
