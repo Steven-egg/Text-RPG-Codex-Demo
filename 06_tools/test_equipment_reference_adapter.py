@@ -49,7 +49,12 @@ def run() -> None:
     assert EQUIPMENT == equipment_before
 
     preview = get_inventory_preview_data(state)
-    assert any(row["item_id"] == "eqi_0001" and row["category"] == "裝備" for row in preview)
+    equipped_row = next(row for row in preview if row["item_id"] == "eqi_0001")
+    assert equipped_row["category"] == "裝備"
+    assert equipped_row["equipment"]["status_label"] == "已裝備"
+    assert equipped_row["equipment"]["slot_label"] == "武器"
+    assert equipped_row["equipment"]["stat_rows"]
+    assert equipped_row["equipment"]["comparison"]["current_name"] == EQUIPMENT["weapon_wood_sword"]["name"]
     assert get_status_preview_data(state)["equipment"][0]["item_name"] == EQUIPMENT["weapon_wood_sword"]["name"]
     storage = storage_screen_model(state)
     assert storage["inventory_rows"][0]["category"] == "equipment"

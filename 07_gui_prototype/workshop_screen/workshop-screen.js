@@ -363,6 +363,13 @@ function renderList() {
     }
     leftZone.appendChild(name);
 
+    if ((currentTab === 'weapon' || currentTab === 'armor') && item.owned_count > 0) {
+      const ownership = document.createElement('span');
+      ownership.className = `item-ownership ${item.equipped_same_base ? 'equipped' : ''}`;
+      ownership.textContent = item.equipped_same_base ? '已裝備同款' : `持有 x${item.owned_count}`;
+      leftZone.appendChild(ownership);
+    }
+
     row.appendChild(leftZone);
 
     // 右側：Badge 或 價格
@@ -573,12 +580,11 @@ function checkRequirements(item) {
   // 4. 針對強化，額外檢查基底裝備與素材
   if (currentTab === 'upgrade') {
     // A. 檢查基底裝備 (在背包或已裝備算擁有)
-    const baseId = item.base_item;
-    const owned = getOwnedItemsList();
-    const hasBase = owned.some((entry) => entry.base_item_id === baseId || entry.id === baseId);
-    const isEquipped = owned.some((entry) => entry.equippedSlot && (entry.base_item_id === baseId || entry.id === baseId));
-    const inInventory = hasBase && !isEquipped;
-    if (!isEquipped && !inInventory) {
+    const hasAuthoritativeCount = item.base_owned_count !== undefined && item.base_owned_count !== null;
+    const hasBase = hasAuthoritativeCount
+      ? Number(item.base_owned_count) > 0
+      : getOwnedItemsList().some((entry) => entry.base_item_id === item.base_item || entry.id === item.base_item);
+    if (!hasBase) {
       return { satisfied: false, reasonText: '缺基底', disabledReason: 'missing_base_item' };
     }
 
@@ -619,7 +625,11 @@ function updateDetailView(item) {
 
   // 1. 渲染詳情面板
   let statsHtml = '';
-  if (item.stats) {
+  if (Array.isArray(item.stat_rows)) {
+    item.stat_rows.forEach(row => {
+      statsHtml += `<span class="stat-tag"><span class="stat-label">${row.label}</span><span class="stat-value">${row.display_value}</span></span>`;
+    });
+  } else if (item.stats) {
     Object.keys(item.stats).forEach(statKey => {
       let label = statKey;
       if (statKey === 'attack') label = '物理攻擊力';
@@ -652,6 +662,31 @@ function updateDetailView(item) {
 
   const slotLabel = item.slot ? item.slot.toUpperCase() : (currentTab === 'upgrade' ? 'UPGRADE' : 'EQUIPMENT');
   const itemType = item.subtype || (currentTab === 'upgrade' ? '裝備強化' : '裝備');
+  let comparisonHtml = '';
+  if ((currentTab === 'weapon' || currentTab === 'armor') && item.comparison) {
+    const comparison = item.comparison;
+    const currentLabel = comparison.current_name
+      ? `${comparison.current_quality_label || ''} ${comparison.current_name}`.trim()
+      : `${comparison.slot_label}欄位尚未裝備`;
+    const comparisonRows = (comparison.stat_rows || []).map(row => {
+      const tone = row.delta > 0 ? 'positive' : (row.delta < 0 ? 'negative' : 'neutral');
+      const delta = row.delta > 0 ? `+${row.delta}` : `${row.delta}`;
+      return `<div class="equipment-comparison-row">
+        <span>${row.label}</span>
+        <span>${row.current}${row.suffix || ''} → ${row.candidate}${row.suffix || ''}</span>
+        <strong class="${tone}">${delta}${row.suffix || ''}</strong>
+      </div>`;
+    }).join('');
+    comparisonHtml = `
+      <div class="equipment-comparison-panel">
+        <div class="equipment-comparison-title">
+          <span>與目前${comparison.slot_label}比較</span>
+          <strong>${currentLabel}</strong>
+        </div>
+        ${comparisonRows || '<p class="equipment-comparison-empty">此裝備沒有數值屬性。</p>'}
+        <p class="equipment-purchase-note">購買後會放入背包，不會自動替換目前裝備。</p>
+      </div>`;
+  }
 
   itemDetailView.innerHTML = `
     <div class="detail-grid">
@@ -666,6 +701,7 @@ function updateDetailView(item) {
       <div class="detail-stats-deck">
         ${statsHtml || '<span class="stat-tag"><span class="stat-label">無屬性增益</span></span>'}
       </div>
+      ${comparisonHtml}
       <div class="job-compatibility-panel">
         <span class="job-compatibility-title">可用職業限制</span>
         <div class="job-badges-deck">
