@@ -471,12 +471,40 @@ def recipe_base_status(state: dict, recipe: dict) -> str:
 
 
 def recipe_material_status(state: dict, materials: dict) -> str:
-    parts = []
-    for item_id, qty in materials.items():
-        owned = state["inventory"].get(item_id, 0)
-        status = "足夠" if owned >= qty else "不足"
-        parts.append(f"{item_name(item_id)} {owned}/{qty} {status}")
+    parts = [
+        f"{row['name']} {row['owned']}/{row['required']} "
+        f"{'足夠' if row['satisfied'] else '不足'}"
+        for row in recipe_material_requirements(state, {"materials": materials})
+    ]
     return "、".join(parts) if parts else "無"
+
+
+def recipe_material_requirements(state: dict, recipe: dict) -> list[dict]:
+    """Return authoritative inventory counts and shortfalls for a recipe."""
+    rows = []
+    for item_id, required in recipe.get("materials", {}).items():
+        owned = state.get("inventory", {}).get(item_id, 0)
+        missing = max(0, required - owned)
+        rows.append({
+            "id": item_id,
+            "name": item_name(item_id),
+            "owned": owned,
+            "required": required,
+            "missing": missing,
+            "satisfied": missing == 0,
+        })
+    return rows
+
+
+def recipe_material_shortage_message(state: dict, recipe: dict) -> str | None:
+    missing = [row for row in recipe_material_requirements(state, recipe) if not row["satisfied"]]
+    if not missing:
+        return None
+    details = "、".join(
+        f"{row['name']}缺 {row['missing']}（持有 {row['owned']}/需求 {row['required']}）"
+        for row in missing
+    )
+    return f"素材不足：{details}。"
 
 
 def recipe_output_summary(recipe: dict) -> str:
@@ -510,7 +538,7 @@ def craft_recipe_message(state: dict, recipe_id: str) -> str:
     if state["gold"] < recipe["gold"]:
         return "金幣不足。"
     if not can_pay_items(state, recipe["materials"]):
-        return "素材不足。"
+        return recipe_material_shortage_message(state, recipe) or "素材不足。"
     base_item = recipe.get("base_item")
     if base_item and not owns_item_or_equipped(state, base_item):
         return f"需要 {item_name(base_item)}。"

@@ -1,6 +1,6 @@
 import { runtimeClient } from "../shared/runtime-client.js";
 import { presentStoryBeat } from "../shared/story-beat.js";
-import { isSfxMuted, setSfxMuted } from "../shared/sfx.js";
+import { isSfxEnabled, setSfxEnabled } from "../shared/sfx.js";
 
 const fixtureSelect = document.querySelector("#fixture-select");
 const shellEl = document.querySelector(".world-map-shell");
@@ -1158,7 +1158,7 @@ function renderSettingsPanel() {
     title: "畫面設定",
     data: {
       reduced_motion: state.settings.reducedMotion,
-      sfx_muted: isSfxMuted(),
+      sfx_enabled: isSfxEnabled(),
     },
   });
 }
@@ -1367,17 +1367,17 @@ function renderUtilityPreview(preview) {
             <span class="settings-switch-thumb"></span>
           </span>
         </label>
-        <label class="settings-toggle-row" for="settings-sfx-muted">
+        <label class="settings-toggle-row" for="settings-sfx-enabled">
           <span class="settings-toggle-copy">
             <strong>音效</strong>
-            <span id="settings-sfx-muted-description">保留於此裝置的靜音偏好。</span>
+            <span id="settings-sfx-enabled-description">開啟時播放戰鬥與介面音效；關閉時靜音。</span>
           </span>
-          <input id="settings-sfx-muted" class="settings-switch-input" type="checkbox" role="switch"
-            aria-describedby="settings-sfx-muted-description" ${preview.data.sfx_muted ? "checked" : ""}>
+          <input id="settings-sfx-enabled" class="settings-switch-input" type="checkbox" role="switch"
+            aria-describedby="settings-sfx-enabled-description" ${preview.data.sfx_enabled ? "checked" : ""}>
           <span class="settings-switch-track" aria-hidden="true"><span class="settings-switch-thumb"></span></span>
         </label>
         <p id="settings-scope-note" class="settings-scope-note">
-          減少動態效果僅套用於目前的世界地圖頁面；音效靜音偏好會保留於此裝置。
+          減少動態效果僅套用於目前的世界地圖頁面；音效開關偏好會保留於此裝置。
         </p>
       </div>
     `;
@@ -1391,10 +1391,10 @@ function renderUtilityPreview(preview) {
     reducedMotionEl?.addEventListener("change", () => {
       applyReducedMotionPreference(reducedMotionEl.checked, true);
     });
-    const sfxMutedEl = utilityPanelEl.querySelector("#settings-sfx-muted");
-    sfxMutedEl?.addEventListener("change", () => {
-      setSfxMuted(sfxMutedEl.checked);
-      feedbackMessageEl.textContent = sfxMutedEl.checked ? "音效已靜音。" : "音效已開啟。";
+    const sfxEnabledEl = utilityPanelEl.querySelector("#settings-sfx-enabled");
+    sfxEnabledEl?.addEventListener("change", () => {
+      setSfxEnabled(sfxEnabledEl.checked);
+      feedbackMessageEl.textContent = sfxEnabledEl.checked ? "音效已開啟。" : "音效已關閉（靜音）。";
     });
   }
   if (preview.type === "inventory") {

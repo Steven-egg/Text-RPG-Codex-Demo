@@ -1,4 +1,5 @@
-export const SFX_STORAGE_KEY = "element_maze.sfx_muted";
+export const SFX_STORAGE_KEY = "element_maze.sfx_enabled";
+export const LEGACY_SFX_MUTED_STORAGE_KEY = "element_maze.sfx_muted";
 export const SFX_MAX_VOLUME = 0.22;
 export const SFX_CUE_NAMES = Object.freeze([
   "ui_click",
@@ -46,7 +47,7 @@ const INTERACTIVE_SELECTOR = [
 
 let audioContext = null;
 let audioUnavailable = false;
-let muted = false;
+let enabled = true;
 let toggleEl = null;
 let playCount = 0;
 
@@ -107,7 +108,7 @@ export function inferSfxCue(target) {
 }
 
 export function playSfx(cueName, { allowContextCreation = false } = {}) {
-  if (muted || !SFX_CUE_DEFINITIONS[cueName]) {
+  if (!enabled || !SFX_CUE_DEFINITIONS[cueName]) {
     return false;
   }
 
@@ -232,14 +233,14 @@ export function handleDelegatedClick(event) {
   }
 
   if (target.id === TOGGLE_ID) {
-    setMuted(!muted);
-    if (!muted) {
+    setEnabled(!enabled);
+    if (enabled) {
       playSfx("confirm", { allowContextCreation: true });
     }
     return;
   }
 
-  if (muted) {
+  if (!enabled) {
     return;
   }
 
@@ -249,26 +250,37 @@ export function handleDelegatedClick(event) {
   }
 }
 
-function readMutedPreference() {
+function readEnabledPreference() {
   try {
-    return window.localStorage.getItem(SFX_STORAGE_KEY) === "true";
+    const stored = window.localStorage.getItem(SFX_STORAGE_KEY);
+    if (stored === "true" || stored === "false") {
+      return stored === "true";
+    }
+
+    const legacyMuted = window.localStorage.getItem(LEGACY_SFX_MUTED_STORAGE_KEY);
+    const migratedEnabled = legacyMuted === null ? true : legacyMuted !== "true";
+    window.localStorage.setItem(SFX_STORAGE_KEY, String(migratedEnabled));
+    window.localStorage.removeItem(LEGACY_SFX_MUTED_STORAGE_KEY);
+    return migratedEnabled;
   } catch {
-    return false;
+    return true;
   }
 }
 
-function storeMutedPreference() {
+function storeEnabledPreference() {
   try {
-    window.localStorage.setItem(SFX_STORAGE_KEY, String(muted));
+    window.localStorage.setItem(SFX_STORAGE_KEY, String(enabled));
   } catch {
     // Storage denial is a silent, non-blocking fallback.
   }
 }
 
-function setMuted(nextMuted) {
-  muted = Boolean(nextMuted);
-  document.documentElement.dataset.sfxMuted = String(muted);
-  storeMutedPreference();
+function setEnabled(nextEnabled) {
+  enabled = Boolean(nextEnabled);
+  if (typeof document !== "undefined") {
+    document.documentElement.dataset.sfxEnabled = String(enabled);
+  }
+  storeEnabledPreference();
   renderToggle();
 }
 
@@ -277,12 +289,12 @@ function renderToggle() {
     return;
   }
 
-  toggleEl.dataset.muted = String(muted);
-  toggleEl.setAttribute("aria-pressed", String(muted));
-  toggleEl.setAttribute("aria-label", muted ? "音效已靜音；按下可開啟音效" : "音效已開啟；按下可靜音");
-  toggleEl.title = muted ? "開啟音效" : "靜音";
-  toggleEl.querySelector(".sfx-toggle-icon").textContent = muted ? "🔇" : "🔊";
-  toggleEl.querySelector(".sfx-toggle-label").textContent = muted ? "靜音" : "音效";
+  toggleEl.dataset.enabled = String(enabled);
+  toggleEl.setAttribute("aria-pressed", String(enabled));
+  toggleEl.setAttribute("aria-label", enabled ? "音效已開啟；按下可關閉音效" : "音效已關閉；按下可開啟音效");
+  toggleEl.title = enabled ? "關閉音效" : "開啟音效";
+  toggleEl.querySelector(".sfx-toggle-icon").textContent = enabled ? "🔊" : "🔇";
+  toggleEl.querySelector(".sfx-toggle-label").textContent = enabled ? "音效" : "靜音";
 }
 
 function createToggle() {
@@ -290,17 +302,17 @@ function createToggle() {
   // floating control over every facility screen.
 }
 
-export function isSfxMuted() {
-  return muted;
+export function isSfxEnabled() {
+  return enabled;
 }
 
-export function setSfxMuted(nextMuted) {
-  setMuted(nextMuted);
+export function setSfxEnabled(nextEnabled) {
+  setEnabled(nextEnabled);
 }
 
 function initializeSfx() {
-  muted = readMutedPreference();
-  document.documentElement.dataset.sfxMuted = String(muted);
+  enabled = readEnabledPreference();
+  document.documentElement.dataset.sfxEnabled = String(enabled);
   setAudioState("idle");
   createToggle();
   document.addEventListener("click", handleDelegatedClick);

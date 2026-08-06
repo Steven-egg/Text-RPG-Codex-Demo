@@ -1656,3 +1656,45 @@ body.facility-body::after {
   font-family: var(--facility-font-ui) !important;
   white-space: normal !important;
 }
+
+/* Upgrade requirements must stay visible without hiding material shortfalls. */
+body[data-workshop-tab="upgrade"] .detail-panel {
+  flex: 0.78;
+}
+
+body[data-workshop-tab="upgrade"] .requirement-panel {
+  flex: 1.22;
+  overflow: visible;
+}
+
+body[data-workshop-tab="upgrade"] .requirement-content {
+  overflow: visible;
+}
+
+body[data-workshop-tab="upgrade"] .detail-grid {
+  gap: 8px;
+}
+
+body[data-workshop-tab="upgrade"] .detail-main-name {
+  font-size: clamp(1.55rem, 2vw, 2rem);
+}
+
+body[data-workshop-tab="upgrade"] .detail-desc-card,
+body[data-workshop-tab="upgrade"] .job-compatibility-panel {
+  padding-block: 8px;
+}
+
+body[data-workshop-tab="upgrade"] .req-strip-row {
+  min-height: 48px;
+  padding-block: 7px;
+}
+
+body[data-workshop-tab="upgrade"] .req-name-zone,
+body[data-workshop-tab="upgrade"] .req-val-zone {
+  font-size: 0.74rem;
+}
+
+body[data-workshop-tab="upgrade"] .req-warning-box {
+  margin-top: 8px;
+  padding-block: 7px;
+}

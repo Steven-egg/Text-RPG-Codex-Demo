@@ -50,8 +50,9 @@ or release scope from feedback without explicit approval.
 - The GUI safely ignores invalid story payloads and presents prologue, region
   transitions, before/after Boss beats, and the ending. Combat completion
   preserves `result close -> boss_after -> ending -> navigation`.
-- Five muteable procedural micro-SFX cues are available without BGM, binary
-  audio, or autoplay. Mute state uses `element_maze.sfx_muted`; untrusted
+- Five switchable procedural micro-SFX cues are available without BGM, binary
+  audio, or autoplay. Enabled state uses `element_maze.sfx_enabled` and defaults
+  to on; legacy `element_maze.sfx_muted` values are migrated once. Untrusted
   synthetic clicks cannot create or resume an `AudioContext`.
 - The release-only image builder writes referenced images to
   `dist/assets-overlay/app/<repository-relative-path>` and writes manifest

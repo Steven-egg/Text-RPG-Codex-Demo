@@ -43,8 +43,9 @@ CLI 文字核心版；詳細決策與專門契約位於 `01_content/`。
   `victory`、`ending`。
 - GUI 會安全忽略無效劇情 payload，並呈現序章、區域轉換、Boss 前後劇情與結局。
   戰鬥完成順序維持：`result close -> boss_after -> ending -> navigation`。
-- 目前有五種可靜音的程序式微型 SFX，沒有 BGM、二進位音檔或自動播放。
-  靜音狀態使用 `element_maze.sfx_muted`；不受信任的 synthetic click 不得建立或
+- 目前有五種可切換的程序式微型 SFX，沒有 BGM、二進位音檔或自動播放。
+  啟用狀態使用 `element_maze.sfx_enabled`，預設為開啟；舊版
+  `element_maze.sfx_muted` 會一次性遷移。不受信任的 synthetic click 不得建立或
   恢復 `AudioContext`。
 - 僅供發行使用的圖片 builder 會將參照圖片寫入
   `dist/assets-overlay/app/<repository-relative-path>`，並將 format 1 manifest

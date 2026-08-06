@@ -5,6 +5,7 @@ from data import ITEMS, SKILLS
 from . import game
 from .formatting import item_name
 from .gui_presentation_helpers import percent
+from .gui_presentation import display_resource
 
 
 def combat_enemy_trait_status(enemy: dict[str, Any], enemy_buffs: dict[str, Any]) -> str:
@@ -192,15 +193,15 @@ def combat_screen_model(session: Any) -> dict[str, Any]:
             "name": state.get("name", ""),
             "class_label": state.get("job", ""),
             "level_label": f"Lv{state.get('level', 1)}",
-            "hp_label": f"{state['current_hp']} / {stats['max_hp']}",
-            "mp_label": f"{state['current_mp']} / {stats['max_mp']}",
+            "hp_label": f"{display_resource(state['current_hp'])} / {display_resource(stats['max_hp'])}",
+            "mp_label": f"{display_resource(state['current_mp'])} / {display_resource(stats['max_mp'])}",
             "status_label": game.buff_summary(combat["player_buffs"]),
             "stance_label": "戰鬥結束" if resolved else "可行動",
         },
         "enemy": {
             "enemy_id": combat["enemy_id"],
             "name": enemy["name"],
-            "hp_label": f"HP {enemy_hp} / {enemy['hp']}",
+            "hp_label": f"HP {display_resource(enemy_hp)} / {display_resource(enemy['hp'])}",
             "hp_percent": percent(enemy_hp, enemy["hp"]),
             "attribute": enemy["element"],
             "race_label": game.monster_race_display_name(enemy),
@@ -212,7 +213,7 @@ def combat_screen_model(session: Any) -> dict[str, Any]:
         "skill_menu": {
             "label": "技能選擇",
             "title": "技能",
-            "summary": f"目前 MP {state['current_mp']}/{stats['max_mp']}。目標：{enemy['name']} / 屬性 {enemy['element']} / 狀態 {game.buff_summary(combat['enemy_buffs'])}。再次按技能可收回。",
+            "summary": f"目前 MP {display_resource(state['current_mp'])}/{display_resource(stats['max_mp'])}。目標：{enemy['name']} / 屬性 {enemy['element']} / 狀態 {game.buff_summary(combat['enemy_buffs'])}。再次按技能可收回。",
             "empty_message": "尚無可用技能。" if state.get("learned_skills", []) else "沒有學會任何技能。",
             "items": usable_skills,
         },

@@ -5,6 +5,7 @@ from pathlib import Path
 from data import JOBS, ITEMS, EQUIPMENT, MONSTERS
 from .state import ensure_state_defaults, get_stats
 from .formatting import item_name
+from .gui_presentation import display_resource
 
 SAVE_PATH = Path(__file__).resolve().parents[2] / "save.json"
 
@@ -51,8 +52,14 @@ def player_model(state: dict[str, Any]) -> dict[str, Any]:
         "name": summary["name"],
         "class_label": summary["job_label"],
         "level_label": f"Lv{summary['level']}",
-        "hp": {"label": f"HP {hp['current']}/{hp['max']}", "percent": percent(hp["current"], hp["max"])},
-        "mp": {"label": f"MP {mp['current']}/{mp['max']}", "percent": percent(mp["current"], mp["max"])},
+        "hp": {
+            "label": f"HP {display_resource(hp['current'])}/{display_resource(hp['max'])}",
+            "percent": percent(hp["current"], hp["max"]),
+        },
+        "mp": {
+            "label": f"MP {display_resource(mp['current'])}/{display_resource(mp['max'])}",
+            "percent": percent(mp["current"], mp["max"]),
+        },
         "gold_label": f"{summary['gold']}G",
     }
 

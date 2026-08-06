@@ -52,9 +52,10 @@ The verified integration candidate adds these shared presentation behaviors:
   Escape, and modal boundaries prevent underlying interaction.
 - Five procedural micro-SFX cues: `ui_click`, `confirm`, `back`, `warning`, and
   `victory`. There is no BGM, loop, binary audio asset, or autoplay.
-- The mute preference is `element_maze.sfx_muted`. Untrusted synthetic clicks
-  cannot create or resume an `AudioContext`; audio failures remain silent and
-  cannot block navigation, actions, or UIAction logging.
+- The enabled preference is `element_maze.sfx_enabled` (`true` means audible,
+  default on); legacy `element_maze.sfx_muted` values migrate once. Untrusted
+  synthetic clicks cannot create or resume an `AudioContext`; audio failures
+  remain silent and cannot block navigation, actions, or UIAction logging.
 - The SFX toggle uses layer `9000`; the story overlay uses `9999`, so the story
   modal remains visually and interactively above the toggle.
 

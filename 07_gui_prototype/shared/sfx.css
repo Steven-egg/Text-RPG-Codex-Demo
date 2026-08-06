@@ -32,7 +32,7 @@
   outline-offset: 3px;
 }
 
-.sfx-toggle[data-muted="true"] {
+.sfx-toggle[data-enabled="false"] {
   border-color: rgba(190, 194, 204, 0.62);
   color: #d6d8df;
 }

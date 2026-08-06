@@ -249,7 +249,7 @@ def run_smoke_test():
         raise AssertionError("Expected low materials upgrade to fail, but it succeeded.")
     except GuiActionError as err:
         assert err.status == 409
-        assert err.blocked_reason == "材料不足"
+        assert err.blocked_reason == "素材不足：破裂石片缺 1（持有 4/需求 5）。"
         print("Blocked Path (Low materials recipe upgrade) verified.")
 
     # 20. Blocked Path: Recipe upgrade missing base item

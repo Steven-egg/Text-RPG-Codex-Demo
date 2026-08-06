@@ -227,6 +227,7 @@ function switchTab(category, forceRefresh = false) {
   if (currentTab === category && !forceRefresh) return;
 
   currentTab = category;
+  document.body.dataset.workshopTab = category;
   applyFacilityBackground({
     model: currentFixtureData,
     shell: document.body,
@@ -544,6 +545,33 @@ function isRecipeLocked(recipe) {
   return !currentFixtureData.player.completed_quests.includes(recipe.unlock_quest);
 }
 
+function getMaterialRequirementRows(item) {
+  const playerInventory = currentFixtureData?.player?.inventory ?? {};
+  return Object.entries(item.materials ?? {}).map(([materialId, material]) => {
+    const required = Number(material.required ?? 0);
+    const owned = Number(material.owned ?? playerInventory[materialId] ?? 0);
+    const missing = Number(material.missing ?? Math.max(0, required - owned));
+    return {
+      id: materialId,
+      name: material.name ?? materialId,
+      required,
+      owned,
+      missing,
+      satisfied: material.satisfied ?? missing === 0,
+    };
+  });
+}
+
+function materialShortageMessage(item) {
+  if (item.material_shortage_message) return item.material_shortage_message;
+  const missing = getMaterialRequirementRows(item).filter(row => !row.satisfied);
+  if (missing.length === 0) return '';
+  const details = missing
+    .map(row => `${row.name}缺 ${row.missing}（持有 ${row.owned}/需求 ${row.required}）`)
+    .join('、');
+  return `素材不足：${details}。`;
+}
+
 /**
  * 檢查金幣、基底、素材是否滿足
  */
@@ -589,17 +617,7 @@ function checkRequirements(item) {
     }
 
     // B. 檢查素材消耗
-    const mats = item.materials;
-    let matsSatisfied = true;
-    Object.keys(mats).forEach(matId => {
-      const reqQty = mats[matId].required;
-      const playerQty = player.inventory[matId] || 0;
-      if (playerQty < reqQty) {
-        matsSatisfied = false;
-      }
-    });
-
-    if (!matsSatisfied) {
+    if (getMaterialRequirementRows(item).some(row => !row.satisfied)) {
       return { satisfied: false, reasonText: '缺素材', disabledReason: 'materials_deficient' };
     }
   }
@@ -818,11 +836,9 @@ function renderRequirementsView(item) {
     `;
 
     // C. 素材需求
-    const mats = item.materials;
-    Object.keys(mats).forEach(matId => {
-      const mat = mats[matId];
-      const playerQty = player.inventory[matId] || 0;
-      const isMatSatisfied = playerQty >= mat.required;
+    getMaterialRequirementRows(item).forEach(mat => {
+      const isMatSatisfied = mat.satisfied;
+      const shortfall = isMatSatisfied ? '' : ` · 缺 ${mat.missing}`;
 
       reqsHtml += `
         <div class="req-strip-row">
@@ -831,7 +847,7 @@ function renderRequirementsView(item) {
             <span class="req-label">消耗素材: ${mat.name}</span>
           </div>
           <div class="req-val-zone">
-            <span class="req-fraction ${isMatSatisfied ? 'satisfied' : 'deficient'}">${playerQty} / ${mat.required}</span>
+            <span class="req-fraction ${isMatSatisfied ? 'satisfied' : 'deficient'}">持有 ${mat.owned} / 需求 ${mat.required}${shortfall}</span>
             <span class="req-status-icon ${isMatSatisfied ? 'satisfied' : 'deficient'}">${isMatSatisfied ? '✓' : '✗'}</span>
           </div>
         </div>
@@ -847,7 +863,7 @@ function renderRequirementsView(item) {
     else if (checkRes.disabledReason === 'job_incompatible') friendlyReason = item.job_blocked_reason || '職業不合：目前職業無法使用此裝備。';
     else if (checkRes.disabledReason === 'gold_deficient') friendlyReason = '金幣不足：冒險者持有金幣無法支付費用。';
     else if (checkRes.disabledReason === 'missing_base_item') friendlyReason = '缺少基底：背包或裝備欄中缺少此強化基底裝備。';
-    else if (checkRes.disabledReason === 'materials_deficient') friendlyReason = '素材不足：缺少所需的鍛造/合成素材。';
+    else if (checkRes.disabledReason === 'materials_deficient') friendlyReason = materialShortageMessage(item);
     
     warningHtml = `<div class="req-warning-box">${friendlyReason}</div>`;
     

@@ -191,7 +191,7 @@ def run_smoke_test():
         raise AssertionError("Expected craft with missing materials to fail, but it succeeded.")
     except GuiActionError as err:
         assert err.status == 409
-        assert err.blocked_reason == "素材不足。"
+        assert err.blocked_reason == "素材不足：火焰石缺 2（持有 1/需求 3）。"
         print("Blocked Path (Missing materials) verified.")
 
     # ----------------------------------------------------
