@@ -1,0 +1,156 @@
+{
+  "name": "火印遠征者",
+  "job": "劍士",
+  "promotion_id": null,
+  "level": 11,
+  "exp": 210,
+  "gold": 1450,
+  "guild_points": 640,
+  "current_hp": 209.1,
+  "current_mp": 28.25,
+  "inventory": {
+    "item_potion_s": 6,
+    "item_focus_drop": 2,
+    "item_herb_antidote": 2,
+    "item_escape_scroll": 1,
+    "item_armor_piercer": 2,
+    "mat_moss_fiber": 2,
+    "mat_cracked_stone": 2,
+    "mat_fire_stone": 2,
+    "mat_scorched_iron": 1,
+    "mat_ravine_ash": 2,
+    "mat_charred_iron": 1,
+    "mat_flame_stone_refined": 1,
+    "mat_lava_shard": 1,
+    "key_fire_seal": 1
+  },
+  "equipment": {
+    "weapon": "eqi_000001",
+    "head": "eqi_000002",
+    "body": "eqi_000003",
+    "accessory": "eqi_000004",
+    "special": "special_trial_badge"
+  },
+  "learned_skills": [
+    "skill_power_slash"
+  ],
+  "completed_quests": [
+    "quest_register",
+    "quest_cave_gathering",
+    "quest_magic_crystal",
+    "quest_mine_scout",
+    "quest_boss_glen",
+    "quest_ash_ravine_scout",
+    "quest_supply_upgrade",
+    "quest_cinder_depths_scout"
+  ],
+  "unlocked": [
+    "dungeon_moss_cave",
+    "shop_synthesis_01",
+    "dungeon_scorched_mine",
+    "quest_cave_gathering",
+    "item_escape_scroll",
+    "recipe_focus_pouch",
+    "quest_magic_crystal",
+    "item_warm_stone",
+    "recipe_fire_cloak",
+    "quest_mine_scout",
+    "second_act_preview",
+    "unlock_act_2",
+    "unlock_ash_ravine",
+    "quest_boss_glen",
+    "quest_ash_ravine_scout",
+    "item_armor_piercer",
+    "recipe_piercing_bundle",
+    "recipe_rending_spike",
+    "dungeon_cinder_seal_depths",
+    "quest_supply_upgrade",
+    "quest_cinder_depths_scout",
+    "unlock_ice_region"
+  ],
+  "cleared_dungeons": [
+    "dungeon_moss_cave",
+    "dungeon_scorched_mine",
+    "dungeon_ash_ravine",
+    "dungeon_cinder_seal_depths"
+  ],
+  "flags": {
+    "current_region_id": "border_fire",
+    "boss_glen_sighted": true,
+    "boss_glen_investigation_accepted": true,
+    "boss_glen_defeated": true,
+    "ash_guardian_defeated": true,
+    "cinder_seal_sentinel_defeated": true,
+    "fire_mark_guild_inquiry_done": true,
+    "fire_mark_church_bridge_done": true,
+    "fire_mark_church_lookup_done": true,
+    "fire_seal_enshrined": true,
+    "story_seen.prologue.new_game": true,
+    "story_seen.boss.before.boss_cinder_seal_sentinel": true,
+    "story_seen.boss.after.boss_cinder_seal_sentinel": true
+  },
+  "relic_passives": {
+    "relic_fire_seal": "fire_all_resist"
+  },
+  "storage_unlocked": false,
+  "storage": {},
+  "bestiary": [
+    "mon_moss_rat",
+    "mon_cave_slug",
+    "mon_cracked_golem",
+    "mon_cinder_bat",
+    "mon_lava_imp",
+    "mon_scorched_guard",
+    "boss_glen",
+    "mon_ash_imp",
+    "mon_lava_bat",
+    "mon_cinder_soldier",
+    "boss_ash_guardian",
+    "mon_ember_stalker",
+    "mon_molten_shell",
+    "mon_cinder_brand_wisp",
+    "boss_cinder_seal_sentinel"
+  ],
+  "state_version": 2,
+  "run_seed": 20260806,
+  "affix_roll_counter": 0,
+  "equipment_instance_counter": 4,
+  "equipment_instances": {
+    "eqi_000001": {
+      "base_item_id": "weapon_iron_sword_plus_1",
+      "generation_version": 2,
+      "roll_index": 0,
+      "quality": "fine",
+      "pattern_id": "charge_gain",
+      "major_affix_id": "major_charge_skill_bonus",
+      "minor_affix_id": null
+    },
+    "eqi_000002": {
+      "base_item_id": "armor_leather_cap",
+      "generation_version": 2,
+      "roll_index": 0,
+      "quality": "fine",
+      "pattern_id": "rune_guard",
+      "major_affix_id": "major_magic_guard",
+      "minor_affix_id": null
+    },
+    "eqi_000003": {
+      "base_item_id": "armor_leather_armor_plus_1",
+      "generation_version": 2,
+      "roll_index": 0,
+      "quality": "fine",
+      "pattern_id": "barrier",
+      "major_affix_id": "major_magic_guard",
+      "minor_affix_id": null
+    },
+    "eqi_000004": {
+      "base_item_id": "acc_fire_cloak",
+      "generation_version": 2,
+      "roll_index": 0,
+      "quality": "fine",
+      "pattern_id": "warding",
+      "major_affix_id": "major_magic_guard",
+      "minor_affix_id": null
+    }
+  }
+}

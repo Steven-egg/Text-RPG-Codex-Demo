@@ -47,10 +47,11 @@ that boundary:
   boundaries. The story overlay layer `9999` remains above the SFX toggle layer
   `9000`.
 
-Five muteable procedural micro-SFX cues coexist with the same static/live
-interfaces. They have no BGM, binary audio, or autoplay; mute state uses
-`element_maze.sfx_muted`, and untrusted synthetic clicks cannot create or
-resume audio. Audio failures must remain non-blocking for UIActions,
+Five switchable procedural micro-SFX cues coexist with the same static/live
+interfaces. They have no BGM, binary audio, or autoplay. Enabled state uses
+`element_maze.sfx_enabled` (`true` means audible, default on); legacy
+`element_maze.sfx_muted` values migrate once. Untrusted synthetic clicks cannot
+create or resume audio. Audio failures must remain non-blocking for UIActions,
 navigation, and logging.
 
 ## Portable And Release Boundary

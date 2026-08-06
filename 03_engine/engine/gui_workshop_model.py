@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from typing import Any
-from data import EQUIPMENT, SHOP_INVENTORY, RECIPES, MATERIALS
+from data import EQUIPMENT, SHOP_INVENTORY, RECIPES
 from . import game
 from .equipment_refs import equipment_base_id, inventory_equipment_refs, resolve_equipment_ref
 from .equipment_quality import QUALITY_LABELS
@@ -96,13 +96,18 @@ def workshop_screen_model(state: dict[str, Any], selected_region_id: str | None 
             base_item = r.get("base_item")
             base_name = EQUIPMENT[base_item]["name"] if (base_item and base_item in EQUIPMENT) else ""
 
-            materials_formatted = {}
-            for mat_id, count in r.get("materials", {}).items():
-                mat_name = MATERIALS.get(mat_id, mat_id)
-                materials_formatted[mat_id] = {
-                    "name": mat_name,
-                    "required": count
+            material_rows = game.recipe_material_requirements(state, r)
+            materials_formatted = {
+                row["id"]: {
+                    "name": row["name"],
+                    "owned": row["owned"],
+                    "required": row["required"],
+                    "missing": row["missing"],
+                    "satisfied": row["satisfied"],
                 }
+                for row in material_rows
+            }
+            missing_materials = [row for row in material_rows if not row["satisfied"]]
 
             output_stats = EQUIPMENT[output_id]["stats"] if output_id in EQUIPMENT else {}
             output_jobs = EQUIPMENT[output_id].get("jobs", []) if output_id in EQUIPMENT else []
@@ -122,6 +127,9 @@ def workshop_screen_model(state: dict[str, Any], selected_region_id: str | None 
                 "base_item": base_item,
                 "base_name": base_name,
                 "materials": materials_formatted,
+                "missing_materials": missing_materials,
+                "materials_satisfied": not missing_materials,
+                "material_shortage_message": game.recipe_material_shortage_message(state, r),
                 "gold": r.get("gold", 0),
                 "stats": output_stats,
                 "jobs": output_jobs,

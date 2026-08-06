@@ -8,6 +8,7 @@ const repoRoot = path.resolve(toolsDir, "..");
 const guiRoot = path.join(repoRoot, "07_gui_prototype");
 const sfxModulePath = path.join(guiRoot, "shared", "sfx.js");
 const sfxCssPath = path.join(guiRoot, "shared", "sfx.css");
+const worldMapModulePath = path.join(guiRoot, "world_map", "world-map.js");
 const expectedCues = ["ui_click", "confirm", "back", "warning", "victory"];
 const expectedScreens = [
   "combat_screen",
@@ -28,10 +29,13 @@ const expectedScreens = [
 
 const moduleSource = await readFile(sfxModulePath, "utf8");
 const cssSource = await readFile(sfxCssPath, "utf8");
+const worldMapSource = await readFile(worldMapModulePath, "utf8");
 const moduleUrl = `${pathToFileURL(sfxModulePath).href}?focused-test=${Date.now()}`;
 const sfx = await import(moduleUrl);
 
-assert.equal(sfx.SFX_STORAGE_KEY, "element_maze.sfx_muted");
+assert.equal(sfx.SFX_STORAGE_KEY, "element_maze.sfx_enabled");
+assert.equal(sfx.LEGACY_SFX_MUTED_STORAGE_KEY, "element_maze.sfx_muted");
+assert.equal(sfx.isSfxEnabled(), true, "SFX must default to enabled");
 assert.deepEqual([...sfx.SFX_CUE_NAMES], expectedCues);
 assert.deepEqual(Object.keys(sfx.SFX_CUE_DEFINITIONS), expectedCues);
 assert.ok(sfx.SFX_MAX_VOLUME <= 0.22, "SFX volume cap must not exceed 0.22");
@@ -150,11 +154,18 @@ assert.match(moduleSource, /window\.AudioContext\s*\?\?\s*window\.webkitAudioCon
 assert.match(moduleSource, /dataset\.sfxPlayCount/, "Browser checks need a non-gameplay cue counter");
 assert.match(moduleSource, /aria-label/);
 assert.match(moduleSource, /aria-pressed/);
-assert.match(moduleSource, /window\.localStorage\.getItem\(SFX_STORAGE_KEY\) === "true"/);
-assert.match(moduleSource, /window\.localStorage\.setItem\(SFX_STORAGE_KEY, String\(muted\)\)/);
+assert.match(moduleSource, /window\.localStorage\.getItem\(SFX_STORAGE_KEY\)/);
+assert.match(moduleSource, /window\.localStorage\.setItem\(SFX_STORAGE_KEY, String\(enabled\)\)/);
+assert.match(moduleSource, /window\.localStorage\.removeItem\(LEGACY_SFX_MUTED_STORAGE_KEY\)/);
+assert.doesNotMatch(worldMapSource, /sfx_muted|settings-sfx-muted|isSfxMuted|setSfxMuted/);
+assert.match(worldMapSource, /sfx_enabled:\s*isSfxEnabled\(\)/);
+assert.match(worldMapSource, /preview\.data\.sfx_enabled\s*\?\s*"checked"/);
+assert.match(worldMapSource, /setSfxEnabled\(sfxEnabledEl\.checked\)/);
 assert.doesNotMatch(moduleSource, /save\.json|sessionStorage|indexedDB/i);
 assert.match(cssSource, /\.sfx-toggle:focus-visible/);
 assert.match(cssSource, /position:\s*fixed/);
+assert.match(cssSource, /\.sfx-toggle\[data-enabled="false"\]/);
+assert.doesNotMatch(cssSource, /data-muted/);
 const toggleRule = cssSource.match(/\.sfx-toggle\s*\{([\s\S]*?)\}/)?.[1] ?? "";
 const toggleZIndex = Number(toggleRule.match(/z-index:\s*(\d+)/)?.[1]);
 assert.ok(Number.isFinite(toggleZIndex) && toggleZIndex < 9999, "SFX toggle must remain below story overlay z-index 9999");
@@ -179,6 +190,32 @@ for (const entry of await readdir(guiRoot, { withFileTypes: true })) {
 }
 
 assert.deepEqual(actualScreens.sort(), expectedScreens);
+
+const previousMigrationWindow = globalThis.window;
+const previousMigrationDocument = globalThis.document;
+const preferenceStore = new Map([["element_maze.sfx_muted", "true"]]);
+globalThis.window = {
+  localStorage: {
+    getItem(key) { return preferenceStore.has(key) ? preferenceStore.get(key) : null; },
+    setItem(key, value) { preferenceStore.set(key, value); },
+    removeItem(key) { preferenceStore.delete(key); },
+  },
+};
+globalThis.document = {
+  documentElement: { dataset: {} },
+  addEventListener() {},
+};
+const migratedSfx = await import(`${pathToFileURL(sfxModulePath).href}?migration-test=${Date.now()}`);
+assert.equal(migratedSfx.isSfxEnabled(), false, "legacy muted=true must migrate to enabled=false");
+assert.equal(preferenceStore.get("element_maze.sfx_enabled"), "false");
+assert.equal(preferenceStore.has("element_maze.sfx_muted"), false);
+migratedSfx.setSfxEnabled(true);
+assert.equal(migratedSfx.isSfxEnabled(), true);
+assert.equal(preferenceStore.get("element_maze.sfx_enabled"), "true");
+if (previousMigrationWindow === undefined) delete globalThis.window;
+else globalThis.window = previousMigrationWindow;
+if (previousMigrationDocument === undefined) delete globalThis.document;
+else globalThis.document = previousMigrationDocument;
 
 const previousWindow = globalThis.window;
 globalThis.window = {

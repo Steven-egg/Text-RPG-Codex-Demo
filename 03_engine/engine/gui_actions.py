@@ -39,6 +39,7 @@ from .gui_presentation import (
     equipment_affix_names,
     equipment_slot_comparison,
     equipment_stat_rows,
+    display_resource,
     resource_strip,
 )
 from .gui_synthesis_model import synthesis_screen_model
@@ -1334,11 +1335,12 @@ class GuiRuntimeSession:
             )
 
         if not game.can_pay_items(state, recipe["materials"]):
+            shortage_message = game.recipe_material_shortage_message(state, recipe) or "素材不足。"
             raise GuiActionError(
-                "材料不足，無法進行強化。",
+                shortage_message,
                 status=409,
                 result_status="blocked",
-                blocked_reason="材料不足",
+                blocked_reason=shortage_message,
             )
 
         base_item = recipe.get("base_item")
@@ -1504,12 +1506,12 @@ class GuiRuntimeSession:
                 result_status="blocked",
                 blocked_reason="金幣不足。",
             )
-        elif result == "素材不足。":
+        elif result.startswith("素材不足"):
             raise GuiActionError(
-                "素材不足。",
+                result,
                 status=409,
                 result_status="blocked",
-                blocked_reason="素材不足。",
+                blocked_reason=result,
             )
         elif result.startswith("需要"):
             raise GuiActionError(
@@ -2020,10 +2022,10 @@ def get_status_preview_data(state: dict[str, Any]) -> dict[str, Any]:
         "exp_next": game.exp_to_next(state.get("level", 1)),
         "gold": state.get("gold", 0),
         "guild_points": state.get("guild_points", 0),
-        "hp_current": state.get("current_hp", stats["max_hp"]),
-        "hp_max": stats["max_hp"],
-        "mp_current": state.get("current_mp", stats["max_mp"]),
-        "mp_max": stats["max_mp"],
+        "hp_current": display_resource(state.get("current_hp", stats["max_hp"])),
+        "hp_max": display_resource(stats["max_hp"]),
+        "mp_current": display_resource(state.get("current_mp", stats["max_mp"])),
+        "mp_max": display_resource(stats["max_mp"]),
         "attack": stats.get("attack", 0),
         "magic_attack": stats.get("magic_attack", 0),
         "defense": stats.get("defense", 0),

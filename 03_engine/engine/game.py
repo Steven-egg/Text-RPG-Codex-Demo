@@ -152,6 +152,8 @@ from .facilities import (
     workshop_buy_menu,
     recipe_base_status,
     recipe_material_status,
+    recipe_material_requirements,
+    recipe_material_shortage_message,
     recipe_output_summary,
     workshop_recipe_line,
     workshop_recipe_detail_lines,
