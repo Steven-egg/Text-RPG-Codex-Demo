@@ -11,6 +11,8 @@ for module_root in (ROOT / "03_engine", ROOT / "04_data"):
 from data import DUNGEONS, JOBS, MONSTERS  # noqa: E402
 from engine import game  # noqa: E402
 from engine.gui_actions import GuiRuntimeSession  # noqa: E402
+from engine.gui_presentation import resource_strip  # noqa: E402
+from engine.gui_workshop_model import workshop_screen_model  # noqa: E402
 
 
 def exploration(dungeon_id: str) -> dict:
@@ -86,11 +88,39 @@ def verify_preview_beats_are_once_only() -> None:
     assert all(not slot["passive_enabled"] for slot in relic["slots"])
 
 
+def verify_workshop_resolves_equipment_instances_and_supply_gate() -> None:
+    session = session_with_state()
+    state = session.require_state()
+    game.add_item(state, "weapon_iron_sword", 1)
+    sword_ref = next(key for key in state["inventory"] if key.startswith("eqi_"))
+    session.dispatch("equip_weapon", {"item_id": sword_ref}, screen_id="workshop_screen")
+    model = workshop_screen_model(state)
+    sword = next(entry for entry in model["owned_equipment"] if entry["id"] == sword_ref)
+    assert sword["base_item_id"] == "weapon_iron_sword"
+    assert sword["equipped_slot"] == "weapon"
+
+    assert not state["flags"].get("dungeon_cinder_seal_depths")
+    state["flags"]["ash_guardian_defeated"] = True
+    assert game.quest_unlocked(state, "quest_supply_upgrade")
+    assert not state["flags"].get("dungeon_cinder_seal_depths")
+
+
+def verify_resource_display_is_clean() -> None:
+    state = game.create_state("Format QA", next(iter(JOBS)))
+    state["current_hp"] = 91.0000000001
+    state["current_mp"] = 12.5
+    labels = {row["id"]: row["label"] for row in resource_strip(state)}
+    assert labels["hp"].startswith("HP 91/")
+    assert labels["mp"].startswith("MP 12.5/")
+
+
 def main() -> None:
     verify_gui_defeat_ends_run()
     verify_glen_endpoint_and_legacy_progress()
     verify_exp_settlement()
     verify_preview_beats_are_once_only()
+    verify_workshop_resolves_equipment_instances_and_supply_gate()
+    verify_resource_display_is_clean()
     print("feedback maintenance contracts ok")
 
 

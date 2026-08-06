@@ -43,6 +43,7 @@ from .state import (
     remove_storage_item,
     owns_item_or_equipped,
     consume_item_or_equipped,
+    parent_job,
     check_and_normalize_region,
     get_stats,
     clamp_vitals,
@@ -518,7 +519,11 @@ def craft_recipe_message(state: dict, recipe_id: str) -> str:
     if base_item:
         consume_item_or_equipped(state, base_item)
     for item_id, qty in recipe["output"].items():
-        if item_id in EQUIPMENT and item_id != "special" and supports_quality_job(state["job"]):
+        if (
+            item_id in EQUIPMENT
+            and EQUIPMENT[item_id].get("slot") != "special"
+            and supports_quality_job(parent_job(state["job"]))
+        ):
             quality = roll_craft_quality(recipe.get("region", "border_fire"))
             for _ in range(qty):
                 grant_quality_equipment(state, item_id, quality)
@@ -806,12 +811,99 @@ def magic_shop(state: dict, region_id: str = "border_fire") -> None:
         magic_shop_book_menu(state, MAGIC_SHOP_CATEGORIES[choice - 1], region_id)
 
 
-def recipe_available(state: dict, recipe_id: str) -> bool:
+def recipe_region_id(recipe: dict) -> str:
+    return recipe.get("region", "border_fire")
+
+
+def recipe_equipment_outputs(recipe: dict, *, include_special: bool = True) -> list[str]:
+    return [
+        item_id
+        for item_id in recipe.get("output", {})
+        if item_id in EQUIPMENT and (include_special or EQUIPMENT[item_id].get("slot") != "special")
+    ]
+
+
+def recipe_job_compatible(state: dict, recipe_id: str) -> bool:
     recipe = RECIPES[recipe_id]
-    equipment_outputs = [item_id for item_id in recipe["output"] if item_id in EQUIPMENT and EQUIPMENT[item_id].get("slot") != "special"]
-    if equipment_outputs and not supports_quality_job(state["job"]):
+    job = parent_job(state["job"])
+    equipment_outputs = recipe_equipment_outputs(recipe)
+    if any(job not in EQUIPMENT[item_id].get("jobs", []) for item_id in equipment_outputs):
         return False
-    return is_unlocked(state, recipe.get("unlock"))
+    quality_outputs = recipe_equipment_outputs(recipe, include_special=False)
+    return not quality_outputs or supports_quality_job(job)
+
+
+def recipe_unlock_condition(recipe_id: str) -> str:
+    """Return a player-facing acquisition condition without exposing data IDs."""
+    unlock_key = RECIPES[recipe_id].get("unlock")
+    if not unlock_key:
+        return "無需額外解鎖"
+    if unlock_key in QUESTS:
+        return f"完成公會任務「{QUESTS[unlock_key]['title']}」"
+
+    fixed_conditions = {
+        "recipe_heat_charm": "在焦石礦坑擊敗熔岩小鬼",
+        ICE_REGION_UNLOCK: "於聖物調查台安置「火之聖印」，開啟極寒區域",
+        FINAL_REGION_UNLOCK: "於聖物調查台安置火、冰、大地、雷鳴四枚聖印，開啟魔王城前線",
+    }
+    if unlock_key in fixed_conditions:
+        return fixed_conditions[unlock_key]
+
+    producers = [
+        quest["title"]
+        for quest in QUESTS.values()
+        if unlock_key in quest.get("unlocks", [])
+    ]
+    if producers:
+        return "完成公會任務「" + "」或「".join(producers) + "」"
+    return "推進目前區域主線並取得配方授權"
+
+
+def recipe_locked_reason(state: dict, recipe_id: str) -> str | None:
+    if is_unlocked(state, RECIPES[recipe_id].get("unlock")):
+        return None
+    return f"配方尚未取得：{recipe_unlock_condition(recipe_id)}。"
+
+
+def recipe_unavailable_reason(state: dict, recipe_id: str) -> str | None:
+    if not recipe_job_compatible(state, recipe_id):
+        output_names = "、".join(
+            item_name(item_id) for item_id in recipe_equipment_outputs(RECIPES[recipe_id])
+        )
+        return f"目前職業「{state['job']}」無法使用產出裝備「{output_names}」。"
+    return recipe_locked_reason(state, recipe_id)
+
+
+def recipe_available(state: dict, recipe_id: str) -> bool:
+    return recipe_unavailable_reason(state, recipe_id) is None
+
+
+def workshop_recipe_ids(region_id: str) -> list[str]:
+    return [
+        recipe_id
+        for recipe_id, recipe in RECIPES.items()
+        if recipe_region_id(recipe) == region_id
+        and recipe.get("base_item")
+        and any(
+            EQUIPMENT[item_id].get("slot") not in {"accessory", "special"}
+            for item_id in recipe_equipment_outputs(recipe)
+        )
+    ]
+
+
+def synthesis_recipe_ids(region_id: str) -> list[str]:
+    return [
+        recipe_id
+        for recipe_id, recipe in RECIPES.items()
+        if recipe_region_id(recipe) == region_id
+        and (
+            not recipe.get("base_item")
+            or any(
+                EQUIPMENT[item_id].get("slot") == "accessory"
+                for item_id in recipe_equipment_outputs(recipe)
+            )
+        )
+    ]
 
 
 def synthesis_recipe_category(recipe_id: str) -> str:
@@ -843,6 +935,8 @@ def recipe_base_owned_count(state: dict, recipe: dict) -> int:
     base_item = recipe.get("base_item")
     if not base_item:
         return 0
+    if base_item in EQUIPMENT:
+        return equipment_ref_count(state, base_item, include_equipped=True)
     return state["inventory"].get(base_item, 0) + (1 if base_item in state["equipment"].values() else 0)
 
 

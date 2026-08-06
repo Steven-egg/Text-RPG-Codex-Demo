@@ -58,6 +58,17 @@ def run() -> None:
     assert legacy["affix_roll_counter"] == 0
     assert EQUIPMENT == equipment_before
 
+    versioned_legacy = create_state("versioned-legacy", "劍士")
+    add_item(versioned_legacy, "weapon_wood_sword")
+    versioned_ref = first_inventory_equipment_ref(versioned_legacy, "weapon_wood_sword")
+    versioned_legacy["equipment_instances"][versioned_ref].pop("quality")
+    versioned_legacy["equipment_instances"][versioned_ref].pop("pattern_id")
+    versioned_legacy["equipment_instances"][versioned_ref]["major_affix_id"] = "major_sharp"
+    ensure_state_defaults(versioned_legacy)
+    assert versioned_legacy["equipment_instances"][versioned_ref]["quality"] == "normal"
+    assert versioned_legacy["equipment_instances"][versioned_ref]["pattern_id"] is None
+    assert versioned_legacy["equipment_instances"][versioned_ref]["major_affix_id"] == "major_sharp"
+
     state = create_state("instances", "劍士")
     seed = state["run_seed"]
     add_item(state, "weapon_wood_sword", 2)

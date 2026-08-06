@@ -1,5 +1,6 @@
 import { runtimeClient } from "../shared/runtime-client.js";
 import { presentStoryBeat } from "../shared/story-beat.js";
+import { isSfxMuted, setSfxMuted } from "../shared/sfx.js";
 
 const fixtureSelect = document.querySelector("#fixture-select");
 const shellEl = document.querySelector(".world-map-shell");
@@ -1157,6 +1158,7 @@ function renderSettingsPanel() {
     title: "畫面設定",
     data: {
       reduced_motion: state.settings.reducedMotion,
+      sfx_muted: isSfxMuted(),
     },
   });
 }
@@ -1257,15 +1259,56 @@ function renderUtilityPreview(preview) {
             <div class="utility-section">
               <p class="utility-section-title">${escapeHtml(cat)} (${items.length})</p>
               <div style="display: grid; gap: 8px;">
-                ${items.map(item => `
-                  <div class="utility-list-item">
+                ${items.map(item => {
+                  const equipment = item.equipment;
+                  const statChips = equipment?.stat_rows?.map(row =>
+                    `<span class="utility-equipment-stat"><span>${escapeHtml(row.label)}</span><strong>${escapeHtml(row.display_value)}</strong></span>`
+                  ).join("") || "";
+                  const affixes = equipment?.affix_names?.length
+                    ? `<p class="utility-equipment-affixes">詞綴：${equipment.affix_names.map(escapeHtml).join("、")}</p>`
+                    : "";
+                  const comparison = equipment?.comparison;
+                  const comparisonRows = comparison?.stat_rows?.map(row => {
+                    const tone = row.delta > 0 ? "positive" : (row.delta < 0 ? "negative" : "neutral");
+                    const delta = row.delta > 0 ? `+${row.delta}` : `${row.delta}`;
+                    return `<div class="utility-equipment-comparison-row">
+                      <span>${escapeHtml(row.label)}</span>
+                      <span>${escapeHtml(row.current)}${escapeHtml(row.suffix)} → ${escapeHtml(row.candidate)}${escapeHtml(row.suffix)}</span>
+                      <strong class="${tone}">${escapeHtml(delta)}${escapeHtml(row.suffix)}</strong>
+                    </div>`;
+                  }).join("") || "";
+                  return `
+                  <div class="utility-list-item ${equipment ? "utility-equipment-item" : ""}"
+                    ${equipment ? `data-equipment-row="${escapeHtml(item.item_id)}" tabindex="0" role="button" aria-expanded="false"` : ""}>
                     <div class="utility-list-item-header">
                       <span class="name">${escapeHtml(item.name)}</span>
                       <span class="meta">x${escapeHtml(item.quantity)}</span>
                     </div>
+                    ${equipment ? `<div class="utility-equipment-meta">
+                      <span class="${equipment.equipped ? "equipped" : "stored"}">${escapeHtml(equipment.status_label)}</span>
+                      <span>${escapeHtml(equipment.slot_label)}</span>
+                      <span>${escapeHtml(equipment.quality_label)}</span>
+                    </div>
+                    <div class="utility-equipment-stats">${statChips || '<span class="utility-equipment-stat">無數值屬性</span>'}</div>` : ""}
                     <div class="utility-list-item-desc">${escapeHtml(item.desc)}</div>
+                    ${equipment ? `<div class="utility-equipment-details">
+                      ${affixes}
+                      <p class="utility-equipment-current">目前${escapeHtml(comparison?.slot_label || equipment.slot_label)}：${escapeHtml(comparison?.current_name || "未裝備")}</p>
+                      ${comparisonRows}
+                    </div>
+                    <span class="utility-equipment-hint">點擊查看裝備詳情</span>` : ""}
+                    ${item.equip_action ? `
+                      <button
+                        class="utility-equip-action"
+                        type="button"
+                        data-item-id="${escapeHtml(item.item_id)}"
+                        aria-disabled="${String(!item.equip_action.enabled)}"
+                        title="${escapeHtml(item.equip_action.disabled_reason ?? "")}"
+                        ${item.equip_action.enabled ? "" : "disabled"}
+                      >${escapeHtml(item.equip_action.label ?? "裝備")}</button>
+                    ` : ""}
                   </div>
-                `).join("")}
+                `}).join("")}
               </div>
             </div>
           `;
@@ -1324,8 +1367,17 @@ function renderUtilityPreview(preview) {
             <span class="settings-switch-thumb"></span>
           </span>
         </label>
+        <label class="settings-toggle-row" for="settings-sfx-muted">
+          <span class="settings-toggle-copy">
+            <strong>音效</strong>
+            <span id="settings-sfx-muted-description">保留於此裝置的靜音偏好。</span>
+          </span>
+          <input id="settings-sfx-muted" class="settings-switch-input" type="checkbox" role="switch"
+            aria-describedby="settings-sfx-muted-description" ${preview.data.sfx_muted ? "checked" : ""}>
+          <span class="settings-switch-track" aria-hidden="true"><span class="settings-switch-thumb"></span></span>
+        </label>
         <p id="settings-scope-note" class="settings-scope-note">
-          此偏好僅套用於目前的世界地圖頁面，重新載入後會回到裝置的預設動態偏好。
+          減少動態效果僅套用於目前的世界地圖頁面；音效靜音偏好會保留於此裝置。
         </p>
       </div>
     `;
@@ -1338,6 +1390,42 @@ function renderUtilityPreview(preview) {
     const reducedMotionEl = utilityPanelEl.querySelector("#settings-reduced-motion");
     reducedMotionEl?.addEventListener("change", () => {
       applyReducedMotionPreference(reducedMotionEl.checked, true);
+    });
+    const sfxMutedEl = utilityPanelEl.querySelector("#settings-sfx-muted");
+    sfxMutedEl?.addEventListener("change", () => {
+      setSfxMuted(sfxMutedEl.checked);
+      feedbackMessageEl.textContent = sfxMutedEl.checked ? "音效已靜音。" : "音效已開啟。";
+    });
+  }
+  if (preview.type === "inventory") {
+    const toggleEquipmentDetails = (row) => {
+      const expanded = row.getAttribute("aria-expanded") === "true";
+      row.setAttribute("aria-expanded", String(!expanded));
+      row.classList.toggle("is-inspected", !expanded);
+      const hint = row.querySelector(".utility-equipment-hint");
+      if (hint) hint.textContent = expanded ? "點擊查看裝備詳情" : "點擊收合裝備詳情";
+      const item = preview.data.find((entry) => entry.item_id === row.dataset.equipmentRow);
+      if (!expanded && item?.equipment) {
+        feedbackMessageEl.textContent = `${item.equipment.status_label}：${item.name}（${item.equipment.slot_label}）`;
+      }
+    };
+    utilityContentEl.querySelectorAll("[data-equipment-row]").forEach((row) => {
+      row.addEventListener("click", () => toggleEquipmentDetails(row));
+      row.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          toggleEquipmentDetails(row);
+        }
+      });
+    });
+    utilityContentEl.querySelectorAll(".utility-equip-action").forEach((button) => {
+      button.addEventListener("click", (event) => {
+        event.stopPropagation();
+        const item = preview.data.find((entry) => entry.item_id === button.dataset.itemId);
+        if (item?.equip_action) {
+          activateAction(item.equip_action, "inventory_preview");
+        }
+      });
     });
   }
 

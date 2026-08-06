@@ -470,7 +470,7 @@ button:focus-visible {
 .dialogue-choices {
   position: absolute;
   right: 16px; /* Perfect alignment with footer-right-action edge */
-  bottom: 145px; /* Floating directly above the Seek Guidance button (135px + gap) */
+  bottom: 178px; /* Keep passive choices above the dialogue bar. */
   display: flex; /* DO NOT USE !important, so JS style.display="none" can hide it */
   flex-direction: column;
   gap: 8px;
@@ -479,7 +479,7 @@ button:focus-visible {
   box-shadow: none;
   padding: 0;
   z-index: 10000;
-  width: clamp(260px, 20vw, 320px); /* Exactly matches the primary action column width */
+  width: clamp(220px, 18vw, 280px);
 }
 
 .choice-btn {
@@ -487,9 +487,9 @@ button:focus-visible {
   border: 1.5px solid var(--paper); /* Divine antique gold border */
   border-radius: 4px;
   color: var(--paper);
-  font-size: 1.2rem; /* 1.5x larger font */
+  font-size: 1rem;
   font-weight: 700;
-  padding: 8px 16px;
+  padding: 6px 12px;
   cursor: pointer;
   transition: all 0.2s ease;
   font-family: var(--facility-font-ui);
@@ -890,7 +890,7 @@ button:focus-visible {
   justify-content: flex-start !important;
   min-width: 0 !important;
   padding-top: 14px !important;
-  max-height: 72px !important;
+  max-height: 60px !important;
   overflow-y: auto !important;
   scrollbar-width: thin !important;
 }

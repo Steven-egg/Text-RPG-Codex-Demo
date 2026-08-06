@@ -25,6 +25,7 @@ def refs_for(state: dict, base_item_id: str) -> list[str]:
 
 
 def run() -> None:
+    equipment_before = copy.deepcopy(EQUIPMENT)
     state = create_state("recipe-boundary", "劍士")
     state["gold"] = 999
     add_item(state, "weapon_iron_sword", 2)
@@ -40,6 +41,7 @@ def run() -> None:
     before = copy.deepcopy(state)
     assert consume_equipment_reference(state, second_ref)
     assert second_ref not in state["inventory"]
+    assert second_ref not in state["equipment_instances"]
     assert state["equipment"]["weapon"] == first_ref
     assert state["equipment_instances"][first_ref] == before["equipment_instances"][first_ref]
     assert not consume_equipment_reference(state, second_ref)
@@ -52,7 +54,9 @@ def run() -> None:
     assert second_ref not in state["inventory"]
     assert equipment_ref_count(state, "weapon_iron_sword", include_equipped=True) == 1
     assert equipment_ref_count(state, "weapon_iron_sword_plus_1") == 1
-    assert EQUIPMENT["weapon_iron_sword"]["stats"] == {"attack": 12}
+    upgraded_ref = refs_for(state, "weapon_iron_sword_plus_1")[0]
+    assert upgraded_ref not in {first_ref, second_ref}
+    assert EQUIPMENT == equipment_before
 
 
 if __name__ == "__main__":

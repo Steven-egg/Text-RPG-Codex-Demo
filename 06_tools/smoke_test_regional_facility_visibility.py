@@ -104,25 +104,20 @@ def run_visibility_test():
     assert len(cli_ice_recipes) > 0
     assert len(cli_ice_upgrades) > 0
 
-    # Verify only Ice items show up, no Earth / Thunder / Final leak, and no Border/Fire items leak into Ice Shop
+    # Verify every row belongs to Ice by authoritative region metadata. IDs are
+    # intentionally not treated as region authority (for example item_throw_ice).
     for item_id in cli_ice_travel:
-        assert "_ice_" in item_id
-        assert "_earth_" not in item_id and "_thunder_" not in item_id and "_final_" not in item_id
+        assert (game.ITEMS.get(item_id) or game.EQUIPMENT[item_id]).get("region", "border_fire") == "ice"
     for w_id in cli_ice_weapons:
-        assert "_ice_" in w_id
-        assert "_earth_" not in w_id and "_thunder_" not in w_id and "_final_" not in w_id
+        assert game.EQUIPMENT[w_id].get("region", "border_fire") == "ice"
     for a_id in cli_ice_armors:
-        assert "_ice_" in a_id
-        assert "_earth_" not in a_id and "_thunder_" not in a_id and "_final_" not in a_id
+        assert game.EQUIPMENT[a_id].get("region", "border_fire") == "ice"
     for b_id in cli_ice_books:
-        assert "_ice_" in b_id
-        assert "_earth_" not in b_id and "_thunder_" not in b_id and "_final_" not in b_id
+        assert MAGIC_BOOKS[b_id].get("region", "border_fire") == "ice"
     for r_id in cli_ice_recipes:
-        assert "_ice_" in r_id
-        assert "_earth_" not in r_id and "_thunder_" not in r_id and "_final_" not in r_id
+        assert game.recipe_region_id(RECIPES[r_id]) == "ice"
     for r_id in cli_ice_upgrades:
-        assert "_ice_" in r_id
-        assert "_earth_" not in r_id and "_thunder_" not in r_id and "_final_" not in r_id
+        assert game.recipe_region_id(RECIPES[r_id]) == "ice"
 
     print("CLI visibility in Ice verified: Only Ice elements visible, no late-game or Border/Fire leak.")
 
@@ -173,25 +168,19 @@ def run_visibility_test():
     assert len(cli_earth_recipes) > 0
     assert len(cli_earth_upgrades) > 0
 
-    # Verify only Earth items show up
+    # Verify every row belongs to Earth by authoritative region metadata.
     for item_id in cli_earth_travel:
-        assert "_earth_" in item_id
-        assert "_ice_" not in item_id and "_thunder_" not in item_id and "_final_" not in item_id
+        assert (game.ITEMS.get(item_id) or game.EQUIPMENT[item_id]).get("region", "border_fire") == "earth"
     for w_id in cli_earth_weapons:
-        assert "_earth_" in w_id
-        assert "_ice_" not in w_id and "_thunder_" not in w_id and "_final_" not in w_id
+        assert game.EQUIPMENT[w_id].get("region", "border_fire") == "earth"
     for a_id in cli_earth_armors:
-        assert "_earth_" in a_id
-        assert "_ice_" not in a_id and "_thunder_" not in a_id and "_final_" not in a_id
+        assert game.EQUIPMENT[a_id].get("region", "border_fire") == "earth"
     for b_id in cli_earth_books:
-        assert "_earth_" in b_id
-        assert "_ice_" not in b_id and "_thunder_" not in b_id and "_final_" not in b_id
+        assert MAGIC_BOOKS[b_id].get("region", "border_fire") == "earth"
     for r_id in cli_earth_recipes:
-        assert "_earth_" in r_id
-        assert "_ice_" not in r_id and "_thunder_" not in r_id and "_final_" not in r_id
+        assert game.recipe_region_id(RECIPES[r_id]) == "earth"
     for r_id in cli_earth_upgrades:
-        assert "_earth_" in r_id
-        assert "_ice_" not in r_id and "_thunder_" not in r_id and "_final_" not in r_id
+        assert game.recipe_region_id(RECIPES[r_id]) == "earth"
 
     print("CLI visibility in Earth verified: Only Earth elements visible, no other region leak.")
 

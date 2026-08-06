@@ -363,6 +363,13 @@ function renderList() {
     }
     leftZone.appendChild(name);
 
+    if ((currentTab === 'weapon' || currentTab === 'armor') && item.owned_count > 0) {
+      const ownership = document.createElement('span');
+      ownership.className = `item-ownership ${item.equipped_same_base ? 'equipped' : ''}`;
+      ownership.textContent = item.equipped_same_base ? '已裝備同款' : `持有 x${item.owned_count}`;
+      leftZone.appendChild(ownership);
+    }
+
     row.appendChild(leftZone);
 
     // 右側：Badge 或 價格
@@ -442,6 +449,13 @@ function renderList() {
  * 取得玩家目前擁有的裝備清單
  */
 function getOwnedItemsList() {
+  if (Array.isArray(currentFixtureData.owned_equipment)) {
+    return currentFixtureData.owned_equipment.map((item) => ({
+      ...item,
+      count: 1,
+      equippedSlot: item.equipped_slot ?? null,
+    }));
+  }
   const map = new Map();
   const player = currentFixtureData.player;
 
@@ -525,6 +539,7 @@ function findItemInFixtures(itemId) {
  * 判斷強化配方是否被鎖定
  */
 function isRecipeLocked(recipe) {
+  if (typeof recipe.unlocked === 'boolean') return !recipe.unlocked;
   if (!recipe.unlock_quest) return false;
   return !currentFixtureData.player.completed_quests.includes(recipe.unlock_quest);
 }
@@ -541,6 +556,9 @@ function checkRequirements(item) {
 
   // 1. 檢查配方解鎖（針對強化）
   if (currentTab === 'upgrade') {
+    if (item.job_compatible === false) {
+      return { satisfied: false, reasonText: '職業不合', disabledReason: 'job_incompatible' };
+    }
     if (isRecipeLocked(item)) {
       return { satisfied: false, reasonText: '未解鎖', disabledReason: 'recipe_locked' };
     }
@@ -562,10 +580,11 @@ function checkRequirements(item) {
   // 4. 針對強化，額外檢查基底裝備與素材
   if (currentTab === 'upgrade') {
     // A. 檢查基底裝備 (在背包或已裝備算擁有)
-    const baseId = item.base_item;
-    const isEquipped = Object.values(player.equipment).includes(baseId);
-    const inInventory = (player.inventory[baseId] || 0) > 0;
-    if (!isEquipped && !inInventory) {
+    const hasAuthoritativeCount = item.base_owned_count !== undefined && item.base_owned_count !== null;
+    const hasBase = hasAuthoritativeCount
+      ? Number(item.base_owned_count) > 0
+      : getOwnedItemsList().some((entry) => entry.base_item_id === item.base_item || entry.id === item.base_item);
+    if (!hasBase) {
       return { satisfied: false, reasonText: '缺基底', disabledReason: 'missing_base_item' };
     }
 
@@ -606,7 +625,11 @@ function updateDetailView(item) {
 
   // 1. 渲染詳情面板
   let statsHtml = '';
-  if (item.stats) {
+  if (Array.isArray(item.stat_rows)) {
+    item.stat_rows.forEach(row => {
+      statsHtml += `<span class="stat-tag"><span class="stat-label">${row.label}</span><span class="stat-value">${row.display_value}</span></span>`;
+    });
+  } else if (item.stats) {
     Object.keys(item.stats).forEach(statKey => {
       let label = statKey;
       if (statKey === 'attack') label = '物理攻擊力';
@@ -639,6 +662,31 @@ function updateDetailView(item) {
 
   const slotLabel = item.slot ? item.slot.toUpperCase() : (currentTab === 'upgrade' ? 'UPGRADE' : 'EQUIPMENT');
   const itemType = item.subtype || (currentTab === 'upgrade' ? '裝備強化' : '裝備');
+  let comparisonHtml = '';
+  if ((currentTab === 'weapon' || currentTab === 'armor') && item.comparison) {
+    const comparison = item.comparison;
+    const currentLabel = comparison.current_name
+      ? `${comparison.current_quality_label || ''} ${comparison.current_name}`.trim()
+      : `${comparison.slot_label}欄位尚未裝備`;
+    const comparisonRows = (comparison.stat_rows || []).map(row => {
+      const tone = row.delta > 0 ? 'positive' : (row.delta < 0 ? 'negative' : 'neutral');
+      const delta = row.delta > 0 ? `+${row.delta}` : `${row.delta}`;
+      return `<div class="equipment-comparison-row">
+        <span>${row.label}</span>
+        <span>${row.current}${row.suffix || ''} → ${row.candidate}${row.suffix || ''}</span>
+        <strong class="${tone}">${delta}${row.suffix || ''}</strong>
+      </div>`;
+    }).join('');
+    comparisonHtml = `
+      <div class="equipment-comparison-panel">
+        <div class="equipment-comparison-title">
+          <span>與目前${comparison.slot_label}比較</span>
+          <strong>${currentLabel}</strong>
+        </div>
+        ${comparisonRows || '<p class="equipment-comparison-empty">此裝備沒有數值屬性。</p>'}
+        <p class="equipment-purchase-note">購買後會放入背包，不會自動替換目前裝備。</p>
+      </div>`;
+  }
 
   itemDetailView.innerHTML = `
     <div class="detail-grid">
@@ -653,6 +701,7 @@ function updateDetailView(item) {
       <div class="detail-stats-deck">
         ${statsHtml || '<span class="stat-tag"><span class="stat-label">無屬性增益</span></span>'}
       </div>
+      ${comparisonHtml}
       <div class="job-compatibility-panel">
         <span class="job-compatibility-title">可用職業限制</span>
         <div class="job-badges-deck">
@@ -730,13 +779,14 @@ function renderRequirementsView(item) {
   // 2. 強化配方的解鎖/基底/素材需求
   if (currentTab === 'upgrade') {
     // A. 解鎖任務
-    if (item.unlock_quest) {
-      const questUnlocked = player.completed_quests.includes(item.unlock_quest);
+    if (item.unlock_condition || item.unlock_quest) {
+      const questUnlocked = !isRecipeLocked(item);
+      const unlockCondition = item.unlock_condition || '完成公會任務「洞窟採集」';
       reqsHtml += `
         <div class="req-strip-row">
           <div class="req-name-zone">
             <span class="req-icon-dot base-dot"></span>
-            <span class="req-label">解鎖任務: 洞窟採集</span>
+            <span class="req-label">配方取得條件：${unlockCondition}</span>
           </div>
           <div class="req-val-zone">
             <span class="req-fraction ${questUnlocked ? 'satisfied' : 'deficient'}">${questUnlocked ? '已完成' : '未解鎖'}</span>
@@ -747,11 +797,12 @@ function renderRequirementsView(item) {
     }
 
     // B. 基底裝備
-    const baseId = item.base_item;
-    const isEquipped = Object.values(player.equipment).includes(baseId);
-    const inInventory = (player.inventory[baseId] || 0) > 0;
-    const hasBase = isEquipped || inInventory;
-    const baseLocationText = isEquipped ? '已裝備' : (inInventory ? '背包持有' : '無');
+    const isEquipped = item.base_equipped === true;
+    const inventoryCount = Number(item.base_inventory_count || 0);
+    const hasBase = Number(item.base_owned_count || 0) > 0;
+    const baseLocationText = isEquipped
+      ? `含已裝備（共 ${item.base_owned_count} 件）`
+      : (inventoryCount > 0 ? `背包持有 ${inventoryCount} 件` : '無');
     
     reqsHtml += `
       <div class="req-strip-row">
@@ -792,8 +843,8 @@ function renderRequirementsView(item) {
   let warningHtml = '';
   if (!checkRes.satisfied) {
     let friendlyReason = '';
-    if (checkRes.disabledReason === 'recipe_locked') friendlyReason = '配方鎖定：需先完成前置任務。';
-    else if (checkRes.disabledReason === 'job_incompatible') friendlyReason = '職業不合：目前職業無法使用此裝備。';
+    if (checkRes.disabledReason === 'recipe_locked') friendlyReason = item.locked_reason || `配方尚未取得：${item.unlock_condition || '完成前置條件'}。`;
+    else if (checkRes.disabledReason === 'job_incompatible') friendlyReason = item.job_blocked_reason || '職業不合：目前職業無法使用此裝備。';
     else if (checkRes.disabledReason === 'gold_deficient') friendlyReason = '金幣不足：冒險者持有金幣無法支付費用。';
     else if (checkRes.disabledReason === 'missing_base_item') friendlyReason = '缺少基底：背包或裝備欄中缺少此強化基底裝備。';
     else if (checkRes.disabledReason === 'materials_deficient') friendlyReason = '素材不足：缺少所需的鍛造/合成素材。';
@@ -903,7 +954,7 @@ function handlePrimaryAction() {
     // 這裏做為 blocked_action 的 Prototype 除錯日誌
     logUIAction('blocked_action', {
       action: currentTab === 'upgrade' ? 'upgrade_equipment' : 'buy_equipment',
-      item_id: selectedItemId,
+      ...(currentTab === 'upgrade' ? { recipe: item.name } : { item_id: selectedItemId }),
       disabled_reason: checkRes.disabledReason
     });
     return;
@@ -1033,6 +1084,11 @@ function renderDebugLog() {
     // 去除 timestamp 輸出其餘 detail
     const detailsCopy = { ...log };
     delete detailsCopy.timestamp;
+    if (detailsCopy.recipe_id) {
+      const recipe = currentFixtureData?.upgrades?.find((row) => row.id === detailsCopy.recipe_id);
+      detailsCopy.recipe = recipe?.name ?? '已選配方';
+      delete detailsCopy.recipe_id;
+    }
     
     const logText = document.createTextNode(JSON.stringify(detailsCopy));
     row.appendChild(logText);

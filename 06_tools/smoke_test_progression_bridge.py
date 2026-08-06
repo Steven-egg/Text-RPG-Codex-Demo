@@ -62,61 +62,31 @@ def run_progression_smoke_test():
     # 5. Advance to the end of the dungeon (step 18)
     session.exploration["current_step"] = 18
 
-    # Verify Glen is sighted, challenge is disabled, and retreat is primary
+    # Verify reaching the endpoint auto-accepts the investigation and permits
+    # the Boss challenge without a prior Guild-board round trip.
     expl_model_18 = session.screen_model("dungeon_exploration")
     assert state["flags"].get("boss_glen_sighted") is True
+    assert state["flags"].get("boss_glen_investigation_accepted") is True
+    assert game.quest_unlocked(state, "quest_boss_glen")
 
     actions_18 = expl_model_18["actions"]
     boss_act = next((a for a in actions_18 if a["action_id"] == "challenge_boss"), None)
     assert boss_act is not None
-    assert boss_act["enabled"] is False
-    assert boss_act["disabled_reason"] == "先回工會確認這股氣息。"
+    assert boss_act["enabled"] is True
+    assert boss_act["disabled_reason"] is None
+    assert boss_act["primary"] is True
 
     ret_act = next((a for a in actions_18 if a["action_id"] == "retreat"), None)
     assert ret_act is not None
-    assert ret_act["primary"] is True
-    print("[Pass] Boss challenge is disabled with correct reason before accepting investigation; retreat is primary.")
+    assert ret_act["primary"] is False
+    print("[Pass] Mine endpoint auto-accepts the investigation and enables the Boss challenge immediately.")
 
-    # 6. Return to town and check Guild board
-    session.dispatch("back_to_town_hub")
-    assert session.exploration is None
-
-    guild_model_sighted = session.screen_model("guild_screen")
-    # Verify story hint is now visible and enabled
-    assert guild_model_sighted["story_hint_card"]["visible"] is True
-    assert guild_model_sighted["story_hint_card"]["enabled"] is True
-    assert guild_model_sighted["story_hint_card"]["primary_action"] == "accept_boss_glen_investigation"
-    print("[Pass] Story hint card is visible and enabled on Guild board.")
-
-    # 7. Accept investigation
-    session.dispatch("accept_boss_glen_investigation", screen_id="guild_screen")
-    assert state["flags"].get("boss_glen_investigation_accepted") is True
-    assert game.quest_unlocked(state, "quest_boss_glen")
-
-    # Verify story hint card is still visible but accepted/disabled, and boss quest is visible but status is requirements_missing
     guild_model_accepted = session.screen_model("guild_screen")
-    assert guild_model_accepted["story_hint_card"]["visible"] is True
-    assert guild_model_accepted["story_hint_card"]["enabled"] is False
-    assert guild_model_accepted["story_hint_card"]["primary_action"] == "unavailable"
-
     boss_quest_row = next(r for r in guild_model_accepted["task_rows"] if r["task_id"] == "quest_boss_glen")
     assert boss_quest_row["status"] == "requirements_missing"
-    print("[Pass] Investigation accepted. Story hint is hidden, and boss quest is now listed as requirements_missing.")
+    print("[Pass] Auto-accepted Boss quest is listed as requirements_missing until victory.")
 
-    # 8. Travel back to Scorched Mine and reach step 18
-    session.dispatch("confirm_travel", {"dungeon_id": "dungeon_scorched_mine"}, screen_id="world_map")
-    session.exploration["current_step"] = 18
-
-    # Verify challenge_boss is now enabled and primary
-    expl_model_final = session.screen_model("dungeon_exploration")
-    actions_final = expl_model_final["actions"]
-    boss_act_final = next((a for a in actions_final if a["action_id"] == "challenge_boss"), None)
-    assert boss_act_final is not None
-    assert boss_act_final["enabled"] is True
-    assert boss_act_final["primary"] is True
-    print("[Pass] Boss challenge action is enabled and primary after accepting investigation.")
-
-    # 9. Trigger Boss Challenge
+    # 6. Trigger Boss Challenge directly from the endpoint
     session.dispatch("challenge_boss", {"dungeon_id": "dungeon_scorched_mine"}, screen_id="dungeon_exploration")
     assert session.combat is not None
     assert session.combat["enemy_id"] == "boss_glen"
@@ -124,7 +94,7 @@ def run_progression_smoke_test():
     assert session.exploration["status"] == "combat"
     print("[Pass] Boss Glen combat successfully initiated.")
 
-    # 10. Resolve combat in victory through the live combat action loop
+    # 7. Resolve combat in victory through the live combat action loop
     session.combat["enemy_hp"] = 1
     session.dispatch("basic_attack", {"enemy_id": "boss_glen"}, screen_id="combat_screen")
     assert session.combat["outcome"] == "victory"
@@ -133,7 +103,7 @@ def run_progression_smoke_test():
     assert state["inventory"].get("key_fire_mark_shard", 0) == 1
     print("[Pass] Combat victory resolved, flags set, and quest key items dropped.")
 
-    # 11. Return to town and open Guild board
+    # 8. Return to town and open Guild board
     session.dispatch("back_to_town_hub")
     assert session.combat is None
     assert session.exploration is None
@@ -148,7 +118,7 @@ def run_progression_smoke_test():
     assert boss_quest_row_post["status_label"] == "可回報"
     print("[Pass] Boss quest displays as 'ready_to_submit' in Guild, and story hint shows turn-in guidance.")
 
-    # 12. Submit Boss Quest
+    # 9. Submit Boss Quest
     session.dispatch("submit_quest", {"task_id": "quest_boss_glen"}, screen_id="guild_screen")
     assert "quest_boss_glen" in state["completed_quests"]
     assert game.is_unlocked(state, "unlock_ash_ravine")
