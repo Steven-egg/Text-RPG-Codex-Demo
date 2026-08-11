@@ -3,6 +3,8 @@ from __future__ import annotations
 import argparse
 import json
 import mimetypes
+import re
+import shutil
 import sys
 from http import HTTPStatus
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
@@ -19,9 +21,28 @@ for module_root in (ROOT / "04_data", ROOT / "03_engine"):
         sys.path.insert(0, module_path)
 
 from engine.gui_actions import GuiActionError, GuiRuntimeSession  # noqa: E402
+from engine import game  # noqa: E402
 
 
 SESSION = GuiRuntimeSession()
+TEST_PROFILE_ROOT = ROOT / "06_tools" / "fixtures" / "saves"
+TEST_SAVE_ROOT = ROOT / ".test-saves"
+PROFILE_ID_PATTERN = re.compile(r"^[a-z0-9][a-z0-9-]*$")
+
+
+def configure_test_profile(profile_id: str, *, reset: bool = False) -> Path:
+    """Activate an isolated mutable copy of a committed test-save fixture."""
+    if not PROFILE_ID_PATTERN.fullmatch(profile_id):
+        raise ValueError("測試 profile 名稱只能使用小寫英數與連字號。")
+    fixture_path = TEST_PROFILE_ROOT / f"{profile_id}.json"
+    if not fixture_path.is_file():
+        raise ValueError(f"找不到測試 profile：{profile_id}")
+    TEST_SAVE_ROOT.mkdir(parents=True, exist_ok=True)
+    save_path = TEST_SAVE_ROOT / f"{profile_id}.json"
+    if reset or not save_path.exists():
+        shutil.copy2(fixture_path, save_path)
+    game.set_save_path(save_path)
+    return save_path
 
 
 class GuiRuntimeBridgeHandler(SimpleHTTPRequestHandler):
@@ -141,17 +162,38 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Serve GUI prototype files with a local runtime bridge API.")
     parser.add_argument("--host", default="127.0.0.1")
     parser.add_argument("--port", type=int, default=8010)
+    parser.add_argument(
+        "--test-profile",
+        metavar="PROFILE",
+        help="載入 06_tools/fixtures/saves 的測試 profile，進度會寫入 .test-saves。",
+    )
+    parser.add_argument(
+        "--reset-test-profile",
+        action="store_true",
+        help="啟動時以 fixture 重設指定的測試 profile。",
+    )
     return parser.parse_args()
 
 
 def main() -> None:
     args = parse_args()
+    if args.reset_test_profile and not args.test_profile:
+        raise SystemExit("--reset-test-profile 必須與 --test-profile 一起使用。")
+    if args.test_profile:
+        try:
+            test_save_path = configure_test_profile(args.test_profile, reset=args.reset_test_profile)
+        except ValueError as error:
+            raise SystemExit(str(error)) from error
+    else:
+        test_save_path = None
     if not PROTO_ROOT.exists():
         raise SystemExit(f"Prototype root not found: {PROTO_ROOT}")
     server = ThreadingHTTPServer((args.host, args.port), GuiRuntimeBridgeHandler)
     print("Element Maze GUI runtime bridge")
     print(f"Static root: {PROTO_ROOT}")
     print(f"Start URL: http://{args.host}:{args.port}/start_screen/index.html?mode=live")
+    if test_save_path is not None:
+        print(f"Test profile save: {test_save_path}")
     print("Press Ctrl+C to stop.")
     try:
         server.serve_forever()

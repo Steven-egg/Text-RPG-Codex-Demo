@@ -1531,12 +1531,38 @@ select:focus-visible {
 .enemy-image {
   max-width: 100%;
   max-height: 100%;
+  transform-origin: center bottom;
   object-fit: contain;
   transform: translate(
     var(--enemy-art-offset-x, 0px),
     calc(var(--enemy-ground-anchor-y, 0px) + var(--enemy-art-offset-y, 0px))
-  );
+  ) scale(var(--enemy-art-scale, 1));
   filter: drop-shadow(0 12px 24px rgba(0, 0, 0, 0.48));
+}
+
+.enemy-image.is-floating {
+  animation: enemy-idle-float 4.2s ease-in-out infinite;
+}
+
+@keyframes enemy-idle-float {
+  0%, 100% {
+    transform: translate(
+      var(--enemy-art-offset-x, 0px),
+      calc(var(--enemy-ground-anchor-y, 0px) + var(--enemy-art-offset-y, 0px))
+    ) translateY(0) scale(var(--enemy-art-scale, 1));
+  }
+  50% {
+    transform: translate(
+      var(--enemy-art-offset-x, 0px),
+      calc(var(--enemy-ground-anchor-y, 0px) + var(--enemy-art-offset-y, 0px))
+    ) translateY(-14px) scale(var(--enemy-art-scale, 1));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .enemy-image.is-floating {
+    animation: none;
+  }
 }
 
 [data-enemy-visual-role="flying-tall"] .enemy-image-layer {

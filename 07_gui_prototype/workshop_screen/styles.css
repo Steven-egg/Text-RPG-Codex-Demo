@@ -1698,3 +1698,37 @@ body[data-workshop-tab="upgrade"] .req-warning-box {
   margin-top: 8px;
   padding-block: 7px;
 }
+
+/* Owned equipment is a management view, not an upgrade transaction. */
+body[data-workshop-tab="owned"] .main-stage {
+  grid-template-columns: minmax(420px, 0.95fr) minmax(620px, 1.55fr);
+}
+
+body[data-workshop-tab="owned"] .right-column,
+body[data-workshop-tab="owned"] .requirement-panel,
+body[data-workshop-tab="owned"] .dialogue-box {
+  display: none;
+}
+
+body[data-workshop-tab="owned"] .detail-panel {
+  flex: 1;
+}
+
+.owned-equipment-status {
+  display: grid;
+  gap: 4px;
+  padding: 11px 13px;
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--info-blue);
+  background: rgba(35, 76, 103, 0.2);
+  font-size: 0.82rem;
+}
+
+.owned-equipment-status.is-equipped {
+  border-left-color: var(--success-color);
+  background: rgba(48, 103, 70, 0.2);
+}
+
+.owned-equipment-status span {
+  color: var(--text-muted);
+}

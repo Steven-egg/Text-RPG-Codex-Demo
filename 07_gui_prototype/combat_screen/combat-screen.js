@@ -512,12 +512,30 @@ const GROUNDED_ENEMY_ROLES = new Set([
   "boss-heavy",
   "boss-tall",
 ]);
+const ENEMY_VISUAL_PROFILES = Object.freeze({
+  "small-ground": { scale: 0.66, floating: false },
+  ground: { scale: 0.72, floating: false },
+  "low-wide": { scale: 0.76, floating: false },
+  flying: { scale: 0.72, floating: true },
+  "flying-tall": { scale: 0.76, floating: true },
+  floating: { scale: 0.72, floating: true },
+  boss: { scale: 1, floating: false },
+  "boss-heavy": { scale: 1, floating: false },
+  "boss-tall": { scale: 1, floating: false },
+});
 const alphaBottomInsetCache = new Map();
-const desktopCombatMedia = window.matchMedia("(min-width: 1181px)");
 let activeEnemyVisual = null;
 
 function numericVisualOffset(value) {
   return Number.isFinite(value) ? value : 0;
+}
+
+function enemyVisualProfile(visual) {
+  const profile = ENEMY_VISUAL_PROFILES[visual?.role] ?? ENEMY_VISUAL_PROFILES.ground;
+  return {
+    scale: numericVisualOffset(visual?.scale) || profile.scale,
+    floating: visual?.floating ?? profile.floating,
+  };
 }
 
 function alphaBottomInsetRatio(image) {
@@ -569,11 +587,14 @@ function applyEnemyImagePlacement() {
   }
 
   const visual = activeEnemyVisual;
+  const profile = enemyVisualProfile(visual);
   enemyImageEl.style.setProperty("--enemy-art-offset-x", `${numericVisualOffset(visual?.offsetX)}px`);
   enemyImageEl.style.setProperty("--enemy-art-offset-y", `${numericVisualOffset(visual?.offsetY)}px`);
   enemyImageEl.style.setProperty("--enemy-ground-anchor-y", "0px");
+  enemyImageEl.style.setProperty("--enemy-art-scale", String(profile.scale));
+  enemyImageEl.classList.toggle("is-floating", profile.floating);
 
-  if (!visual || !GROUNDED_ENEMY_ROLES.has(visual.role) || !desktopCombatMedia.matches || !enemyImageEl.complete) {
+  if (!visual || !GROUNDED_ENEMY_ROLES.has(visual.role) || !enemyImageEl.complete) {
     return;
   }
 

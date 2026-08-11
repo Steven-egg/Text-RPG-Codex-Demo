@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import argparse
 import json
 import math
 import random
@@ -222,7 +223,25 @@ from .facilities import (
 
 
 ROOT = Path(__file__).resolve().parents[2]
-SAVE_PATH = ROOT / "save.json"
+DEFAULT_SAVE_PATH = ROOT / "save.json"
+SAVE_PATH = DEFAULT_SAVE_PATH
+
+
+def set_save_path(path: str | Path | None = None) -> Path:
+    """Choose a runtime save path without changing the default player save."""
+    global SAVE_PATH
+    candidate = DEFAULT_SAVE_PATH if path is None else Path(path)
+    if not candidate.is_absolute():
+        candidate = ROOT / candidate
+    candidate = candidate.resolve()
+    try:
+        candidate.relative_to(ROOT.resolve())
+    except ValueError as error:
+        raise ValueError("存檔路徑必須位於專案目錄內。") from error
+    if candidate.suffix.casefold() != ".json":
+        raise ValueError("存檔檔名必須使用 .json 副檔名。")
+    SAVE_PATH = candidate
+    return SAVE_PATH
 
 
 
@@ -729,6 +748,7 @@ def gain_exp(state: dict, amount: int, dungeon_id: str | None = None) -> dict:
 
 
 def save_game(state: dict) -> None:
+    SAVE_PATH.parent.mkdir(parents=True, exist_ok=True)
     SAVE_PATH.write_text(json.dumps(state, ensure_ascii=False, indent=2), encoding="utf-8")
     print(f"已存檔：{SAVE_PATH}")
 
@@ -2290,8 +2310,22 @@ def smoke_test() -> None:
     print("smoke test ok")
 
 def main() -> None:
+    parser = argparse.ArgumentParser(description="元素迷宮文字核心版")
+    parser.add_argument("--smoke-test", action="store_true", help="執行不寫入存檔的 smoke test")
+    parser.add_argument(
+        "--save-path",
+        metavar="PATH",
+        help="使用專案內的指定存檔；未指定時仍使用 save.json。",
+    )
+    args = parser.parse_args()
+    if args.save_path:
+        try:
+            set_save_path(args.save_path)
+        except ValueError as error:
+            parser.error(str(error))
+
     setup_console()
-    if "--smoke-test" in sys.argv:
+    if args.smoke_test:
         smoke_test()
         return
 

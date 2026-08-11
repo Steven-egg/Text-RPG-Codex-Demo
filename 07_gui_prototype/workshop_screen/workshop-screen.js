@@ -43,6 +43,8 @@ const itemListContainer = document.getElementById('item-list-container');
 const itemDetailView = document.getElementById('item-detail-view');
 const requirementBox = document.getElementById('requirement-box');
 const itemRequirementView = document.getElementById('item-requirement-view');
+const detailPanelTitleEl = document.querySelector('.detail-panel .panel-title');
+const requirementPanelTitleEl = document.querySelector('.requirement-panel .panel-title');
 const npcRoleEl = document.getElementById('npc-role');
 const npcNameEl = document.getElementById('npc-name');
 const npcVisualEl = document.getElementById('npc-visual');
@@ -228,6 +230,8 @@ function switchTab(category, forceRefresh = false) {
 
   currentTab = category;
   document.body.dataset.workshopTab = category;
+  if (detailPanelTitleEl) detailPanelTitleEl.textContent = category === 'owned' ? '裝備詳情' : '項目詳細';
+  if (requirementPanelTitleEl) requirementPanelTitleEl.textContent = category === 'owned' ? '裝備狀態' : '需求與消耗';
   applyFacilityBackground({
     model: currentFixtureData,
     shell: document.body,
@@ -678,10 +682,10 @@ function updateDetailView(item) {
     jobBadgesHtml += `<span class="${className}">${jobName}</span>`;
   });
 
-  const slotLabel = item.slot ? item.slot.toUpperCase() : (currentTab === 'upgrade' ? 'UPGRADE' : 'EQUIPMENT');
+  const slotLabel = item.slot_label || (item.slot ? item.slot.toUpperCase() : (currentTab === 'upgrade' ? 'UPGRADE' : 'EQUIPMENT'));
   const itemType = item.subtype || (currentTab === 'upgrade' ? '裝備強化' : '裝備');
   let comparisonHtml = '';
-  if ((currentTab === 'weapon' || currentTab === 'armor') && item.comparison) {
+  if ((currentTab === 'weapon' || currentTab === 'armor' || currentTab === 'owned') && item.comparison) {
     const comparison = item.comparison;
     const currentLabel = comparison.current_name
       ? `${comparison.current_quality_label || ''} ${comparison.current_name}`.trim()
@@ -728,6 +732,19 @@ function updateDetailView(item) {
       </div>
     </div>
   `;
+
+  if (currentTab === 'owned') {
+    const ownership = document.createElement('div');
+    ownership.className = `owned-equipment-status ${item.equippedSlot ? 'is-equipped' : 'is-backpack'}`;
+    const status = document.createElement('strong');
+    status.textContent = item.status_label || (item.equippedSlot ? '已裝備' : '背包中');
+    const detail = document.createElement('span');
+    detail.textContent = item.equippedSlot
+      ? `目前裝備於：${item.equipped_slot_label || slotLabel}`
+      : '可在此直接裝備，裝備後會套用至角色能力。';
+    ownership.append(status, detail);
+    itemDetailView.querySelector('.detail-desc-card')?.after(ownership);
+  }
 
   document.getElementById('detail-slot').textContent = slotLabel;
 

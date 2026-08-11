@@ -17,11 +17,12 @@ from data import EQUIPMENT, get_unlocked_regions  # noqa: E402
 from engine import game  # noqa: E402
 from engine.equipment_refs import equipment_base_id, equipment_ref_count, resolve_equipment_ref  # noqa: E402
 from engine.gui_actions import GuiActionError, GuiRuntimeSession, get_status_preview_data  # noqa: E402
+from engine.gui_presentation import display_hit_points, equipment_stat_rows  # noqa: E402
 from engine.gui_presentation_helpers import player_model  # noqa: E402
 from engine.gui_workshop_model import workshop_screen_model  # noqa: E402
 
 
-FIXTURE_PATH = ROOT / "06_tools" / "fixtures" / "fire-cleared-ice-ready-save.json"
+FIXTURE_PATH = ROOT / "06_tools" / "fixtures" / "saves" / "ice-entry.json"
 FIRE_QUESTS = {
     "quest_register",
     "quest_cave_gathering",
@@ -129,6 +130,8 @@ def verify_workshop_material_details_and_instance_bases() -> None:
 
 
 def verify_player_resource_formatting() -> None:
+    assert display_hit_points(209.1) == "209"
+    assert display_hit_points(215.6) == "216"
     session = GuiRuntimeSession()
     session.new_game("資源格式測試", "warrior")
     state = session.require_state()
@@ -148,6 +151,7 @@ def verify_player_resource_formatting() -> None:
     status = get_status_preview_data(state)
     assert (status["hp_current"], status["hp_max"]) == ("91", "120")
     assert (status["mp_current"], status["mp_max"]) == ("12.5", "20")
+    assert [row["key"] for row in equipment_stat_rows({"trap_evasion": 8, "attack": 3})] == ["attack"]
 
 
 def verify_fire_clear_fixture_load_and_ice_route() -> None:
@@ -178,6 +182,15 @@ def verify_fire_clear_fixture_load_and_ice_route() -> None:
         assert resolved and resolved["base_item_id"] == base_item_id
         assert resolved["quality"] == "fine"
         assert migrated["job"] in EQUIPMENT[base_item_id]["jobs"]
+
+    workshop = workshop_screen_model(migrated, selected_region_id="ice")
+    equipped_weapon = next(item for item in workshop["owned_equipment"] if item["equipped_slot"] == "weapon")
+    assert equipped_weapon["slot_label"] == "武器"
+    assert equipped_weapon["equipped_slot_label"] == "武器"
+    assert equipped_weapon["status_label"] == "已裝備"
+    assert equipped_weapon["comparison"] is not None
+    assert all(row["key"] != "physical_charge_skill_bonus" or row["label"] == "蓄力技能傷害"
+               for item in workshop["owned_equipment"] for row in item["stat_rows"])
 
     stats = game.get_stats(migrated)
     assert migrated["current_hp"] == stats["max_hp"]

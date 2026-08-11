@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import math
 from typing import Any
 from .equipment_quality import QUALITY_LABELS
 from .equipment_refs import resolve_equipment_ref
@@ -20,12 +21,13 @@ EQUIPMENT_STAT_LABELS = {
     "earth_resist": "地屬性抗性",
     "lightning_resist": "雷屬性抗性",
     "rare_drop": "稀有掉落率",
-    "trap_evasion": "陷阱迴避率",
+    "physical_charge_skill_bonus": "蓄力技能傷害",
 }
 EQUIPMENT_PERCENT_STATS = {
     "crit", "accuracy", "fire_resist", "ice_resist", "earth_resist",
-    "lightning_resist", "rare_drop", "trap_evasion",
+    "lightning_resist", "rare_drop", "physical_charge_skill_bonus",
 }
+GUI_HIDDEN_EQUIPMENT_STATS = {"trap_evasion"}
 EQUIPMENT_SLOT_LABELS = {
     "weapon": "武器",
     "offhand": "副手",
@@ -39,6 +41,8 @@ EQUIPMENT_SLOT_LABELS = {
 def equipment_stat_rows(stats: dict[str, Any] | None) -> list[dict[str, Any]]:
     rows = []
     for key, value in (stats or {}).items():
+        if key in GUI_HIDDEN_EQUIPMENT_STATS:
+            continue
         suffix = "%" if key in EQUIPMENT_PERCENT_STATS else ""
         sign = "+" if isinstance(value, (int, float)) and value > 0 else ""
         rows.append({
@@ -105,6 +109,15 @@ def display_resource(value: object) -> str:
     return str(int(number)) if number.is_integer() else f"{number:.2f}".rstrip("0").rstrip(".")
 
 
+def display_hit_points(value: object) -> str:
+    """Present HP as a whole number while the combat model retains precision."""
+    try:
+        number = float(value)
+    except (TypeError, ValueError):
+        return str(value)
+    return str(max(0, math.floor(number + 0.5)))
+
+
 def resource_strip(state: dict[str, Any]) -> list[dict[str, str]]:
     ensure_state_defaults(state)
     stats = get_stats(state)
@@ -124,7 +137,7 @@ def resource_strip(state: dict[str, Any]) -> list[dict[str, str]]:
 
     return [
         {"id": "hero", "label": f"{name} / {job_label} Lv{level}", "tone": "primary"},
-        {"id": "hp", "label": f"HP {display_resource(current_hp)}/{display_resource(max_hp)}", "tone": "healthy"},
+        {"id": "hp", "label": f"HP {display_hit_points(current_hp)}/{display_hit_points(max_hp)}", "tone": "healthy"},
         {"id": "mp", "label": f"MP {display_resource(current_mp)}/{display_resource(max_mp)}", "tone": "mana"},
         {"id": "gold", "label": f"{gold}G", "tone": "gold"},
         {"id": "guild_points", "label": f"Guild {guild_points}", "tone": "neutral"},

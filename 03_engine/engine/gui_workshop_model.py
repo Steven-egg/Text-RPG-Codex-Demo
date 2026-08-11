@@ -5,7 +5,12 @@ from data import EQUIPMENT, SHOP_INVENTORY, RECIPES
 from . import game
 from .equipment_refs import equipment_base_id, inventory_equipment_refs, resolve_equipment_ref
 from .equipment_quality import QUALITY_LABELS
-from .gui_presentation import equipment_affix_names, equipment_slot_comparison, equipment_stat_rows
+from .gui_presentation import (
+    EQUIPMENT_SLOT_LABELS,
+    equipment_affix_names,
+    equipment_slot_comparison,
+    equipment_stat_rows,
+)
 
 
 def _shop_equipment_row(state: dict[str, Any], item_id: str) -> dict[str, Any]:
@@ -160,12 +165,18 @@ def workshop_screen_model(state: dict[str, Any], selected_region_id: str | None 
             "base_item_id": resolved["base_item_id"],
             "name": base["name"],
             "slot": base["slot"],
+            "slot_label": EQUIPMENT_SLOT_LABELS.get(base["slot"], base["slot"]),
             "subtype": base["subtype"],
             "jobs": base["jobs"],
             "stats": resolved["effective_stats"],
             "stat_rows": equipment_stat_rows(resolved["effective_stats"]),
             "desc": base["desc"],
             "equipped_slot": equipped_by_reference.get(reference_id),
+            "equipped_slot_label": EQUIPMENT_SLOT_LABELS.get(
+                equipped_by_reference.get(reference_id),
+                equipped_by_reference.get(reference_id),
+            ),
+            "status_label": "已裝備" if reference_id in equipped_by_reference else "背包中",
             "quality_label": QUALITY_LABELS.get(resolved["quality"], "普通"),
             "affix_names": equipment_affix_names(resolved),
             "comparison": equipment_slot_comparison(state, reference_id),

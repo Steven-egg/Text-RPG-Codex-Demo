@@ -1,13 +1,10 @@
 from __future__ import annotations
 
 from typing import Any
-from pathlib import Path
 from data import JOBS, ITEMS, EQUIPMENT, MONSTERS
 from .state import ensure_state_defaults, get_stats
 from .formatting import item_name
-from .gui_presentation import display_resource
-
-SAVE_PATH = Path(__file__).resolve().parents[2] / "save.json"
+from .gui_presentation import display_hit_points, display_resource
 
 JOB_IDS = ["warrior", "mage", "rogue", "cleric"]
 JOB_ID_TO_KEY = dict(zip(JOB_IDS, JOBS.keys()))
@@ -15,7 +12,9 @@ JOB_KEY_TO_ID = {value: key for key, value in JOB_ID_TO_KEY.items()}
 
 
 def save_exists() -> bool:
-    return SAVE_PATH.exists()
+    from . import game
+
+    return game.SAVE_PATH.exists()
 
 
 def percent(current: int, maximum: int) -> int:
@@ -53,7 +52,7 @@ def player_model(state: dict[str, Any]) -> dict[str, Any]:
         "class_label": summary["job_label"],
         "level_label": f"Lv{summary['level']}",
         "hp": {
-            "label": f"HP {display_resource(hp['current'])}/{display_resource(hp['max'])}",
+            "label": f"HP {display_hit_points(hp['current'])}/{display_hit_points(hp['max'])}",
             "percent": percent(hp["current"], hp["max"]),
         },
         "mp": {
