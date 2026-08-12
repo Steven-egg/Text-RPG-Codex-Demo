@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AGENTS.md：短主檔、長知識、可判讀的協作規則</title>
+  <style>
+    :root { --ink:#19231f; --muted:#5d6a63; --paper:#fbfaf6; --line:#dfe5dd; --green:#126749; --pale:#e7f3eb; --amber:#fff2d1; --rose:#ffe8e5; }
+    * { box-sizing:border-box; }
+    body { margin:0; color:var(--ink); background:var(--paper); font-family:"Noto Sans TC","Microsoft JhengHei",system-ui,sans-serif; line-height:1.65; }
+    main { width:min(980px, calc(100% - 32px)); margin:48px auto 72px; }
+    h1 { max-width:850px; font-size:clamp(2rem,5vw,3.55rem); line-height:1.18; letter-spacing:-.04em; margin:0 0 16px; }
+    h2 { font-size:1.35rem; margin:40px 0 12px; }
+    h3 { margin:0 0 6px; font-size:1.03rem; }
+    p { margin:0 0 12px; }
+    .lead { max-width:760px; font-size:1.15rem; color:var(--muted); }
+    .note { border-left:4px solid var(--green); padding:14px 18px; background:var(--pale); border-radius:0 10px 10px 0; margin:26px 0; }
+    .diagram { display:grid; grid-template-columns:1fr; gap:12px; margin:18px 0; }
+    .node { border:1px solid var(--line); border-radius:14px; padding:18px 20px; background:#fff; position:relative; }
+    .node.primary { border-color:var(--green); background:var(--pale); }
+    .node .tag { color:var(--green); font-weight:700; font-size:.82rem; letter-spacing:.04em; }
+    .arrow { color:var(--green); text-align:center; font-weight:700; line-height:1; }
+    .grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; }
+    .card { border:1px solid var(--line); border-radius:12px; padding:18px; background:#fff; }
+    .good { background:var(--pale); } .warn { background:var(--amber); } .bad { background:var(--rose); }
+    ul { margin:8px 0 0; padding-left:1.3em; }
+    code, pre { font-family:ui-monospace,Consolas,monospace; }
+    pre { margin:14px 0 0; padding:18px; overflow:auto; background:#17231d; color:#eaf4ed; border-radius:12px; font-size:.86rem; line-height:1.55; }
+    .check { display:grid; grid-template-columns:28px 1fr; gap:8px; padding:11px 0; border-bottom:1px solid var(--line); }
+    .check:last-child { border-bottom:0; }
+    .box { color:var(--green); font-size:1.25rem; }
+    footer { margin-top:42px; color:var(--muted); font-size:.92rem; }
+    @media (max-width:650px) { main { margin-top:28px; } .grid { grid-template-columns:1fr; } }
+  </style>
+</head>
+<body>
+<main>
+  <p class="tag">協作文件架構／中文速覽</p>
+  <h1>AGENTS.md 不該是百科；它該是一個讓 agent 能果斷開始、也知道何時停下來的入口。</h1>
+  <p class="lead">文件變長是自然結果：agent 越能自主，團隊越想把經驗、例外與交接寫下來。問題不在「長」，而在於把不同用途的內容全塞進每次必讀的主檔。</p>
+
+  <div class="note"><strong>我的看法：</strong>AGENTS.md 越來越像 agent 間的通訊協定與導航層，這是好事；但它不應承擔知識庫、進度日誌、完整流程手冊三種角色。把它們拆開，才能同時保有自主性與可判讀性。</div>
+
+  <h2>推薦結構：一個短入口，三種按需閱讀的文件</h2>
+  <section class="diagram" aria-label="文件分層圖">
+    <div class="node primary"><span class="tag">每次必讀・約 300–700 英文字</span><h3>AGENTS.md</h3><p>任務邊界、預設自主權、硬紅線、如何找到下一層文件。它回答：「我現在可不可以動手？什麼時候必須停？」</p></div>
+    <div class="arrow">↓ 任務需要時才讀</div>
+    <div class="grid">
+      <div class="node"><span class="tag">領域規範</span><h3>子目錄 AGENTS.md／SKILL.md</h3><p>例如 GUI、資料、部署、內容編輯。只在進入該區域時載入。</p></div>
+      <div class="node"><span class="tag">當前狀態</span><h3>README／handoff／progress</h3><p>目前完成到哪、已知問題、下一步；會過期的資訊放這裡。</p></div>
+    </div>
+    <div class="arrow">↓ 需要證據或細節才讀</div>
+    <div class="node"><span class="tag">長期知識</span><h3>設計文件、架構決策、測試、程式碼</h3><p>理由、歷史、完整規格與可執行事實。這些不應重複濃縮進主檔。</p></div>
+  </section>
+
+  <h2>你可以用這三個問題判讀任何一條 AGENTS.md 規則</h2>
+  <div class="grid">
+    <div class="card good"><h3>1. 它是否改變預設行為？</h3><p>「不要動 save 資料」會；「某功能目前完成 70%」通常不會。前者留主檔，後者移進進度文件。</p></div>
+    <div class="card good"><h3>2. 每個任務都需要它嗎？</h3><p>不是的話，移到子目錄文件或技能文件，讓 agent 按任務載入。</p></div>
+    <div class="card good"><h3>3. 是否能被更短的原則取代？</h3><p>一條「可回復、局部、可驗證的變更可自主進行」往往可取代十條工具或檔案例外。</p></div>
+    <div class="card warn"><h3>警訊：它只是在描述歷史</h3><p>版本流水帳、舊決策的逐字辯論、已完成清單，都會增加閱讀成本卻不提高當下決策品質。</p></div>
+  </div>
+
+  <h2>一份足夠短、但不會讓 agent 過度保守的主檔核心</h2>
+  <pre>## Autonomy and safety
+
+- Make routine technical decisions from repository conventions, tests, prior
+  implementations, and authoritative documentation; do not ask users to decide
+  what can be reasonably inferred.
+
+- Proceed autonomously with scoped, reversible, and verifiable work. Preserve
+  unrelated changes, run relevant checks, and reassess if evidence contradicts
+  the approach or scope expands materially.
+
+- Ask only when product intent, unavailable information, external authorization,
+  irreversible/destructive actions, meaningful cost, security, or permission
+  risk requires a decision.
+
+- Require confirmation before production deployment, external messages,
+  purchases, credential/permission changes, or destructive actions outside
+  clearly approved targets.</pre>
+  <p>其餘內容以連結指向各自的真實來源，而不是在此複製一份。</p>
+
+  <h2>主檔變長時的「減肥」清單</h2>
+  <section class="card">
+    <div class="check"><div class="box">□</div><div><strong>留在 AGENTS.md：</strong>跨領域硬邊界、預設授權、文件入口、不可逆動作規則。</div></div>
+    <div class="check"><div class="box">□</div><div><strong>移到子目錄規範：</strong>只有 GUI、資料、部署或特定工具才需要的工作流。</div></div>
+    <div class="check"><div class="box">□</div><div><strong>移到進度／交接文件：</strong>目前階段、螢幕清單、已知 bug、下一步與舊決策。</div></div>
+    <div class="check"><div class="box">□</div><div><strong>移到測試／程式碼：</strong>能自動檢查的約束不應只靠自然語言記住。</div></div>
+    <div class="check"><div class="box">□</div><div><strong>定期刪除：</strong>已被更好規則涵蓋、已失效、或 agent 違反它也不會造成明顯問題的文字。</div></div>
+  </section>
+
+  <h2>一個重要的心法：給自主權，不是給無限制授權</h2>
+  <p>你不需要靠加長文件來讓 agent 膽大。真正讓 agent 能穩定前進的是明確的預設：在「範圍小、可回復、可驗證」內自行處理；碰到產品意圖、不可逆風險與外部副作用才停下。這樣未來模型能力提升，它會先把更多事情做好，而不會把更多事情擴張到失控。</p>
+
+  <footer>建議把這頁當作維護 AGENTS.md 的審稿尺，而不是再加進 AGENTS.md 的內容。</footer>
+</main>
+</body>
+</html>
