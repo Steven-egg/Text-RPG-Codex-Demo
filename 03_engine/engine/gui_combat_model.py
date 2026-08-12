@@ -5,7 +5,7 @@ from data import ITEMS, SKILLS
 from . import game
 from .formatting import item_name
 from .gui_presentation_helpers import percent
-from .gui_presentation import display_hit_points, display_resource
+from .gui_presentation import display_hit_points, display_mana_points
 
 
 def combat_enemy_trait_status(enemy: dict[str, Any], enemy_buffs: dict[str, Any]) -> str:
@@ -194,7 +194,7 @@ def combat_screen_model(session: Any) -> dict[str, Any]:
             "class_label": state.get("job", ""),
             "level_label": f"Lv{state.get('level', 1)}",
             "hp_label": f"{display_hit_points(state['current_hp'])} / {display_hit_points(stats['max_hp'])}",
-            "mp_label": f"{display_resource(state['current_mp'])} / {display_resource(stats['max_mp'])}",
+            "mp_label": f"{display_mana_points(state['current_mp'])} / {display_mana_points(stats['max_mp'])}",
             "status_label": game.buff_summary(combat["player_buffs"]),
             "stance_label": "戰鬥結束" if resolved else "可行動",
         },
@@ -213,7 +213,7 @@ def combat_screen_model(session: Any) -> dict[str, Any]:
         "skill_menu": {
             "label": "技能選擇",
             "title": "技能",
-            "summary": f"目前 MP {display_resource(state['current_mp'])}/{display_resource(stats['max_mp'])}。目標：{enemy['name']} / 屬性 {enemy['element']} / 狀態 {game.buff_summary(combat['enemy_buffs'])}。再次按技能可收回。",
+            "summary": f"目前 MP {display_mana_points(state['current_mp'])}/{display_mana_points(stats['max_mp'])}。目標：{enemy['name']} / 屬性 {enemy['element']} / 狀態 {game.buff_summary(combat['enemy_buffs'])}。再次按技能可收回。",
             "empty_message": "尚無可用技能。" if state.get("learned_skills", []) else "沒有學會任何技能。",
             "items": usable_skills,
         },

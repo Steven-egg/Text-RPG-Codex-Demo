@@ -118,6 +118,11 @@ def display_hit_points(value: object) -> str:
     return str(max(0, math.floor(number + 0.5)))
 
 
+def display_mana_points(value: object) -> str:
+    """Present MP as a whole number while the runtime retains precision."""
+    return display_hit_points(value)
+
+
 def resource_strip(state: dict[str, Any]) -> list[dict[str, str]]:
     ensure_state_defaults(state)
     stats = get_stats(state)
@@ -138,7 +143,7 @@ def resource_strip(state: dict[str, Any]) -> list[dict[str, str]]:
     return [
         {"id": "hero", "label": f"{name} / {job_label} Lv{level}", "tone": "primary"},
         {"id": "hp", "label": f"HP {display_hit_points(current_hp)}/{display_hit_points(max_hp)}", "tone": "healthy"},
-        {"id": "mp", "label": f"MP {display_resource(current_mp)}/{display_resource(max_mp)}", "tone": "mana"},
+        {"id": "mp", "label": f"MP {display_mana_points(current_mp)}/{display_mana_points(max_mp)}", "tone": "mana"},
         {"id": "gold", "label": f"{gold}G", "tone": "gold"},
         {"id": "guild_points", "label": f"Guild {guild_points}", "tone": "neutral"},
     ]

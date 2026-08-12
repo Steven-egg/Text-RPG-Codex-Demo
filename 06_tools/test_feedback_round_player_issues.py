@@ -17,7 +17,7 @@ from data import EQUIPMENT, get_unlocked_regions  # noqa: E402
 from engine import game  # noqa: E402
 from engine.equipment_refs import equipment_base_id, equipment_ref_count, resolve_equipment_ref  # noqa: E402
 from engine.gui_actions import GuiActionError, GuiRuntimeSession, get_status_preview_data  # noqa: E402
-from engine.gui_presentation import display_hit_points, equipment_stat_rows  # noqa: E402
+from engine.gui_presentation import display_hit_points, display_mana_points, equipment_stat_rows  # noqa: E402
 from engine.gui_presentation_helpers import player_model  # noqa: E402
 from engine.gui_workshop_model import workshop_screen_model  # noqa: E402
 
@@ -132,6 +132,7 @@ def verify_workshop_material_details_and_instance_bases() -> None:
 def verify_player_resource_formatting() -> None:
     assert display_hit_points(209.1) == "209"
     assert display_hit_points(215.6) == "216"
+    assert display_mana_points(12.5) == "13"
     session = GuiRuntimeSession()
     session.new_game("資源格式測試", "warrior")
     state = session.require_state()
@@ -141,16 +142,16 @@ def verify_player_resource_formatting() -> None:
 
     combat = session.combat_screen_model()
     assert combat["player"]["hp_label"] == "91 / 120"
-    assert combat["player"]["mp_label"] == "12.5 / 20"
-    assert "目前 MP 12.5/20" in combat["skill_menu"]["summary"]
+    assert combat["player"]["mp_label"] == "13 / 20"
+    assert "目前 MP 13/20" in combat["skill_menu"]["summary"]
     assert ".0" not in combat["player"]["hp_label"]
 
     world_player = player_model(state)
     assert world_player["hp"]["label"] == "HP 91/120"
-    assert world_player["mp"]["label"] == "MP 12.5/20"
+    assert world_player["mp"]["label"] == "MP 13/20"
     status = get_status_preview_data(state)
     assert (status["hp_current"], status["hp_max"]) == ("91", "120")
-    assert (status["mp_current"], status["mp_max"]) == ("12.5", "20")
+    assert (status["mp_current"], status["mp_max"]) == ("13", "20")
     assert [row["key"] for row in equipment_stat_rows({"trap_evasion": 8, "attack": 3})] == ["attack"]
 
 

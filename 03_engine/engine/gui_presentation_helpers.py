@@ -4,7 +4,7 @@ from typing import Any
 from data import JOBS, ITEMS, EQUIPMENT, MONSTERS
 from .state import ensure_state_defaults, get_stats
 from .formatting import item_name
-from .gui_presentation import display_hit_points, display_resource
+from .gui_presentation import display_hit_points, display_mana_points
 
 JOB_IDS = ["warrior", "mage", "rogue", "cleric"]
 JOB_ID_TO_KEY = dict(zip(JOB_IDS, JOBS.keys()))
@@ -56,7 +56,7 @@ def player_model(state: dict[str, Any]) -> dict[str, Any]:
             "percent": percent(hp["current"], hp["max"]),
         },
         "mp": {
-            "label": f"MP {display_resource(mp['current'])}/{display_resource(mp['max'])}",
+            "label": f"MP {display_mana_points(mp['current'])}/{display_mana_points(mp['max'])}",
             "percent": percent(mp["current"], mp["max"]),
         },
         "gold_label": f"{summary['gold']}G",

@@ -40,6 +40,7 @@ from .gui_presentation import (
     equipment_slot_comparison,
     equipment_stat_rows,
     display_hit_points,
+    display_mana_points,
     display_resource,
     resource_strip,
 )
@@ -2025,8 +2026,8 @@ def get_status_preview_data(state: dict[str, Any]) -> dict[str, Any]:
         "guild_points": state.get("guild_points", 0),
         "hp_current": display_hit_points(state.get("current_hp", stats["max_hp"])),
         "hp_max": display_hit_points(stats["max_hp"]),
-        "mp_current": display_resource(state.get("current_mp", stats["max_mp"])),
-        "mp_max": display_resource(stats["max_mp"]),
+        "mp_current": display_mana_points(state.get("current_mp", stats["max_mp"])),
+        "mp_max": display_mana_points(stats["max_mp"]),
         "attack": stats.get("attack", 0),
         "magic_attack": stats.get("magic_attack", 0),
         "defense": stats.get("defense", 0),
